@@ -1,0 +1,46 @@
+name: Deploy Multi-Agent Platform
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/multi-agent-backend:latest
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/multi-agent-frontend:latest
+
+      - name: Deploy to cloud platform
+        run: |
+          echo "Deployment steps would go here"
+          echo "This would typically involve deploying to a cloud platform like AWS, Azure, or Google Cloud"
+          echo "that supports Docker containers and can run the docker-compose.yaml file"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
