@@ -12,7 +12,7 @@ The platform consists of multiple services that need to be deployed:
 4. **Vector Database** (Milvus)
 5. **Observability** (Prometheus, Grafana)
 
-## Option 1: Frontend on Netlify + Backend on Railway (Recommended)
+## Option 1: Frontend on Netlify + Backend on Render (Truly Free)
 
 ### Deploying the Frontend to Netlify
 
@@ -37,76 +37,116 @@ The platform consists of multiple services that need to be deployed:
 5. Deploy the site:
    - Click "Deploy site"
 
-### Deploying the Backend to Railway
+### Deploying the Backend to Render (Free Tier)
 
-1. Sign up at https://railway.app/
+1. Sign up at https://render.com/ (no credit card required for free tier)
 
-2. Create a new project:
-   - Click "+ New Project" → "Deploy from GitHub repo"
+2. Create a new web service:
+   - Click "New" → "Web Service"
    - Connect to your GitHub account
    - Select your `multi-agent-intelligence-platform` repository
 
 3. Configure the service:
-   - Set the root directory to `/backend`
-   - Railway will automatically detect it's a Node.js project
-   - Set environment variables:
-     - `OPENAI_API_KEY`: Your OpenAI API key
-     - `MONGODB_URI`: MongoDB connection string (Railway can provision this)
-     - `MILVUS_HOST`: Milvus host
-     - `MILVUS_PORT`: 19530
-     - `PROMETHEUS_PORT`: 9464
+   - Name: `multi-agent-backend`
+   - Root directory: `/backend`
+   - Runtime: `Node`
+   - Build command: `npm install`
+   - Start command: `npm start`
 
-4. Provision MongoDB:
-   - In your Railway project, click "+ New" → "Database" → "MongoDB"
-   - Railway will automatically set the `MONGODB_URI` environment variable
+4. Set environment variables:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `MONGODB_URI`: MongoDB connection string (use MongoDB Atlas free tier)
+   - `NODE_ENV`: `production`
+   - `PORT`: `3002`
 
-5. Deploy the service
+5. Create a MongoDB database:
+   - Sign up for MongoDB Atlas (free tier): https://www.mongodb.com/cloud/atlas
+   - Create a free cluster
+   - Get your connection string and add it as `MONGODB_URI` in Render
 
-6. Update Netlify environment:
+6. Deploy the service
+
+7. Update Netlify environment:
    - Go back to your Netlify site settings
-   - Update `NEXT_PUBLIC_API_URL` with your Railway backend URL
+   - Update `NEXT_PUBLIC_API_URL` with your Render backend URL
 
-## Option 2: Full Stack on Railway
+## Option 2: Full Stack on Cyclic (Free Tier)
 
-Railway supports Docker Compose deployments, making it possible to deploy the entire stack:
+Cyclic.sh offers a simple way to deploy full-stack applications for free:
+
+1. Sign up at https://www.cyclic.sh/ (free tier available)
+
+2. Connect your GitHub repository
+
+3. Select your `multi-agent-intelligence-platform` repository
+
+4. Set the root directory to `/backend`
+
+5. Set environment variables:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `MONGODB_URI`: MongoDB connection string
+
+6. Deploy the application
+
+7. For the frontend, you can still use Netlify with the backend URL from Cyclic
+
+## Option 3: Frontend on Netlify + Backend on Fly.io (Free Tier)
+
+1. Install the Fly.io CLI: `curl -L https://fly.io/install.sh | sh`
+
+2. Sign up at https://fly.io/ (free tier available)
+
+3. Create a `Dockerfile` in your backend directory if it doesn't exist
+
+4. Deploy using `flyctl launch` from your backend directory
+
+5. Set environment variables using `flyctl secrets set`
+
+## Option 4: Full Stack on Railway (Free Credit)
+
+While Railway eventually requires payment, they offer $5 in free credit which should be sufficient for testing:
 
 1. Sign up at https://railway.app/
 
-2. Create a new project from your GitHub repository
+2. Connect your GitHub repository
 
-3. Railway will automatically detect the `docker-compose.yaml` file
+3. Deploy using the Docker Compose file
 
-4. Set environment variables:
-   - `OPENAI_API_KEY`: Your OpenAI API key
-
-5. Deploy the entire stack
-
-## Option 3: Full Stack on Render
-
-1. Sign up at https://render.com/
-
-2. Create a new web service from your GitHub repository
-
-3. Configure to use the `docker-compose.yaml` file
-
-4. Set environment variables:
-   - `OPENAI_API_KEY`: Your OpenAI API key
-
-5. Deploy the entire stack
+4. Set environment variables
 
 ## Environment Variables
 
 ### Backend Required Variables
 
 - `OPENAI_API_KEY`: Your OpenAI API key
-- `MONGODB_URI`: MongoDB connection string (if not using Railway's provisioned database)
-- `MILVUS_HOST`: Milvus host (if using external Milvus)
-- `MILVUS_PORT`: Milvus port (default: 19530)
-- `PROMETHEUS_PORT`: Prometheus port (default: 9464)
+- `MONGODB_URI`: MongoDB connection string (MongoDB Atlas free tier works well)
+- `NODE_ENV`: `production`
+- `PORT`: `3002`
 
 ### Frontend Required Variables
 
 - `NEXT_PUBLIC_API_URL`: URL of the deployed backend API
+
+## Free Database Options
+
+### MongoDB Atlas (Recommended Free Option)
+
+1. Sign up at https://www.mongodb.com/cloud/atlas (no credit card for free tier)
+
+2. Create a free M0 cluster
+
+3. Add your IP address to the whitelist (or allow 0.0.0.0/0 for testing)
+
+4. Create a database user
+
+5. Get your connection string and use it as `MONGODB_URI`
+
+### Limitations of Free Tiers
+
+- **Render Free Tier**: Sleeps after 15 minutes of inactivity, wakes up in ~30 seconds
+- **MongoDB Atlas Free**: 512MB storage limit, shared RAM
+- **Cyclic Free Tier**: Limited to 1GB storage, sleeps after inactivity
+- **Fly.io Free Tier**: Generous but with some resource limitations
 
 ## Testing Your Deployment
 
