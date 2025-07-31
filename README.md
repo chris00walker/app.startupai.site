@@ -81,6 +81,22 @@ For a free deployment option, consider:
 2. **Render** (render.com): Free tier available for web services
 3. **Fly.io**: Free tier with some limitations
 
+### Netlify Deployment (Frontend Only)
+
+Since Netlify primarily supports static sites and serverless functions, you can deploy the frontend to Netlify while running the backend separately:
+
+1. **Deploy the frontend to Netlify**:
+   - Connect your GitHub repository to Netlify
+   - Set the build command to `npm run build`
+   - Set the publish directory to `.next`
+   - Add `NEXT_PUBLIC_API_URL` as an environment variable in Netlify pointing to your backend
+
+2. **Run the backend separately**:
+   - You'll need to deploy the backend to a platform that supports Docker Compose or containers
+   - Options include Railway, Render, or AWS ECS
+
+**Note**: Netlify won't be able to run your full multi-container application as it doesn't support Docker Compose. You'll need a separate backend deployment.
+
 ## Testing
 
 - Frontend: `npm test` (100% test coverage)
