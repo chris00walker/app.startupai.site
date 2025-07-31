@@ -48,7 +48,38 @@ The platform consists of:
 
 ## Deployment
 
-This application can be deployed to any cloud platform that supports Docker containers. For cloud deployment, update the environment variables to point to your production services.
+### GitHub Actions Deployment
+
+This repository includes a GitHub Actions workflow that automatically builds Docker images for both the frontend and backend services. The workflow is triggered on pushes to the `main` branch.
+
+### Cloud Platform Deployment Options
+
+Since this is a multi-container application with complex dependencies (MongoDB, Milvus, etc.), you'll need a cloud platform that supports Docker Compose or Kubernetes:
+
+1. **AWS**: Use AWS ECS with Docker Compose or EKS with Kubernetes
+2. **Google Cloud**: Use Cloud Run or Google Kubernetes Engine
+3. **Azure**: Use Azure Container Instances or Azure Kubernetes Service
+4. **DigitalOcean**: Use App Platform which supports Docker Compose
+5. **Railway**: Supports Docker Compose deployments
+6. **Render**: Supports Docker Compose deployments
+
+### Deployment Steps
+
+1. Choose a cloud platform that supports Docker Compose
+2. Create an account and set up your deployment environment
+3. Configure the environment variables in your cloud platform:
+   - `OPENAI_API_KEY`: Your OpenAI API key
+   - Database connection strings for MongoDB and Milvus
+4. Deploy the `docker-compose.yaml` file to your cloud platform
+5. Update the frontend's `NEXT_PUBLIC_API_URL` to point to your deployed backend
+
+### Free Deployment Options
+
+For a free deployment option, consider:
+
+1. **Railway** (railway.app): Offers $5 credit free, supports Docker Compose
+2. **Render** (render.com): Free tier available for web services
+3. **Fly.io**: Free tier with some limitations
 
 ## Testing
 
