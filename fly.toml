@@ -1,0 +1,19 @@
+app = "multi-agent-platform"
+primary_region = "iad"
+
+[build]
+  dockerfile = "./backend/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3002"
+  MONGODB_URI = "mongodb://mongo:27017/multi-agent-platform"
+  MILVUS_HOST = "milvus"
+  MILVUS_PORT = "19530"
+  PROMETHEUS_PORT = "9464"
+
+[http_service]
+  internal_port = 3002
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
