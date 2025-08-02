@@ -18,14 +18,17 @@ export async function runDiscoveryWorkflow(clientId) {
     const intakeInput = lastIntake ? lastIntake.data : { clientId };
     const intakeResult = await intakeAgent(intakeInput);
 
-    // Research step
-    const researchResult = await researchAgent(intakeResult);
+    // Research step - preserve clientId
+    const researchInput = { ...intakeResult, clientId };
+    const researchResult = await researchAgent(researchInput);
 
-    // Canvas drafting step
-    const canvasResult = await canvasDraftingAgent(researchResult);
+    // Canvas drafting step - preserve clientId
+    const canvasInput = { ...researchResult, clientId };
+    const canvasResult = await canvasDraftingAgent(canvasInput);
 
-    // Validation plan step
-    const planResult = await validationPlanAgent(canvasResult);
+    // Validation plan step - preserve clientId
+    const planInput = { ...canvasResult, clientId };
+    const planResult = await validationPlanAgent(planInput);
 
     return planResult;
   } catch (err) {
