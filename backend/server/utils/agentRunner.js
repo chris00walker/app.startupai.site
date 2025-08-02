@@ -34,7 +34,7 @@ Please analyze this input and return a JSON object with the following structure:
 }`;
     
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-nano", // Using most cost-effective model for development/testing
+      model: "gpt-4o-mini", // Using cost-effective model for development/testing
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
     });
