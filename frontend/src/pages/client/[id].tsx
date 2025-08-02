@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import api from '../../services/api';
 import { KanbanBoard } from '../../components/Dashboard/KanbanBoard';
@@ -8,12 +8,22 @@ import { AgentStatus } from '../../components/Agents/AgentStatus';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
+import { AlertCircle, CheckCircle, Clock, Play, RotateCcw, Activity, X, Eye } from 'lucide-react';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { Progress } from '../../components/ui/progress';
 
 interface Client {
-  id: string;
+  _id: string;
   name: string;
+  company: string;
   status: string;
   description?: string;
+  workflowStatus?: {
+    discovery: { status: string; completedAt?: string };
+    validation: { status: string; completedAt?: string };
+    scale: { status: string; completedAt?: string };
+  };
 }
 
 interface Artefact {
@@ -24,20 +34,40 @@ interface Artefact {
   createdAt: string;
 }
 
+interface WorkflowProgress {
+  workflow: string;
+  stage: string;
+  progress: number;
+  estimatedTimeRemaining: number;
+  startTime: number;
+}
+
 // Demo data for when backend is offline
 const getDemoClient = (id: string): Client => {
   const demoClients = {
     'demo-1': {
-      id: 'demo-1',
+      _id: 'demo-1',
       name: 'TechStart Ventures',
+      company: 'TechStart Ventures',
       status: 'active',
-      description: 'Series A SaaS Startup - Strategic Growth & Market Expansion'
+      description: 'Series A SaaS Startup - Strategic Growth & Market Expansion',
+      workflowStatus: {
+        discovery: { status: 'completed', completedAt: '2025-08-01T10:00:00Z' },
+        validation: { status: 'in_progress' },
+        scale: { status: 'not_started' }
+      }
     },
     'demo-2': {
-      id: 'demo-2',
+      _id: 'demo-2',
       name: 'Global Manufacturing Co',
+      company: 'Global Manufacturing Co',
       status: 'in-progress',
-      description: 'Enterprise Digital Transformation - Operations Optimization'
+      description: 'Enterprise Digital Transformation - Operations Optimization',
+      workflowStatus: {
+        discovery: { status: 'completed', completedAt: '2025-07-30T14:30:00Z' },
+        validation: { status: 'completed', completedAt: '2025-08-01T16:45:00Z' },
+        scale: { status: 'in_progress' }
+      }
     }
   };
   return demoClients[id as keyof typeof demoClients] || demoClients['demo-1'];
@@ -100,6 +130,7 @@ const getDemoArtefacts = (id: string): Artefact[] => {
 
 const ClientPage: React.FC = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id } = router.query;
 
   const { data: client, isLoading: clientLoading, error: clientError } = useQuery<Client>({
@@ -118,6 +149,11 @@ const ClientPage: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
+  // Enhanced workflow tracking state
+  const [workflowProgress, setWorkflowProgress] = useState<Record<string, WorkflowProgress>>({});
+  const [showResults, setShowResults] = useState<Record<string, boolean>>({});
+  const [workflowErrors, setWorkflowErrors] = useState<Record<string, string>>({});
+
   // Use demo data if there's an error (backend offline) or if it's a demo ID
   const displayClient = clientError || (typeof id === 'string' && id.startsWith('demo-')) 
     ? getDemoClient(id as string) 
@@ -126,6 +162,58 @@ const ClientPage: React.FC = () => {
   const displayArtefacts = artefactsError || (typeof id === 'string' && id.startsWith('demo-')) 
     ? getDemoArtefacts(id as string) 
     : artefacts;
+
+  // Progress tracking for running workflows
+  useEffect(() => {
+    const intervals: Record<string, NodeJS.Timeout> = {};
+    
+    Object.entries(workflowProgress).forEach(([workflow, progress]) => {
+      if (progress.progress < 100) {
+        intervals[workflow] = setInterval(() => {
+          setWorkflowProgress(prev => {
+            const current = prev[workflow];
+            if (!current || current.progress >= 100) return prev;
+            
+            const elapsed = Date.now() - current.startTime;
+            const newProgress = Math.min(95, (elapsed / (current.estimatedTimeRemaining * 1000)) * 100);
+            
+            return {
+              ...prev,
+              [workflow]: {
+                ...current,
+                progress: newProgress,
+                estimatedTimeRemaining: Math.max(5, current.estimatedTimeRemaining - 1)
+              }
+            };
+          });
+        }, 1000);
+      }
+    });
+    
+    return () => {
+      Object.values(intervals).forEach(clearInterval);
+    };
+  }, [workflowProgress]);
+
+  // Workflow trigger mutation
+  const workflowMutation = useMutation({
+    mutationFn: async (workflowType: string) => {
+      return api.post(`/clients/${id}/${workflowType}`);
+    },
+    onSuccess: () => {
+      // Refresh client data to get updated workflow status
+      queryClient.invalidateQueries({ queryKey: ['client', id] });
+      queryClient.invalidateQueries({ queryKey: ['artefacts', id] });
+    },
+    onError: (error) => {
+      console.error('Workflow failed:', error);
+      alert('Failed to start workflow. Please try again.');
+    }
+  });
+
+  const triggerWorkflow = (workflowType: string) => {
+    workflowMutation.mutate(workflowType);
+  };
 
   if (clientLoading && !clientError) {
     return (
@@ -257,32 +345,82 @@ const ClientPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
+            {/* AI Workflow Controls */}
             <Card className="business-card">
               <CardHeader className="business-card-header">
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Strategic management tools</CardDescription>
+                <CardTitle>🤖 AI Workflows</CardTitle>
+                <CardDescription>Automated business intelligence & strategy</CardDescription>
               </CardHeader>
               <CardContent className="business-card-content">
-                <div className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Generate Market Report
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    Update Strategic Plan
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Run Risk Assessment
-                  </Button>
+                <div className="space-y-4">
+                  {/* Discovery Workflow */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'bg-green-500' :
+                        displayClient?.workflowStatus?.discovery?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
+                        'bg-gray-300'
+                      }`}></div>
+                      <div>
+                        <div className="font-medium text-sm">Discovery</div>
+                        <div className="text-xs text-muted-foreground">Business analysis & strategy</div>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant={displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'outline' : 'default'}
+                      onClick={() => triggerWorkflow('discovery')}
+                    >
+                      {displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'Re-run' : 
+                       displayClient?.workflowStatus?.discovery?.status === 'in_progress' ? 'Running...' : 'Start'}
+                    </Button>
+                  </div>
+
+                  {/* Validation Workflow */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        displayClient?.workflowStatus?.validation?.status === 'completed' ? 'bg-green-500' :
+                        displayClient?.workflowStatus?.validation?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
+                        'bg-gray-300'
+                      }`}></div>
+                      <div>
+                        <div className="font-medium text-sm">Validation</div>
+                        <div className="text-xs text-muted-foreground">Market testing & validation</div>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant={displayClient?.workflowStatus?.validation?.status === 'completed' ? 'outline' : 'default'}
+                      onClick={() => triggerWorkflow('validation')}
+                    >
+                      {displayClient?.workflowStatus?.validation?.status === 'completed' ? 'Re-run' : 
+                       displayClient?.workflowStatus?.validation?.status === 'in_progress' ? 'Running...' : 'Start'}
+                    </Button>
+                  </div>
+
+                  {/* Scale Workflow */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        displayClient?.workflowStatus?.scale?.status === 'completed' ? 'bg-green-500' :
+                        displayClient?.workflowStatus?.scale?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
+                        'bg-gray-300'
+                      }`}></div>
+                      <div>
+                        <div className="font-medium text-sm">Scale</div>
+                        <div className="text-xs text-muted-foreground">Growth & scaling strategy</div>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant={displayClient?.workflowStatus?.scale?.status === 'completed' ? 'outline' : 'default'}
+                      onClick={() => triggerWorkflow('scale')}
+                    >
+                      {displayClient?.workflowStatus?.scale?.status === 'completed' ? 'Re-run' : 
+                       displayClient?.workflowStatus?.scale?.status === 'in_progress' ? 'Running...' : 'Start'}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
