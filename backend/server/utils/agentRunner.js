@@ -1,7 +1,6 @@
 // Generic runner for OpenAI-based workflows
 import OpenAI from 'openai';
 import Artefact from '../models/artefactModel.js';
-import * as vectorStore from './vectorStore.js';
 import { traceOperation } from './observability.js';
 import ComplianceAgent from '../../agents/crossCutting/complianceAgent.js';
 
@@ -91,6 +90,7 @@ Please analyze this input and return a JSON object with the following structure:
 
     // Create artefact data structure
     const artefactData = {
+      id: artefactId,
       clientId: clientId,
       name: `${agentName}_result`,
       type: 'Analysis',
@@ -105,18 +105,8 @@ Please analyze this input and return a JSON object with the following structure:
     const artefact = new Artefact(artefactData);
     await artefact.save();
 
-    // Persist to vector store, handling errors gracefully
-    try {
-      await vectorStore.storeEmbedding(
-        `${agentName}-${clientId}-${artefactId}`,
-        storedOutput,
-        { agent: agentName, clientId: clientId }
-      );
-      console.log(`[${agentName}] Successfully stored embedding for client ${clientId}`);
-    } catch (e) {
-      console.error(`[${agentName}] Vector store failed:`, e.message);
-      // Continue execution even if vector store fails
-    }
+    // Artefact successfully saved to MongoDB
+    console.log(`[${agentName}] Successfully created artefact for client ${clientId}`);
 
     return responseData;
   });
