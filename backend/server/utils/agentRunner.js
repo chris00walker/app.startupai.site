@@ -18,7 +18,20 @@ export async function runAgent(agentName, input, toolsConfig = {}) {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     
     // Create a simple agent execution using OpenAI chat completions
-    const prompt = `You are ${agentName}, a specialized AI agent. Process the following input and provide a structured response:\n\nInput: ${JSON.stringify(safeInput, null, 2)}`;
+    const prompt = `You are ${agentName}, a specialized AI agent. Process the following input and provide a structured JSON response.
+
+IMPORTANT: Your response must be valid JSON format only, no additional text or explanation.
+
+Input: ${JSON.stringify(safeInput, null, 2)}
+
+Please analyze this input and return a JSON object with the following structure:
+{
+  "analysis": "your analysis of the input",
+  "recommendations": ["list of recommendations"],
+  "nextSteps": ["suggested next steps"],
+  "insights": ["key insights discovered"],
+  "status": "completed"
+}`;
     
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
@@ -26,12 +39,28 @@ export async function runAgent(agentName, input, toolsConfig = {}) {
       temperature: 0.7,
     });
 
+    const rawResponse = completion.choices[0].message.content;
+    console.log(`[${agentName}] Raw OpenAI response:`, rawResponse);
+
     // Parse the AI response
     let responseData;
     try {
-      responseData = JSON.parse(completion.choices[0].message.content);
+      responseData = JSON.parse(rawResponse);
+      console.log(`[${agentName}] Successfully parsed JSON response`);
     } catch (e) {
-      throw new Error('Invalid JSON response');
+      console.error(`[${agentName}] JSON parsing failed:`, e.message);
+      console.error(`[${agentName}] Raw response that failed to parse:`, rawResponse);
+      
+      // Fallback: create a structured response from the raw text
+      responseData = {
+        analysis: rawResponse,
+        recommendations: ["Review and refine the AI agent response format"],
+        nextSteps: ["Implement better structured prompting"],
+        insights: ["AI response needs JSON formatting improvement"],
+        status: "completed_with_fallback",
+        rawResponse: rawResponse
+      };
+      console.log(`[${agentName}] Using fallback structured response`);
     }
 
     // Perform compliance scanning/redaction (supports both checkCompliance and scanContent APIs)
@@ -51,19 +80,26 @@ export async function runAgent(agentName, input, toolsConfig = {}) {
 
     // Build artefact payload
     const artefactId = `${agentName}-${Date.now()}-${Math.random().toString(36).substring(2,8)}`;
+    // Extract clientId from various possible input formats
+    const clientId = safeInput.clientId || safeInput.id || (typeof safeInput === 'string' ? safeInput : null);
+    console.log(`[${agentName}] Extracted clientId:`, clientId);
+    
+    if (!clientId) {
+      console.error(`[${agentName}] No clientId found in input:`, safeInput);
+      throw new Error('ClientId is required for artefact creation');
+    }
+
+    // Create artefact data structure
     const artefactData = {
-      id: artefactId,
+      clientId: clientId,
       name: `${agentName}_result`,
       type: 'Analysis',
       status: 'completed',
       agentId: agentName,
       content: storedOutput,
-      metadata: { ...responseData, clientId: safeInput.clientId },
+      metadata: { ...responseData, clientId: clientId },
       createdAt: new Date(),
     };
-    if (safeInput.clientId) {
-      artefactData.clientId = safeInput.clientId;
-    }
 
     // Save artefact
     const artefact = new Artefact(artefactData);
@@ -72,12 +108,14 @@ export async function runAgent(agentName, input, toolsConfig = {}) {
     // Persist to vector store, handling errors gracefully
     try {
       await vectorStore.storeEmbedding(
-        `${agentName}-${safeInput.clientId || ''}-${artefactData.id}`,
+        `${agentName}-${clientId}-${artefactId}`,
         storedOutput,
-        { agent: agentName, clientId: safeInput.clientId }
+        { agent: agentName, clientId: clientId }
       );
+      console.log(`[${agentName}] Successfully stored embedding for client ${clientId}`);
     } catch (e) {
-      console.error('Vector store failed', e);
+      console.error(`[${agentName}] Vector store failed:`, e.message);
+      // Continue execution even if vector store fails
     }
 
     return responseData;
