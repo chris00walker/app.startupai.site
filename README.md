@@ -2,22 +2,38 @@
 
 A professional-grade multi-agent intelligence platform designed for consulting businesses. This platform provides advanced AI capabilities for client intake, agent orchestration, task management, and real-time analytics.
 
+
+## Live Demo
+
+The platform is currently deployed and accessible at:
+
+ 
+- **Main Dashboard**: http://34.27.49.185:3000
+- **Backend API**: http://34.27.49.185:4000
+- **Prometheus**: http://34.27.49.185:9090
+- **Grafana**: http://34.27.49.185:3001
+
+
 ## Features
 
-- **Client Intake System**: Professional intake forms with PII redaction
-- **Agent Orchestration**: Multi-agent workflow management
+ 
+- **Client Management**: Professional intake forms with comprehensive business details
+- **AI Agent Orchestration**: Multi-agent workflow management (Discovery, Validation, Scale)
 - **Task Management**: Kanban-style task boards with progress tracking
 - **Real-time Analytics**: Prometheus metrics with Grafana dashboards
 - **Vector Database**: Milvus integration for advanced AI features
 - **Compliance**: Built-in PII redaction and security measures
+- **Professional UI**: Modern, clean interface suitable for client presentations
+
 
 ## Architecture
 
 The platform consists of:
 
+
 - **Frontend**: Next.js 15 with React Query and Tailwind CSS
 - **Backend**: Node.js/Express with MongoDB and Milvus
-- **Infrastructure**: Docker Compose for local development
+- **Infrastructure**: Docker Compose for deployment
 - **Observability**: OpenTelemetry with Prometheus and Grafana
 
 ## Prerequisites
@@ -25,90 +41,73 @@ The platform consists of:
 - Node.js 18+
 - Docker and Docker Compose
 - OpenAI API key
+- Google Cloud Platform account (for deployment)
 
 ## Local Development
 
-1. Clone the repository
-2. Set up environment variables (see `.env.example` files)
-3. Run `docker-compose up -d` to start all services
-4. Access the frontend at http://localhost:3000
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/chris00walker/multi-agent-intelligence-platform.git
+   cd multi-agent-intelligence-platform
+   ```
 
-## Environment Variables
+2. Install dependencies:
 
-### Backend (`.env`)
+   ```bash
+   # Backend
+   cd backend && npm install && cd ..
+   
+   # Frontend
+   cd frontend && npm install && cd ..
+   ```
 
-- `OPENAI_API_KEY`: Your OpenAI API key
-- `MONGODB_URI`: MongoDB connection string
-- `MILVUS_HOST`: Milvus host (default: localhost)
-- `MILVUS_PORT`: Milvus port (default: 19530)
+3. Set up environment variables:
 
-### Frontend (`.env.local`)
+   ```bash
+   # Backend
+   cp backend/.env.example backend/.env
+   # Edit backend/.env with your values
+   
+   # Frontend
+   cp frontend/.env.local.example frontend/.env.local
+   # Edit frontend/.env.local with your values
+   ```
 
-- `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:3002/api)
+4. Start the development server:
+
+   ```bash
+   docker-compose up
+   ```
+
+5. Access the application:
+
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:4000
 
 ## Deployment
 
-### GitHub Actions Deployment
+The platform is deployed on Google Cloud Platform using the comprehensive deployment guide:
 
-This repository includes a GitHub Actions workflow that automatically builds Docker images for both the frontend and backend services. The workflow is triggered on pushes to the `main` branch.
+[GCP Deployment Guide](GCP_DEPLOYMENT_GUIDE.md)
 
-### Cloud Platform Deployment Options
+This deployment includes all services (frontend, backend, MongoDB, Milvus, Prometheus, Grafana) running on a single GCP Compute Engine instance.
 
-Since this is a multi-container application with complex dependencies (MongoDB, Milvus, etc.), you'll need a cloud platform that supports Docker Compose or Kubernetes:
+## Development Workflow
 
-1. **AWS**: Use AWS ECS with Docker Compose or EKS with Kubernetes
-2. **Google Cloud**: Use Cloud Run or Google Kubernetes Engine
-3. **Azure**: Use Azure Container Instances or Azure Kubernetes Service
-4. **DigitalOcean**: Use App Platform which supports Docker Compose
-5. **Railway**: Supports Docker Compose deployments
-6. **Render**: Supports Docker Compose deployments
+1. Make changes to code locally
+2. Test with `docker-compose up`
+3. Commit and push to GitHub
+4. SSH to GCP instance and pull changes
+5. Rebuild and restart services as needed
 
-### Deployment Steps
+## Contributing
 
-1. Choose a cloud platform that supports Docker Compose
-2. Create an account and set up your deployment environment
-3. Configure the environment variables in your cloud platform:
-   - `OPENAI_API_KEY`: Your OpenAI API key
-   - Database connection strings for MongoDB and Milvus
-4. Deploy the `docker-compose.yaml` file to your cloud platform
-5. Update the frontend's `NEXT_PUBLIC_API_URL` to point to your deployed backend
-
-### Free Deployment Options
-
-For a free deployment option, consider:
-
-1. **Railway** (railway.app): Offers $5 credit free, supports Docker Compose
-2. **Render** (render.com): Free tier available for web services
-3. **Fly.io**: Free tier with some limitations
-
-### Netlify Deployment (Frontend Only)
-
-Since Netlify primarily supports static sites and serverless functions, you can deploy the frontend to Netlify while running the backend separately:
-
-1. **Deploy the frontend to Netlify**:
-   - Connect your GitHub repository to Netlify
-   - Set the build command to `npm run build`
-   - Set the publish directory to `.next`
-   - Add `NEXT_PUBLIC_API_URL` as an environment variable in Netlify pointing to your backend
-
-2. **Run the backend separately**:
-   - You'll need to deploy the backend to a platform that supports Docker Compose or containers
-   - Options include Railway, Render, or AWS ECS
-
-**Note**: Netlify won't be able to run your full multi-container application as it doesn't support Docker Compose. You'll need a separate backend deployment.
-
-## Testing
-
-- Frontend: `npm test` (100% test coverage)
-- Backend: `npm test` (100% test coverage)
-
-## Services
-
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3002/api
-- Prometheus: http://localhost:9464/metrics
-- Grafana: http://localhost:3001
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a pull request
 
 ## License
 
-ISC
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
