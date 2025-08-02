@@ -52,3 +52,26 @@ minio_data/
 
 # Prometheus
 prometheus_data/
+
+# GCP Deployment Guide (contains sensitive information)
+GCP_DEPLOYMENT_GUIDE.md
+
+# Connection directory (contains sensitive information)
+connection/
+
+# Google Cloud SDK
+y/
+
+# Recursive ignores for nested packages/workspaces
+**/node_modules/
+**/.next/
+**/.nuxt/
+**/dist/
+**/build/
+**/out/
+**/.turbo/
+**/.swc/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.log
