@@ -5,5 +5,10 @@
   "scripts": {
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d"
+  },
+  "devDependencies": {
+    "axios": "^1.11.0",
+    "jest": "^30.0.5",
+    "jest-environment-node": "^30.0.5"
   }
 }
