@@ -460,48 +460,96 @@ const ClientPage: React.FC = () => {
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               {selectedArtefact.content ? (
                 <div className="space-y-4">
-                  {typeof selectedArtefact.content === 'string' ? (
-                    <div className="whitespace-pre-wrap text-sm">{selectedArtefact.content}</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {selectedArtefact.content.analysis && (
-                        <div>
-                          <h3 className="font-semibold text-lg mb-2">Analysis</h3>
-                          <p className="text-sm text-gray-700">{selectedArtefact.content.analysis}</p>
+                  {(() => {
+                    // Handle different content structures
+                    let contentData = selectedArtefact.content;
+                    
+                    // If content is a string, try to parse it as JSON
+                    if (typeof contentData === 'string') {
+                      try {
+                        contentData = JSON.parse(contentData);
+                      } catch (e) {
+                        return <div className="whitespace-pre-wrap text-sm">{contentData}</div>;
+                      }
+                    }
+                    
+                    // If content has nested structure, extract the actual data
+                    if (contentData && typeof contentData === 'object') {
+                      // Check if it's wrapped in metadata (common in our backend)
+                      const actualContent = contentData.content || contentData.data || contentData;
+                      
+                      return (
+                        <div className="space-y-4">
+                          {actualContent.analysis && (
+                            <div>
+                              <h3 className="font-semibold text-lg mb-2 text-blue-800">🔍 Analysis</h3>
+                              <p className="text-sm text-gray-700 leading-relaxed">{actualContent.analysis}</p>
+                            </div>
+                          )}
+                          {actualContent.recommendations && Array.isArray(actualContent.recommendations) && (
+                            <div>
+                              <h3 className="font-semibold text-lg mb-2 text-green-800">💡 Recommendations</h3>
+                              <ul className="list-disc list-inside space-y-2">
+                                {actualContent.recommendations.map((rec: string, index: number) => (
+                                  <li key={index} className="text-sm text-gray-700 leading-relaxed">{rec}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {actualContent.nextSteps && Array.isArray(actualContent.nextSteps) && (
+                            <div>
+                              <h3 className="font-semibold text-lg mb-2 text-purple-800">🚀 Next Steps</h3>
+                              <ul className="list-disc list-inside space-y-2">
+                                {actualContent.nextSteps.map((step: string, index: number) => (
+                                  <li key={index} className="text-sm text-gray-700 leading-relaxed">{step}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {actualContent.insights && Array.isArray(actualContent.insights) && (
+                            <div>
+                              <h3 className="font-semibold text-lg mb-2 text-orange-800">✨ Key Insights</h3>
+                              <ul className="list-disc list-inside space-y-2">
+                                {actualContent.insights.map((insight: string, index: number) => (
+                                  <li key={index} className="text-sm text-gray-700 leading-relaxed">{insight}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {actualContent.status && (
+                            <div>
+                              <h3 className="font-semibold text-lg mb-2 text-gray-800">📊 Status</h3>
+                              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                                actualContent.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {actualContent.status}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Fallback: show raw JSON if no structured data found */}
+                          {!actualContent.analysis && !actualContent.recommendations && !actualContent.nextSteps && !actualContent.insights && (
+                            <div>
+                              <h3 className="font-semibold text-lg mb-2 text-gray-800">📄 Raw Content</h3>
+                              <pre className="bg-gray-100 p-4 rounded-lg text-xs overflow-x-auto">
+                                {JSON.stringify(actualContent, null, 2)}
+                              </pre>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {selectedArtefact.content.recommendations && (
-                        <div>
-                          <h3 className="font-semibold text-lg mb-2">Recommendations</h3>
-                          <ul className="list-disc list-inside space-y-1">
-                            {selectedArtefact.content.recommendations.map((rec: string, index: number) => (
-                              <li key={index} className="text-sm text-gray-700">{rec}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {selectedArtefact.content.nextSteps && (
-                        <div>
-                          <h3 className="font-semibold text-lg mb-2">Next Steps</h3>
-                          <ul className="list-disc list-inside space-y-1">
-                            {selectedArtefact.content.nextSteps.map((step: string, index: number) => (
-                              <li key={index} className="text-sm text-gray-700">{step}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {selectedArtefact.content.insights && (
-                        <div>
-                          <h3 className="font-semibold text-lg mb-2">Key Insights</h3>
-                          <ul className="list-disc list-inside space-y-1">
-                            {selectedArtefact.content.insights.map((insight: string, index: number) => (
-                              <li key={index} className="text-sm text-gray-700">{insight}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                      );
+                    }
+                    
+                    // Fallback for any other data type
+                    return (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>Unable to parse artefact content.</p>
+                        <pre className="mt-4 bg-gray-100 p-4 rounded-lg text-xs">
+                          {JSON.stringify(contentData, null, 2)}
+                        </pre>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
