@@ -185,7 +185,28 @@ const canvasSchema = new mongoose.Schema({
       default: 'gpt-4'
     },
     prompt: String,
-    rawResponse: String
+    rawResponse: String,
+    
+    // Visual Generation Metadata
+    visualGenerated: {
+      type: Boolean,
+      default: false
+    },
+    visualGeneratedAt: Date,
+    visualQualityScore: {
+      type: Number,
+      min: 0,
+      max: 1
+    },
+    visualFormats: [{
+      type: String,
+      enum: ['svg', 'png', 'pdf']
+    }],
+    visualAssetSizes: {
+      svg: Number,
+      png: Number,
+      pdf: Number
+    }
   },
 
   // Visual and Export Settings
