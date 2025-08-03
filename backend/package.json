@@ -10,7 +10,7 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "lint": "eslint . --ext .js,.mjs",
-    "test": "vitest run --no-threads",
+    "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run __tests__/unit",
     "test:integration": "vitest run __tests__/integration",
