@@ -370,19 +370,27 @@ const HomePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Metrics */}
-                    {client.metrics && (
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="text-center p-2 bg-slate-50 rounded">
-                          <div className="font-semibold text-slate-900">{client.metrics.totalTasks}</div>
-                          <div className="text-slate-600">Total Tasks</div>
+                    {/* Workflow Progress Metrics */}
+                    {(() => {
+                      const workflows = ['discovery', 'validation', 'scale'];
+                      const completedWorkflows = workflows.filter(w => 
+                        client.workflowStatus?.[w]?.status === 'completed'
+                      ).length;
+                      const totalWorkflows = workflows.length;
+                      
+                      return (
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="text-center p-2 bg-slate-50 rounded">
+                            <div className="font-semibold text-slate-900">{totalWorkflows}</div>
+                            <div className="text-slate-600">AI Workflows</div>
+                          </div>
+                          <div className="text-center p-2 bg-slate-50 rounded">
+                            <div className="font-semibold text-slate-900">{completedWorkflows}</div>
+                            <div className="text-slate-600">Completed</div>
+                          </div>
                         </div>
-                        <div className="text-center p-2 bg-slate-50 rounded">
-                          <div className="font-semibold text-slate-900">{client.metrics.completedTasks}</div>
-                          <div className="text-slate-600">Completed</div>
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {client.assignedConsultant && (
                       <div className="text-xs text-slate-600">
