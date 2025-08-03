@@ -5,8 +5,12 @@ import { runScaleWorkflow } from '../workflows/scaleWorkflow.js';
 import Artefact from '../models/artefactModel.js';
 import Client from '../models/clientModel.js';
 import Task from '../models/taskModel.js';
+import collaborationRoutes from '../routes/collaboration.js';
 
 const router = express.Router();
+
+// Register collaboration routes for multi-agent consulting
+router.use('/collaboration', collaborationRoutes);
 
 /**
  * Health check endpoint for frontend connectivity testing.
