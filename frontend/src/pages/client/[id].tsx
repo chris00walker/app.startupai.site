@@ -32,6 +32,7 @@ interface Artefact {
   type: string;
   status: string;
   createdAt: string;
+  content?: any; // AI-generated content from workflows
 }
 
 interface WorkflowProgress {
@@ -132,6 +133,8 @@ const ClientPage: React.FC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { id } = router.query;
+  const [selectedArtefact, setSelectedArtefact] = useState<Artefact | null>(null);
+  const [showArtefactModal, setShowArtefactModal] = useState(false);
 
   const { data: client, isLoading: clientLoading, error: clientError } = useQuery<Client>({
     queryKey: ['client', id],
@@ -299,7 +302,14 @@ const ClientPage: React.FC = () => {
               <div className="space-y-4">
                 {displayArtefacts.length > 0 ? (
                   displayArtefacts.map((artefact) => (
-                    <div key={artefact.id} className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors">
+                    <div 
+                      key={artefact.id} 
+                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedArtefact(artefact);
+                        setShowArtefactModal(true);
+                      }}
+                    >
                       <div className="flex-1">
                         <h4 className="font-medium text-foreground">{artefact.name}</h4>
                         <p className="text-sm text-muted-foreground">{artefact.type}</p>
@@ -307,12 +317,15 @@ const ClientPage: React.FC = () => {
                           {new Date(artefact.createdAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <Badge 
-                        variant={artefact.status === 'completed' ? 'success' : 
-                               artefact.status === 'in-progress' ? 'warning' : 'info'}
-                      >
-                        {artefact.status}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge 
+                          variant={artefact.status === 'completed' ? 'success' : 
+                                 artefact.status === 'in-progress' ? 'warning' : 'info'}
+                        >
+                          {artefact.status}
+                        </Badge>
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -427,6 +440,78 @@ const ClientPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Artefact Modal */}
+      {showArtefactModal && selectedArtefact && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h2 className="text-xl font-semibold">{selectedArtefact.name}</h2>
+                <p className="text-sm text-muted-foreground">{selectedArtefact.type} • {new Date(selectedArtefact.createdAt).toLocaleDateString()}</p>
+              </div>
+              <button 
+                onClick={() => setShowArtefactModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {selectedArtefact.content ? (
+                <div className="space-y-4">
+                  {typeof selectedArtefact.content === 'string' ? (
+                    <div className="whitespace-pre-wrap text-sm">{selectedArtefact.content}</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {selectedArtefact.content.analysis && (
+                        <div>
+                          <h3 className="font-semibold text-lg mb-2">Analysis</h3>
+                          <p className="text-sm text-gray-700">{selectedArtefact.content.analysis}</p>
+                        </div>
+                      )}
+                      {selectedArtefact.content.recommendations && (
+                        <div>
+                          <h3 className="font-semibold text-lg mb-2">Recommendations</h3>
+                          <ul className="list-disc list-inside space-y-1">
+                            {selectedArtefact.content.recommendations.map((rec: string, index: number) => (
+                              <li key={index} className="text-sm text-gray-700">{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {selectedArtefact.content.nextSteps && (
+                        <div>
+                          <h3 className="font-semibold text-lg mb-2">Next Steps</h3>
+                          <ul className="list-disc list-inside space-y-1">
+                            {selectedArtefact.content.nextSteps.map((step: string, index: number) => (
+                              <li key={index} className="text-sm text-gray-700">{step}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {selectedArtefact.content.insights && (
+                        <div>
+                          <h3 className="font-semibold text-lg mb-2">Key Insights</h3>
+                          <ul className="list-disc list-inside space-y-1">
+                            {selectedArtefact.content.insights.map((insight: string, index: number) => (
+                              <li key={index} className="text-sm text-gray-700">{insight}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No content available for this artefact.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
