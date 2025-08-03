@@ -6,11 +6,15 @@ import Artefact from '../models/artefactModel.js';
 import Client from '../models/clientModel.js';
 import Task from '../models/taskModel.js';
 import collaborationRoutes from '../routes/collaboration.js';
+import monitoringRoutes from '../routes/monitoring.js';
 
 const router = express.Router();
 
 // Register collaboration routes for multi-agent consulting
 router.use('/collaboration', collaborationRoutes);
+
+// Register monitoring routes for Epic 4.3 Production Readiness
+router.use('/monitoring', monitoringRoutes);
 
 /**
  * Health check endpoint for frontend connectivity testing.
