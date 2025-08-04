@@ -8,6 +8,7 @@ import Task from '../models/taskModel.js';
 import collaborationRoutes from '../routes/collaboration.js';
 import monitoringRoutes from '../routes/monitoring.js';
 import securityRoutes from '../routes/security.js';
+import securityTestingRoutes from '../routes/securityTesting.js';
 
 const router = express.Router();
 
@@ -19,6 +20,9 @@ router.use('/monitoring', monitoringRoutes);
 
 // Register security routes for Epic 4.3 Story 4.3.2: Security & Compliance
 router.use('/security', securityRoutes);
+
+// Register security testing routes for Epic 4.3 Story 4.3.2: Vulnerability Scanning
+router.use('/security-testing', securityTestingRoutes);
 
 /**
  * Health check endpoint for frontend connectivity testing.
