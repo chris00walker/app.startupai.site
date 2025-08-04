@@ -51,15 +51,69 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: production
     ports:
       - '4000:4000'
     environment:
+      # Database Configuration
       MONGODB_URI: mongodb://mongo:27017/agents
+      
+      # AI Configuration
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      
+      # Server Configuration
       PORT: 4000
+      NODE_ENV: production
+      
+      # Security Configuration
+      JWT_SECRET: ${JWT_SECRET:-default-jwt-secret-change-in-production}
+      MASTER_ENCRYPTION_KEY: ${MASTER_ENCRYPTION_KEY:-default-encryption-key-change-in-production}
+      ANONYMIZATION_SALT: ${ANONYMIZATION_SALT:-default-salt-change-in-production}
+      PSEUDONYMIZATION_KEY: ${PSEUDONYMIZATION_KEY:-default-pseudo-key-change-in-production}
+      
+      # Security Settings
+      FORCE_HTTPS: ${FORCE_HTTPS:-false}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      
+      # Monitoring Configuration
+      ENABLE_MONITORING: ${ENABLE_MONITORING:-true}
+      PROMETHEUS_METRICS: ${PROMETHEUS_METRICS:-true}
+      
+      # Audit Logging
+      AUDIT_LOG_LEVEL: ${AUDIT_LOG_LEVEL:-info}
+      AUDIT_LOG_RETENTION_DAYS: ${AUDIT_LOG_RETENTION_DAYS:-90}
+      
+      # Security Scanner
+      ENABLE_SECURITY_SCANNING: ${ENABLE_SECURITY_SCANNING:-true}
+      SECURITY_SCAN_INTERVAL: ${SECURITY_SCAN_INTERVAL:-86400000}
+    volumes:
+      # Persistent storage for security reports and audit logs
+      - security_reports:/app/security-reports
+      - audit_logs:/app/audit-logs
     depends_on:
       - mongo
       - milvus
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Security: Run with limited capabilities
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    # Security: Read-only root filesystem
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /app/security-reports:noexec,nosuid,size=50m
+      - /app/audit-logs:noexec,nosuid,size=100m
 
   frontend:
     build:
@@ -93,3 +147,5 @@ services:
 volumes:
   mongo_data:
   prometheus_data:
+  security_reports:
+  audit_logs:

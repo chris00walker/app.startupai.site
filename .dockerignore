@@ -1,0 +1,100 @@
+# Dockerignore file for security and optimization
+
+# Development files
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (security)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Test files
+__tests__/
+*.test.js
+*.spec.js
+coverage/
+.nyc_output
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Build artifacts
+build/
+dist/
+
+# Security reports (will be generated in container)
+security-reports/
+audit-logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Docker files (don't include in image)
+Dockerfile
+docker-compose.yaml
+docker-compose.yml
+.dockerignore
+
+# Scripts (deployment scripts shouldn't be in container)
+scripts/deploy-*.sh
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Backup files
+*.bak
+*.backup
+
+# Editor files
+*.sublime-*
+*.code-workspace
