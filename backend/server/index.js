@@ -6,8 +6,8 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import routes from './routes.js';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root directory
+dotenv.config({ path: '../.env' });
 
 // Initialize OpenTelemetry SDK with Prometheus exporter
 const prometheusExporter = new PrometheusExporter({ startServer: true }, () => {

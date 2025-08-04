@@ -29,7 +29,7 @@ const NewClientPage: React.FC = () => {
         setWorkflowStatus({ stage: 'triggering-discovery', message: 'Launching AI discovery workflow...' });
         
         // Start the discovery workflow
-        await api.post(`/clients/${clientId}/discovery`);
+        await api.post(`/api/clients/${clientId}/discovery`, {});
         
         setWorkflowStatus({ stage: 'complete', message: 'Client created and AI analysis started!' });
         

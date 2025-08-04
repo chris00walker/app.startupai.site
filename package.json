@@ -1,14 +1,16 @@
 {
-  "name": "andrewCave",
+  "name": "strategyzer-ai-platform",
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
     "docker:build": "docker-compose build",
-    "docker:up": "docker-compose up -d"
-  },
-  "devDependencies": {
-    "axios": "^1.11.0",
-    "jest": "^30.0.5",
-    "jest-environment-node": "^30.0.5"
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   }
 }

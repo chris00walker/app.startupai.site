@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_ID=${GCP_PROJECT_ID:-"your-gcp-project-id"}
+PROJECT_ID=${GCP_PROJECT_ID:-"andrewcave"}
 REGION=${GCP_REGION:-"us-central1"}
 SERVICE_NAME="strategyzer-ai-backend"
 FRONTEND_SERVICE_NAME="strategyzer-ai-frontend"
@@ -38,6 +38,9 @@ print_error() {
 # Check if required tools are installed
 check_dependencies() {
     echo -e "${BLUE}🔍 Checking dependencies...${NC}"
+    
+    # Add Google Cloud SDK to PATH
+    export PATH="/home/chris/google-cloud-sdk/bin:$PATH"
     
     if ! command -v docker &> /dev/null; then
         print_error "Docker is not installed"

@@ -201,7 +201,7 @@ const ClientPage: React.FC = () => {
   // Workflow trigger mutation
   const workflowMutation = useMutation({
     mutationFn: async (workflowType: string) => {
-      return api.post(`/clients/${id}/${workflowType}`);
+      return api.post(`/api/clients/${id}/${workflowType}`, {});
     },
     onSuccess: () => {
       // Refresh client data to get updated workflow status

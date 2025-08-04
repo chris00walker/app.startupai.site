@@ -9,6 +9,7 @@ import collaborationRoutes from '../routes/collaboration.js';
 import monitoringRoutes from '../routes/monitoring.js';
 import securityRoutes from '../routes/security.js';
 import securityTestingRoutes from '../routes/securityTesting.js';
+import canvasRoutes from '../routes/canvas.js';
 
 const router = express.Router();
 
@@ -23,6 +24,9 @@ router.use('/security', securityRoutes);
 
 // Register security testing routes for Epic 4.3 Story 4.3.2: Vulnerability Scanning
 router.use('/security-testing', securityTestingRoutes);
+
+// Register canvas routes for Strategyzer AI canvas generation
+router.use('/canvas', canvasRoutes);
 
 /**
  * Health check endpoint for frontend connectivity testing.

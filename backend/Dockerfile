@@ -20,6 +20,21 @@ RUN npm run build || true
 # Production stage
 FROM node:22-alpine AS production
 
+# Install Chrome dependencies for Puppeteer
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    && rm -rf /var/cache/apk/*
+
+# Tell Puppeteer to use the installed Chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 # Security: Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S strategyzer -u 1001

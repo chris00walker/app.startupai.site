@@ -1,13 +1,5 @@
-version: '3.8'
+version: "3.8"
 services:
-  mongo:
-    image: mongo:6
-    restart: unless-stopped
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongo_data:/data/db
-
   milvus:
     image: milvusdb/milvus:v2.3.0
     restart: unless-stopped
@@ -16,7 +8,7 @@ services:
       - ETCD_ENDPOINTS=etcd:2379
       - MINIO_ADDRESS=minio:9000
     ports:
-      - '19530:19530'
+      - "19530:19530"
     depends_on:
       - etcd
       - minio
@@ -53,37 +45,37 @@ services:
       dockerfile: Dockerfile
       target: production
     ports:
-      - '4000:4000'
+      - "4000:4000"
     environment:
-      # Database Configuration
-      MONGODB_URI: mongodb://mongo:27017/agents
-      
+      # Database Configuration - Use MongoDB Atlas from .env
+      MONGODB_URI: ${MONGODB_URI}
+
       # AI Configuration
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      
+
       # Server Configuration
-      PORT: 4000
-      NODE_ENV: production
-      
-      # Security Configuration
-      JWT_SECRET: ${JWT_SECRET:-default-jwt-secret-change-in-production}
-      MASTER_ENCRYPTION_KEY: ${MASTER_ENCRYPTION_KEY:-default-encryption-key-change-in-production}
-      ANONYMIZATION_SALT: ${ANONYMIZATION_SALT:-default-salt-change-in-production}
-      PSEUDONYMIZATION_KEY: ${PSEUDONYMIZATION_KEY:-default-pseudo-key-change-in-production}
-      
+      PORT: ${PORT:-4000}
+      NODE_ENV: ${NODE_ENV:-development}
+
+      # Security Configuration - Use values from .env
+      JWT_SECRET: ${JWT_SECRET}
+      MASTER_ENCRYPTION_KEY: ${MASTER_ENCRYPTION_KEY}
+      ANONYMIZATION_SALT: ${ANONYMIZATION_SALT}
+      PSEUDONYMIZATION_KEY: ${PSEUDONYMIZATION_KEY}
+
       # Security Settings
       FORCE_HTTPS: ${FORCE_HTTPS:-false}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
-      
+
       # Monitoring Configuration
       ENABLE_MONITORING: ${ENABLE_MONITORING:-true}
       PROMETHEUS_METRICS: ${PROMETHEUS_METRICS:-true}
-      
+
       # Audit Logging
       AUDIT_LOG_LEVEL: ${AUDIT_LOG_LEVEL:-info}
       AUDIT_LOG_RETENTION_DAYS: ${AUDIT_LOG_RETENTION_DAYS:-90}
-      
+
       # Security Scanner
       ENABLE_SECURITY_SCANNING: ${ENABLE_SECURITY_SCANNING:-true}
       SECURITY_SCAN_INTERVAL: ${SECURITY_SCAN_INTERVAL:-86400000}
@@ -92,11 +84,18 @@ services:
       - security_reports:/app/security-reports
       - audit_logs:/app/audit-logs
     depends_on:
-      - mongo
       - milvus
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/api/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:4000/api/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -120,11 +119,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://34.27.49.185:4000/api
+        NEXT_PUBLIC_API_URL: http://backend:4000/api
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://34.27.49.185:4000/api
+      NEXT_PUBLIC_API_URL: http://backend:4000/api
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Strategyzer AI Platform}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-1.0.0}
     depends_on:
       - backend
 
@@ -133,19 +134,18 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
-      - '9090:9090'
+      - "9090:9090"
     depends_on:
       - backend
 
   grafana:
     image: grafana/grafana:latest
     ports:
-      - '3001:3000'
+      - "3001:3000"
     depends_on:
       - prometheus
 
 volumes:
-  mongo_data:
   prometheus_data:
   security_reports:
   audit_logs:

@@ -1,11 +1,33 @@
-// Multi-Agent Intelligence Platform - Client Portfolio Dashboard
-import React from 'react';
+// Strategyzer AI Platform - Visual Canvas Generation Dashboard
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { 
+  Palette, 
+  TrendingUp, 
+  Users, 
+  Zap,
+  BarChart3,
+  Eye,
+  Edit,
+  Share,
+  Download,
+  Plus,
+  Sparkles,
+  Target,
+  Layers,
+  Brain,
+  FileImage,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  ArrowRight
+} from 'lucide-react';
 
 interface Client {
   _id: string;
@@ -41,13 +63,52 @@ const HomePage: React.FC = () => {
   const isBackendOnline = !error && !isLoading;
   const hasClients = clients && clients.length > 0;
 
+  // Mock canvas data to showcase AI capabilities
+  const mockCanvases = [
+    {
+      id: 1,
+      name: "TechCorp Business Model",
+      type: "Business Model Canvas",
+      client: "TechCorp Solutions",
+      status: "completed",
+      completion: 95,
+      lastModified: "2 hours ago",
+      aiGenerated: true,
+      thumbnail: "/api/placeholder/300/200"
+    },
+    {
+      id: 2,
+      name: "FinanceApp Value Proposition",
+      type: "Value Proposition Canvas",
+      client: "FinanceApp Inc",
+      status: "in-progress",
+      completion: 78,
+      lastModified: "1 day ago",
+      aiGenerated: true,
+      thumbnail: "/api/placeholder/300/200"
+    },
+    {
+      id: 3,
+      name: "RetailCo Testing Framework",
+      type: "Testing Business Ideas",
+      client: "RetailCo",
+      status: "draft",
+      completion: 45,
+      lastModified: "3 days ago",
+      aiGenerated: false,
+      thumbnail: "/api/placeholder/300/200"
+    }
+  ];
+
   if (isLoading) {
     return (
       <div className="min-h-screen business-gradient">
-        <div className="business-container py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <div className="text-lg text-muted-foreground">Loading client portfolio...</div>
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading Strategyzer AI Platform...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -85,22 +146,23 @@ const HomePage: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        {/* Professional Header */}
+        {/* Strategyzer AI Header */}
         <header className="bg-white shadow-sm border-b border-slate-200">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">Multi-Agent Intelligence Platform</h1>
-                <p className="text-slate-600 mt-1">Strategic Business Development & Market Analysis</p>
+                <h1 className="text-3xl font-bold text-slate-900">Strategyzer AI Platform</h1>
+                <p className="text-slate-600 mt-1">AI-Powered Visual Canvas Generation & Business Strategy</p>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <span className="text-sm text-slate-600">Connection Error</span>
+                  <div className={`w-2 h-2 rounded-full ${isBackendOnline ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                  <span className="text-sm text-slate-600">{isBackendOnline ? 'AI Services Online' : 'AI Services Offline'}</span>
                 </div>
-                <Link href="/clients/new">
-                  <Button>+ New Client</Button>
-                </Link>
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Palette className="w-4 h-4 mr-2" />
+                  Generate Canvas
+                </Button>
               </div>
             </div>
           </div>
@@ -150,118 +212,187 @@ const HomePage: React.FC = () => {
             </Card>
           )}
 
-          {/* Demo Client Portfolio */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Demo Client 1 */}
-            <Card className="business-card">
-              <CardHeader className="business-card-header">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">TechStart Ventures</CardTitle>
-                    <CardDescription>Series A SaaS Startup</CardDescription>
-                  </div>
-                  <Badge variant="success">Active</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="business-card-content">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="metric-card">
-                      <div className="metric-value text-primary">87%</div>
-                      <div className="metric-label">Market Fit</div>
+          {/* AI-Generated Canvas Gallery */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">AI-Generated Canvas Gallery</h2>
+                <p className="text-slate-600 mt-1">Interactive Strategyzer frameworks powered by multi-agent AI</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <Brain className="w-3 h-3 mr-1" />
+                  AI Active
+                </Badge>
+                <Button variant="outline" size="sm">
+                  <FileImage className="w-4 h-4 mr-2" />
+                  View All
+                </Button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockCanvases.map((canvas) => (
+                <Card key={canvas.id} className="hover:shadow-lg transition-shadow duration-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg font-semibold text-slate-900 mb-1">
+                          {canvas.name}
+                        </CardTitle>
+                        <CardDescription className="text-sm text-slate-600">
+                          {canvas.type} • {canvas.client}
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {canvas.aiGenerated && (
+                          <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                            <Brain className="w-3 h-3 mr-1" />
+                            AI
+                          </Badge>
+                        )}
+                        <Badge 
+                          className={`text-xs ${
+                            canvas.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
+                            canvas.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                            'bg-gray-100 text-gray-800 border-gray-200'
+                          }`}
+                        >
+                          {canvas.status}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="metric-card">
-                      <div className="metric-value text-green-600">$2.4M</div>
-                      <div className="metric-label">ARR</div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      {/* Canvas Preview */}
+                      <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border border-slate-200 flex items-center justify-center">
+                        <div className="text-center">
+                          <Palette className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                          <p className="text-sm text-slate-600">{canvas.type}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-600">Completion</span>
+                          <span className="font-medium text-slate-900">{canvas.completion}%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${canvas.completion}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      {/* Meta Information */}
+                      <div className="flex items-center justify-between text-sm text-slate-500">
+                        <span>Updated {canvas.lastModified}</span>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>Live</span>
+                        </div>
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex space-x-2">
+                        <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                          <Eye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </div>
                     </div>
-                    <div className="metric-card">
-                      <div className="metric-value text-purple-600">4.2x</div>
-                      <div className="metric-label">Growth</div>
-                    </div>
-                  </div>
-                  <Link href="/client/demo-1" passHref>
-                    <Button className="w-full">
-                      View Strategic Dashboard →
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Demo Client 2 */}
-            <Card className="business-card">
-              <CardHeader className="business-card-header">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">Global Manufacturing Co</CardTitle>
-                    <CardDescription>Enterprise Digital Transformation</CardDescription>
-                  </div>
-                  <Badge variant="warning">In Progress</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="business-card-content">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="metric-card">
-                      <div className="metric-value text-primary">64%</div>
-                      <div className="metric-label">Efficiency</div>
-                    </div>
-                    <div className="metric-card">
-                      <div className="metric-value text-green-600">$18M</div>
-                      <div className="metric-label">Cost Savings</div>
-                    </div>
-                    <div className="metric-card">
-                      <div className="metric-value text-purple-600">12</div>
-                      <div className="metric-label">Months</div>
-                    </div>
-                  </div>
-                  <Link href="/client/demo-2" passHref>
-                    <Button className="w-full">
-                      View Strategic Dashboard →
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
-          {/* Platform Features */}
+          {/* AI Canvas Generation Capabilities */}
           <div className="mt-16">
-            <h2 className="text-2xl font-bold text-center mb-8">Intelligence Platform Capabilities</h2>
+            <h2 className="text-2xl font-bold text-center mb-8">AI-Powered Strategyzer Canvas Generation</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center">
+              <Card className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Palette className="w-8 h-8 text-blue-600" />
                   </div>
-                  <CardTitle className="text-lg mb-2">Market Discovery</CardTitle>
-                  <CardDescription>AI-powered market analysis and opportunity identification</CardDescription>
+                  <CardTitle className="text-lg mb-2">Business Model Canvas</CardTitle>
+                  <CardDescription>AI-generated 9-block interactive business model visualization with real-time collaboration</CardDescription>
+                  <div className="mt-4">
+                    <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                      <Brain className="w-3 h-3 mr-1" />
+                      Multi-Agent AI
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
-              <Card className="text-center">
+              <Card className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Target className="w-8 h-8 text-green-600" />
                   </div>
-                  <CardTitle className="text-lg mb-2">Strategic Validation</CardTitle>
-                  <CardDescription>Data-driven validation of business hypotheses and strategies</CardDescription>
+                  <CardTitle className="text-lg mb-2">Value Proposition Canvas</CardTitle>
+                  <CardDescription>Interactive interlocked circles design with customer jobs, pains, and gains analysis</CardDescription>
+                  <div className="mt-4">
+                    <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                      <Layers className="w-3 h-3 mr-1" />
+                      Interactive SVG
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
-              <Card className="text-center">
+              <Card className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="pt-6">
                   <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
+                    <TrendingUp className="w-8 h-8 text-purple-600" />
                   </div>
-                  <CardTitle className="text-lg mb-2">Scale Optimization</CardTitle>
-                  <CardDescription>Intelligent scaling strategies and performance optimization</CardDescription>
+                  <CardTitle className="text-lg mb-2">Testing Business Ideas</CardTitle>
+                  <CardDescription>Hypothesis-driven testing framework with automated validation and metrics tracking</CardDescription>
+                  <div className="mt-4">
+                    <Badge className="bg-purple-100 text-purple-800 border-purple-200 text-xs">
+                      <BarChart3 className="w-3 h-3 mr-1" />
+                      Analytics
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
+            </div>
+            
+            {/* AI Capabilities Highlight */}
+            <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-100">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                    <Brain className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900">Multi-Agent AI Orchestration</h3>
+                </div>
+                <p className="text-slate-600 text-lg mb-6 max-w-3xl mx-auto">
+                  Our sophisticated AI agents collaborate to generate professional, client-ready visual canvases 
+                  with rich insights, interactive elements, and export capabilities for strategic consulting.
+                </p>
+                <div className="flex items-center justify-center space-x-8">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">95%</div>
+                    <div className="text-sm text-slate-600">Completion Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">&lt;2s</div>
+                    <div className="text-sm text-slate-600">Generation Time</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">100%</div>
+                    <div className="text-sm text-slate-600">Client Ready</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </main>
