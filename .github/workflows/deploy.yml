@@ -36,11 +36,42 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/multi-agent-frontend:latest
 
-      - name: Deploy to cloud platform
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Deploy Backend to Cloud Run
         run: |
-          echo "Deployment steps would go here"
-          echo "This would typically involve deploying to a cloud platform like AWS, Azure, or Google Cloud"
-          echo "that supports Docker containers and can run the docker-compose.yaml file"
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          gcloud run deploy strategyzer-ai-backend \
+            --source ./backend \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --port 4000 \
+            --memory 2Gi \
+            --cpu 2 \
+            --timeout 300 \
+            --set-env-vars MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            --set-env-vars OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            --set-env-vars JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            --set-env-vars MASTER_ENCRYPTION_KEY="${{ secrets.MASTER_ENCRYPTION_KEY }}" \
+            --set-env-vars NODE_ENV=production \
+            --project andrewcave
+
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy strategyzer-ai-frontend \
+            --source ./frontend \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated \
+            --port 3000 \
+            --memory 1Gi \
+            --cpu 1 \
+            --timeout 300 \
+            --set-env-vars NEXT_PUBLIC_API_URL="https://strategyzer-ai-backend-e42x4wjxiq-uc.a.run.app/api" \
+            --project andrewcave
