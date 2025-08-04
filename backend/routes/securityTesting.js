@@ -10,7 +10,7 @@
 
 import express from 'express';
 import SecurityScannerService from '../services/SecurityScannerService.js';
-import { authenticateJWT, requirePermission } from '../middleware/securityMiddleware.js';
+import { authenticateJWT, authorize } from '../middleware/securityMiddleware.js';
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ const securityScanner = new SecurityScannerService({
  * @desc Run comprehensive security scan
  * @access Admin only
  */
-router.post('/scan/comprehensive', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/scan/comprehensive', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const scanResults = await securityScanner.runComprehensiveScan();
     
@@ -55,7 +55,7 @@ router.post('/scan/comprehensive', authenticateJWT, requirePermission('admin'), 
  * @desc Run dependency vulnerability scan
  * @access Admin only
  */
-router.post('/scan/dependencies', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/scan/dependencies', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const results = await securityScanner.scanDependencies();
     
@@ -78,7 +78,7 @@ router.post('/scan/dependencies', authenticateJWT, requirePermission('admin'), a
  * @desc Run security configuration scan
  * @access Admin only
  */
-router.post('/scan/configuration', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/scan/configuration', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const results = await securityScanner.scanConfiguration();
     
@@ -101,7 +101,7 @@ router.post('/scan/configuration', authenticateJWT, requirePermission('admin'), 
  * @desc Run API security scan
  * @access Admin only
  */
-router.post('/scan/api-security', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/scan/api-security', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const results = await securityScanner.scanAPISecurity();
     
@@ -124,7 +124,7 @@ router.post('/scan/api-security', authenticateJWT, requirePermission('admin'), a
  * @desc Run code security analysis
  * @access Admin only
  */
-router.post('/scan/code-analysis', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/scan/code-analysis', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const results = await securityScanner.scanCodeSecurity();
     
@@ -147,7 +147,7 @@ router.post('/scan/code-analysis', authenticateJWT, requirePermission('admin'), 
  * @desc Run compliance validation scan
  * @access Admin only
  */
-router.post('/scan/compliance', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/scan/compliance', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const results = await securityScanner.scanCompliance();
     
@@ -170,7 +170,7 @@ router.post('/scan/compliance', authenticateJWT, requirePermission('admin'), asy
  * @desc Get security scan results
  * @access Admin only
  */
-router.get('/results/:scanId?', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.get('/results/:scanId?', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const { scanId } = req.params;
     const results = securityScanner.getScanResults(scanId);
@@ -201,7 +201,7 @@ router.get('/results/:scanId?', authenticateJWT, requirePermission('admin'), asy
  * @desc Get security scan history
  * @access Admin only
  */
-router.get('/history', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.get('/history', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const history = securityScanner.getScanHistory();
     
@@ -227,7 +227,7 @@ router.get('/history', authenticateJWT, requirePermission('admin'), async (req, 
  * @desc Get latest security scan summary
  * @access Admin only
  */
-router.get('/summary/latest', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.get('/summary/latest', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const summary = securityScanner.getLatestScanSummary();
     
@@ -257,7 +257,7 @@ router.get('/summary/latest', authenticateJWT, requirePermission('admin'), async
  * @desc Get security scanner health status
  * @access Admin only
  */
-router.get('/health', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.get('/health', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const health = securityScanner.getHealthStatus();
     
@@ -280,7 +280,7 @@ router.get('/health', authenticateJWT, requirePermission('admin'), async (req, r
  * @desc Run penetration testing simulation
  * @access Admin only
  */
-router.post('/penetration-test', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/penetration-test', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const { testType = 'basic', targetEndpoints = [] } = req.body;
     
@@ -340,7 +340,7 @@ router.post('/penetration-test', authenticateJWT, requirePermission('admin'), as
  * @desc Run security-focused load testing
  * @access Admin only
  */
-router.post('/load-test-security', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.post('/load-test-security', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const { duration = 60, concurrency = 10, endpoint = '/api/health' } = req.body;
     
@@ -396,7 +396,7 @@ router.post('/load-test-security', authenticateJWT, requirePermission('admin'), 
  * @desc Generate compliance report
  * @access Admin only
  */
-router.get('/compliance-report', authenticateJWT, requirePermission('admin'), async (req, res) => {
+router.get('/compliance-report', authenticateJWT, authorize('admin'), async (req, res) => {
   try {
     const { format = 'json', frameworks = ['GDPR', 'SOX', 'OWASP'] } = req.query;
     
