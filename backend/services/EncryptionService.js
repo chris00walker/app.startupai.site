@@ -24,7 +24,7 @@ export default class EncryptionService extends EventEmitter {
       
       // Key Management
       masterKey: config.masterKey || process.env.MASTER_ENCRYPTION_KEY || this.generateMasterKey(),
-      keyRotationInterval: config.keyRotationInterval || 90 * 24 * 60 * 60 * 1000, // 90 days
+      keyRotationInterval: config.keyRotationInterval || 7 * 24 * 60 * 60 * 1000, // 7 days (fits in 32-bit)
       keyDerivationIterations: config.keyDerivationIterations || 100000,
       
       // PII Configuration
@@ -400,14 +400,14 @@ export default class EncryptionService extends EventEmitter {
     // Schedule cleanup of old keys (keep for 1 year for decryption)
     setTimeout(() => {
       this.cleanupOldKeys();
-    }, 365 * 24 * 60 * 60 * 1000); // 1 year
+    }, 30 * 24 * 60 * 60 * 1000); // 30 days (safe for 32-bit)
   }
 
   /**
    * Cleanup old encryption keys
    */
   cleanupOldKeys() {
-    const cutoff = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000); // 1 year ago
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago (safe for 32-bit)
     let cleanedCount = 0;
     
     for (const [keyId, keyData] of this.dataKeys.entries()) {

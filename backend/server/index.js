@@ -41,6 +41,34 @@ app.use(cors());
 import { redactPIIMiddleware } from './utils/complianceMiddleware.js';
 app.use(express.json(), redactPIIMiddleware);
 
+// Root route - API status and information
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Strategyzer AI Backend',
+    version: '1.0.0',
+    status: 'operational',
+    description: 'AI-powered business strategy platform backend',
+    endpoints: {
+      health: '/api/health',
+      security: '/api/security',
+      monitoring: '/api/monitoring',
+      collaboration: '/api/collaboration'
+    },
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API status endpoint
+app.get('/status', (req, res) => {
+  res.json({
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
 // Register API routes
 app.use('/api', routes);
 
