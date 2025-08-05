@@ -29,7 +29,8 @@ class VisualRenderingService {
       pngQuality: config.pngQuality || 95,
       browserOptions: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath: '/usr/bin/chromium-browser'
       }
     };
 
