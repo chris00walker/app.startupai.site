@@ -20,6 +20,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      
+      - name: Upgrade npm to 11.5.2
+        run: npm install -g npm@11.5.2
 
 
       - name: Install dependencies and run tests
@@ -40,6 +43,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      
+      - name: Upgrade npm to 11.5.2
+        run: npm install -g npm@11.5.2
 
 
       - name: Install dependencies
