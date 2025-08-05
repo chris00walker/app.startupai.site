@@ -12,16 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Authenticate to Google Cloud and set up SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: andrewcave
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Google Cloud Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Configure Docker for Google Cloud
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
       - name: Build and push backend
         uses: docker/build-push-action@v4
@@ -37,13 +38,10 @@ jobs:
           push: true
           tags: us-central1-docker.pkg.dev/andrewcave/strategyzer-ai/strategyzer-ai-frontend:latest
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-
       - name: Deploy Backend to Cloud Run
         run: |
           gcloud run deploy strategyzer-ai-backend \
-            --image gcr.io/andrewcave/strategyzer-ai-backend:latest \
+            --image us-central1-docker.pkg.dev/andrewcave/strategyzer-ai/strategyzer-ai-backend:latest \
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
@@ -58,7 +56,7 @@ jobs:
       - name: Deploy Frontend to Cloud Run
         run: |
           gcloud run deploy strategyzer-ai-frontend \
-            --image gcr.io/andrewcave/strategyzer-ai-frontend:latest \
+            --image us-central1-docker.pkg.dev/andrewcave/strategyzer-ai/strategyzer-ai-frontend:latest \
             --platform managed \
             --region us-central1 \
             --allow-unauthenticated \
