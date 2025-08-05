@@ -8,164 +8,127 @@ import { vi } from 'vitest';
 export class DatabaseTestHelper {
   constructor() {
     this.mongoServer = null;
+    this.isConnected = false;
   }
 
   async connect() {
-    if (process.env.USE_EXTERNAL_MONGO === '1') {
-      await mongoose.connect(process.env.MONGODB_URI);
-      return;
-    }
     try {
+      // Use external MongoDB in CI, memory server locally
+      if (process.env.USE_EXTERNAL_MONGO === '1') {
+        await mongoose.connect(process.env.MONGODB_URI);
+        this.isConnected = true;
+        return;
+      }
+      
+      // CI Environment - always use external MongoDB Atlas
+      if (process.env.NODE_ENV === 'test' || process.env.CI) {
+        await mongoose.connect(process.env.MONGODB_URI);
+        this.isConnected = true;
+        return;
+      }
+      
+      // Local development - use memory server
       this.mongoServer = await MongoMemoryServer.create();
       const uri = this.mongoServer.getUri();
       await mongoose.connect(uri);
-    } catch (e) {
-      console.warn('MongoMemoryServer failed, falling back to MONGODB_URI', e);
-      if (!process.env.MONGODB_URI) throw e;
-      await mongoose.connect(process.env.MONGODB_URI);
+      this.isConnected = true;
+    } catch (error) {
+      console.error('Database connection failed:', error.message);
+      throw error;
     }
   }
 
   async disconnect() {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    if (this.mongoServer) {
-      await this.mongoServer.stop();
+    try {
+      if (this.isConnected && mongoose.connection.readyState === 1) {
+        // Use safe cleanup approach
+        const db = mongoose.connection.db;
+        if (db) {
+          try {
+            await db.dropDatabase();
+          } catch (dbError) {
+            console.warn('Database cleanup warning:', dbError.message);
+          }
+        }
+        
+        try {
+          await mongoose.connection.close();
+        } catch (closeError) {
+          console.warn('Connection close warning:', closeError.message);
+        }
+      }
+    } catch (error) {
+      console.warn('Cleanup warning:', error.message);
+    } finally {
+      if (this.mongoServer) {
+        try {
+          await this.mongoServer.stop();
+        } catch (error) {
+          console.warn('Mongo server cleanup warning:', error.message);
+        }
+      }
+      this.isConnected = false;
     }
   }
 
   async clearDatabase() {
-    // Complete database reset for maximum test isolation
     try {
-      await mongoose.connection.db.dropDatabase();
-      // Database will be automatically recreated on next operation
+      // Check if connection is active before clearing
+      if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+        await mongoose.connection.db.dropDatabase();
+      }
       
       // Clear Mongoose connection state to force fresh model registration
       mongoose.connection.models = {};
       
-      // Clear any cached model schemas
+      // Clear any cached model schemas safely
       Object.keys(mongoose.models).forEach(modelName => {
-        delete mongoose.models[modelName];
-      });
-      
-    } catch (e) {
-      // Fallback to collection-level cleanup if dropDatabase fails
-      const collections = mongoose.connection.collections;
-      for (const key in collections) {
-        const collection = collections[key];
-        await collection.deleteMany({});
-        // Drop indexes to ensure clean state between tests
         try {
-          await collection.dropIndexes();
-        } catch (indexError) {
-          // Ignore errors if indexes don't exist
+          delete mongoose.models[modelName];
+        } catch (error) {
+          console.warn('Model cleanup warning:', error.message);
         }
-      }
+      });
+    } catch (error) {
+      console.warn('Database clear warning:', error.message);
     }
   }
 }
 
-// Mock OpenAI API responses
-export const mockOpenAI = {
-  chat: {
-    completions: {
-      create: vi.fn(() => Promise.resolve({
-        choices: [{
-          message: {
-            content: 'Mock AI response for testing'
-          }
-        }]
-      }))
-    }
-  }
-};
+// Mock utilities for testing
+export const createMockResponse = () => ({
+  status: vi.fn().mockReturnThis(),
+  json: vi.fn().mockReturnThis(),
+  send: vi.fn().mockReturnThis(),
+});
 
-// Mock Milvus vector database
-export const mockMilvus = {
-  connect: vi.fn(() => Promise.resolve()),
-  disconnect: vi.fn(() => Promise.resolve()),
-  insert: vi.fn(() => Promise.resolve({ status: 'success' })),
-  search: vi.fn(() => Promise.resolve({ results: [] })),
-  createCollection: vi.fn(() => Promise.resolve()),
-  dropCollection: vi.fn(() => Promise.resolve())
-};
-
-// Mock Express request/response objects
-export const mockRequest = (overrides = {}) => ({
+export const createMockRequest = (overrides = {}) => ({
+  body: {},
   params: {},
   query: {},
-  body: {},
   headers: {},
-  user: { id: 'test-user' },
-  ...overrides
+  ...overrides,
 });
-
-export const mockResponse = () => {
-  const res = {};
-  res.status = vi.fn().mockReturnValue(res);
-  res.json = vi.fn().mockReturnValue(res);
-  res.send = vi.fn().mockReturnValue(res);
-  res.end = vi.fn().mockReturnValue(res);
-  return res;
-};
-
-// Mock agent workflow data
-export const mockWorkflowData = {
-  clientId: 'test-client-123',
-  workflowType: 'discovery',
-  input: {
-    name: 'Test Client',
-    email: 'test@example.com',
-    projectDescription: 'Test project for agent processing'
-  },
-  expectedOutput: {
-    analysis: 'Mock analysis result',
-    recommendations: ['Mock recommendation 1', 'Mock recommendation 2'],
-    nextSteps: ['Mock next step 1', 'Mock next step 2']
-  }
-};
 
 // Test data generators
-export const generateTestClient = (overrides = {}) => ({
-  id: 'test-client-' + Math.random().toString(36).substr(2, 9),
-  name: 'Test Client',
-  email: 'test@example.com',
-  status: 'active',
-  createdAt: new Date(),
-  ...overrides
-});
-
 export const generateTestTask = (overrides = {}) => ({
-  id: 'task-' + Math.random().toString(36).substr(2, 9),
   title: 'Test Task',
+  description: 'Test description',
   status: 'todo',
+  priority: 'medium',
   assignedTo: 'TestAgent',
-  clientId: 'test-client-123',
-  createdAt: new Date(),
-  ...overrides
+  clientId: 'test-client',
+  category: 'research',
+  ...overrides,
 });
 
-export const generateTestArtefact = (overrides = {}) => ({
-  id: 'test-artefact-' + Math.random().toString(36).substr(2, 9),
-  name: 'Test Artefact',
-  type: 'Analysis',
-  status: 'completed',
-  clientId: 'test-client-123',
-  agentId: 'TestAgent',
-  content: 'Test artefact content',
-  createdAt: new Date(),
-  ...overrides
+export const generateTestCanvas = (overrides = {}) => ({
+  type: 'value-proposition',
+  title: 'Test Canvas',
+  clientId: 'test-client',
+  data: {},
+  ...overrides,
 });
 
-// Async test helpers
-export const waitFor = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const retryUntil = async (condition, maxAttempts = 10, delay = 100) => {
-  for (let i = 0; i < maxAttempts; i++) {
-    if (await condition()) {
-      return true;
-    }
-    await waitFor(delay);
-  }
-  throw new Error(`Condition not met after ${maxAttempts} attempts`);
-};
+// Database helper instance
+export const dbHelper = new DatabaseTestHelper();
