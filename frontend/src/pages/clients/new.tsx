@@ -24,30 +24,27 @@ const NewClientPage: React.FC = () => {
     onSuccess: async (data) => {
       const clientId = data.client._id;
       
+      // Show immediate success for client creation
+      setWorkflowStatus({ stage: 'complete', message: 'Client created successfully!' });
+      
+      // Start discovery workflow in background (don't wait for it)
       try {
-        // Trigger discovery workflow automatically
-        setWorkflowStatus({ stage: 'triggering-discovery', message: 'Launching AI discovery workflow...' });
+        setWorkflowStatus({ stage: 'triggering-discovery', message: 'Client created! Starting AI discovery workflow in background...' });
         
-        // Start the discovery workflow
-        await api.post(`/api/clients/${clientId}/discovery`, {});
-        
-        setWorkflowStatus({ stage: 'complete', message: 'Client created and AI analysis started!' });
-        
-        // Wait a moment to show success message, then redirect
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['clients'] });
-          router.push(`/client/${clientId}`);
-        }, 2000);
+        // Fire and forget - don't await this call
+        api.post(`/api/clients/${clientId}/discovery`, {}).catch(error => {
+          console.warn('Discovery workflow failed to start (client still created):', error);
+        });
         
       } catch (workflowError) {
-        console.warn('Client created but workflow failed to start:', workflowError);
-        setWorkflowStatus({ stage: 'complete', message: 'Client created! You can manually start workflows from the dashboard.' });
-        
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['clients'] });
-          router.push(`/client/${clientId}`);
-        }, 2000);
+        console.warn('Discovery workflow failed to start (client still created):', workflowError);
       }
+      
+      // Redirect after showing success message
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        router.push(`/client/${clientId}`);
+      }, 2000);
     },
     onError: (error: any) => {
       console.error('Failed to create client:', error);
