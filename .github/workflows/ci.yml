@@ -32,7 +32,11 @@ jobs:
         working-directory: ${{ matrix.service }}
         run: |
           npm ci
-          npm test --if-present -- --runInBand
+          if [ "${{ matrix.service }}" = "frontend" ]; then
+            npm test --if-present -- --runInBand
+          else
+            npm test --if-present
+          fi
 
   build-frontend-prod-like:
     name: Build Frontend with Prod-like Env
