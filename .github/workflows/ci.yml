@@ -1,0 +1,62 @@
+name: Continuous Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit-and-integration-tests:
+    name: Unit & Integration Tests (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies and run tests
+        working-directory: ${{ matrix.service }}
+        run: |
+          npm ci
+          npm test --if-present
+
+  build-frontend-prod-like:
+    name: Build Frontend with Prod-like Env
+    needs: unit-and-integration-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build production bundle (dummy env)
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: 'https://dummy/api'
+        run: npm run build
+
+      # Simple grep-based assertion to fail if any duplicated /api/api/ slips through
+      - name: Fail build on duplicated API prefix
+        working-directory: frontend
+        run: |
+          if grep -R "\/api\/api\/" .next/static | grep -q "/api/api/"; then
+            echo "Found duplicated /api prefix in compiled bundle – failing build." && exit 1;
+          fi
+          echo "No duplicated /api prefix detected."
