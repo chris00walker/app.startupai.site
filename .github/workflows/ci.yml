@@ -30,6 +30,13 @@ jobs:
 
       - name: Install dependencies and run tests
         working-directory: ${{ matrix.service }}
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MASTER_ENCRYPTION_KEY: ${{ secrets.MASTER_ENCRYPTION_KEY }}
+          NODE_ENV: test
+          USE_EXTERNAL_MONGO: 1
         run: |
           npm ci
           if [ "${{ matrix.service }}" = "frontend" ]; then
