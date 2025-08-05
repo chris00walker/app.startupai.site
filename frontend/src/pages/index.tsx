@@ -54,7 +54,7 @@ interface Client {
 const HomePage: React.FC = () => {
   const { data: clients = [], isLoading, error } = useQuery<Client[]>({
     queryKey: ['clients'],
-    queryFn: () => api.get('/clients').then((r) => r.clients),
+    queryFn: () => api.get('/clients').then((r) => r.data.clients),
     retry: false,
     refetchOnWindowFocus: false,
   });
