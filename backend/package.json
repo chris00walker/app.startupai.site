@@ -39,6 +39,7 @@
     "c8": "^10.1.2",
     "jest-environment-node": "^29.7.0",
     "mongodb-memory-server": "^10.1.1",
+    "nodemon": "^3.1.10",
     "supertest": "^7.0.0",
     "vitest": "^2.1.5"
   },

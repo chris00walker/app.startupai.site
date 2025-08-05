@@ -63,42 +63,7 @@ const HomePage: React.FC = () => {
   const isBackendOnline = !error && !isLoading;
   const hasClients = clients && clients.length > 0;
 
-  // Mock canvas data to showcase AI capabilities
-  const mockCanvases = [
-    {
-      id: 1,
-      name: "TechCorp Business Model",
-      type: "Business Model Canvas",
-      client: "TechCorp Solutions",
-      status: "completed",
-      completion: 95,
-      lastModified: "2 hours ago",
-      aiGenerated: true,
-      thumbnail: "/api/placeholder/300/200"
-    },
-    {
-      id: 2,
-      name: "FinanceApp Value Proposition",
-      type: "Value Proposition Canvas",
-      client: "FinanceApp Inc",
-      status: "in-progress",
-      completion: 78,
-      lastModified: "1 day ago",
-      aiGenerated: true,
-      thumbnail: "/api/placeholder/300/200"
-    },
-    {
-      id: 3,
-      name: "RetailCo Testing Framework",
-      type: "Testing Business Ideas",
-      client: "RetailCo",
-      status: "draft",
-      completion: 45,
-      lastModified: "3 days ago",
-      aiGenerated: false,
-      thumbnail: "/api/placeholder/300/200"
-    }
-  ];
+
 
   if (isLoading) {
     return (
@@ -232,85 +197,76 @@ const HomePage: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCanvases.map((canvas) => (
-                <Card key={canvas.id} className="hover:shadow-lg transition-shadow duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg font-semibold text-slate-900 mb-1">
-                          {canvas.name}
-                        </CardTitle>
-                        <CardDescription className="text-sm text-slate-600">
-                          {canvas.type} • {canvas.client}
-                        </CardDescription>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {canvas.aiGenerated && (
+              {hasClients && clients.map((client) => {
+                const completion = getWorkflowProgress(client.workflowStatus);
+                const canvasType = "Business Model Canvas"; // Placeholder
+                return (
+                  <Card key={client._id} className="hover:shadow-lg transition-shadow duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg font-semibold text-slate-900 mb-1">
+                            {`${client.company} Model`}
+                          </CardTitle>
+                          <CardDescription className="text-sm text-slate-600">
+                            {canvasType} • {client.name}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center space-x-2">
                           <Badge className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
                             <Brain className="w-3 h-3 mr-1" />
                             AI
                           </Badge>
-                        )}
-                        <Badge 
-                          className={`text-xs ${
-                            canvas.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
-                            canvas.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                            'bg-gray-100 text-gray-800 border-gray-200'
-                          }`}
-                        >
-                          {canvas.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      {/* Canvas Preview */}
-                      <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border border-slate-200 flex items-center justify-center">
-                        <div className="text-center">
-                          <Palette className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                          <p className="text-sm text-slate-600">{canvas.type}</p>
+                          <Badge 
+                            className={`text-xs ${getStatusColor(client.status)}`}
+                          >
+                            {client.status}
+                          </Badge>
                         </div>
                       </div>
-                      
-                      {/* Progress Bar */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-600">Completion</span>
-                          <span className="font-medium text-slate-900">{canvas.completion}%</span>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-4">
+                        <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border border-slate-200 flex items-center justify-center">
+                          <div className="text-center">
+                            <Palette className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                            <p className="text-sm text-slate-600">{canvasType}</p>
+                          </div>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                            style={{ width: `${canvas.completion}%` }}
-                          ></div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-slate-600">Completion</span>
+                            <span className="font-medium text-slate-900">{completion}%</span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                              style={{ width: `${completion}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-slate-500">
+                          <span>Updated {client.metrics?.lastActivity || 'recently'}</span>
+                          <div className="flex items-center space-x-1">
+                            <Clock className="w-3 h-3" />
+                            <span>Live</span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
                         </div>
                       </div>
-                      
-                      {/* Meta Information */}
-                      <div className="flex items-center justify-between text-sm text-slate-500">
-                        <span>Updated {canvas.lastModified}</span>
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3" />
-                          <span>Live</span>
-                        </div>
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex space-x-2">
-                        <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
 
