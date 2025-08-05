@@ -67,7 +67,7 @@ const HomePage: React.FC = () => {
   });
 
   // Check if backend services are online based on API call success
-  const isBackendOnline = health?.status === 'ok';
+  const isBackendOnline = health?.status === 'healthy';
 
   const hasClients = clients && clients.length > 0;
 
