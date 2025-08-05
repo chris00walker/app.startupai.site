@@ -7,8 +7,9 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install dependencies with security optimizations
-RUN npm ci --legacy-peer-deps && \
+# Upgrade npm to match engines requirement and install dependencies with security optimizations
+RUN npm install -g npm@11.5.2 && \
+    npm ci --legacy-peer-deps && \
     npm cache clean --force
 
 # Copy source code
