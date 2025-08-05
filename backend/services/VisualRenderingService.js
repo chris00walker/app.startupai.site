@@ -29,8 +29,33 @@ class VisualRenderingService {
       pngQuality: config.pngQuality || 95,
       browserOptions: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: '/usr/bin/chromium-browser'
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-features=TranslateUI',
+          '--disable-ipc-flooding-protection',
+          '--disable-extensions',
+          '--disable-default-apps',
+          '--disable-sync',
+          '--disable-translate',
+          '--hide-scrollbars',
+          '--mute-audio',
+          '--no-default-browser-check',
+          '--no-pings',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
+        ],
+        executablePath: '/usr/bin/chromium-browser',
+        timeout: 60000
       }
     };
 
@@ -39,21 +64,38 @@ class VisualRenderingService {
     this.renderQueue = [];
     this.activeRenders = 0;
     
-    this.initializeService();
+    // Don't initialize Puppeteer on startup - use lazy initialization
+    this.browserInitialized = false;
+    this.browserInitializationAttempted = false;
   }
 
   async initializeService() {
     try {
       await fs.mkdir(this.config.outputPath, { recursive: true });
-      
-      if (!this.browser) {
-        this.browser = await puppeteer.launch(this.config.browserOptions);
-      }
-      
-      this.logger.info('Visual Rendering Service initialized');
+      this.logger.info('Visual Rendering Service initialized (Puppeteer will be initialized on first use)');
     } catch (error) {
       this.logger.error('Failed to initialize Visual Rendering Service', { error: error.message });
       throw error;
+    }
+  }
+
+  async initializeBrowser() {
+    if (this.browserInitialized || this.browserInitializationAttempted) {
+      return this.browser;
+    }
+
+    this.browserInitializationAttempted = true;
+    
+    try {
+      this.logger.info('Attempting to initialize Puppeteer browser...');
+      this.browser = await puppeteer.launch(this.config.browserOptions);
+      this.browserInitialized = true;
+      this.logger.info('Puppeteer browser initialized successfully');
+      return this.browser;
+    } catch (error) {
+      this.logger.warn('Puppeteer browser initialization failed - visual rendering will be disabled', { error: error.message });
+      this.browser = null;
+      return null;
     }
   }
 
@@ -210,11 +252,18 @@ class VisualRenderingService {
    */
   async convertToPDF(svgContent, options) {
     try {
-      if (!this.browser) {
-        await this.initializeService();
+      const browser = await this.initializeBrowser();
+      if (!browser) {
+        // Graceful degradation - return SVG if Puppeteer fails
+        this.logger.warn('Puppeteer unavailable, returning SVG instead of PDF');
+        return {
+          data: Buffer.from(svgContent),
+          mimeType: 'image/svg+xml',
+          filename: `canvas.svg`
+        };
       }
 
-      const page = await this.browser.newPage();
+      const page = await browser.newPage();
       
       try {
         await page.setViewport({
