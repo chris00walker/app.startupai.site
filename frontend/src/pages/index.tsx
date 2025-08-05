@@ -61,7 +61,7 @@ const HomePage: React.FC = () => {
 
   const { data: health, isLoading: isHealthLoading, error: healthError } = useQuery({
     queryKey: ['health'],
-    queryFn: () => api.get('/health').then((r) => r.data),
+    queryFn: () => api.get('/api/health').then((r) => r.data),
     retry: 3,
     retryDelay: 1000,
   });
