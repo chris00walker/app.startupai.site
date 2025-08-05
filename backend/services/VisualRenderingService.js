@@ -29,7 +29,8 @@ class VisualRenderingService {
       pngQuality: config.pngQuality || 95,
       browserOptions: {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath: '/usr/bin/chromium-browser'
       }
     };
 
@@ -410,12 +411,12 @@ class VisualRenderingService {
         <text x="860" y="250" text-anchor="middle" class="bmc-section-title">Channels</text>
         {{channels}}
         
-        <rect x="20" y="380" width="580" height="120" class="bmc-section" rx="5"/>
-        <text x="310" y="400" text-anchor="middle" class="bmc-section-title">Cost Structure</text>
+        <rect x="20" y="380" width="520" height="120" class="bmc-section" rx="5"/>
+        <text x="280" y="400" text-anchor="middle" class="bmc-section-title">Cost Structure</text>
         {{cost_structure}}
         
-        <rect x="620" y="380" width="560" height="120" class="bmc-section" rx="5"/>
-        <text x="900" y="400" text-anchor="middle" class="bmc-section-title">Revenue Streams</text>
+        <rect x="560" y="380" width="620" height="120" class="bmc-section" rx="5"/>
+        <text x="870" y="400" text-anchor="middle" class="bmc-section-title">Revenue Streams</text>
         {{revenue_streams}}
         
         <text x="600" y="530" text-anchor="middle" class="bmc-text">Generated on {{timestamp}}</text>
@@ -431,83 +432,63 @@ class VisualRenderingService {
             .tbi-title { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; fill: #2c3e50; }
             .tbi-section-title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #34495e; }
             .tbi-text { font-family: Arial, sans-serif; font-size: 12px; fill: #2c3e50; }
-            .tbi-experiment { fill: #e8f5e8; stroke: #28a745; stroke-width: 2; }
-            .tbi-metrics { fill: #fff3cd; stroke: #ffc107; stroke-width: 2; }
+            .tbi-section { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 2; }
           </style>
         </defs>
         
         <rect width="100%" height="100%" fill="white"/>
         <text x="600" y="40" text-anchor="middle" class="tbi-title">{{title}}</text>
         
-        <rect x="50" y="80" width="500" height="500" class="tbi-experiment" rx="10"/>
-        <text x="300" y="110" text-anchor="middle" class="tbi-section-title">Experiment Design</text>
-        {{experiments}}
+        <rect x="50" y="80" width="1100" height="600" class="tbi-section" rx="10"/>
+        <text x="600" y="110" text-anchor="middle" class="tbi-section-title">Testing Business Ideas Framework</text>
         
-        <rect x="600" y="80" width="500" height="500" class="tbi-metrics" rx="10"/>
-        <text x="850" y="110" text-anchor="middle" class="tbi-section-title">Success Metrics</text>
-        {{metrics}}
+        <text x="70" y="150" class="tbi-section-title">Hypothesis</text>
+        {{hypothesis}}
         
-        <text x="600" y="620" text-anchor="middle" class="tbi-text">Generated on {{timestamp}}</text>
+        <text x="70" y="250" class="tbi-section-title">Experiment</text>
+        {{experiment}}
+        
+        <text x="70" y="350" class="tbi-section-title">Success Criteria</text>
+        {{success_criteria}}
+        
+        <text x="70" y="450" class="tbi-section-title">Results</text>
+        {{results}}
+        
+        <text x="70" y="550" class="tbi-section-title">Next Steps</text>
+        {{next_steps}}
+        
+        <text x="600" y="720" text-anchor="middle" class="tbi-text">Generated on {{timestamp}}</text>
       </svg>
     `;
   }
 
-  // Helper methods
-  getCanvasTitle(canvasType) {
-    const titles = {
-      valueProposition: 'Value Proposition Canvas',
-      businessModel: 'Business Model Canvas',
-      testingBusinessIdeas: 'Testing Business Ideas'
-    };
-    return titles[canvasType] || 'Strategic Canvas';
-  }
-
+  // Utility methods
   extractTemplateData(canvasData) {
     const data = {};
     
-    switch (canvasData.type) {
-      case 'valueProposition':
-        data.customer_jobs = this.formatListItems(canvasData.data?.customerProfile?.jobs || []);
-        data.customer_pains = this.formatListItems(canvasData.data?.customerProfile?.pains || []);
-        data.customer_gains = this.formatListItems(canvasData.data?.customerProfile?.gains || []);
-        data.products_services = this.formatListItems(canvasData.data?.valueMap?.products || []);
-        data.pain_relievers = this.formatListItems(canvasData.data?.valueMap?.painRelievers || []);
-        data.gain_creators = this.formatListItems(canvasData.data?.valueMap?.gainCreators || []);
-        break;
-        
-      case 'businessModel':
-        data.key_partners = this.formatListItems(canvasData.data?.keyPartners || []);
-        data.key_activities = this.formatListItems(canvasData.data?.keyActivities || []);
-        data.key_resources = this.formatListItems(canvasData.data?.keyResources || []);
-        data.value_propositions = this.formatListItems(canvasData.data?.valuePropositions || []);
-        data.customer_relationships = this.formatListItems(canvasData.data?.customerRelationships || []);
-        data.channels = this.formatListItems(canvasData.data?.channels || []);
-        data.customer_segments = this.formatListItems(canvasData.data?.customerSegments || []);
-        data.cost_structure = this.formatListItems(canvasData.data?.costStructure || []);
-        data.revenue_streams = this.formatListItems(canvasData.data?.revenueStreams || []);
-        break;
-        
-      case 'testingBusinessIdeas':
-        data.experiments = this.formatExperiments(canvasData.data?.experiments || []);
-        data.metrics = this.formatListItems(['Success Rate', 'User Engagement', 'Revenue Impact']);
-        break;
+    if (canvasData.sections) {
+      for (const [key, value] of Object.entries(canvasData.sections)) {
+        if (Array.isArray(value)) {
+          data[key] = value.map((item, index) => 
+            `<text x="70" y="${160 + (index * 20)}" class="vpc-text">${this.escapeXML(item)}</text>`
+          ).join('');
+        } else {
+          data[key] = `<text x="70" y="160" class="vpc-text">${this.escapeXML(String(value))}</text>`;
+        }
+      }
     }
     
     return data;
   }
 
-  formatListItems(items, maxItems = 4) {
-    return items.slice(0, maxItems).map((item, index) => {
-      const text = typeof item === 'string' ? item : item.name || item.description || String(item);
-      return `<text x="70" y="${160 + (index * 25)}" class="vpc-text">• ${this.escapeXML(text)}</text>`;
-    }).join('\n');
-  }
-
-  formatExperiments(experiments, maxItems = 3) {
-    return experiments.slice(0, maxItems).map((experiment, index) => {
-      const name = typeof experiment === 'string' ? experiment : experiment.name;
-      return `<text x="70" y="${140 + (index * 30)}" class="tbi-text">• ${this.escapeXML(name)}</text>`;
-    }).join('\n');
+  getCanvasTitle(type) {
+    const titles = {
+      valueProposition: 'Value Proposition Canvas',
+      businessModel: 'Business Model Canvas',
+      testingBusinessIdeas: 'Testing Business Ideas Framework'
+    };
+    
+    return titles[type] || 'Strategyzer Canvas';
   }
 
   escapeXML(text) {
@@ -520,18 +501,27 @@ class VisualRenderingService {
   }
 
   optimizeSVG(svgContent) {
-    return svgContent.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim();
+    // Basic SVG optimization
+    return svgContent
+      .replace(/\s+/g, ' ')
+      .replace(/>\s+</g, '><')
+      .trim();
   }
 
   generateCacheKey(canvasData, options) {
     const keyData = {
-      type: canvasData.type,
-      dataHash: crypto.createHash('md5').update(JSON.stringify(canvasData.data)).digest('hex'),
-      format: options.format,
-      theme: options.theme,
-      dimensions: `${options.width}x${options.height}`
+      canvas: canvasData,
+      options: {
+        format: options.format,
+        theme: options.theme,
+        width: options.width,
+        height: options.height
+      }
     };
-    return Buffer.from(JSON.stringify(keyData)).toString('base64');
+    
+    return crypto.createHash('md5')
+      .update(JSON.stringify(keyData))
+      .digest('hex');
   }
 
   async queueRender() {
@@ -550,8 +540,34 @@ class VisualRenderingService {
   async cleanup() {
     if (this.browser) {
       await this.browser.close();
+      this.browser = null;
     }
+    
     this.cache.clear();
+    this.renderQueue = [];
+    this.activeRenders = 0;
+  }
+
+  // Health check
+  async healthCheck() {
+    try {
+      if (!this.browser) {
+        await this.initializeService();
+      }
+      
+      return {
+        status: 'healthy',
+        browser: !!this.browser,
+        activeRenders: this.activeRenders,
+        queueLength: this.renderQueue.length,
+        cacheSize: this.cache.size
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        error: error.message
+      };
+    }
   }
 }
 
