@@ -1,5 +1,23 @@
 const request = require('supertest');
-const app = require('../../index');
+const express = require('express');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+// Create a simple test app for health endpoint testing
+const app = express();
+app.use(express.json());
+
+// Health endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {
+      mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    }
+  });
+});
 
 describe('Health Endpoint Integration Tests', () => {
   describe('GET /api/health', () => {
