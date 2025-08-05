@@ -40,13 +40,6 @@ jobs:
           push: true
           tags: us-central1-docker.pkg.dev/andrewcave/strategyzer-ai/strategyzer-ai-frontend:latest
 
-      - name: Grant Secret Manager Accessor role to Cloud Run service account
-        run: |
-          gcloud secrets add-iam-policy-binding MONGODB_URI --member="serviceAccount:627223217916-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project="andrewcave" || echo "IAM binding for MONGODB_URI already exists, skipping."
-          gcloud secrets add-iam-policy-binding OPENAI_API_KEY --member="serviceAccount:627223217916-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project="andrewcave" || echo "IAM binding for OPENAI_API_KEY already exists, skipping."
-          gcloud secrets add-iam-policy-binding JWT_SECRET --member="serviceAccount:627223217916-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project="andrewcave" || echo "IAM binding for JWT_SECRET already exists, skipping."
-          gcloud secrets add-iam-policy-binding MASTER_ENCRYPTION_KEY --member="serviceAccount:627223217916-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project="andrewcave" || echo "IAM binding for MASTER_ENCRYPTION_KEY already exists, skipping."
-
       - name: Deploy Backend to Cloud Run
         run: |
           gcloud run deploy strategyzer-ai-backend \
