@@ -59,8 +59,16 @@ const HomePage: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
+  const { data: health, isLoading: isHealthLoading, error: healthError } = useQuery({
+    queryKey: ['health'],
+    queryFn: () => api.get('/health').then((r) => r.data),
+    retry: 3,
+    retryDelay: 1000,
+  });
+
   // Check if backend services are online based on API call success
-  const isBackendOnline = !error && !isLoading;
+  const isBackendOnline = health?.status === 'ok';
+
   const hasClients = clients && clients.length > 0;
 
 
@@ -367,8 +375,8 @@ const HomePage: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-sm text-slate-600">Services Online</span>
+                <div className={`w-2 h-2 rounded-full ${isBackendOnline ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                <span className="text-sm text-slate-600">{isBackendOnline ? 'Services Online' : 'Services Offline'}</span>
               </div>
               <Link href="/clients/new">
                 <Button>+ New Client</Button>
