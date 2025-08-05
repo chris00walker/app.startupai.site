@@ -534,10 +534,35 @@ class VisualRenderingService {
     const titles = {
       valueProposition: 'Value Proposition Canvas',
       businessModel: 'Business Model Canvas',
-      testingBusinessIdeas: 'Testing Business Ideas Framework'
+      testingBusinessIdeas: 'Testing Business Ideas Framework',
+      customerSegment: 'Customer Segment Canvas',
+      revenueStream: 'Revenue Stream Canvas',
+      costStructure: 'Cost Structure Canvas',
+      keyPartners: 'Key Partners Canvas',
+      keyActivities: 'Key Activities Canvas',
+      keyResources: 'Key Resources Canvas',
+      valuePropositions: 'Value Propositions Canvas',
+      customerRelationships: 'Customer Relationships Canvas',
+      channels: 'Channels Canvas',
+      unknown: 'Strategic Canvas'
     };
+    return titles[type] || titles.unknown;
+  }
+
+  formatListItems(items) {
+    if (!Array.isArray(items)) {
+      return [];
+    }
     
-    return titles[type] || 'Strategyzer Canvas';
+    return items.map(item => {
+      if (typeof item === 'string') {
+        return item.trim();
+      }
+      if (typeof item === 'object' && item.text) {
+        return item.text.trim();
+      }
+      return String(item).trim();
+    }).filter(item => item.length > 0);
   }
 
   escapeXML(text) {
