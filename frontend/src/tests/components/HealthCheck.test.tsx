@@ -1,25 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import HomePage from '../../pages/index';
 
 // Mock the API responses
 const server = setupServer(
-  rest.get('/api/health', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        status: 'healthy',
-        timestamp: '2025-08-05T15:00:00.000Z',
-        services: {
-          mongodb: 'connected',
-          milvus: 'connected'
-        }
-      })
-    );
+  http.get('/api/health', () => {
+    return HttpResponse.json({
+      status: 'healthy',
+      timestamp: '2025-08-05T15:00:00.000Z',
+      services: {
+        mongodb: 'connected',
+        milvus: 'connected'
+      }
+    });
   }),
-  rest.get('/api/clients', (req, res, ctx) => {
-    return res(ctx.json({ clients: [] }));
+  http.get('/api/clients', () => {
+    return HttpResponse.json({ clients: [] });
   })
 );
 
@@ -56,8 +54,11 @@ describe('Health Check Integration Tests', () => {
   it('should show "Backend Services Offline" when health check fails', async () => {
     // Override the health endpoint to return error
     server.use(
-      rest.get('/api/health', (req, res, ctx) => {
-        return res(ctx.status(503), ctx.json({ error: 'Service unavailable' }));
+      http.get('/api/health', () => {
+        return new HttpResponse(JSON.stringify({ error: 'Service unavailable' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
+        });
       })
     );
 
@@ -77,14 +78,12 @@ describe('Health Check Integration Tests', () => {
   it('should enforce frontend-backend health contract', async () => {
     // This test ensures the status value contract is maintained
     server.use(
-      rest.get('/api/health', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            status: 'healthy', // Must be 'healthy', not 'ok'
-            timestamp: '2025-08-05T15:00:00.000Z',
-            services: { mongodb: 'connected' }
-          })
-        );
+      http.get('/api/health', () => {
+        return HttpResponse.json({
+          status: 'healthy', // Must be 'healthy', not 'ok'
+          timestamp: '2025-08-05T15:00:00.000Z',
+          services: { mongodb: 'connected' }
+        });
       })
     );
 
@@ -105,14 +104,12 @@ describe('Health Check Integration Tests', () => {
   it('should fail if backend returns wrong status value', async () => {
     // This test would catch the 'ok' vs 'healthy' mismatch
     server.use(
-      rest.get('/api/health', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            status: 'ok', // Wrong status value
-            timestamp: '2025-08-05T15:00:00.000Z',
-            services: { mongodb: 'connected' }
-          })
-        );
+      http.get('/api/health', () => {
+        return HttpResponse.json({
+          status: 'ok', // Wrong status value
+          timestamp: '2025-08-05T15:00:00.000Z',
+          services: { mongodb: 'connected' }
+        });
       })
     );
 
