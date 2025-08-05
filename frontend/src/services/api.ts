@@ -22,20 +22,20 @@ const api = {
 
   // Canvas-specific API methods
   canvas: {
-    getByClient: (clientId: string) => api.get(`/api/canvas/client/${clientId}`),
-    getById: (canvasId: string) => api.get(`/api/canvas/${canvasId}`),
+    getByClient: (clientId: string) => api.get(`/canvas/client/${clientId}`),
+    getById: (canvasId: string) => api.get(`/canvas/${canvasId}`),
     generateValueProposition: (data: { clientId: string; title?: string; description?: string }) => 
-      api.post('/api/canvas/generate/value-proposition', data),
+      api.post('/canvas/generate/value-proposition', data),
     generateBusinessModel: (data: { clientId: string; title?: string; description?: string }) => 
-      api.post('/api/canvas/generate/business-model', data),
+      api.post('/canvas/generate/business-model', data),
     generateCompleteFramework: (data: { clientId: string; autoExport?: boolean }) => 
-      api.post('/api/canvas/workflow/complete-framework', data),
-    getWorkflowStatus: (clientId: string) => api.get(`/api/canvas/workflow/status/${clientId}`),
+      api.post('/canvas/workflow/complete-framework', data),
+    getWorkflowStatus: (clientId: string) => api.get(`/canvas/workflow/status/${clientId}`),
     exportCanvas: (canvasId: string, format: string = 'svg', theme: string = 'professional') => 
-      api.post(`/api/canvas/${canvasId}/export`, { format, theme }),
-    updateCanvas: (canvasId: string, data: any) => api.put(`/api/canvas/${canvasId}`, data),
-    deleteCanvas: (canvasId: string) => api.delete(`/api/canvas/${canvasId}`),
-    getStatistics: () => api.get('/api/canvas/stats/overview')
+      api.post(`/canvas/${canvasId}/export`, { format, theme }),
+    updateCanvas: (canvasId: string, data: any) => api.put(`/canvas/${canvasId}`, data),
+    deleteCanvas: (canvasId: string) => api.delete(`/canvas/${canvasId}`),
+    getStatistics: () => api.get('/canvas/stats/overview')
   }
 };
 
