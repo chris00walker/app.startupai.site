@@ -209,17 +209,18 @@ describe('Sprint 4 Services', () => {
       expect(optimization.optimizations).toContain('model-selection');
     });
 
-    it('should enforce cost thresholds and generate alerts', () => {
+    it('should enforce cost thresholds and generate alerts', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       
       // Track expensive request - use values that exceed threshold
       aiCostService.trackCost('canvas-generation', 'gpt-4o', 20000, 12000);
       
-      // Allow for async processing
-      setTimeout(() => {
-        expect(consoleSpy).toHaveBeenCalled();
-        consoleSpy.mockRestore();
-      }, 100);
+      // Allow for async processing with proper await
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Use flexible assertion - check if spy was called or service state changed
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 
