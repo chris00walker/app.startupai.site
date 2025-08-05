@@ -1,5 +1,5 @@
 // Strategyzer AI Platform API Service
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://strategyzer-ai-backend-e42x4wjxiq-uc.a.run.app/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const api = {
   get: (endpoint: string) => fetch(`${API_BASE_URL}${endpoint}`).then(r => r.json()),

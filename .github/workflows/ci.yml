@@ -9,7 +9,10 @@ jobs:
   unit-and-integration-tests:
     name: Unit & Integration Tests (${{ matrix.service }})
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
     strategy:
+      fail-fast: false
       matrix:
         service: [backend, frontend]
     steps:
@@ -29,12 +32,14 @@ jobs:
         working-directory: ${{ matrix.service }}
         run: |
           npm ci
-          npm test --if-present
+          npm test --if-present -- --runInBand
 
   build-frontend-prod-like:
     name: Build Frontend with Prod-like Env
     needs: unit-and-integration-tests
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

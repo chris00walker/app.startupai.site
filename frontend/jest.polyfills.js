@@ -1,18 +1,11 @@
 // Jest polyfills for Node.js environment
+// Use relative API paths in tests
+process.env.NEXT_PUBLIC_API_URL = '/api'
 const { TextEncoder, TextDecoder } = require('util');
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Mock fetch if needed
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    json: () => Promise.resolve({}),
-    text: () => Promise.resolve(''),
-  })
-);
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
@@ -21,6 +14,31 @@ global.IntersectionObserver = class IntersectionObserver {
   observe() {}
   unobserve() {}
 };
+
+// Polyfill BroadcastChannel
+if (typeof global.BroadcastChannel === 'undefined') {
+  global.BroadcastChannel = class BroadcastChannel {
+    constructor() {}
+    postMessage() {}
+    close() {}
+    addEventListener() {}
+    removeEventListener() {}
+  };
+}
+
+// Polyfill TransformStream (used by MSW)
+if (typeof global.TransformStream === 'undefined') {
+  try {
+    const { TransformStream } = require('stream/web');
+    if (TransformStream) {
+      global.TransformStream = TransformStream;
+    } else {
+      global.TransformStream = class {};
+    }
+  } catch {
+    global.TransformStream = class {};
+  }
+}
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
