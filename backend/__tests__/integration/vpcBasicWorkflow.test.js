@@ -3,32 +3,33 @@
  * Tests core VPC functionality with current basic models
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import DatabaseTestHelper from '../utils/testHelpers.js';
 import Client from '../../models/clientModel.js';
 import Canvas from '../../models/canvasModel.js';
 import ValuePropositionAgent from '../../agents/strategyzer/ValuePropositionAgent.js';
 
 describe('VPC Basic Workflow', () => {
-  let mongoServer;
+  // database handled by helper
   let testClient;
   let vpcAgent;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    await DatabaseTestHelper.connect();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await DatabaseTestHelper.disconnect();
   });
 
   beforeEach(async () => {
-    await Client.deleteMany({});
-    await Canvas.deleteMany({});
+    await DatabaseTestHelper.clearDatabase();
+    [Client, Canvas].forEach(mdl => {
+      if (!mongoose.models[mdl.modelName]) {
+        mongoose.model(mdl.modelName, mdl.schema);
+      }
+    });
 
     testClient = await Client.create({
       name: 'TechStartup Inc',

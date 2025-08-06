@@ -4,33 +4,35 @@
  * including client creation, VPC generation, and canvas persistence
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import DatabaseTestHelper from '../utils/testHelpers.js';
 import Client from '../../models/clientModel.js';
 import Canvas from '../../models/canvasModel.js';
 import ValuePropositionAgent from '../../agents/strategyzer/ValuePropositionAgent.js';
 
 describe('Strategyzer AI Workflow Integration', () => {
-  let mongoServer;
+  // database handled by helper
   let testClient;
   let vpcAgent;
 
   beforeAll(async () => {
-    // Start in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    await DatabaseTestHelper.connect();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await DatabaseTestHelper.disconnect();
   });
 
   beforeEach(async () => {
-    // Clear collections
-    await Client.deleteMany({});
+    // Clear database
+    await DatabaseTestHelper.clearDatabase();
+    // Re-register schemas
+    [Client, Canvas].forEach(mdl => {
+      if (!mongoose.models[mdl.modelName]) {
+        mongoose.model(mdl.modelName, mdl.schema);
+      }
+    });
     await Canvas.deleteMany({});
 
     // Create test client with complete schema including required fields

@@ -1,20 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import DatabaseTestHelper from '../../utils/testHelpers.js';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import EnhancedClient from '../../../models/enhancedClientModel.js';
 
 describe('Enhanced Client Model', () => {
-  let mongoServer;
-
   beforeEach(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    await DatabaseTestHelper.connect();
   });
 
   afterEach(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await DatabaseTestHelper.disconnect();
   });
 
   describe('Schema Validation', () => {

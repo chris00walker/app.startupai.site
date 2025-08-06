@@ -5,34 +5,39 @@
  * Tests BMC generation, business analysis, quality assessment, and error handling.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import DatabaseTestHelper from '../../utils/testHelpers.js';
 import BusinessModelAgent from '../../../agents/strategyzer/BusinessModelAgent.js';
 import Client from '../../../models/clientModel.js';
 import Canvas from '../../../models/canvasModel.js';
 
 describe('Business Model Canvas Agent', () => {
-  let mongoServer;
+  // database handled by helper
   let bmcAgent;
   let testClient;
 
-  beforeEach(async () => {
-    // Setup in-memory MongoDB
-    if (!mongoServer) {
-      mongoServer = await MongoMemoryServer.create();
-      const mongoUri = mongoServer.getUri();
-      await mongoose.connect(mongoUri);
-    }
+  beforeAll(async () => {
+    await DatabaseTestHelper.connect();
+  });
 
-    // Clear collections
-    await Client.deleteMany({});
-    await Canvas.deleteMany({});
+  afterAll(async () => {
+    await DatabaseTestHelper.disconnect();
+  });
+
+  beforeEach(async () => {
+    await DatabaseTestHelper.clearDatabase();
+    // Re-register schemas after clear
+    [Client, Canvas].forEach(mdl => {
+      if (!mongoose.models[mdl.modelName]) {
+        mongoose.model(mdl.modelName, mdl.schema);
+      }
+    });
 
     // Create test client
     testClient = await Client.create({
       name: 'TechCorp Solutions',
-      email: 'ceo@techcorp.com',
+      email: `${new mongoose.Types.ObjectId()}@test.com`,
       company: 'TechCorp Solutions',
       industry: 'Enterprise Software'
     });
@@ -54,11 +59,7 @@ describe('Business Model Canvas Agent', () => {
   });
 
   afterEach(async () => {
-    if (mongoServer) {
-      await mongoose.disconnect();
-      await mongoServer.stop();
-      mongoServer = null;
-    }
+    vi.clearAllMocks();
   });
 
   describe('Agent Initialization', () => {

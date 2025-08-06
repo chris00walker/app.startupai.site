@@ -6,8 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import mongoose from 'mongoose';
+import DatabaseTestHelper from '../../utils/testHelpers.js';
 import ComprehensiveMonitoringService from '../../../services/ComprehensiveMonitoringService.js';
 import APMIntegrationService from '../../../services/APMIntegrationService.js';
 
@@ -19,16 +18,20 @@ vi.mock('perf_hooks', () => ({
 }));
 
 describe('Epic 4.3 Story 4.3.1: Comprehensive Monitoring', () => {
-  let mongoServer;
+  // Database connection handled by DatabaseTestHelper
   let monitoringService;
   let apmService;
 
-  beforeEach(async () => {
-    // Start in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+  beforeAll(async () => {
+    await DatabaseTestHelper.connect();
+  });
 
+  afterAll(async () => {
+    await DatabaseTestHelper.disconnect();
+  });
+
+  beforeEach(async () => {
+    await DatabaseTestHelper.clearDatabase();
     // Initialize services
     monitoringService = new ComprehensiveMonitoringService();
     apmService = new APMIntegrationService({
@@ -40,12 +43,9 @@ describe('Epic 4.3 Story 4.3.1: Comprehensive Monitoring', () => {
     await new Promise(resolve => setTimeout(resolve, 100));
   });
 
+  // No per-test teardown necessary as DatabaseTestHelper.clearDatabase runs before each test
   afterEach(async () => {
-    await mongoose.disconnect();
-    if (mongoServer && typeof mongoServer.stop === 'function') {
-      await mongoServer.stop();
-    }
-    
+
     // Clean up services
     if (monitoringService) {
       monitoringService.removeAllListeners();
@@ -526,7 +526,8 @@ describe('Epic 4.3 Story 4.3.1: Comprehensive Monitoring', () => {
 
     it('should handle database connection issues', async () => {
       // Disconnect database
-      await mongoose.disconnect();
+      await DatabaseTestHelper.disconnect();
+
 
       expect(() => {
         monitoringService.collectBusinessMetrics();

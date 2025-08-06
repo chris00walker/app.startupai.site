@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import DatabaseTestHelper from '../../utils/testHelpers.js';
 import ValuePropositionAgent from '../../../agents/strategyzer/ValuePropositionAgent.js';
 import EnhancedClient from '../../../models/enhancedClientModel.js';
 import Canvas from '../../../models/canvasModel.js';
@@ -21,14 +21,20 @@ const mockVectorStore = {
 };
 
 describe('Value Proposition Canvas Agent', () => {
-  let mongoServer;
+  // database handled by helper
   let agent;
   let testClient;
 
+  beforeAll(async () => {
+    await DatabaseTestHelper.connect();
+  });
+
+  afterAll(async () => {
+    await DatabaseTestHelper.disconnect();
+  });
+
   beforeEach(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    await DatabaseTestHelper.clearDatabase();
 
     vi.clearAllMocks();
     
@@ -119,9 +125,8 @@ describe('Value Proposition Canvas Agent', () => {
     });
   });
 
-  afterEach(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   describe('Agent Initialization', () => {
@@ -168,10 +173,8 @@ describe('Value Proposition Canvas Agent', () => {
       const result = await agent.generateCanvas(input);
       
       // Check if canvas was saved
-      const savedCanvas = await Canvas.findOne({ 
-        clientId: testClient._id.toString(),
-        type: 'valueProposition'
-      });
+      const savedCanvas = await Canvas.findOne({ clientId: testClient._id, type: 'valueProposition' });
+      const savedCanvasAgain = await Canvas.findOne({ clientId: testClient._id, type: 'valueProposition' });
 
       expect(savedCanvas).toBeDefined();
       expect(savedCanvas.title).toContain('Value Proposition Canvas');

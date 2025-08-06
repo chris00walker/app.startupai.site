@@ -784,6 +784,30 @@ const CanvasArtifactSchema = new mongoose.Schema({
 
 ---
 
+## 🔄 Canvas Model Migration Roadmap (2025)
+
+_Current status_: Canvas documents embed `versions[]` snapshots and store binary SVG/PDF exports.
+
+### Planned Evolution (Q4 2025)
+1. **Separate Version Collection** – Introduce `canvas_versions` storing *diffs* instead of full snapshots; main `canvas` doc gains `activeVersion` pointer.
+2. **Hierarchical JSON Schema** – Move `data` to a fully structured, nested JSON model where each block (e.g. `data.keyPartners[]`) has its own `_id` allowing fine-grained updates.
+3. **Vector Search Enablement** – Create Atlas Vector Search indexes on rich-text arrays (`customerJobs`, `valuePropositions`, etc.) for semantic retrieval by AI agents.
+4. **Real-time Collaboration** – Pipe MongoDB Change Streams into the WebSocket gateway; front-end uses CRDT/whiteboard lib (`tldraw` + Liveblocks) for simultaneous edits.
+5. **On-Demand Export Service** – Decouple media generation; a serverless `export-service` renders PDF/SVG on request and caches assets in Cloud Storage.
+6. **Backward Compatibility Layer** – Dual-write during migration; legacy API/tests still operate on `versions[]` until Phase 3.
+
+### Incremental Roll-out
+| Phase | Goal | Key Tasks |
+|-------|------|-----------|
+| 0 | Stabilise current model & tests | Finish CI fixes (current sprint) |
+| 1 | Dual-write | Write canvases in both schemas behind `CANVAS_V2` flag |
+| 2 | Read-path switch | Update agents & routes to consume v2 schema; maintain export compatibility via service |
+| 3 | Legacy removal | Delete `versions[]`, binary storage, and old tests once coverage parity achieved |
+
+> **Action item:** All new features touching canvases must respect `CANVAS_V2` feature flag and write to both schemas.
+
+---
+
 ## 🧠 Advanced AI-Optimized Architecture
 
 ### **Enhanced MongoDB Schema for AI Workflows**

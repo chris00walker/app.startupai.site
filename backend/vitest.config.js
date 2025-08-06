@@ -3,6 +3,8 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     globals: true,
+    threads: false,  // Run tests in a single thread to avoid MongoDB memory server conflicts
+    maxConcurrency: 1,
     environment: 'node',
     setupFiles: ['./vitest.setup.js'],
     testTimeout: 60000,

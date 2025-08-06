@@ -10,16 +10,20 @@ const artefactSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // Optional display title separate from internal name
+  title: {
+    type: String
+  },
   type: {
     type: String,
     required: true,
-    enum: ['Research', 'Analysis', 'Planning', 'Operations', 'Strategy', 'Report']
+    enum: ['Research', 'Analysis', 'Planning', 'Operations', 'Strategy', 'Report', 'vpc', 'bmc', 'swot']
   },
   status: {
     type: String,
     required: true,
-    enum: ['pending', 'in-progress', 'completed', 'failed'],
-    default: 'pending'
+    enum: ['pending', 'in-progress', 'completed', 'failed', 'draft', 'published', 'archived'],
+    default: 'draft'
   },
   clientId: {
     type: String,
@@ -29,9 +33,14 @@ const artefactSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // Can hold either raw JSON string or parsed object
   content: {
-    type: String,
-    default: ''
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  tags: {
+    type: [String],
+    default: []
   },
   metadata: {
     type: mongoose.Schema.Types.Mixed,

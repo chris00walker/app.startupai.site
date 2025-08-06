@@ -1,6 +1,6 @@
 // Global test setup for Vitest
 import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
-import { DatabaseTestHelper } from './utils/testHelpers.js';
+import DatabaseTestHelper from './utils/testHelpers.js';
 
 // Load environment variables
 if (process.env.NODE_ENV !== 'production') {

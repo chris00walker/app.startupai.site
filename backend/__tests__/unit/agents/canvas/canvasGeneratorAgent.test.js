@@ -5,30 +5,30 @@
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import DatabaseTestHelper from '../../../utils/testHelpers.js';
 import CanvasGeneratorAgent from '../../../../agents/canvas/CanvasGeneratorAgent.js';
 import Canvas from '../../../../models/canvasModel.js';
 
 describe('Canvas Generator Agent', () => {
-  let mongoServer;
+  // database handled by helper
   let canvasGenerator;
   let testCanvas;
 
   beforeAll(async () => {
-    // Start in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+    await DatabaseTestHelper.connect();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await DatabaseTestHelper.disconnect();
   });
 
   beforeEach(async () => {
     // Clear database
-    await Canvas.deleteMany({});
+    await DatabaseTestHelper.clearDatabase();
+    // Re-register schema
+    if (!mongoose.models[Canvas.modelName]) {
+      mongoose.model(Canvas.modelName, Canvas.schema);
+    }
 
     // Initialize Canvas Generator Agent
     canvasGenerator = new CanvasGeneratorAgent({
@@ -180,6 +180,10 @@ describe('Canvas Generator Agent', () => {
           revenueStreams: ['Subscription fees']
         }
       });
+
+      // Create a new canvas version
+      testCanvas = await Canvas.findById(testCanvas._id);
+      await Canvas.version(testCanvas._id);
 
       const result = await canvasGenerator.generateVisualCanvas(testCanvas._id, {
         formats: ['svg']

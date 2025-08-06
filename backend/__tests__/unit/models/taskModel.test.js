@@ -1,7 +1,7 @@
 // Unit tests for taskModel
 
 import mongoose from 'mongoose';
-import { DatabaseTestHelper } from '../../utils/testHelpers.js';
+import DatabaseTestHelper from '../../utils/testHelpers.js';
 
 // Import the model we're testing
 let TaskModel;
@@ -30,12 +30,13 @@ describe('TaskModel Unit Tests', () => {
     it('should create task with required fields', async () => {
       const taskData = {
         title: 'Test Task',
-        description: 'Test Description',
+        description: 'Test description',
         type: 'feature',
         priority: 'high',
         status: 'todo',
         assignee: new mongoose.Types.ObjectId(),
         projectId: new mongoose.Types.ObjectId(),
+        clientId: new mongoose.Types.ObjectId(),
         estimatedHours: 8,
         actualHours: 0
       };
@@ -67,7 +68,8 @@ describe('TaskModel Unit Tests', () => {
           originalId: '12345'
         },
         assignee: new mongoose.Types.ObjectId(),
-        projectId: new mongoose.Types.ObjectId()
+        projectId: new mongoose.Types.ObjectId(),
+        clientId: new mongoose.Types.ObjectId()
       };
 
       const task = new TaskModel(taskData);
@@ -89,7 +91,8 @@ describe('TaskModel Unit Tests', () => {
         estimatedHours: 10,
         actualHours: 3,
         assignee: new mongoose.Types.ObjectId(),
-        projectId: new mongoose.Types.ObjectId()
+        projectId: new mongoose.Types.ObjectId(),
+        clientId: new mongoose.Types.ObjectId()
       });
 
       const savedTask = await task.save();
@@ -105,16 +108,17 @@ describe('TaskModel Unit Tests', () => {
         priority: 'low',
         status: 'todo',
         assignee: new mongoose.Types.ObjectId(),
-        projectId: new mongoose.Types.ObjectId()
+        projectId: new mongoose.Types.ObjectId(),
+        clientId: new mongoose.Types.ObjectId()
       });
 
       const savedTask = await task.save();
       
       // Update status
-      savedTask.status = 'completed';
+      savedTask.status = 'complete';
       const updatedTask = await savedTask.save();
       
-      expect(updatedTask.status).toBe('completed');
+      expect(updatedTask.status).toBe('complete');
     });
   });
 });

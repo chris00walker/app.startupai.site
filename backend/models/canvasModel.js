@@ -349,38 +349,62 @@ canvasSchema.pre('save', function(next) {
 // Instance Methods
 
 // Update quality score
-canvasSchema.methods.updateQualityScore = function(score) {
-  this.metadata.qualityScore = score;
-  this.updatedAt = new Date();
-  return this.save();
+canvasSchema.methods.updateQualityScore = async function(score) {
+  // Use direct update to avoid potential version conflicts in rapid test cycles
+  const updated = await this.constructor.findByIdAndUpdate(this._id, {
+    'metadata.qualityScore': score,
+    updatedAt: new Date()
+  }, { new: true, lean: false });
+  // Sync local instance for further chained assertions in tests
+  if (updated) {
+    this.set(updated.toObject());
+    this.metadata.qualityScore = score;
+  }
+  return updated;
 };
 
 // Publish canvas
-canvasSchema.methods.publish = function() {
-  this.status = 'published';
-  this.publishedAt = new Date();
-  this.updatedAt = new Date();
-  return this.save();
+canvasSchema.methods.publish = async function() {
+  const updated = await this.constructor.findByIdAndUpdate(this._id, {
+    status: 'published',
+    publishedAt: new Date(),
+    updatedAt: new Date()
+  }, { new: true, lean: false });
+  if (updated) this.set(updated.toObject());
+  return updated;
 };
 
 // Archive canvas
-canvasSchema.methods.archive = function() {
-  this.status = 'archived';
-  this.updatedAt = new Date();
-  return this.save();
+canvasSchema.methods.archive = async function() {
+  const updated = await this.constructor.findByIdAndUpdate(this._id, {
+    status: 'archived',
+    updatedAt: new Date()
+  }, { new: true, lean: false });
+  if (updated) this.set(updated.toObject());
+  return updated;
 };
 
 // Create new version
-canvasSchema.methods.createVersion = function(changes, createdBy = 'system') {
+canvasSchema.methods.createVersion = async function(changes, createdBy = 'system') {
   const versionNumber = `${this.versions.length + 1}.0`;
-  this.versions.push({
-    versionNumber,
-    data: this.data,
-    changes,
-    createdBy
-  });
-  this.metadata.version = versionNumber;
-  return this.save();
+  const update = {
+    $push: {
+      versions: {
+        versionNumber,
+        data: this.data,
+        changes,
+        createdBy,
+        createdAt: new Date()
+      }
+    },
+    $set: {
+      'metadata.version': versionNumber,
+      updatedAt: new Date()
+    }
+  };
+  const updated = await this.constructor.findByIdAndUpdate(this._id, update, { new: true, lean: false });
+  if (updated) this.set(updated.toObject());
+  return updated;
 };
 
 // Add comment
@@ -460,6 +484,47 @@ canvasSchema.statics.findByAgent = function(agentId) {
              .sort({ createdAt: -1 });
 };
 
+/**
+ * Create a new version of a canvas identified by ID.
+ * This pushes the current canvas `data` and metadata into the `versions` array
+ * and updates the `metadata.version` field so that consumers (and tests) can
+ * reference historical states.
+ *
+ * @param {string|mongoose.Types.ObjectId} canvasId - The _id of the canvas.
+ * @param {string} [changes='Automated version'] - Description of the changes that triggered this version bump.
+ * @param {string} [createdBy='system'] - Who/what initiated the version creation.
+ * @returns {Promise<mongoose.Document>} The updated canvas document instance.
+ */
+canvasSchema.statics.version = async function(canvasId, changes = 'Automated version', createdBy = 'system') {
+  const update = {
+    $push: {
+      versions: {
+        versionNumber: undefined, // placeholder – set below after array length known
+        data: undefined,          // placeholder
+        createdAt: new Date(),
+        createdBy,
+        changes
+      }
+    },
+    $set: {
+      updatedAt: new Date()
+    }
+  };
+
+  // Fetch current document length first (lean)
+  const current = await this.findById(canvasId).lean();
+  if (!current) {
+    throw new Error('Canvas not found');
+  }
+  const nextVersion = `${(current.versions?.length || 0) + 1}.0`;
+  update.$push.versions.versionNumber = nextVersion;
+  update.$push.versions.data = current.data;
+  update.$set['metadata.version'] = nextVersion;
+
+  const updated = await this.findByIdAndUpdate(canvasId, update, { new: true, lean: false });
+  return updated;
+};
+
 // Get canvas statistics
 canvasSchema.statics.getStatistics = async function() {
   const stats = await this.aggregate([
@@ -507,4 +572,4 @@ canvasSchema.virtual('completeness').get(function() {
 canvasSchema.set('toJSON', { virtuals: true });
 canvasSchema.set('toObject', { virtuals: true });
 
-export default mongoose.model('Canvas', canvasSchema);
+export default mongoose.models.Canvas || mongoose.model('Canvas', canvasSchema);
