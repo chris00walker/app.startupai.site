@@ -6,30 +6,38 @@ import { vi } from 'vitest';
 
 // Database test utilities
 export class DatabaseTestHelper {
-  constructor() {
-    this.mongoServer = null;
-    this.isConnected = false;
-  }
+  static mongoServer = null;
+  static isConnected = false;
 
-  async connect() {
+  static async connect() {
+    // Ensure each test file gets its **own isolated database** so that
+    // documents created in one file can never bleed into another (or be
+    // accidentally removed by another file’s cleanup).  We achieve this by
+    // giving each connection a unique database name that includes the current
+    // process id and a high-resolution timestamp.
+    const uniqueDbName = `test_${process.pid}_${Date.now()}`;
     try {
-      // Use external MongoDB in CI, memory server locally
+      // Use external MongoDB in CI, memory server locally – but always append
+      // a **unique database name** so that each test file can run completely
+      // independently even when they share the same Atlas cluster.
       if (process.env.USE_EXTERNAL_MONGO === '1') {
-        await mongoose.connect(process.env.MONGODB_URI);
+        const uriWithDb = process.env.MONGODB_URI.replace(/(\/[\w-]+)(\?.*)?$/, '') + `/${uniqueDbName}`;
+         await mongoose.connect(uriWithDb);
         this.isConnected = true;
         return;
       }
       
       // CI Environment - always use external MongoDB Atlas
       if (process.env.NODE_ENV === 'test' || process.env.CI) {
-        await mongoose.connect(process.env.MONGODB_URI);
+        const uriWithDb = process.env.MONGODB_URI.replace(/(\/[\w-]+)(\?.*)?$/, '') + `/${uniqueDbName}`;
+         await mongoose.connect(uriWithDb);
         this.isConnected = true;
         return;
       }
       
       // Local development - use memory server
-      this.mongoServer = await MongoMemoryServer.create();
-      const uri = this.mongoServer.getUri();
+      this.mongoServer = await MongoMemoryServer.create({ instance: { dbName: uniqueDbName }});
+      const uri = this.mongoServer.getUri(uniqueDbName);
       await mongoose.connect(uri);
       this.isConnected = true;
     } catch (error) {
@@ -38,16 +46,16 @@ export class DatabaseTestHelper {
     }
   }
 
-  async disconnect() {
+  static async disconnect() {
     try {
       if (this.isConnected && mongoose.connection.readyState === 1) {
         // Use safe cleanup approach
-        const db = mongoose.connection.db;
-        if (db) {
+        const collections = mongoose.connection.collections;
+        for (const key of Object.keys(collections)) {
           try {
-            await db.dropDatabase();
-          } catch (dbError) {
-            console.warn('Database cleanup warning:', dbError.message);
+            await collections[key].deleteMany({});
+          } catch (err) {
+            console.warn(`Database cleanup warning [${key}]`, err.message);
           }
         }
         
@@ -71,24 +79,24 @@ export class DatabaseTestHelper {
     }
   }
 
-  async clearDatabase() {
+  static async clearDatabase() {
     try {
-      // Check if connection is active before clearing
-      if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
-        await mongoose.connection.db.dropDatabase();
-      }
-      
-      // Clear Mongoose connection state to force fresh model registration
-      mongoose.connection.models = {};
-      
-      // Clear any cached model schemas safely
-      Object.keys(mongoose.models).forEach(modelName => {
+      if (mongoose.connection.readyState !== 1) return;
+
+      // Delete documents from every collection individually — avoids the
+      // asynchronous "DatabaseDropPending" state seen in CI.
+      const collections = mongoose.connection.collections;
+      for (const key of Object.keys(collections)) {
         try {
-          delete mongoose.models[modelName];
-        } catch (error) {
-          console.warn('Model cleanup warning:', error.message);
+          await collections[key].deleteMany({});
+        } catch (colErr) {
+          console.warn(`Collection cleanup warning [${key}]:`, colErr.message);
         }
-      });
+      }
+
+      // Do NOT drop the whole database and do NOT purge model definitions.
+      // Keeping schema cache intact preserves plugin-attached statics such as
+      // Canvas.version() and avoids duplicate-index redefinition warnings.
     } catch (error) {
       console.warn('Database clear warning:', error.message);
     }
@@ -130,5 +138,5 @@ export const generateTestCanvas = (overrides = {}) => ({
   ...overrides,
 });
 
-// Database helper instance
-export const dbHelper = new DatabaseTestHelper();
+// Export the DatabaseTestHelper class for static method access
+export default DatabaseTestHelper;
