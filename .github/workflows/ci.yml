@@ -38,16 +38,26 @@ jobs:
         run: npm install -g npm@11.5.2
 
 
-      - name: Install deps and run backend tests (with Mongo service)
+      - name: Install backend dependencies
+        if: matrix.service == 'backend'
+        working-directory: backend
+        run: npm ci
+
+      - name: Wait for MongoDB readiness
+        if: matrix.service == 'backend'
+        working-directory: backend
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/ci-${{ github.run_id }}
+        run: node scripts/wait_for_mongo.js --timeoutMs 60000 --intervalMs 2000
+
+      - name: Run backend tests (with Mongo service)
         if: matrix.service == 'backend'
         working-directory: backend
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/ci-${{ github.run_id }}
           NODE_ENV: test
           USE_EXTERNAL_MONGO: 1
-        run: |
-          npm ci
-          npm test --if-present
+        run: npm test --if-present
 
       - name: Install deps and run frontend tests
         if: matrix.service == 'frontend'
@@ -74,6 +84,14 @@ jobs:
       - name: Upgrade npm to 11.5.2
         run: npm install -g npm@11.5.2
 
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: frontend/.next/cache
+          key: nextjs-${{ runner.os }}-node22-${{ hashFiles('frontend/package-lock.json') }}-v1
+          restore-keys: |
+            nextjs-${{ runner.os }}-node22-
+            nextjs-${{ runner.os }}-
 
       - name: Install dependencies
         working-directory: frontend
@@ -85,11 +103,17 @@ jobs:
           NEXT_PUBLIC_API_URL: 'https://dummy/api'
         run: npm run build
 
-      # Simple grep-based assertion to fail if any duplicated /api/api/ slips through
-      - name: Fail build on duplicated API prefix
+      - name: Check for duplicated API prefix via manifests
         working-directory: frontend
-        run: |
-          if grep -R "\/api\/api\/" .next/static | grep -q "/api/api/"; then
-            echo "Found duplicated /api prefix in compiled bundle – failing build." && exit 1;
-          fi
-          echo "No duplicated /api prefix detected."
+        run: node ../scripts/check_api_prefix.js .next
+
+      - name: Upload Next.js build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: next-build-${{ github.run_id }}
+          path: |
+            frontend/.next
+            frontend/package.json
+            frontend/next.config.*
+            frontend/tsconfig.json
