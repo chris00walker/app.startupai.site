@@ -20,17 +20,13 @@ export class DatabaseTestHelper {
       // Use external MongoDB in CI, memory server locally – but always append
       // a **unique database name** so that each test file can run completely
       // independently even when they share the same Atlas cluster.
-      if (process.env.USE_EXTERNAL_MONGO === '1') {
-        const uriWithDb = process.env.MONGODB_URI.replace(/(\/[\w-]+)(\?.*)?$/, '') + `/${uniqueDbName}`;
-         await mongoose.connect(uriWithDb);
-        this.isConnected = true;
-        return;
-      }
-      
-      // CI Environment - always use external MongoDB Atlas
-      if (process.env.NODE_ENV === 'test' || process.env.CI) {
-        const uriWithDb = process.env.MONGODB_URI.replace(/(\/[\w-]+)(\?.*)?$/, '') + `/${uniqueDbName}`;
-         await mongoose.connect(uriWithDb);
+      if (process.env.USE_EXTERNAL_MONGO === '1' || process.env.CI) {
+        const baseUri = process.env.MONGODB_URI;
+        if (!baseUri) {
+          throw new Error('MONGODB_URI is required when USE_EXTERNAL_MONGO=1 or running in CI');
+        }
+        const uriWithDb = baseUri.replace(/(\/[\w-]+)(\?.*)?$/, '') + `/${uniqueDbName}`;
+        await mongoose.connect(uriWithDb);
         this.isConnected = true;
         return;
       }

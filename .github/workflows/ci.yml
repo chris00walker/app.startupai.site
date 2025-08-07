@@ -9,6 +9,16 @@ jobs:
   unit-and-integration-tests:
     name: Unit & Integration Tests (${{ matrix.service }})
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
     env:
       CI: "true"
     strategy:
@@ -28,22 +38,23 @@ jobs:
         run: npm install -g npm@11.5.2
 
 
-      - name: Install dependencies and run tests
-        working-directory: ${{ matrix.service }}
+      - name: Install deps and run backend tests (with Mongo service)
+        if: matrix.service == 'backend'
+        working-directory: backend
         env:
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          MASTER_ENCRYPTION_KEY: ${{ secrets.MASTER_ENCRYPTION_KEY }}
+          MONGODB_URI: mongodb://127.0.0.1:27017/ci-${{ github.run_id }}
           NODE_ENV: test
           USE_EXTERNAL_MONGO: 1
         run: |
           npm ci
-          if [ "${{ matrix.service }}" = "frontend" ]; then
-            npm test --if-present -- --runInBand
-          else
-            npm test --if-present
-          fi
+          npm test --if-present
+
+      - name: Install deps and run frontend tests
+        if: matrix.service == 'frontend'
+        working-directory: frontend
+        run: |
+          npm ci
+          npm test --if-present -- --runInBand
 
   build-frontend-prod-like:
     name: Build Frontend with Prod-like Env
