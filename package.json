@@ -17,9 +17,24 @@
     "prompts:validate": "node scripts/prompts/validate.js",
     "docs:openapi:lint": "npx @redocly/cli lint docs/architecture/20-contracts/openapi-gateway.yaml",
     "docs:diagrams:render": "docker run --rm -v \"$PWD/docs/architecture/10-views\":/ws plantuml/plantuml -tpng /ws/*.puml",
-    "docs:validate": "npm run lint:md && npm run prompts:validate && npm run docs:openapi:lint"
+    "docs:validate": "npm run lint:md && npm run prompts:validate && npm run docs:openapi:lint",
+    "bdd": "cucumber-js --require tests/e2e/steps/**/*.js --require tests/e2e/support/**/*.js --publish-quiet --tags 'not @wip'",
+    "bdd:wip": "cucumber-js --require tests/e2e/steps/**/*.js --require tests/e2e/support/**/*.js --publish-quiet",
+    "test:unit": "jest --runInBand --selectProjects default --config jest.config.js --testPathPattern=tests/unit/",
+    "test:contract": "jest --runInBand --config jest.config.js --testPathPattern=tests/contract/",
+    "test:integration": "jest --runInBand --config jest.config.js --testPathPattern=tests/integration/",
+    "test:e2e": "npm run bdd",
+    "test:perf": "k6 run tests/perf/smoke.js || echo 'k6 not installed; skipping perf'",
+    "test:mutation": "stryker run",
+    "test": "npm run test:unit && npm run test:contract",
+    "test:ci": "npm run test && npm run e2e --if-present"
   },
   "devDependencies": {
-    "markdownlint-cli": "^0.39.0"
+    "markdownlint-cli": "^0.39.0",
+    "@cucumber/cucumber": "^10.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "@stryker-mutator/core": "^7.3.2",
+    "@stryker-mutator/jest-runner": "^7.3.2"
   }
 }
