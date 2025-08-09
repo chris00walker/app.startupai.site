@@ -75,3 +75,6 @@ y/
 **/__pycache__/
 **/*.pyc
 **/*.log
+
+# Local temp and legacy artifacts
+/tmp/
