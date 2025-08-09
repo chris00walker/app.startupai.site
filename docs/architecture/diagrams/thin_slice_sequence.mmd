@@ -1,0 +1,18 @@
+%% Mermaid Thin-Slice Sequence (skeleton)
+sequenceDiagram
+  participant U as User
+  participant G as API Gateway
+  participant O as Orchestrator
+  participant R as Renderer
+  participant P as Provider
+  participant S as Storage
+
+  U->>G: POST /export {canvas_id, format}
+  G->>O: dispatch request
+  O->>R: render(canvas_id, format)
+  R->>P: generate SVG/PDF
+  P-->>R: artifact bytes
+  R->>S: store artifact
+  R-->>O: uri + meta
+  O-->>G: 202 Accepted (job id)
+  G-->>U: job status link

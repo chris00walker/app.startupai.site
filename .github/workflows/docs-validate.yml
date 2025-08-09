@@ -1,0 +1,46 @@
+name: Docs Validation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (if any)
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci --prefer-offline --no-audit --no-fund
+          elif [ -f package.json ]; then
+            npm i --prefer-offline --no-audit --no-fund
+          fi
+
+      - name: Markdownlint
+        run: npm run lint:md
+
+      - name: Prompt packs validation
+        run: npm run prompts:validate
+
+      - name: OpenAPI lint (Gateway)
+        run: npm run docs:openapi:lint
+
+      - name: Render PlantUML diagrams
+        run: npm run docs:diagrams:render
+
+      - name: Archive rendered diagrams
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c4-diagrams-png
+          path: docs/architecture/10-views/*.png
+          if-no-files-found: warn

@@ -1,0 +1,22 @@
+// Prisma schema for Cloud SQL Postgres with pgvector
+// Note: Replace connection URL with Secret Manager reference in application config.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Canvas {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  ownerEmail String
+  title      String
+  status     String   @default("draft")
+  // Vector embedding for semantic search
+  embedding  Bytes?
+}

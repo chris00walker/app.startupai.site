@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strategyzer AI Diagrams</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; line-height: 1.5; }
+    .container { max-width: 960px; margin: 0 auto; }
+    .note { background: #f2f6ff; border: 1px solid #cfe0ff; padding: 12px 16px; border-radius: 8px; }
+    pre { background: #f7f7f7; padding: 12px; border-radius: 6px; overflow: auto; }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'default' });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Architecture Diagrams</h1>
+    <p class="note">
+      This viewer renders Mermaid diagrams for the Strategyzer AI architecture. Place <code>.mmd</code> files in this directory and link to them from docs. A sample sequence diagram is rendered below as a placeholder if no files are present.
+    </p>
+
+    <h2>Sample Orchestration Sequence (Placeholder)</h2>
+    <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    participant U as User (Consultant)
+    participant FE as Frontend (Next.js)
+    participant OR as Orchestrator (Cloud Run)
+    participant PR as Policy Router
+    participant AG as Agents (VPC/BMC/TBI)
+    participant EV as Evaluators (Quality/Cost/Safety)
+    participant DS as Data Store (Cloud SQL + pgvector)
+    participant Q as Queue (Pub/Sub/Cloud Tasks)
+
+    U->>FE: Submit canvas generation
+    FE->>OR: createJob(request)
+    OR->>PR: route(request)
+    PR-->>OR: policy(plan)
+    OR->>AG: execute(plan)
+    AG-->>EV: submit(results)
+    EV-->>OR: evaluation(scores)
+    OR->>DS: persist(artifacts, scores)
+    OR-->>FE: deliver(links)
+    FE-->>U: Show client-ready artifacts
+    </pre>
+  </div>
+</body>
+</html>

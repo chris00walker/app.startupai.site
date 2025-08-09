@@ -400,7 +400,7 @@ Performance Testing:
 Backend Testing:
   Framework: Jest with ES Modules support
   Mocking: Jest mocks for OpenAI API
-  Database: MongoDB Memory Server for isolation
+  Database: Postgres (Cloud SQL-compatible) via Testcontainers or Docker
   Coverage: Istanbul for code coverage reporting
   Performance: Node.js performance hooks
 
@@ -785,7 +785,7 @@ Acceptance Criteria:
   - Query performance monitoring
 
 Technical Tasks:
-  - Analyze and optimize MongoDB queries
+  - Analyze and optimize Postgres (Cloud SQL) queries
   - Implement query result caching with Redis
   - Add database performance monitoring
   - Optimize connection pooling
@@ -834,7 +834,7 @@ Acceptance Criteria:
 
 Technical Tasks:
   - Implement vector embedding generation
-  - Add MongoDB Atlas Vector Search
+  - Enable pgvector in Cloud SQL for semantic search
   - Create semantic search endpoints
   - Implement similarity algorithms
   - Add search performance optimization

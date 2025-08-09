@@ -1,0 +1,27 @@
+@startuml C4_Components_Orchestrator
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+Container_Boundary(orchestrator, "Orchestrator (Cloud Run)") {
+  Component(policyRouter, "Policy Router", "Node/TS", "Routes tasks by pii_level & budget_tier")
+  Component(workflowMgr, "Workflow Manager", "Node/TS", "Executes Design-Build workflows")
+  Component(evaluator, "Evaluator Engine", "Node/TS", "Runs evaluators & thresholds")
+  Component(costGuard, "Cost Guard", "Node/TS", "Budgets, breakers, logging")
+}
+
+ComponentDb(db, "Postgres + pgvector", "Cloud SQL")
+ComponentQueue(queue, "Tasks/Events", "Pub/Sub / Cloud Tasks")
+Component(monitor, "Telemetry SDK", "Cloud Monitoring", "SLOs/alerts")
+
+Rel(policyRouter, workflowMgr, "Dispatch job")
+Rel(workflowMgr, evaluator, "Evaluate artefacts")
+Rel(costGuard, policyRouter, "Budget status")
+Rel(workflowMgr, db, "SQL/pgvector")
+Rel(workflowMgr, queue, "Enqueue render job")
+Rel(policyRouter, monitor, "Decision logs/metrics")
+Rel(evaluator, monitor, "Scores & thresholds")
+
+SHOW_LEGEND()
+@enduml

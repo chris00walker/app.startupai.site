@@ -1,5 +1,7 @@
 # 🔧 Engineering Implementation Guide
 
+> IMPORTANT: As of Aug 7, 2025 the platform is migrating away from MongoDB/Atlas. All references to MongoDB/Mongoose in this document are deprecated. The target datastore is GCP-native Cloud SQL for Postgres with pgvector. Prisma (or TypeORM) will be used for schema/migrations and access. This document will be progressively updated to reflect the new architecture.
+
 ## Single Source of Engineering Truth
 
 This document provides comprehensive engineering specifications for implementing the **Strategyzer AI Architecture** using the MERN stack, building upon the existing codebase infrastructure.
@@ -21,7 +23,7 @@ Frontend:
 Backend:
   Runtime: Node.js (ES Modules)
   Framework: Express.js 4.21.1
-  Database: MongoDB 8.8.4 (Mongoose ODM)
+  Database: Cloud SQL for Postgres (Prisma ORM, pgvector)
   AI Integration: OpenAI 4.73.1
   Monitoring: OpenTelemetry + Prometheus
   Testing: Vitest
@@ -35,9 +37,9 @@ Infrastructure:
 
 ### **Architecture Alignment**
 
-The current MERN stack perfectly supports the Strategyzer AI Architecture requirements:
+The current stack supports the Strategyzer AI Architecture requirements on GCP:
 
-- ✅ **MongoDB**: AI-optimized schema with vector embeddings
+- ✅ **Cloud SQL Postgres**: Relational schema with pgvector embeddings
 - ✅ **Express.js**: RESTful API for multi-agent orchestration
 - ✅ **React/Next.js**: Interactive canvas generation and visualization
 - ✅ **Node.js**: AI agent execution and workflow management
@@ -69,9 +71,9 @@ graph TB
     end
     
     subgraph "Data Layer"
-        M[MongoDB] --> N[Client Collections]
-        M --> O[Artefact Collections]
-        M --> P[Canvas Collections]
+        M[Cloud SQL (Postgres)] --> N[Client Tables]
+        M --> O[Artefact Tables]
+        M --> P[Canvas Tables]
     end
     
     subgraph "External Services"
@@ -98,7 +100,7 @@ graph TB
 │   │   ├── strategyzer/             # Strategyzer-specific agents
 │   │   ├── orchestration/           # Multi-agent orchestration
 │   │   └── canvas/                  # Canvas generation agents
-│   ├── models/                      # MongoDB schemas
+│   ├── db/                          # Prisma schema & migrations (Postgres)
 │   │   ├── Client.js
 │   │   ├── Artefact.js
 │   │   └── Canvas.js
@@ -118,7 +120,7 @@ graph TB
 
 ## 🗄️ Database Schema Implementation
 
-### **Enhanced MongoDB Collections**
+### **Relational Schema (Cloud SQL Postgres)**
 
 #### 1. **Clients Collection**
 

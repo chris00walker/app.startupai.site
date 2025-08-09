@@ -1,0 +1,26 @@
+@startuml C4_Container
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(client, "Client")
+System_Boundary(sys, "Chris Walker Consulting Platform") {
+  Container(gateway, "Gateway", "Cloud Run", "Auth, intake API, status")
+  Container(orchestrator, "Orchestrator", "Cloud Run", "Policy router, evaluators, workflows")
+  Container(renderer, "Renderer", "Cloud Run", "Headless Chromium PDF/SVG export")
+  ContainerDb(db, "Postgres + pgvector", "Cloud SQL", "Projects, canvases, evidence, metrics")
+  Container(queue, "Tasks/Events", "Pub/Sub / Cloud Tasks", "Async jobs, retries")
+  Container(monitor, "Monitoring", "Cloud Monitoring", "SLOs, budgets, alerts, dashboards")
+}
+
+Rel(client, gateway, "HTTPS")
+Rel(gateway, orchestrator, "gRPC/HTTP")
+Rel(orchestrator, db, "SQL/pgvector")
+Rel(orchestrator, queue, "Publish tasks/events")
+Rel(queue, renderer, "Render job")
+Rel(renderer, db, "Store artefact metadata")
+Rel(orchestrator, monitor, "Emit telemetry")
+Rel(renderer, monitor, "Emit telemetry")
+
+SHOW_LEGEND()
+@enduml

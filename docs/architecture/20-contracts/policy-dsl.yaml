@@ -1,0 +1,45 @@
+version: 1
+kind: policy
+metadata:
+  name: default-routing
+  owner: platform
+spec:
+  selectors:
+    task_type: ["canvas.generate", "evidence.collect", "render.export"]
+    pii_level: ["none", "low", "moderate", "high"]
+    budget_tier: ["standard", "premium"]
+  routing:
+    - when:
+        task_type: "canvas.generate"
+        pii_level: ["none", "low", "moderate"]
+        budget_tier: ["standard", "premium"]
+      then:
+        model: "gpt-4o-mini"
+        max_latency_ms: 8000
+        max_cost_usd: 0.30
+        retries: 1
+    - when:
+        task_type: "evidence.collect"
+      then:
+        model: "search+rerank"
+        max_latency_ms: 6000
+        max_cost_usd: 0.15
+        retries: 2
+    - when:
+        task_type: "render.export"
+      then:
+        backend: "renderer"
+        max_latency_ms: 8000
+        retries: 2
+  breakers:
+    - name: latency_p95_exceeded
+      condition: p95_latency_ms > max_latency_ms
+      action: downgrade_or_abort
+  budgets:
+    monthly_cap_usd: 200
+    per_artifact_cap_usd:
+      standard: 0.75
+      premium: 2.00
+  telemetry:
+    decision_log: true
+    emit_metrics: true

@@ -6,7 +6,7 @@
     MONGODB_URI=mongodb://127.0.0.1:27017 node scripts/wait_for_mongo.js [--timeoutMs 60000] [--intervalMs 1000]
 */
 
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 function getArg(name, def) {
   const idx = process.argv.indexOf(`--${name}`);

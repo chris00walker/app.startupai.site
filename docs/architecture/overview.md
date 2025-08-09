@@ -1,4 +1,7 @@
 # 🎨 Strategyzer-Powered AI Consulting Platform
+<!-- markdownlint-disable MD013 -->
+
+> Related Docs: [Product Requirements](../product/requirements.md) · [Decision Pack](../product/decision_pack.md) · [Policy DSL](../policy/dsl.md) · [Evaluation Rubrics](../evaluation/rubrics.md) · [Experiment Catalog](../experiments/catalog.md) · [Data Architecture](./data.md) · [Engineering Guide](../engineering/implementation.md) · [Operations](../operations/operations.md) · [Integrations](../integrations/overview.md) · [Diagrams Viewer](./diagrams/viewer.html)
 
 ## Vision: Visual Canvas Generation at Scale
 
@@ -7,6 +10,93 @@ Transform complex strategic analysis into the proven visual frameworks that clie
 > *"A picture is worth a thousand words in the consulting business"* - This is why Osterwalder's visual frameworks dominate strategic consulting.
 
 ---
+
+## Executive Summary: Solopreneur Consulting-as-Code
+
+You are the service. This platform turns your Strategyzer playbook into an always-on, policy-routed, evaluator-guarded AI system so you can serve many clients in parallel without hiring. The system preserves your quality bar through automated stage-gates while learning from every engagement.
+
+- Maintain your personal brand and standards with evaluator rubrics and golden scenarios
+- Run 10–50 client engagements concurrently via async orchestration and event logs
+- Route tasks across providers (Vertex AI, OpenAI, local tools) for the best quality/cost/latency
+- Keep sensitive data in GCP; send minimal context externally; enforce guardrails
+- Continuously improve with feedback loops, outcome attribution, and router policy updates
+
+## Who We Serve (ICP)
+
+This section has moved to a dedicated document focused on product requirements and client outcomes:
+
+- See [product/requirements.md](../product/requirements.md) for the full Ideal Client Profile, primary challenges, and why custom solutions.
+- It also contains the Client Outcome (Promise) and Deliverables Contract with acceptance criteria.
+
+## Client Outcome (Promise) & Deliverables
+
+Moved to [product/requirements.md](../product/requirements.md).
+
+## Operating Model & Service Tiers
+
+- Standard: fully automated workflows with published canvases and artefacts
+- Premium: human-in-the-loop checkpoints at high-value stages (e.g., final critique/sign-off)
+- Client pods: per-client workspace, vector namespace, and dashboards for transparency
+- Weekly product ops: use monitoring insights to refine prompts, thresholds, and router policies
+
+## Problem Definition & Success Criteria
+
+**Problem.** A solopreneur consultant faces a capacity ceiling, quality drift across clients, context switching, rising inference costs, and strict data-protection needs. They need to deliver Strategyzer-standard outcomes at scale without hiring.
+
+**Constraints:**
+
+- GCP-native data plane only (Cloud SQL Postgres + pgvector). No MongoDB or self-hosted DBs.
+- PII and sensitive data remain in GCP; send minimal context externally.
+- Cloud Run limits (CPU/RAM/timeout/concurrency) apply to orchestrators and renderer.
+- Solopreneur budget/time; prefer policy, automation, and learning over manual ops.
+
+**Non-Goals:**
+
+- Training/custom-hosting foundation models.
+- Tight coupling to any single AI provider.
+- Building bespoke infra outside GCP managed services.
+
+**Personas.** Solopreneur Consultant (primary), Client Stakeholder (consumer), Reviewer/Approver (quality gate), Platform Operator (same person as consultant in most cases).
+
+**Success Criteria.**
+
+- Quality: evaluator composite score ≥ target per canvas (e.g., VPC ≥ 0.85; BMC ≥ 0.80).
+- Latency: p95 end-to-end discovery ≤ 180s; single agent p95 ≤ 8s; renderer p95 ≤ 8s.
+- Cost: per-canvas cap standard ≤ $0.75, premium ≤ $2.00; per-client monthly cap; per-request max.
+- Safety: zero PII exfiltration outside policy; guardrails enforced with audit trail.
+
+### Behavior-driven goals (preview)
+
+- Generate Strategyzer-compliant canvases from structured inputs with defined quality/latency SLOs.
+- Orchestrate multi-agent debate/consensus with evaluator-guarded stage gates.
+- Provide real-time progress, recover from failures, and preserve partial results.
+- Support human-AI collaborative iteration and branded, professional exports.
+- Respect per-client budgets and cost guardrails with degradations and fallbacks.
+
+[See full BDD scenarios](#behavior-driven-development-bdd-scenarios)
+
+## eCommerce Validation Workflow (Online‑Only)
+
+1. Intake (5 questions) → select eCom policy preset via Policy Router.
+2. Plan: choose experiments (smoke page, fake door, price probe, paid pulse, matrix, checkout emu).
+3. Execute: run online experiments only; collect metrics.
+4. Evaluate: rubric benchmarks by vertical (CTR, CPC, CVR to intent, price elasticity delta, evidence score).
+5. Decide: Green/Yellow/Red + next 3 actions.
+6. Deliver: one‑page plan + evidence pack; versioned artifacts with lineage.
+
+See diagrams: [diagrams/viewer.html](./diagrams/viewer.html) renders the sequence and learning loop.
+
+### Experiment Catalog (Online TBI Adaptation)
+
+- Moved to [experiments/catalog.md](../experiments/catalog.md).
+
+### Policy Router: eCom Presets (DSL)
+
+Details and YAML presets moved to [policy/dsl.md](../policy/dsl.md).
+
+### Evaluator Rubrics & Benchmarks (eCom)
+
+Moved to [evaluation/rubrics.md](../evaluation/rubrics.md).
 
 ## 🎯 Core Strategyzer Frameworks to Implement
 
@@ -29,95 +119,180 @@ Transform complex strategic analysis into the proven visual frameworks that clie
 
 ---
 
-## 🧠 AI Agent Architecture for Visual Canvas Generation
+## 🧠 Strategyzer AI 2.0 — ML/AI‑First Architecture
 
-### **Value Proposition Design Agents**
+This replaces the previous agent listing with an adaptive, measurable, and continuously learning architecture. The goal is to optimize quality, cost, and latency while preserving Strategyzer methodology and keeping data/control in GCP.
 
-#### **Customer Jobs Agent**
+### Pillars
 
-```javascript
-Purpose: Identify and analyze customer Jobs-to-be-done
-Methodology: Osterwalder's Jobs-to-be-done framework
-Inputs: Customer interviews, market research, behavioral data
-Outputs:
-- Functional jobs (tasks customers want to accomplish)
-- Emotional jobs (feelings customers want to achieve)  
-- Social jobs (how customers want to be perceived)
+- Adaptive multi‑agent orchestration with a Policy Router (runtime Mixture‑of‑Experts).
+- Hybrid providers behind adapters (OpenAI, Vertex AI, local tools) to avoid lock‑in.
+- Continuous learning loop from user edits, feedback, golden tasks, and outcomes.
+- GCP‑native data plane (Cloud SQL Postgres + pgvector) with auditability and security.
 
-Visual Artifacts Generated:
-- Customer Jobs Map (visual hierarchy)
-- Jobs Prioritization Matrix
-- Jobs-to-be-done Canvas section
+### Policy Router (Agent‑level MoE)
+
+- Selects expert path per request based on task type, domain, sensitivity/PII, latency/cost SLOs, historical evaluations, and current budget.
+- v1: rule‑based with thresholds and provider preferences.
+- v2: contextual bandits where reward = quality − cost − latency penalties; features/logs in Vertex AI Feature Store; versions tracked in Vertex Experiments/Registry.
+
+#### Policy DSL (example)
+
+```yaml
+version: 1
+routes:
+  - match:
+      task: "render"
+      pii: "low"
+      budget_tier: "standard"
+    choose:
+      provider_order: ["LocalAdapter", "OpenAIAdapter"]
+      model: "gpt-4o-mini"
+      max_cost_usd: 0.05
+      latency_p95_ms: 8000
+  - match:
+      task: "analysis"
+      pii: "high"
+    choose:
+      provider_order: ["VertexAIAdapter"]
+      model: "gemini-1.5-pro-safe"
+      context_policy: "minimal"
+      max_cost_usd: 0.15
+      latency_p95_ms: 6000
+defaults:
+  fallback_provider: "VertexAIAdapter"
+  on_violation: "pause_and_require_approval"
 ```
 
-#### **Customer Pains Agent**
+#### Router telemetry (decision log)
+
+- `decision_id`, `policy_version`, `request_id`
+- `features`: task, pii, budget_tier, context_size, historical_quality
+- `choice`: provider, model, template, retries
+- `targets`: quality_goal, latency_p95_ms, max_cost_usd
+- `estimates`: cost_usd, tokens, duration_ms
+- `outcome`: quality, latency_ms, cost_usd, success
+
+Note: maintain a decision table per task type (VPC, BMC, TBI, Render) for readability and audits.
+
+### Economics & Cost Guardrails
+
+- Per-task and per-canvas budget caps with hard stops and graceful degradation paths
+- Tiered model selection: economical models for boilerplate; premium models for high-ambiguity reasoning
+- Caching and reuse: deduplicate research, reuse blocks across canvases, vector-cache frequent queries
+- Budget-aware routing: router considers remaining monthly/client budgets and chooses accordingly
+
+### Provider Adapters
+
+- `OpenAIAdapter`, `VertexAIAdapter`, `LocalAdapter` implement a common interface: `generate()`, `tools`, `cost()`, `telemetry()`.
+- Enables choosing best‑of‑breed per subtask (planning, research, synthesis, tool‑use, rendering) without changing business logic or prompts.
+
+### Orchestration Patterns that Scale You
+
+- Hub-and-Spoke: orchestrator fans out to specialists (VPC, BMC, Research, Canvas Renderer, Evaluators)
+- Stage Gates: draft → critique → improve → finalize; auto-advance only if thresholds pass
+- Human-in-the-Loop on Exceptions: you review when quality/safety thresholds fail or for premium clients
+- Batch + Async: Pub/Sub and Cloud Tasks queue heavy jobs; Workflows manage long-running chains
+- Replayable Events: immutable event log enables audits, reprocessing with new models, and rollbacks
+
+### Evaluators & Guardrails
+
+- Critic/verifier agents score outputs for factuality, completeness, methodology adherence, safety, and PII.
+- Vertex Guardrails for policy enforcement plus repair loops before persist/publish.
+- Golden tasks per canvas type protect against regressions in CI/CD.
+
+### Architecture Diagrams
+
+- Orchestration Sequence: see `docs/diagrams/orchestration_sequence.mmd`.
+- Learning Loop: see `docs/diagrams/learning_loop.mmd`.
+
+### RAG & Knowledge Graph (Postgres/pgvector)
+
+- Artefacts, transcripts, client docs embedded with pgvector; ANN indexes (ivfflat/HNSW) tuned per table.
+- SQL for vector search: `ORDER BY embedding <-> $1 LIMIT k` with metadata filters via JSONB.
+- Strategy Knowledge Graph tables: hypotheses → evidence → decisions → outcomes for traceability and attribution.
+
+### Orchestration on GCP
+
+- Cloud Run services: `gateway` (API), `orchestrator` (policy + agents), `renderer` (canvas), `monitoring`, `security-testing`.
+- Pub/Sub for fan‑out, Cloud Tasks for retries/backoff/idempotency, Workflows for long chains; structured `events` table for audit.
+- Secret Manager, per‑service IAM, optional Serverless VPC Access.
+
+### Renderer Stability Playbook (Cloud Run + Puppeteer/Chromium)
+
+- Base image: use a maintained Chromium-enabled image or install deps in Docker; ensure fonts and locales are present.
+- Launch flags: `--no-sandbox`, `--disable-dev-shm-usage`, `--disable-setuid-sandbox`, `--disable-gpu`, `--single-process` (only if needed).
+- Filesystem: write to `/tmp` only; ensure `XDG_CACHE_HOME=/tmp/.cache` to avoid write errors.
+- Resources: start with Cloud Run 2 vCPU / 2–4 GiB RAM; adjust concurrency=1 for renderers; enable CPU always allocated for faster cold start page loads.
+- Timeouts & retries: set request timeout ≥ 120s for large canvases; use Cloud Tasks with retry/backoff for idempotent render jobs.
+- Fonts: install common fonts (Noto, DejaVu) to improve text consistency across locales.
+- Example launcher:
 
 ```javascript
-Purpose: Map customer pain points and frustrations
-Methodology: Strategyzer Pain identification framework
-Inputs: Customer feedback, support tickets, interview data
-Outputs:
-- Undesired outcomes customers want to avoid
-- Obstacles preventing job completion
-- Risks customers fear taking
+import puppeteer from 'puppeteer';
 
-Visual Artifacts Generated:
-- Pain Points Heat Map
-- Pain Severity Matrix
-- Customer Pains Canvas section
+export async function launchBrowser() {
+  return await puppeteer.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+    ],
+    headless: 'new',
+  });
+}
 ```
 
-#### **Customer Gains Agent**
+### MLOps on Vertex AI
 
-```javascript
-Purpose: Identify customer gains and desired outcomes
-Methodology: Strategyzer Gains framework
-Inputs: Customer success stories, desired outcomes, aspirations
-Outputs:
-- Required gains (expected outcomes)
-- Expected gains (basic expectations)
-- Desired gains (exceeding expectations)
-- Unexpected gains (surprise and delight)
+- Pipelines: nightly curation → evaluator/router training → register → staged rollout and rollback.
+- Feature Store for routing features & rewards; Experiments for comparison; Model Registry for versioning.
+- Batch embedding refresh and drift checks; budget enforcement baked into pipelines.
 
-Visual Artifacts Generated:
-- Gains Opportunity Map
-- Gains Impact Matrix
-- Customer Gains Canvas section
-```
+### Security & Compliance
 
-#### **Value Map Agent**
+- PII encryption at rest (app‑layer for designated fields) per org standards; keys via Secret Manager.
+- Minimal context to external providers; sensitive data stays in GCP.
+- Maintain CI/CD security gates (dependency, secret, IaC, container scans) and Audit Logging.
 
-```javascript
-Purpose: Design products/services that create value
-Methodology: Strategyzer Value Map framework
-Inputs: Customer profile, competitive analysis, capabilities
-Outputs:
-- Products & Services list
-- Pain Relievers (how offerings address pains)
-- Gain Creators (how offerings create gains)
+### Observability, SLOs & Ops
 
-Visual Artifacts Generated:
-- Value Map Canvas section
-- Pain-Relief Mapping
-- Gain Creation Matrix
-```
+- Telemetry: OpenTelemetry SDK exports traces/metrics/logs → Cloud Trace/Monitoring/Logging; per-request correlation IDs.
+- Core SLOs (targets):
+  - Quality: evaluator composite ≥ 0.85 (VPC), ≥ 0.80 (BMC), ≥ 0.80 (TBI).
+  - Latency: p95 end-to-end discovery ≤ 180s; single agent p95 ≤ 8s; renderer p95 ≤ 8s.
+  - Cost: per-canvas cap standard ≤ $0.75, premium ≤ $2.00; per-client monthly cap; per-request max.
+  - Reliability: error budget ≤ 2% failed publishes / 30 days.
+  - Observability: 100% of router decisions logged with correlation IDs.
+- Dashboards: Cloud Monitoring for quality/latency/cost; alerts on burn rate, error spikes, budget exhaustion.
+- Auditability: immutable `events` + `router_decisions` tables; replay tooling gated by budget + safety policy.
 
-#### **Fit Assessment Agent**
+Operational responses when SLOs breach:
 
-```javascript
-Purpose: Validate Product-Market Fit
-Methodology: Strategyzer Fit methodology
-Inputs: Customer evidence, market feedback, usage data
-Outputs:
-- Problem-Solution Fit assessment
-- Product-Market Fit validation
-- Fit improvement recommendations
+- Quality: pause auto-publish, route to human review, open an incident, create golden tasks for regressions.
+- Latency: scale Cloud Run, reduce context size, degrade to cheaper/faster model tier per policy.
+- Cost: trigger cost breaker, require approval, switch to degraded prompts or local tools, reschedule heavy jobs.
 
-Visual Artifacts Generated:
-- Fit Assessment Dashboard
-- Evidence-Based Fit Report
-- Complete Value Proposition Canvas
-```
+### TDD/BDD on GCP
+
+- Contract tests at adapter boundary; golden scenarios for VPC/BMC/TBI with evaluator thresholds.
+- Integration with Postgres/pgvector; e2e smokes against Cloud Run; cost/latency assertions with SLO bounds.
+
+#### Expanded TDD/BDD for ML/AI‑first Workflows
+
+- Unit: prompt builders, parsers, evaluators; deterministic with fixtures.
+- Contract: `OpenAIAdapter`/`VertexAIAdapter` wire-format, error semantics, cost reporting.
+- Golden tests: curated client scenarios with locked inputs and expected evaluator scores.
+- E2E: orchestrator happy-path and failure-path through stage gates; renderer smoke tests (SVG diff tolerance).
+- Non-functional: load/cost tests verify router respects budget caps; chaos tests for provider timeouts.
+
+### Minimal Data Model Additions (Postgres)
+
+- `events(id, workflow_id, agent, type, payload_jsonb, created_at)` immutable event log.
+- `feedback(id, artefact_id, signal, edit_distance, time_to_accept, user_id, created_at)`.
+- `evaluations(id, artefact_id, quality, safety, completeness, latency_ms, cost_usd, created_at)`.
+- `router_decisions(id, request_id, features_jsonb, choice, reward, created_at)`.
 
 ### **Business Model Generation Agents**
 
@@ -659,101 +834,67 @@ async function executeTestingPhase(businessModelResults, clientData) {
 
 ---
 
-## 📊 Enhanced MongoDB Schema for Strategyzer Artifacts
+## 📊 Cloud SQL (Postgres) Schema for Strategyzer Artifacts
 
-### **Canvas Artifact Model**
+### **Canvas Artifact Model (Prisma + Postgres/pgvector)**
 
-```javascript
-const CanvasArtifactSchema = new mongoose.Schema({
-  // Core identification
-  id: { type: String, required: true, unique: true },
-  clientId: { type: String, required: true, index: true },
-  
-  // Strategyzer framework metadata
-  frameworkType: { 
-    type: String, 
-    enum: ['value_proposition_canvas', 'business_model_canvas', 'testing_dashboard'],
-    required: true 
-  },
-  canvasVersion: { type: String, default: '1.0' },
-  
-  // Visual canvas data
-  canvasData: {
-    // SVG/interactive canvas content
-    visualContent: { type: String }, // SVG markup
-    interactiveElements: { type: mongoose.Schema.Types.Mixed },
-    
-    // Structured data for each canvas section
-    sections: {
-      // Value Proposition Canvas sections
-      customerJobs: [{ type: String }],
-      customerPains: [{ type: String }],
-      customerGains: [{ type: String }],
-      productsServices: [{ type: String }],
-      painRelievers: [{ type: String }],
-      gainCreators: [{ type: String }],
-      
-      // Business Model Canvas sections
-      keyPartners: [{ type: String }],
-      keyActivities: [{ type: String }],
-      keyResources: [{ type: String }],
-      valuePropositions: [{ type: String }],
-      customerRelationships: [{ type: String }],
-      channels: [{ type: String }],
-      customerSegments: [{ type: String }],
-      costStructure: [{ type: String }],
-      revenueStreams: [{ type: String }],
-      
-      // Testing Business Ideas sections
-      hypotheses: [{ 
-        type: { type: String },
-        description: { type: String },
-        riskLevel: { type: String },
-        evidenceStrength: { type: String }
-      }],
-      experiments: [{ 
-        name: { type: String },
-        type: { type: String },
-        cost: { type: String },
-        time: { type: String },
-        evidenceStrength: { type: String }
-      }]
-    }
-  },
-  
-  // Client presentation metadata
-  presentation: {
-    isClientReady: { type: Boolean, default: true },
-    exportFormats: [{ type: String }], // ['pdf', 'png', 'svg', 'ppt']
-    brandingApplied: { type: Boolean, default: false },
-    lastPresentationDate: { type: Date }
-  },
-  
-  // Collaboration and iteration
-  collaboration: {
-    stakeholderComments: [{ 
-      author: { type: String },
-      comment: { type: String },
-      section: { type: String },
-      timestamp: { type: Date, default: Date.now }
-    }],
-    iterationHistory: [{ 
-      version: { type: String },
-      changes: { type: String },
-      timestamp: { type: Date, default: Date.now }
-    }]
-  },
-  
-  // AI generation metadata
-  generation: {
-    generatedBy: [{ type: String }], // List of AI agents involved
-    confidence: { type: Number, min: 0, max: 1 },
-    evidenceBased: { type: Boolean, default: true },
-    dataSourcesUsed: [{ type: String }],
-    generationTime: { type: Number }, // milliseconds
-    qualityScore: { type: Number, min: 0, max: 1 }
-  }
-});
+```sql
+-- Postgres schema (conceptual)
+CREATE TABLE canvas_artifacts (
+  id              UUID PRIMARY KEY,
+  client_id       UUID NOT NULL,
+  framework_type  TEXT NOT NULL CHECK (framework_type IN (
+    'value_proposition_canvas', 'business_model_canvas', 'testing_dashboard'
+  )),
+  canvas_version  TEXT NOT NULL DEFAULT '1.0',
+
+  -- Visual canvas data
+  visual_content        TEXT,            -- SVG markup
+  interactive_elements  JSONB,           -- interactive config/state
+
+  -- Structured sections
+  sections              JSONB NOT NULL DEFAULT '{}',
+
+  -- Presentation metadata
+  presentation          JSONB NOT NULL DEFAULT '{}',
+
+  -- Collaboration and iteration
+  collaboration         JSONB NOT NULL DEFAULT '{}',
+
+  -- AI generation metadata
+  generation            JSONB NOT NULL DEFAULT '{}',
+
+  -- Vector for semantic search (optional, for summaries)
+  embedding             VECTOR(1536),
+
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Example pgvector index
+CREATE INDEX IF NOT EXISTS idx_canvas_artifacts_embedding
+  ON canvas_artifacts USING ivfflat (embedding vector_cosine_ops);
+```
+
+```prisma
+// Prisma model (representative)
+model CanvasArtifact {
+  id                 String   @id @default(uuid())
+  clientId           String   @db.Uuid
+  frameworkType      String
+  canvasVersion      String   @default("1.0")
+
+  visualContent      String?
+  interactiveElements Json?
+  sections           Json     @default("{}")
+  presentation       Json     @default("{}")
+  collaboration      Json     @default("{}")
+  generation         Json     @default("{}")
+
+  // Store embedding in a companion table or as bytea/array if preferred; raw SQL used for ANN queries
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
 ```
 
 ---
@@ -782,21 +923,17 @@ const CanvasArtifactSchema = new mongoose.Schema({
 - [ ] Create Evidence Collection agent
 - [ ] Develop Testing Dashboard generator
 
----
-
-## 🔄 Canvas Model Migration Roadmap (2025)
-
-_Current status_: Canvas documents embed `versions[]` snapshots and store binary SVG/PDF exports.
-
 ### Planned Evolution (Q4 2025)
-1. **Separate Version Collection** – Introduce `canvas_versions` storing *diffs* instead of full snapshots; main `canvas` doc gains `activeVersion` pointer.
-2. **Hierarchical JSON Schema** – Move `data` to a fully structured, nested JSON model where each block (e.g. `data.keyPartners[]`) has its own `_id` allowing fine-grained updates.
-3. **Vector Search Enablement** – Create Atlas Vector Search indexes on rich-text arrays (`customerJobs`, `valuePropositions`, etc.) for semantic retrieval by AI agents.
-4. **Real-time Collaboration** – Pipe MongoDB Change Streams into the WebSocket gateway; front-end uses CRDT/whiteboard lib (`tldraw` + Liveblocks) for simultaneous edits.
+
+1. **Separate Version Table** – Introduce `canvas_versions` storing diffs; main `canvas_artifacts` gains `active_version_id` pointer.
+2. **Hierarchical JSON Schema** – Keep `sections` as structured JSONB with fine-grained updates by path.
+3. **Vector Search Enablement** – Use `pgvector` on semantic fields for retrieval augmented generation; maintain ANN indexes (ivfflat/HNSW) with appropriate tuning.
+4. **Real-time Collaboration** – Use Pub/Sub or Eventarc to trigger updates and push via WebSocket gateway; avoid DB-specific change streams.
 5. **On-Demand Export Service** – Decouple media generation; a serverless `export-service` renders PDF/SVG on request and caches assets in Cloud Storage.
-6. **Backward Compatibility Layer** – Dual-write during migration; legacy API/tests still operate on `versions[]` until Phase 3.
+6. **Backward Compatibility Layer** – Dual-write during migration; legacy API/tests still operate on prior shape until Phase 3.
 
 ### Incremental Roll-out
+
 | Phase | Goal | Key Tasks |
 |-------|------|-----------|
 | 0 | Stabilise current model & tests | Finish CI fixes (current sprint) |
@@ -810,150 +947,82 @@ _Current status_: Canvas documents embed `versions[]` snapshots and store binary
 
 ## 🧠 Advanced AI-Optimized Architecture
 
-### **Enhanced MongoDB Schema for AI Workflows**
+### **Cloud SQL Schema for AI Workflows (Prisma + Postgres/pgvector)**
 
-```javascript
-// AI-Optimized Artefact Schema
-const EnhancedArtefactSchema = new mongoose.Schema({
-  // Core Identification
-  id: String,
-  clientId: { type: String, index: true },
-  
-  // AI Agent Metadata
-  agentId: String,
-  agentType: {
-    type: String,
-    enum: ['intakeAgent', 'researchAgent', 'canvasDraftingAgent', 'validationPlanAgent', 'scaleAgent']
-  },
-  workflowId: String,
-  workflowStage: { type: String, enum: ['discovery', 'validation', 'scale'] },
-  
-  // AI-Optimized Content Structure
-  content: {
-    raw: mongoose.Schema.Types.Mixed,                    // Original AI response
-    structured: {                                        // Normalized structure
-      analysis: String,
-      recommendations: [String],
-      nextSteps: [String],
-      insights: [String],
-      confidence: { type: Number, min: 0, max: 1 },
-      reasoning: String
-    },
-    embeddings: {                                        // Vector embeddings for semantic search
-      content_vector: [Number],
-      semantic_vector: [Number],
-      summary_vector: [Number]
-    },
-    metadata: {                                          // AI processing metadata
-      model_used: String,
-      processing_time: Number,
-      token_count: Number,
-      cost: Number,
-      quality_score: { type: Number, min: 0, max: 1 }
-    }
-  },
-  
-  // Workflow Execution Context
-  execution: {
-    input_context: mongoose.Schema.Types.Mixed,
-    output_context: mongoose.Schema.Types.Mixed,
-    agent_state: mongoose.Schema.Types.Mixed,
-    dependencies: [String],                              // Artefact IDs this depends on
-    dependents: [String]                                 // Artefacts that depend on this
-  },
-  
-  // Quality & Validation
-  validation: {
-    is_validated: { type: Boolean, default: false },
-    validation_score: { type: Number, min: 0, max: 1 },
-    validation_notes: String,
-    human_reviewed: { type: Boolean, default: false }
-  },
-  
-  // Search Optimization
-  searchable_content: String,                            // Flattened for full-text search
-  tags: [String],                                        // Auto-generated tags
-  keywords: [String],                                    // Extracted keywords
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+```prisma
+model Artefact {
+  id            String   @id @default(uuid())
+  clientId      String   @db.Uuid
+  agentId       String?
+  agentType     String?
+  workflowId    String?
+  workflowStage String?
 
-// Compound indexes for optimized queries
-EnhancedArtefactSchema.index({ clientId: 1, workflowStage: 1, createdAt: -1 });
-EnhancedArtefactSchema.index({ agentType: 1, 'content.metadata.quality_score': -1 });
-EnhancedArtefactSchema.index({ tags: 1, keywords: 1 });
+  contentRaw        Json?
+  contentStructured Json?
+  contentMetadata   Json?
+
+  execution         Json?   // input_context, output_context, agent_state, deps
+  validation        Json?   // validated flags, scores, notes
+
+  searchableContent String?
+  tags              Json?
+  keywords          Json?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
 ```
 
 ### **Advanced Query Capabilities**
 
 #### 1. **Contextual Artefact Retrieval**
 
-```javascript
-// Get relevant context using aggregation pipeline
-const getContextualArtefacts = async (clientId, currentStage) => {
-  return await Artefact.aggregate([
-    { $match: { clientId } },
-    { 
-      $addFields: {
-        relevanceScore: {
-          $switch: {
-            branches: [
-              { case: { $eq: ['$workflowStage', currentStage] }, then: 3 },
-              { case: { $in: ['$workflowStage', ['discovery', 'validation']] }, then: 2 },
-              { case: true, then: 1 }
-            ]
-          }
-        }
-      }
-    },
-    { $sort: { relevanceScore: -1, 'content.metadata.quality_score': -1, createdAt: -1 } },
-    { $limit: 5 }
-  ]);
+```typescript
+// Prisma example (relevance approximated via sort priority and stage match)
+const getContextualArtefacts = async (clientId: string, currentStage: string) => {
+  return prisma.artefact.findMany({
+    where: { clientId },
+    orderBy: [
+      { workflowStage: 'desc' }, // ensure exact stage sorted via CASE in raw SQL if needed
+      { createdAt: 'desc' }
+    ],
+    take: 5
+  });
 };
 ```
 
 #### 2. **AI-Powered Insights Generation**
 
-```javascript
-// Generate insights across all artefacts
-const generateCrossWorkflowInsights = async (clientId) => {
-  return await Artefact.aggregate([
-    { $match: { clientId, status: 'completed' } },
-    { $unwind: '$content.structured.insights' },
-    {
-      $group: {
-        _id: '$content.structured.insights',
-        frequency: { $sum: 1 },
-        avgConfidence: { $avg: '$content.structured.confidence' },
-        sources: { $addToSet: { agentType: '$agentType', workflowStage: '$workflowStage' } }
-      }
-    },
-    { $sort: { frequency: -1, avgConfidence: -1 } }
-  ]);
-};
+```sql
+-- Aggregate insights from JSONB
+SELECT
+  insight,
+  COUNT(*)                     AS frequency,
+  AVG((content->'structured'->>'confidence')::numeric) AS avg_confidence
+FROM (
+  SELECT jsonb_array_elements(content->'structured'->'insights') AS insight, content
+  FROM artefacts
+  WHERE client_id = $1 AND (content->'metadata'->>'status') = 'completed'
+) t
+GROUP BY insight
+ORDER BY frequency DESC, avg_confidence DESC;
 ```
 
 #### 3. **Quality Assessment Pipeline**
 
-```javascript
-// Assess artefact quality across workflows
-const assessWorkflowQuality = async (clientId) => {
-  return await Artefact.aggregate([
-    { $match: { clientId } },
-    {
-      $group: {
-        _id: '$workflowStage',
-        avgQuality: { $avg: '$content.metadata.quality_score' },
-        totalArtefacts: { $sum: 1 },
-        avgProcessingTime: { $avg: '$content.metadata.processing_time' },
-        totalCost: { $sum: '$content.metadata.cost' }
-      }
-    },
-    { $sort: { avgQuality: -1 } }
-  ]);
-};
+```sql
+-- Per-stage quality summary
+SELECT
+  workflow_stage,
+  AVG((content->'metadata'->>'quality_score')::numeric) AS avg_quality,
+  COUNT(*)                                              AS total_artefacts,
+  AVG((content->'metadata'->>'processing_time')::numeric) AS avg_processing_time,
+  SUM((content->'metadata'->>'cost')::numeric)            AS total_cost
+FROM artefacts
+WHERE client_id = $1
+GROUP BY workflow_stage
+ORDER BY avg_quality DESC;
 ```
 
 ---
@@ -1201,65 +1270,42 @@ const CONSULTING_DELIVERABLES = {
 
 ---
 
-## 🔮 Advanced MongoDB AI Capabilities
+## 🔮 Advanced GCP-Native AI Capabilities
 
-### **Vector Search Integration**
+### **Vector Search Integration (pgvector)**
 
-```javascript
-// Semantic Search for Strategic Insights
-const semanticSearchArtefacts = async (query, clientId) => {
-  return await db.collection('artefacts').aggregate([
-    {
-      $vectorSearch: {
-        index: "artefact_content_index",
-        path: "content.embeddings.semantic_vector",
-        queryVector: await generateEmbedding(query),
-        numCandidates: 100,
-        limit: 10
-      }
-    },
-    {
-      $match: { clientId }
-    },
-    {
-      $addFields: {
-        score: { $meta: "vectorSearchScore" }
-      }
-    },
-    {
-      $sort: { score: -1 }
-    }
-  ]);
-};
+```sql
+-- Semantic Search for Strategic Insights (pgvector)
+-- $1 = query embedding (vector), $2 = client_id
+SELECT id,
+       client_id,
+       1 - (embedding <=> $1) AS score
+FROM artefacts
+WHERE client_id = $2
+ORDER BY embedding <=> $1
+LIMIT 10;
 ```
 
-### **Real-time Analytics Pipeline**
+### **Real-time Analytics Pipeline (SQL)**
 
-```javascript
-// Live Workflow Monitoring
-const workflowAnalytics = await db.collection('artefacts').aggregate([
-  {
-    $match: {
-      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Last 24 hours
-    }
-  },
-  {
-    $group: {
-      _id: {
-        workflowStage: "$workflowStage",
-        agentType: "$agentType",
-        hour: { $hour: "$createdAt" }
-      },
-      count: { $sum: 1 },
-      avgQuality: { $avg: "$content.metadata.quality_score" },
-      avgProcessingTime: { $avg: "$content.metadata.processing_time" },
-      totalCost: { $sum: "$content.metadata.cost" }
-    }
-  },
-  {
-    $sort: { "_id.hour": 1 }
-  }
-]);
+```sql
+-- Live Workflow Monitoring (last 24 hours)
+WITH recent AS (
+  SELECT *
+  FROM artefacts
+  WHERE created_at >= now() - interval '24 hours'
+)
+SELECT
+  workflow_stage,
+  agent_type,
+  date_trunc('hour', created_at) AS hour,
+  COUNT(*) AS count,
+  AVG((content->'metadata'->>'quality_score')::numeric) AS avg_quality,
+  AVG((content->'metadata'->>'processing_time')::numeric) AS avg_processing_time,
+  SUM((content->'metadata'->>'cost')::numeric) AS total_cost
+FROM recent
+GROUP BY workflow_stage, agent_type, hour
+ORDER BY hour ASC;
 ```
 
 ### **Phase 4: Integration & Polish (Weeks 7-8)**
@@ -1291,6 +1337,9 @@ const workflowAnalytics = await db.collection('artefacts').aggregate([
 - **Export Options**: PDF, PNG, SVG, PowerPoint formats
 
 ---
+
+<!-- markdownlint-disable-next-line MD033 -->
+<a id="behavior-driven-development-bdd-scenarios"></a>
 
 ## 🎭 Behavior-Driven Development (BDD) Scenarios
 

@@ -1,13 +1,7 @@
-name: Security Scanning
+name: Security Scanning (Manual)
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  schedule:
-    # Run security scan daily at 2 AM UTC
-    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   dependency-scan:
@@ -21,7 +15,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: '20'
         cache: 'npm'
         cache-dependency-path: backend/package-lock.json
         
@@ -89,7 +83,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: '20'
         cache: 'npm'
         cache-dependency-path: backend/package-lock.json
         
@@ -197,7 +191,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
         cache-dependency-path: backend/package-lock.json
         

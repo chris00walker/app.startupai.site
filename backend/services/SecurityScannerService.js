@@ -435,8 +435,8 @@ export default class SecurityScannerService extends EventEmitter {
   checkEnvironmentSecurity() {
     const checks = [];
     
-    // Check for required environment variables
-    const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI', 'NODE_ENV'];
+    // Check for required environment variables (Mongo removed)
+    const requiredEnvVars = ['JWT_SECRET', 'NODE_ENV'];
     
     for (const envVar of requiredEnvVars) {
       checks.push({
@@ -482,20 +482,8 @@ export default class SecurityScannerService extends EventEmitter {
    * Check database configuration
    */
   checkDatabaseConfiguration() {
-    return [
-      {
-        check: 'Database connection encrypted',
-        passed: process.env.MONGODB_URI?.includes('ssl=true') || false,
-        severity: 'high',
-        description: 'Database connections should use SSL/TLS encryption'
-      },
-      {
-        check: 'Database authentication enabled',
-        passed: process.env.MONGODB_URI?.includes('@') || false,
-        severity: 'high',
-        description: 'Database should require authentication'
-      }
-    ];
+    // Mongo-specific checks removed. Database checks will be implemented per target DB (e.g., Postgres/Prisma).
+    return [];
   }
   
   /**

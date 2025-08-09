@@ -60,7 +60,7 @@ GCP_DEPLOYMENT_GUIDE.md
 connection/
 
 # Google Cloud SDK
-y/
+google-cloud-sdk/
 
 # Recursive ignores for nested packages/workspaces
 **/node_modules/
@@ -78,3 +78,20 @@ y/
 
 # Local temp and legacy artifacts
 /tmp/
+
+# App-local reports and logs (created when running services locally)
+security-reports/
+audit-logs/
+**/security-reports/
+**/audit-logs/
+
+# Tooling caches
+.eslintcache
+*.tsbuildinfo
+.cache/
+**/.vite/
+
+# Hosting/deploy provider metadata
+.vercel/
+
+# End of file

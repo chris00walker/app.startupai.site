@@ -1,24 +1,12 @@
-name: Continuous Integration Tests
+name: Continuous Integration Tests (Manual)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   unit-and-integration-tests:
     name: Unit & Integration Tests (${{ matrix.service }})
     runs-on: ubuntu-latest
-    services:
-      mongo:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
     env:
       CI: "true"
     strategy:
@@ -32,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
       
       - name: Upgrade npm to 11.5.2
         run: npm install -g npm@11.5.2
@@ -43,20 +31,11 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Wait for MongoDB readiness
+      - name: Run backend tests
         if: matrix.service == 'backend'
         working-directory: backend
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27017/ci-${{ github.run_id }}
-        run: node scripts/wait_for_mongo.js --timeoutMs 60000 --intervalMs 2000
-
-      - name: Run backend tests (with Mongo service)
-        if: matrix.service == 'backend'
-        working-directory: backend
-        env:
-          MONGODB_URI: mongodb://127.0.0.1:27017/ci-${{ github.run_id }}
           NODE_ENV: test
-          USE_EXTERNAL_MONGO: 1
         run: npm test --if-present
 
       - name: Install deps and run frontend tests
@@ -79,7 +58,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
       
       - name: Upgrade npm to 11.5.2
         run: npm install -g npm@11.5.2
@@ -88,9 +67,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: frontend/.next/cache
-          key: nextjs-${{ runner.os }}-node22-${{ hashFiles('frontend/package-lock.json') }}-v1
+          key: nextjs-${{ runner.os }}-node20-${{ hashFiles('frontend/package-lock.json') }}-v1
           restore-keys: |
-            nextjs-${{ runner.os }}-node22-
+            nextjs-${{ runner.os }}-node20-
             nextjs-${{ runner.os }}-
 
       - name: Install dependencies

@@ -92,6 +92,7 @@ SECURITY_SCAN_INTERVAL=86400000  # 24 hours
 ### Deployment Steps
 
 1. **Prepare Environment**
+
    ```bash
    # Copy and configure production environment
    cp .env.production.template .env.production
@@ -99,6 +100,7 @@ SECURITY_SCAN_INTERVAL=86400000  # 24 hours
    ```
 
 2. **Run Deployment Script**
+
    ```bash
    # Full deployment
    ./scripts/deploy-production.sh
@@ -111,6 +113,7 @@ SECURITY_SCAN_INTERVAL=86400000  # 24 hours
    ```
 
 3. **Verify Deployment**
+
    ```bash
    # Check deployment health
    ./scripts/deploy-production.sh verify
@@ -212,7 +215,7 @@ docker-compose up -d --build
 
 ## 🛡️ Security Best Practices
 
-### Container Security
+### Container Security (Production)
 
 1. **Non-root User**
    - Application runs as `strategyzer` user
@@ -227,6 +230,7 @@ docker-compose up -d --build
    - Specific tmpfs mounts for writable areas
 
 4. **Resource Limits**
+
    ```yaml
    deploy:
      resources:
@@ -279,6 +283,7 @@ docker-compose up -d --build
 ### Runtime Optimization
 
 1. **Resource Allocation**
+
    ```yaml
    # Cloud Run configuration
    memory: 2Gi
@@ -300,6 +305,7 @@ docker-compose up -d --build
 ### Common Issues
 
 1. **Container Won't Start**
+
    ```bash
    # Check logs
    docker logs container-name
@@ -309,6 +315,7 @@ docker-compose up -d --build
    ```
 
 2. **Permission Issues**
+
    ```bash
    # Check file ownership
    docker exec container-name ls -la /app
@@ -318,6 +325,7 @@ docker-compose up -d --build
    ```
 
 3. **Network Issues**
+
    ```bash
    # Test connectivity
    docker exec container-name wget -qO- http://localhost:4000/api/health

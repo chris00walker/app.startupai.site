@@ -1,0 +1,21 @@
+@startuml Domain_Context_Map
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+' Simple context map using components as bounded contexts
+
+LAYOUT_TOP_DOWN()
+
+Component(engage, "Engagements", "Bounded Context", "Briefs, assumptions, iteration log")
+Component(canvas, "Canvas", "Bounded Context", "Strategyzer canvases and export")
+Component(evidence, "Evidence", "Bounded Context", "Sources, scoring, traceability")
+Component(orchestration, "Orchestration", "Bounded Context", "Policy router, workflows, evaluators")
+Component(ops, "Operations", "Bounded Context", "SLOs, budgets, alerts, dashboards")
+
+Rel(engage, canvas, "Defines goals & constraints")
+Rel(canvas, orchestration, "Requests AI workflows")
+Rel(evidence, orchestration, "Scores & signals")
+Rel(orchestration, ops, "Telemetry & budgets")
+Rel(canvas, evidence, "Attaches evidence to artefacts")
+
+@enduml

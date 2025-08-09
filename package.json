@@ -11,6 +11,15 @@
     "test:frontend": "cd frontend && npm test",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "lint:md": "markdownlint docs",
+    "lint:md:fix": "markdownlint docs --fix",
+    "prompts:validate": "node scripts/prompts/validate.js",
+    "docs:openapi:lint": "npx @redocly/cli lint docs/architecture/20-contracts/openapi-gateway.yaml",
+    "docs:diagrams:render": "docker run --rm -v \"$PWD/docs/architecture/10-views\":/ws plantuml/plantuml -tpng /ws/*.puml",
+    "docs:validate": "npm run lint:md && npm run prompts:validate && npm run docs:openapi:lint"
+  },
+  "devDependencies": {
+    "markdownlint-cli": "^0.39.0"
   }
 }

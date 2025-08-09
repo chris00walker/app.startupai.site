@@ -150,7 +150,6 @@ deploy_backend() {
         --timeout 300 \
         --concurrency 80 \
         --set-env-vars "NODE_ENV=production,PORT=4000" \
-        --set-env-vars "MONGODB_URI=${MONGODB_URI}" \
         --set-env-vars "OPENAI_API_KEY=${OPENAI_API_KEY}" \
         --set-env-vars "JWT_SECRET=${JWT_SECRET}" \
         --set-env-vars "MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}" \
