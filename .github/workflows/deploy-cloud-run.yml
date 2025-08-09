@@ -1,0 +1,80 @@
+name: Deploy Backend (Cloud Run)
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: GCP Project ID
+        required: true
+      service_name:
+        description: Cloud Run service name
+        required: true
+        default: strategyzer-backend
+      region:
+        description: GCP region
+        required: true
+        default: us-central1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ github.event.inputs.project_id }}
+
+      # If using Workload Identity Federation, configure here; else provide a JSON key via secrets.
+      # - name: Authenticate to Google Cloud (WIF example)
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+      #     service_account: ${{ secrets.GCP_DEPLOY_SA }}
+
+      - name: Configure Docker auth for Artifact Registry
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build container image
+        run: |
+          IMAGE="us-central1-docker.pkg.dev/${{ github.event.inputs.project_id }}/apps/${{ github.event.inputs.service_name }}:${{ github.sha }}"
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          docker build -f backend_legacy/Dockerfile -t "$IMAGE" .
+
+      - name: Push image
+        run: docker push "$IMAGE"
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "${{ github.event.inputs.service_name }}" \
+            --project "${{ github.event.inputs.project_id }}" \
+            --region "${{ github.event.inputs.region }}" \
+            --image "$IMAGE" \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 3000 \
+            --memory 512Mi \
+            --cpu 1 \
+            --max-instances 3 \
+            --set-env-vars NODE_ENV=production \
+            --set-secrets DATABASE_URL=DATABASE_URL:latest
+
+      - name: Get service URL
+        id: url
+        run: |
+          URL=$(gcloud run services describe "${{ github.event.inputs.service_name }}" --region "${{ github.event.inputs.region }}" --format='value(status.url)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Smoke test /api/health
+        run: |
+          URL=${{ steps.url.outputs.url }}
+          echo "Testing $URL/api/health"
+          curl -fsS "$URL/api/health" -o /dev/null
