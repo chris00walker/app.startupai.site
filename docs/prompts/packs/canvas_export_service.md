@@ -5,7 +5,7 @@ title: Canvas Export Service (PDF/SVG)
 objective: Render canvases via serverless export-service with caching.
 inputs:
   - docs/architecture/data.md#canvas-artifacts
-  - docs/architecture/overview.md#architecture-diagrams
+  - docs/architecture/diagrams/viewer.html
 outputs:
   - api: POST /export {canvas_id, format}
   - artifacts: gs://…/exports/{canvas_id}.{pdf|svg}

@@ -4,7 +4,7 @@ id: ARCH-DESIGN-BUILD
 title: Architecture Completion — Design‑Build
 objective: Finish architecture to buildable quality with Design‑Build Mode.
 inputs:
-  - docs/architecture/overview.md
+  - docs/architecture/01-brief.md
   - docs/architecture/data.md#canvas-artifacts
 outputs:
   - docs: full architecture tree (views, contracts, data, quality, ADRs, ops)

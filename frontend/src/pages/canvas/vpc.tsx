@@ -1,0 +1,123 @@
+import React from 'react'
+import { DashboardLayout } from "@/components/layout/DashboardLayout"
+import ValuePropositionCanvas from "@/components/canvas/ValuePropositionCanvas"
+import { useDemoMode } from "@/hooks/useDemoMode"
+import { demoValuePropositionCanvas } from "@/data/demoData"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Lightbulb, Save, Download, Share } from "lucide-react"
+
+export default function VPCPage() {
+  const demoMode = useDemoMode()
+
+  return (
+    <DashboardLayout
+      breadcrumbs={[
+        { title: "Canvas Gallery", href: "/canvas" },
+        { title: "Value Proposition Canvas", href: "/canvas/vpc" },
+      ]}
+    >
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        {/* Header */}
+        <div className="flex items-center justify-between space-y-2">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
+              <Lightbulb className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight">Value Proposition Canvas</h2>
+              <p className="text-muted-foreground">
+                Design value propositions that customers want with Customer Profile + Value Map
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {demoMode.isDemo && (
+              <Badge variant="secondary">Demo Mode</Badge>
+            )}
+            <Button variant="outline">
+              <Share className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+            <Button>
+              <Save className="mr-2 h-4 w-4" />
+              Save Canvas
+            </Button>
+          </div>
+        </div>
+
+        {/* Canvas Description */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <Lightbulb className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-blue-900">About Value Proposition Canvas</h3>
+              <p className="text-blue-800 text-sm mt-1">
+                The Value Proposition Canvas helps you design value propositions that customers want. 
+                It consists of two sides: the <strong>Customer Profile</strong> (customer jobs, pains, and gains) 
+                and the <strong>Value Map</strong> (products & services, pain relievers, and gain creators). 
+                Achieve fit by ensuring your value map addresses the most important jobs, pains, and gains 
+                in your customer profile.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Value Proposition Canvas Component */}
+        <div className="bg-white rounded-lg border shadow-sm">
+          <ValuePropositionCanvas 
+            canvasId={demoMode.isDemo ? "demo-vpc-1" : undefined}
+            clientId={demoMode.isDemo ? "demo-techstart" : "demo-client"}
+            onSave={(canvasData) => {
+              console.log('Saving VPC:', canvasData)
+              // TODO: Implement save functionality
+            }}
+            readOnly={false}
+          />
+        </div>
+
+        {/* Canvas Tips */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <h4 className="font-semibold text-green-900 mb-2">Customer Profile Tips</h4>
+            <ul className="text-green-800 text-sm space-y-1">
+              <li>• Focus on the most important customer jobs</li>
+              <li>• Identify functional, emotional, and social jobs</li>
+              <li>• Describe pains that prevent job completion</li>
+              <li>• Define gains customers want to achieve</li>
+            </ul>
+          </div>
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h4 className="font-semibold text-purple-900 mb-2">Value Map Tips</h4>
+            <ul className="text-purple-800 text-sm space-y-1">
+              <li>• List all products and services you offer</li>
+              <li>• Describe how you relieve customer pains</li>
+              <li>• Explain how you create customer gains</li>
+              <li>• Ensure alignment with customer profile</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Strategyzer Attribution */}
+        <div className="text-center text-sm text-muted-foreground border-t pt-4">
+          <p>
+            Value Proposition Canvas methodology by{" "}
+            <a 
+              href="https://www.strategyzer.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Strategyzer
+            </a>
+            {" "}• Powered by AI-driven canvas generation and analysis
+          </p>
+        </div>
+      </div>
+    </DashboardLayout>
+  )
+}

@@ -4,7 +4,7 @@ id: ROUTER-DECISION-LOG
 title: Policy Router Decision Logging & Dashboards
 objective: Log router decisions with correlation IDs and build dashboards/alerts.
 inputs:
-  - docs/architecture/overview.md#router-telemetry-decision-log
+  - docs/architecture/40-quality/observability.md#auditability
 outputs:
   - tables: events/router_decisions (schema + migrations)
   - dashboards: Cloud Monitoring views

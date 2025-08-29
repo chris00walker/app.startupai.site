@@ -4,7 +4,7 @@ id: BDD-ECOM-DISCOVERY
 title: BDD eCommerce Discovery Workflow (End‑to‑End)
 objective: Implement the end‑to‑end discovery flow aligned to behavior‑driven goals.
 inputs:
-  - docs/architecture/overview.md#behavior-driven-goals-preview
+  - docs/architecture/40-quality/tdd-bdd.md#behavior-driven-development-bdd-scenarios
 outputs:
   - orchestrations: workflow definitions
   - tests: e2e scenarios reflecting user behaviors

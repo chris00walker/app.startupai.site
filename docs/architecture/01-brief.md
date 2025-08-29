@@ -37,7 +37,7 @@ validates ideas via online experiments with guardrailed, deterministic AI workfl
 
 ## References
 
-- `docs/architecture/overview.md`
+- `docs/comprehensive_requirements.md`
 - `docs/architecture/data.md#canvas-artifacts`
 - `docs/evaluation/rubrics.md`
 - `docs/operations/operations.md`

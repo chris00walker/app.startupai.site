@@ -3,7 +3,7 @@
 
 > Mode: Design-Build · Runtime: Node.js 20.x LTS · Cloud: GCP · DB: Cloud SQL Postgres + pgvector · Secrets: Secret Manager
 
-This plan set operationalizes the approved ML/AI-first architecture documented in `docs/ARCHITECTURE.md` and `docs/architecture/overview.md`.
+This plan set operationalizes the approved ML/AI-first architecture documented in [docs/architecture/01-brief.md](../architecture/01-brief.md) and [docs/engineering/20-system/technical-architecture.md](20-system/technical-architecture.md).
 
 - System: Cloud Run microservices (Renderer, Orchestrator, Policy Router, Evaluators) with shared libraries and clear module boundaries.
 - Data: Postgres (Cloud SQL) with `pgvector` for embeddings; Prisma ORM ≥ 5.x.

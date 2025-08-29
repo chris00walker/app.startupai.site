@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Save, Download, Share2, History, Eye, Edit3, Sparkles, Users, MessageSquare } from 'lucide-react';
 import ValuePropositionCanvas from './ValuePropositionCanvas';
 import BusinessModelCanvas from './BusinessModelCanvas';
+import TestingBusinessIdeasCanvas from './TestingBusinessIdeasCanvas';
 import api from '@/services/api';
 
 interface CanvasEditorProps {
@@ -57,10 +58,16 @@ export default function CanvasEditor({
   const loadCanvas = async () => {
     setLoading(true);
     try {
+      // Validate required clientId
+      if (!clientId || clientId.trim() === '') {
+        // Keep loading state when clientId is missing
+        return;
+      }
+
       if (canvasId) {
         // Load existing canvas
         const response = await api.canvas.getById(canvasId);
-        setCanvasData(response.canvas);
+        setCanvasData(response.canvas.data);
         setMetadata(response.metadata);
       } else {
         // Create new canvas
@@ -79,7 +86,10 @@ export default function CanvasEditor({
     } catch (error) {
       console.error('Failed to load canvas:', error);
     } finally {
-      setLoading(false);
+      // Only set loading to false if clientId is valid
+      if (clientId && clientId.trim() !== '') {
+        setLoading(false);
+      }
     }
   };
 
@@ -229,6 +239,16 @@ export default function CanvasEditor({
       case 'business-model':
         return (
           <BusinessModelCanvas
+            canvasId={canvasId}
+            clientId={clientId}
+            initialData={canvasData}
+            onSave={handleSave}
+            readOnly={mode === 'view'}
+          />
+        );
+      case 'testing-business-ideas':
+        return (
+          <TestingBusinessIdeasCanvas
             canvasId={canvasId}
             clientId={clientId}
             initialData={canvasData}

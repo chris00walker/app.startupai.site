@@ -4,7 +4,7 @@ id: TEMPLATE-AGENT-SPEC
 title: Agent/Endpoint Spec
 objective: Create/update an agent or endpoint with measurable quality/latency.
 inputs:
-  - docs/architecture/overview.md
+  - docs/architecture/01-brief.md
   - docs/architecture/data.md
 outputs:
   - api: route(s) and handler(s)
