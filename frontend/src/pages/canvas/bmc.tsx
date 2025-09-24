@@ -1,6 +1,6 @@
 import React from 'react'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
-import BusinessModelCanvas from "@/components/canvas/BusinessModelCanvas"
+import GuidedBusinessModelCanvas from "@/components/canvas/GuidedBusinessModelCanvas"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { demoBusinessModelCanvas } from "@/data/demoData"
 import { Badge } from "@/components/ui/badge"
@@ -9,13 +9,32 @@ import { Brain, Save, Download, Share } from "lucide-react"
 
 export default function BMCPage() {
   const demoMode = useDemoMode()
+  
+  // Check if we're in founder platform mode (client-side only)
+  const [isFounderPlatform, setIsFounderPlatform] = React.useState(false)
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const platform = urlParams.get('platform')
+      setIsFounderPlatform(platform === 'founder')
+    }
+  }, [])
 
   return (
     <DashboardLayout
-      breadcrumbs={[
-        { title: "Canvas Gallery", href: "/canvas" },
-        { title: "Business Model Canvas", href: "/canvas/bmc" },
-      ]}
+      userType={isFounderPlatform ? "founder" : "consultant"}
+      breadcrumbs={
+        isFounderPlatform 
+          ? [
+              { title: "Founder Dashboard", href: "/founder-dashboard" },
+              { title: "Business Model Canvas", href: "/canvas/bmc?platform=founder" },
+            ]
+          : [
+              { title: "Canvas Gallery", href: "/canvas" },
+              { title: "Business Model Canvas", href: "/canvas/bmc" },
+            ]
+      }
     >
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Header */}
@@ -55,11 +74,10 @@ export default function BMCPage() {
           <div className="flex items-start space-x-3">
             <Brain className="h-5 w-5 text-green-600 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-green-900">About Business Model Canvas</h3>
+              <h3 className="font-semibold text-green-900">Guided Business Model Canvas</h3>
               <p className="text-green-800 text-sm mt-1">
-                The Business Model Canvas is a strategic management template for developing new business models 
-                and documenting existing ones. It offers a visual chart with 9 elements describing a firm's 
-                value proposition, infrastructure, customers, and finances to help businesses align their activities.
+                Step-by-step guided creation of your business model. Follow the structured workflow to build 
+                each component in the right order, with contextual guidance and examples at every step.
               </p>
             </div>
           </div>
@@ -67,7 +85,7 @@ export default function BMCPage() {
 
         {/* Business Model Canvas Component */}
         <div className="bg-white rounded-lg border shadow-sm">
-          <BusinessModelCanvas 
+          <GuidedBusinessModelCanvas 
             canvasId={demoMode.isDemo ? "demo-bmc-1" : undefined}
             clientId={demoMode.isDemo ? "demo-techstart" : "demo-client"}
             onSave={(canvasData) => {
@@ -78,49 +96,7 @@ export default function BMCPage() {
           />
         </div>
 
-        {/* Canvas Building Blocks Guide */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-2">Value Creation</h4>
-            <ul className="text-blue-800 text-sm space-y-1">
-              <li>• <strong>Key Partners:</strong> Network of suppliers and partners</li>
-              <li>• <strong>Key Activities:</strong> Most important actions to operate</li>
-              <li>• <strong>Key Resources:</strong> Assets required to offer value</li>
-            </ul>
-          </div>
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <h4 className="font-semibold text-purple-900 mb-2">Value Proposition</h4>
-            <ul className="text-purple-800 text-sm space-y-1">
-              <li>• <strong>Value Propositions:</strong> Bundle of products/services</li>
-              <li>• <strong>Customer Relationships:</strong> Types of relationships</li>
-              <li>• <strong>Channels:</strong> How you reach customers</li>
-            </ul>
-          </div>
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-            <h4 className="font-semibold text-orange-900 mb-2">Value Capture</h4>
-            <ul className="text-orange-800 text-sm space-y-1">
-              <li>• <strong>Customer Segments:</strong> Groups you aim to serve</li>
-              <li>• <strong>Cost Structure:</strong> All costs to operate</li>
-              <li>• <strong>Revenue Streams:</strong> Cash from customers</li>
-            </ul>
-          </div>
-        </div>
 
-        {/* Strategyzer Attribution */}
-        <div className="text-center text-sm text-muted-foreground border-t pt-4">
-          <p>
-            Business Model Canvas methodology by{" "}
-            <a 
-              href="https://www.strategyzer.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Strategyzer
-            </a>
-            {" "}• Powered by AI-driven canvas generation and analysis
-          </p>
-        </div>
       </div>
     </DashboardLayout>
   )

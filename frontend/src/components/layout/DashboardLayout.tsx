@@ -23,9 +23,10 @@ interface DashboardLayoutProps {
     title: string
     href?: string
   }>
+  userType?: "consultant" | "founder"
 }
 
-export function DashboardLayout({ children, breadcrumbs = [] }: DashboardLayoutProps) {
+export function DashboardLayout({ children, breadcrumbs = [], userType = "consultant" }: DashboardLayoutProps) {
   return (
     <SidebarProvider
       style={
@@ -35,7 +36,7 @@ export function DashboardLayout({ children, breadcrumbs = [] }: DashboardLayoutP
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" userType={userType} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

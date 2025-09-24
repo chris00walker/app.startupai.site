@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -238,94 +238,71 @@ export default function BusinessModelCanvas({
     items, 
     section, 
     icon: Icon,
-    color,
     description 
   }: {
     title: string;
     items: string[];
     section: keyof BMCData;
     icon: any;
-    color: string;
     description: string;
-  }) => (
-    <Card className={`h-full border-2 ${color} transition-all hover:shadow-lg`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Icon className="w-4 h-4" />
-          {title}
+  }) => {
+    const hasContent = items.some(item => item.trim());
+    
+    return (
+      <Card className="h-full border hover:shadow-md transition-all">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-base font-medium">
+            <Icon className="w-4 h-4 text-muted-foreground" />
+            {title}
+          </CardTitle>
+          <CardDescription className="text-sm">
+            {description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {hasContent ? (
+            <div className="space-y-2">
+              {items.filter(item => item.trim()).map((item, index) => (
+                <div key={index} className="group relative">
+                  <div className="p-3 bg-muted/30 rounded-md text-sm leading-relaxed">
+                    {item}
+                  </div>
+                  {!readOnly && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeItem(section, index)}
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                      aria-label={`Remove item`}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Icon className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">No items added yet</p>
+            </div>
+          )}
+          
           {!readOnly && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => handleAddClick(section)}
-              className="ml-auto h-6 w-6 p-0"
-              aria-label={`Add ${title.toLowerCase()}`}
+              className="w-full mt-3"
             >
-              <Plus className="w-3 h-3" />
+              <Plus className="w-3 h-3 mr-2" />
+              Add {title.slice(0, -1)}
             </Button>
           )}
-        </CardTitle>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {items.map((item, index) => (
-          <div key={index} className="flex items-start gap-2 group">
-            <Textarea
-              value={item}
-              onChange={(e) => handleTextareaChange(section, index, e.target.value)}
-              disabled={readOnly}
-              className="flex-1 min-h-[60px] resize-none"
-              placeholder={`Enter ${title.toLowerCase().slice(0, -1)}...`}
-              data-testid={`${section}-${index}`}
-              aria-label={`${title} item ${index + 1}`}
-            />
-            {!readOnly && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeItem(section, index)}
-                className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-destructive"
-                aria-label={`Remove ${title.toLowerCase().slice(0, -1)}`}
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            )}
-          </div>
-        ))}
-        
-        {editingSection === section && (
-          <div className="space-y-2 pt-2 border-t">
-            <Textarea
-              placeholder={`Add new ${title.toLowerCase()}...`}
-              value={newItem}
-              onChange={(e) => setNewItem(e.target.value)}
-              className="min-h-[60px]"
-            />
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={() => addItem(section)}
-                disabled={!newItem.trim()}
-              >
-                <Save className="w-3 h-3 mr-1" />
-                Add
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setEditingSection(null);
-                  setNewItem('');
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
@@ -375,7 +352,6 @@ export default function BusinessModelCanvas({
           items={canvasData.keyPartners}
           section="keyPartners"
           icon={UserCheck}
-          color="border-blue-200 bg-blue-50/50"
           description="Who are your key partners and suppliers?"
         />
         
@@ -384,7 +360,6 @@ export default function BusinessModelCanvas({
           items={canvasData.keyActivities}
           section="keyActivities"
           icon={Zap}
-          color="border-purple-200 bg-purple-50/50"
           description="What key activities does your value proposition require?"
         />
         
@@ -393,7 +368,6 @@ export default function BusinessModelCanvas({
           items={canvasData.valuePropositions}
           section="valuePropositions"
           icon={Target}
-          color="border-green-200 bg-green-50/50"
           description="What value do you deliver to customers?"
         />
         
@@ -402,7 +376,6 @@ export default function BusinessModelCanvas({
           items={canvasData.customerRelationships}
           section="customerRelationships"
           icon={Heart}
-          color="border-pink-200 bg-pink-50/50"
           description="What type of relationship do you establish?"
         />
         
@@ -411,7 +384,6 @@ export default function BusinessModelCanvas({
           items={canvasData.customerSegments}
           section="customerSegments"
           icon={Users}
-          color="border-orange-200 bg-orange-50/50"
           description="For whom are you creating value?"
         />
 
@@ -421,7 +393,6 @@ export default function BusinessModelCanvas({
           items={canvasData.keyResources}
           section="keyResources"
           icon={Building2}
-          color="border-indigo-200 bg-indigo-50/50"
           description="What key resources does your value proposition require?"
         />
         
@@ -433,7 +404,6 @@ export default function BusinessModelCanvas({
           items={canvasData.channels}
           section="channels"
           icon={Truck}
-          color="border-teal-200 bg-teal-50/50"
           description="Through which channels do you reach customers?"
         />
         
@@ -446,7 +416,6 @@ export default function BusinessModelCanvas({
             items={canvasData.costStructure}
             section="costStructure"
             icon={DollarSign}
-            color="border-red-200 bg-red-50/50"
             description="What are the most important costs in your business model?"
           />
         </div>
@@ -459,7 +428,6 @@ export default function BusinessModelCanvas({
             items={canvasData.revenueStreams}
             section="revenueStreams"
             icon={Coins}
-            color="border-emerald-200 bg-emerald-50/50"
             description="For what value are customers willing to pay?"
           />
         </div>

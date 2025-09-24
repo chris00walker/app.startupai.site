@@ -66,7 +66,7 @@ function HomePage() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Brain className="h-4 w-4" />
               </div>
-              <span className="text-xl font-bold">Strategyzer AI</span>
+              <span className="text-xl font-bold">StartupAI</span>
             </Link>
             <div className="flex items-center gap-4">
               {/* Health Status Display */}
@@ -77,7 +77,10 @@ function HomePage() {
                 </span>
               </div>
               <Button variant="ghost" asChild>
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">Consultant</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link href="/founder-dashboard">Founder</Link>
               </Button>
               <Button asChild>
                 <Link href="/login">Sign In</Link>
@@ -99,20 +102,20 @@ function HomePage() {
             <span className="text-primary">Multi-Agent AI</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Generate professional business canvases, validate ideas, and accelerate 
+            Generate professional business models, validate ideas, and accelerate 
             strategic planning with collaborative AI agents following proven Strategyzer methodology.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <Button size="lg" className="w-full sm:w-auto" asChild>
-              <Link href="/dashboard">
-                <Brain className="h-4 w-4 mr-2" />
-                Start AI Workflow
+              <Link href="/founder-dashboard">
+                <Target className="h-4 w-4 mr-2" />
+                Founder Validation
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
-              <Link href="/dashboard?demo=true">
-                View Demo
-                <ArrowRight className="h-4 w-4 ml-2" />
+              <Link href="/dashboard">
+                <Brain className="h-4 w-4 mr-2" />
+                Consultant Platform
               </Link>
             </Button>
           </div>
@@ -144,7 +147,7 @@ function HomePage() {
       {/* Features Section */}
       <section className="container mx-auto px-6 py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Strategyzer Methodology + AI Innovation</h2>
+          <h2 className="text-3xl font-bold mb-4">StartupAI Methodology + AI Innovation</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Proven business strategy frameworks enhanced with multi-agent AI collaboration 
             for faster, more accurate strategic insights.
@@ -182,7 +185,7 @@ function HomePage() {
             <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Strategy?</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join leading consultants and strategists using AI to generate professional 
-              business canvases and accelerate client outcomes.
+              business models and accelerate client outcomes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
@@ -210,10 +213,10 @@ function HomePage() {
               <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground">
                 <Brain className="h-3 w-3" />
               </div>
-              <span className="font-semibold">Strategyzer AI Platform</span>
+              <span className="font-semibold">StartupAI Platform</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2024 Strategyzer AI. Powered by multi-agent collaboration.
+              © 2024 StartupAI. Powered by multi-agent collaboration.
             </div>
           </div>
         </div>

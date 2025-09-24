@@ -1,6 +1,6 @@
 import React from 'react'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
-import TestingBusinessIdeasCanvas from "@/components/canvas/TestingBusinessIdeasCanvas"
+import GuidedTestingBusinessIdeasCanvas from "@/components/canvas/GuidedTestingBusinessIdeasCanvas"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { demoTestingBusinessIdeas } from "@/data/demoData"
 import { Badge } from "@/components/ui/badge"
@@ -9,13 +9,32 @@ import { FileText, Save, Download, Share } from "lucide-react"
 
 export default function TBIPage() {
   const demoMode = useDemoMode()
+  
+  // Check if we're in founder platform mode (client-side only)
+  const [isFounderPlatform, setIsFounderPlatform] = React.useState(false)
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const platform = urlParams.get('platform')
+      setIsFounderPlatform(platform === 'founder')
+    }
+  }, [])
 
   return (
     <DashboardLayout
-      breadcrumbs={[
-        { title: "Canvas Gallery", href: "/canvas" },
-        { title: "Testing Business Ideas", href: "/canvas/tbi" },
-      ]}
+      userType={isFounderPlatform ? "founder" : "consultant"}
+      breadcrumbs={
+        isFounderPlatform 
+          ? [
+              { title: "Founder Dashboard", href: "/founder-dashboard" },
+              { title: "Testing Business Ideas", href: "/canvas/tbi?platform=founder" },
+            ]
+          : [
+              { title: "Canvas Gallery", href: "/canvas" },
+              { title: "Testing Business Ideas", href: "/canvas/tbi" },
+            ]
+      }
     >
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Header */}
@@ -27,7 +46,7 @@ export default function TBIPage() {
             <div>
               <h2 className="text-3xl font-bold tracking-tight">Testing Business Ideas</h2>
               <p className="text-muted-foreground">
-                Systematically test your business ideas with experiments and evidence-based learning
+                Systematically validate your business model through structured experimentation
               </p>
             </div>
           </div>
@@ -55,28 +74,24 @@ export default function TBIPage() {
           <div className="flex items-start space-x-3">
             <FileText className="h-5 w-5 text-purple-600 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-purple-900">About Testing Business Ideas</h3>
+              <h3 className="font-semibold text-purple-900">Guided Experimentation Framework</h3>
               <p className="text-purple-800 text-sm mt-1">
-                Testing Business Ideas provides a systematic approach to testing your business model assumptions 
-                through experiments. Use assumption mapping to identify risks, design test cards for experiments, 
-                capture learning cards for insights, and build an experiment library to track all your validation efforts.
+                A proven approach to validate business assumptions through structured experiments. Map risks, design tests, capture insights, and track validation progress in one place.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Testing Business Ideas Canvas Component */}
-        <div className="bg-white rounded-lg border shadow-sm">
-          <TestingBusinessIdeasCanvas 
-            canvasId={demoMode.isDemo ? "demo-tbi-1" : undefined}
-            clientId={demoMode.isDemo ? "demo-techstart" : "demo-client"}
-            onSave={(canvasData) => {
-              console.log('Saving TBI:', canvasData)
-              // TODO: Implement save functionality
-            }}
-            readOnly={false}
-          />
-        </div>
+        {/* Guided Testing Business Ideas Canvas Component */}
+        <GuidedTestingBusinessIdeasCanvas 
+          canvasId={demoMode.isDemo ? "demo-tbi-1" : undefined}
+          clientId={demoMode.isDemo ? "demo-techstart" : "demo-client"}
+          onSave={(canvasData) => {
+            console.log('Saving TBI:', canvasData)
+            // TODO: Implement save functionality
+          }}
+          readOnly={false}
+        />
 
         {/* Testing Framework Guide */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -137,21 +152,6 @@ export default function TBIPage() {
           </div>
         </div>
 
-        {/* Strategyzer Attribution */}
-        <div className="text-center text-sm text-muted-foreground border-t pt-4">
-          <p>
-            Testing Business Ideas methodology by{" "}
-            <a 
-              href="https://www.strategyzer.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Strategyzer
-            </a>
-            {" "}• Powered by AI-driven experiment design and validation tracking
-          </p>
-        </div>
       </div>
     </DashboardLayout>
   )

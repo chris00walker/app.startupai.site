@@ -30,11 +30,11 @@ import {
 import { Button } from "@/components/ui/button"
 
 // Strategyzer AI navigation data
-const navigationData = {
+const consultantNavigation = {
   main: [
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: "/",
       icon: LayoutDashboard,
     },
     {
@@ -78,6 +78,26 @@ const navigationData = {
       description: "Experiment design framework",
     },
   ],
+  canvases: [
+    {
+      title: "Value Proposition Canvas",
+      url: "/canvas/vpc",
+      icon: Lightbulb,
+      description: "Customer Profile + Value Map",
+    },
+    {
+      title: "Business Model Canvas",
+      url: "/canvas/bmc",
+      icon: Brain,
+      description: "9-block BMC structure",
+    },
+    {
+      title: "Testing Business Ideas",
+      url: "/canvas/tbi",
+      icon: FileText,
+      description: "Experiment design framework",
+    },
+  ],
   settings: [
     {
       title: "Settings",
@@ -87,7 +107,107 @@ const navigationData = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+const founderNavigation = {
+  main: [
+    {
+      title: "Founder Dashboard",
+      url: "/founder-dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Value Proposition Canvas",
+      url: "/canvas/vpc?platform=founder",
+      icon: Lightbulb,
+    },
+    {
+      title: "Testing Business Ideas",
+      url: "/canvas/tbi?platform=founder",
+      icon: FileText,
+    },
+    {
+      title: "Business Model Canvas",
+      url: "/canvas/bmc?platform=founder",
+      icon: Brain,
+    },
+    {
+      title: "Hypotheses",
+      url: "/founder-dashboard?tab=hypotheses",
+      icon: Lightbulb,
+    },
+    {
+      title: "Experiments",
+      url: "/founder-dashboard?tab=experiments", 
+      icon: Workflow,
+    },
+    {
+      title: "Evidence Ledger",
+      url: "/founder-dashboard?tab=evidence",
+      icon: FileText,
+    },
+    {
+      title: "AI Insights",
+      url: "/founder-dashboard?tab=insights",
+      icon: Brain,
+    },
+  ],
+  validation: [
+    {
+      title: "Product-Customer Fit",
+      url: "/founder-dashboard?tab=evidence&filter=desirability",
+      icon: Users,
+      description: "Do customers want what we're building?",
+    },
+    {
+      title: "Product-Market Fit",
+      url: "/founder-dashboard?tab=evidence&filter=feasibility",
+      icon: Lightbulb,
+      description: "Can we build and reach the market?",
+    },
+    {
+      title: "Product-Model Fit",
+      url: "/founder-dashboard?tab=evidence&filter=viability",
+      icon: BarChart3,
+      description: "Can we sustain a profitable business?",
+    },
+  ],
+  
+  tools: [
+    {
+      title: "Export Evidence Pack",
+      url: "/export",
+      icon: Palette,
+    },
+  ],
+  settings: [
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings,
+    },
+  ],
+}
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  userType?: "consultant" | "founder"
+}
+
+export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProps) {
+  const navigationData = userType === "founder" ? founderNavigation : consultantNavigation
+  const platformLabel = userType === "founder" ? "Validation Framework" : "Platform"
+  const secondaryLabel = userType === "founder" ? "Fit Types" : "Canvas Generation"
+  
+  const secondaryItems = userType === "founder" 
+    ? (founderNavigation.validation || [])
+    : (consultantNavigation.canvasTypes || [])
+  
+  const toolsItems = userType === "founder" 
+    ? (founderNavigation.tools || [])
+    : []
+  
+  const settingsItems = userType === "founder"
+    ? (founderNavigation.settings || [])
+    : (consultantNavigation.settings || [])
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -97,8 +217,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Brain className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-semibold">Strategyzer AI</span>
-              <span className="text-xs text-muted-foreground">Consulting Platform</span>
+              <span className="text-base font-semibold">StartupAI</span>
+              <span className="text-xs text-muted-foreground">
+                {userType === "founder" ? "Founder Platform" : "Consulting Platform"}
+              </span>
             </div>
           </div>
         </Link>
@@ -107,7 +229,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationData.main.map((item) => (
@@ -124,12 +245,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Canvas Types */}
+
+        {/* Secondary Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Canvas Generation</SidebarGroupLabel>
+          <SidebarGroupLabel>{secondaryLabel}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationData.canvasTypes.map((item) => (
+              {secondaryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.description}>
                     <a href={item.url}>
@@ -143,11 +265,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Tools (Founder only) */}
+        {userType === "founder" && toolsItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Tools</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {toolsItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         {/* Settings */}
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationData.settings.map((item) => (
+              {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>

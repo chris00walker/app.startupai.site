@@ -512,19 +512,8 @@ export default function ValuePropositionCanvas({
         </div>
       </div>
 
-      {/* Footer Attribution */}
-      <Separator className="my-8" />
-      <div className="flex justify-between items-center text-sm text-gray-600 print:text-xs">
-        <div>
-          <p>Turn ideas into revenue with</p>
-          <p>Strategyzer's innovation programs</p>
-        </div>
-        <div className="text-right">
-          <p>Copyright Strategyzer AG. The creators of Business Model Generation and Strategyzer.</p>
-          <p className="font-bold text-lg mt-1">Strategyzer</p>
-          <p>strategyzer.com/innovation</p>
-        </div>
-      </div>
+      {/* Footer Spacing */}
+      <div className="h-16"></div>
     </div>
   )
 }
