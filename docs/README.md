@@ -1,4 +1,4 @@
-# CWC Agentic Platform Documentation
+# app.startupai.site Documentation
 
 **Status:** REFERENCES SHARED DOCS  
 **Date:** September 25, 2025  
@@ -7,10 +7,10 @@
 
 ## Two-Site Architecture
 
-This repository (`cwc-agentic-platform`) is the **Product Platform** in StartupAI's two-site architecture:
+This repository (`app.startupai.site`) is the **Product Platform** in StartupAI's two-site architecture:
 
 - **startupai.site** (The Promise) - Convert Prospects to customers
-- **cwc-agentic-platform** (The Product) - Deliver value and create advocates ← **YOU ARE HERE**
+- **app.startupai.site** (The Product) - Deliver value and create advocates ← **YOU ARE HERE**
 
 ---
 
@@ -23,17 +23,17 @@ All **shared documentation** lives in the StartupAI repository:
 ### Quick Navigation for Product Platform Development:
 
 #### Core Requirements
-- **MVP Specification:** [Two-Site Architecture](../startupai.site/docs/product/mvp-specification.md#02-product-platform-cwc-agentic-platform---the-product)
+- **MVP Specification:** [Two-Site Architecture](../startupai.site/docs/product/mvp-specification.md#02-product-platform-appstartupaisite-the-product)
 - **User Stories:** [Product Platform Stories](../startupai.site/docs/product/user-stories.md)
-- **UX Design:** [Product Platform UX](../startupai.site/docs/design/user-experience.md#phase-2-onboarding--first-value-cwc-agentic-platform---10-20-minutes)
+- **UX Design:** [Product Platform UX](../startupai.site/docs/design/user-experience.md#phase-2-onboarding-first-value-appstartupaisite-10-20-minutes)
 
 #### Technical Implementation
-- **System Architecture:** [Product Platform Architecture](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-cwc-agentic-platform-the-product)
-- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-cwc-agentic-platform)
+- **System Architecture:** [Product Platform Architecture](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-appstartupaisite-the-product)
+- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
 - **Authentication:** [Token Validation](../startupai.site/docs/technical/two-site-implementation-plan.md#41-authentication-receiver--user-onboarding)
 
 #### Cross-Site Integration
-- **Handoff Process:** [Secure Token Validation](../startupai.site/docs/product/user-stories.md#story-02-token-validation--session-creation-cwc-agentic-platform)
+- **Handoff Process:** [Secure Token Validation](../startupai.site/docs/product/user-stories.md#story-02-token-validation-session-creation-appstartupaisite)
 - **Shared Services:** [Supabase Integration](../startupai.site/docs/technical/high_level_architectural_spec.md#34-shared-infrastructure--services)
 
 ---
@@ -41,8 +41,8 @@ All **shared documentation** lives in the StartupAI repository:
 ## Development Quick Start
 
 ### For Product Platform Development:
-1. **Read:** [MVP Spec - Product Platform Section](../startupai.site/docs/product/mvp-specification.md#02-product-platform-cwc-agentic-platform---the-product)
-2. **Implement:** [Implementation Plan - Phase 3](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-cwc-agentic-platform)
+1. **Read:** [MVP Spec - Product Platform Section](../startupai.site/docs/product/mvp-specification.md#02-product-platform-appstartupaisite-the-product)
+2. **Implement:** [Implementation Plan - Phase 3](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
 3. **Test:** [User Stories - Product Platform](../startupai.site/docs/product/user-stories.md)
 
 ### Key Features to Implement:
@@ -72,9 +72,9 @@ The following documents in this repository are **archived** and kept for histori
 
 ## Development Workflow
 
-**For cwc-agentic-platform development:**
+**For app.startupai.site development:**
 1. **Reference:** `/home/chris/startupai.site/docs/` for all specifications
-2. **Implement:** Code in `/home/chris/cwc-agentic-platform/`
+2. **Implement:** Code in `/home/chris/app.startupai.site/`
 3. **Focus:** Product platform features (authentication receiver, core platform, AI workflows)
 4. **Integration:** Secure handoff from startupai.site
 

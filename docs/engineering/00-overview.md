@@ -6,10 +6,10 @@
 
 ## 🏗️ Platform Context
 
-This repository implements the **Product Platform** (`cwc-agentic-platform`) in StartupAI's two-site architecture:
+This repository implements the **Product Platform** (`app.startupai.site`) in StartupAI's two-site architecture:
 
 - **🎯 startupai.site** (Marketing) - Convert prospects to customers
-- **⚡ cwc-agentic-platform** (Product) - Deliver value and create advocates ← **THIS REPO**
+- **⚡ app.startupai.site** (Product) - Deliver value and create advocates ← **THIS REPO**
 
 ## 📋 Shared Documentation
 

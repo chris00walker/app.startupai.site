@@ -1,13 +1,13 @@
-# CWC Agentic Platform
+# app.startupai.site
 
 **Product Platform in StartupAI's Two-Site Architecture**
 
 ## 🏗️ Architecture Overview
 
-This repository implements the **Product Platform** (`cwc-agentic-platform`) in StartupAI's two-site architecture:
+This repository implements the **Product Platform** (`app.startupai.site`) in StartupAI's two-site architecture:
 
 - **🎯 startupai.site** (The Promise) - Convert prospects to customers
-- **⚡ cwc-agentic-platform** (The Product) - Deliver value and create advocates ← **THIS REPO**
+- **⚡ app.startupai.site** (The Product) - Deliver value and create advocates ← **THIS REPO**
 
 ## 🚀 What This Platform Does
 
@@ -44,7 +44,7 @@ npm run dev
 
 ## 📋 Documentation
 
-**All shared documentation lives in the StartupAI repository:**
+**All shared documentation lives in the marketing repository:**
 👉 **[/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)**
 
 **Quick Links for Development:**
@@ -125,13 +125,13 @@ cd ../startupai.site && npm run dev  # http://localhost:3001
 ## 📁 Repository Structure
 
 ```
-cwc-agentic-platform/
+app.startupai.site/
 ├── frontend/              # Next.js 14 Product Platform
 ├── docs/                  # Platform-specific documentation
-├── tests/                 # Integration tests
-├── scripts/               # Build and deployment scripts
-├── features/              # BDD testing scenarios
-└── REPOSITORY_CLEANUP_PLAN.md  # Cleanup documentation
+├── .windsurf/             # Project-specific Windsurf configuration
+├── package.json           # Root scripts and metadata
+├── package-lock.json      # Locked dependencies
+└── README.md              # This documentation
 ```
 
 **Key Directories:**
