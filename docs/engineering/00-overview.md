@@ -1,16 +1,47 @@
-# Engineering Plan Set Overview
+# CWC Agentic Platform Engineering Overview
 <!-- markdownlint-disable MD013 -->
 
-> Mode: Design-Build · Runtime: Node.js 20.x LTS · Cloud: GCP · DB: Cloud SQL Postgres + pgvector · Secrets: Secret Manager
+> **Product Platform** in StartupAI Two-Site Architecture  
+> Runtime: Next.js 14 · Database: Supabase PostgreSQL · AI: CrewAI + Vercel AI SDK · Deploy: Vercel
 
-This plan set operationalizes the approved ML/AI-first architecture documented in [docs/architecture/01-brief.md](../architecture/01-brief.md) and [docs/engineering/20-system/technical-architecture.md](20-system/technical-architecture.md).
+## 🏗️ Platform Context
 
-- System: Cloud Run microservices (Renderer, Orchestrator, Policy Router, Evaluators) with shared libraries and clear module boundaries.
-- Data: Postgres (Cloud SQL) with `pgvector` for embeddings; Prisma ORM ≥ 5.x.
-- Interfaces: OpenAPI Gateway `docs/architecture/20-contracts/openapi-gateway.yaml` (canonical).
-- Security: Least privilege, non-root containers, read-only FS, dropped capabilities, HTTPS-only, SBOM.
-- Observability: OTel traces/metrics/logs, Prometheus metrics endpoint, correlation IDs.
-- SLOs: API p95 ≤ 3s; DB avg < 100ms; render p95 ≤ 8s; end-to-end canvas ≤ 30s.
-- Determinism: Linting for Markdown and OpenAPI; diagram compilation in CI; prompt structure validation.
+This repository implements the **Product Platform** (`cwc-agentic-platform`) in StartupAI's two-site architecture:
 
-See subfolders for requirements, system design, data, API, testing, CI/CD, deployment, operations, and governance.
+- **🎯 startupai.site** (Marketing) - Convert prospects to customers
+- **⚡ cwc-agentic-platform** (Product) - Deliver value and create advocates ← **THIS REPO**
+
+## 📋 Shared Documentation
+
+**All business requirements, architecture, and user stories are maintained in:**
+👉 **[/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)**
+
+**Key References for Platform Development:**
+- **System Architecture:** [High-Level Architecture Spec](../../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-cwc-agentic-platform-the-product)
+- **Implementation Plan:** [Phases 3-5](../../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-cwc-agentic-platform)
+- **User Requirements:** [User Stories](../../startupai.site/docs/product/user-stories.md)
+
+## 🛠️ Platform-Specific Implementation
+
+**Core Technologies:**
+- **Frontend:** Next.js 14 with TypeScript, Tailwind CSS
+- **Backend:** Netlify Functions (Python) for CrewAI workflows
+- **Database:** Supabase PostgreSQL with Row Level Security
+- **AI:** CrewAI multi-agent system + Vercel AI SDK
+- **Authentication:** JWT token validation from startupai.site
+- **Deployment:** Vercel with serverless functions
+
+**Key Features to Implement:**
+- JWT token validation endpoint (`/api/auth/handoff`)
+- User onboarding and project creation
+- Evidence collection and hypothesis management
+- AI-powered report generation via CrewAI
+- Cross-site analytics and user tracking
+
+**Performance Targets:**
+- Token validation: <2 seconds
+- AI report generation: <30 seconds
+- Page load times: <3 seconds
+- Cross-site handoff: <3 seconds total
+
+See subfolders for data models, API specifications, testing, CI/CD, deployment, and operations.

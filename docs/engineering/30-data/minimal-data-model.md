@@ -1,24 +1,47 @@
-# Minimal Data Model Additions (Postgres)
+# CWC Agentic Platform Data Models (Supabase)
 
-Tables to support orchestration, evaluations, and learning loops.
+Platform-specific tables for cwc-agentic-platform functionality. 
 
-## events
+**Note:** Core user authentication and profiles are managed in shared Supabase instance.
+**Reference:** [Shared Database Schema](../../../startupai.site/docs/technical/two-site-implementation-plan.md#database-schema)
 
-- `id`, `workflow_id`, `agent`, `type`, `payload_jsonb`, `created_at`
-- Immutable event log
+## Platform-Specific Tables
 
-## feedback
+### projects
+- `id`, `user_id`, `name`, `description`, `customer_segment`, `status`, `created_at`, `updated_at`
+- User projects and business validation initiatives
 
-- `id`, `artefact_id`, `signal`, `edit_distance`, `time_to_accept`, `user_id`, `created_at`
+### hypotheses
+- `id`, `project_id`, `statement`, `category` (desirability/feasibility/viability), `confidence_score`, `status`, `created_at`
+- Business assumptions and hypotheses to validate
 
-## evaluations
+### evidence
+- `id`, `project_id`, `hypothesis_id`, `type`, `source_url`, `content`, `confidence_score`, `created_at`
+- Evidence collected to support or refute hypotheses
 
-- `id`, `artefact_id`, `quality`, `safety`, `completeness`, `latency_ms`, `cost_usd`, `created_at`
+### experiments
+- `id`, `project_id`, `hypothesis_id`, `name`, `description`, `status`, `results`, `created_at`
+- Validation experiments and their outcomes
 
-## router_decisions
+### ai_workflows
+- `id`, `project_id`, `workflow_type`, `input_data`, `output_data`, `status`, `crew_run_id`, `created_at`
+- CrewAI workflow executions and results
 
-- `id`, `request_id`, `features_jsonb`, `choice`, `reward`, `created_at`
+### reports
+- `id`, `project_id`, `type`, `content`, `generated_at`, `shared_token`
+- AI-generated reports and business model canvases
 
-Related:
+## Cross-Site Integration Tables
 
-- Data Architecture: `docs/architecture/data.md`
+### handoff_tokens
+- `id`, `user_id`, `token_hash`, `expires_at`, `used_at`, `created_at`
+- Track authentication handoff tokens from startupai.site
+
+### analytics_events
+- `id`, `user_id`, `event_type`, `site`, `properties`, `created_at`
+- Cross-site user behavior tracking
+
+## Related Documentation
+
+- **Shared Authentication Schema:** [Implementation Plan - Phase 1](../../../startupai.site/docs/technical/two-site-implementation-plan.md#21-supabase-setup--configuration)
+- **Cross-Site Integration:** [MVP Spec - Integration Requirements](../../../startupai.site/docs/product/mvp-specification.md#03-cross-site-integration-requirements)

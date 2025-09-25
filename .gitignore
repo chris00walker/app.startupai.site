@@ -31,36 +31,27 @@ docker-compose.override.yml
 # System files
 Thumbs.db
 
-# Backend specific
-backend.log
-
-# Frontend specific
+# Next.js specific
 .swc/
+*.tsbuildinfo
 
 # Testing
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
 
-# Database
-*.db
-*.sqlite
+# Supabase
+.supabase/
 
-# Milvus
-milvus_data/
-etcd_data/
-minio_data/
+# Vercel
+.vercel/
 
-# Prometheus
-prometheus_data/
-
-# GCP Deployment Guide (contains sensitive information)
-GCP_DEPLOYMENT_GUIDE.md
-
-# Connection directory (contains sensitive information)
-connection/
-
-# Google Cloud SDK
-google-cloud-sdk/
+# CrewAI / Python
+__pycache__/
+*.pyc
+.venv/
+venv/
 
 # Recursive ignores for nested packages/workspaces
 **/node_modules/

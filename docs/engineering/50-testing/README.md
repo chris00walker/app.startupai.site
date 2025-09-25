@@ -1,15 +1,30 @@
-# Testing Strategy (TDD outside-in)
+# CWC Agentic Platform Testing Strategy
 
-This repo practices BDD for intent and TDD for implementation. BDD features live in `features/` and run via Cucumber (see `docs/architecture/40-quality/bdd.md`). TDD is executed outside-in starting from ports/contracts and driving domain code to green.
+**Context:** Product platform testing with cross-site integration focus  
+**Reference:** [Implementation Plan - Testing Strategy](../../../startupai.site/docs/technical/two-site-implementation-plan.md#72-testing-strategy)
 
-## Suite types
+This platform uses comprehensive testing to ensure reliable cross-site authentication, AI workflows, and user experience.
 
-- **Contract (ports/APIs)**: Tests on hexagonal ports and OpenAPI contracts. No external I/O beyond agreed boundaries.
-- **Unit (domain logic)**: Pure functions/classes; no network, no filesystem.
-- **Integration (adapters/DB)**: Real adapter + seeded Postgres via Prisma; minimal surface area.
-- **E2E (thin slice)**: User journeys mapped from BDD scenarios; smoke + golden tasks.
-- **Performance/Resilience**: Load (p95 latency), retry/idempotency, back-pressure; chaos where safe.
-- **Mutation**: Mutation score to ensure test effectiveness.
+## Testing Priorities for Product Platform
+
+### Cross-Site Integration Tests
+- **JWT Token Validation**: Test `/api/auth/handoff` with valid/invalid/expired tokens
+- **User Session Creation**: Verify user account creation from token data
+- **Handoff Error Recovery**: Test fallback mechanisms for failed authentication
+- **Analytics Tracking**: Verify cross-site event tracking works correctly
+
+### Core Platform Features
+- **Project Management**: CRUD operations for user projects
+- **Hypothesis Management**: Create, update, link hypotheses to evidence
+- **Evidence Collection**: File upload, URL parsing, manual entry
+- **AI Workflows**: CrewAI integration and response handling
+- **Report Generation**: AI-powered business model canvas creation
+
+### Performance & Reliability
+- **Token Validation**: <2 seconds response time
+- **AI Generation**: <30 seconds for report creation
+- **Database Operations**: <100ms average query time
+- **Cross-Site Handoff**: <3 seconds total user experience
 
 ## Outside-in TDD flow
 

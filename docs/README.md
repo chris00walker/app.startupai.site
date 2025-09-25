@@ -1,75 +1,89 @@
-# Strategyzer AI – Start Here
+# CWC Agentic Platform Documentation
 
-Welcome. This doc set is organized for fast onboarding.
-
-## Executive Summary
-
-Build a comprehensive digital platform that implements the complete Strategyzer innovation methodology, covering the full cycle from understanding customer needs through business model design to rigorous testing and validation.
-
-**Target Users:** Entrepreneurs, business strategists, innovation teams, product managers, and startup founders
-
-**Core Value Proposition:** A unified platform that guides users through the proven Strategyzer process of creating, designing, and validating business ideas with systematic experimentation.
+**Status:** REFERENCES SHARED DOCS  
+**Date:** September 25, 2025  
 
 ---
-## Consolidated Requirements Index
 
-### Product Methodology
+## Two-Site Architecture
 
-- Value Proposition Design: [product/value_proposition_design.md](product/value_proposition_design.md)
-- Business Model Generation: [product/business_model_generation.md](product/business_model_generation.md)
-- Testing Business Ideas: [product/testing_business_ideas.md](product/testing_business_ideas.md)
-- Success Criteria & KPIs: [product/success_criteria.md](product/success_criteria.md)
-- Development Phases (Roadmap): [product/development_phases.md](product/development_phases.md)
+This repository (`cwc-agentic-platform`) is the **Product Platform** in StartupAI's two-site architecture:
 
-### Engineering & Architecture
-
-- Functional Requirements: [engineering/10-requirements/functional.md](engineering/10-requirements/functional.md)
-- Technical Architecture: [engineering/20-system/technical-architecture.md](engineering/20-system/technical-architecture.md)
-- Non-Functional Requirements: [engineering/10-requirements/non-functionals.md](engineering/10-requirements/non-functionals.md)
-- Security Posture: [engineering/10-requirements/security-posture.md](engineering/10-requirements/security-posture.md)
-- Observability & Operations: [architecture/40-quality/observability.md](architecture/40-quality/observability.md)
-- TDD/BDD on GCP: [architecture/40-quality/tdd-bdd.md](architecture/40-quality/tdd-bdd.md)
-- SLOs & Budgets: [engineering/10-requirements/slos-and-budgets.md](engineering/10-requirements/slos-and-budgets.md)
-- MLOps on Vertex AI: [architecture/60-implementation/mlops-vertex-ai.md](architecture/60-implementation/mlops-vertex-ai.md)
-- Renderer Stability Playbook: [architecture/60-implementation/renderer-stability-playbook.md](architecture/60-implementation/renderer-stability-playbook.md)
-- Minimal Data Model Additions: [engineering/30-data/minimal-data-model.md](engineering/30-data/minimal-data-model.md)
-
-### Experiments & Evaluation
-
-- Experiments Catalog: [experiments/catalog.md](experiments/catalog.md)
-- Evaluation Rubrics: [evaluation/rubrics.md](evaluation/rubrics.md)
-
-### Diagrams
-
-- Architecture viewer: [architecture/diagrams/viewer.html](architecture/diagrams/viewer.html)
+- **startupai.site** (The Promise) - Convert Prospects to customers
+- **cwc-agentic-platform** (The Product) - Deliver value and create advocates ← **YOU ARE HERE**
 
 ---
-This document has been consolidated into focused, canonical references. Use the index above as the entry point; detailed requirements now live in the linked documents to avoid duplication and ease maintenance.
 
-## Deep dives
+## Documentation Location
 
-- Policy DSL & presets: [policy/dsl.md](policy/dsl.md)
-- Evaluation rubrics: [evaluation/rubrics.md](evaluation/rubrics.md)
-- Experiment catalog: [experiments/catalog.md](experiments/catalog.md)
-- Data architecture: [architecture/data.md](architecture/data.md)
-- Integrations: [integrations/overview.md](integrations/overview.md)
-- Comprehensive Strategyzer Platform Requirements
+All **shared documentation** lives in the StartupAI repository:
 
-## Client deliverables
+**[/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)**
 
-- Decision pack template: [product/decision_pack.md](product/decision_pack.md)
+### Quick Navigation for Product Platform Development:
 
-## Engineering references
+#### Core Requirements
+- **MVP Specification:** [Two-Site Architecture](../startupai.site/docs/product/mvp-specification.md#02-product-platform-cwc-agentic-platform---the-product)
+- **User Stories:** [Product Platform Stories](../startupai.site/docs/product/user-stories.md)
+- **UX Design:** [Product Platform UX](../startupai.site/docs/design/user-experience.md#phase-2-onboarding--first-value-cwc-agentic-platform---10-20-minutes)
 
-- Build plan: [engineering/build_plan.md](engineering/build_plan.md)
-- Docker deployment: [engineering/deployment/docker.md](engineering/deployment/docker.md)
-- Release notes v1.4.0: [engineering/releases/v1.4.0.md](engineering/releases/v1.4.0.md)
+#### Technical Implementation
+- **System Architecture:** [Product Platform Architecture](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-cwc-agentic-platform-the-product)
+- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-cwc-agentic-platform)
+- **Authentication:** [Token Validation](../startupai.site/docs/technical/two-site-implementation-plan.md#41-authentication-receiver--user-onboarding)
 
-## Read me first
+#### Cross-Site Integration
+- **Handoff Process:** [Secure Token Validation](../startupai.site/docs/product/user-stories.md#story-02-token-validation--session-creation-cwc-agentic-platform)
+- **Shared Services:** [Supabase Integration](../startupai.site/docs/technical/high_level_architectural_spec.md#34-shared-infrastructure--services)
 
-- Product requirements: [product/requirements.md](product/requirements.md)
-- Architecture overview: [architecture/01-brief.md](architecture/01-brief.md)
-- Engineering guide: [engineering/implementation.md](engineering/implementation.md)
-- Operations (SLOs, alerts): [operations/operations.md](operations/operations.md)
-- Diagram viewer: [architecture/diagrams/viewer.html](architecture/diagrams/viewer.html)
-- Prompt packs (AI-executable): [prompts/index.md](prompts/index.md)
+---
+
+## Development Quick Start
+
+### For Product Platform Development:
+1. **Read:** [MVP Spec - Product Platform Section](../startupai.site/docs/product/mvp-specification.md#02-product-platform-cwc-agentic-platform---the-product)
+2. **Implement:** [Implementation Plan - Phase 3](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-cwc-agentic-platform)
+3. **Test:** [User Stories - Product Platform](../startupai.site/docs/product/user-stories.md)
+
+### Key Features to Implement:
+- [ ] JWT token validation endpoint (`/api/auth/handoff`)
+- [ ] User onboarding flow
+- [ ] Project creation wizard
+- [ ] Evidence collection system
+- [ ] AI-powered report generation
+- [ ] CrewAI integration
+
+---
+
+## Local Documentation (Archived)
+
+The following documents in this repository are **archived** and kept for historical reference only:
+
+{{ ... }}
+
+### Migration Summary:
+- All requirements moved to shared StartupAI docs
+- Two-site architecture documented
+- Cross-site authentication specified
+- Product platform requirements detailed
+- Implementation roadmap created
+
+---
+
+## Development Workflow
+
+**For cwc-agentic-platform development:**
+1. **Reference:** `/home/chris/startupai.site/docs/` for all specifications
+2. **Implement:** Code in `/home/chris/cwc-agentic-platform/`
+3. **Focus:** Product platform features (authentication receiver, core platform, AI workflows)
+4. **Integration:** Secure handoff from startupai.site
+
+**For cross-site features:**
+- Authentication handoff testing
+- Shared Supabase integration
+- Cross-site analytics implementation
+
+---
+
+**Last Updated:** September 25, 2025  
+**Architecture:** Two-Site Marketing → Product Flow
