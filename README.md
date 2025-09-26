@@ -32,6 +32,7 @@ This repository implements the **Product Platform** (`app.startupai.site`) in St
 
 ### Development Setup
 ```bash
+nvm use
 pnpm install
 pnpm dev
 ```
@@ -39,6 +40,10 @@ pnpm dev
 **Local Access:**
 - **Development:** http://localhost:3000
 - **Authentication Test:** Redirected from startupai.site (localhost:3001)
+
+**Runtime Requirements:**
+- Node.js 22.18.0 (`nvm use` will load the version specified in `.nvmrc`)
+- pnpm (install via `corepack enable pnpm`)
 
 **Production Access:**
 - **Staging:** https://app-startupai-site.vercel.app
