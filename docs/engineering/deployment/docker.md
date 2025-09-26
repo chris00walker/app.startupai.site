@@ -14,10 +14,10 @@ This guide covers the Docker-based deployment strategy for the Strategyzer AI Pl
 # Builder stage - Install dependencies and build
 FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production --legacy-peer-deps
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable pnpm && pnpm install --frozen-lockfile --prod
 COPY . .
-RUN npm run build || true
+RUN corepack enable pnpm && pnpm run build || true
 
 # Production stage - Optimized runtime
 FROM node:22-alpine AS production
@@ -250,7 +250,7 @@ docker-compose up -d --build
    - Minimal attack surface
 
 2. **Dependency Management**
-   - Use `npm ci` for reproducible builds
+   - Use `pnpm install --frozen-lockfile` for reproducible builds
    - Regular dependency updates
    - Security vulnerability scanning
 

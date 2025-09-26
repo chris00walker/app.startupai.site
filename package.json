@@ -3,16 +3,17 @@
   "version": "2.0.0",
   "description": "Product Platform for StartupAI Two-Site Architecture",
   "private": true,
+  "packageManager": "pnpm@9.12.1",
   "scripts": {
-    "dev": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build",
-    "start": "cd frontend && npm start",
-    "test": "cd frontend && npm test",
-    "test:e2e": "cd frontend && npm run test:e2e",
-    "lint": "cd frontend && npm run lint",
+    "dev": "pnpm --filter frontend run dev",
+    "build": "pnpm --filter frontend run build",
+    "start": "pnpm --filter frontend run start",
+    "test": "pnpm --filter frontend run test",
+    "test:e2e": "pnpm --filter frontend run test:e2e",
+    "lint": "pnpm --filter frontend run lint",
     "lint:md": "markdownlint docs",
     "lint:md:fix": "markdownlint docs --fix",
-    "docs:validate": "npm run lint:md"
+    "docs:validate": "pnpm run lint:md"
   },
   "keywords": [
     "nextjs",

@@ -29,92 +29,34 @@ This repository implements the **Product Platform** (`app.startupai.site`) in St
 - **Authentication:** JWT token validation from startupai.site
 - **Deployment:** Vercel
 
-## 🚀 Quick Start
 
 ### Development Setup
 ```bash
-cd frontend/
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 **Local Access:**
 - **Development:** http://localhost:3000
 - **Authentication Test:** Redirected from startupai.site (localhost:3001)
-
-## 📋 Documentation
-
-**All shared documentation lives in the marketing repository:**
-👉 **[/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)**
-
-**Quick Links for Development:**
-- **System Architecture:** [High-Level Architecture Spec](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-appstartupaisite-the-product)
-- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
-- **User Stories:** [Product Platform Stories](../startupai.site/docs/product/user-stories.md)
-- **Local Documentation:** [docs/README.md](docs/README.md)
-
-## 🔧 Key Features to Implement
-
-- **JWT Token Validation** - `/api/auth/handoff` endpoint
-- **User Onboarding** - Guided project creation flow
-- **Evidence Collection** - URL parsing, file upload, manual entry
-- **AI Report Generation** - CrewAI-powered business model canvases
-- **Cross-Site Analytics** - User behavior tracking and conversion metrics
-- **Professional UI**: ShadCN components with modern interface
-
-## 🔗 Cross-Site Integration
-
-This platform receives authenticated users from **startupai.site** via secure JWT token handoff:
-
-1. User completes signup/payment on startupai.site
-2. startupai.site generates JWT token with user data
-3. User redirected to app.startupai.site with token
-4. Platform validates token and creates user session
-5. User begins onboarding and project creation
-
-## 🚀 Development Workflow
-
-1. **Reference shared docs** for requirements and architecture
-2. **Implement in `/frontend/`** - This is the product platform
-3. **Test cross-site integration** with startupai.site
-4. **Deploy to Vercel** when ready
-
----
-
-**Repository Structure:** Clean and focused on product platform implementation  
-**Documentation:** Comprehensive cross-references to shared specifications  
-**Architecture:** Two-site system optimized for conversion and retention
-
-## 💻 Development
-
-### Prerequisites
-- Node.js 18+
-- Supabase account (shared with startupai.site)
-- OpenAI API key (for CrewAI workflows)
-
+{{ ... }}
 ### Environment Setup
 ```bash
-# 1. Navigate to frontend (the product platform)
-cd frontend/
+# 1. Configure environment variables
+cp frontend/.env.example frontend/.env.local
+# Update Supabase URLs, JWT secrets, and OpenAI keys
 
-# 2. Install dependencies
-npm install
-
-# 3. Configure environment variables
-cp .env.example .env.local
-# Add Supabase URLs, JWT secrets, OpenAI keys
-
-# 4. Start development server
-npm run dev
+# 2. Start development server
+pnpm dev
 ```
 
 ### Testing Cross-Site Integration
 ```bash
-# 1. Start app.startupai.site (this repo)
-cd frontend/ && npm run dev  # http://localhost:3000
+# 1. Start app.startupai.site (product platform)
+pnpm dev  # http://localhost:3000
 
-# 2. Start startupai.site (marketing site)
-cd ../startupai.site && npm run dev  # http://localhost:3001
+# 2. In another terminal, start startupai.site (marketing site)
+pnpm --dir ../startupai.site dev  # http://localhost:3001
 
 # 3. Test authentication handoff
 # - Visit http://localhost:3001
@@ -130,7 +72,7 @@ app.startupai.site/
 ├── docs/                  # Platform-specific documentation
 ├── .windsurf/             # Project-specific Windsurf configuration
 ├── package.json           # Root scripts and metadata
-├── package-lock.json      # Locked dependencies
+├── pnpm-lock.yaml         # Locked dependencies
 └── README.md              # This documentation
 ```
 

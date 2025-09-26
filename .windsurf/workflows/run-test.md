@@ -8,7 +8,7 @@ Run all local validations and tests in a consistent, idempotent sequence.
 
 ## Preconditions
 - Node.js 20 installed
-- Internet access for npm install (first run)
+- Internet access for pnpm install (first run)
 - Project root contains scripts: `docs:validate`, `test`, `bdd`
 
 ## What this workflow does
@@ -23,4 +23,5 @@ Run all local validations and tests in a consistent, idempotent sequence.
 1) Install dependencies
 - Use the terminal to run:
 ```bash
-npm ci
+pnpm install
+```
