@@ -38,7 +38,10 @@ interface Task {
 export const KanbanBoard: React.FC<{ clientId: string }> = ({ clientId }) => {
   const { data: tasks = [], isLoading, error } = useQuery<Task[]>({
     queryKey: ['tasks', clientId],
-    queryFn: () => api.get(`/clients/${clientId}/tasks`).then(res => res.data.tasks),
+    queryFn: async () => {
+      const response = await api.get(`/clients/${clientId}/tasks`);
+      return response?.data?.tasks ?? [];
+    },
     retry: false,
     refetchOnWindowFocus: false,
   });

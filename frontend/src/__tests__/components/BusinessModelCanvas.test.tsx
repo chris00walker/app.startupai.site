@@ -96,7 +96,9 @@ describe('BusinessModelCanvas', () => {
         />
       )
 
-      await user.click(screen.getByLabelText('Remove item'))
+      await user.click(
+        screen.getByRole('button', { name: /remove.*pilot partner/i })
+      )
 
       await waitFor(() => {
         expect(screen.queryByText('Pilot partner')).not.toBeInTheDocument()
@@ -187,7 +189,7 @@ describe('BusinessModelCanvas', () => {
 
       expect(screen.getByText('Trusted partner')).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /add/i })).not.toBeInTheDocument()
-      expect(screen.queryByLabelText('Remove item')).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /remove/i })).not.toBeInTheDocument()
     })
   })
 })

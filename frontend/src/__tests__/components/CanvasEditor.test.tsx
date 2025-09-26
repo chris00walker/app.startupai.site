@@ -1,8 +1,61 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import CanvasEditor from '@/components/canvas/CanvasEditor'
+import api from '@/services/api'
+
+type MockedCanvasApi = jest.Mocked<typeof api.canvas>
+
+const mockedCanvasApi = api.canvas as MockedCanvasApi
+
+type CanvasEditorPropsType = Parameters<typeof CanvasEditor>[0]
+
+const mockCanvasResponse = {
+  canvas: { data: {} },
+  metadata: {
+    id: 'test-canvas-1',
+    name: 'Test Canvas',
+    type: 'value-proposition',
+    status: 'draft',
+    lastModified: new Date().toISOString(),
+    collaborators: [],
+    aiGenerated: false,
+    version: 1,
+  },
+}
+
+const defaultProps: CanvasEditorPropsType = {
+  canvasId: 'test-canvas-1',
+  canvasType: 'value-proposition',
+  clientId: 'test-client',
+  mode: 'edit',
+}
+
+const renderCanvasEditor = async (
+  props: Partial<CanvasEditorPropsType> = {},
+  { waitForLoad = true }: { waitForLoad?: boolean } = {}
+) => {
+  const utils = render(<CanvasEditor {...defaultProps} {...props} />)
+
+  if (waitForLoad) {
+    await waitForElementToBeRemoved(() => screen.getByText('Loading canvas...'))
+  }
+
+  return utils
+}
+
+const rerenderCanvasEditor = async (
+  renderResult: ReturnType<typeof render>,
+  props: Partial<CanvasEditorPropsType> = {},
+  { waitForLoad = true }: { waitForLoad?: boolean } = {}
+) => {
+  renderResult.rerender(<CanvasEditor {...defaultProps} {...props} />)
+
+  if (waitForLoad) {
+    await waitForElementToBeRemoved(() => screen.getByText('Loading canvas...'))
+  }
+}
 
 // Mock the canvas components
 jest.mock('@/components/canvas/ValuePropositionCanvas', () => {
@@ -49,110 +102,116 @@ jest.mock('@/components/canvas/TestingBusinessIdeasCanvas', () => {
 
 // Mock API service
 jest.mock('@/services/api', () => ({
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    canvas: {
+      getById: jest.fn(),
+      updateCanvas: jest.fn(),
+      generateValueProposition: jest.fn(),
+      exportCanvas: jest.fn(),
+    },
+  },
 }))
 
 describe('CanvasEditor', () => {
-  const defaultProps = {
-    canvasId: 'test-canvas-1',
-    canvasType: 'value-proposition' as const,
-    clientId: 'test-client',
-    mode: 'edit' as const,
-  }
-
   beforeEach(() => {
     jest.clearAllMocks()
+    mockedCanvasApi.getById.mockResolvedValue(mockCanvasResponse)
+    mockedCanvasApi.updateCanvas.mockResolvedValue({ success: true })
+    mockedCanvasApi.generateValueProposition.mockResolvedValue({ canvasId: 'generated-id' })
+    mockedCanvasApi.exportCanvas.mockResolvedValue(new Uint8Array())
   })
 
   describe('Component Rendering', () => {
-    test('renders canvas editor with header', () => {
-      render(<CanvasEditor {...defaultProps} />)
-      
+    test('renders canvas editor with header', async () => {
+      await renderCanvasEditor()
+
       // Should show canvas editor interface
       expect(screen.getByText('Value Proposition Canvas')).toBeInTheDocument()
     })
 
-    test('renders Value Proposition Canvas when type is value-proposition', () => {
-      render(<CanvasEditor {...defaultProps} canvasType="value-proposition" />)
-      
+    test('renders Value Proposition Canvas when type is value-proposition', async () => {
+      await renderCanvasEditor({ canvasType: 'value-proposition' })
+
       expect(screen.getByTestId('vpc-component')).toBeInTheDocument()
       expect(screen.getByText('Value Proposition Canvas')).toBeInTheDocument()
       expect(screen.getByText('Canvas ID: test-canvas-1')).toBeInTheDocument()
       expect(screen.getByText('Client ID: test-client')).toBeInTheDocument()
     })
 
-    test('renders Business Model Canvas when type is business-model', () => {
-      render(<CanvasEditor {...defaultProps} canvasType="business-model" />)
-      
+    test('renders Business Model Canvas when type is business-model', async () => {
+      await renderCanvasEditor({ canvasType: 'business-model' })
+
       expect(screen.getByTestId('bmc-component')).toBeInTheDocument()
       expect(screen.getByText('Business Model Canvas')).toBeInTheDocument()
       expect(screen.getByText('Canvas ID: test-canvas-1')).toBeInTheDocument()
       expect(screen.getByText('Client ID: test-client')).toBeInTheDocument()
     })
 
-    test('renders Testing Business Ideas Canvas when type is testing-business-ideas', () => {
-      render(<CanvasEditor {...defaultProps} canvasType="testing-business-ideas" />)
-      
+    test('renders Testing Business Ideas Canvas when type is testing-business-ideas', async () => {
+      await renderCanvasEditor({ canvasType: 'testing-business-ideas' })
+
       expect(screen.getByTestId('tbi-component')).toBeInTheDocument()
       expect(screen.getByText('Testing Business Ideas Canvas')).toBeInTheDocument()
       expect(screen.getByText('Canvas ID: test-canvas-1')).toBeInTheDocument()
       expect(screen.getByText('Client ID: test-client')).toBeInTheDocument()
     })
 
-    test('shows unsupported message for unknown canvas type', () => {
-      render(<CanvasEditor {...defaultProps} canvasType={'unknown' as any} />)
-      
+    test('shows unsupported message for unknown canvas type', async () => {
+      await renderCanvasEditor({ canvasType: 'unknown' as any })
+
       expect(screen.getByText('Canvas type not supported yet')).toBeInTheDocument()
     })
   })
 
   describe('Mode Handling', () => {
-    test('passes readOnly=false when mode is edit', () => {
-      render(<CanvasEditor {...defaultProps} mode="edit" />)
-      
+    test('passes readOnly=false when mode is edit', async () => {
+      await renderCanvasEditor({ mode: 'edit' })
+
       expect(screen.getByText('Read Only: false')).toBeInTheDocument()
     })
 
-    test('passes readOnly=true when mode is view', () => {
-      render(<CanvasEditor {...defaultProps} mode="view" />)
-      
+    test('passes readOnly=true when mode is view', async () => {
+      await renderCanvasEditor({ mode: 'view' })
+
       expect(screen.getByText('Read Only: true')).toBeInTheDocument()
     })
 
-    test('passes readOnly=false when mode is collaborate', () => {
-      render(<CanvasEditor {...defaultProps} mode="collaborate" />)
-      
+    test('passes readOnly=false when mode is collaborate', async () => {
+      await renderCanvasEditor({ mode: 'collaborate' })
+
       expect(screen.getByText('Read Only: false')).toBeInTheDocument()
     })
 
-    test('defaults to edit mode when no mode specified', () => {
-      const { mode, ...propsWithoutMode } = defaultProps
-      render(<CanvasEditor {...propsWithoutMode} />)
-      
+    test('defaults to edit mode when no mode specified', async () => {
+      const { mode: _mode, ...propsWithoutMode } = defaultProps
+      await renderCanvasEditor(propsWithoutMode)
+
       expect(screen.getByText('Read Only: false')).toBeInTheDocument()
     })
   })
 
   describe('Canvas Type Names', () => {
-    test('returns correct name for value-proposition', () => {
-      render(<CanvasEditor {...defaultProps} canvasType="value-proposition" />)
-      
+    test('returns correct name for value-proposition', async () => {
+      await renderCanvasEditor({ canvasType: 'value-proposition' })
+
       // The component should internally handle the type name correctly
       expect(screen.getByTestId('vpc-component')).toBeInTheDocument()
     })
 
-    test('returns correct name for business-model', () => {
-      render(<CanvasEditor {...defaultProps} canvasType="business-model" />)
-      
+    test('returns correct name for business-model', async () => {
+      await renderCanvasEditor({ canvasType: 'business-model' })
+
       expect(screen.getByTestId('bmc-component')).toBeInTheDocument()
     })
 
-    test('returns correct name for testing-business-ideas', () => {
-      render(<CanvasEditor {...defaultProps} canvasType="testing-business-ideas" />)
-      
+    test('returns correct name for testing-business-ideas', async () => {
+      await renderCanvasEditor({ canvasType: 'testing-business-ideas' })
+
       expect(screen.getByTestId('tbi-component')).toBeInTheDocument()
     })
   })
@@ -160,8 +219,8 @@ describe('CanvasEditor', () => {
   describe('Save Functionality', () => {
     test('handles save from Value Proposition Canvas', async () => {
       const user = userEvent.setup()
-      render(<CanvasEditor {...defaultProps} canvasType="value-proposition" />)
-      
+      await renderCanvasEditor({ canvasType: 'value-proposition' })
+
       const saveButton = screen.getByText('Save VPC')
       await user.click(saveButton)
       
@@ -171,7 +230,7 @@ describe('CanvasEditor', () => {
 
     test('handles save from Business Model Canvas', async () => {
       const user = userEvent.setup()
-      render(<CanvasEditor {...defaultProps} canvasType="business-model" />)
+      await renderCanvasEditor({ canvasType: 'business-model' })
       
       const saveButton = screen.getByText('Save BMC')
       await user.click(saveButton)
@@ -181,7 +240,7 @@ describe('CanvasEditor', () => {
 
     test('handles save from Testing Business Ideas Canvas', async () => {
       const user = userEvent.setup()
-      render(<CanvasEditor {...defaultProps} canvasType="testing-business-ideas" />)
+      await renderCanvasEditor({ canvasType: 'testing-business-ideas' })
       
       const saveButton = screen.getByText('Save TBI')
       await user.click(saveButton)
@@ -191,141 +250,140 @@ describe('CanvasEditor', () => {
   })
 
   describe('Props Passing', () => {
-    test('passes canvasId correctly to child components', () => {
-      render(<CanvasEditor {...defaultProps} canvasId="custom-canvas-id" />)
-      
+    test('passes canvasId correctly to child components', async () => {
+      await renderCanvasEditor({ canvasId: 'custom-canvas-id' })
+
       expect(screen.getByText('Canvas ID: custom-canvas-id')).toBeInTheDocument()
     })
 
-    test('passes clientId correctly to child components', () => {
-      render(<CanvasEditor {...defaultProps} clientId="custom-client-id" />)
-      
+    test('passes clientId correctly to child components', async () => {
+      await renderCanvasEditor({ clientId: 'custom-client-id' })
+
       expect(screen.getByText('Client ID: custom-client-id')).toBeInTheDocument()
     })
 
-    test('handles new canvas creation', () => {
-      render(<CanvasEditor {...defaultProps} canvasId="new" />)
-      
+    test('handles new canvas creation', async () => {
+      await renderCanvasEditor({ canvasId: 'new' })
+
       expect(screen.getByText('Canvas ID: new')).toBeInTheDocument()
     })
   })
 
   describe('Canvas Type Switching', () => {
-    test('switches between canvas types correctly', () => {
-      const { rerender } = render(<CanvasEditor {...defaultProps} canvasType="value-proposition" />)
-      
+    test('switches between canvas types correctly', async () => {
+      const renderResult = await renderCanvasEditor({ canvasType: 'value-proposition' })
+
       expect(screen.getByTestId('vpc-component')).toBeInTheDocument()
       expect(screen.queryByTestId('bmc-component')).not.toBeInTheDocument()
-      
-      rerender(<CanvasEditor {...defaultProps} canvasType="business-model" />)
-      
+
+      await rerenderCanvasEditor(renderResult, { canvasType: 'business-model' })
+
       expect(screen.queryByTestId('vpc-component')).not.toBeInTheDocument()
       expect(screen.getByTestId('bmc-component')).toBeInTheDocument()
-      
-      rerender(<CanvasEditor {...defaultProps} canvasType="testing-business-ideas" />)
-      
+
+      await rerenderCanvasEditor(renderResult, { canvasType: 'testing-business-ideas' })
+
       expect(screen.queryByTestId('bmc-component')).not.toBeInTheDocument()
       expect(screen.getByTestId('tbi-component')).toBeInTheDocument()
     })
   })
 
   describe('Error Handling', () => {
-    test('handles missing canvasId gracefully', () => {
-      const { canvasId, ...propsWithoutCanvasId } = defaultProps
-      render(<CanvasEditor {...propsWithoutCanvasId} />)
-      
+    test('handles missing canvasId gracefully', async () => {
+      const { canvasId: _canvasId, ...propsWithoutCanvasId } = defaultProps
+      await renderCanvasEditor(propsWithoutCanvasId)
+
       // Should still render without crashing
       expect(screen.getByTestId('vpc-component')).toBeInTheDocument()
     })
 
-    test('handles missing clientId gracefully', () => {
+    test('handles missing clientId gracefully', async () => {
       // Since clientId is required, we'll test with an empty string instead
-      const propsWithEmptyClientId = { ...defaultProps, clientId: '' }
-      render(<CanvasEditor {...propsWithEmptyClientId} />)
-      
+      await renderCanvasEditor({ clientId: '' }, { waitForLoad: false })
+
       // Should still render without crashing
       expect(screen.getByText('Loading canvas...')).toBeInTheDocument()
     })
   })
 
   describe('Integration', () => {
-    test('integrates with all three canvas types', () => {
+    test('integrates with all three canvas types', async () => {
       const canvasTypes: Array<'value-proposition' | 'business-model' | 'testing-business-ideas'> = [
         'value-proposition',
         'business-model', 
         'testing-business-ideas'
       ]
-      
-      canvasTypes.forEach(canvasType => {
-        const { unmount } = render(<CanvasEditor {...defaultProps} canvasType={canvasType} />)
-        
-        // Each canvas type should render without errors
-        const expectedTestId = canvasType === 'value-proposition' ? 'vpc-component' :
-                              canvasType === 'business-model' ? 'bmc-component' : 'tbi-component'
-        
+
+      for (const canvasType of canvasTypes) {
+        const utils = await renderCanvasEditor({ canvasType })
+
+        const expectedTestId = canvasType === 'value-proposition'
+          ? 'vpc-component'
+          : canvasType === 'business-model'
+            ? 'bmc-component'
+            : 'tbi-component'
+
         expect(screen.getByTestId(expectedTestId)).toBeInTheDocument()
-        
-        unmount()
-      })
+
+        utils.unmount()
+      }
     })
 
-    test('maintains consistent interface across canvas types', () => {
+    test('maintains consistent interface across canvas types', async () => {
       const canvasTypes: Array<'value-proposition' | 'business-model' | 'testing-business-ideas'> = [
         'value-proposition',
         'business-model', 
         'testing-business-ideas'
       ]
-      
-      canvasTypes.forEach(canvasType => {
-        const { unmount } = render(<CanvasEditor {...defaultProps} canvasType={canvasType} />)
-        
-        // All canvas types should receive the same props structure
+
+      for (const canvasType of canvasTypes) {
+        const utils = await renderCanvasEditor({ canvasType })
+
         expect(screen.getByText('Canvas ID: test-canvas-1')).toBeInTheDocument()
         expect(screen.getByText('Client ID: test-client')).toBeInTheDocument()
         expect(screen.getByText('Read Only: false')).toBeInTheDocument()
-        
-        unmount()
-      })
+
+        utils.unmount()
+      }
     })
   })
 
   describe('Performance', () => {
-    test('renders quickly with different canvas types', () => {
+    test('renders quickly with different canvas types', async () => {
       const canvasTypes: Array<'value-proposition' | 'business-model' | 'testing-business-ideas'> = [
         'value-proposition',
         'business-model', 
         'testing-business-ideas'
       ]
       
-      canvasTypes.forEach(canvasType => {
+      for (const canvasType of canvasTypes) {
         const startTime = performance.now()
-        const { unmount } = render(<CanvasEditor {...defaultProps} canvasType={canvasType} />)
+        const utils = await renderCanvasEditor({ canvasType })
         const endTime = performance.now()
-        
-        expect(endTime - startTime).toBeLessThan(100) // Should render very quickly
-        
-        unmount()
-      })
+
+        expect(endTime - startTime).toBeLessThan(100)
+
+        utils.unmount()
+      }
     })
   })
 
   describe('Accessibility', () => {
-    test('maintains accessibility across canvas types', () => {
+    test('maintains accessibility across canvas types', async () => {
       const canvasTypes: Array<'value-proposition' | 'business-model' | 'testing-business-ideas'> = [
         'value-proposition',
         'business-model', 
         'testing-business-ideas'
       ]
-      
-      canvasTypes.forEach(canvasType => {
-        const { unmount } = render(<CanvasEditor {...defaultProps} canvasType={canvasType} />)
-        
-        // Should have proper heading structure
+
+      for (const canvasType of canvasTypes) {
+        const utils = await renderCanvasEditor({ canvasType })
+
         const canvasHeading = screen.getByRole('heading', { level: 2 })
         expect(canvasHeading).toBeInTheDocument()
-        
-        unmount()
-      })
+
+        utils.unmount()
+      }
     })
   })
 })

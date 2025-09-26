@@ -84,38 +84,41 @@ describe('Client Dashboard Integration Tests', () => {
     ]
   };
 
+  const defaultApiGetResponse = (url: string) => {
+    if (url.includes('clients/') && url.includes('artefacts')) {
+      return Promise.resolve({ data: { artefacts: [] } });
+    }
+    if (url.includes('clients/') && url.includes('tasks')) {
+      return Promise.resolve({ data: { tasks: [] } });
+    }
+    if (url.includes('agents/status')) {
+      return Promise.resolve({ data: { agents: [] } });
+    }
+    if (url.includes('metrics/tasks')) {
+      return Promise.resolve({
+        data: {
+          counts: {
+            pending: 0,
+            in_progress: 0,
+            complete: 0,
+            exception: 0,
+          },
+        },
+      });
+    }
+    if (url.includes('clients/')) {
+      return Promise.resolve({ data: mockClientData });
+    }
+    return Promise.resolve({ data: {} });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedApi.get.mockImplementation(defaultApiGetResponse);
   });
 
   describe('Data Loading Integration', () => {
     it('should load and display client data from API', async () => {
-      mockedApi.get.mockImplementation((url) => {
-        if (url.includes('/clients/test-client-123')) {
-          return Promise.resolve({ data: mockClientData });
-        }
-        if (url.includes('/metrics')) {
-          return Promise.resolve({ data: mockMetrics });
-        }
-        if (url.includes('/tasks')) {
-          return Promise.resolve({ data: mockTasks });
-        }
-        if (url.includes('/artefacts')) {
-          return Promise.resolve({ data: { artefacts: [] } });
-        }
-        if (url.includes('/agents/status')) {
-          return Promise.resolve({ data: { agents: [] } });
-        }
-        // Default fallback with proper structure to prevent undefined data
-        if (url.includes('/clients/') && url.includes('/artefacts')) {
-          return Promise.resolve({ data: { artefacts: [] } });
-        }
-        if (url.includes('/clients/') && url.includes('/tasks')) {
-          return Promise.resolve({ data: mockTasks });
-        }
-        return Promise.resolve({ data: [] });
-      });
-
       renderWithProviders(<ClientPage />);
 
       // Wait for all queries to resolve and demo data to load
@@ -158,14 +161,19 @@ describe('Client Dashboard Integration Tests', () => {
   describe('Real-time Data Updates', () => {
     it('should refresh data when client status changes', async () => {
       let callCount = 0;
-      mockedApi.get.mockImplementation(() => {
-        callCount++;
-        return Promise.resolve({
-          data: {
-            ...mockClientData,
-            status: callCount === 1 ? 'active' : 'inactive'
-          }
-        });
+      mockedApi.get.mockImplementation((url) => {
+        if (url.includes('clients/test-client-123')) {
+          callCount++;
+          return Promise.resolve({
+            data: {
+              client: {
+                ...mockClientData.client,
+                status: callCount === 1 ? 'active' : 'inactive',
+              },
+            },
+          });
+        }
+        return defaultApiGetResponse(url);
       });
 
       renderWithProviders(<ClientPage />);
@@ -183,15 +191,27 @@ describe('Client Dashboard Integration Tests', () => {
   describe('Agent Status Integration', () => {
     it('should display agent statuses and handle agent interactions', async () => {
       const mockAgents = [
-        { id: 'agent-1', name: 'Research Agent', status: 'active', tasks: 3 },
-        { id: 'agent-2', name: 'Compliance Agent', status: 'idle', tasks: 1 }
+        {
+          id: 'agent-1',
+          name: 'DiscoveryAgent',
+          status: 'running',
+          tasks: 3,
+          lastUpdated: new Date().toISOString(),
+        },
+        {
+          id: 'agent-2',
+          name: 'ValidationAgent',
+          status: 'idle',
+          tasks: 1,
+          lastUpdated: new Date().toISOString(),
+        },
       ];
 
       mockedApi.get.mockImplementation((url) => {
-        if (url.includes('/agents')) {
-          return Promise.resolve({ data: mockAgents });
+        if (url.includes('agents')) {
+          return Promise.resolve({ data: { agents: mockAgents } });
         }
-        return Promise.resolve({ data: mockClientData });
+        return defaultApiGetResponse(url);
       });
 
       renderWithProviders(<ClientPage />);
@@ -209,10 +229,10 @@ describe('Client Dashboard Integration Tests', () => {
   describe('Kanban Board Integration', () => {
     it('should load and display tasks in kanban format', async () => {
       mockedApi.get.mockImplementation((url) => {
-        if (url.includes('/tasks')) {
+        if (url.includes('tasks')) {
           return Promise.resolve({ data: mockTasks });
         }
-        return Promise.resolve({ data: mockClientData });
+        return defaultApiGetResponse(url);
       });
 
       renderWithProviders(<ClientPage />);

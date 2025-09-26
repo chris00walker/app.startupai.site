@@ -30,7 +30,10 @@ interface AgentInfo {
 export const AgentStatus: React.FC = () => {
   const { data, isLoading, error, refetch } = useQuery<AgentInfo[]>({
     queryKey: ['agentsStatus'],
-    queryFn: () => api.get('/agents/status').then((res) => res.data.agents),
+    queryFn: async () => {
+      const response = await api.get('/agents/status');
+      return response?.data?.agents ?? [];
+    },
     refetchInterval: 5000,
     retry: false,
     refetchOnWindowFocus: false,

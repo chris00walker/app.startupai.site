@@ -39,7 +39,10 @@ pnpm dev
 **Local Access:**
 - **Development:** http://localhost:3000
 - **Authentication Test:** Redirected from startupai.site (localhost:3001)
-{{ ... }}
+
+**Production Access:**
+- **Staging:** https://app-startupai-site.vercel.app
+- **Production:** https://app.startupai.site
 ### Environment Setup
 ```bash
 # 1. Configure environment variables

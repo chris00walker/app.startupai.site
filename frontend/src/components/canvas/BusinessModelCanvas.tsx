@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Plus, Save, X, Sparkles, Building2, Users, DollarSign, Zap, Heart, Truck, UserCheck, Coins, Target } from 'lucide-react';
 
 interface BusinessModelCanvasProps {
@@ -28,15 +28,15 @@ interface BMCData {
 }
 
 const defaultBMC: BMCData = {
-  keyPartners: [""],
-  keyActivities: [""],
-  keyResources: [""],
-  valuePropositions: [""],
-  customerRelationships: [""],
-  channels: [""],
-  customerSegments: [""],
-  costStructure: [""],
-  revenueStreams: [""]
+  keyPartners: [],
+  keyActivities: [],
+  keyResources: [],
+  valuePropositions: [],
+  customerRelationships: [],
+  channels: [],
+  customerSegments: [],
+  costStructure: [],
+  revenueStreams: []
 };
 
 export default function BusinessModelCanvas({ 
@@ -56,15 +56,15 @@ export default function BusinessModelCanvas({
     if (initialData) {
       // Merge with default data to ensure all fields exist and are arrays
       const mergedData: BMCData = {
-        keyPartners: Array.isArray(initialData.keyPartners) ? initialData.keyPartners : [""],
-        keyActivities: Array.isArray(initialData.keyActivities) ? initialData.keyActivities : [""],
-        keyResources: Array.isArray(initialData.keyResources) ? initialData.keyResources : [""],
-        valuePropositions: Array.isArray(initialData.valuePropositions) ? initialData.valuePropositions : [""],
-        customerRelationships: Array.isArray(initialData.customerRelationships) ? initialData.customerRelationships : [""],
-        channels: Array.isArray(initialData.channels) ? initialData.channels : [""],
-        customerSegments: Array.isArray(initialData.customerSegments) ? initialData.customerSegments : [""],
-        costStructure: Array.isArray(initialData.costStructure) ? initialData.costStructure : [""],
-        revenueStreams: Array.isArray(initialData.revenueStreams) ? initialData.revenueStreams : [""]
+        keyPartners: Array.isArray(initialData.keyPartners) ? initialData.keyPartners : [],
+        keyActivities: Array.isArray(initialData.keyActivities) ? initialData.keyActivities : [],
+        keyResources: Array.isArray(initialData.keyResources) ? initialData.keyResources : [],
+        valuePropositions: Array.isArray(initialData.valuePropositions) ? initialData.valuePropositions : [],
+        customerRelationships: Array.isArray(initialData.customerRelationships) ? initialData.customerRelationships : [],
+        channels: Array.isArray(initialData.channels) ? initialData.channels : [],
+        customerSegments: Array.isArray(initialData.customerSegments) ? initialData.customerSegments : [],
+        costStructure: Array.isArray(initialData.costStructure) ? initialData.costStructure : [],
+        revenueStreams: Array.isArray(initialData.revenueStreams) ? initialData.revenueStreams : []
       };
       setCanvasData(mergedData);
     } else if (canvasId) {
@@ -74,15 +74,15 @@ export default function BusinessModelCanvas({
         try {
           const parsedData = JSON.parse(saved);
           const mergedData: BMCData = {
-            keyPartners: Array.isArray(parsedData.keyPartners) ? parsedData.keyPartners : [""],
-            keyActivities: Array.isArray(parsedData.keyActivities) ? parsedData.keyActivities : [""],
-            keyResources: Array.isArray(parsedData.keyResources) ? parsedData.keyResources : [""],
-            valuePropositions: Array.isArray(parsedData.valuePropositions) ? parsedData.valuePropositions : [""],
-            customerRelationships: Array.isArray(parsedData.customerRelationships) ? parsedData.customerRelationships : [""],
-            channels: Array.isArray(parsedData.channels) ? parsedData.channels : [""],
-            customerSegments: Array.isArray(parsedData.customerSegments) ? parsedData.customerSegments : [""],
-            costStructure: Array.isArray(parsedData.costStructure) ? parsedData.costStructure : [""],
-            revenueStreams: Array.isArray(parsedData.revenueStreams) ? parsedData.revenueStreams : [""]
+            keyPartners: Array.isArray(parsedData.keyPartners) ? parsedData.keyPartners : [],
+            keyActivities: Array.isArray(parsedData.keyActivities) ? parsedData.keyActivities : [],
+            keyResources: Array.isArray(parsedData.keyResources) ? parsedData.keyResources : [],
+            valuePropositions: Array.isArray(parsedData.valuePropositions) ? parsedData.valuePropositions : [],
+            customerRelationships: Array.isArray(parsedData.customerRelationships) ? parsedData.customerRelationships : [],
+            channels: Array.isArray(parsedData.channels) ? parsedData.channels : [],
+            customerSegments: Array.isArray(parsedData.customerSegments) ? parsedData.customerSegments : [],
+            costStructure: Array.isArray(parsedData.costStructure) ? parsedData.costStructure : [],
+            revenueStreams: Array.isArray(parsedData.revenueStreams) ? parsedData.revenueStreams : []
           };
           setCanvasData(mergedData);
         } catch (error) {
@@ -105,11 +105,6 @@ export default function BusinessModelCanvas({
   };
 
   const handleAddClick = (section: keyof BMCData) => {
-    // Add an empty item immediately for better test compatibility
-    setCanvasData(prev => ({
-      ...prev,
-      [section]: [...prev[section], '']
-    }));
     setEditingSection(section);
     setNewItem('');
   };
@@ -262,8 +257,13 @@ export default function BusinessModelCanvas({
         <CardContent className="space-y-3">
           {hasContent ? (
             <div className="space-y-2">
-              {items.filter(item => item.trim()).map((item, index) => (
-                <div key={index} className="group relative">
+              {items.map((item, index) => {
+                if (!item.trim()) {
+                  return null;
+                }
+
+                return (
+                  <div key={`${section}-${index}`} className="group relative">
                   <div className="p-3 bg-muted/30 rounded-md text-sm leading-relaxed">
                     {item}
                   </div>
@@ -273,13 +273,14 @@ export default function BusinessModelCanvas({
                       size="sm"
                       onClick={() => removeItem(section, index)}
                       className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                      aria-label={`Remove item`}
+                      aria-label={`Remove ${item ? `${item} from ${title}` : `item ${index + 1} from ${title}`}`}
                     >
                       <X className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
@@ -440,6 +441,9 @@ export default function BusinessModelCanvas({
             <DialogTitle>
               Add {editingSection ? editingSection.replace(/([A-Z])/g, ' $1').toLowerCase() : ''}
             </DialogTitle>
+            <DialogDescription>
+              Provide the details for the new entry and choose Add to include it in the canvas.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Input

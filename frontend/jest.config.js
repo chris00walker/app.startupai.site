@@ -15,6 +15,7 @@ const customJestConfig = {
     '^until-async$': '<rootDir>/src/tests/mocks/untilAsyncMock.ts',
   },
   setupFiles: ['<rootDir>/jest.polyfills.js'],
+  maxWorkers: 1, // Prevent worker crashes in constrained environments
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

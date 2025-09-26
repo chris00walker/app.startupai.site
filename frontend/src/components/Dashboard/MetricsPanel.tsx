@@ -8,7 +8,10 @@ type Status = 'pending' | 'in_progress' | 'complete' | 'exception';
 export const MetricsPanel: React.FC = () => {
   const { data, isLoading, error } = useQuery<Record<Status, number>>({
     queryKey: ['metrics', 'tasks'],
-    queryFn: () => api.get('/metrics/tasks').then((r) => r.data.counts),
+    queryFn: async () => {
+      const response = await api.get('/metrics/tasks');
+      return response?.data?.counts ?? ({} as Record<Status, number>);
+    },
     retry: false,
     refetchOnWindowFocus: false,
   });

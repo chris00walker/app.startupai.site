@@ -136,9 +136,12 @@ const ClientPage: React.FC = () => {
   const [selectedArtefact, setSelectedArtefact] = useState<Artefact | null>(null);
   const [showArtefactModal, setShowArtefactModal] = useState(false);
 
-  const { data: client, isLoading: clientLoading, error: clientError } = useQuery<Client>({
+  const { data: client, isLoading: clientLoading, error: clientError } = useQuery<Client | null>({
     queryKey: ['client', id],
-    queryFn: () => api.get(`/clients/${id}`).then((r) => r.data.client),
+    queryFn: async () => {
+      const response = await api.get(`/clients/${id}`);
+      return response?.data?.client ?? null;
+    },
     enabled: !!id,
     retry: false,
     refetchOnWindowFocus: false,
@@ -146,7 +149,10 @@ const ClientPage: React.FC = () => {
 
   const { data: artefacts = [], isLoading: artefactsLoading, error: artefactsError } = useQuery<Artefact[]>({
     queryKey: ['artefacts', id],
-    queryFn: () => api.get(`/clients/${id}/artefacts`).then((r) => r.data.artefacts),
+    queryFn: async () => {
+      const response = await api.get(`/clients/${id}/artefacts`);
+      return response?.data?.artefacts ?? [];
+    },
     enabled: !!id,
     retry: false,
     refetchOnWindowFocus: false,

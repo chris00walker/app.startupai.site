@@ -339,29 +339,43 @@ describe('Canvas Components TDD Validation', () => {
 
 describe('TDD Implementation Validation', () => {
   it('validates all canvas components exist and render', () => {
-    // Test that all three main canvas components can be imported and rendered
-    expect(() => {
-      render(<TestingBusinessIdeasCanvas canvasId="test" clientId="test" />)
-    }).not.toThrow()
+    const tbiRender = render(
+      <TestingBusinessIdeasCanvas canvasId="test" clientId="test" />
+    )
+    expect(screen.getByText('Testing Business Ideas')).toBeInTheDocument()
+    tbiRender.unmount()
 
-    expect(() => {
-      render(<ValuePropositionCanvas canvasId="test" clientId="test" />)
-    }).not.toThrow()
+    const vpcRender = render(
+      <ValuePropositionCanvas canvasId="test" clientId="test" />
+    )
+    expect(screen.getByText('Value Proposition Canvas')).toBeInTheDocument()
+    vpcRender.unmount()
 
-    expect(() => {
-      render(<BusinessModelCanvas canvasId="test" clientId="test" />)
-    }).not.toThrow()
+    const bmcRender = render(
+      <BusinessModelCanvas canvasId="test" clientId="test" />
+    )
+    expect(screen.getByText('Business Model Canvas')).toBeInTheDocument()
+    bmcRender.unmount()
   })
 
-  it('validates integration components exist and render', () => {
-    // Test that integration components work
-    expect(() => {
-      render(<CanvasEditor canvasType="value-proposition" canvasId="test" clientId="test" mode="edit" />)
-    }).not.toThrow()
+  it('validates integration components exist and render', async () => {
+    const editorRender = render(
+      <CanvasEditor
+        canvasType="value-proposition"
+        canvasId="test"
+        clientId="test"
+        mode="edit"
+      />
+    )
 
-    expect(() => {
-      render(<CanvasGallery />)
-    }).not.toThrow()
+    await waitFor(() => {
+      expect(screen.getByText('Value Proposition Canvas')).toBeInTheDocument()
+    })
+    editorRender.unmount()
+
+    const galleryRender = render(<CanvasGallery />)
+    expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
+    galleryRender.unmount()
   })
 
   it('validates ShadCN UI integration', () => {
