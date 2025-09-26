@@ -48,8 +48,8 @@ npm run dev
 👉 **[/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)**
 
 **Quick Links for Development:**
-- **System Architecture:** [High-Level Architecture Spec](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-cwc-agentic-platform-the-product)
-- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-cwc-agentic-platform)
+- **System Architecture:** [High-Level Architecture Spec](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-appstartupaisite-the-product)
+- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
 - **User Stories:** [Product Platform Stories](../startupai.site/docs/product/user-stories.md)
 - **Local Documentation:** [docs/README.md](docs/README.md)
 
@@ -68,7 +68,7 @@ This platform receives authenticated users from **startupai.site** via secure JW
 
 1. User completes signup/payment on startupai.site
 2. startupai.site generates JWT token with user data
-3. User redirected to cwc-agentic-platform with token
+3. User redirected to app.startupai.site with token
 4. Platform validates token and creates user session
 5. User begins onboarding and project creation
 
@@ -110,7 +110,7 @@ npm run dev
 
 ### Testing Cross-Site Integration
 ```bash
-# 1. Start cwc-agentic-platform (this repo)
+# 1. Start app.startupai.site (this repo)
 cd frontend/ && npm run dev  # http://localhost:3000
 
 # 2. Start startupai.site (marketing site)
