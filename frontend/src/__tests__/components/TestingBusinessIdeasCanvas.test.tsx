@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import TestingBusinessIdeasCanvas from '@/components/canvas/TestingBusinessIdeasCanvas'
@@ -19,6 +19,62 @@ const localStorageMock = {
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 })
+
+type TestUser = ReturnType<typeof userEvent.setup>
+
+async function findActiveDialog(timeout = 250): Promise<HTMLElement | null> {
+  try {
+    return await screen.findByRole('dialog', undefined, { timeout })
+  } catch {
+    return null
+  }
+}
+
+async function addItemThroughDialogOrInline({
+  user,
+  buttonName,
+  placeholder,
+  value,
+  submitLabel = /^add$/i
+}: {
+  user: TestUser
+  buttonName: RegExp | string
+  placeholder: string
+  value?: string
+  submitLabel?: RegExp
+}): Promise<HTMLElement> {
+  const addButton = screen.getByRole('button', { name: buttonName })
+  const inputsBefore = screen.queryAllByPlaceholderText(placeholder)
+
+  await user.click(addButton)
+
+  const dialog = await findActiveDialog()
+  if (dialog) {
+    const field = within(dialog).getByPlaceholderText(placeholder)
+    if (value) {
+      await user.clear(field)
+      await user.type(field, value)
+    }
+
+    const confirmButton = within(dialog).getByRole('button', { name: submitLabel })
+    await user.click(confirmButton)
+
+    if (value) {
+      return await screen.findByDisplayValue(value)
+    }
+
+    const inputsAfter = await screen.findAllByPlaceholderText(placeholder)
+    const newlyAdded = inputsAfter.find((input) => !inputsBefore.includes(input))
+    return newlyAdded ?? inputsAfter[inputsAfter.length - 1]
+  }
+
+  const inputsAfter = screen.getAllByPlaceholderText(placeholder)
+  const newInput = inputsAfter[inputsAfter.length - 1]
+  if (value) {
+    await user.type(newInput, value)
+  }
+  return newInput
+}
 
 describe('TestingBusinessIdeasCanvas', () => {
   const defaultProps = {
@@ -70,8 +126,11 @@ describe('TestingBusinessIdeasCanvas', () => {
       const user = userEvent.setup()
       render(<TestingBusinessIdeasCanvas {...defaultProps} />)
       
-      const addButton = screen.getByRole('button', { name: /add assumption/i })
-      await user.click(addButton)
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add assumption/i,
+        placeholder: 'Describe your assumption...'
+      })
       
       // Should see table headers and a new row
       expect(screen.getByText('Assumption')).toBeInTheDocument()
@@ -91,9 +150,11 @@ describe('TestingBusinessIdeasCanvas', () => {
       render(<TestingBusinessIdeasCanvas {...defaultProps} />)
       
       // Add an assumption first
-      await user.click(screen.getByRole('button', { name: /add assumption/i }))
-      
-      const assumptionTextarea = screen.getByPlaceholderText('Describe your assumption...')
+      const assumptionTextarea = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add assumption/i,
+        placeholder: 'Describe your assumption...'
+      })
       fireEvent.change(assumptionTextarea, { target: { value: 'Users will pay for premium features' } })
       
       expect(assumptionTextarea).toHaveValue('Users will pay for premium features')
@@ -104,9 +165,12 @@ describe('TestingBusinessIdeasCanvas', () => {
       render(<TestingBusinessIdeasCanvas {...defaultProps} />)
       
       // Add an assumption first
-      await user.click(screen.getByRole('button', { name: /add assumption/i }))
-      
-      // Wait for the assumption to be added and verify the select is available
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add assumption/i,
+        placeholder: 'Describe your assumption...'
+      })
+
       const riskSelect = await screen.findByRole('combobox')
       
       // Verify the select component is properly rendered and accessible
@@ -120,9 +184,12 @@ describe('TestingBusinessIdeasCanvas', () => {
       render(<TestingBusinessIdeasCanvas {...defaultProps} />)
       
       // Add an assumption first
-      await user.click(screen.getByRole('button', { name: /add assumption/i }))
-      
-      // Should show default confidence of 50%
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add assumption/i,
+        placeholder: 'Describe your assumption...'
+      })
+
       expect(screen.getByText('50%')).toBeInTheDocument()
       
       // Find the slider (it's an input with type range)
@@ -136,10 +203,11 @@ describe('TestingBusinessIdeasCanvas', () => {
       render(<TestingBusinessIdeasCanvas {...defaultProps} />)
       
       // Add an assumption first
-      await user.click(screen.getByRole('button', { name: /add assumption/i }))
-      
-      // Type some text to identify the assumption
-      const assumptionTextarea = screen.getByPlaceholderText('Describe your assumption...')
+      const assumptionTextarea = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add assumption/i,
+        placeholder: 'Describe your assumption...'
+      })
       await user.type(assumptionTextarea, 'Test assumption')
       
       // Find and click the delete button
@@ -202,8 +270,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('adds new test card', async () => {
       const user = userEvent.setup()
       
-      const addButton = screen.getByRole('button', { name: /add test card/i })
-      await user.click(addButton)
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add test card/i,
+        placeholder: 'We believe that...'
+      })
       
       // Should see a new test card
       expect(screen.getByText('Test Card')).toBeInTheDocument()
@@ -216,11 +287,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('fills out test card form fields', async () => {
       const user = userEvent.setup()
       
-      // Add a test card first
-      await user.click(screen.getByRole('button', { name: /add test card/i }))
-      
-      // Wait for the form to appear and fill it out
-      const hypothesisField = await screen.findByPlaceholderText('We believe that...')
+      const hypothesisField = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add test card/i,
+        placeholder: 'We believe that...'
+      })
       await user.type(hypothesisField, 'Users will sign up for our newsletter')
       
       const testMethodField = await screen.findByPlaceholderText('How will you test this?')
@@ -242,8 +313,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('selects expected outcome via radio buttons', async () => {
       const user = userEvent.setup()
       
-      // Add a test card first
-      await user.click(screen.getByRole('button', { name: /add test card/i }))
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add test card/i,
+        placeholder: 'We believe that...'
+      })
       
       // Find and select pivot option
       const pivotRadio = screen.getByLabelText('Pivot')
@@ -266,8 +340,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('adds new learning card', async () => {
       const user = userEvent.setup()
       
-      const addButton = screen.getByRole('button', { name: /add learning card/i })
-      await user.click(addButton)
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add learning card/i,
+        placeholder: 'What did you observe?'
+      })
       
       // Should see a new learning card
       expect(await screen.findByText('Learning Card')).toBeInTheDocument()
@@ -280,10 +357,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('fills out learning card observations and insights', async () => {
       const user = userEvent.setup()
       
-      // Add a learning card first
-      await user.click(screen.getByRole('button', { name: /add learning card/i }))
-      
-      const observationsField = await screen.findByPlaceholderText('What did you observe?')
+      const observationsField = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add learning card/i,
+        placeholder: 'What did you observe?'
+      })
       await user.type(observationsField, 'Users clicked the signup button but abandoned the form')
       
       const insightsField = await screen.findByPlaceholderText('What insights did you gain?')
@@ -307,8 +385,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('adds new experiment', async () => {
       const user = userEvent.setup()
       
-      const addButton = screen.getByRole('button', { name: /add experiment/i })
-      await user.click(addButton)
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add experiment/i,
+        placeholder: 'Experiment title...'
+      })
       
       // Should see table headers and a new row
       expect(screen.getByText('Title')).toBeInTheDocument()
@@ -326,10 +407,11 @@ describe('TestingBusinessIdeasCanvas', () => {
     test('fills out experiment details', async () => {
       const user = userEvent.setup()
       
-      // Add an experiment first
-      await user.click(screen.getByRole('button', { name: /add experiment/i }))
-      
-      const titleField = await screen.findByPlaceholderText('Experiment title...')
+      const titleField = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add experiment/i,
+        placeholder: 'Experiment title...'
+      })
       await user.type(titleField, 'Landing Page A/B Test')
       
       const ownerField = await screen.findByPlaceholderText('Owner...')

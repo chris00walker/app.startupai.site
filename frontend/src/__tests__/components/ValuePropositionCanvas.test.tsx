@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import ValuePropositionCanvas from '@/components/canvas/ValuePropositionCanvas'
@@ -38,6 +38,62 @@ document.createElement = jest.fn((tagName) => {
   }
   return originalCreateElement.call(document, tagName)
 })
+
+type TestUser = ReturnType<typeof userEvent.setup>
+
+async function findActiveDialog(timeout = 250): Promise<HTMLElement | null> {
+  try {
+    return await screen.findByRole('dialog', undefined, { timeout })
+  } catch {
+    return null
+  }
+}
+
+async function addItemThroughDialogOrInline({
+  user,
+  buttonName,
+  placeholder,
+  value,
+  submitLabel = /^add$/i
+}: {
+  user: TestUser
+  buttonName: RegExp | string
+  placeholder: string
+  value?: string
+  submitLabel?: RegExp
+}): Promise<HTMLElement> {
+  const addButton = screen.getByRole('button', { name: buttonName })
+  const inputsBefore = screen.queryAllByPlaceholderText(placeholder)
+
+  await user.click(addButton)
+
+  const dialog = await findActiveDialog()
+  if (dialog) {
+    const field = within(dialog).getByPlaceholderText(placeholder)
+    if (value) {
+      await user.clear(field)
+      await user.type(field, value)
+    }
+
+    const confirmButton = within(dialog).getByRole('button', { name: submitLabel })
+    await user.click(confirmButton)
+
+    if (value) {
+      return await screen.findByDisplayValue(value)
+    }
+
+    const inputsAfter = await screen.findAllByPlaceholderText(placeholder)
+    const newlyAdded = inputsAfter.find((input) => !inputsBefore.includes(input))
+    return newlyAdded ?? inputsAfter[inputsAfter.length - 1]
+  }
+
+  const inputsAfter = screen.getAllByPlaceholderText(placeholder)
+  const newInput = inputsAfter[inputsAfter.length - 1]
+  if (value) {
+    await user.type(newInput, value)
+  }
+  return newInput
+}
 
 describe('ValuePropositionCanvas', () => {
   const defaultProps = {
@@ -96,15 +152,17 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Find the add button for Products & Services section
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      const productsAddButton = addButtons[0] // First add button should be for products
-      
-      await user.click(productsAddButton)
-      
-      // Should see a new input field
-      const productInputs = screen.getAllByPlaceholderText('What products and services do you offer?')
-      expect(productInputs.length).toBeGreaterThan(0)
+      const placeholder = 'What products and services do you offer?'
+      const initialCount = screen.getAllByPlaceholderText(placeholder).length
+
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add product\/service/i,
+        placeholder,
+      })
+
+      const productInputs = screen.getAllByPlaceholderText(placeholder)
+      expect(productInputs.length).toBe(initialCount + 1)
     })
 
     test('updates product/service text', async () => {
@@ -112,14 +170,15 @@ describe('ValuePropositionCanvas', () => {
       render(<ValuePropositionCanvas {...defaultProps} />)
       
       // Add a product first
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      await user.click(addButtons[0])
-      
-      // Type in the new input
-      const productInputs = screen.getAllByPlaceholderText('What products and services do you offer?')
-      const productInput = productInputs[0] // Get the first input
+      const placeholder = 'What products and services do you offer?'
+      const productInput = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add product\/service/i,
+        placeholder,
+      })
+
       await user.type(productInput, 'Mobile app')
-      
+
       expect(productInput).toHaveValue('Mobile app')
     })
 
@@ -127,29 +186,31 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Add a product first
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      await user.click(addButtons[0])
-      
-      // Type some text
-      const productInputs = screen.getAllByPlaceholderText('What products and services do you offer?')
-      const productInput = productInputs[productInputs.length - 1] // Get the newly added input
-      await user.type(productInput, 'Test product')
-      
-      // Add another product first to enable remove button (only shows when length > 1)
-      await user.click(addButtons[0])
-      
-      // Count initial products
-      const initialProducts = screen.getAllByPlaceholderText('What products and services do you offer?')
-      const initialCount = initialProducts.length
-      
+      const placeholder = 'What products and services do you offer?'
+
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add product\/service/i,
+        placeholder,
+        value: 'Test product',
+      })
+
+      await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add product\/service/i,
+        placeholder,
+        value: 'Another product',
+      })
+
+      const initialCount = screen.getAllByPlaceholderText(placeholder).length
+
       // Find and click remove button (× symbol)
       const removeButtons = screen.getAllByText('×')
       if (removeButtons.length > 0) {
         await user.click(removeButtons[0])
         
         // Check that one product was removed
-        const remainingProducts = screen.getAllByPlaceholderText('What products and services do you offer?')
+        const remainingProducts = screen.getAllByPlaceholderText(placeholder)
         expect(remainingProducts.length).toBe(initialCount - 1)
       }
     })
@@ -158,16 +219,15 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Find pain relievers add button (should be second in value map)
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      const painRelieversAddButton = addButtons[1]
-      
-      await user.click(painRelieversAddButton)
-      
-      const painRelieverInputs = screen.getAllByPlaceholderText('How do you relieve customer pains?')
-      const painRelieverInput = painRelieverInputs[painRelieverInputs.length - 1] // Get the newly added input
-      await user.type(painRelieverInput, 'Automated backup system')
-      
+      const placeholder = 'How do you relieve customer pains?'
+
+      const painRelieverInput = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add pain reliever/i,
+        placeholder,
+        value: 'Automated backup system',
+      })
+
       expect(painRelieverInput).toHaveValue('Automated backup system')
     })
 
@@ -175,16 +235,15 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Find gain creators add button (should be third in value map)
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      const gainCreatorsAddButton = addButtons[2]
-      
-      await user.click(gainCreatorsAddButton)
-      
-      const gainCreatorInputs = screen.getAllByPlaceholderText('How do you create customer gains?')
-      const gainCreatorInput = gainCreatorInputs[gainCreatorInputs.length - 1] // Get the newly added input
-      await user.type(gainCreatorInput, 'Real-time analytics dashboard')
-      
+      const placeholder = 'How do you create customer gains?'
+
+      const gainCreatorInput = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add gain creator/i,
+        placeholder,
+        value: 'Real-time analytics dashboard',
+      })
+
       expect(gainCreatorInput).toHaveValue('Real-time analytics dashboard')
     })
   })
@@ -194,16 +253,15 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Find customer jobs add button (should be fourth)
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      const jobsAddButton = addButtons[3]
-      
-      await user.click(jobsAddButton)
-      
-      const jobInputs = screen.getAllByPlaceholderText('What jobs is your customer trying to get done?')
-      const jobInput = jobInputs[jobInputs.length - 1] // Get the newly added input
-      await user.type(jobInput, 'Track business performance')
-      
+      const placeholder = 'What jobs is your customer trying to get done?'
+
+      const jobInput = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add customer job/i,
+        placeholder,
+        value: 'Track business performance',
+      })
+
       expect(jobInput).toHaveValue('Track business performance')
     })
 
@@ -211,15 +269,15 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Find pains add button (should be fifth)
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      const painsAddButton = addButtons[4]
-      
-      await user.click(painsAddButton)
-      
-      const painInput = screen.getByPlaceholderText('What pains does your customer experience?')
-      await user.type(painInput, 'Manual data entry is time-consuming')
-      
+      const placeholder = 'What pains does your customer experience?'
+
+      const painInput = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add pain$/i,
+        placeholder,
+        value: 'Manual data entry is time-consuming',
+      })
+
       expect(painInput).toHaveValue('Manual data entry is time-consuming')
     })
 
@@ -227,15 +285,15 @@ describe('ValuePropositionCanvas', () => {
       const user = userEvent.setup()
       render(<ValuePropositionCanvas {...defaultProps} />)
       
-      // Find gains add button (should be sixth)
-      const addButtons = screen.getAllByRole('button', { name: /add/i })
-      const gainsAddButton = addButtons[5]
-      
-      await user.click(gainsAddButton)
-      
-      const gainInput = screen.getByPlaceholderText('What gains does your customer expect?')
-      await user.type(gainInput, 'Increased productivity and efficiency')
-      
+      const placeholder = 'What gains does your customer expect?'
+
+      const gainInput = await addItemThroughDialogOrInline({
+        user,
+        buttonName: /add gain$/i,
+        placeholder,
+        value: 'Increased productivity and efficiency',
+      })
+
       expect(gainInput).toHaveValue('Increased productivity and efficiency')
     })
   })

@@ -12,6 +12,7 @@ const customJestConfig = {
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/src/__tests__/e2e/', '<rootDir>/src/pages/test.tsx'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^until-async$': '<rootDir>/src/tests/mocks/untilAsyncMock.ts',
   },
   setupFiles: ['<rootDir>/jest.polyfills.js'],
 }

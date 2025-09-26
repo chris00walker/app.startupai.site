@@ -30,13 +30,14 @@ export function useHealthCheck() {
   })
 
   // Determine if backend is online based on response
-  const isBackendOnline = !isError && !error && data?.data?.status === 'healthy'
+  const healthStatus = data?.data?.status ?? (data as any)?.status ?? null
+  const isBackendOnline = !isError && !error && typeof healthStatus === 'string' && healthStatus.toLowerCase() === 'healthy'
 
   return {
     isBackendOnline,
     isLoading,
     error,
     isError,
-    healthData: data?.data
+    healthData: data?.data ?? (data as any) ?? null
   }
 }
