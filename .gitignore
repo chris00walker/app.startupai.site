@@ -86,3 +86,12 @@ audit-logs/
 .vercel/
 
 # End of file
+
+# Local Netlify folder
+.netlify
+
+# Deployment artifacts
+app-deployment.zip
+frontend/app-startupai-site.tar.gz
+netlify.toml.backup
+*.tar.gz
