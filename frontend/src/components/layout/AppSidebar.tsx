@@ -10,6 +10,7 @@ import {
   Home,
   LayoutDashboard,
   Lightbulb,
+  LogOut,
   Settings,
   Users,
   Workflow,
@@ -28,6 +29,15 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+
+// Navigation item type
+interface NavigationItem {
+  title: string
+  url: string
+  icon: any
+  description?: string
+  isExternal?: boolean
+}
 
 // Strategyzer AI navigation data
 const consultantNavigation = {
@@ -103,6 +113,12 @@ const consultantNavigation = {
       title: "Settings",
       url: "/settings",
       icon: Settings,
+    },
+    {
+      title: "Logout",
+      url: "https://startupai-site.netlify.app",
+      icon: LogOut,
+      isExternal: true,
     },
   ],
 }
@@ -183,6 +199,12 @@ const founderNavigation = {
       title: "Settings",
       url: "/settings",
       icon: Settings,
+    },
+    {
+      title: "Logout",
+      url: "https://startupai-site.netlify.app",
+      icon: LogOut,
+      isExternal: true,
     },
   ],
 }
@@ -293,10 +315,17 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
+                    {item.isExternal ? (
+                      <a href={item.url} target="_blank" rel="noopener noreferrer">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    ) : (
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
