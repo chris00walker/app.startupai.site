@@ -29,12 +29,18 @@ All **shared documentation** lives in the StartupAI repository:
 
 #### Technical Implementation
 - **System Architecture:** [Product Platform Architecture](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-appstartupaisite-the-product)
+- **Database Architecture:** [Supabase Configuration](../startupai.site/docs/technical/high_level_architectural_spec.md#9-database-architecture)
+- **Storage Architecture:** [Supabase Storage](../startupai.site/docs/technical/high_level_architectural_spec.md#10-storage-architecture)
 - **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
+- **Supabase Setup:** [Database Configuration](../startupai.site/docs/technical/two-site-implementation-plan.md#21-supabase-setup--configuration)
 - **Authentication:** [Token Validation](../startupai.site/docs/technical/two-site-implementation-plan.md#41-authentication-receiver--user-onboarding)
+- **Vector Search:** [Semantic Search Implementation](../startupai.site/docs/technical/two-site-implementation-plan.md#vector-search-functions)
 
 #### Cross-Site Integration
 - **Handoff Process:** [Secure Token Validation](../startupai.site/docs/product/user-stories.md#story-02-token-validation-session-creation-appstartupaisite)
 - **Shared Services:** [Supabase Integration](../startupai.site/docs/technical/high_level_architectural_spec.md#34-shared-infrastructure--services)
+- **Database Integration:** [Shared Supabase Database](../startupai.site/docs/technical/high_level_architectural_spec.md#9-database-architecture)
+- **Storage Integration:** [Cross-Site File Management](../startupai.site/docs/technical/high_level_architectural_spec.md#10-storage-architecture)
 
 ---
 
@@ -47,11 +53,14 @@ All **shared documentation** lives in the StartupAI repository:
 
 ### Key Features to Implement:
 - [ ] JWT token validation endpoint (`/api/auth/handoff`)
-- [ ] User onboarding flow
-- [ ] Project creation wizard
-- [ ] Evidence collection system
-- [ ] AI-powered report generation
-- [ ] CrewAI integration
+- [ ] Supabase database integration with Drizzle ORM
+- [ ] Vector search implementation with pgvector
+- [ ] User onboarding flow with database persistence
+- [ ] Project creation wizard with evidence storage
+- [ ] Evidence collection system with semantic search
+- [ ] AI-powered report generation with storage
+- [ ] CrewAI integration with database logging
+- [ ] File upload system with Supabase Storage
 
 ---
 
@@ -79,8 +88,10 @@ The following documents in this repository are **archived** and kept for histori
 4. **Integration:** Secure handoff from startupai.site
 
 **For cross-site features:**
-- Authentication handoff testing
-- Shared Supabase integration
+- Authentication handoff testing with JWT tokens
+- Shared Supabase database integration with Drizzle ORM
+- Vector search implementation with pgvector
+- Storage integration with Supabase Storage
 - Cross-site analytics implementation
 
 ---

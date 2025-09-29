@@ -24,10 +24,14 @@ This repository implements the **Product Platform** (`app.startupai.site`) in St
 
 - **Frontend:** Next.js 14 with TypeScript (`/frontend/`)
 - **Backend:** Netlify Functions (Python) for CrewAI workflows
-- **Database:** Supabase PostgreSQL (shared with startupai.site)
+- **Database:** Supabase PostgreSQL with pgvector for semantic search
+- **ORM:** Drizzle ORM for type-safe database operations
+- **Storage:** Supabase Storage with RLS policies and CDN
+- **Vector Search:** pgvector with OpenAI embeddings (1536 dimensions)
 - **AI:** CrewAI multi-agent system + Vercel AI SDK
 - **Authentication:** JWT token validation from startupai.site
-- **Deployment:** Vercel
+- **Package Manager:** pnpm (✅ migrated)
+- **Deployment:** Netlify (✅ live at https://app-startupai-site.netlify.app)
 
 
 ### Development Setup
@@ -43,16 +47,25 @@ pnpm dev
 
 **Runtime Requirements:**
 - Node.js 22.18.0 (`nvm use` will load the version specified in `.nvmrc`)
-- pnpm (install via `corepack enable pnpm`)
+- pnpm (install via `corepack enable pnpm`) - ✅ Migrated from npm
+- Supabase CLI (available via `pnpm exec supabase`) - ✅ Installed
 
 **Production Access:**
-- **Staging:** https://app-startupai-site.vercel.app
-- **Production:** https://app.startupai.site
+- **Live Production:** https://app-startupai-site.netlify.app
+- **Future Custom Domain:** https://app.startupai.site
 ### Environment Setup
 ```bash
 # 1. Configure environment variables
 cp frontend/.env.example frontend/.env.local
-# Update Supabase URLs, JWT secrets, and OpenAI keys
+# Update Supabase URLs, JWT secrets, OpenAI keys, and database connection
+
+# Required environment variables:
+# NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+# DATABASE_URL=postgresql://postgres:[password]@db.[project].supabase.co:6543/postgres?workaround=supabase-pooler.vercel
+# JWT_SECRET=your-jwt-secret
+# OPENAI_API_KEY=your-openai-key
 
 # 2. Start development server
 pnpm dev
