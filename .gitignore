@@ -11,6 +11,8 @@ out/
 # Environment files
 .env*
 !.env.example
+backend/.env
+!backend/.env.example
 
 # Logs
 *.log
@@ -47,11 +49,125 @@ playwright-report/
 # Vercel
 .vercel/
 
-# CrewAI / Python
+# Python / CrewAI Backend
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments (must be before other patterns)
+.env
 .venv/
+env/
 venv/
+ENV/
+env.bak/
+venv.bak/
+**/crewai-env/
+backend/crewai-env/
+**/venv/
+**/.venv/
+**/env/
+
+# Python testing
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# CrewAI specific
+.crewai/
+crew_logs/
+agent_logs/
+task_logs/
+
+# AI/ML specific
+models/
+*.pkl
+*.joblib
+*.h5
+*.hdf5
+*.onnx
+*.pb
+checkpoints/
+wandb/
+mlruns/
+
+# API keys and secrets (extra protection)
+**/secrets/
+**/.secrets/
+**/keys/
+**/.keys/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Temporary analysis files
+analysis_results/
+temp_analysis/
+*.analysis
+*.report
 
 # Recursive ignores for nested packages/workspaces
 **/node_modules/
@@ -63,9 +179,24 @@ venv/
 **/.turbo/
 **/.swc/
 **/.venv/
+**/venv/
+**/env/
+**/crewai-env/
 **/__pycache__/
 **/*.pyc
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/.Python
 **/*.log
+**/.env
+!**/.env.example
+**/.crewai/
+**/crew_logs/
+**/agent_logs/
+**/task_logs/
+**/analysis_results/
+**/temp_analysis/
 
 # Local temp and legacy artifacts
 /tmp/
