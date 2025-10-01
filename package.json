@@ -13,7 +13,12 @@
     "lint": "pnpm --filter frontend run lint",
     "lint:md": "markdownlint docs",
     "lint:md:fix": "markdownlint docs --fix",
-    "docs:validate": "pnpm run lint:md"
+    "docs:validate": "pnpm run lint:md",
+    "db:generate": "pnpm exec drizzle-kit generate --config=drizzle.config.ts",
+    "db:push": "pnpm exec drizzle-kit push --config=drizzle.config.ts",
+    "db:migrate": "pnpm exec drizzle-kit migrate --config=drizzle.config.ts",
+    "db:studio": "pnpm exec drizzle-kit studio --config=drizzle.config.ts",
+    "db:introspect": "pnpm exec drizzle-kit introspect --config=drizzle.config.ts"
   },
   "keywords": [
     "nextjs",
@@ -23,6 +28,9 @@
     "two-site-architecture"
   ],
   "devDependencies": {
+    "@types/node": "24.1.0",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.5",
     "markdownlint-cli": "^0.39.0",
     "supabase": "^2.47.2"
   },
