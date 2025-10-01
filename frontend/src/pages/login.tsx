@@ -1,27 +1,16 @@
-"use client"
+/**
+ * Login Page (Pages Router - Legacy)
+ * 
+ * Note: This uses the pages router. New development should use /app/login/page.tsx
+ * Kept for backwards compatibility.
+ */
 
-import * as React from "react"
 import Link from "next/link"
 import { LoginForm } from "@/components/auth/LoginForm"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
 export default function LoginPage() {
-  const handleLogin = async (email: string, password: string) => {
-    // Mock authentication - in production this would call your auth API
-    console.log("Authenticating:", email)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // For demo purposes, accept any email/password
-    if (email && password) {
-      // In production, you'd set auth tokens and redirect
-      window.location.href = "/dashboard"
-    } else {
-      throw new Error("Please enter both email and password")
-    }
-  }
 
   return (
     <div className="min-h-screen flex">
@@ -30,13 +19,13 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-8">
             <Button variant="ghost" size="sm" className="mb-4" asChild>
-              <Link href="/">
+              <Link href="https://startupai-site.netlify.app">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to home
               </Link>
             </Button>
           </div>
-          <LoginForm onLogin={handleLogin} />
+          <LoginForm />
         </div>
       </div>
 
