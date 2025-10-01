@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Removed 'output: export' to support server-side authentication
+  // Static export doesn't support dynamic routes with cookies/auth
   reactStrictMode: true,
   trailingSlash: true,
   images: {

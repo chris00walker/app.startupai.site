@@ -11,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Plus, FileText, Database, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
+// Force dynamic rendering for authentication
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Dashboard | StartupAI',
   description: 'Your startup strategy dashboard',
