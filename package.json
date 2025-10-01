@@ -23,7 +23,8 @@
     "two-site-architecture"
   ],
   "devDependencies": {
-    "markdownlint-cli": "^0.39.0"
+    "markdownlint-cli": "^0.39.0",
+    "supabase": "^2.47.2"
   },
   "engines": {
     "node": ">=18.0.0"
