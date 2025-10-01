@@ -24,6 +24,43 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [isGitHubLoading, setIsGitHubLoading] = React.useState(false)
 
+  const handleGitHubSignIn = async () => {
+    setIsGitHubLoading(true)
+    try {
+      const result = await signInWithGitHub()
+      
+      if (result.error) {
+        console.error('GitHub OAuth error:', result.error)
+        alert(`GitHub sign-in failed: ${result.error}`)
+        setIsGitHubLoading(false)
+        return
+      }
+      
+      if (result.url) {
+        // Redirect to GitHub OAuth
+        window.location.href = result.url
+      } else {
+        alert('No OAuth URL received')
+        setIsGitHubLoading(false)
+      }
+    } catch (error) {
+      console.error('GitHub sign in error:', error)
+      alert(`GitHub sign-in failed. Check console for details.`)
+      setIsGitHubLoading(false)
+    }
+  }
+
+  const handleEmailSignIn = async (formData: FormData) => {
+    setIsLoading(true)
+    try {
+      await signIn(formData)
+    } catch (error) {
+      console.error('Email sign in error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -41,27 +78,25 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         <CardContent>
           <div className="flex flex-col gap-6">
             {/* GitHub OAuth - Primary */}
-            <form action={signInWithGitHub} className="w-full">
-              <Button 
-                type="submit" 
-                variant="default" 
-                className="w-full" 
-                disabled={isGitHubLoading || isLoading}
-                aria-label="Sign in with GitHub"
-              >
-                {isGitHubLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Connecting to GitHub...
-                  </>
-                ) : (
-                  <>
-                    <Github className="mr-2 h-4 w-4" />
-                    Sign in with GitHub
-                  </>
-                )}
-              </Button>
-            </form>
+            <Button 
+              onClick={handleGitHubSignIn}
+              variant="default" 
+              className="w-full" 
+              disabled={isGitHubLoading || isLoading}
+              aria-label="Sign in with GitHub"
+            >
+              {isGitHubLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connecting to GitHub...
+                </>
+              ) : (
+                <>
+                  <Github className="mr-2 h-4 w-4" />
+                  Sign in with GitHub
+                </>
+              )}
+            </Button>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -75,7 +110,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
             </div>
 
             {/* Email/Password Form */}
-            <form action={signIn}>
+            <form action={handleEmailSignIn}>
               <div className="grid gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>

@@ -7,9 +7,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Dev Mode Enabled 
+  // Enable dev indicators for component selection
   devIndicators: {
-    buildActivity: true,
+    appIsrStatus: true,
     buildActivityPosition: 'bottom-right',
   },
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'tsx', 'ts', 'jsx', 'js'].filter(
