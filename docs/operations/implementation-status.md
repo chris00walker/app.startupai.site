@@ -46,7 +46,8 @@ Features (Tier 3)      [░░░░░░░░░░]  0%
 
 - **✅ Authentication Integration** - Supabase Auth setup (Task 4)
   - Documentation: [Authentication Setup](../engineering/10-authentication/authentication-setup.md)
-  - Status: Complete - OAuth, email/password, middleware
+  - MVP Scope: [GitHub OAuth Setup](../engineering/10-authentication/mvp-oauth-setup.md)
+  - Status: Complete - GitHub OAuth (MVP), email/password, middleware
   - Completed: October 1, 2025
 
 ### In Progress

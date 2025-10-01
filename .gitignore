@@ -226,3 +226,6 @@ app-deployment.zip
 frontend/app-startupai-site.tar.gz
 netlify.toml.backup
 *.tar.gz
+
+# OAuth credentials
+.oauth-credentials/
