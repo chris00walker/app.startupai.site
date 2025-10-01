@@ -96,5 +96,23 @@ The following documents in this repository are **archived** and kept for histori
 
 ---
 
-**Last Updated:** September 25, 2025  
+---
+
+## Implementation Guides
+
+**Current implementation documentation for this repository:**
+
+### Setup & Configuration
+- **[Supabase Setup](engineering/30-data/supabase-setup.md)** - ✅ Complete - Database infrastructure setup
+- **[CrewAI Implementation](../backend/CREW_AI.md)** - 6-agent AI workflow implementation (pending)
+- **[Implementation Status](operations/implementation-status.md)** - Current progress tracking (updated Oct 1, 2025)
+
+### Engineering Documentation
+- **[Data Architecture](engineering/30-data/)** - Database, migrations, retention
+- **[Testing](engineering/50-testing/)** - Testing strategies and frameworks
+- **[Operations](operations/)** - Implementation status, runbooks and procedures
+
+---
+
+**Last Updated:** October 1, 2025  
 **Architecture:** Two-Site Marketing → Product Flow
