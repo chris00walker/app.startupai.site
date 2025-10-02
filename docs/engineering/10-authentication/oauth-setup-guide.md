@@ -1,8 +1,23 @@
 # OAuth Providers Setup Guide
 
 **Project:** StartupAI App Platform  
-**Last Updated:** October 1, 2025  
-**Status:** Manual Configuration Required
+**Last Updated:** October 2, 2025  
+**Status:** GitHub OAuth ✅ Complete | Google/Azure Optional
+
+---
+
+## ⚠️ Critical: Two-Step Configuration Required
+
+OAuth setup requires configuration in **TWO** locations:
+
+1. **Provider Platform** (GitHub/Google/Azure) - Create OAuth app and get credentials
+2. **Supabase Dashboard** - Configure Site URL, Redirect URLs, and paste credentials
+
+Additionally, for cross-site authentication (marketing → product):
+3. **Marketing Site** - Add `.env.production` with `NEXT_PUBLIC_APP_URL`
+4. **Netlify Build** - Ensure environment variables available at build time
+
+**Missing any step will cause OAuth to redirect to localhost in production.**
 
 ---
 
