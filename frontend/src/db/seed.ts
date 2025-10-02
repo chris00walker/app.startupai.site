@@ -54,14 +54,14 @@ async function createTestUser() {
   }
 
   // Get user ID
-  const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+  const { data, error: listError } = await supabase.auth.admin.listUsers();
   
   if (listError) {
     console.error('❌ Error listing users:', listError);
     throw listError;
   }
 
-  const testUser = users?.find(u => u.email === testEmail);
+  const testUser = data.users?.find(u => u.email === testEmail);
   
   if (!testUser) {
     throw new Error('Test user not found after creation');

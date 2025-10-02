@@ -9,8 +9,7 @@ const nextConfig = {
   },
   // Enable dev indicators for component selection
   devIndicators: {
-    appIsrStatus: true,
-    buildActivityPosition: 'bottom-right',
+    position: 'bottom-right',
   },
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'tsx', 'ts', 'jsx', 'js'].filter(
     (extension) => !extension.includes('test') && !extension.includes('spec')
