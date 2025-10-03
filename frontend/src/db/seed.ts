@@ -5,6 +5,12 @@
  * Run with: pnpm db:seed
  */
 
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load .env.local file
+config({ path: resolve(process.cwd(), '.env.local') });
+
 import { createClient } from '@supabase/supabase-js';
 import {
   demoClient,
@@ -36,24 +42,12 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
  * Create a test user for seeding data
  */
 async function createTestUser() {
-  console.log('\n🔐 Creating test user...');
+  console.log('\n🔐 Getting/creating test user...');
   
   const testEmail = 'test@startupai.site';
   const testPassword = 'Test123456!';
 
-  // Try to sign up the user (will fail if already exists)
-  const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
-    email: testEmail,
-    password: testPassword,
-    email_confirm: true,
-  });
-
-  if (signUpError && !signUpError.message.includes('already registered')) {
-    console.error('❌ Error creating user:', signUpError);
-    throw signUpError;
-  }
-
-  // Get user ID
+  // First, check if user already exists
   const { data, error: listError } = await supabase.auth.admin.listUsers();
   
   if (listError) {
@@ -61,10 +55,26 @@ async function createTestUser() {
     throw listError;
   }
 
-  const testUser = data.users?.find(u => u.email === testEmail);
+  let testUser = data.users?.find(u => u.email === testEmail);
+  
+  // If user doesn't exist, create it
+  if (!testUser) {
+    const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
+      email: testEmail,
+      password: testPassword,
+      email_confirm: true,
+    });
+
+    if (signUpError) {
+      console.error('❌ Error creating user:', signUpError);
+      throw signUpError;
+    }
+
+    testUser = signUpData.user;
+  }
   
   if (!testUser) {
-    throw new Error('Test user not found after creation');
+    throw new Error('Test user not found');
   }
 
   console.log(`✅ Test user ready: ${testEmail} (${testUser.id})`);
@@ -105,23 +115,66 @@ async function seedUserProfile(userId: string) {
 }
 
 /**
- * Seed projects from mock data
+ * Seed projects from mock data with full portfolio fields
  */
 async function seedProjects(userId: string) {
   console.log('\n📁 Seeding projects...');
   
+  // First, delete existing test projects for this user
+  const { error: deleteError } = await supabase
+    .from('projects')
+    .delete()
+    .eq('user_id', userId);
+
+  if (deleteError) {
+    console.warn('⚠️  Error deleting existing projects:', deleteError);
+  }
+
   const projectsToSeed = [
     ...mockPortfolioProjects.map(p => ({
+      // Basic fields
       name: p.clientName,
       description: `${p.stage} stage project for ${p.clientName}`,
       user_id: userId,
       status: 'active',
+      
+      // Portfolio management fields
+      stage: p.stage,
+      gate_status: p.gateStatus,
+      
+      // Risk budget tracking
+      risk_budget_planned: p.riskBudget.planned,
+      risk_budget_actual: p.riskBudget.actual,
+      risk_budget_delta: p.riskBudget.delta,
+      
+      // Consultant & activity tracking
+      assigned_consultant: p.assignedConsultant,
+      last_activity: new Date(), // Will be updated by activities
+      next_gate_date: p.nextGateDate ? new Date(new Date().getFullYear(), new Date().getMonth(), parseInt(p.nextGateDate.split(' ')[1])) : null,
+      
+      // Evidence & quality metrics
+      evidence_quality: p.evidenceQuality,
+      hypotheses_count: p.hypothesesCount,
+      experiments_count: p.experimentsCount,
+      evidence_count: p.evidenceCount,
     })),
     {
+      // Demo client project with defaults
       name: demoClient.name,
       description: demoClient.description,
       user_id: userId,
       status: 'active',
+      stage: 'DESIRABILITY',
+      gate_status: 'Pending',
+      risk_budget_planned: 5.0,
+      risk_budget_actual: 4.5,
+      risk_budget_delta: -0.1,
+      assigned_consultant: 'Demo Consultant',
+      last_activity: new Date(),
+      evidence_quality: 0.75,
+      hypotheses_count: 8,
+      experiments_count: 5,
+      evidence_count: 15,
     }
   ];
 
@@ -132,10 +185,7 @@ async function seedProjects(userId: string) {
 
   const { data, error } = await supabase
     .from('projects')
-    .upsert(uniqueProjects, {
-      onConflict: 'name,user_id',
-      ignoreDuplicates: true
-    })
+    .insert(uniqueProjects)
     .select();
 
   if (error) {
@@ -143,7 +193,7 @@ async function seedProjects(userId: string) {
     throw error;
   }
 
-  console.log(`✅ Seeded ${data?.length || 0} projects`);
+  console.log(`✅ Seeded ${data?.length || 0} projects with full portfolio fields`);
   return data || [];
 }
 

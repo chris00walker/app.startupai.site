@@ -8,6 +8,7 @@ import { StageProgressIndicator } from "@/components/portfolio/StageProgressIndi
 import { RiskBudgetWidget } from "@/components/portfolio/RiskBudgetWidget"
 import { GuidedTour, DemoBanner } from "@/components/demo/GuidedTour"
 import { useDemoMode } from "@/hooks/useDemoMode"
+import { useProjects } from "@/hooks/useProjects"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,7 +21,8 @@ import {
   AlertTriangle,
   CheckCircle,
   Plus,
-  Filter
+  Filter,
+  Loader2
 } from "lucide-react"
 import { mockPortfolioProjects, mockPortfolioMetrics } from "@/data/portfolioMockData"
 import { PortfolioProject } from "@/types/portfolio"
@@ -129,10 +131,32 @@ function PortfolioOverview() {
 
 function Dashboard() {
   const demoMode = useDemoMode()
+  const { projects, isLoading, error } = useProjects()
+  
+  // Use real projects if available, fallback to mock data for demo
+  const displayProjects = projects.length > 0 ? projects : mockPortfolioProjects
+  const usingRealData = projects.length > 0
   
   const handleProjectClick = (project: PortfolioProject) => {
     // Navigate to project details - placeholder for now
     console.log('Navigate to project:', project.id)
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        breadcrumbs={[
+          { title: "Portfolio Dashboard", href: "/dashboard" },
+        ]}
+      >
+        <div className="flex items-center justify-center h-[400px]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading your projects...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
@@ -142,6 +166,21 @@ function Dashboard() {
           onExitDemo={demoMode.exitDemo}
           onRestartTour={demoMode.restartTour}
         />
+      )}
+      
+      {!usingRealData && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertTriangle className="h-5 w-5 text-blue-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                <strong>Demo Mode:</strong> Showing sample data. Create your first project to see real data.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
       
       <DashboardLayout
@@ -192,16 +231,26 @@ function Dashboard() {
                   <BarChart3 className="h-5 w-5" />
                   Active Projects
                   <Badge variant="outline" className="ml-2">
-                    {mockPortfolioProjects.length} Projects
+                    {displayProjects.length} Projects
                   </Badge>
+                  {usingRealData && (
+                    <Badge variant="default" className="ml-2">
+                      Live Data
+                    </Badge>
+                  )}
                 </CardTitle>
                 <CardDescription>
                   Multi-client validation pipeline with evidence-based gates
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {error && (
+                  <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                    Error loading projects: {error.message}
+                  </div>
+                )}
                 <PortfolioGrid 
-                  projects={mockPortfolioProjects} 
+                  projects={displayProjects} 
                   onProjectClick={handleProjectClick}
                 />
               </CardContent>

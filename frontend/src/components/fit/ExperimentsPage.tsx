@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
+import { createClient } from "@/lib/supabase/client"
+import { useProjects } from "@/hooks/useProjects"
 import { 
   Play,
   Pause,
@@ -27,7 +29,7 @@ interface Experiment {
   description: string
   fitType: "Desirability" | "Feasibility" | "Viability"
   expectedStrength: "Strong" | "Medium" | "Weak"
-  status: "not_started" | "in_progress" | "completed"
+  status: "not_started" | "in_progress" | "completed" | "cancelled"
   progress: number
   hypothesis: string
   steps: string[]
@@ -40,114 +42,26 @@ interface Experiment {
   }
 }
 
-const mockExperiments: Experiment[] = [
-  {
-    id: "1",
-    name: "Customer Interview Round 2",
-    description: "Deep dive interviews with 10 small business owners to validate pricing assumptions and feature priorities.",
-    fitType: "Desirability",
-    expectedStrength: "Strong",
-    status: "not_started",
-    progress: 0,
-    hypothesis: "Small business owners will pay $40-50/month for inventory management if it saves them 4+ hours weekly and prevents stockouts.",
-    steps: [
-      "Recruit 10 small business owners (retail, food service, services)",
-      "Prepare interview script focusing on current pain points and pricing sensitivity",
-      "Conduct 45-minute interviews via video call",
-      "Analyze responses for patterns and contradictions",
-      "Update fit scores based on findings"
-    ],
-    estimatedTime: "2 weeks",
-    potentialImpact: "If successful, Desirability may increase by 8-12 points"
-  },
-  {
-    id: "2",
-    name: "MVP Prototype Development",
-    description: "Build a working prototype with core inventory tracking features to validate technical feasibility.",
-    fitType: "Feasibility",
-    expectedStrength: "Strong",
-    status: "in_progress",
-    progress: 35,
-    hypothesis: "Our team can build a functional MVP with real-time inventory syncing within 8 months using React Native and Node.js.",
-    steps: [
-      "Set up development environment and architecture",
-      "Build core inventory CRUD operations",
-      "Implement real-time syncing between devices",
-      "Create basic mobile interface",
-      "Test with sample data and multiple users",
-      "Document technical challenges and solutions"
-    ],
-    estimatedTime: "8 weeks",
-    potentialImpact: "If successful, Feasibility may increase by 15-20 points"
-  },
-  {
-    id: "3",
-    name: "Pricing Strategy Survey",
-    description: "Large-scale survey to understand price sensitivity across different business segments and feature sets.",
-    fitType: "Desirability",
-    expectedStrength: "Medium",
-    status: "completed",
-    progress: 100,
-    hypothesis: "Price sensitivity varies by business size, with micro-businesses preferring $30-40/month and small businesses accepting $50-60/month.",
-    steps: [
-      "Design survey with price sensitivity questions",
-      "Segment by business size and industry",
-      "Deploy via social media and business forums",
-      "Collect 200+ responses",
-      "Analyze price elasticity by segment"
-    ],
-    estimatedTime: "3 weeks",
-    potentialImpact: "Completed - contributed 5 points to Desirability",
-    results: {
-      quantitative: "Survey of 247 small business owners. Price acceptance: $30-40 (68%), $40-50 (45%), $50+ (23%). Willingness to pay premium for mobile-first design: 61%.",
-      qualitative: "Strong preference for simple, mobile-first solutions. Many mentioned frustration with complex enterprise tools. Price sensitivity higher in food service (avg $35) vs retail (avg $45).",
-      submittedAt: "2024-08-20"
-    }
-  },
-  {
-    id: "4",
-    name: "Competitive Feature Analysis",
-    description: "Detailed analysis of top 5 competitors to identify feature gaps and differentiation opportunities.",
-    fitType: "Desirability",
-    expectedStrength: "Medium",
-    status: "not_started",
-    progress: 0,
-    hypothesis: "Current solutions lack mobile-first design and intuitive UX, creating opportunity for differentiation.",
-    steps: [
-      "Identify top 5 direct competitors",
-      "Sign up for free trials and document user experience",
-      "Create feature comparison matrix",
-      "Analyze user reviews for pain points",
-      "Identify 3-5 key differentiation opportunities"
-    ],
-    estimatedTime: "1 week",
-    potentialImpact: "If successful, Desirability may increase by 3-5 points"
-  },
-  {
-    id: "5",
-    name: "Technical Architecture Review",
-    description: "Comprehensive review with senior developers to validate technical approach and timeline estimates.",
-    fitType: "Feasibility",
-    expectedStrength: "Strong",
-    status: "completed",
-    progress: 100,
-    hypothesis: "Technical team can deliver MVP in 6 months with current architecture plan.",
-    steps: [
-      "Review proposed technical architecture",
-      "Assess team capabilities and capacity",
-      "Identify potential technical risks",
-      "Estimate development timeline for each component",
-      "Create risk mitigation strategies"
-    ],
-    estimatedTime: "1 week",
-    potentialImpact: "Completed - reduced Feasibility by 10 points due to timeline concerns",
-    results: {
-      quantitative: "Revised timeline: 8-10 months for MVP (vs original 6 months). Key bottlenecks: real-time syncing (2 months), mobile development (3 months), POS integrations (2 months).",
-      qualitative: "Team has strong backend capabilities but limited mobile experience. Recommend hiring mobile developer or partnering with development agency. Architecture is sound but more complex than initially estimated.",
-      submittedAt: "2024-08-18"
-    }
-  }
-]
+type DbExperiment = {
+  id: string
+  project_id: string
+  hypothesis_id: string | null
+  name: string
+  description: string | null
+  fit_type: Experiment['fitType']
+  evidence_strength: 'weak' | 'medium' | 'strong' | null
+  status: 'planned' | 'running' | 'completed' | 'cancelled'
+  progress: number | null
+  estimated_time: string | null
+  potential_impact: string | null
+  steps: string[] | null
+  results_quantitative: string | null
+  results_qualitative: string | null
+  results_submitted_at: string | null
+  hypotheses?: {
+    statement: string | null
+  } | null
+}
 
 const fitTypeColors = {
   Desirability: "bg-pink-100 text-pink-800",
@@ -173,6 +87,12 @@ const statusConfig = {
     label: "Completed",
     color: "text-green-500",
     variant: "secondary" as const
+  },
+  cancelled: {
+    icon: AlertCircle,
+    label: "Cancelled",
+    color: "text-red-500",
+    variant: "outline" as const
   }
 }
 
@@ -181,7 +101,7 @@ function ExperimentCard({ experiment, isSelected, onClick }: {
   isSelected: boolean
   onClick: () => void 
 }) {
-  const status = statusConfig[experiment.status]
+  const status = statusConfig[experiment.status] ?? statusConfig.not_started
   const StatusIcon = status.icon
 
   return (
@@ -429,8 +349,118 @@ function ExperimentDetails({ experiment }: { experiment: Experiment }) {
   )
 }
 
+function mapStatus(status: DbExperiment['status']): Experiment['status'] {
+  switch (status) {
+    case 'planned':
+      return 'not_started'
+    case 'running':
+      return 'in_progress'
+    case 'completed':
+      return 'completed'
+    case 'cancelled':
+      return 'cancelled'
+    default:
+      return 'not_started'
+  }
+}
+
+function mapStrength(value: DbExperiment['evidence_strength']): Experiment['expectedStrength'] {
+  switch (value) {
+    case 'strong':
+      return 'Strong'
+    case 'weak':
+      return 'Weak'
+    case 'medium':
+    default:
+      return 'Medium'
+  }
+}
+
+function transformExperiment(record: DbExperiment): Experiment {
+  return {
+    id: record.id,
+    name: record.name,
+    description: record.description ?? '',
+    fitType: record.fit_type,
+    expectedStrength: mapStrength(record.evidence_strength),
+    status: mapStatus(record.status),
+    progress: record.progress ?? 0,
+    hypothesis: record.hypotheses?.statement ?? 'Unlinked hypothesis',
+    steps: record.steps ?? [],
+    estimatedTime: record.estimated_time ?? 'Not specified',
+    potentialImpact: record.potential_impact ?? 'Impact not documented yet.',
+    results: record.status === 'completed'
+      ? {
+          quantitative: record.results_quantitative ?? undefined,
+          qualitative: record.results_qualitative ?? undefined,
+          submittedAt: record.results_submitted_at ?? undefined,
+        }
+      : undefined,
+  }
+}
+
 export function ExperimentsPage() {
-  const [selectedExperiment, setSelectedExperiment] = React.useState<Experiment>(mockExperiments[0])
+  const supabase = React.useMemo(() => createClient(), [])
+  const { projects, isLoading: projectsLoading, error: projectsError } = useProjects()
+  const activeProjectId = React.useMemo(() => projects[0]?.id ?? null, [projects])
+
+  const [experiments, setExperiments] = React.useState<Experiment[]>([])
+  const [selectedExperiment, setSelectedExperiment] = React.useState<Experiment | null>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+
+  const fetchExperiments = React.useCallback(async () => {
+    if (!activeProjectId) {
+      setExperiments([])
+      setSelectedExperiment(null)
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      const { data, error: queryError } = await supabase
+        .from('experiments')
+        .select('*, hypotheses: hypothesis_id (statement)')
+        .eq('project_id', activeProjectId)
+        .order('created_at', { ascending: false })
+
+      if (queryError) throw queryError
+
+      const transformed = ((data as DbExperiment[]) ?? []).map(transformExperiment)
+      setExperiments(transformed)
+      setSelectedExperiment(transformed[0] ?? null)
+      setError(null)
+    } catch (err) {
+      console.error('Error fetching experiments:', err)
+      setError((err as Error).message)
+      setExperiments([])
+      setSelectedExperiment(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [activeProjectId, supabase])
+
+  React.useEffect(() => {
+    if (projectsLoading) return
+    fetchExperiments()
+  }, [projectsLoading, fetchExperiments])
+
+  if (projectsLoading) {
+    return (
+      <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+        Loading your projects…
+      </div>
+    )
+  }
+
+  if (!activeProjectId) {
+    return (
+      <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+        Create a project to start planning experiments.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -441,31 +471,69 @@ export function ExperimentsPage() {
             Run validation experiments and track results to improve your fit scores
           </p>
         </div>
-        <Button>
+        <Button disabled={isLoading}>
           <Plus className="h-4 w-4 mr-2" />
           Create Custom Experiment
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Experiments List */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Available Experiments</h2>
-          {mockExperiments.map((experiment) => (
-            <ExperimentCard
-              key={experiment.id}
-              experiment={experiment}
-              isSelected={selectedExperiment.id === experiment.id}
-              onClick={() => setSelectedExperiment(experiment)}
-            />
-          ))}
+      {(projectsError || error) && (
+        <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          {projectsError?.message || error}
         </div>
+      )}
 
-        {/* Experiment Details */}
-        <div className="lg:col-span-2">
-          <ExperimentDetails experiment={selectedExperiment} />
+      {isLoading ? (
+        <Card>
+          <CardContent className="p-6 text-sm text-muted-foreground">
+            Loading experiments…
+          </CardContent>
+        </Card>
+      ) : experiments.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+            <Play className="h-10 w-10 text-muted-foreground" />
+            <div>
+              <h3 className="text-lg font-semibold">No experiments yet</h3>
+              <p className="text-muted-foreground">
+                Start planning experiments to validate your hypotheses and improve fit scores.
+              </p>
+            </div>
+            <Button disabled>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Experiment
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Experiments List */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Available Experiments</h2>
+            {experiments.map((experiment) => (
+              <ExperimentCard
+                key={experiment.id}
+                experiment={experiment}
+                isSelected={selectedExperiment?.id === experiment.id}
+                onClick={() => setSelectedExperiment(experiment)}
+              />
+            ))}
+          </div>
+
+          {/* Experiment Details */}
+          <div className="lg:col-span-2">
+            {selectedExperiment ? (
+              <ExperimentDetails experiment={selectedExperiment} />
+            ) : (
+              <Card>
+                <CardContent className="p-6 text-sm text-muted-foreground">
+                  Select an experiment to view the plan and record results.
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

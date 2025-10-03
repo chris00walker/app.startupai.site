@@ -8,3 +8,5 @@ export * from './users';
 export * from './projects';
 export * from './evidence';
 export * from './reports';
+export * from './hypotheses';
+export * from './experiments';

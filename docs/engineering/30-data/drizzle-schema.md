@@ -30,10 +30,43 @@ frontend/src/db/schema/
 └── reports.ts       # AI-generated reports
 ```
 
-### Database Client
-- **Location:** `frontend/src/db/client.ts`
-- **Configuration:** Uses Supabase connection pooling (transaction mode)
-- **Connection:** `{ max: 1 }` for serverless compatibility
+### Database Architecture Decision
+
+**Browser vs Server Queries:**
+
+When building React applications with Supabase, it's critical to use the right client for the right context:
+
+#### ✅ **Browser Queries (React Hooks)**
+```typescript
+// In Client Components ('use client')
+import { createClient } from '@/lib/supabase/client';
+
+export function useProjects() {
+  const supabase = createClient();
+  const { data } = await supabase.from('projects').select('*');
+  return data;
+}
+```
+
+#### ✅ **Server Queries (API Routes/Server Components)**
+```typescript
+// In API Routes and Server Components
+import { db } from '@/db/client';
+
+export async function GET() {
+  const data = await db.select().from(projects);
+  return Response.json(data);
+}
+```
+
+**Rule of Thumb:**
+- **Client Components** → Supabase client (browser-compatible)
+- **Server Components/API Routes** → Drizzle ORM (Node.js)
+- **Never mix** → Don't import Drizzle in client components
+
+---
+
+## Schema Files
 
 ---
 
@@ -66,7 +99,7 @@ type NewUserProfile = typeof userProfiles.$inferInsert;
 
 ### 2. projects
 
-Stores user projects for evidence-led strategy development.
+Stores user projects for evidence-led strategy development with comprehensive portfolio management.
 
 **Columns:**
 | Column | Type | Constraints | Description |
@@ -76,8 +109,22 @@ Stores user projects for evidence-led strategy development.
 | `name` | TEXT | NOT NULL | Project name |
 | `description` | TEXT | NULLABLE | Project description |
 | `status` | TEXT | DEFAULT 'active', NOT NULL | Project status |
-| `created_at` | TIMESTAMPTZ | DEFAULT NOW(), NOT NULL | Creation timestamp |
-| `updated_at` | TIMESTAMPTZ | DEFAULT NOW(), NOT NULL | Last update timestamp |
+
+#### Portfolio Management Fields (Added Oct 2, 2025)
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `stage` | TEXT | DEFAULT 'DESIRABILITY', CHECK (stage IN (...)) | Current validation stage |
+| `gate_status` | TEXT | DEFAULT 'Pending', CHECK (gate_status IN (...)) | Gate passage status |
+| `risk_budget_planned` | DECIMAL(10,2) | DEFAULT 0 | Planned risk budget allocation |
+| `risk_budget_actual` | DECIMAL(10,2) | DEFAULT 0 | Actual risk budget spent |
+| `risk_budget_delta` | DECIMAL(10,2) | DEFAULT 0 | Budget variance percentage |
+| `assigned_consultant` | TEXT | NULLABLE | Consultant name |
+| `last_activity` | TIMESTAMPTZ | DEFAULT NOW() | Last activity timestamp |
+| `next_gate_date` | DATE | NULLABLE | Next gate assessment date |
+| `evidence_quality` | DECIMAL(3,2) | DEFAULT 0, CHECK (0-1) | Overall evidence quality score |
+| `hypotheses_count` | INTEGER | DEFAULT 0 | Number of hypotheses defined |
+| `experiments_count` | INTEGER | DEFAULT 0 | Number of experiments conducted |
+| `evidence_count` | INTEGER | DEFAULT 0 | Total evidence items collected |
 
 **Foreign Keys:**
 - `user_id` → `user_profiles(id)` ON DELETE CASCADE
@@ -86,6 +133,28 @@ Stores user projects for evidence-led strategy development.
 ```typescript
 type Project = typeof projects.$inferSelect;
 type NewProject = typeof projects.$inferInsert;
+```
+
+**Portfolio Project Mapping:**
+Database fields automatically transform to UI `PortfolioProject` type:
+```typescript
+// Database (snake_case)
+{
+  name: "TechStart Inc.",
+  gate_status: "Pending",
+  risk_budget_planned: 5.0,
+  last_activity: "2025-10-02T18:30:00Z"
+}
+
+// ↓ Transforms to ↓
+
+// UI (PortfolioProject camelCase)
+{
+  clientName: "TechStart Inc.",
+  gateStatus: "Pending",
+  riskBudget: { planned: 5.0, ... },
+  lastActivity: "2 hours ago"
+}
 ```
 
 ---

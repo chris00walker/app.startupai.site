@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Target, Users, Cog, DollarSign, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useProjects } from '@/hooks/useProjects'
 
 // Types
 interface Hypothesis {
@@ -15,49 +17,12 @@ interface Hypothesis {
   statement: string
   type: 'desirable' | 'feasible' | 'viable'
   importance: 'high' | 'medium' | 'low'
-  evidence: 'none' | 'weak' | 'strong'
+  evidence: 'none' | 'weak' | 'medium' | 'strong'
   status: 'untested' | 'testing' | 'validated' | 'invalidated'
   source: string // BMC section or VPC section
   createdAt: Date
   updatedAt: Date
 }
-
-// Mock data
-const mockHypotheses: Hypothesis[] = [
-  {
-    id: '1',
-    statement: 'We believe that millennial parents with kids ages 5-9 will pay $15 a month for curated science projects that match their kids\' education level',
-    type: 'desirable',
-    importance: 'high',
-    evidence: 'none',
-    status: 'untested',
-    source: 'Value Propositions',
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-15')
-  },
-  {
-    id: '2',
-    statement: 'We believe we can purchase science project materials at wholesale for less than $3 a box',
-    type: 'viable',
-    importance: 'high',
-    evidence: 'weak',
-    status: 'testing',
-    source: 'Cost Structure',
-    createdAt: new Date('2024-01-16'),
-    updatedAt: new Date('2024-01-20')
-  },
-  {
-    id: '3',
-    statement: 'We believe we can create partnerships with educational content providers',
-    type: 'feasible',
-    importance: 'medium',
-    evidence: 'strong',
-    status: 'validated',
-    source: 'Key Partners',
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-25')
-  }
-]
 
 const typeConfig = {
   desirable: { 
@@ -89,6 +54,7 @@ const importanceConfig = {
 const evidenceConfig = {
   none: { label: 'No Evidence', color: 'bg-red-100 text-red-800' },
   weak: { label: 'Weak Evidence', color: 'bg-orange-100 text-orange-800' },
+  medium: { label: 'Moderate Evidence', color: 'bg-yellow-100 text-yellow-800' },
   strong: { label: 'Strong Evidence', color: 'bg-green-100 text-green-800' }
 }
 
@@ -99,8 +65,39 @@ const statusConfig = {
   invalidated: { label: 'Invalidated', color: 'bg-red-100 text-red-800', icon: XCircle }
 }
 
+type DbHypothesis = {
+  id: string
+  project_id: string
+  statement: string
+  type: Hypothesis['type']
+  importance: Hypothesis['importance']
+  evidence_strength: Hypothesis['evidence']
+  status: Hypothesis['status']
+  source: string | null
+  created_at: string
+  updated_at: string
+}
+
+function transformHypothesis(record: DbHypothesis): Hypothesis {
+  return {
+    id: record.id,
+    statement: record.statement,
+    type: record.type,
+    importance: record.importance,
+    evidence: record.evidence_strength,
+    status: record.status,
+    source: record.source ?? 'Unspecified',
+    createdAt: new Date(record.created_at),
+    updatedAt: new Date(record.updated_at)
+  }
+}
+
 export default function HypothesisManager() {
-  const [hypotheses, setHypotheses] = useState<Hypothesis[]>(mockHypotheses)
+  const supabase = useMemo(() => createClient(), [])
+  const { projects, isLoading: projectsLoading, error: projectsError } = useProjects()
+  const activeProjectId = useMemo(() => projects[0]?.id ?? null, [projects])
+
+  const [hypotheses, setHypotheses] = useState<Hypothesis[]>([])
   const [selectedType, setSelectedType] = useState<string>('all')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newHypothesis, setNewHypothesis] = useState({
@@ -109,28 +106,78 @@ export default function HypothesisManager() {
     importance: 'medium' as const,
     source: ''
   })
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const filteredHypotheses = selectedType === 'all' 
-    ? hypotheses 
-    : hypotheses.filter(h => h.type === selectedType)
-
-  const handleCreateHypothesis = () => {
-    const hypothesis: Hypothesis = {
-      id: Date.now().toString(),
-      statement: newHypothesis.statement,
-      type: newHypothesis.type,
-      importance: newHypothesis.importance,
-      evidence: 'none',
-      status: 'untested',
-      source: newHypothesis.source,
-      createdAt: new Date(),
-      updatedAt: new Date()
+  const fetchHypotheses = useCallback(async () => {
+    if (!activeProjectId) {
+      setHypotheses([])
+      setIsLoading(false)
+      return
     }
-    
-    setHypotheses([...hypotheses, hypothesis])
-    setNewHypothesis({ statement: '', type: 'desirable', importance: 'medium', source: '' })
-    setIsCreateDialogOpen(false)
-  }
+
+    try {
+      setIsLoading(true)
+      const { data, error: queryError } = await supabase
+        .from('hypotheses')
+        .select('*')
+        .eq('project_id', activeProjectId)
+        .order('created_at', { ascending: false })
+
+      if (queryError) throw queryError
+
+      const transformed = ((data as DbHypothesis[]) ?? []).map(transformHypothesis)
+      setHypotheses(transformed)
+      setError(null)
+    } catch (err) {
+      console.error('Error fetching hypotheses:', err)
+      setError((err as Error).message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [activeProjectId, supabase])
+
+  useEffect(() => {
+    if (projectsLoading) return
+    fetchHypotheses()
+  }, [projectsLoading, fetchHypotheses])
+
+  const filteredHypotheses = useMemo(() => {
+    if (selectedType === 'all') return hypotheses
+    return hypotheses.filter(h => h.type === selectedType)
+  }, [selectedType, hypotheses])
+
+  const handleCreateHypothesis = useCallback(async () => {
+    if (!activeProjectId) return
+
+    try {
+      setIsSubmitting(true)
+      const { error: insertError } = await supabase
+        .from('hypotheses')
+        .insert({
+          project_id: activeProjectId,
+          statement: newHypothesis.statement,
+          type: newHypothesis.type,
+          importance: newHypothesis.importance,
+          evidence_strength: 'none',
+          status: 'untested',
+          source: newHypothesis.source || null
+        })
+
+      if (insertError) throw insertError
+
+      setNewHypothesis({ statement: '', type: 'desirable', importance: 'medium', source: '' })
+      setIsCreateDialogOpen(false)
+      setError(null)
+      await fetchHypotheses()
+    } catch (err) {
+      console.error('Error creating hypothesis:', err)
+      setError((err as Error).message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [activeProjectId, fetchHypotheses, newHypothesis.importance, newHypothesis.source, newHypothesis.statement, newHypothesis.type, supabase])
 
   // Prioritization Matrix Data
   const getMatrixPosition = (hypothesis: Hypothesis) => {
@@ -156,6 +203,22 @@ export default function HypothesisManager() {
       const pos = getMatrixPosition(h)
       return pos.importance === 0 && pos.evidence >= 1
     })
+  }
+
+  if (projectsLoading) {
+    return (
+      <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+        Loading your projects…
+      </div>
+    )
+  }
+
+  if (!activeProjectId) {
+    return (
+      <div className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">
+        Create a project to start capturing hypotheses.
+      </div>
+    )
   }
 
   return (
@@ -245,13 +308,19 @@ export default function HypothesisManager() {
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleCreateHypothesis} disabled={!newHypothesis.statement.trim()}>
+              <Button onClick={handleCreateHypothesis} disabled={!newHypothesis.statement.trim() || isSubmitting}>
                 Create Hypothesis
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
+
+      {(projectsError || error) && (
+        <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          {projectsError?.message || error}
+        </div>
+      )}
 
       {/* Main Content */}
       <Tabs defaultValue="list" className="space-y-6">
@@ -288,52 +357,67 @@ export default function HypothesisManager() {
           </div>
 
           {/* Hypothesis Cards */}
-          <div className="grid gap-4">
-            {filteredHypotheses.map((hypothesis) => {
-              const typeInfo = typeConfig[hypothesis.type]
-              const StatusIcon = statusConfig[hypothesis.status].icon
-              
-              return (
-                <Card key={hypothesis.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Badge className={typeInfo.color}>
-                            <typeInfo.icon className="h-3 w-3 mr-1" />
-                            {typeInfo.label}
-                          </Badge>
-                          <Badge className={importanceConfig[hypothesis.importance].color}>
-                            {importanceConfig[hypothesis.importance].label}
-                          </Badge>
-                          <Badge className={evidenceConfig[hypothesis.evidence].color}>
-                            {evidenceConfig[hypothesis.evidence].label}
-                          </Badge>
-                          <Badge className={statusConfig[hypothesis.status].color}>
-                            <StatusIcon className="h-3 w-3 mr-1" />
-                            {statusConfig[hypothesis.status].label}
-                          </Badge>
+          {isLoading ? (
+            <Card>
+              <CardContent className="p-6 text-sm text-muted-foreground">
+                Loading hypotheses…
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {filteredHypotheses.map((hypothesis) => {
+                const typeInfo = typeConfig[hypothesis.type]
+                const StatusIcon = statusConfig[hypothesis.status].icon
+                
+                return (
+                  <Card key={hypothesis.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge className={typeInfo.color}>
+                              <typeInfo.icon className="h-3 w-3 mr-1" />
+                              {typeInfo.label}
+                            </Badge>
+                            <Badge className={importanceConfig[hypothesis.importance].color}>
+                              {importanceConfig[hypothesis.importance].label}
+                            </Badge>
+                            <Badge className={evidenceConfig[hypothesis.evidence].color}>
+                              {evidenceConfig[hypothesis.evidence].label}
+                            </Badge>
+                            <Badge className={statusConfig[hypothesis.status].color}>
+                              <StatusIcon className="h-3 w-3 mr-1" />
+                              {statusConfig[hypothesis.status].label}
+                            </Badge>
+                          </div>
+                          <p className="text-sm leading-relaxed">{hypothesis.statement}</p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>Source: {hypothesis.source}</span>
+                            <span>Created: {hypothesis.createdAt.toLocaleDateString()}</span>
+                          </div>
                         </div>
-                        <p className="text-sm leading-relaxed">{hypothesis.statement}</p>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Source: {hypothesis.source}</span>
-                          <span>Created: {hypothesis.createdAt.toLocaleDateString()}</span>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" disabled>
+                            Edit
+                          </Button>
+                          <Button variant="outline" size="sm" disabled>
+                            Test
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Test
-                        </Button>
-                      </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+              {!filteredHypotheses.length && (
+                <Card>
+                  <CardContent className="p-6 text-sm text-muted-foreground">
+                    No hypotheses found for this filter.
                   </CardContent>
                 </Card>
-              )
-            })}
-          </div>
+              )}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="matrix" className="space-y-6">
