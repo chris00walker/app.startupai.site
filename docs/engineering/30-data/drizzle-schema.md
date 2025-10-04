@@ -12,7 +12,7 @@ This document describes the Drizzle ORM schema implementation for the StartupAI 
 
 **Related Documentation:**
 - [Supabase Setup](./supabase-setup.md)
-- [Architecture Specification](../../../../startupai.site/docs/technical/high_level_architectural_spec.md#9-database-architecture)
+- [Master Implementation Guide](../../../../startupai.site/docs/technical/two-site-implementation-plan.md) - Database architecture
 
 ---
 
@@ -347,7 +347,7 @@ DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-us-east-1.pool
 
 1. **Enable Row Level Security (RLS)**
    - Add RLS policies for secure multi-tenant access
-   - See [Architecture Spec](../../../../startupai.site/docs/technical/high_level_architectural_spec.md#93-row-level-security)
+   - See [Master Implementation Guide](../../../../startupai.site/docs/technical/two-site-implementation-plan.md#33-database-architecture)
 
 2. **Add Indexes**
    - Create indexes for frequently queried columns

@@ -28,19 +28,17 @@ All **shared documentation** lives in the StartupAI repository:
 - **UX Design:** [Product Platform UX](../startupai.site/docs/design/user-experience.md#phase-2-onboarding-first-value-appstartupaisite-10-20-minutes)
 
 #### Technical Implementation
-- **System Architecture:** [Product Platform Architecture](../startupai.site/docs/technical/high_level_architectural_spec.md#32-product-platform-appstartupaisite-the-product)
-- **Database Architecture:** [Supabase Configuration](../startupai.site/docs/technical/high_level_architectural_spec.md#9-database-architecture)
-- **Storage Architecture:** [Supabase Storage](../startupai.site/docs/technical/high_level_architectural_spec.md#10-storage-architecture)
-- **Implementation Plan:** [Phases 3-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
-- **Supabase Setup:** [Database Configuration](../startupai.site/docs/technical/two-site-implementation-plan.md#21-supabase-setup--configuration)
-- **Authentication:** [Token Validation](../startupai.site/docs/technical/two-site-implementation-plan.md#41-authentication-receiver--user-onboarding)
+- **Master Implementation Guide:** [Complete Technical Reference](../startupai.site/docs/technical/two-site-implementation-plan.md) - Single source for architecture, roadmap, and status
+- **System Architecture:** [Product Platform Stack](../startupai.site/docs/technical/two-site-implementation-plan.md#32-product-site-stack-appstartupaisite)
+- **Database Architecture:** [Supabase Configuration](../startupai.site/docs/technical/two-site-implementation-plan.md#33-database-architecture)
+- **Implementation Phases:** [Phase 1-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-implementation-phases)
+- **Current Status:** [All Status Tracking](../startupai.site/docs/technical/two-site-implementation-plan.md#2-current-implementation-status)
 - **Vector Search:** [Semantic Search Implementation](../startupai.site/docs/technical/two-site-implementation-plan.md#vector-search-functions)
 
 #### Cross-Site Integration
 - **Handoff Process:** [Secure Token Validation](../startupai.site/docs/product/user-stories.md#story-02-token-validation-session-creation-appstartupaisite)
-- **Shared Services:** [Supabase Integration](../startupai.site/docs/technical/high_level_architectural_spec.md#34-shared-infrastructure--services)
-- **Database Integration:** [Shared Supabase Database](../startupai.site/docs/technical/high_level_architectural_spec.md#9-database-architecture)
-- **Storage Integration:** [Cross-Site File Management](../startupai.site/docs/technical/high_level_architectural_spec.md#10-storage-architecture)
+- **Shared Services:** [Supabase Integration](../startupai.site/docs/technical/two-site-implementation-plan.md#33-database-architecture)
+- **Authentication:** [Cross-Site Auth Flow](../startupai.site/docs/technical/two-site-implementation-plan.md#23-authentication)
 
 ---
 

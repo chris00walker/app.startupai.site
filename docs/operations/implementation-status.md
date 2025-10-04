@@ -559,9 +559,9 @@ Supabase (Task 1)
 ## Resources
 
 ### Documentation
+- [Master Implementation Guide](../../../startupai.site/docs/technical/two-site-implementation-plan.md) - Single source of truth
 - [Supabase Setup](../engineering/30-data/supabase-setup.md)
 - [CrewAI Guide](../../backend/CREW_AI.md)
-- [Architecture](../../../startupai.site/docs/technical/high_level_architectural_spec.md)
 
 ### Tools
 - Supabase Dashboard: https://supabase.com/dashboard

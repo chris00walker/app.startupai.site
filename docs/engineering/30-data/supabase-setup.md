@@ -19,8 +19,7 @@ This guide covers the complete Supabase setup for StartupAI's two-site architect
 - **Created:** September 29, 2025
 
 **Related Documentation:**
-- [Architecture Specification](../../../../startupai.site/docs/technical/high_level_architectural_spec.md#9-database-architecture)
-- [Implementation Plan](../../../../startupai.site/docs/technical/two-site-implementation-plan.md#21-supabase-setup--configuration)
+- [Master Implementation Guide](../../../../startupai.site/docs/technical/two-site-implementation-plan.md) - Database architecture and setup
 
 ---
 
