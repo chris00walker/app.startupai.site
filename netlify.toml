@@ -7,7 +7,17 @@
   NODE_VERSION = "18"
   PNPM_VERSION = "9.12.1"
 
-# Handle SPA routing for static export
+[functions]
+  directory = "netlify/functions"
+  # Python functions will use Python 3.10 automatically
+
+# API endpoint for CrewAI backend
+[[redirects]]
+  from = "/api/analyze"
+  to = "/.netlify/functions/crew-analyze"
+  status = 200
+
+# Handle SPA routing for static export (must be last)
 [[redirects]]
   from = "/*"
   to = "/index.html"
