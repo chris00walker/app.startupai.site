@@ -5,7 +5,9 @@
  * Extends the built-in auth.users table with application-specific data.
  */
 
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+
+export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant', 'trial']);
 
 export const userProfiles = pgTable('user_profiles', {
   // Primary key references auth.users(id) from Supabase Auth
@@ -19,6 +21,8 @@ export const userProfiles = pgTable('user_profiles', {
   subscriptionTier: text('subscription_tier').default('free').notNull(),
   subscriptionStatus: text('subscription_status').default('trial'),
   trialExpiresAt: timestamp('trial_expires_at', { withTimezone: true }),
+  planStatus: text('plan_status').default('active').notNull(),
+  role: userRoleEnum('role').default('trial').notNull(),
   
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -27,3 +31,4 @@ export const userProfiles = pgTable('user_profiles', {
 
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
+export type UserRole = (typeof userRoleEnum.enumValues)[number];

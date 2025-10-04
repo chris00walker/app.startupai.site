@@ -18,9 +18,18 @@ import {
   Sparkles
 } from "lucide-react"
 import { useHealthCheck } from "@/hooks/useHealthCheck"
+import { useRoleInfo } from "@/lib/auth/hooks"
 
 function HomePage() {
   const { isBackendOnline, isLoading, isError } = useHealthCheck()
+  const roleInfo = useRoleInfo()
+
+  const isAuthenticated = roleInfo.isAuthenticated
+  const showConsultant = !isAuthenticated || roleInfo.canAccessConsultant
+  const showFounder = !isAuthenticated || roleInfo.canAccessFounder || roleInfo.role === "trial"
+
+  const consultantHref = isAuthenticated ? "/dashboard" : "/login?next=/dashboard"
+  const founderHref = isAuthenticated ? "/founder-dashboard" : "/login?next=/founder-dashboard"
 
   const features = [
     {
@@ -76,12 +85,16 @@ function HomePage() {
                   {isLoading && !isError ? 'Checking...' : isBackendOnline ? 'Services Online' : 'Services Offline'}
                 </span>
               </div>
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard">Consultant</Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link href="/founder-dashboard">Founder</Link>
-              </Button>
+              {showConsultant && (
+                <Button variant="ghost" asChild>
+                  <Link href={consultantHref}>{isAuthenticated ? "Consultant" : "Consultant Login"}</Link>
+                </Button>
+              )}
+              {showFounder && (
+                <Button variant="ghost" asChild>
+                  <Link href={founderHref}>{isAuthenticated ? "Founder" : "Founder Login"}</Link>
+                </Button>
+              )}
               <Button asChild>
                 <Link href="/login">Sign In</Link>
               </Button>
@@ -106,18 +119,22 @@ function HomePage() {
             strategic planning with collaborative AI agents following proven Strategyzer methodology.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-            <Button size="lg" className="w-full sm:w-auto" asChild>
-              <Link href="/founder-dashboard">
+            {showFounder && (
+              <Button size="lg" className="w-full sm:w-auto" asChild>
+                <Link href={founderHref}>
                 <Target className="h-4 w-4 mr-2" />
-                Founder Validation
+                  {isAuthenticated ? "Founder Workspace" : "Founder Validation"}
               </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
-              <Link href="/dashboard">
+              </Button>
+            )}
+            {showConsultant && (
+              <Button variant="outline" size="lg" className="w-full sm:w-auto" asChild>
+                <Link href={consultantHref}>
                 <Brain className="h-4 w-4 mr-2" />
-                Consultant Platform
+                  {isAuthenticated ? "Consultant Platform" : "Consultant Demo"}
               </Link>
-            </Button>
+              </Button>
+            )}
           </div>
         </div>
       </section>

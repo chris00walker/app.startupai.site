@@ -6,6 +6,8 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getUserProfile } from '@/db/queries/users';
+import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
 
 export async function GET(request: Request) {
   console.log('=== OAuth Callback Started ===');
@@ -14,20 +16,20 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const accessToken = searchParams.get('access_token');
   const refreshToken = searchParams.get('refresh_token');
-  const next = searchParams.get('next') ?? '/dashboard';
+  const rawNext = searchParams.get('next');
 
   console.log('Callback URL:', request.url);
   console.log('Code present:', !!code);
   console.log('Access token present:', !!accessToken);
   console.log('Refresh token present:', !!refreshToken);
-  console.log('Next destination:', next);
+  console.log('Next destination:', rawNext);
   console.log('Origin:', origin);
 
   const supabase = await createClient();
 
   if (accessToken && refreshToken) {
     console.log('Setting session from provided tokens...');
-    const { error: sessionError } = await supabase.auth.setSession({
+    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
@@ -38,8 +40,13 @@ export async function GET(request: Request) {
         `${origin}/auth/auth-code-error?error=${encodeURIComponent(sessionError.message)}`
       );
     }
-
-    const redirectUrl = buildRedirectUrl({ request, origin, next });
+    const redirectUrl = await resolveRedirect({
+      request,
+      origin,
+      next: rawNext,
+      supabase,
+      userId: sessionData?.session?.user?.id,
+    });
     console.log('Redirecting after token session set to:', redirectUrl);
     return NextResponse.redirect(redirectUrl);
   }
@@ -56,8 +63,14 @@ export async function GET(request: Request) {
     console.log('Session exchange successful!');
     console.log('User:', data?.user?.email);
     
-    const redirectUrl = buildRedirectUrl({ request, origin, next });
-    
+    const redirectUrl = await resolveRedirect({
+      request,
+      origin,
+      next: rawNext,
+      supabase,
+      userId: data.session?.user?.id,
+    });
+
     console.log('Redirecting to:', redirectUrl);
     return NextResponse.redirect(redirectUrl);
   }
@@ -66,21 +79,62 @@ export async function GET(request: Request) {
   return NextResponse.redirect(`${origin}/auth/auth-code-error?error=no_code`);
 }
 
-function buildRedirectUrl({
+async function resolveRedirect({
   request,
   origin,
   next,
+  supabase,
+  userId,
 }: {
   request: Request;
   origin: string;
-  next: string;
+  next: string | null;
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  userId?: string;
+}) {
+  const defaultPath = '/dashboard';
+  const sanitizedNext = sanitizePath(next);
+  if (sanitizedNext) {
+    return buildRedirectUrl({ request, origin, path: sanitizedNext });
+  }
+
+  if (!userId) {
+    console.warn('resolveRedirect: Missing user ID, falling back to default path');
+    return buildRedirectUrl({ request, origin, path: defaultPath });
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const profile = await getUserProfile(userId);
+
+  const role = deriveRole({
+    profileRole: profile?.role,
+    appRole: user?.app_metadata?.role as string | undefined,
+  });
+
+  const planStatus = profile?.planStatus ?? profile?.subscriptionStatus ?? undefined;
+
+  const resolvedPath = getRedirectForRole({ role, planStatus });
+  return buildRedirectUrl({ request, origin, path: resolvedPath });
+}
+
+function buildRedirectUrl({
+  request,
+  origin,
+  path,
+}: {
+  request: Request;
+  origin: string;
+  path: string;
 }) {
   const forwardedHost = request.headers.get('x-forwarded-host');
   const isLocalEnv = process.env.NODE_ENV === 'development';
 
   return isLocalEnv
-    ? `${origin}${next}`
+    ? `${origin}${path}`
     : forwardedHost
-      ? `https://${forwardedHost}${next}`
-      : `${origin}${next}`;
+      ? `https://${forwardedHost}${path}`
+      : `${origin}${path}`;
 }

@@ -16,6 +16,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useRoleInfo } from "@/lib/auth/hooks"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -27,6 +28,14 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, breadcrumbs = [], userType = "consultant" }: DashboardLayoutProps) {
+  const roleInfo = useRoleInfo()
+
+  const resolvedUserType: "consultant" | "founder" = roleInfo.loading
+    ? userType
+    : roleInfo.role === "founder" || roleInfo.role === "trial"
+      ? "founder"
+      : "consultant"
+
   return (
     <SidebarProvider
       style={
@@ -36,7 +45,7 @@ export function DashboardLayout({ children, breadcrumbs = [], userType = "consul
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" userType={userType} />
+      <AppSidebar variant="inset" userType={resolvedUserType} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

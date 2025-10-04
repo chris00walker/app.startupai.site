@@ -21,6 +21,7 @@ import {
 import {
   mockPortfolioProjects,
 } from '../data/portfolioMockData';
+import type { UserRole } from '../db/schema';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -41,28 +42,49 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 /**
  * Create a test user for seeding data
  */
-async function createTestUser() {
-  console.log('\n🔐 Getting/creating test user...');
-  
-  const testEmail = 'test@startupai.site';
-  const testPassword = 'Test123456!';
+async function getOrCreateUser({
+  email,
+  password,
+  role,
+  subscriptionTier,
+  subscriptionStatus,
+  planStatus = 'active',
+  trialExpiresAt = null,
+  company = 'StartupAI',
+  fullName,
+}: {
+  email: string;
+  password: string;
+  role: UserRole;
+  subscriptionTier: string;
+  subscriptionStatus: string;
+  planStatus?: string;
+  trialExpiresAt?: string | null;
+  company?: string;
+  fullName: string;
+}) {
+  console.log(`\n🔐 Ensuring user exists: ${email}`);
 
-  // First, check if user already exists
-  const { data, error: listError } = await supabase.auth.admin.listUsers();
-  
+  const { data: listData, error: listError } = await supabase.auth.admin.listUsers();
   if (listError) {
     console.error('❌ Error listing users:', listError);
     throw listError;
   }
 
-  let testUser = data.users?.find(u => u.email === testEmail);
-  
-  // If user doesn't exist, create it
-  if (!testUser) {
+  let user = listData.users?.find(u => u.email === email);
+
+  if (!user) {
     const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
-      email: testEmail,
-      password: testPassword,
+      email,
+      password,
       email_confirm: true,
+      app_metadata: {
+        role,
+      },
+      user_metadata: {
+        full_name: fullName,
+        company,
+      },
     });
 
     if (signUpError) {
@@ -70,35 +92,39 @@ async function createTestUser() {
       throw signUpError;
     }
 
-    testUser = signUpData.user;
-  }
-  
-  if (!testUser) {
-    throw new Error('Test user not found');
+    user = signUpData.user;
+  } else if (user.app_metadata?.role !== role) {
+    const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, {
+      app_metadata: {
+        ...user.app_metadata,
+        role,
+      },
+    });
+
+    if (updateError) {
+      console.error('❌ Error updating user metadata:', updateError);
+      throw updateError;
+    }
   }
 
-  console.log(`✅ Test user ready: ${testEmail} (${testUser.id})`);
-  console.log(`   Password: ${testPassword}`);
-  
-  return testUser.id;
-}
+  if (!user) {
+    throw new Error(`User not found after creation: ${email}`);
+  }
 
-/**
- * Seed user profile
- */
-async function seedUserProfile(userId: string) {
-  console.log('\n👤 Seeding user profile...');
-  
+  console.log(`✅ User ready: ${email} (${user.id}) [role=${role}]`);
+
   const { data, error } = await supabase
     .from('user_profiles')
     .upsert({
-      id: userId,
-      email: 'test@startupai.site',
-      full_name: 'Test User',
-      company: 'StartupAI Demo',
-      subscription_tier: 'pro',
-      subscription_status: 'active',
-      trial_expires_at: null,
+      id: user.id,
+      email,
+      full_name: fullName,
+      company,
+      subscription_tier: subscriptionTier,
+      subscription_status: subscriptionStatus,
+      plan_status: planStatus,
+      trial_expires_at: trialExpiresAt,
+      role,
     }, {
       onConflict: 'id'
     })
@@ -106,12 +132,15 @@ async function seedUserProfile(userId: string) {
     .single();
 
   if (error) {
-    console.error('❌ Error seeding user profile:', error);
+    console.error('❌ Error upserting user profile:', error);
     throw error;
   }
 
-  console.log('✅ User profile seeded');
-  return data;
+  return {
+    userId: user.id,
+    profile: data,
+    credentials: { email, password },
+  };
 }
 
 /**
@@ -334,25 +363,70 @@ async function seed() {
 
   try {
     // 1. Create test user
-    const userId = await createTestUser();
+    const users = await Promise.all([
+      getOrCreateUser({
+        email: 'admin@startupai.site',
+        password: 'Admin123456!',
+        role: 'admin',
+        subscriptionTier: 'enterprise',
+        subscriptionStatus: 'active',
+        planStatus: 'active',
+        company: 'StartupAI Admin',
+        fullName: 'System Administrator',
+      }),
+      getOrCreateUser({
+        email: 'founder@startupai.site',
+        password: 'Founder123!',
+        role: 'founder',
+        subscriptionTier: 'pro',
+        subscriptionStatus: 'active',
+        planStatus: 'active',
+        company: 'Founder Co.',
+        fullName: 'Founder User',
+      }),
+      getOrCreateUser({
+        email: 'consultant@startupai.site',
+        password: 'Consultant123!',
+        role: 'consultant',
+        subscriptionTier: 'enterprise',
+        subscriptionStatus: 'active',
+        planStatus: 'active',
+        company: 'Consultant Collective',
+        fullName: 'Consultant User',
+      }),
+      getOrCreateUser({
+        email: 'trial@startupai.site',
+        password: 'Trial123!',
+        role: 'trial',
+        subscriptionTier: 'free',
+        subscriptionStatus: 'trial',
+        planStatus: 'trialing',
+        trialExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        company: 'Trial Startup',
+        fullName: 'Trial User',
+      }),
+    ]);
 
-    // 2. Seed user profile
-    await seedUserProfile(userId);
+    const consultantUser = users.find(u => u.profile.role === 'consultant');
+    if (!consultantUser) {
+      throw new Error('Consultant user not seeded correctly');
+    }
 
-    // 3. Seed projects
-    const projects = await seedProjects(userId);
+    // 2. Seed projects for consultant persona
+    const projects = await seedProjects(consultantUser.userId);
 
-    // 4. Seed evidence
+    // 3. Seed evidence
     await seedEvidence(projects);
 
-    // 5. Seed reports
+    // 4. Seed reports
     await seedReports(projects);
 
     console.log('\n' + '━'.repeat(50));
     console.log('✅ Database seeded successfully!\n');
-    console.log('📝 Test credentials:');
-    console.log('   Email: test@startupai.site');
-    console.log('   Password: Test123456!');
+    console.log('📝 Seeded user credentials:');
+    for (const user of users) {
+      console.log(`   ${user.profile.role.toUpperCase()}: ${user.credentials.email} / ${user.credentials.password}`);
+    }
     console.log('\n💡 You can now login and see the seeded data!');
     
   } catch (error) {

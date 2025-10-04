@@ -1,9 +1,17 @@
 # StartupAI Implementation Status - COMPREHENSIVE AUDIT
 
 **Project:** Both Sites (Marketing + Product)  
-**Last Updated:** October 2, 2025 21:22 UTC-3  
-**Audit Date:** October 2, 2025  
+**Last Updated:** October 4, 2025 14:30 UTC-3  
+**Audit Date:** October 4, 2025  
 **Current Phase:** Foundation Complete | UI Development 60-70% | Backend Integration 45% ⬆️
+
+---
+
+## Related Documentation
+
+- `docs/operations/database-seeding.md` — Supabase seeding runbook and troubleshooting.
+- `docs/operations/routing-consolidation-plan.md` — Hybrid router clean-up options and decision matrix.
+- `startupai.site/docs/technical/two-site-implementation-plan.md` — Cross-site architecture roadmap and phase planning.
 
 ---
 
@@ -25,6 +33,11 @@ AI Backend (CrewAI)   [░░░░░░░░░░]  0%  ❌
 4. Database schema expanded with full portfolio management fields
 5. Storage buckets migration created (4 buckets with RLS)
 6. Hook architecture established (Browser vs Server queries)
+7. Role-based redirects enforce founder vs consultant dashboards (`src/app/auth/callback/route.ts`)
+
+**ℹ️ In Progress:**
+- Navigation now adapts to Supabase roles; finalize trial usage guardrails and surface messaging once backend limits land
+- Netlify production env missing `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; update build settings and redeploy
 
 **🔧 Technical Architecture Decisions:**
 - **Browser Queries:** Use Supabase client in React hooks (`'use client'` components)
@@ -35,59 +48,10 @@ AI Backend (CrewAI)   [░░░░░░░░░░]  0%  ❌
 
 ## Database Integration Status
 
-### ✅ **Schema Expansion Complete**
-**Enhanced Projects Table:** Added 13 portfolio management fields
-- Stage tracking (DESIRABILITY → SCALE)
-- Gate status (Pending/Passed/Failed)
-- Risk budget tracking (planned/actual/delta)
-- Consultant assignment
-- Activity timestamps
-- Evidence quality metrics
-- Hypothesis/experiment/evidence counts
-
-**New Tables Added:**
-- `hypotheses` - Business hypothesis tracking
-- `evidence` - Vector embeddings ready (pgvector extension needed)
-- `experiments` - Hypothesis testing
-- `reports` - AI-generated assessments
-- `gate_policies` - Configurable validation gates
-- `override_requests` - Approval workflow
-- `audit_log` - Tamper-evident trail
-
-**Migration Files:**
-- `00001_initial_schema.sql` - Complete schema with 8 tables
-- `00002_expand_projects_table.sql` - Portfolio fields for existing projects
-- `00003_storage_buckets.sql` - File storage configuration
-
-### ✅ **Type-Safe Queries Implemented**
-**Files Created:**
-- `db/queries/users.ts` - User profile operations
-- `db/queries/projects.ts` - Full CRUD with portfolio fields
-- `db/queries/evidence.ts` - Evidence management
-- `db/queries/reports.ts` - AI report operations
-
-**Architecture:** Type-safe Drizzle ORM queries for server-side operations
-
-### ✅ **UI/DB Connection Established**
-**Hook Created:** `/frontend/src/hooks/useProjects.ts`
-- Transforms database records to `PortfolioProject` type
-- Smart date formatting (relative time, gate dates)
-- Loading states and error handling
-- Browser-compatible Supabase client queries
-
-**Dashboard Integration:**
-- Real data loading with "Live Data" badge
-- Fallback to mock data when database empty
-- Loading spinners and error boundaries
-
-### ✅ **Database Seeding Complete**
-**Test Data:** Comprehensive portfolio management examples
-- 6 projects with full portfolio fields
-- 10 evidence items with semantic content
-- 3 AI-generated reports
-- Test user: `test@startupai.site` / `Test123456!`
-
-**Seed Script:** `/frontend/src/db/seed.ts` - Fully functional with error handling
+- **Schema & migrations:** ✅ Complete. See `supabase/migrations/` for the authoritative scripts and `docs/operations/database-seeding.md` for the seeded dataset and verification steps.
+- **Query layer:** ✅ Live. Browser hooks via `frontend/src/hooks/useProjects.ts`; server-side Drizzle queries catalogued in `frontend/src/db/queries/`.
+- **UI wiring:** ✅ Dashboard and FIT surfaces now consume Supabase data (evidence, experiments, hypotheses). Refer to component docs/comments for transformation details.
+- **Seeding:** ✅ Seed runbook maintained in `docs/operations/database-seeding.md`; this audit no longer duplicates the step-by-step instructions.
 
 ## 🔍 SITE AUDIT RESULTS
 

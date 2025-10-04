@@ -29,6 +29,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { useRoleInfo } from "@/lib/auth/hooks"
 
 // Navigation item type
 interface NavigationItem {
@@ -214,26 +215,33 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProps) {
-  const navigationData = userType === "founder" ? founderNavigation : consultantNavigation
-  const platformLabel = userType === "founder" ? "Validation Framework" : "Platform"
-  const secondaryLabel = userType === "founder" ? "Fit Types" : "Canvas Generation"
+  const roleInfo = useRoleInfo()
+
+  const resolvedType: "consultant" | "founder" = roleInfo.role === "founder" ? "founder" : userType
+
+  const navigationData = resolvedType === "founder" ? founderNavigation : consultantNavigation
+  const platformLabel = resolvedType === "founder" ? "Validation Framework" : "Platform"
+  const secondaryLabel = resolvedType === "founder" ? "Fit Types" : "Canvas Generation"
   
-  const secondaryItems = userType === "founder" 
+  const secondaryItems = resolvedType === "founder" 
     ? (founderNavigation.validation || [])
     : (consultantNavigation.canvasTypes || [])
   
-  const toolsItems = userType === "founder" 
+  const toolsItems = resolvedType === "founder" 
     ? (founderNavigation.tools || [])
     : []
   
-  const settingsItems = userType === "founder"
+  const settingsItems = resolvedType === "founder"
     ? (founderNavigation.settings || [])
     : (consultantNavigation.settings || [])
+
+  const showConsultantMenu = roleInfo.canAccessConsultant
+  const showFounderMenu = roleInfo.canAccessFounder || roleInfo.role === "founder"
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
-        <Link href="/" className="block">
+        <Link href={showConsultantMenu ? "/dashboard" : "/founder-dashboard"} className="block">
           <div className="flex items-center gap-2 px-2 py-2 hover:bg-accent rounded-lg transition-colors cursor-pointer">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Brain className="h-4 w-4" />
@@ -241,7 +249,7 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
             <div className="flex flex-col">
               <span className="text-base font-semibold">StartupAI</span>
               <span className="text-xs text-muted-foreground">
-                {userType === "founder" ? "Founder Platform" : "Consulting Platform"}
+                {resolvedType === "founder" ? "Founder Platform" : "Consulting Platform"}
               </span>
             </div>
           </div>
@@ -253,7 +261,14 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationData.main.map((item) => (
+              {navigationData.main
+                .filter((item) => {
+                  if (item.url.startsWith("/founder") && !showFounderMenu) return false
+                  if (item.url.startsWith("/clients") && !showConsultantMenu) return false
+                  if (item.url.startsWith("/analytics") && !showConsultantMenu) return false
+                  return true
+                })
+                .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
@@ -269,26 +284,28 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
 
 
         {/* Secondary Navigation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>{secondaryLabel}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {secondaryItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.description}>
-                    <a href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {(resolvedType === "founder" ? showFounderMenu : showConsultantMenu) && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{secondaryLabel}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {secondaryItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.description}>
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* Tools (Founder only) */}
-        {userType === "founder" && toolsItems.length > 0 && (
+        {resolvedType === "founder" && showFounderMenu && toolsItems.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>Tools</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -336,10 +353,17 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
       
       <SidebarFooter>
         <div className="p-2">
-          <Button variant="outline" size="sm" className="w-full">
-            <Brain className="h-4 w-4 mr-2" />
-            AI Assistant
-          </Button>
+          <div className="space-y-2">
+            {roleInfo.trialReadonly && (
+              <div className="rounded-md bg-amber-50 border border-amber-200 p-2 text-xs text-amber-900">
+                Trial mode: upgrade to unlock full AI automation.
+              </div>
+            )}
+            <Button variant="outline" size="sm" className="w-full">
+              <Brain className="h-4 w-4 mr-2" />
+              AI Assistant
+            </Button>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>

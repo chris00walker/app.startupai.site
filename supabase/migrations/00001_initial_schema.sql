@@ -100,22 +100,19 @@ CREATE INDEX IF NOT EXISTS idx_hypotheses_status ON hypotheses(status);
 
 -- ============================================================================
 -- EVIDENCE TABLE (with Vector Search)
--- ============================================================================
 CREATE TABLE IF NOT EXISTS evidence (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   
-  -- Evidence Content
+  -- Evidence metadata
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   source TEXT NOT NULL,
-  evidence_type TEXT NOT NULL CHECK (evidence_type IN ('interview', 'survey', 'analytics', 'experiment', 'desk_research', 'observation')),
   
   -- Quality & Strength
   strength TEXT CHECK (strength IN ('weak', 'medium', 'strong')),
   quality_score DECIMAL(3,2) CHECK (quality_score >= 0 AND quality_score <= 1),
-  
   -- Semantic Search (Vector Embeddings) - requires pgvector extension
   -- embedding VECTOR(1536), -- OpenAI embeddings dimension (uncomment when pgvector enabled)
   
@@ -130,7 +127,6 @@ CREATE TABLE IF NOT EXISTS evidence (
 );
 
 CREATE INDEX IF NOT EXISTS idx_evidence_project_id ON evidence(project_id);
-CREATE INDEX IF NOT EXISTS idx_evidence_type ON evidence(evidence_type);
 
 -- Create vector similarity search index (requires pgvector extension)
 -- CREATE INDEX IF NOT EXISTS idx_evidence_embedding ON evidence 
@@ -212,7 +208,7 @@ CREATE TABLE IF NOT EXISTS gate_policies (
   -- Policy Configuration
   gate TEXT NOT NULL CHECK (gate IN ('DESIRABILITY', 'FEASIBILITY', 'VIABILITY')),
   min_experiments INTEGER NOT NULL DEFAULT 3,
-  required_evidence_types TEXT[] NOT NULL DEFAULT ARRAY['interview', 'analytics'],
+  required_fit_types TEXT[] NOT NULL DEFAULT ARRAY['Desirability', 'Feasibility'],
   
   -- Strength Mix Requirements
   min_weak_evidence INTEGER DEFAULT 0,
@@ -295,85 +291,198 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at);
 -- User Profiles
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own profile"
-ON user_profiles FOR SELECT
-USING (auth.uid() = id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'user_profiles'
+      AND policyname = 'Users can view own profile'
+  ) THEN
+    CREATE POLICY "Users can view own profile"
+    ON user_profiles FOR SELECT
+    USING (auth.uid() = id);
+  END IF;
 
-CREATE POLICY "Users can update own profile"
-ON user_profiles FOR UPDATE
-USING (auth.uid() = id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'user_profiles'
+      AND policyname = 'Users can update own profile'
+  ) THEN
+    CREATE POLICY "Users can update own profile"
+    ON user_profiles FOR UPDATE
+    USING (auth.uid() = id);
+  END IF;
+END$$;
 
 -- Projects
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own projects"
-ON projects FOR SELECT
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'projects' AND policyname = 'Users can view own projects'
+  ) THEN
+    CREATE POLICY "Users can view own projects"
+    ON projects FOR SELECT
+    USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can create own projects"
-ON projects FOR INSERT
-WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'projects' AND policyname = 'Users can create own projects'
+  ) THEN
+    CREATE POLICY "Users can create own projects"
+    ON projects FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can update own projects"
-ON projects FOR UPDATE
-USING (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'projects' AND policyname = 'Users can update own projects'
+  ) THEN
+    CREATE POLICY "Users can update own projects"
+    ON projects FOR UPDATE
+    USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can delete own projects"
-ON projects FOR DELETE
-USING (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'projects' AND policyname = 'Users can delete own projects'
+  ) THEN
+    CREATE POLICY "Users can delete own projects"
+    ON projects FOR DELETE
+    USING (auth.uid() = user_id);
+  END IF;
+END$$;
 
 -- Hypotheses
 ALTER TABLE hypotheses ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own hypotheses"
-ON hypotheses FOR ALL
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'hypotheses' AND policyname = 'Users can manage own hypotheses'
+  ) THEN
+    CREATE POLICY "Users can manage own hypotheses"
+    ON hypotheses FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM projects
+        WHERE projects.id = hypotheses.project_id
+          AND projects.user_id = auth.uid()
+      )
+    );
+  END IF;
+END$$;
 
 -- Evidence
 ALTER TABLE evidence ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own evidence"
-ON evidence FOR ALL
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'evidence' AND policyname = 'Users can manage own evidence'
+  ) THEN
+    CREATE POLICY "Users can manage own evidence"
+    ON evidence FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM projects
+        WHERE projects.id = evidence.project_id
+          AND projects.user_id = auth.uid()
+      )
+    );
+  END IF;
+END$$;
 
 -- Experiments
 ALTER TABLE experiments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own experiments"
-ON experiments FOR ALL
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'experiments' AND policyname = 'Users can manage own experiments'
+  ) THEN
+    CREATE POLICY "Users can manage own experiments"
+    ON experiments FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM projects
+        WHERE projects.id = experiments.project_id
+          AND projects.user_id = auth.uid()
+      )
+    );
+  END IF;
+END$$;
 
 -- Reports
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own reports"
-ON reports FOR ALL
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'reports' AND policyname = 'Users can manage own reports'
+  ) THEN
+    CREATE POLICY "Users can manage own reports"
+    ON reports FOR ALL
+    USING (
+      EXISTS (
+        SELECT 1 FROM projects
+        WHERE projects.id = reports.project_id
+          AND projects.user_id = auth.uid()
+      )
+    );
+  END IF;
+END$$;
 
 -- Gate Policies
 ALTER TABLE gate_policies ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own gate policies"
-ON gate_policies FOR ALL
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'gate_policies' AND policyname = 'Users can manage own gate policies'
+  ) THEN
+    CREATE POLICY "Users can manage own gate policies"
+    ON gate_policies FOR ALL
+    USING (auth.uid() = user_id);
+  END IF;
+END$$;
 
 -- Override Requests
 ALTER TABLE override_requests ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own override requests"
-ON override_requests FOR SELECT
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'override_requests' AND policyname = 'Users can view own override requests'
+  ) THEN
+    CREATE POLICY "Users can view own override requests"
+    ON override_requests FOR SELECT
+    USING (auth.uid() = user_id);
+  END IF;
 
-CREATE POLICY "Users can create override requests"
-ON override_requests FOR INSERT
-WITH CHECK (auth.uid() = user_id);
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'override_requests' AND policyname = 'Users can create override requests'
+  ) THEN
+    CREATE POLICY "Users can create override requests"
+    ON override_requests FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+  END IF;
+END$$;
 
 -- Audit Log (Read-only for users, write-only for system)
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own audit logs"
-ON audit_log FOR SELECT
-USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'audit_log' AND policyname = 'Users can view own audit logs'
+  ) THEN
+    CREATE POLICY "Users can view own audit logs"
+    ON audit_log FOR SELECT
+    USING (auth.uid() = user_id);
+  END IF;
+END$$;
 
 -- ============================================================================
 -- FUNCTIONS

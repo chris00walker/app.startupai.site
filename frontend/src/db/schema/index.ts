@@ -16,3 +16,4 @@ export * from './evidence';
 export * from './reports';
 export * from './hypotheses';
 export * from './experiments';
+export * from './usage-quota';
