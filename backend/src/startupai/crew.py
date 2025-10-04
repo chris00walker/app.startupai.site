@@ -227,14 +227,12 @@ class StartupAICrew:
     
     def create_crew(self) -> Crew:
         """
-        Create the StartupAI Crew with all agents and tasks.
+        Create and configure the StartupAI Crew.
         
-        Returns:
-            Configured Crew instance with hierarchical process
+        Uses sequential process for reliable execution.
         """
-        return Crew(
+        crew = Crew(
             agents=[
-                self.orchestration_agent(),
                 self.research_agent(),
                 self.analysis_agent(),
                 self.validation_agent(),
@@ -242,17 +240,16 @@ class StartupAICrew:
                 self.reporting_agent(),
             ],
             tasks=[
-                self.workflow_orchestration_task(),
                 self.evidence_collection_task(),
-                self.evidence_validation_task(),
                 self.evidence_analysis_task(),
+                self.evidence_validation_task(),
                 self.insight_synthesis_task(),
                 self.report_generation_task(),
             ],
-            process=Process.hierarchical,
-            manager_agent=self.orchestration_agent(),
+            process=Process.sequential,  # Use sequential for testing
             verbose=True,
         )
+        return crew
     
     def kickoff(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -260,7 +257,7 @@ class StartupAICrew:
         
         Args:
             inputs: Dictionary with strategic_question, project_context, etc.
-            
+        
         Returns:
             Results from crew execution
         """
