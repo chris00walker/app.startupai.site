@@ -32,3 +32,4 @@ export const userProfiles = pgTable('user_profiles', {
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type NewUserProfile = typeof userProfiles.$inferInsert;
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
+export type { userProfiles as UserProfilesTable };

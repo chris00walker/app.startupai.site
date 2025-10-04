@@ -14,7 +14,7 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^until-async$': '<rootDir>/src/tests/mocks/untilAsyncMock.ts',
   },
-  setupFiles: ['<rootDir>/jest.polyfills.js'],
+  setupFiles: ['<rootDir>/jest.polyfills.js', '<rootDir>/jest.env.js'],
   maxWorkers: 1, // Prevent worker crashes in constrained environments
 }
 

@@ -92,6 +92,15 @@ docs/operations/
 ✅ **Detailed Logging** - See what's happening  
 ✅ **Test User Creation** - Auto-creates login  
 
+### Trial Usage Counters
+
+- Migration `00007_trial_usage_counters.sql` (Supabase) / `0002_trial_usage_counters.sql` (Drizzle) adds the `trial_usage_counters` table with RLS.
+- Reset a user's counters via SQL:
+  ```sql
+  delete from trial_usage_counters where user_id = '<uuid>';
+  ```
+- The `set_updated_at_timestamp()` trigger keeps timestamps fresh; confirm the function exists before applying the migration in production.
+
 ---
 
 ## Verification Steps

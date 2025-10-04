@@ -1,0 +1,289 @@
+{
+  "id": "f3d7d9e5-1eab-4c3d-b9b7-1315bca0e2d9",
+  "prevId": "bb2b9d6d-42fb-4cc2-9ae5-4f8dd7ecb1f1",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.user_profiles": {
+      "name": "user_profiles",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "email": { "name": "email", "type": "text", "primaryKey": false, "notNull": true },
+        "full_name": { "name": "full_name", "type": "text", "primaryKey": false, "notNull": false },
+        "company": { "name": "company", "type": "text", "primaryKey": false, "notNull": false },
+        "subscription_tier": { "name": "subscription_tier", "type": "text", "primaryKey": false, "notNull": true, "default": "'free'" },
+        "subscription_status": { "name": "subscription_status", "type": "text", "primaryKey": false, "notNull": false, "default": "'trial'" },
+        "trial_expires_at": { "name": "trial_expires_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": false },
+        "plan_status": { "name": "plan_status", "type": "text", "primaryKey": false, "notNull": true, "default": "'active'" },
+        "role": { "name": "role", "type": "user_role", "primaryKey": false, "notNull": true, "default": "'trial'" },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.projects": {
+      "name": "projects",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "user_id": { "name": "user_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
+        "description": { "name": "description", "type": "text", "primaryKey": false, "notNull": false },
+        "status": { "name": "status", "type": "text", "primaryKey": false, "notNull": true, "default": "'active'" },
+        "stage": { "name": "stage", "type": "text", "primaryKey": false, "notNull": true, "default": "'DESIRABILITY'" },
+        "gate_status": { "name": "gate_status", "type": "text", "primaryKey": false, "notNull": false, "default": "'Pending'" },
+        "risk_budget_planned": { "name": "risk_budget_planned", "type": "numeric(10, 2)", "primaryKey": false, "notNull": false, "default": 0 },
+        "risk_budget_actual": { "name": "risk_budget_actual", "type": "numeric(10, 2)", "primaryKey": false, "notNull": false, "default": 0 },
+        "risk_budget_delta": { "name": "risk_budget_delta", "type": "numeric(10, 2)", "primaryKey": false, "notNull": false, "default": 0 },
+        "assigned_consultant": { "name": "assigned_consultant", "type": "text", "primaryKey": false, "notNull": false },
+        "last_activity": { "name": "last_activity", "type": "timestamp with time zone", "primaryKey": false, "notNull": false, "default": "now()" },
+        "next_gate_date": { "name": "next_gate_date", "type": "date", "primaryKey": false, "notNull": false },
+        "evidence_quality": { "name": "evidence_quality", "type": "numeric(3, 2)", "primaryKey": false, "notNull": false, "default": 0 },
+        "hypotheses_count": { "name": "hypotheses_count", "type": "integer", "primaryKey": false, "notNull": false, "default": 0 },
+        "experiments_count": { "name": "experiments_count", "type": "integer", "primaryKey": false, "notNull": false, "default": 0 },
+        "evidence_count": { "name": "evidence_count", "type": "integer", "primaryKey": false, "notNull": false, "default": 0 },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "projects_user_id_user_profiles_id_fk": {
+          "name": "projects_user_id_user_profiles_id_fk",
+          "tableFrom": "projects",
+          "tableTo": "user_profiles",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.evidence": {
+      "name": "evidence",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "project_id": { "name": "project_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "title": { "name": "title", "type": "text", "primaryKey": false, "notNull": false },
+        "category": { "name": "category", "type": "text", "primaryKey": false, "notNull": false },
+        "summary": { "name": "summary", "type": "text", "primaryKey": false, "notNull": false },
+        "full_text": { "name": "full_text", "type": "text", "primaryKey": false, "notNull": false },
+        "content": { "name": "content", "type": "text", "primaryKey": false, "notNull": true },
+        "embedding": { "name": "embedding", "type": "vector(1536)", "primaryKey": false, "notNull": false },
+        "strength": { "name": "strength", "type": "text", "primaryKey": false, "notNull": false },
+        "is_contradiction": { "name": "is_contradiction", "type": "boolean", "primaryKey": false, "notNull": false, "default": false },
+        "fit_type": { "name": "fit_type", "type": "text", "primaryKey": false, "notNull": false },
+        "source_type": { "name": "source_type", "type": "text", "primaryKey": false, "notNull": false },
+        "source_url": { "name": "source_url", "type": "text", "primaryKey": false, "notNull": false },
+        "author": { "name": "author", "type": "text", "primaryKey": false, "notNull": false },
+        "source": { "name": "source", "type": "text", "primaryKey": false, "notNull": false },
+        "occurred_on": { "name": "occurred_on", "type": "date", "primaryKey": false, "notNull": false },
+        "linked_assumptions": { "name": "linked_assumptions", "type": "text[]", "primaryKey": false, "notNull": false },
+        "tags": { "name": "tags", "type": "text[]", "primaryKey": false, "notNull": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "evidence_project_id_projects_id_fk": {
+          "name": "evidence_project_id_projects_id_fk",
+          "tableFrom": "evidence",
+          "tableTo": "projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.reports": {
+      "name": "reports",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "project_id": { "name": "project_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "report_type": { "name": "report_type", "type": "text", "primaryKey": false, "notNull": true },
+        "title": { "name": "title", "type": "text", "primaryKey": false, "notNull": true },
+        "content": { "name": "content", "type": "jsonb", "primaryKey": false, "notNull": true },
+        "model": { "name": "model", "type": "text", "primaryKey": false, "notNull": false },
+        "tokens_used": { "name": "tokens_used", "type": "text", "primaryKey": false, "notNull": false },
+        "generated_at": { "name": "generated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "reports_project_id_projects_id_fk": {
+          "name": "reports_project_id_projects_id_fk",
+          "tableFrom": "reports",
+          "tableTo": "projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.hypotheses": {
+      "name": "hypotheses",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "project_id": { "name": "project_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "statement": { "name": "statement", "type": "text", "primaryKey": false, "notNull": true },
+        "type": { "name": "type", "type": "text", "primaryKey": false, "notNull": true },
+        "importance": { "name": "importance", "type": "text", "primaryKey": false, "notNull": true },
+        "evidence_strength": { "name": "evidence_strength", "type": "text", "primaryKey": false, "notNull": true },
+        "status": { "name": "status", "type": "text", "primaryKey": false, "notNull": true },
+        "source": { "name": "source", "type": "text", "primaryKey": false, "notNull": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "hypotheses_project_id_projects_id_fk": {
+          "name": "hypotheses_project_id_projects_id_fk",
+          "tableFrom": "hypotheses",
+          "tableTo": "projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.experiments": {
+      "name": "experiments",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "project_id": { "name": "project_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "hypothesis_id": { "name": "hypothesis_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "name": { "name": "name", "type": "text", "primaryKey": false, "notNull": true },
+        "description": { "name": "description", "type": "text", "primaryKey": false, "notNull": false },
+        "fit_type": { "name": "fit_type", "type": "text", "primaryKey": false, "notNull": false },
+        "evidence_strength": { "name": "evidence_strength", "type": "text", "primaryKey": false, "notNull": false },
+        "status": { "name": "status", "type": "text", "primaryKey": false, "notNull": true, "default": "'planned'" },
+        "progress": { "name": "progress", "type": "integer", "primaryKey": false, "notNull": false, "default": 0 },
+        "estimated_time": { "name": "estimated_time", "type": "text", "primaryKey": false, "notNull": false },
+        "potential_impact": { "name": "potential_impact", "type": "text", "primaryKey": false, "notNull": false },
+        "steps": { "name": "steps", "type": "text[]", "primaryKey": false, "notNull": false },
+        "results_quantitative": { "name": "results_quantitative", "type": "text", "primaryKey": false, "notNull": false },
+        "results_qualitative": { "name": "results_qualitative", "type": "text", "primaryKey": false, "notNull": false },
+        "results_submitted_at": { "name": "results_submitted_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": false },
+        "start_date": { "name": "start_date", "type": "date", "primaryKey": false, "notNull": false },
+        "end_date": { "name": "end_date", "type": "date", "primaryKey": false, "notNull": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "experiments_project_id_projects_id_fk": {
+          "name": "experiments_project_id_projects_id_fk",
+          "tableFrom": "experiments",
+          "tableTo": "projects",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "experiments_hypothesis_id_hypotheses_id_fk": {
+          "name": "experiments_hypothesis_id_hypotheses_id_fk",
+          "tableFrom": "experiments",
+          "tableTo": "hypotheses",
+          "columnsFrom": ["hypothesis_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.trial_usage_counters": {
+      "name": "trial_usage_counters",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "user_id": { "name": "user_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "action": { "name": "action", "type": "text", "primaryKey": false, "notNull": true },
+        "period": { "name": "period", "type": "text", "primaryKey": false, "notNull": true },
+        "period_start": { "name": "period_start", "type": "timestamp with time zone", "primaryKey": false, "notNull": true },
+        "count": { "name": "count", "type": "integer", "primaryKey": false, "notNull": true, "default": 0 },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {
+        "trial_usage_user_action_period_idx": {
+          "name": "trial_usage_user_action_period_idx",
+          "columns": ["user_id", "action", "period", "period_start"],
+          "isUnique": true,
+          "isPrimary": false,
+          "where": null
+        }
+      },
+      "foreignKeys": {
+        "trial_usage_counters_user_id_user_profiles_id_fk": {
+          "name": "trial_usage_counters_user_id_user_profiles_id_fk",
+          "tableFrom": "trial_usage_counters",
+          "tableTo": "user_profiles",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.user_role": {
+      "name": "user_role",
+      "schema": "",
+      "values": ["admin", "founder", "consultant", "trial"]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
