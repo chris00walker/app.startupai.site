@@ -13,6 +13,9 @@ out/
 !.env.example
 backend/.env
 !backend/.env.example
+.envrc.local
+*.env.secrets
+secrets.env
 
 # Logs
 *.log
