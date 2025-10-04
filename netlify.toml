@@ -11,10 +11,15 @@
   directory = "netlify/functions"
   # Python functions will use Python 3.10 automatically
 
-# API endpoint for CrewAI backend
+# API endpoints for CrewAI backend
 [[redirects]]
   from = "/api/analyze"
   to = "/.netlify/functions/crew-analyze"
+  status = 200
+
+[[redirects]]
+  from = "/api/analyze-background"
+  to = "/.netlify/functions/crew-analyze-background"
   status = 200
 
 # Handle SPA routing for static export (must be last)

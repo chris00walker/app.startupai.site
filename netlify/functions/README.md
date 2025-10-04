@@ -13,11 +13,36 @@ netlify/functions/
 └── README.md           # This file
 ```
 
-## Function: crew-analyze.py
+## Functions
+
+### 1. crew-analyze.py (Standard Function)
 
 **Endpoint:** `POST /api/analyze` (or `/.netlify/functions/crew-analyze`)
 
 **Purpose:** Runs CrewAI strategic analysis workflows serverlessly
+
+**Timeout:** 26 seconds (Pro) / 10 seconds (Free)
+
+**Features:**
+- ✅ JWT authentication with Supabase
+- ✅ Rate limiting (10 requests per 15 minutes per user)
+- ✅ Request/response logging
+- ✅ Error tracking with timestamps
+- ✅ Execution time monitoring
+
+### 2. crew-analyze-background.py (Background Function)
+
+**Endpoint:** `POST /api/analyze-background` (or `/.netlify/functions/crew-analyze-background`)
+
+**Purpose:** Long-running analyses with 15-minute timeout
+
+**Timeout:** 15 minutes (wall clock time)
+
+**Features:**
+- Returns 202 immediately
+- Runs analysis in background
+- Results stored in database/blob storage
+- Suitable for complex, multi-agent workflows
 
 ### Request Format
 
@@ -51,7 +76,16 @@ netlify/functions/
 - `400` - Bad request (missing fields, invalid JSON)
 - `401` - Unauthorized (missing or invalid auth token)
 - `405` - Method not allowed (non-POST request)
+- `429` - Rate limit exceeded (max 10 requests per 15 minutes)
 - `500` - Internal server error
+
+### Response Headers
+
+- `X-RateLimit-Limit` - Maximum requests allowed in window
+- `X-RateLimit-Remaining` - Requests remaining in current window
+- `X-RateLimit-Reset` - Seconds until rate limit resets
+- `X-Execution-Time` - Function execution time in seconds
+- `Retry-After` - Seconds to wait before retrying (on 429)
 
 ## Configuration
 
@@ -72,7 +106,8 @@ netlify/functions/
 Required environment variables (set in Netlify UI):
 - `OPENAI_API_KEY` - OpenAI API key for LLM
 - `SUPABASE_URL` - Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service key
+- `SUPABASE_ANON_KEY` - Supabase anon key (for JWT validation)
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service key (for admin operations)
 - `DATABASE_URL` - Database connection string
 
 Optional:
@@ -134,14 +169,23 @@ Check function logs in Netlify dashboard:
 3. **Rate Limiting**: Consider implementing rate limiting for production
 4. **Error Handling**: Errors logged but sensitive data not exposed
 
+## Completed Features
+
+- [x] JWT token validation with Supabase
+- [x] Rate limiting (10 req/15min per user)
+- [x] Background function for long analyses (15 min timeout)
+- [x] Request/response logging with timestamps
+- [x] Error tracking and monitoring
+- [x] Execution time tracking
+
 ## Next Steps
 
-- [ ] Implement JWT token validation
-- [ ] Add rate limiting
-- [ ] Create background function for long-running analyses
-- [ ] Add request/response logging
-- [ ] Implement retry logic
+- [ ] Implement Redis-based distributed rate limiting
+- [ ] Store background function results in Supabase/Blobs
+- [ ] Add result notification system (webhooks/realtime)
+- [ ] Implement retry logic for transient failures
 - [ ] Add integration tests
+- [ ] Set up error alerting (Sentry/similar)
 
 ## Resources
 
