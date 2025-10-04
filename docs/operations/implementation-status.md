@@ -24,9 +24,17 @@ Backend Integration   [████░░░░░░] 45%  ✅ (UP from 40%)
 AI Backend (CrewAI)   [░░░░░░░░░░]  0%  ❌
 ```
 
-### 🎉 Latest Updates (Oct 2, 2025 - 21:22)
+### 🎉 Latest Updates (Oct 4, 2025 - 11:09)
 
-**✅ Critical Issues Fixed:**
+**✅ Trial Guardrails Implemented:**
+1. Database migration `00007_trial_usage_counters.sql` created with RLS policies
+2. Server-side enforcement via `/api/trial/allow` endpoint
+3. Trial limits configured: projects (3/mo), workflows (10/mo), reports (5/mo)
+4. All 162 tests passing including 4 new trial guard tests
+5. Test environment configured with `.env.test.local` and `jest.env.js`
+6. Migration scripts added: `db:migrate` and `db:generate` in package.json
+
+**✅ Previous Updates (Oct 2, 2025):**
 1. Build error resolved (Node.js modules in browser context)
 2. Dashboard connected to live database via Supabase client
 3. Database seeded with comprehensive portfolio data (6 projects, 10 evidence, 3 reports)
@@ -35,9 +43,12 @@ AI Backend (CrewAI)   [░░░░░░░░░░]  0%  ❌
 6. Hook architecture established (Browser vs Server queries)
 7. Role-based redirects enforce founder vs consultant dashboards (`src/app/auth/callback/route.ts`)
 
-**ℹ️ In Progress:**
-- Navigation now adapts to Supabase roles; finalize trial usage guardrails and surface messaging once backend limits land
-- Netlify production env missing `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; update build settings and redeploy
+**📋 Ready for Production Deployment:**
+1. Verify `set_updated_at_timestamp()` function exists (already in migration 00005)
+2. Configure 5 Netlify env vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SITE_URL, DATABASE_URL
+3. Apply migration `00007_trial_usage_counters.sql` in Supabase SQL Editor
+4. Wait for Netlify auto-deploy (commits 4ad8716, 039c152, 2bcf174, 8c119c2)
+5. Verify: `curl -X POST https://app-startupai-site.netlify.app/api/trial/allow -H "Content-Type: application/json" -d '{"action":"projects.create"}'`
 
 **🔧 Technical Architecture Decisions:**
 - **Browser Queries:** Use Supabase client in React hooks (`'use client'` components)

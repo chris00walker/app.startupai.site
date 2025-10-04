@@ -94,12 +94,29 @@ docs/operations/
 
 ### Trial Usage Counters
 
-- Migration `00007_trial_usage_counters.sql` (Supabase) / `0002_trial_usage_counters.sql` (Drizzle) adds the `trial_usage_counters` table with RLS.
-- Reset a user's counters via SQL:
-  ```sql
-  delete from trial_usage_counters where user_id = '<uuid>';
-  ```
-- The `set_updated_at_timestamp()` trigger keeps timestamps fresh; confirm the function exists before applying the migration in production.
+**Migration:** `00007_trial_usage_counters.sql` (Supabase) / `0002_trial_usage_counters.sql` (Drizzle)
+
+**Purpose:** Enforce trial usage limits (projects: 3/mo, workflows: 10/mo, reports: 5/mo)
+
+**Production Deployment:**
+1. Verify function exists: `SELECT proname FROM pg_proc WHERE proname = 'set_updated_at_timestamp';` (created in migration 00005)
+2. Configure Netlify env vars (5 required): NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SITE_URL, DATABASE_URL
+3. Apply migration in Supabase SQL Editor: Copy `supabase/migrations/00007_trial_usage_counters.sql` and run
+4. Verify: `SELECT * FROM trial_usage_counters LIMIT 1;`
+5. Test API: `curl -X POST https://app-startupai-site.netlify.app/api/trial/allow -H "Content-Type: application/json" -d '{"action":"projects.create"}'`
+
+**Reset user counters:**
+```sql
+DELETE FROM trial_usage_counters WHERE user_id = '<uuid>';
+```
+
+**Check usage:**
+```sql
+SELECT user_id, action, SUM(count) as total
+FROM trial_usage_counters
+GROUP BY user_id, action
+ORDER BY total DESC LIMIT 10;
+```
 
 ---
 
