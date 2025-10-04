@@ -17,8 +17,12 @@
     "test:integration": "jest --testPathPatterns=integration",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:backend": "playwright test backend-integration.spec.ts",
+    "test:e2e:backend:ui": "playwright test backend-integration.spec.ts --ui",
+    "test:e2e:headed": "playwright test --headed",
     "test:all": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
-    "test:ci": "pnpm run test:coverage && pnpm run test:e2e"
+    "test:ci": "pnpm run test:coverage && pnpm run test:e2e",
+    "test:generate-token": "tsx scripts/generate-test-token.ts"
   },
   "keywords": [],
   "author": "",
