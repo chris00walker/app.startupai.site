@@ -344,9 +344,130 @@ pnpm exec playwright show-report test-results/playwright-report
 - **Performance Testing:** E2E tests include load time assertions
 - **Accessibility:** Follow WCAG 2.0/2.1/2.2 AA standards (see `docs/design/accessibility-standards.md`)
 
+## Backend Testing (Python/CrewAI)
+
+### Multi-Layer Testing Strategy
+
+The CrewAI backend uses a hybrid testing approach:
+
+```
+Layer 1: Python Unit Tests (pytest)
+  ├─ Test individual tools (WebSearch, EvidenceStore)
+  ├─ Test agent configurations
+  └─ Test task definitions
+
+Layer 2: Python Integration Tests (pytest)
+  ├─ Test crew execution end-to-end
+  ├─ Test tool interactions
+  └─ Test error handling
+
+Layer 3: Netlify Function Tests (Python)
+  ├─ Test function handler
+  ├─ Test JWT validation
+  ├─ Test rate limiting
+  └─ Test request/response formatting
+
+Layer 4: API Integration Tests (Jest/Playwright)
+  ├─ Test frontend → Netlify function calls
+  ├─ Test authentication flow
+  └─ Test error scenarios
+
+Layer 5: E2E User Flows (Playwright)
+  ├─ Test complete analysis workflow
+  ├─ Test UI → API → CrewAI → Results
+  └─ Test real user scenarios
+```
+
+### Backend Test Setup
+
+**Install pytest:**
+```bash
+cd backend
+source crewai-env/bin/activate
+pip install pytest pytest-asyncio pytest-mock pytest-cov
+```
+
+**Test Structure:**
+```
+backend/
+├── src/startupai/
+│   ├── crew.py
+│   ├── tools.py
+│   └── main.py
+└── tests/
+    ├── conftest.py           # Shared fixtures
+    ├── unit/
+    │   ├── test_tools.py     # Test individual tools
+    │   ├── test_agents.py    # Test agent creation
+    │   └── test_tasks.py     # Test task creation
+    ├── integration/
+    │   ├── test_crew.py      # Test crew execution
+    │   └── test_workflow.py  # Test end-to-end
+    └── fixtures/
+        └── test_data.py      # Test data
+```
+
+**Run backend tests:**
+```bash
+# Run all tests
+pytest
+
+# With coverage
+pytest --cov=src/startupai --cov-report=html
+
+# Specific tests
+pytest tests/unit/test_tools.py -v
+pytest -m "not slow"  # Skip slow integration tests
+```
+
+### Testing Commands Reference
+
+**Backend (Python):**
+```bash
+cd backend && pytest                    # All tests
+cd backend && pytest --cov=src         # With coverage
+cd backend && pytest tests/unit        # Unit tests only
+```
+
+**Frontend (JavaScript):**
+```bash
+cd frontend && pnpm test               # Jest unit tests
+cd frontend && pnpm test:e2e           # Playwright e2e
+cd frontend && pnpm test:all           # Everything
+```
+
+**Full Stack Integration:**
+```typescript
+// frontend/src/__tests__/e2e/api/crewai.spec.ts
+test('CrewAI API integration', async ({ request }) => {
+  const response = await request.post('/api/analyze', {
+    headers: { 'Authorization': `Bearer ${token}` },
+    data: {
+      strategic_question: 'Test question',
+      project_id: 'test-123',
+      priority_level: 'medium'
+    }
+  });
+  expect(response.ok()).toBeTruthy();
+});
+```
+
+### Test Coverage Targets
+
+**Backend Coverage:**
+- Unit Tests: 80%+ coverage
+- Integration Tests: Critical paths only
+- Function Tests: 100% of public endpoints
+
+**Frontend Coverage:**
+- Unit Tests: 70%+ coverage
+- Integration Tests: API calls, auth flows
+- E2E Tests: 3-5 critical user journeys
+
 ## Related Documentation
 
 - [Database Seeding](../../operations/database-seeding.md)
 - [Implementation Status](../../operations/implementation-status.md)
 - [Accessibility Standards](../../../startupai.site/docs/design/accessibility-standards.md)
 - [Two-Site Implementation Plan](../../../startupai.site/docs/technical/two-site-implementation-plan.md)
+- [Netlify Functions](../../../netlify/functions/README.md)
