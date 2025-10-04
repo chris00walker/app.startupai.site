@@ -170,7 +170,7 @@ class VectorSearchTool(BaseTool):
 
 class WebSearchTool(BaseTool):
     """
-    Tool for web search and content extraction.
+    Tool for web search and content extraction using DuckDuckGo.
     Searches the web for relevant information and extracts key content.
     """
     
@@ -188,39 +188,55 @@ class WebSearchTool(BaseTool):
         search_type: str = "general",
     ) -> str:
         """
-        Perform web search and extract content.
+        Perform web search and extract content using DuckDuckGo.
         
         Args:
             query: Search query
-            num_results: Number of results to return
+            num_results: Number of results to return (max 10)
             search_type: Type of search (general, news, academic)
             
         Returns:
             JSON string with search results
         """
         try:
-            # TODO: Implement actual web search using DuckDuckGo or similar
-            # For now, return a placeholder response
+            from ddgs import DDGS
+            import json
             
-            return f'''{{
+            # Initialize DuckDuckGo search
+            ddgs = DDGS()
+            
+            # Perform search based on type
+            results = []
+            
+            if search_type == "news":
+                # Search news
+                search_results = ddgs.news(query, max_results=min(num_results, 10))
+            else:
+                # General web search
+                search_results = ddgs.text(query, max_results=min(num_results, 10))
+            
+            # Format results
+            for idx, result in enumerate(search_results):
+                formatted_result = {
+                    "rank": idx + 1,
+                    "title": result.get("title", ""),
+                    "url": result.get("href") or result.get("url", ""),
+                    "snippet": result.get("body") or result.get("description", ""),
+                    "source": result.get("source", ""),
+                }
+                results.append(formatted_result)
+            
+            return json.dumps({
                 "status": "success",
-                "query": "{query}",
-                "num_results": {num_results},
-                "search_type": "{search_type}",
-                "results": [
-                    {{
-                        "title": "Example Result",
-                        "url": "https://example.com",
-                        "snippet": "This is a placeholder result. Implement actual web search.",
-                        "source": "Example Source",
-                        "relevance_score": 0.9
-                    }}
-                ],
-                "note": "Web search implementation pending"
-            }}'''
+                "query": query,
+                "num_results": len(results),
+                "search_type": search_type,
+                "results": results
+            })
         
         except Exception as e:
-            return f'{{"error": "{str(e)}"}}'
+            import json
+            return json.dumps({"error": str(e), "status": "failed"})
 
 
 class ReportGeneratorTool(BaseTool):
