@@ -1,7 +1,7 @@
 [build]
-  base = "."
-  command = "cd frontend && pnpm build"
-  publish = "frontend/out"
+  base = "frontend"
+  command = "pnpm build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"

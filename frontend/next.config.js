@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Removed 'output: export' to support server features (OAuth, API routes)
   reactStrictMode: true,
   trailingSlash: true,
   images: {
