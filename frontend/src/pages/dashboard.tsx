@@ -6,6 +6,8 @@ import { PortfolioGrid } from "@/components/portfolio/PortfolioGrid"
 import { PortfolioMetrics } from "@/components/portfolio/PortfolioMetrics"
 import { StageProgressIndicator } from "@/components/portfolio/StageProgressIndicator"
 import { RiskBudgetWidget } from "@/components/portfolio/RiskBudgetWidget"
+import { GateStageFilter, type GateStage, type GateStatus } from "@/components/portfolio/GateStageFilter"
+import { GateAlerts } from "@/components/portfolio/GateAlerts"
 import { GuidedTour, DemoBanner } from "@/components/demo/GuidedTour"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { useProjects } from "@/hooks/useProjects"
@@ -133,13 +135,48 @@ function Dashboard() {
   const demoMode = useDemoMode()
   const { projects, isLoading, error } = useProjects()
   
+  // Gate filtering state
+  const [selectedStages, setSelectedStages] = React.useState<GateStage[]>([])
+  const [selectedStatuses, setSelectedStatuses] = React.useState<GateStatus[]>([])
+  
   // Use real projects if available, fallback to mock data for demo
-  const displayProjects = projects.length > 0 ? projects : mockPortfolioProjects
+  const allProjects = projects.length > 0 ? projects : mockPortfolioProjects
   const usingRealData = projects.length > 0
   
+  // Apply gate filters
+  const displayProjects = React.useMemo(() => {
+    let filtered = allProjects
+    
+    if (selectedStages.length > 0) {
+      filtered = filtered.filter(project => selectedStages.includes(project.stage))
+    }
+    
+    if (selectedStatuses.length > 0) {
+      filtered = filtered.filter(project => selectedStatuses.includes(project.gateStatus))
+    }
+    
+    return filtered
+  }, [allProjects, selectedStages, selectedStatuses])
+  
+  // Calculate project counts by stage for filter badges
+  const projectCounts = React.useMemo(() => {
+    const counts: Record<GateStage, number> = {
+      DESIRABILITY: 0,
+      FEASIBILITY: 0,
+      VIABILITY: 0,
+      SCALE: 0
+    }
+    
+    allProjects.forEach(project => {
+      counts[project.stage]++
+    })
+    
+    return counts
+  }, [allProjects])
+  
   const handleProjectClick = (project: PortfolioProject) => {
-    // Navigate to project details - placeholder for now
-    console.log('Navigate to project:', project.id)
+    // Navigate to project gate details
+    window.location.href = `/project/${project.id}/gate`
   }
 
   if (isLoading) {
@@ -198,10 +235,13 @@ function Dashboard() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter Projects
-              </Button>
+              <GateStageFilter
+                selectedStages={selectedStages}
+                selectedStatuses={selectedStatuses}
+                onStageChange={setSelectedStages}
+                onStatusChange={setSelectedStatuses}
+                projectCounts={projectCounts}
+              />
               <Button variant="outline">
                 <Settings className="h-4 w-4 mr-2" />
                 Gate Policies
@@ -218,9 +258,17 @@ function Dashboard() {
             <PortfolioMetrics metrics={mockPortfolioMetrics} />
           </div>
 
-          {/* Portfolio Overview */}
-          <div data-tour="portfolio-overview">
-            <PortfolioOverview />
+          {/* Portfolio Overview & Gate Alerts */}
+          <div data-tour="portfolio-overview" className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <PortfolioOverview />
+            </div>
+            <div>
+              <GateAlerts 
+                projects={allProjects} 
+                onProjectClick={handleProjectClick}
+              />
+            </div>
           </div>
 
           {/* Portfolio Projects Grid */}
