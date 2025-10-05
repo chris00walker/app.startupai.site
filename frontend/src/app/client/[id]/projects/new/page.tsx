@@ -6,9 +6,9 @@ import { ProjectCreationWizard } from "@/components/onboarding/ProjectCreationWi
 
 export default function NewClientProjectPage() {
   const params = useParams()
-  const clientId = params?.clientId as string
+  const id = params?.id as string
 
-  if (!clientId) {
+  if (!id) {
     return <div>Client not found</div>
   }
 
@@ -16,8 +16,8 @@ export default function NewClientProjectPage() {
     <DashboardLayout
       breadcrumbs={[
         { title: "Clients", href: "/clients" },
-        { title: "Client Details", href: `/client/${clientId}` },
-        { title: "New Project", href: `/client/${clientId}/projects/new` },
+        { title: "Client Details", href: `/client/${id}` },
+        { title: "New Project", href: `/client/${id}/projects/new` },
       ]}
       userType="consultant"
     >
@@ -27,7 +27,7 @@ export default function NewClientProjectPage() {
           Use our AI-powered wizard to set up a comprehensive validation framework for this client's project
         </p>
       </div>
-      <ProjectCreationWizard clientId={clientId} />
+      <ProjectCreationWizard clientId={id} />
     </DashboardLayout>
   )
 }
