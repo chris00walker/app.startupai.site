@@ -18,7 +18,11 @@ import { useEffect } from 'react';
 
 export default function ProjectGatePage() {
   const params = useParams();
-  const projectId = params.id as string;
+  const projectId = params?.id as string;
+  
+  if (!projectId) {
+    return <div>Project not found</div>;
+  }
 
   // For demo, using DESIRABILITY stage
   // In production, fetch from project data
