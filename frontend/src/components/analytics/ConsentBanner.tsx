@@ -8,7 +8,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { setAnalyticsConsent } from '@/lib/analytics';
+// PostHog consent is handled directly via posthog.opt_in_capturing() and posthog.opt_out_capturing()
+import posthog from 'posthog-js';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -34,7 +35,11 @@ export function ConsentBanner() {
       const { consent, expiry } = JSON.parse(storedConsent);
       
       if (new Date().getTime() < expiry) {
-        setAnalyticsConsent(consent === 'accepted');
+        if (consent === 'accepted') {
+          posthog.opt_in_capturing();
+        } else {
+          posthog.opt_out_capturing();
+        }
       } else {
         // Consent expired, show banner again
         localStorage.removeItem(CONSENT_STORAGE_KEY);
@@ -45,13 +50,13 @@ export function ConsentBanner() {
 
   const handleAccept = () => {
     saveConsent('accepted');
-    setAnalyticsConsent(true);
+    posthog.opt_in_capturing();
     hideBanner();
   };
 
   const handleDecline = () => {
     saveConsent('declined');
-    setAnalyticsConsent(false);
+    posthog.opt_out_capturing();
     hideBanner();
   };
 
@@ -162,7 +167,11 @@ export function ConsentSettings() {
     );
     
     setConsent(newConsent);
-    setAnalyticsConsent(newConsent === 'accepted');
+    if (newConsent === 'accepted') {
+      posthog.opt_in_capturing();
+    } else {
+      posthog.opt_out_capturing();
+    }
   };
 
   if (loading) {

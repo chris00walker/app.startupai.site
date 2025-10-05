@@ -26,6 +26,9 @@ export type ProductEvent =
   | 'workflow_started'
   | 'ai_analysis_requested'
   | 'export_generated'
+  | 'gate_alert_created'
+  | 'gate_alert_dismissed'
+  | 'gate_evaluation_requested'
 
 interface EventProperties {
   [key: string]: string | number | boolean | undefined

@@ -3,6 +3,11 @@
 import * as React from "react"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { FitDashboard } from "@/components/fit/FitDashboard"
+import { GateDashboard } from "@/components/gates/GateDashboard"
+import { GateStatusBadge } from "@/components/gates/GateStatusBadge"
+import { GateReadinessIndicator } from "@/components/gates/GateReadinessIndicator"
+import { useGateEvaluation } from "@/hooks/useGateEvaluation"
+import { useGateAlerts } from "@/hooks/useGateAlerts"
 import HypothesisManager from "@/components/hypothesis/HypothesisManager"
 import { EvidenceLedger } from "@/components/fit/EvidenceLedger"
 import { ExperimentsPage } from "@/components/fit/ExperimentsPage"
@@ -26,36 +31,51 @@ import {
   Rocket
 } from "lucide-react"
 
-function QuickStats() {
+function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
+  // Use gate evaluation hook for dynamic data
+  const { 
+    result, 
+    isLoading: gateLoading 
+  } = useGateEvaluation({ 
+    projectId: projectId || 'default', 
+    stage: (currentStage as any) || 'FEASIBILITY',
+    autoRefresh: true 
+  })
+  
+  const gateStatus = result?.status || 'Pending'
+  const readinessScore = result?.readiness_score || 0
+  const evidenceCount = result?.evidence_count || 0
+  const experimentsCount = result?.experiments_count || 0
+
   const stats = [
     {
-      label: "Overall Fit Score",
-      value: "59%",
-      change: "+12% this week",
-      trend: "up",
+      label: "Gate Readiness",
+      value: gateLoading ? "Loading..." : `${readinessScore}%`,
+      change: gateStatus === 'Passed' ? "Gate Passed" : gateStatus === 'Failed' ? "Gate Failed" : "In Progress",
+      trend: gateStatus === 'Passed' ? "up" : gateStatus === 'Failed' ? "warning" : "neutral",
       icon: Target,
       color: "text-blue-600"
     },
     {
       label: "Evidence Items",
-      value: "23",
-      change: "5 contradictions",
-      trend: "warning",
+      value: gateLoading ? "Loading..." : evidenceCount.toString(),
+      change: "Quality tracked",
+      trend: "neutral",
       icon: FileText,
       color: "text-green-600"
     },
     {
       label: "Active Experiments",
-      value: "2",
-      change: "3 completed",
+      value: gateLoading ? "Loading..." : experimentsCount.toString(),
+      change: "Stage requirements",
       trend: "neutral",
       icon: Beaker,
       color: "text-purple-600"
     },
     {
       label: "Next Milestone",
-      value: "Feasibility",
-      change: "15 points needed",
+      value: currentStage || "Feasibility",
+      change: gateStatus === 'Pending' ? "Gate evaluation pending" : "Ready to progress",
       trend: "neutral",
       icon: TrendingUp,
       color: "text-orange-600"
@@ -279,6 +299,11 @@ export default function FounderDashboard() {
   const [activeTab, setActiveTab] = React.useState('overview')
   const { projects, isLoading, error } = useProjects()
   
+  // Get current project (first project for now, can be enhanced later)
+  const currentProject = projects.length > 0 ? projects[0] : null
+  const projectId = currentProject?.id
+  const currentStage = currentProject?.stage || 'FEASIBILITY'
+  
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const tabFromUrl = urlParams.get('tab')
@@ -351,8 +376,9 @@ export default function FounderDashboard() {
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full max-w-2xl grid-cols-5">
+          <TabsList className="grid w-full max-w-3xl grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="gates">Gates</TabsTrigger>
             <TabsTrigger value="hypotheses">Hypotheses</TabsTrigger>
             <TabsTrigger value="experiments">Experiments</TabsTrigger>
             <TabsTrigger value="evidence">Evidence</TabsTrigger>
@@ -369,19 +395,139 @@ export default function FounderDashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           {/* Quick Stats */}
-          <QuickStats />
+          <QuickStats projectId={projectId} currentStage={currentStage} />
 
           {/* Validation Journey Stage Selector */}
           <StageSelector currentStage="validation" className="mb-6" />
 
-          {/* Fit Dashboard */}
-          <FitDashboard />
+          {/* Gate Dashboard - Replace FitDashboard with GateDashboard */}
+          {projectId ? (
+            <GateDashboard 
+              projectId={projectId}
+              stage={currentStage as any}
+              gateStatus={currentProject?.gateStatus || 'Pending'}
+              readinessScore={0} // Will be calculated by the component
+              evidenceCount={0} // Will be calculated by the component
+              experimentsCount={0} // Will be calculated by the component
+            />
+          ) : (
+            <FitDashboard />
+          )}
 
           {/* Bottom Grid */}
           <div className="grid gap-6 lg:grid-cols-2">
             <RecentActivity />
             <NextSteps />
           </div>
+        </TabsContent>
+
+        <TabsContent value="gates" className="space-y-6">
+          {/* Dedicated Gates Tab */}
+          {projectId ? (
+            <div className="space-y-6">
+              {/* Gate Status Overview */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <Target className="h-8 w-8 text-blue-600" />
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Current Stage</p>
+                        <p className="text-2xl font-bold">{currentStage}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Gate Status</p>
+                        <GateStatusBadge status={currentProject?.gateStatus || 'Pending'} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className="h-8 w-8 text-orange-600" />
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">Readiness</p>
+                        <GateReadinessIndicator 
+                          score={0} 
+                          stage={currentStage as any}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Full Gate Dashboard */}
+              <GateDashboard 
+                projectId={projectId}
+                stage={currentStage as any}
+                gateStatus={currentProject?.gateStatus || 'Pending'}
+                readinessScore={0}
+                evidenceCount={0}
+                experimentsCount={0}
+              />
+              
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Gate Actions</CardTitle>
+                  <CardDescription>
+                    Quick actions to improve your gate readiness
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <Link href="/founder-dashboard?tab=evidence">
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Add Evidence
+                      </Button>
+                    </Link>
+                    <Link href="/founder-dashboard?tab=experiments">
+                      <Button variant="outline" className="w-full justify-start">
+                        <Beaker className="h-4 w-4 mr-2" />
+                        Run Experiment
+                      </Button>
+                    </Link>
+                    <Link href={`/project/${projectId}/gate`}>
+                      <Button variant="outline" className="w-full justify-start">
+                        <Target className="h-4 w-4 mr-2" />
+                        Full Gate View
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Project Selected</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Create a project to access gate evaluation features.
+                  </p>
+                  <Link href="/projects/new">
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Project
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="hypotheses" className="space-y-6">

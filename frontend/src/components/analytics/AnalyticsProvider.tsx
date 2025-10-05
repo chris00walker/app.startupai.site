@@ -8,7 +8,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { initAnalytics } from '@/lib/analytics';
+// PostHog is initialized via instrumentation-client.ts, no need to import initAnalytics
 import { usePageTracking, useUserIdentification } from '@/lib/analytics/hooks';
 import { ConsentBanner } from './ConsentBanner';
 
@@ -31,13 +31,8 @@ export function AnalyticsProvider({
   showConsentBanner = true,
   autoConsentInDev = true,
 }: AnalyticsProviderProps) {
-  // Initialize analytics
-  useEffect(() => {
-    const isDev = process.env.NODE_ENV === 'development';
-    const autoConsent = isDev && autoConsentInDev;
-    
-    initAnalytics(autoConsent);
-  }, [autoConsentInDev]);
+  // PostHog is automatically initialized via instrumentation-client.ts
+  // No manual initialization needed
   
   // Track page views automatically
   usePageTracking();

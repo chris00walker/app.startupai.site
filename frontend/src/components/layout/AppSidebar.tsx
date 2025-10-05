@@ -14,6 +14,7 @@ import {
   Settings,
   Users,
   Workflow,
+  Target,
 } from "lucide-react"
 
 import {
@@ -167,6 +168,14 @@ const founderNavigation = {
       icon: Brain,
     },
   ],
+  gates: [
+    {
+      title: "Gate Evaluation",
+      url: "/project/current/gate",
+      icon: Target,
+      description: "Stage gate evaluation and readiness",
+    },
+  ],
   validation: [
     {
       title: "Product-Customer Fit",
@@ -226,6 +235,10 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
   const secondaryItems = resolvedType === "founder" 
     ? (founderNavigation.validation || [])
     : (consultantNavigation.canvasTypes || [])
+  
+  const gatesItems = resolvedType === "founder" 
+    ? (founderNavigation.gates || [])
+    : []
   
   const toolsItems = resolvedType === "founder" 
     ? (founderNavigation.tools || [])
@@ -290,6 +303,27 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
             <SidebarGroupContent>
               <SidebarMenu>
                 {secondaryItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild tooltip={item.description}>
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {/* Gates (Founder only) */}
+        {resolvedType === "founder" && showFounderMenu && gatesItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Gates</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {gatesItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild tooltip={item.description}>
                       <a href={item.url}>
