@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useProjects } from "@/hooks/useProjects"
+import Link from "next/link"
 import { 
   Target,
   FileText,
@@ -217,12 +218,6 @@ function NextSteps() {
 }
 
 function EmptyState() {
-  const [showWizard, setShowWizard] = React.useState(false)
-
-  if (showWizard) {
-    return <ProjectCreationWizard />
-  }
-
   return (
     <div className="text-center py-16 space-y-6">
       <div className="space-y-4">
@@ -267,14 +262,15 @@ function EmptyState() {
         </Card>
       </div>
       
-      <Button 
-        size="lg" 
-        onClick={() => setShowWizard(true)}
-        className="bg-blue-600 hover:bg-blue-700"
-      >
-        <Plus className="h-5 w-5 mr-2" />
-        Create Your First Project
-      </Button>
+      <Link href="/projects/new">
+        <Button 
+          size="lg" 
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Create Your First Project
+        </Button>
+      </Link>
     </div>
   )
 }
@@ -363,10 +359,12 @@ export default function FounderDashboard() {
             <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
           
-          <Button variant="outline">
-            <Plus className="h-4 w-4 mr-2" />
-            New Project
-          </Button>
+          <Link href="/projects/new">
+            <Button variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              New Project
+            </Button>
+          </Link>
         </div>
 
         <TabsContent value="overview" className="space-y-6">
