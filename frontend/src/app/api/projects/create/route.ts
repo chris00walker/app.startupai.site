@@ -8,7 +8,8 @@ const createProjectSchema = z.object({
   problemStatement: z.string().min(1, 'Problem statement is required'),
   targetMarket: z.string().min(1, 'Target market is required'),
   businessModel: z.string().min(1, 'Business model is required'),
-  stage: z.enum(['DESIRABILITY', 'FEASIBILITY', 'VIABILITY', 'SCALE']).default('DESIRABILITY')
+  stage: z.enum(['DESIRABILITY', 'FEASIBILITY', 'VIABILITY', 'SCALE']).default('DESIRABILITY'),
+  clientId: z.string().optional() // For consultants creating projects for clients
 })
 
 export async function POST(request: NextRequest) {
@@ -55,7 +56,8 @@ export async function POST(request: NextRequest) {
           targetMarket: validatedData.targetMarket,
           businessModel: validatedData.businessModel,
           createdViaWizard: true,
-          aiInsightsGenerated: true
+          aiInsightsGenerated: true,
+          ...(validatedData.clientId && { clientId: validatedData.clientId })
         }
       })
       .select()
@@ -123,7 +125,8 @@ export async function POST(request: NextRequest) {
         description: project.description,
         stage: project.stage,
         status: project.status
-      }
+      },
+      clientId: validatedData.clientId
     })
 
   } catch (error) {

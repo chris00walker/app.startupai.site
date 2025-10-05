@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Separator } from '../../components/ui/separator';
-import { AlertCircle, CheckCircle, Clock, Play, RotateCcw, Activity, X, Eye } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Play, RotateCcw, Activity, X, Eye, Plus } from 'lucide-react';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Progress } from '../../components/ui/progress';
 
@@ -256,6 +256,12 @@ const ClientPage: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href={`/client/${id}/projects/new`}>
+                <Button variant="default">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Project
+                </Button>
+              </Link>
               <Badge variant="success">
                 Active
               </Badge>

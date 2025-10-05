@@ -26,6 +26,10 @@ import {
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/auth/hooks"
 
+interface ProjectCreationWizardProps {
+  clientId?: string // Optional - for consultants creating projects for clients
+}
+
 interface ProjectData {
   name: string
   description: string
@@ -33,6 +37,7 @@ interface ProjectData {
   targetMarket: string
   businessModel: string
   stage: 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'
+  clientId?: string
 }
 
 interface AIInsight {
@@ -42,7 +47,7 @@ interface AIInsight {
   priority: 'high' | 'medium' | 'low'
 }
 
-export function ProjectCreationWizard() {
+export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps = {}) {
   const [currentStep, setCurrentStep] = useState(1)
   const [projectData, setProjectData] = useState<ProjectData>({
     name: '',
@@ -50,7 +55,8 @@ export function ProjectCreationWizard() {
     problemStatement: '',
     targetMarket: '',
     businessModel: '',
-    stage: 'DESIRABILITY'
+    stage: 'DESIRABILITY',
+    clientId: clientId
   })
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false)
@@ -124,10 +130,16 @@ export function ProjectCreationWizard() {
         throw new Error(errorData.error || 'Failed to create project')
       }
 
-      const { project } = await response.json()
+      const { project, clientId: responseClientId } = await response.json()
       
       startTransition(() => {
-        router.push(`/project/${project.id}/gate`)
+        // If created for a client, redirect to client dashboard
+        // Otherwise redirect to project gate page
+        if (responseClientId) {
+          router.push(`/client/${responseClientId}`)
+        } else {
+          router.push(`/project/${project.id}/gate`)
+        }
       })
     } catch (error) {
       console.error('Error creating project:', error)
