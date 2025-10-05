@@ -53,7 +53,9 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const handleEmailSignIn = async (formData: FormData) => {
     setIsLoading(true)
     try {
-      await signIn(formData)
+      const email = formData.get('email') as string
+      const password = formData.get('password') as string
+      await signIn(email, password)
     } catch (error) {
       console.error('Email sign in error:', error)
     } finally {
