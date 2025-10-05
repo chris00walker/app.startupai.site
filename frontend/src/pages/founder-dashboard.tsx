@@ -7,10 +7,12 @@ import HypothesisManager from "@/components/hypothesis/HypothesisManager"
 import { EvidenceLedger } from "@/components/fit/EvidenceLedger"
 import { ExperimentsPage } from "@/components/fit/ExperimentsPage"
 import { StageSelector } from "@/components/founder/StageSelector"
+import { ProjectCreationWizard } from "@/components/onboarding/ProjectCreationWizard"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useProjects } from "@/hooks/useProjects"
 import { 
   Target,
   FileText,
@@ -18,7 +20,9 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Clock
+  Clock,
+  Plus,
+  Rocket
 } from "lucide-react"
 
 function QuickStats() {
@@ -212,8 +216,72 @@ function NextSteps() {
   )
 }
 
+function EmptyState() {
+  const [showWizard, setShowWizard] = React.useState(false)
+
+  if (showWizard) {
+    return <ProjectCreationWizard />
+  }
+
+  return (
+    <div className="text-center py-16 space-y-6">
+      <div className="space-y-4">
+        <Rocket className="h-16 w-16 text-blue-600 mx-auto" />
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold">Welcome to StartupAI! 🚀</h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Ready to validate your startup idea with AI-powered insights? Let's create your first validation project.
+          </p>
+        </div>
+      </div>
+      
+      <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
+        <Card className="text-left">
+          <CardContent className="pt-6">
+            <Target className="h-8 w-8 text-blue-600 mb-3" />
+            <h3 className="font-semibold mb-2">AI-Powered Analysis</h3>
+            <p className="text-sm text-muted-foreground">
+              Our AI analyzes your idea and creates personalized hypotheses and experiments
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card className="text-left">
+          <CardContent className="pt-6">
+            <FileText className="h-8 w-8 text-green-600 mb-3" />
+            <h3 className="font-semibold mb-2">Evidence-Led Validation</h3>
+            <p className="text-sm text-muted-foreground">
+              Track evidence, measure progress, and make data-driven decisions
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card className="text-left">
+          <CardContent className="pt-6">
+            <Beaker className="h-8 w-8 text-purple-600 mb-3" />
+            <h3 className="font-semibold mb-2">Structured Experiments</h3>
+            <p className="text-sm text-muted-foreground">
+              Follow proven methodologies to validate desirability, feasibility, and viability
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Button 
+        size="lg" 
+        onClick={() => setShowWizard(true)}
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        <Plus className="h-5 w-5 mr-2" />
+        Create Your First Project
+      </Button>
+    </div>
+  )
+}
+
 export default function FounderDashboard() {
   const [activeTab, setActiveTab] = React.useState('overview')
+  const { projects, isLoading, error } = useProjects()
   
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -223,6 +291,61 @@ export default function FounderDashboard() {
     }
   }, [])
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        breadcrumbs={[
+          { title: "Founder Dashboard", href: "/founder-dashboard" },
+        ]}
+        userType="founder"
+      >
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your projects...</p>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <DashboardLayout
+        breadcrumbs={[
+          { title: "Founder Dashboard", href: "/founder-dashboard" },
+        ]}
+        userType="founder"
+      >
+        <div className="text-center py-16 space-y-4">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Error Loading Projects</h2>
+            <p className="text-muted-foreground">{error.message}</p>
+          </div>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  // Show empty state if no projects
+  if (projects.length === 0) {
+    return (
+      <DashboardLayout
+        breadcrumbs={[
+          { title: "Founder Dashboard", href: "/founder-dashboard" },
+        ]}
+        userType="founder"
+      >
+        <EmptyState />
+      </DashboardLayout>
+    )
+  }
+
+  // Show normal dashboard with projects
   return (
     <DashboardLayout
       breadcrumbs={[
@@ -239,6 +362,11 @@ export default function FounderDashboard() {
             <TabsTrigger value="evidence">Evidence</TabsTrigger>
             <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
+          
+          <Button variant="outline">
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
+          </Button>
         </div>
 
         <TabsContent value="overview" className="space-y-6">

@@ -8,7 +8,7 @@
 
 import { useEffect, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth/hooks';
+import { useAuth, useUser } from '@/lib/auth/hooks';
 import {
   trackEvent,
   trackPageView,
@@ -182,8 +182,8 @@ export function useFeatureTracking(featureName: string) {
 /**
  * Track time on page
  */
-export function useTimeOnPage(pageName: string) {
-  const startTime = useRef<number>();
+export function useTimeOnPage(pageName?: string) {
+  const startTime = useRef<number | undefined>(undefined);
   const pathname = usePathname();
 
   useEffect(() => {
