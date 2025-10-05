@@ -5,6 +5,7 @@ Command-line interface for running strategic analysis workflows
 """
 
 import sys
+import os
 import json
 import argparse
 from typing import Dict, Any
@@ -19,6 +20,11 @@ from src.startupai.crew import StartupAICrew
 
 def load_environment():
     """Load environment variables from .env file."""
+    # Skip loading .env if direnv is already providing environment variables
+    if os.getenv('SKIP_DOTENV') or os.getenv('DIRENV_DIR'):
+        print("✅ Using system environment variables (direnv detected)")
+        return
+        
     try:
         from dotenv import load_dotenv
         env_path = backend_dir / ".env"
