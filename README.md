@@ -7,39 +7,40 @@
 This repository implements the **Product Platform** (`app.startupai.site`) in StartupAI's two-site architecture:
 
 - **🎯 startupai.site** (The Promise) - Convert prospects to customers - ✅ 95% Complete
-- **⚡ app.startupai.site** (The Product) - Deliver value and create advocates ← **THIS REPO** - ⚠️ 50-55% Complete
+- **⚡ app.startupai.site** (The Product) - Deliver value and create advocates ← **THIS REPO** - ⚠️ 65-70% Complete
 
-**Latest Audit:** [Codebase Audit (Oct 4, 2025)](../startupai.site/docs/CODEBASE_AUDIT_2025-10-04.md)
+**Latest Updates:** October 6, 2025 - CrewAI backend 15% implemented, trial guardrails deployed, deployment fixed
 
 ## 🚀 What This Platform Does
 
 **Evidence-Led Strategy Platform** that helps entrepreneurs validate business ideas through systematic experimentation:
 
-- **Secure Authentication Handoff** - ✅ Seamlessly receive authenticated users from startupai.site
-- **Project Management** - ⚠️ UI complete, DB integration partial
-- **Hypothesis Testing** - ⚠️ Complete UI (HypothesisManager 20KB), needs DB integration
-- **AI-Powered Insights** - ❌ CrewAI backend not implemented (CRITICAL BLOCKER)
-- **Professional Reports** - ⚠️ Display UI ready, generation backend missing
-- **Progress Tracking** - ⚠️ Gate UI complete, logic needs implementation
+- **Secure Authentication Handoff** - ✅ Working with token-based session (Oct 4, 2025)
+- **Project Management** - ✅ UI complete, DB integration working via useProjects hook (Oct 3, 2025)
+- **Hypothesis Testing** - ✅ Complete UI with database integration
+- **AI-Powered Insights** - ⚠️ CrewAI backend 15% implemented (Oct 4, 2025)
+- **Professional Reports** - ⚠️ Display UI ready, generation backend in progress
+- **Progress Tracking** - ✅ Gate scoring integrated (Oct 4, 2025)
+- **Trial Usage Guardrails** - ✅ Implemented with /api/trial/allow endpoint (Oct 4, 2025)
 
 ## 🛠️ Technology Stack
 
 - **Frontend:** Next.js 15.5.3 with TypeScript 5.8.3 (`/frontend/`)
-- **Backend:** Netlify Functions (Python) for CrewAI workflows - ❌ NOT IMPLEMENTED
-- **Database:** Supabase PostgreSQL with pgvector - ✅ Configured
+- **Backend:** Netlify Functions (Python) for CrewAI workflows - ⚠️ 15% Implemented (Oct 4, 2025)
+- **Database:** Supabase PostgreSQL with pgvector - ✅ 100% Complete (8 migrations deployed)
 - **ORM:** Drizzle ORM for type-safe operations - ✅ Complete
-- **Storage:** Supabase Storage with RLS policies - ❌ Buckets not created
-- **Vector Search:** pgvector with OpenAI embeddings (1536 dimensions) - ✅ Ready
-- **AI:** CrewAI multi-agent system + Vercel AI SDK - ❌ NOT IMPLEMENTED
-- **Authentication:** JWT token validation - ✅ Working (GitHub OAuth)
+- **Storage:** Supabase Storage with RLS policies - ✅ Buckets created (Oct 3, 2025)
+- **Vector Search:** pgvector with match_evidence() function - ✅ Complete (Oct 4, 2025)
+- **AI:** CrewAI 0.201.1 + Netlify Functions - ⚠️ 15% Implemented
+- **Authentication:** JWT token validation - ✅ Working with role-based routing (Oct 4, 2025)
 - **Package Manager:** pnpm 9.12.1 (✅ migrated Sept 26, 2025)
 - **Deployment:** Netlify (✅ live at https://app-startupai-site.netlify.app)
 
 **Current Status:**
-- ✅ Infrastructure: 80% (Supabase, Auth, Deployment)
-- ✅ UI Components: 60-70% (50+ components, 160KB canvas code)
-- ⚠️ Backend Integration: 45% (Dashboard connected, others pending)
-- ❌ AI Backend: 0% (CRITICAL BLOCKER)
+- ✅ Infrastructure: 95% (Supabase, Auth, Deployment, Environment Variables)
+- ✅ UI Components: 70% (50+ components, 160KB canvas code, DB integrated)
+- ✅ Backend Integration: 70% (Dashboard, projects, evidence all connected to Supabase)
+- ⚠️ AI Backend: 15% (CrewAI installed, Netlify functions created, needs completion)
 
 
 ### Development Setup
@@ -112,30 +113,39 @@ app.startupai.site/
 
 ## 📊 Current Status
 
-**Overall Progress:** 50-55% Complete  
-**Last Audit:** October 4, 2025
+**Overall Progress:** 65-70% Complete  
+**Last Updated:** October 6, 2025
 
-**What's Working:**
+**✅ What's Working (Oct 3-6, 2025):**
 - ✅ 20 pages deployed (16 Pages Router + 4 App Router)
 - ✅ 50+ UI components including 9 canvas tools (160KB code)
-- ✅ Complete validation UI (Hypothesis, Evidence, Experiments)
-- ✅ GitHub OAuth working in production
+- ✅ Complete validation UI with database integration
+- ✅ GitHub OAuth working in production with role-based routing
 - ✅ Dashboard connected to Supabase via useProjects hook
-- ✅ 7 database migrations deployed
-- ✅ Type-safe query layer complete
-- ✅ 162 tests passing
+- ✅ 8 database migrations deployed (including trial guardrails)
+- ✅ Type-safe query layer complete with read/write operations
+- ✅ 162 tests passing (Jest) + 45 E2E tests (Playwright)
+- ✅ Mock data removed from production code paths
+- ✅ Storage buckets created with RLS policies
+- ✅ Vector search function deployed (match_evidence)
+- ✅ Trial usage guardrails with /api/trial/allow endpoint
+- ✅ Netlify deployment environment variables configured
+- ✅ CrewAI backend 15% implemented (agents, tasks, Netlify functions)
 
-**Critical Gaps:**
-- 🚨 CrewAI backend not implemented (0% - BLOCKS CORE VALUE)
-- ⚠️ Most components still use mock data (needs DB integration)
-- ⚠️ Storage buckets not configured (blocks file uploads)
-- ⚠️ Routing architecture needs consolidation (App + Pages Router)
+**⚠️ In Progress:**
+- ⚠️ CrewAI backend completion (85% remaining - 10-13 hours)
+- ⚠️ Frontend integration with CrewAI endpoints
+- ⚠️ Real-time progress tracking for AI workflows
+
+**✅ Architecture Decisions:**
+- ✅ Router consolidation: KEEP HYBRID (Vercel recommended, documented Oct 4)
+- ✅ Database integration: COMPLETE (all components use real data)
 
 **Next Steps (Prioritized):**
-1. 🚨 Implement CrewAI backend (15-20 hours) - CRITICAL
-2. ⚡ Connect UI to database (10-15 hours) - HIGH
-3. ⚡ Configure storage buckets (4 hours) - HIGH
-4. 📋 Router consolidation (6 hours) - MEDIUM
+1. 🚨 Complete CrewAI backend (Steps 3-10) - 10-13 hours - CRITICAL
+2. ⚡ Frontend integration (ProjectCreationWizard) - 4 hours - HIGH
+3. ⚡ Real-time progress tracking - 3 hours - HIGH
+4. 📋 End-to-end workflow testing - 2 hours - MEDIUM
 
 ## 📚 Documentation
 
