@@ -28,7 +28,8 @@ import {
   CheckCircle,
   Clock,
   Plus,
-  Rocket
+  Rocket,
+  Brain
 } from "lucide-react"
 
 function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
