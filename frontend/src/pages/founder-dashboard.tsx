@@ -385,12 +385,20 @@ export default function FounderDashboard() {
             <TabsTrigger value="insights">Insights</TabsTrigger>
           </TabsList>
           
-          <Link href="/projects/new">
-            <Button variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/ai-analysis">
+              <Button>
+                <Brain className="h-4 w-4 mr-2" />
+                AI Strategic Analysis
+              </Button>
+            </Link>
+            <Link href="/projects/new">
+              <Button variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <TabsContent value="overview" className="space-y-6">

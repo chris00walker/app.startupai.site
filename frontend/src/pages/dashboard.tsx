@@ -24,7 +24,8 @@ import {
   CheckCircle,
   Plus,
   Filter,
-  Loader2
+  Loader2,
+  Brain
 } from "lucide-react"
 import { mockPortfolioProjects, mockPortfolioMetrics } from "@/data/portfolioMockData"
 import { PortfolioProject } from "@/types/portfolio"
@@ -242,6 +243,10 @@ function Dashboard() {
                 onStatusChange={setSelectedStatuses}
                 projectCounts={projectCounts}
               />
+              <Button variant="outline">
+                <Brain className="h-4 w-4 mr-2" />
+                Portfolio AI Analysis
+              </Button>
               <Button variant="outline">
                 <Settings className="h-4 w-4 mr-2" />
                 Gate Policies
