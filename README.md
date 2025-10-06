@@ -137,11 +137,67 @@ app.startupai.site/
 3. ⚡ Configure storage buckets (4 hours) - HIGH
 4. 📋 Router consolidation (6 hours) - MEDIUM
 
+## 📚 Documentation
+
+### 📖 Master Reference
+
+**→ [Two-Site Implementation Plan](../startupai.site/docs/technical/two-site-implementation-plan.md)**  
+The **SINGLE SOURCE OF TRUTH** for all StartupAI development (located in marketing repo).
+
+### 🔧 Engineering Documentation
+
+#### Authentication (10-series)
+- [Authentication Setup](docs/engineering/10-authentication/authentication-setup.md)
+- [OAuth Configuration Guide](docs/engineering/10-authentication/oauth-setup-guide.md)
+- [Role-Based Routing](docs/engineering/10-authentication/ROLE_BASED_ROUTING_SETUP.md) (Oct 5, 2025)
+
+#### Data Layer (30-series)
+- [Supabase Setup](docs/engineering/30-data/supabase-setup.md)
+- [Drizzle Schema](docs/engineering/30-data/drizzle-schema.md)
+- [Database Migrations](docs/engineering/30-data/migrations/README.md)
+- [Data Retention & PII](docs/engineering/30-data/retention-and-pii.md)
+
+#### Testing (50-series)
+- [Testing Infrastructure](docs/engineering/50-testing/README.md)
+- [E2E Testing Guide](frontend/E2E_TESTING_GUIDE.md)
+- [TDD Implementation Report](frontend/TDD_IMPLEMENTATION_COMPLETE.md)
+
+#### Deployment
+- [Docker Configuration](docs/engineering/deployment/docker.md)
+- [Netlify Environment Variables](docs/engineering/deployment/NETLIFY_ENV_VARS.md) (Oct 5, 2025)
+
+### 🎯 Features & Integrations
+
+#### CrewAI Backend
+- [CrewAI Implementation Spec](backend/CREW_AI.md) - Complete 6-agent workflow specification
+- [CrewAI Status Report](docs/integrations/crewai/CREWAI_STATUS_REPORT.md) (Oct 5, 2025)
+- [Netlify Functions Guide](netlify/functions/README.md)
+
+#### Feature Documentation
+- [Gate Scoring Integration](docs/features/gate-scoring-integration.md) (Oct 4, 2025)
+- [Gate Integration Complete](docs/features/GATE_INTEGRATION_COMPLETE.md)
+- [Consultant Gate Enhancements](docs/features/CONSULTANT_GATE_ENHANCEMENTS_COMPLETE.md) (Oct 5, 2025)
+
+### 🔄 Operations
+
+- [Implementation Status](docs/operations/implementation-status.md) - **Weekly progress tracking**
+- [Dashboard Integration Priorities](docs/operations/DASHBOARD_INTEGRATION_PRIORITIES.md)
+- [Database Seeding Guide](docs/operations/database-seeding.md)
+- [Router Consolidation Plan](docs/operations/routing-consolidation-plan.md)
+
+### 🔗 Marketing Site Documentation
+
+For business, product, and design documentation, see:
+- **[startupai.site README](../startupai.site/README.md)** - Marketing site overview with full doc index
+- **[Product Requirements](../startupai.site/docs/product/PRD.md)** - PRD and specifications
+- **[Design System](../startupai.site/docs/design/design-system.md)** - Shared design tokens and components
+
+---
+
 ## 🔗 Related Repositories
 
 - **[startupai.site](../startupai.site/)** - Marketing site (95% complete)
-- **Shared Documentation** - [/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)
-- **Comprehensive Audit** - [Codebase Audit Oct 4, 2025](../startupai.site/docs/CODEBASE_AUDIT_2025-10-04.md)
+- **[Master Implementation Plan](../startupai.site/docs/technical/two-site-implementation-plan.md)** - Single source of truth
 
 ---
 
