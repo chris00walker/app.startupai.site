@@ -206,13 +206,13 @@ function Dashboard() {
       )}
       
       {!usingRealData && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
-          <div className="flex">
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-r-md">
+          <div className="flex items-start">
             <div className="flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-blue-400" />
+              <AlertTriangle className="h-5 w-5 text-blue-400 mt-0.5" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700">
+            <div className="ml-3 flex-1">
+              <p className="text-sm text-blue-700 leading-relaxed">
                 <strong>Demo Mode:</strong> Showing sample data. Create your first project to see real data.
               </p>
             </div>
