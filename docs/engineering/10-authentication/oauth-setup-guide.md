@@ -1,8 +1,8 @@
 # OAuth Providers Setup Guide
 
 **Project:** StartupAI App Platform  
-**Last Updated:** October 2, 2025  
-**Status:** GitHub OAuth ✅ Complete | Google/Azure Optional
+**Last Updated:** October 22, 2025  
+**Status:** GitHub OAuth ✅ Complete (PKCE Flow Fixed) | Google/Azure Optional
 
 ---
 
@@ -16,8 +16,36 @@ OAuth setup requires configuration in **TWO** locations:
 Additionally, for cross-site authentication (marketing → product):
 3. **Marketing Site** - Add `.env.production` with `NEXT_PUBLIC_APP_URL`
 4. **Netlify Build** - Ensure environment variables available at build time
+5. **PKCE Configuration** - Configure Supabase client for PKCE flow (CRITICAL)
 
 **Missing any step will cause OAuth to redirect to localhost in production.**
+
+### PKCE Flow Configuration (October 22, 2025 Fix)
+
+**Critical:** Both sites must have PKCE flow properly configured in their Supabase clients:
+
+```typescript
+// Required in both startupai.site and app.startupai.site
+// File: src/lib/supabase/client.ts
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        flowType: 'pkce',                    // Enable PKCE flow
+        detectSessionInUrl: false,           // Handle manually in callback
+      },
+    }
+  );
+}
+```
+
+**Why This Matters:**
+- Supabase SSR uses PKCE flow by default
+- Without explicit configuration, code verifier is missing
+- Results in "invalid request: both auth code and code verifier should be non-empty" error
+- Both sites need matching configuration for cross-site OAuth
 
 ---
 

@@ -1,7 +1,7 @@
 # Authentication Setup Documentation
 
-**Status:** ✅ Complete (GitHub OAuth Working in Production)  
-**Last Updated:** October 2, 2025  
+**Status:** ✅ Complete (GitHub OAuth Working in Production - PKCE Flow Fixed)  
+**Last Updated:** October 22, 2025  
 **Database:** Supabase Auth with RLS
 
 ---
@@ -24,9 +24,10 @@ Complete authentication system using Supabase Auth with Row Level Security, OAut
 ## Architecture
 
 ### Client-Side (`@/lib/supabase/client.ts`)
-- Browser-based Supabase client
+- Browser-based Supabase client with PKCE flow configuration
 - Used in Client Components
 - Real-time auth state updates
+- **PKCE Configuration:** `flowType: 'pkce'` and `detectSessionInUrl: false`
 
 ### Server-Side (`@/lib/supabase/server.ts`)
 - Server-based Supabase client
@@ -276,6 +277,49 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 ```
+
+---
+
+## PKCE Flow Configuration
+
+### Critical Fix (October 22, 2025)
+
+**Problem Resolved:** OAuth was failing with "invalid request: both auth code and code verifier should be non-empty" error.
+
+**Root Cause:** Supabase client was using PKCE flow by default but wasn't properly configured, causing the code verifier to be missing during OAuth callback exchange.
+
+**Solution Applied:**
+
+```typescript
+// /lib/supabase/client.ts
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        flowType: 'pkce',                    // Explicitly enable PKCE flow
+        detectSessionInUrl: false,           // Handle manually in callback
+      },
+    }
+  );
+}
+```
+
+**Key Configuration Points:**
+- ✅ **`flowType: 'pkce'`** - Explicitly enables PKCE (Proof Key for Code Exchange) flow
+- ✅ **`detectSessionInUrl: false`** - Disables automatic session detection to handle manually in callback route
+- ✅ **Applied to both sites** - `startupai.site` and `app.startupai.site` have matching configuration
+
+**PKCE Flow Sequence:**
+1. User clicks "Sign in with GitHub" → App generates code verifier and challenge
+2. GitHub authenticates user → Redirects to Supabase callback URL with auth code
+3. Supabase processes OAuth → Redirects to app callback URL with auth code
+4. App callback exchanges code + verifier for session → User logged in
+
+**Files Updated:**
+- ✅ `/home/chris/app.startupai.site/frontend/src/lib/supabase/client.ts`
+- ✅ `/home/chris/startupai.site/src/lib/supabase/client.ts`
 
 ---
 
