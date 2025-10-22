@@ -7,6 +7,10 @@
   NODE_VERSION = "18"
   PNPM_VERSION = "9.12.1"
 
+# Enable Next.js on Netlify
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [functions]
   directory = "netlify/functions"
   # Python functions will use Python 3.10 automatically
@@ -22,11 +26,7 @@
   to = "/.netlify/functions/crew-analyze-background"
   status = 200
 
-# Handle SPA routing for static export (must be last)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Note: Removed catch-all redirect - Next.js plugin handles routing
 
 # Headers for security and performance
 [[headers]]
