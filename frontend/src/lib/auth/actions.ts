@@ -73,7 +73,11 @@ export async function signOut() {
 export async function signInWithOAuth(provider: 'github' | 'google' | 'azure'): Promise<{ url?: string; error?: string }> {
   const supabase = createClient();
 
-  const redirectUrl = `${window.location.origin}/auth/callback`;
+  // Use environment-aware URL for OAuth redirect
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+  const redirectUrl = `${baseUrl}/auth/callback`;
+
+  console.log('OAuth redirect URL:', redirectUrl); // Debug logging
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,

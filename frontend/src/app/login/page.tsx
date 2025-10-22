@@ -31,7 +31,7 @@ export default async function LoginPage({
       <div className="flex flex-col p-8 lg:p-12">
         <div className="mb-8">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="https://startupai-site.netlify.app">
+            <Link href={process.env.NEXT_PUBLIC_MARKETING_URL || "http://localhost:3000"}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to home
             </Link>
