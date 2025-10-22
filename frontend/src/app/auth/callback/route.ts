@@ -12,20 +12,21 @@ import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
 export async function GET(request: Request) {
   console.log('=== OAuth Callback Started ===');
   
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const accessToken = searchParams.get('access_token');
-  const refreshToken = searchParams.get('refresh_token');
-  const rawNext = searchParams.get('next');
+  try {
+    const { searchParams, origin } = new URL(request.url);
+    const code = searchParams.get('code');
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    const rawNext = searchParams.get('next');
 
-  console.log('Callback URL:', request.url);
-  console.log('Code present:', !!code);
-  console.log('Access token present:', !!accessToken);
-  console.log('Refresh token present:', !!refreshToken);
-  console.log('Next destination:', rawNext);
-  console.log('Origin:', origin);
+    console.log('Callback URL:', request.url);
+    console.log('Code present:', !!code);
+    console.log('Access token present:', !!accessToken);
+    console.log('Refresh token present:', !!refreshToken);
+    console.log('Next destination:', rawNext);
+    console.log('Origin:', origin);
 
-  const supabase = await createClient();
+    const supabase = await createClient();
 
   if (accessToken && refreshToken) {
     console.log('Setting session from provided tokens...');
@@ -75,8 +76,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  console.error('No code in callback - redirecting to error page');
-  return NextResponse.redirect(`${origin}/auth/auth-code-error?error=no_code`);
+    console.error('No code in callback - redirecting to error page');
+    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=no_code`);
+  } catch (error) {
+    console.error('OAuth callback error:', error);
+    const { origin } = new URL(request.url);
+    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=callback_error`);
+  }
 }
 
 async function resolveRedirect({
@@ -103,11 +109,22 @@ async function resolveRedirect({
     return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    console.warn('Failed to get user from Supabase:', error);
+    return buildRedirectUrl({ request, origin, path: defaultPath });
+  }
 
-  const profile = await getUserProfile(userId);
+  let profile;
+  try {
+    profile = await getUserProfile(userId);
+  } catch (error) {
+    console.warn('Failed to get user profile:', error);
+    profile = undefined;
+  }
 
   const role = deriveRole({
     profileRole: profile?.role,
