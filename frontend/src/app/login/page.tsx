@@ -17,11 +17,14 @@ export const metadata = {
   description: 'Sign in to your StartupAI account',
 };
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { provider?: string; next?: string };
+  searchParams: Promise<{ provider?: string; next?: string }>;
 }) {
+  // Await searchParams for Next.js 15 compatibility
+  const params = await searchParams;
+  
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left side - Login Form */}
@@ -37,8 +40,8 @@ export default function LoginPage({
         
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-md">
-            {searchParams.provider === 'github' && (
-              <AutoOAuthTrigger provider="github" next={searchParams.next} />
+            {params.provider === 'github' && (
+              <AutoOAuthTrigger provider="github" next={params.next} />
             )}
             <LoginForm />
           </div>
