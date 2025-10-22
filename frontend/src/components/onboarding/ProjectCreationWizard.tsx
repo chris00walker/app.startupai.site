@@ -61,6 +61,8 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false)
   const [isCreatingProject, setIsCreatingProject] = useState(false)
+  const [aiProgress, setAiProgress] = useState<string>('')
+  const [aiError, setAiError] = useState<string>('')
   const [pending, startTransition] = useTransition()
   const { user } = useAuth()
   const router = useRouter()
@@ -75,6 +77,8 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
 
   const generateAIInsights = async () => {
     setIsGeneratingInsights(true)
+    setAiProgress('Starting AI analysis...')
+    setAiError('')
     
     try {
       // Get auth token for CrewAI API call
@@ -83,6 +87,8 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
       if (!session?.access_token) {
         throw new Error('Authentication required for AI analysis')
       }
+      
+      setAiProgress('Connecting to AI analysis engine...')
       
       // Call CrewAI backend for real strategic analysis
       const response = await fetch('/.netlify/functions/crew-analyze', {
@@ -99,19 +105,29 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
         })
       })
       
+      setAiProgress('AI agents analyzing your startup...')
+      
       if (!response.ok) {
-        throw new Error(`AI analysis failed: ${response.statusText}`)
+        const errorText = await response.text()
+        throw new Error(`AI analysis failed: ${response.statusText}. ${errorText}`)
       }
       
+      setAiProgress('Processing AI analysis results...')
       const aiResult = await response.json()
       
       // Parse CrewAI result into insights format
       const crewaiInsights = parseCrewAIResult(aiResult.result)
       
+      setAiProgress('AI analysis complete')
       setAiInsights(crewaiInsights)
       
     } catch (error) {
       console.error('AI analysis error:', error)
+      
+      // Set accessible error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      setAiError(`AI analysis error: ${errorMessage}. Using fallback recommendations.`)
+      setAiProgress('Using fallback recommendations...')
       
       // Fallback to enhanced mock insights if AI fails
       const fallbackInsights: AIInsight[] = [
@@ -142,6 +158,7 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
       ]
       
       setAiInsights(fallbackInsights)
+      setAiProgress('Fallback recommendations ready')
     } finally {
       setIsGeneratingInsights(false)
     }
@@ -403,16 +420,57 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
                 </p>
               </div>
 
+              {/* Accessibility: Screen reader announcements */}
+              <div 
+                role="status" 
+                aria-live="polite" 
+                aria-atomic="true"
+                className="sr-only"
+              >
+                {aiProgress}
+              </div>
+              
+              {aiError && (
+                <div 
+                  role="alert" 
+                  aria-live="assertive"
+                  className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <MessageSquare className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-yellow-900">AI Analysis Notice</h4>
+                      <p className="text-sm text-yellow-700 mt-1">{aiError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {isGeneratingInsights ? (
                 <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Analyzing your startup with AI...</p>
+                  <div 
+                    className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
+                    role="img"
+                    aria-label="Loading spinner"
+                  ></div>
+                  <p className="text-muted-foreground" aria-live="polite">{aiProgress || 'Analyzing your startup with AI...'}</p>
+                  <p className="text-sm text-muted-foreground mt-2">This may take 30-60 seconds</p>
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {/* Accessibility: Announce insights count to screen readers */}
+                  <div className="sr-only" role="status" aria-live="polite">
+                    Found {aiInsights.length} AI-generated insights for your startup
+                  </div>
+                  
                   <div className="grid gap-4 md:grid-cols-2">
                     {aiInsights.map((insight, index) => (
-                      <Card key={index} className="border-l-4 border-l-blue-500">
+                      <Card 
+                        key={index} 
+                        className="border-l-4 border-l-blue-500"
+                        role="article"
+                        aria-label={`${insight.type}: ${insight.title}`}
+                      >
                         <CardHeader className="pb-3">
                           <div className="flex items-center justify-between">
                             <Badge variant={insight.priority === 'high' ? 'default' : 'secondary'}>
@@ -431,9 +489,13 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
                     ))}
                   </div>
                   
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div 
+                    className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+                    role="complementary"
+                    aria-label="AI Recommendation"
+                  >
                     <div className="flex items-start gap-3">
-                      <MessageSquare className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <MessageSquare className="h-5 w-5 text-blue-600 mt-0.5" aria-hidden="true" />
                       <div>
                         <h4 className="font-medium text-blue-900">AI Recommendation</h4>
                         <p className="text-sm text-blue-700 mt-1">

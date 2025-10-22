@@ -3,10 +3,12 @@
  * 
  * Accessible authentication page with GitHub OAuth and email/password.
  * Uses Server Actions for authentication.
+ * Supports auto-triggering OAuth via ?provider=github query parameter.
  */
 
 import Link from 'next/link';
 import { LoginForm } from '@/components/auth/LoginForm';
+import { AutoOAuthTrigger } from '@/components/auth/AutoOAuthTrigger';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -15,7 +17,11 @@ export const metadata = {
   description: 'Sign in to your StartupAI account',
 };
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { provider?: string; next?: string };
+}) {
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left side - Login Form */}
@@ -31,6 +37,9 @@ export default function LoginPage() {
         
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-md">
+            {searchParams.provider === 'github' && (
+              <AutoOAuthTrigger provider="github" next={searchParams.next} />
+            )}
             <LoginForm />
           </div>
         </div>
