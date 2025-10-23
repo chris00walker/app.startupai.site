@@ -1,48 +1,50 @@
 [build]
   command = "pnpm build"
-  functions = "netlify/functions"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_FLAGS = "--version"
+  PNPM_VERSION = "9.12.1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
 [functions]
-  node_bundler = "esbuild"
+  directory = "netlify/functions"
 
-# Dynamic rendering handled by @netlify/plugin-nextjs
-
-# Redirects for SPA routing
 [[redirects]]
-  from = "/onboarding/*"
-  to = "/onboarding/index.html"
+  from = "/api/analyze"
+  to = "/.netlify/functions/crew-analyze"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/*"
-  to = "/dashboard/index.html"
+  from = "/api/analyze-background"
+  to = "/.netlify/functions/crew-analyze-background"
   status = 200
 
-# API redirects (fallback for old API routes)
-[[redirects]]
-  from = "/api/onboarding/start"
-  to = "/.netlify/functions/onboarding-start"
-  status = 200
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-[[redirects]]
-  from = "/api/onboarding/message"
-  to = "/.netlify/functions/onboarding-message"
-  status = 200
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-[[redirects]]
-  from = "/api/onboarding/complete"
-  to = "/.netlify/functions/onboarding-complete"
-  status = 200
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-# Catch-all redirect for SPA
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[[headers]]
+  for = "*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [dev]
   command = "pnpm dev"
