@@ -262,7 +262,7 @@ const ClientPage: React.FC = () => {
                   New Project
                 </Button>
               </Link>
-              <Badge variant="success">
+              <Badge variant="default">
                 Active
               </Badge>
               <div className="flex items-center space-x-2">
@@ -331,8 +331,8 @@ const ClientPage: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Badge 
-                          variant={artefact.status === 'completed' ? 'success' : 
-                                 artefact.status === 'in-progress' ? 'warning' : 'info'}
+                          variant={artefact.status === 'completed' ? 'default' : 
+                                 artefact.status === 'in-progress' ? 'secondary' : 'outline'}
                         >
                           {artefact.status}
                         </Badge>
