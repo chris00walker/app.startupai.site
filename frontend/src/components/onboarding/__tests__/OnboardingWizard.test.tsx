@@ -4,7 +4,6 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { jest } from '@jest/globals';
 import { OnboardingWizard } from '../OnboardingWizard';
 
 // Mock Next.js router
@@ -23,39 +22,39 @@ jest.mock('sonner', () => ({
   },
 }));
 
-// Mock fetch for API calls
-global.fetch = jest.fn();
+// Mock fetch for API calls with proper typing
+const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+global.fetch = mockFetch;
 
 describe('OnboardingWizard - TDD Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (global.fetch as jest.Mock).mockClear();
+    mockFetch.mockClear();
   });
 
   describe('1. API Endpoint Integration', () => {
     it('should successfully initialize onboarding session', async () => {
       // Arrange: Mock successful API response
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          success: true,
-          sessionId: 'test-session-123',
-          stageInfo: {
-            currentStage: 1,
-            totalStages: 7,
-            stageName: 'Welcome & Introduction'
-          },
-          agentIntroduction: 'Hello! I\'m your AI strategic consultant.',
-          firstQuestion: 'What brings you here today?',
-          conversationContext: {
-            agentPersonality: {
-              name: 'Alex',
-              role: 'Strategic Business Consultant',
-              expertise: 'startup strategy'
-            }
+      const mockResponse = new Response(JSON.stringify({
+        success: true,
+        sessionId: 'test-session-123',
+        stageInfo: {
+          currentStage: 1,
+          totalStages: 7,
+          stageName: 'Welcome & Introduction'
+        },
+        agentIntroduction: 'Hello! I\'m your AI strategic consultant.',
+        firstQuestion: 'What brings you here today?',
+        conversationContext: {
+          agentPersonality: {
+            name: 'Alex',
+            role: 'Strategic Business Consultant',
+            expertise: 'startup strategy'
           }
-        })
-      });
+        }
+      }), { status: 200, statusText: 'OK' });
+      
+      mockFetch.mockResolvedValueOnce(mockResponse);
 
       // Act: Render component with valid props
       render(
@@ -71,7 +70,7 @@ describe('OnboardingWizard - TDD Integration Tests', () => {
 
       // Wait for API call to complete
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('/api/onboarding/start/', {
+        expect(mockFetch).toHaveBeenCalledWith('/api/onboarding/start/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -96,7 +95,7 @@ describe('OnboardingWizard - TDD Integration Tests', () => {
 
     it('should handle API errors gracefully', async () => {
       // Arrange: Mock API error
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
       // Act: Render component
       render(
@@ -120,30 +119,27 @@ describe('OnboardingWizard - TDD Integration Tests', () => {
   describe('2. User Journey Flow', () => {
     it('should complete the full onboarding conversation flow', async () => {
       // Arrange: Mock successful initialization
-      (global.fetch as jest.Mock)
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            success: true,
-            sessionId: 'test-session-123',
-            stageInfo: { currentStage: 1, totalStages: 7 },
-            agentIntroduction: 'Welcome to onboarding!',
-            firstQuestion: 'Tell me about your business idea.',
-            conversationContext: {
-              agentPersonality: { name: 'Alex', role: 'Consultant' }
-            }
-          })
-        })
-        // Mock message sending
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            success: true,
-            messageId: 'msg-123',
-            agentResponse: 'That sounds interesting! Tell me more.',
-            stageProgress: { currentStage: 1, overallProgress: 15 }
-          })
-        });
+      const initResponse = new Response(JSON.stringify({
+        success: true,
+        sessionId: 'test-session-123',
+        stageInfo: { currentStage: 1, totalStages: 7 },
+        agentIntroduction: 'Welcome to onboarding!',
+        firstQuestion: 'Tell me about your business idea.',
+        conversationContext: {
+          agentPersonality: { name: 'Alex', role: 'Consultant' }
+        }
+      }), { status: 200 });
+
+      const messageResponse = new Response(JSON.stringify({
+        success: true,
+        messageId: 'msg-123',
+        agentResponse: 'That sounds interesting! Tell me more.',
+        stageProgress: { currentStage: 1, overallProgress: 15 }
+      }), { status: 200 });
+
+      mockFetch
+        .mockResolvedValueOnce(initResponse)
+        .mockResolvedValueOnce(messageResponse);
 
       // Act: Render and interact
       render(
@@ -168,7 +164,7 @@ describe('OnboardingWizard - TDD Integration Tests', () => {
 
       // Assert: Message should be sent
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('/api/onboarding/message/', expect.objectContaining({
+        expect(mockFetch).toHaveBeenCalledWith('/api/onboarding/message/', expect.objectContaining({
           method: 'POST',
           body: expect.stringContaining('I want to build a SaaS platform')
         }));
@@ -179,18 +175,17 @@ describe('OnboardingWizard - TDD Integration Tests', () => {
   describe('3. Error Recovery', () => {
     it('should provide retry functionality on failures', async () => {
       // Arrange: Mock initial failure then success
-      (global.fetch as jest.Mock)
+      const successResponse = new Response(JSON.stringify({
+        success: true,
+        sessionId: 'test-session-123',
+        stageInfo: { currentStage: 1, totalStages: 7 },
+        agentIntroduction: 'Welcome!',
+        conversationContext: { agentPersonality: { name: 'Alex' } }
+      }), { status: 200 });
+
+      mockFetch
         .mockRejectedValueOnce(new Error('Initial failure'))
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            success: true,
-            sessionId: 'test-session-123',
-            stageInfo: { currentStage: 1, totalStages: 7 },
-            agentIntroduction: 'Welcome!',
-            conversationContext: { agentPersonality: { name: 'Alex' } }
-          })
-        });
+        .mockResolvedValueOnce(successResponse);
 
       // Act: Render component
       render(
@@ -226,7 +221,7 @@ describe('Production Issue Reproduction', () => {
     const mockPlanType = 'trial';
     
     // Mock the failing API call that's happening in production
-    (global.fetch as jest.Mock).mockRejectedValueOnce(
+    mockFetch.mockRejectedValueOnce(
       new Error('Failed to start onboarding session')
     );
 
