@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import type { Context, Config } from "@netlify/functions";
+import { createClient } from '@supabase/supabase-js';
 
 // ============================================================================
 // Types and Interfaces
@@ -13,7 +12,7 @@ interface StartOnboardingRequest {
   userContext?: {
     referralSource?: string;
     previousExperience?: 'first_time' | 'experienced' | 'serial_entrepreneur';
-    timeAvailable?: number; // minutes available for conversation
+    timeAvailable?: number;
   };
 }
 
@@ -47,7 +46,7 @@ interface StartOnboardingError {
 }
 
 // ============================================================================
-// Plan Limits Configuration
+// Configuration
 // ============================================================================
 
 const PLAN_LIMITS = {
@@ -77,14 +76,24 @@ const PLAN_LIMITS = {
 // Helper Functions
 // ============================================================================
 
-async function validateUser(userId: string, authToken?: string) {
+function createAdminClient() {
+  return createClient(
+    Netlify.env.get('NEXT_PUBLIC_SUPABASE_URL')!,
+    Netlify.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
+}
+
+async function validateUser(userId: string) {
   try {
-    // For static export, we need to validate using the admin client
-    // and the provided auth token or user ID directly
-    const adminClient = createAdminClient();
+    const supabase = createAdminClient();
     
-    // Get user by ID using admin client
-    const { data: user, error } = await adminClient.auth.admin.getUserById(userId);
+    const { data: user, error } = await supabase.auth.admin.getUserById(userId);
     
     if (error || !user?.user) {
       console.error('User validation error:', error);
@@ -100,14 +109,13 @@ async function validateUser(userId: string, authToken?: string) {
 
 async function checkPlanLimits(userId: string, planType: string) {
   try {
-    const adminClient = createAdminClient();
+    const supabase = createAdminClient();
     
-    // Get user's current month sessions
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
     
-    const { data: sessions, error } = await adminClient
+    const { data: sessions, error } = await supabase
       .from('onboarding_sessions')
       .select('id')
       .eq('user_id', userId)
@@ -115,11 +123,7 @@ async function checkPlanLimits(userId: string, planType: string) {
     
     if (error) {
       console.error('Error checking plan limits:', error);
-      return {
-        allowed: true, // Allow on error to avoid blocking users
-        reason: null,
-        message: null,
-      };
+      return { allowed: true, reason: null, message: null };
     }
     
     const currentSessions = sessions?.length || 0;
@@ -134,18 +138,10 @@ async function checkPlanLimits(userId: string, planType: string) {
       };
     }
     
-    return {
-      allowed: true,
-      reason: null,
-      message: null,
-    };
+    return { allowed: true, reason: null, message: null };
   } catch (error) {
     console.error('Plan limits check error:', error);
-    return {
-      allowed: true, // Allow on error to avoid blocking users
-      reason: null,
-      message: null,
-    };
+    return { allowed: true, reason: null, message: null };
   }
 }
 
@@ -163,8 +159,6 @@ async function initializeOnboardingAgent(params: {
   planType: string;
   userContext?: any;
 }) {
-  // For now, return a structured response
-  // TODO: Replace with actual CrewAI integration
   const agentPersonalities = {
     trial: {
       name: 'Alex',
@@ -233,9 +227,9 @@ async function saveOnboardingSession(sessionData: {
   agentState: any;
 }) {
   try {
-    const adminClient = createAdminClient();
+    const supabase = createAdminClient();
     
-    const { data, error } = await adminClient
+    const { data, error } = await supabase
       .from('onboarding_sessions')
       .insert({
         session_id: sessionData.sessionId,
@@ -250,7 +244,7 @@ async function saveOnboardingSession(sessionData: {
         ai_context: sessionData.agentState,
         started_at: sessionData.startedAt.toISOString(),
         last_activity: sessionData.startedAt.toISOString(),
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       })
       .select()
       .single();
@@ -268,43 +262,63 @@ async function saveOnboardingSession(sessionData: {
 }
 
 // ============================================================================
-// Main API Handler
+// Main Handler
 // ============================================================================
 
-export async function POST(request: NextRequest) {
+export default async (req: Request, context: Context) => {
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({
+      success: false,
+      error: {
+        code: 'INVALID_REQUEST',
+        message: 'Method not allowed',
+        retryable: false,
+      },
+    }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
-    const body = await request.json();
+    const body = await req.json();
     const { userId, planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
     
     // Validate required fields
     if (!userId || !planType) {
-      return NextResponse.json({
+      return new Response(JSON.stringify({
         success: false,
         error: {
           code: 'INVALID_REQUEST',
           message: 'Missing required fields: userId and planType',
           retryable: false,
         },
-      } as StartOnboardingError, { status: 400 });
+      } as StartOnboardingError), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
     
     // Validate user authentication
     const user = await validateUser(userId);
     if (!user) {
-      return NextResponse.json({
+      return new Response(JSON.stringify({
         success: false,
         error: {
           code: 'USER_NOT_FOUND',
           message: 'User not authenticated or not found',
           retryable: false,
         },
-      } as StartOnboardingError, { status: 401 });
+      } as StartOnboardingError), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
     
-    // Check plan-specific limits (all tiers have onboarding access)
+    // Check plan-specific limits
     const canStart = await checkPlanLimits(userId, planType);
     if (!canStart.allowed) {
-      return NextResponse.json({
+      return new Response(JSON.stringify({
         success: false,
         error: {
           code: canStart.reason as any || 'SESSION_LIMIT_EXCEEDED',
@@ -312,13 +326,16 @@ export async function POST(request: NextRequest) {
           retryable: false,
           fallbackOptions: canStart.fallbackOptions || ['upgrade_plan', 'contact_support'],
         },
-      } as StartOnboardingError, { status: 403 });
+      } as StartOnboardingError), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
     
     // Generate session ID
     const sessionId = generateSessionId();
     
-    // Initialize CrewAI onboarding agent
+    // Initialize onboarding agent
     const agentResponse = await initializeOnboardingAgent({
       sessionId,
       userId,
@@ -352,33 +369,32 @@ export async function POST(request: NextRequest) {
       conversationContext: agentResponse.context,
     };
     
-    return NextResponse.json(response);
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
     
   } catch (error) {
     console.error('Onboarding start error:', error);
     
-    return NextResponse.json({
+    return new Response(JSON.stringify({
       success: false,
       error: {
         code: 'AI_SERVICE_UNAVAILABLE',
         message: 'Unable to start conversation. Please try again in a moment.',
         retryable: true,
       },
-    } as StartOnboardingError, { status: 500 });
+    } as StartOnboardingError), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-}
+};
 
 // ============================================================================
-// OPTIONS handler for CORS
+// Configuration
 // ============================================================================
 
-export async function OPTIONS(request: NextRequest) {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
-}
+export const config: Config = {
+  path: "/api/onboarding/start"
+};
