@@ -42,11 +42,13 @@ This file serves to document the environment configuration and trigger a new dep
 Please add these environment variables manually in Netlify dashboard:
 
 1. **DATABASE_URL** (Secret)
-   - Value: `postgresql://postgres.eqxropalhxjeyvfcoyxg:bPRV%21ur25yBx9%40AxHPPh@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+   - Value: `postgresql://postgres.<project-ref>:<encoded-password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true`
+   - Retrieve the encoded password from the Supabase dashboard and substitute the project reference and region.
    - Scopes: builds, functions, runtime
 
 2. **SUPABASE_SERVICE_ROLE_KEY** (Secret)  
-   - Value: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxeHJvcGFsaHhqZXl2ZmNveXhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTE0OTk4MSwiZXhwIjoyMDc0NzI1OTgxfQ.FtGLrxGw6Mm-I5ow8a1i-6RqYMYwGpzQNe3qOBLBzYs`
+   - Value: `<SUPABASE_SERVICE_ROLE_KEY_FROM_SUPABASE>`
+   - Generate a fresh service role key in Supabase (Settings → API) and paste it here.
    - Scopes: builds, functions, runtime
 
 **After manual configuration:** Deployment should succeed

@@ -65,9 +65,9 @@ Navigate: **Settings** → **API**
 
 Copy these values:
 ```bash
-Project URL: https://[PROJECT-REF].supabase.co
-anon key: eyJh...
-service_role key: eyJh...
+Project URL: https://<project-ref>.supabase.co
+anon key: <SUPABASE_ANON_KEY>
+service_role key: <SUPABASE_SERVICE_ROLE_KEY>
 ```
 
 Navigate: **Settings** → **Database**
@@ -78,25 +78,25 @@ Copy the connection string (**Transaction mode**, port 6543)
 
 **Marketing Site:** `/home/chris/startupai.site/.env.local`
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT-REF].supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...
-DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<SUPABASE_ANON_KEY>
+DATABASE_URL=postgresql://postgres.<project-ref>:<encoded-password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true
 ```
 
 **Product Site Frontend:** `/home/chris/app.startupai.site/frontend/.env.local`
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT-REF].supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJh...
-DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<SUPABASE_ANON_KEY>
+DATABASE_URL=postgresql://postgres.<project-ref>:<encoded-password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true
 ```
 
 **Backend:** `/home/chris/app.startupai.site/backend/.env`
 ```bash
 # Copy from .env.example and fill in:
-SUPABASE_URL=https://[PROJECT-REF].supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJh...
-DATABASE_URL=postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true
-DIRECT_DATABASE_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<SUPABASE_SERVICE_ROLE_KEY>
+DATABASE_URL=postgresql://postgres.<project-ref>:<encoded-password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true
+DIRECT_DATABASE_URL=postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres
 OPENAI_API_KEY=sk-...
 ```
 
@@ -341,13 +341,13 @@ After Supabase setup:
 ### 🔑 Project Credentials
 
 **API Keys:**
-- Anon Key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxeHJvcGFsaHhqZXl2ZmNveXhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkxNDk5ODEsImV4cCI6MjA3NDcyNTk4MX0.Muq6OvplTkSfjb02NihiQKqBLn3gh9YLBNWUQgwV-yU`
-- Service Role Key: (stored in `backend/.env`)
+- Anon Key: `<SUPABASE_ANON_KEY>`
+- Service Role Key: `<SUPABASE_SERVICE_ROLE_KEY>` (store in `backend/.env` only)
 
 **Connection Strings:**
-- Project URL: `https://eqxropalhxjeyvfcoyxg.supabase.co`
-- Pooled (Transaction): `postgresql://postgres.eqxropalhxjeyvfcoyxg:[PASSWORD]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
-- Direct: `postgresql://postgres:[PASSWORD]@db.eqxropalhxjeyvfcoyxg.supabase.co:5432/postgres`
+- Project URL: `https://<project-ref>.supabase.co`
+- Pooled (Transaction): `postgresql://postgres.<project-ref>:<encoded-password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true`
+- Direct: `postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres`
 
 ---
 

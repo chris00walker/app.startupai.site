@@ -156,8 +156,8 @@ embedding_response = openai_client.embeddings.create(
 ```bash
 # Required environment variables
 OPENAI_API_KEY=sk-...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-DATABASE_URL=postgresql://...
+SUPABASE_SERVICE_ROLE_KEY=<SUPABASE_SERVICE_ROLE_KEY>
+DATABASE_URL=postgresql://postgres.<project-ref>:<encoded-password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true
 ```
 
 ---
