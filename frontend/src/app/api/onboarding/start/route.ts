@@ -77,23 +77,39 @@ const PLAN_LIMITS = {
 // Helper Functions
 // ============================================================================
 
-async function validateUser(userId: string, authToken?: string) {
+async function validateUser(userId: string) {
+  // Prefer validating against the active auth session
   try {
-    // For static export, we need to validate using the admin client
-    // and the provided auth token or user ID directly
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (!error && user && user.id === userId) {
+      return user;
+    }
+
+    if (error) {
+      console.warn('Supabase session validation failed:', error.message);
+    }
+  } catch (error) {
+    console.warn('Supabase session validation threw:', error);
+  }
+
+  // Fall back to the admin client in case the session is unavailable (e.g. server-side invocation)
+  try {
     const adminClient = createAdminClient();
-    
-    // Get user by ID using admin client
     const { data: user, error } = await adminClient.auth.admin.getUserById(userId);
-    
+
     if (error || !user?.user) {
-      console.error('User validation error:', error);
+      console.error('Admin user validation error:', error);
       return null;
     }
-    
+
     return user.user;
   } catch (error) {
-    console.error('User validation error:', error);
+    console.error('Admin user validation threw:', error);
     return null;
   }
 }
