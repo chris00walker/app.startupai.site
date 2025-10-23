@@ -100,7 +100,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setError(null);
 
     try {
-      const response = await fetch('/api/onboarding/start', {
+      const response = await fetch('/api/onboarding/start/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     } : null);
 
     try {
-      const response = await fetch('/api/onboarding/message', {
+      const response = await fetch('/api/onboarding/message/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     if (!session) return;
 
     try {
-      const response = await fetch('/api/onboarding/complete', {
+      const response = await fetch('/api/onboarding/complete/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
