@@ -7,8 +7,7 @@ import {
   SidebarProvider,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { OnboardingSidebar } from './OnboardingSidebar';
-import { ConversationInterface } from './ConversationInterface';
+import { OnboardingSidebar, ConversationInterface } from '@/components/onboarding';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
