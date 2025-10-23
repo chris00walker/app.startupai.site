@@ -100,7 +100,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setError(null);
 
     try {
-      const response = await fetch('/.netlify/functions/onboarding-start', {
+      const response = await fetch('/api/onboarding/start', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
