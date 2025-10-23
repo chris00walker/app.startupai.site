@@ -31,7 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDemoMode } from "@/hooks/useDemoMode"
-import { demoActiveWorkflows } from "@/data/demoData"
+import { getDemoActiveWorkflows } from "@/data/demoData"
 
 interface WorkflowStep {
   id: string
@@ -60,6 +60,9 @@ export default function WorkflowsPage() {
   const demoMode = useDemoMode()
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("all")
+  
+  // Get demo data using lazy loading function
+  const demoActiveWorkflows = getDemoActiveWorkflows()
 
   // Demo workflows data
   const demoWorkflows: AIWorkflow[] = [

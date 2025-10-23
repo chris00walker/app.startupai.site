@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useDemoMode } from "@/hooks/useDemoMode"
-import { demoClient } from "@/data/demoData"
+import { getDemoClient } from "@/data/demoData"
 
 interface Client {
   id: string
@@ -43,6 +43,9 @@ export default function ClientsPage() {
   const demoMode = useDemoMode()
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("all")
+
+  // Get demo data using lazy loading function
+  const demoClient = getDemoClient()
 
   // Demo clients data
   const demoClients: Client[] = [

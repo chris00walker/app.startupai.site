@@ -1,17 +1,27 @@
 import React from 'react'
+import { GetServerSideProps } from 'next'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
+
+// Force dynamic rendering to avoid expensive build-time processing
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} }
+}
 import { CanvasGallery } from "@/components/canvas/CanvasGallery"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { 
-  demoValuePropositionCanvas, 
-  demoBusinessModelCanvas, 
-  demoTestingBusinessIdeas 
+  getDemoValuePropositionCanvas, 
+  getDemoBusinessModelCanvas, 
+  getDemoTestingBusinessIdeas 
 } from "@/data/demoData"
 
 export default function CanvasPage() {
   const demoMode = useDemoMode()
 
   // Create demo canvases array from individual demo objects
+  const demoValuePropositionCanvas = getDemoValuePropositionCanvas()
+  const demoBusinessModelCanvas = getDemoBusinessModelCanvas()
+  const demoTestingBusinessIdeas = getDemoTestingBusinessIdeas()
+  
   const demoCanvases = [
     {
       id: demoValuePropositionCanvas.id,

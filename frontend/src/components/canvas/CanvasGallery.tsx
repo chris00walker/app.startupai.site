@@ -17,7 +17,7 @@ import {
 import ValuePropositionCanvas from "./ValuePropositionCanvas"
 import BusinessModelCanvas from "./BusinessModelCanvas"
 import TestingBusinessIdeasCanvas from "./TestingBusinessIdeasCanvas"
-import { demoValuePropositionCanvas } from "@/data/demoData"
+import { getDemoValuePropositionCanvas } from "@/data/demoData"
 
 interface CanvasItem {
   id: string
@@ -219,6 +219,9 @@ export function CanvasGallery({ demoCanvases }: CanvasGalleryProps = {}) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [viewingCanvas, setViewingCanvas] = React.useState<CanvasItem | null>(null)
   const [searchTerm, setSearchTerm] = React.useState("")
+
+  // Get demo data using lazy loading function
+  const demoValuePropositionCanvas = getDemoValuePropositionCanvas()
 
   // Use demo canvases if provided, otherwise use mock data
   const canvasData = demoCanvases || mockCanvases

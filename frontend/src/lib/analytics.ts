@@ -29,6 +29,10 @@ export type ProductEvent =
   | 'gate_alert_created'
   | 'gate_alert_dismissed'
   | 'gate_evaluation_requested'
+  | 'signup_started'
+  | 'signup_completed'
+  | 'signup_initiated_oauth'
+  | 'signup_failed'
 
 interface EventProperties {
   [key: string]: string | number | boolean | undefined
@@ -118,6 +122,17 @@ export const analytics = {
       trackEvent('dashboard_viewed'),
     analyticsViewed: (projectId?: string) => 
       trackEvent('analytics_viewed', { projectId }),
+  },
+
+  auth: {
+    signupStarted: (method: string, plan: string) =>
+      trackEvent('signup_started', { method, plan }),
+    signupCompleted: (method: string, plan: string, userId?: string) =>
+      trackEvent('signup_completed', { method, plan, userId }),
+    signupInitiatedOAuth: (method: string, plan: string) =>
+      trackEvent('signup_initiated_oauth', { method, plan }),
+    signupFailed: (method: string, plan: string, reason?: string) =>
+      trackEvent('signup_failed', { method, plan, reason }),
   },
   
   workflow: {

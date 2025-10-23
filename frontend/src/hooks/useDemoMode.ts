@@ -1,13 +1,13 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import {
-  demoClient,
-  demoValuePropositionCanvas,
-  demoBusinessModelCanvas,
-  demoTestingBusinessIdeas,
-  demoMetrics,
-  demoActiveWorkflows,
-  demoRecentActivity
+  getDemoClient,
+  getDemoValuePropositionCanvas,
+  getDemoBusinessModelCanvas,
+  getDemoTestingBusinessIdeas,
+  getDemoMetrics,
+  getDemoActiveWorkflows,
+  getDemoRecentActivity
 } from '@/data/demoData'
 
 interface CanvasItem {
@@ -25,15 +25,24 @@ export interface DemoState {
   isDemo: boolean
   currentStep: number
   showGuidedTour: boolean
-  client: typeof demoClient
+  client: ReturnType<typeof getDemoClient>
   canvases: CanvasItem[]
-  metrics: typeof demoMetrics
-  activeWorkflows: typeof demoActiveWorkflows
-  recentActivity: typeof demoRecentActivity
+  metrics: ReturnType<typeof getDemoMetrics>
+  activeWorkflows: ReturnType<typeof getDemoActiveWorkflows>
+  recentActivity: ReturnType<typeof getDemoRecentActivity>
 }
 
 export const useDemoMode = () => {
   const router = useRouter()
+  
+  // Get demo data using lazy loading functions
+  const demoValuePropositionCanvas = getDemoValuePropositionCanvas()
+  const demoBusinessModelCanvas = getDemoBusinessModelCanvas()
+  const demoTestingBusinessIdeas = getDemoTestingBusinessIdeas()
+  const demoClient = getDemoClient()
+  const demoMetrics = getDemoMetrics()
+  const demoActiveWorkflows = getDemoActiveWorkflows()
+  const demoRecentActivity = getDemoRecentActivity()
   
   // Transform demo canvas data to match CanvasGallery expected format
   const transformedCanvases = [

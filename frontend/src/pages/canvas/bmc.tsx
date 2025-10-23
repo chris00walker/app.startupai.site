@@ -2,13 +2,16 @@ import React from 'react'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import GuidedBusinessModelCanvas from "@/components/canvas/GuidedBusinessModelCanvas"
 import { useDemoMode } from "@/hooks/useDemoMode"
-import { demoBusinessModelCanvas } from "@/data/demoData"
+import { getDemoBusinessModelCanvas } from "@/data/demoData"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Brain, Save, Download, Share } from "lucide-react"
 
 export default function BMCPage() {
   const demoMode = useDemoMode()
+  
+  // Get demo data using lazy loading function
+  const demoBusinessModelCanvas = getDemoBusinessModelCanvas()
   
   // Check if we're in founder platform mode (client-side only)
   const [isFounderPlatform, setIsFounderPlatform] = React.useState(false)

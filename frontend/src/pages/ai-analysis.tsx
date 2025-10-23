@@ -1,6 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { GetServerSideProps } from 'next'
+
+// Force dynamic rendering to avoid expensive build-time processing
+export const getServerSideProps: GetServerSideProps = async () => {
+  return { props: {} }
+}
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

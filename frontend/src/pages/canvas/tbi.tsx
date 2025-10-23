@@ -2,13 +2,16 @@ import React from 'react'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import GuidedTestingBusinessIdeasCanvas from "@/components/canvas/GuidedTestingBusinessIdeasCanvas"
 import { useDemoMode } from "@/hooks/useDemoMode"
-import { demoTestingBusinessIdeas } from "@/data/demoData"
+import { getDemoTestingBusinessIdeas } from "@/data/demoData"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { FileText, Save, Download, Share } from "lucide-react"
 
 export default function TBIPage() {
   const demoMode = useDemoMode()
+  
+  // Get demo data using lazy loading function
+  const demoTestingBusinessIdeas = getDemoTestingBusinessIdeas()
   
   // Check if we're in founder platform mode (client-side only)
   const [isFounderPlatform, setIsFounderPlatform] = React.useState(false)

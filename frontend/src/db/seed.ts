@@ -13,10 +13,10 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 import { createClient } from '@supabase/supabase-js';
 import {
-  demoClient,
-  demoValuePropositionCanvas,
-  demoBusinessModelCanvas,
-  demoTestingBusinessIdeas,
+  getDemoClient,
+  getDemoValuePropositionCanvas,
+  getDemoBusinessModelCanvas,
+  getDemoTestingBusinessIdeas,
 } from '../data/demoData';
 import {
   mockPortfolioProjects,
@@ -146,7 +146,7 @@ async function getOrCreateUser({
 /**
  * Seed projects from mock data with full portfolio fields
  */
-async function seedProjects(userId: string) {
+async function seedProjects(userId: string, demoClient: any) {
   console.log('\n📁 Seeding projects...');
   
   // First, delete existing test projects for this user
@@ -229,7 +229,7 @@ async function seedProjects(userId: string) {
 /**
  * Seed evidence items
  */
-async function seedEvidence(projects: any[]) {
+async function seedEvidence(projects: any[], demoTestingBusinessIdeas: any) {
   console.log('\n📊 Seeding evidence...');
   
   // Find the TechStart project
@@ -291,7 +291,7 @@ async function seedEvidence(projects: any[]) {
 /**
  * Seed AI-generated reports
  */
-async function seedReports(projects: any[]) {
+async function seedReports(projects: any[], demoValuePropositionCanvas: any, demoBusinessModelCanvas: any, demoTestingBusinessIdeas: any) {
   console.log('\n📄 Seeding reports...');
   
   const techStartProject = projects.find(p => p.name === 'TechStart Inc.');
@@ -361,6 +361,12 @@ async function seed() {
   console.log('🌱 Starting database seed...\n');
   console.log('━'.repeat(50));
 
+  // Get demo data using lazy loading functions
+  const demoClient = getDemoClient();
+  const demoValuePropositionCanvas = getDemoValuePropositionCanvas();
+  const demoBusinessModelCanvas = getDemoBusinessModelCanvas();
+  const demoTestingBusinessIdeas = getDemoTestingBusinessIdeas();
+
   try {
     // 1. Create test user
     const users = await Promise.all([
@@ -413,13 +419,13 @@ async function seed() {
     }
 
     // 2. Seed projects for consultant persona
-    const projects = await seedProjects(consultantUser.userId);
+    const projects = await seedProjects(consultantUser.userId, demoClient);
 
     // 3. Seed evidence
-    await seedEvidence(projects);
+    await seedEvidence(projects, demoTestingBusinessIdeas);
 
     // 4. Seed reports
-    await seedReports(projects);
+    await seedReports(projects, demoValuePropositionCanvas, demoBusinessModelCanvas, demoTestingBusinessIdeas);
 
     console.log('\n' + '━'.repeat(50));
     console.log('✅ Database seeded successfully!\n');

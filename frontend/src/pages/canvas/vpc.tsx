@@ -2,13 +2,16 @@ import React from 'react'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import GuidedValuePropositionCanvas from "@/components/canvas/GuidedValuePropositionCanvas"
 import { useDemoMode } from "@/hooks/useDemoMode"
-import { demoValuePropositionCanvas } from "@/data/demoData"
+import { getDemoValuePropositionCanvas } from "@/data/demoData"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Lightbulb, Save, Download, Share } from "lucide-react"
 
 export default function VPCPage() {
   const demoMode = useDemoMode()
+  
+  // Get demo data using lazy loading function
+  const demoValuePropositionCanvas = getDemoValuePropositionCanvas()
   
   // Check if we're in founder platform mode (client-side only)
   const [isFounderPlatform, setIsFounderPlatform] = React.useState(false)

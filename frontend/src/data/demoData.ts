@@ -1,17 +1,18 @@
 // Demo data for Interactive Demo Mode
 // Sample client: TechStart Inc. - AI-powered fitness app
 
-export const demoClient = {
+// Lazy load demo data to improve initial bundle size
+export const getDemoClient = () => ({
   id: "demo-techstart",
   name: "TechStart Inc.",
   industry: "Health & Fitness Technology",
   description: "AI-powered personalized fitness coaching app",
   stage: "validation",
   createdAt: "2024-01-15",
-}
+})
 
 // Value Proposition Canvas Demo Data
-export const demoValuePropositionCanvas = {
+export const getDemoValuePropositionCanvas = () => ({
   id: "demo-vpc-1",
   clientId: "demo-techstart",
   title: "TechStart Inc. - AI Fitness Coach VPC",
@@ -79,10 +80,10 @@ export const demoValuePropositionCanvas = {
     "Multiple revenue streams possible (freemium, premium, corporate)",
     "High scalability potential with digital-first approach"
   ]
-}
+})
 
 // Business Model Canvas Demo Data
-export const demoBusinessModelCanvas = {
+export const getDemoBusinessModelCanvas = () => ({
   id: "demo-bmc-1",
   clientId: "demo-techstart",
   title: "TechStart Inc. - AI Fitness Coach BMC",
@@ -172,10 +173,10 @@ export const demoBusinessModelCanvas = {
     "Scalable business model with high gross margins",
     "Partnership opportunities enhance value proposition"
   ]
-}
+})
 
 // Testing Business Ideas Demo Data
-export const demoTestingBusinessIdeas = {
+export const getDemoTestingBusinessIdeas = () => ({
   id: "demo-tbi-1",
   clientId: "demo-techstart",
   title: "TechStart Inc. - AI Fitness Coach Validation",
@@ -316,20 +317,20 @@ export const demoTestingBusinessIdeas = {
     "Corporate B2B channel shows promise for revenue diversification",
     "Technical differentiation validated, creates competitive advantage"
   ]
-}
+})
 
 // Demo Dashboard Metrics
-export const demoMetrics = {
+export const getDemoMetrics = () => ({
   activeClients: 1,
   canvasGenerated: 3,
   workflowSuccessRate: 94,
   costEfficiency: 1.2,
   avgGenerationTime: "1.8s",
   clientSatisfaction: 4.8
-}
+})
 
 // Demo Active Workflows
-export const demoActiveWorkflows = [
+export const getDemoActiveWorkflows = () => [
   {
     id: "demo-workflow-1",
     client: "TechStart Inc.",
@@ -353,7 +354,7 @@ export const demoActiveWorkflows = [
 ]
 
 // Demo Recent Activity
-export const demoRecentActivity = [
+export const getDemoRecentActivity = () => [
   {
     id: "demo-activity-1",
     type: "canvas_generated",
