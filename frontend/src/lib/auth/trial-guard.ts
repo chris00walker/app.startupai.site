@@ -1,6 +1,29 @@
-import { getUserProfile } from '@/db/queries/users';
-import { findTrialUsageCounter, upsertTrialUsageCounter } from '@/db/repositories/trialUsage';
+// TODO: Implement proper database queries
+// import { getUserProfile } from '@/db/queries/users';
+// import { findTrialUsageCounter, upsertTrialUsageCounter } from '@/db/repositories/trialUsage';
 import { evaluateTrialAllowance, getPeriodStart, getTrialActionConfig, resolveTrialRole } from './trial-limits';
+
+// Temporary stub functions until database layer is implemented
+async function getUserProfile(userId: string) {
+  // TODO: Implement actual database query
+  return {
+    role: 'trial' as const,
+    planStatus: 'trial' as const,
+    subscriptionStatus: 'trial' as const
+  };
+}
+
+async function findTrialUsageCounter(params: any) {
+  // TODO: Implement actual database query
+  return {
+    count: 0
+  };
+}
+
+async function upsertTrialUsageCounter(params: any) {
+  // TODO: Implement actual database operation
+  return;
+}
 
 export async function assertTrialAllowance(params: {
   userId: string;

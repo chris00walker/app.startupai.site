@@ -6,7 +6,18 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getUserProfile } from '@/db/queries/users';
+// TODO: Implement proper database query
+// import { getUserProfile } from '@/db/queries/users';
+
+// Temporary stub function until database layer is implemented
+async function getUserProfile(userId: string) {
+  // TODO: Implement actual database query
+  return {
+    role: 'trial' as const,
+    planStatus: 'trialing' as const,
+    subscriptionStatus: 'trialing' as const
+  };
+}
 import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
 
 export async function GET(request: Request) {

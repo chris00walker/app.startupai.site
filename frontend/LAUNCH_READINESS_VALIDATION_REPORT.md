@@ -39,7 +39,7 @@ The complete onboarding system implementation has been validated through compreh
 **Source:** `marketing-promise-delivery.test.tsx`
 
 **✅ 404 Blocker Resolution**
-- All user tiers (trial, founder, consultant) can access onboarding
+- All user tiers (trial, sprint, founder, enterprise) can access onboarding
 - Functional onboarding experience provided for each tier
 - Critical launch blocker resolved
 
