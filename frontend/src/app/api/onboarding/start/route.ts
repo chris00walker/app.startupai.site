@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@/lib/supabase/admin';
 
 // ============================================================================
 // Types and Interfaces
@@ -77,53 +76,42 @@ const PLAN_LIMITS = {
 // Helper Functions
 // ============================================================================
 
-async function validateUser(userId: string) {
-  // Prefer validating against the active auth session
+async function validateUser(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   try {
-    const supabase = await createClient();
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser();
 
-    if (!error && user && user.id === userId) {
-      return user;
-    }
-
     if (error) {
       console.warn('Supabase session validation failed:', error.message);
-    }
-  } catch (error) {
-    console.warn('Supabase session validation threw:', error);
-  }
-
-  // Fall back to the admin client in case the session is unavailable (e.g. server-side invocation)
-  try {
-    const adminClient = createAdminClient();
-    const { data: user, error } = await adminClient.auth.admin.getUserById(userId);
-
-    if (error || !user?.user) {
-      console.error('Admin user validation error:', error);
       return null;
     }
 
-    return user.user;
+    if (!user || user.id !== userId) {
+      console.warn('Supabase session user mismatch', { sessionUserId: user?.id, expected: userId });
+      return null;
+    }
+
+    return user;
   } catch (error) {
-    console.error('Admin user validation threw:', error);
+    console.warn('Supabase session validation threw:', error);
     return null;
   }
 }
 
-async function checkPlanLimits(userId: string, planType: string) {
+async function checkPlanLimits(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  planType: string
+) {
   try {
-    const adminClient = createAdminClient();
-    
     // Get user's current month sessions
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
-    
-    const { data: sessions, error } = await adminClient
+
+    const { data: sessions, error } = await supabase
       .from('onboarding_sessions')
       .select('id')
       .eq('user_id', userId)
@@ -240,7 +228,9 @@ async function initializeOnboardingAgent(params: {
   };
 }
 
-async function saveOnboardingSession(sessionData: {
+async function saveOnboardingSession(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  sessionData: {
   sessionId: string;
   userId: string;
   planType: string;
@@ -249,9 +239,7 @@ async function saveOnboardingSession(sessionData: {
   agentState: any;
 }) {
   try {
-    const adminClient = createAdminClient();
-    
-    const { data, error } = await adminClient
+    const { data, error } = await supabase
       .from('onboarding_sessions')
       .insert({
         session_id: sessionData.sessionId,
@@ -291,7 +279,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
-    
+    const supabase = await createClient();
+
     // Validate required fields
     if (!userId || !planType) {
       return NextResponse.json({
@@ -303,9 +292,9 @@ export async function POST(request: NextRequest) {
         },
       } as StartOnboardingError, { status: 400 });
     }
-    
+
     // Validate user authentication
-    const user = await validateUser(userId);
+    const user = await validateUser(supabase, userId);
     if (!user) {
       return NextResponse.json({
         success: false,
@@ -316,9 +305,9 @@ export async function POST(request: NextRequest) {
         },
       } as StartOnboardingError, { status: 401 });
     }
-    
+
     // Check plan-specific limits (all tiers have onboarding access)
-    const canStart = await checkPlanLimits(userId, planType);
+    const canStart = await checkPlanLimits(supabase, userId, planType);
     if (!canStart.allowed) {
       return NextResponse.json({
         success: false,
@@ -343,7 +332,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Save session to database
-    await saveOnboardingSession({
+    await saveOnboardingSession(supabase, {
       sessionId,
       userId,
       planType,
