@@ -1,6 +1,13 @@
-import { and, eq } from 'drizzle-orm';
-import { db } from '@/db/client';
-import { trialUsageCounters } from '@/db/schema/usage-quota';
+/**
+ * Trial Usage Repository
+ * 
+ * Database operations for trial_usage_counters table.
+ * Tracks usage limits for trial users.
+ * 
+ * Phase 0 implementation using direct Supabase client.
+ */
+
+import { createClient as createAdminClient } from '@/lib/supabase/admin';
 
 export async function findTrialUsageCounter(params: {
   userId: string;
@@ -8,22 +15,23 @@ export async function findTrialUsageCounter(params: {
   period: string;
   periodStart: Date;
 }) {
-  const { userId, action, period, periodStart } = params;
-
-  const [record] = await db
-    .select()
-    .from(trialUsageCounters)
-    .where(
-      and(
-        eq(trialUsageCounters.userId, userId),
-        eq(trialUsageCounters.action, action),
-        eq(trialUsageCounters.period, period),
-        eq(trialUsageCounters.periodStart, periodStart)
-      )
-    )
-    .limit(1);
-
-  return record ?? null;
+  const supabase = createAdminClient();
+  
+  const { data, error } = await supabase
+    .from('trial_usage_counters')
+    .select('*')
+    .eq('user_id', params.userId)
+    .eq('action', params.action)
+    .eq('period', params.period)
+    .eq('period_start', params.periodStart.toISOString())
+    .single();
+  
+  if (error) {
+    // Not found is expected, return null
+    return null;
+  }
+  
+  return data;
 }
 
 export async function upsertTrialUsageCounter(params: {
@@ -34,29 +42,20 @@ export async function upsertTrialUsageCounter(params: {
   count: number;
   now: Date;
 }) {
-  const { userId, action, period, periodStart, count, now } = params;
-
-  await db
-    .insert(trialUsageCounters)
-    .values({
-      userId,
-      action,
-      period,
-      periodStart,
-      count,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: [
-        trialUsageCounters.userId,
-        trialUsageCounters.action,
-        trialUsageCounters.period,
-        trialUsageCounters.periodStart,
-      ],
-      set: {
-        count,
-        updatedAt: now,
-      },
+  const supabase = createAdminClient();
+  
+  const { error } = await supabase
+    .from('trial_usage_counters')
+    .upsert({
+      user_id: params.userId,
+      action: params.action,
+      period: params.period,
+      period_start: params.periodStart.toISOString(),
+      count: params.count,
+      updated_at: params.now.toISOString()
     });
+  
+  if (error) {
+    console.error('Failed to upsert trial usage:', error);
+  }
 }

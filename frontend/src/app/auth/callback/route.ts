@@ -6,18 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-// TODO: Implement proper database query
-// import { getUserProfile } from '@/db/queries/users';
-
-// Temporary stub function until database layer is implemented
-async function getUserProfile(userId: string) {
-  // TODO: Implement actual database query
-  return {
-    role: 'trial' as const,
-    planStatus: 'trialing' as const,
-    subscriptionStatus: 'trialing' as const
-  };
-}
+import { getUserProfile } from '@/db/queries/users';
 import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
 
 export async function GET(request: Request) {
@@ -161,7 +150,7 @@ async function resolveRedirect({
     appRole: user?.app_metadata?.role as string | undefined,
   });
 
-  const planStatus = profile?.planStatus ?? profile?.subscriptionStatus ?? undefined;
+  const planStatus = profile?.plan_status ?? profile?.subscription_status ?? undefined;
 
   const resolvedPath = getRedirectForRole({ role, planStatus });
   return buildRedirectUrl({ request, origin, path: resolvedPath });
