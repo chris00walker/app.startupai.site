@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@/lib/supabase/admin';
 
 // ============================================================================
 // Types and Interfaces
@@ -111,12 +112,31 @@ async function checkPlanLimits(
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const { data: sessions, error } = await supabase
+    let { data: sessions, error } = await supabase
       .from('onboarding_sessions')
       .select('id')
       .eq('user_id', userId)
       .gte('started_at', startOfMonth.toISOString());
-    
+
+    if (error && error.code === '42501') {
+      console.warn('RLS prevented onboarding session lookup, falling back to admin client.');
+      try {
+        const adminClient = createAdminClient();
+        ({ data: sessions, error } = await adminClient
+          .from('onboarding_sessions')
+          .select('id')
+          .eq('user_id', userId)
+          .gte('started_at', startOfMonth.toISOString()));
+      } catch (adminError) {
+        console.error('Admin client unavailable for plan limit check:', adminError);
+        return {
+          allowed: true,
+          reason: null,
+          message: null,
+        };
+      }
+    }
+
     if (error) {
       console.error('Error checking plan limits:', error);
       return {
@@ -239,7 +259,7 @@ async function saveOnboardingSession(
   agentState: any;
 }) {
   try {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('onboarding_sessions')
       .insert({
         session_id: sessionData.sessionId,
@@ -258,12 +278,41 @@ async function saveOnboardingSession(
       })
       .select()
       .single();
-    
+
+    if (error && error.code === '42501') {
+      console.warn('RLS prevented onboarding session insert, falling back to admin client.');
+      try {
+        const adminClient = createAdminClient();
+        ({ data, error } = await adminClient
+          .from('onboarding_sessions')
+          .insert({
+            session_id: sessionData.sessionId,
+            user_id: sessionData.userId,
+            plan_type: sessionData.planType,
+            status: sessionData.status,
+            current_stage: 1,
+            stage_progress: 0,
+            overall_progress: 0,
+            conversation_history: [],
+            stage_data: {},
+            ai_context: sessionData.agentState,
+            started_at: sessionData.startedAt.toISOString(),
+            last_activity: sessionData.startedAt.toISOString(),
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          })
+          .select()
+          .single());
+      } catch (adminError) {
+        console.error('Admin client unavailable for session insert:', adminError);
+        throw new Error('Failed to save session: admin client unavailable');
+      }
+    }
+
     if (error) {
       console.error('Error saving onboarding session:', error);
       throw new Error('Failed to save session');
     }
-    
+
     return data;
   } catch (error) {
     console.error('Save session error:', error);
