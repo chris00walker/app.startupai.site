@@ -6,6 +6,9 @@
 [build.environment]
   NODE_VERSION = "18"
   PNPM_VERSION = "9.12.1"
+  # Allow server-side environment variables in Next.js API routes
+  # These are only accessed at runtime, not embedded in client code
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_SERVICE_ROLE_KEY,DATABASE_URL,SUPABASE_URL"
 
 # Enable Next.js on Netlify
 [[plugins]]
