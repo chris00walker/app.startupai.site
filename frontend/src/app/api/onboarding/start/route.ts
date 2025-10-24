@@ -102,7 +102,7 @@ async function validateUser(supabase: Awaited<ReturnType<typeof createClient>>, 
 }
 
 async function checkPlanLimits(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  client: ReturnType<typeof createAdminClient>,
   userId: string,
   planType: string
 ) {
@@ -112,30 +112,11 @@ async function checkPlanLimits(
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    let { data: sessions, error } = await supabase
+    const { data: sessions, error } = await client
       .from('onboarding_sessions')
       .select('id')
       .eq('user_id', userId)
       .gte('started_at', startOfMonth.toISOString());
-
-    if (error && error.code === '42501') {
-      console.warn('RLS prevented onboarding session lookup, falling back to admin client.');
-      try {
-        const adminClient = createAdminClient();
-        ({ data: sessions, error } = await adminClient
-          .from('onboarding_sessions')
-          .select('id')
-          .eq('user_id', userId)
-          .gte('started_at', startOfMonth.toISOString()));
-      } catch (adminError) {
-        console.error('Admin client unavailable for plan limit check:', adminError);
-        return {
-          allowed: true,
-          reason: null,
-          message: null,
-        };
-      }
-    }
 
     if (error) {
       console.error('Error checking plan limits:', error);
@@ -249,7 +230,7 @@ async function initializeOnboardingAgent(params: {
 }
 
 async function saveOnboardingSession(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  client: ReturnType<typeof createAdminClient>,
   sessionData: {
   sessionId: string;
   userId: string;
@@ -259,7 +240,7 @@ async function saveOnboardingSession(
   agentState: any;
 }) {
   try {
-    let { data, error } = await supabase
+    const { data, error } = await client
       .from('onboarding_sessions')
       .insert({
         session_id: sessionData.sessionId,
@@ -278,35 +259,6 @@ async function saveOnboardingSession(
       })
       .select()
       .single();
-
-    if (error && error.code === '42501') {
-      console.warn('RLS prevented onboarding session insert, falling back to admin client.');
-      try {
-        const adminClient = createAdminClient();
-        ({ data, error } = await adminClient
-          .from('onboarding_sessions')
-          .insert({
-            session_id: sessionData.sessionId,
-            user_id: sessionData.userId,
-            plan_type: sessionData.planType,
-            status: sessionData.status,
-            current_stage: 1,
-            stage_progress: 0,
-            overall_progress: 0,
-            conversation_history: [],
-            stage_data: {},
-            ai_context: sessionData.agentState,
-            started_at: sessionData.startedAt.toISOString(),
-            last_activity: sessionData.startedAt.toISOString(),
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          })
-          .select()
-          .single());
-      } catch (adminError) {
-        console.error('Admin client unavailable for session insert:', adminError);
-        throw new Error('Failed to save session: admin client unavailable');
-      }
-    }
 
     if (error) {
       console.error('Error saving onboarding session:', error);
@@ -329,6 +281,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
     const supabase = await createClient();
+    const adminClient = createAdminClient();
 
     // Validate required fields
     if (!userId || !planType) {
@@ -356,7 +309,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check plan-specific limits (all tiers have onboarding access)
-    const canStart = await checkPlanLimits(supabase, userId, planType);
+    const canStart = await checkPlanLimits(adminClient, userId, planType);
     if (!canStart.allowed) {
       return NextResponse.json({
         success: false,
@@ -381,7 +334,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Save session to database
-    await saveOnboardingSession(supabase, {
+    await saveOnboardingSession(adminClient, {
       sessionId,
       userId,
       planType,
