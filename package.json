@@ -32,7 +32,7 @@
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.5",
     "markdownlint-cli": "^0.39.0",
-    "supabase": "^2.47.2"
+    "supabase": "^2.53.6"
   },
   "engines": {
     "node": ">=18.0.0"
