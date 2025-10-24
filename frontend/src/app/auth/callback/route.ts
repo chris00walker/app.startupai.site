@@ -4,12 +4,13 @@
  * Handles OAuth provider callbacks and exchanges code for session.
  */
 
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { getUserProfile } from '@/db/queries/users';
 import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   console.log('=== OAuth Callback Started ===');
   
   try {
@@ -26,7 +27,24 @@ export async function GET(request: Request) {
     console.log('Next destination:', rawNext);
     console.log('Origin:', origin);
 
-    const supabase = await createClient();
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            cookieStore.set({ name, value, ...options });
+          },
+          remove(name: string, options: CookieOptions) {
+            cookieStore.set({ name, value: '', ...options });
+          },
+        },
+      }
+    );
 
   if (accessToken && refreshToken) {
     console.log('Setting session from provided tokens...');
@@ -114,7 +132,7 @@ async function resolveRedirect({
   request: Request;
   origin: string;
   next: string | null;
-  supabase: Awaited<ReturnType<typeof createClient>>;
+  supabase: ReturnType<typeof createServerClient>;
   userId?: string;
 }) {
   const defaultPath = '/dashboard';
