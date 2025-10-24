@@ -232,3 +232,12 @@ netlify.toml.backup
 
 # OAuth credentials
 .oauth-credentials/
+
+# Development/test scripts (may contain hardcoded secrets)
+**/create-users*.mjs
+**/create-users*.js
+**/test-*.mjs
+**/debug-*.mjs
+frontend/create-*.mjs
+frontend/test-*.mjs
+frontend/debug-*.mjs
