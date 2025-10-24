@@ -155,6 +155,7 @@ export function SignupForm({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
         options: {
+          scopes: 'user:email read:user',
           redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&next=/onboarding`,
           queryParams: {
             access_type: 'offline',
