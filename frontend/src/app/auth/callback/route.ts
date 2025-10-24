@@ -75,6 +75,25 @@ export async function GET(request: Request) {
     console.log('Session exchange successful!');
     console.log('User:', data?.user?.email);
     
+    // Update user metadata with plan selection if provided
+    const plan = searchParams.get('plan');
+    if (plan && data.session?.user) {
+      console.log('Updating user metadata with plan:', plan);
+      try {
+        await supabase.auth.updateUser({
+          data: {
+            plan_type: plan,
+            subscription_tier: plan,
+            role: 'trial',
+          }
+        });
+        console.log('User metadata updated successfully');
+      } catch (metaError) {
+        console.error('Failed to update user metadata:', metaError);
+        // Don't fail the auth flow, just log the error
+      }
+    }
+    
     const redirectUrl = await resolveRedirect({
       request,
       origin,
