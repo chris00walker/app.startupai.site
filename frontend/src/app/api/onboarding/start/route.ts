@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 
 // ============================================================================
@@ -77,26 +76,18 @@ const PLAN_LIMITS = {
 // Helper Functions
 // ============================================================================
 
-async function validateUser(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
+async function validateUser(adminClient: ReturnType<typeof createAdminClient>, userId: string) {
   try {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const { data: user, error } = await adminClient.auth.admin.getUserById(userId);
 
-    if (error) {
-      console.warn('Supabase session validation failed:', error.message);
+    if (error || !user?.user) {
+      console.error('Admin user validation error:', error);
       return null;
     }
 
-    if (!user || user.id !== userId) {
-      console.warn('Supabase session user mismatch', { sessionUserId: user?.id, expected: userId });
-      return null;
-    }
-
-    return user;
+    return user.user;
   } catch (error) {
-    console.warn('Supabase session validation threw:', error);
+    console.error('Admin user validation threw:', error);
     return null;
   }
 }
@@ -280,7 +271,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
-    const supabase = await createClient();
     const adminClient = createAdminClient();
 
     // Validate required fields
@@ -296,7 +286,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate user authentication
-    const user = await validateUser(supabase, userId);
+    const user = await validateUser(adminClient, userId);
     if (!user) {
       return NextResponse.json({
         success: false,
