@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { createClient as createServerClient } from '@/lib/supabase/server';
+
+type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
+type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
+type SupabaseClient = SupabaseAdminClient | SupabaseServerClient;
 
 // ============================================================================
 // Types and Interfaces
@@ -55,11 +60,9 @@ interface CompleteOnboardingError {
 // Helper Functions
 // ============================================================================
 
-async function getOnboardingSession(sessionId: string) {
+async function getOnboardingSession(client: SupabaseClient, sessionId: string, expectedUserId?: string) {
   try {
-    const adminClient = createAdminClient();
-    
-    const { data: session, error } = await adminClient
+    const { data: session, error } = await client
       .from('onboarding_sessions')
       .select('*')
       .eq('session_id', sessionId)
@@ -67,6 +70,13 @@ async function getOnboardingSession(sessionId: string) {
     
     if (error) {
       console.error('Error fetching session:', error);
+      return null;
+    }
+
+    if (expectedUserId && session?.user_id && session.user_id !== expectedUserId) {
+      console.warn(
+        `[onboarding/complete] Session ownership mismatch. Expected ${expectedUserId}, got ${session.user_id}.`,
+      );
       return null;
     }
     
@@ -85,17 +95,20 @@ function generateProjectId(): string {
   return `proj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-async function createEntrepreneurBrief(sessionId: string, userId: string, briefData: any) {
+async function createEntrepreneurBrief(
+  client: SupabaseClient,
+  sessionId: string,
+  userId: string,
+  briefData: any,
+) {
   try {
-    const adminClient = createAdminClient();
-    
     // Calculate completeness and quality scores
     const completenessScore = calculateCompletenessScore(briefData);
     const clarityScore = calculateClarityScore(briefData);
     const consistencyScore = calculateConsistencyScore(briefData);
     const overallQualityScore = Math.round((completenessScore + clarityScore + consistencyScore) / 3);
     
-    const { data, error } = await adminClient
+    const { data, error } = await client
       .from('entrepreneur_briefs')
       .insert({
         session_id: sessionId,
@@ -231,10 +244,13 @@ function calculateConsistencyScore(briefData: any): number {
   return Math.min(100, consistencyScore);
 }
 
-async function createProjectFromOnboarding(sessionId: string, userId: string, briefData: any) {
+async function createProjectFromOnboarding(
+  client: SupabaseClient,
+  sessionId: string,
+  userId: string,
+  briefData: any,
+) {
   try {
-    const adminClient = createAdminClient();
-    
     // Generate project name from brief data
     const projectName = briefData.unique_value_proposition || 
                        briefData.solution_description?.substring(0, 50) || 
@@ -242,7 +258,7 @@ async function createProjectFromOnboarding(sessionId: string, userId: string, br
     
     const projectId = generateProjectId();
     
-    const { data, error } = await adminClient
+    const { data, error } = await client
       .from('projects')
       .insert({
         id: projectId,
@@ -271,11 +287,14 @@ async function createProjectFromOnboarding(sessionId: string, userId: string, br
   }
 }
 
-async function updateSessionComplete(sessionId: string, workflowId: string, userFeedback?: any) {
+async function updateSessionComplete(
+  client: SupabaseClient,
+  sessionId: string,
+  workflowId: string,
+  userFeedback?: any,
+) {
   try {
-    const adminClient = createAdminClient();
-    
-    const { data, error } = await adminClient
+    const { data, error } = await client
       .from('onboarding_sessions')
       .update({
         status: 'completed',
@@ -431,7 +450,35 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { sessionId, finalConfirmation, entrepreneurBrief, userFeedback }: CompleteOnboardingRequest = body;
-    
+
+    const sessionClient = await createServerClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await sessionClient.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_SESSION',
+            message: 'User session is required',
+            retryable: false,
+          },
+        } as CompleteOnboardingError,
+        { status: 401 },
+      );
+    }
+
+    let supabaseClient: SupabaseClient;
+    try {
+      supabaseClient = createAdminClient();
+    } catch (error) {
+      console.warn('[onboarding/complete] SUPABASE_SERVICE_ROLE_KEY unavailable, using user-scoped client.');
+      supabaseClient = sessionClient;
+    }
+
     // Validate required fields
     if (!sessionId || !finalConfirmation) {
       return NextResponse.json({
@@ -445,7 +492,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Validate session
-    const session = await getOnboardingSession(sessionId);
+    const session = await getOnboardingSession(supabaseClient, sessionId, user.id);
     if (!session || session.status !== 'active') {
       return NextResponse.json({
         success: false,
@@ -468,16 +515,16 @@ export async function POST(request: NextRequest) {
     
     try {
       // Create entrepreneur brief in database
-      const brief = await createEntrepreneurBrief(sessionId, session.user_id, finalBriefData);
+      const brief = await createEntrepreneurBrief(supabaseClient, sessionId, session.user_id, finalBriefData);
       
       // Create project from onboarding
-      const project = await createProjectFromOnboarding(sessionId, session.user_id, {
+      const project = await createProjectFromOnboarding(supabaseClient, sessionId, session.user_id, {
         ...finalBriefData,
         overall_quality_score: brief.overall_quality_score,
       });
       
       // Update session to completed
-      await updateSessionComplete(sessionId, workflowId, userFeedback);
+      await updateSessionComplete(supabaseClient, sessionId, workflowId, userFeedback);
       
       // Generate strategic analysis
       const analysis = generateStrategicAnalysis(finalBriefData, session);

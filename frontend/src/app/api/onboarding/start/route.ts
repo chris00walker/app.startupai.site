@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { createClient as createServerClient } from '@/lib/supabase/server';
+
+type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
+type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
+type SupabaseClient = SupabaseAdminClient | SupabaseServerClient;
 
 // ============================================================================
 // Types and Interfaces
 // ============================================================================
 
 interface StartOnboardingRequest {
-  userId: string;
+  userId?: string;
   planType: 'trial' | 'sprint' | 'founder' | 'enterprise';
   resumeSessionId?: string;
   userContext?: {
@@ -76,24 +81,8 @@ const PLAN_LIMITS = {
 // Helper Functions
 // ============================================================================
 
-async function validateUser(adminClient: ReturnType<typeof createAdminClient>, userId: string) {
-  try {
-    const { data: user, error } = await adminClient.auth.admin.getUserById(userId);
-
-    if (error || !user?.user) {
-      console.error('Admin user validation error:', error);
-      return null;
-    }
-
-    return user.user;
-  } catch (error) {
-    console.error('Admin user validation threw:', error);
-    return null;
-  }
-}
-
 async function checkPlanLimits(
-  client: ReturnType<typeof createAdminClient>,
+  client: SupabaseClient,
   userId: string,
   planType: string
 ) {
@@ -221,15 +210,17 @@ async function initializeOnboardingAgent(params: {
 }
 
 async function saveOnboardingSession(
-  client: ReturnType<typeof createAdminClient>,
+  client: SupabaseClient,
   sessionData: {
-  sessionId: string;
-  userId: string;
-  planType: string;
-  status: string;
-  startedAt: Date;
-  agentState: any;
-}) {
+    sessionId: string;
+    userId: string;
+    planType: string;
+    status: string;
+    startedAt: Date;
+    agentState: any;
+    userContext?: Record<string, any>;
+  }
+) {
   try {
     const { data, error } = await client
       .from('onboarding_sessions')
@@ -244,6 +235,7 @@ async function saveOnboardingSession(
         conversation_history: [],
         stage_data: {},
         ai_context: sessionData.agentState,
+        user_context: sessionData.userContext ?? {},
         started_at: sessionData.startedAt.toISOString(),
         last_activity: sessionData.startedAt.toISOString(),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
@@ -270,70 +262,101 @@ async function saveOnboardingSession(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
-    const adminClient = createAdminClient();
+    const { planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
 
-    // Validate required fields
-    if (!userId || !planType) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Missing required fields: userId and planType',
-          retryable: false,
-        },
-      } as StartOnboardingError, { status: 400 });
+    const sessionClient = await createServerClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await sessionClient.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'User not authenticated or not found',
+            retryable: false,
+          },
+        } as StartOnboardingError,
+        { status: 401 },
+      );
     }
 
-    // Validate user authentication
-    const user = await validateUser(adminClient, userId);
-    if (!user) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'USER_NOT_FOUND',
-          message: 'User not authenticated or not found',
-          retryable: false,
-        },
-      } as StartOnboardingError, { status: 401 });
+    let supabaseClient: SupabaseClient;
+    try {
+      supabaseClient = createAdminClient();
+    } catch (error) {
+      console.warn(
+        '[onboarding/start] SUPABASE_SERVICE_ROLE_KEY unavailable, falling back to user-scoped client.',
+      );
+      supabaseClient = sessionClient;
     }
 
-    // Check plan-specific limits (all tiers have onboarding access)
-    const canStart = await checkPlanLimits(adminClient, userId, planType);
-    if (!canStart.allowed) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: canStart.reason as any || 'SESSION_LIMIT_EXCEEDED',
-          message: canStart.message || 'Plan limit reached',
-          retryable: false,
-          fallbackOptions: canStart.fallbackOptions || ['upgrade_plan', 'contact_support'],
-        },
-      } as StartOnboardingError, { status: 403 });
+    const allowedPlans = new Set<StartOnboardingRequest['planType']>([
+      'trial',
+      'sprint',
+      'founder',
+      'enterprise',
+    ]);
+
+    if (!planType || !allowedPlans.has(planType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_PLAN',
+            message: 'Invalid or missing plan type',
+            retryable: false,
+          },
+        } as StartOnboardingError,
+        { status: 400 },
+      );
     }
-    
-    // Generate session ID
+
+    const planCheck = await checkPlanLimits(supabaseClient, user.id, planType);
+    if (!planCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: (planCheck.reason as StartOnboardingError['error']['code']) ?? 'SESSION_LIMIT_EXCEEDED',
+            message: planCheck.message || 'Plan limit reached',
+            retryable: false,
+            fallbackOptions: planCheck.fallbackOptions || ['upgrade_plan', 'contact_support'],
+          },
+        } as StartOnboardingError,
+        { status: 403 },
+      );
+    }
+
+    if (resumeSessionId) {
+      console.info(
+        `[onboarding/start] Received resumeSessionId (${resumeSessionId}) but resume flow is not yet implemented. Creating a new session instead.`,
+      );
+    }
+
     const sessionId = generateSessionId();
-    
-    // Initialize CrewAI onboarding agent
+    const startedAt = new Date();
+
     const agentResponse = await initializeOnboardingAgent({
       sessionId,
-      userId,
+      userId: user.id,
       planType,
       userContext,
     });
-    
-    // Save session to database
-    await saveOnboardingSession(adminClient, {
+
+    await saveOnboardingSession(supabaseClient, {
       sessionId,
-      userId,
+      userId: user.id,
       planType,
       status: 'active',
-      startedAt: new Date(),
+      startedAt,
       agentState: agentResponse.initialState,
+      userContext,
     });
-    
-    // Return successful response
+
     const response: StartOnboardingResponse = {
       success: true,
       sessionId,
@@ -348,20 +371,22 @@ export async function POST(request: NextRequest) {
       },
       conversationContext: agentResponse.context,
     };
-    
+
     return NextResponse.json(response);
-    
   } catch (error) {
     console.error('Onboarding start error:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: {
-        code: 'AI_SERVICE_UNAVAILABLE',
-        message: 'Unable to start conversation. Please try again in a moment.',
-        retryable: true,
-      },
-    } as StartOnboardingError, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'AI_SERVICE_UNAVAILABLE',
+          message: 'Unable to start conversation. Please try again in a moment.',
+          retryable: true,
+        },
+      } as StartOnboardingError,
+      { status: 500 },
+    );
   }
 }
 

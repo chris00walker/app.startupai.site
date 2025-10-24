@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { createClient as createServerClient } from '@/lib/supabase/server';
+
+type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
+type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
+type SupabaseClient = SupabaseAdminClient | SupabaseServerClient;
 
 // ============================================================================
 // Types and Interfaces
@@ -146,11 +151,9 @@ const CONVERSATION_STAGES = {
 // Helper Functions
 // ============================================================================
 
-async function getOnboardingSession(sessionId: string) {
+async function getOnboardingSession(client: SupabaseClient, sessionId: string, expectedUserId?: string) {
   try {
-    const adminClient = createAdminClient();
-    
-    const { data: session, error } = await adminClient
+    const { data: session, error } = await client
       .from('onboarding_sessions')
       .select('*')
       .eq('session_id', sessionId)
@@ -158,6 +161,13 @@ async function getOnboardingSession(sessionId: string) {
     
     if (error) {
       console.error('Error fetching session:', error);
+      return null;
+    }
+
+    if (expectedUserId && session?.user_id && session.user_id !== expectedUserId) {
+      console.warn(
+        `[onboarding/message] Session ownership mismatch. Expected ${expectedUserId}, got ${session.user_id}.`,
+      );
       return null;
     }
     
@@ -168,11 +178,9 @@ async function getOnboardingSession(sessionId: string) {
   }
 }
 
-async function checkDuplicateMessage(sessionId: string, messageId: string) {
+async function checkDuplicateMessage(client: SupabaseClient, sessionId: string, messageId: string) {
   try {
-    const adminClient = createAdminClient();
-    
-    const { data: session } = await adminClient
+    const { data: session } = await client
       .from('onboarding_sessions')
       .select('conversation_history')
       .eq('session_id', sessionId)
@@ -381,16 +389,18 @@ async function processUserMessage(params: {
   };
 }
 
-async function updateOnboardingSession(sessionId: string, updates: {
-  conversationHistory: any[];
-  currentStage: number;
-  stageData: any;
-  lastActivity: Date;
-}) {
+async function updateOnboardingSession(
+  client: SupabaseClient,
+  sessionId: string,
+  updates: {
+    conversationHistory: any[];
+    currentStage: number;
+    stageData: any;
+    lastActivity: Date;
+  },
+) {
   try {
-    const adminClient = createAdminClient();
-    
-    const { data, error } = await adminClient
+    const { data, error } = await client
       .from('onboarding_sessions')
       .update({
         conversation_history: updates.conversationHistory,
@@ -459,7 +469,35 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { sessionId, userMessage, messageType, timestamp, messageId, conversationContext }: SendMessageRequest = body;
-    
+
+    const sessionClient = await createServerClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await sessionClient.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_SESSION',
+            message: 'User session is required',
+            retryable: false,
+          },
+        } as MessageError,
+        { status: 401 },
+      );
+    }
+
+    let supabaseClient: SupabaseClient;
+    try {
+      supabaseClient = createAdminClient();
+    } catch (error) {
+      console.warn('[onboarding/message] SUPABASE_SERVICE_ROLE_KEY unavailable, using user-scoped client.');
+      supabaseClient = sessionClient;
+    }
+
     // Validate required fields
     if (!sessionId || !userMessage || !messageId) {
       return NextResponse.json({
@@ -471,9 +509,9 @@ export async function POST(request: NextRequest) {
         },
       } as MessageError, { status: 400 });
     }
-    
+
     // Validate session
-    const session = await getOnboardingSession(sessionId);
+    const session = await getOnboardingSession(supabaseClient, sessionId, user.id);
     if (!session || session.status !== 'active') {
       return NextResponse.json({
         success: false,
@@ -484,9 +522,9 @@ export async function POST(request: NextRequest) {
         },
       } as MessageError, { status: 404 });
     }
-    
+
     // Check for duplicate message
-    const isDuplicate = await checkDuplicateMessage(sessionId, messageId);
+    const isDuplicate = await checkDuplicateMessage(supabaseClient, sessionId, messageId);
     if (isDuplicate) {
       const cachedResponse = await getCachedResponse(sessionId, messageId);
       if (cachedResponse) {
@@ -513,12 +551,12 @@ export async function POST(request: NextRequest) {
       stage: session.current_stage,
       messageType: messageType || 'text',
     };
-    
+
     const updatedHistory = [...(session.conversation_history || []), newConversationEntry];
     const updatedStageData = { ...(session.stage_data || {}), ...agentResponse.briefUpdate };
     
     // Update session state
-    await updateOnboardingSession(sessionId, {
+    await updateOnboardingSession(supabaseClient, sessionId, {
       conversationHistory: updatedHistory,
       currentStage: agentResponse.newStage || session.current_stage,
       stageData: updatedStageData,
