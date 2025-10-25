@@ -9,43 +9,31 @@
 -- Portfolio Management Fields
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS stage TEXT NOT NULL DEFAULT 'DESIRABILITY' CHECK (stage IN ('DESIRABILITY', 'FEASIBILITY', 'VIABILITY', 'SCALE'));
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS gate_status TEXT DEFAULT 'Pending' CHECK (gate_status IN ('Pending', 'Passed', 'Failed'));
-
 -- Risk Budget Tracking
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS risk_budget_planned DECIMAL(10,2) DEFAULT 0;
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS risk_budget_actual DECIMAL(10,2) DEFAULT 0;
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS risk_budget_delta DECIMAL(10,2) DEFAULT 0;
-
 -- Consultant & Activity Tracking
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS assigned_consultant TEXT;
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS last_activity TIMESTAMPTZ DEFAULT NOW();
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS next_gate_date DATE;
-
 -- Evidence & Quality Metrics
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS evidence_quality DECIMAL(3,2) DEFAULT 0 CHECK (evidence_quality >= 0 AND evidence_quality <= 1);
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS hypotheses_count INTEGER DEFAULT 0;
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS experiments_count INTEGER DEFAULT 0;
-
 ALTER TABLE projects 
 ADD COLUMN IF NOT EXISTS evidence_count INTEGER DEFAULT 0;
-
 -- ============================================================================
 -- ADD INDEXES FOR NEW COLUMNS
 -- ============================================================================
@@ -53,7 +41,6 @@ ADD COLUMN IF NOT EXISTS evidence_count INTEGER DEFAULT 0;
 CREATE INDEX IF NOT EXISTS idx_projects_stage ON projects(stage);
 CREATE INDEX IF NOT EXISTS idx_projects_gate_status ON projects(gate_status);
 CREATE INDEX IF NOT EXISTS idx_projects_last_activity ON projects(last_activity DESC);
-
 -- ============================================================================
 -- UPDATE EXISTING ROWS WITH DEFAULT VALUES
 -- ============================================================================
@@ -62,17 +49,14 @@ CREATE INDEX IF NOT EXISTS idx_projects_last_activity ON projects(last_activity 
 UPDATE projects 
 SET last_activity = COALESCE(created_at, NOW())
 WHERE last_activity IS NULL;
-
 -- Set default stage based on status if possible
 -- (This is a smart default - adjust based on your business logic)
 UPDATE projects 
 SET stage = 'DESIRABILITY'
 WHERE stage IS NULL;
-
 UPDATE projects 
 SET gate_status = 'Pending'
 WHERE gate_status IS NULL;
-
 -- ============================================================================
 -- ADD TRIGGER FOR UPDATING UPDATED_AT
 -- ============================================================================
@@ -85,15 +69,12 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 -- Drop trigger if it exists and recreate
 DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
-
 CREATE TRIGGER update_projects_updated_at 
 BEFORE UPDATE ON projects
 FOR EACH ROW 
 EXECUTE FUNCTION update_updated_at_column();
-
 -- ============================================================================
 -- COMMENTS
 -- ============================================================================

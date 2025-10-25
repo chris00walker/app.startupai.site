@@ -8,19 +8,15 @@ BEGIN
     CREATE TYPE user_role AS ENUM ('admin', 'founder', 'consultant', 'trial');
   END IF;
 END$$;
-
 -- Add role column to user_profiles if missing
 ALTER TABLE user_profiles
   ADD COLUMN IF NOT EXISTS role user_role DEFAULT 'trial'::user_role;
-
 -- Add plan_status column for lifecycle management
 ALTER TABLE user_profiles
   ADD COLUMN IF NOT EXISTS plan_status TEXT DEFAULT 'active';
-
 -- Ensure subscription_tier has a default value
 ALTER TABLE user_profiles
   ALTER COLUMN subscription_tier SET DEFAULT 'free';
-
 -- Backfill role for existing records based on subscription tier if missing
 UPDATE user_profiles
 SET role = CASE
@@ -29,7 +25,6 @@ SET role = CASE
   ELSE 'trial'::user_role
 END
 WHERE role IS NULL;
-
 -- Maintain updated_at timestamp when profile changes
 CREATE OR REPLACE FUNCTION set_updated_at_timestamp()
 RETURNS TRIGGER AS $$
@@ -38,7 +33,6 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 DROP TRIGGER IF EXISTS set_user_profiles_updated_at ON user_profiles;
 CREATE TRIGGER set_user_profiles_updated_at
 BEFORE UPDATE ON user_profiles

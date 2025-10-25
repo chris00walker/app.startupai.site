@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 -- ============================================================================
 -- PROJECTS TABLE (Enhanced Portfolio Management)
 -- ============================================================================
@@ -63,7 +62,6 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 -- Create index for user queries
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
@@ -94,10 +92,8 @@ CREATE TABLE IF NOT EXISTS hypotheses (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_hypotheses_project_id ON hypotheses(project_id);
 CREATE INDEX IF NOT EXISTS idx_hypotheses_status ON hypotheses(status);
-
 -- ============================================================================
 -- EVIDENCE TABLE (with Vector Search)
 CREATE TABLE IF NOT EXISTS evidence (
@@ -125,9 +121,7 @@ CREATE TABLE IF NOT EXISTS evidence (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_evidence_project_id ON evidence(project_id);
-
 -- Create vector similarity search index (requires pgvector extension)
 -- CREATE INDEX IF NOT EXISTS idx_evidence_embedding ON evidence 
 -- USING hnsw (embedding vector_cosine_ops);
@@ -164,11 +158,9 @@ CREATE TABLE IF NOT EXISTS experiments (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_experiments_project_id ON experiments(project_id);
 CREATE INDEX IF NOT EXISTS idx_experiments_hypothesis_id ON experiments(hypothesis_id);
 CREATE INDEX IF NOT EXISTS idx_experiments_status ON experiments(status);
-
 -- ============================================================================
 -- REPORTS TABLE (AI-Generated)
 -- ============================================================================
@@ -194,10 +186,8 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_reports_project_id ON reports(project_id);
 CREATE INDEX IF NOT EXISTS idx_reports_type ON reports(report_type);
-
 -- ============================================================================
 -- GATE POLICIES TABLE
 -- ============================================================================
@@ -228,9 +218,7 @@ CREATE TABLE IF NOT EXISTS gate_policies (
   
   UNIQUE(user_id, gate)
 );
-
 CREATE INDEX IF NOT EXISTS idx_gate_policies_user_id ON gate_policies(user_id);
-
 -- ============================================================================
 -- OVERRIDE REQUESTS TABLE
 -- ============================================================================
@@ -253,10 +241,8 @@ CREATE TABLE IF NOT EXISTS override_requests (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_override_requests_project_id ON override_requests(project_id);
 CREATE INDEX IF NOT EXISTS idx_override_requests_status ON override_requests(status);
-
 -- ============================================================================
 -- AUDIT LOG TABLE
 -- ============================================================================
@@ -278,19 +264,16 @@ CREATE TABLE IF NOT EXISTS audit_log (
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
 CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_project_id ON audit_log(project_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_event_type ON audit_log(event_type);
 CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at);
-
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
 
 -- User Profiles
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -315,10 +298,8 @@ BEGIN
     USING (auth.uid() = id);
   END IF;
 END$$;
-
 -- Projects
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -353,10 +334,8 @@ BEGIN
     USING (auth.uid() = user_id);
   END IF;
 END$$;
-
 -- Hypotheses
 ALTER TABLE hypotheses ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -373,10 +352,8 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- Evidence
 ALTER TABLE evidence ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -393,10 +370,8 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- Experiments
 ALTER TABLE experiments ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -413,10 +388,8 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- Reports
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -433,10 +406,8 @@ BEGIN
     );
   END IF;
 END$$;
-
 -- Gate Policies
 ALTER TABLE gate_policies ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -447,10 +418,8 @@ BEGIN
     USING (auth.uid() = user_id);
   END IF;
 END$$;
-
 -- Override Requests
 ALTER TABLE override_requests ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -469,10 +438,8 @@ BEGIN
     WITH CHECK (auth.uid() = user_id);
   END IF;
 END$$;
-
 -- Audit Log (Read-only for users, write-only for system)
 ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
-
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -483,7 +450,6 @@ BEGIN
     USING (auth.uid() = user_id);
   END IF;
 END$$;
-
 -- ============================================================================
 -- FUNCTIONS
 -- ============================================================================
@@ -496,26 +462,19 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 -- Apply updated_at trigger to all relevant tables
 CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_hypotheses_updated_at BEFORE UPDATE ON hypotheses
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_evidence_updated_at BEFORE UPDATE ON evidence
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_experiments_updated_at BEFORE UPDATE ON experiments
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 CREATE TRIGGER update_reports_updated_at BEFORE UPDATE ON reports
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 -- Vector Search Function (requires pgvector extension)
 -- Uncomment when pgvector is enabled in Supabase Dashboard
 -- CREATE OR REPLACE FUNCTION match_evidence(

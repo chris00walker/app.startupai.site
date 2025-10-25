@@ -18,17 +18,14 @@ ALTER TABLE projects
   ADD COLUMN IF NOT EXISTS hypotheses_count INTEGER DEFAULT 0,
   ADD COLUMN IF NOT EXISTS experiments_count INTEGER DEFAULT 0,
   ADD COLUMN IF NOT EXISTS evidence_count INTEGER DEFAULT 0;
-
 CREATE INDEX IF NOT EXISTS idx_projects_stage ON projects(stage);
 CREATE INDEX IF NOT EXISTS idx_projects_gate_status ON projects(gate_status);
 CREATE INDEX IF NOT EXISTS idx_projects_last_activity ON projects(last_activity DESC);
-
 UPDATE projects
 SET last_activity = COALESCE(last_activity, created_at, NOW()),
     stage = COALESCE(stage, 'DESIRABILITY'),
     gate_status = COALESCE(gate_status, 'Pending')
 WHERE TRUE;
-
 -- ============================================================================
 -- HYPOTHESES TABLE
 -- ============================================================================
@@ -44,18 +41,14 @@ CREATE TABLE IF NOT EXISTS hypotheses (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
-
 CREATE INDEX IF NOT EXISTS idx_hypotheses_project_id ON hypotheses(project_id);
 CREATE INDEX IF NOT EXISTS idx_hypotheses_status ON hypotheses(status);
 CREATE INDEX IF NOT EXISTS idx_hypotheses_type ON hypotheses(type);
-
 ALTER TABLE hypotheses ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Users can manage own hypotheses" ON hypotheses;
 CREATE POLICY "Users can manage own hypotheses"
 ON hypotheses FOR ALL
 USING (auth.uid() = (SELECT user_id FROM projects WHERE projects.id = hypotheses.project_id));
-
 -- ============================================================================
 -- EXPERIMENTS TABLE
 -- ============================================================================
@@ -80,18 +73,14 @@ CREATE TABLE IF NOT EXISTS experiments (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
-
 CREATE INDEX IF NOT EXISTS idx_experiments_project_id ON experiments(project_id);
 CREATE INDEX IF NOT EXISTS idx_experiments_status ON experiments(status);
 CREATE INDEX IF NOT EXISTS idx_experiments_hypothesis_id ON experiments(hypothesis_id);
-
 ALTER TABLE experiments ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Users can manage own experiments" ON experiments;
 CREATE POLICY "Users can manage own experiments"
 ON experiments FOR ALL
 USING (auth.uid() = (SELECT user_id FROM projects WHERE projects.id = experiments.project_id));
-
 -- ============================================================================
 -- EVIDENCE TABLE ENRICHMENT
 -- ============================================================================
@@ -107,22 +96,18 @@ ALTER TABLE evidence
   ADD COLUMN IF NOT EXISTS source TEXT,
   ADD COLUMN IF NOT EXISTS occurred_on DATE,
   ADD COLUMN IF NOT EXISTS linked_assumptions TEXT[];
-
 CREATE INDEX IF NOT EXISTS idx_evidence_project_fit ON evidence(project_id, fit_type);
 CREATE INDEX IF NOT EXISTS idx_evidence_strength ON evidence(strength);
 CREATE INDEX IF NOT EXISTS idx_evidence_contradiction ON evidence(is_contradiction);
-
 UPDATE evidence
 SET title = COALESCE(title, LEFT(content, 80)),
     summary = COALESCE(summary, content),
     full_text = COALESCE(full_text, content)
 WHERE TRUE;
-
 -- Ensure existing rows comply
 UPDATE evidence SET strength = 'medium' WHERE strength IS NULL;
 UPDATE evidence SET fit_type = 'Desirability' WHERE fit_type IS NULL;
 UPDATE evidence SET category = 'Research' WHERE category IS NULL;
-
 -- ============================================================================
 -- TRIGGERS
 -- ============================================================================
@@ -133,22 +118,18 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
 DROP TRIGGER IF EXISTS update_hypotheses_updated_at ON hypotheses;
 CREATE TRIGGER update_hypotheses_updated_at
 BEFORE UPDATE ON hypotheses
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_experiments_updated_at ON experiments;
 CREATE TRIGGER update_experiments_updated_at
 BEFORE UPDATE ON experiments
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 CREATE TRIGGER update_projects_updated_at
 BEFORE UPDATE ON projects
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
 DROP TRIGGER IF EXISTS update_evidence_updated_at ON evidence;
 CREATE TRIGGER update_evidence_updated_at
 BEFORE UPDATE ON evidence

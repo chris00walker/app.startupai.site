@@ -13,7 +13,6 @@ VALUES (
   ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 )
 ON CONFLICT (id) DO NOTHING;
-
 -- User uploads RLS policies
 CREATE POLICY "Users can upload to own folder"
 ON storage.objects FOR INSERT
@@ -21,28 +20,24 @@ WITH CHECK (
   bucket_id = 'user-uploads' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
-
 CREATE POLICY "Users can view own uploads"
 ON storage.objects FOR SELECT
 USING (
   bucket_id = 'user-uploads' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
-
 CREATE POLICY "Users can update own uploads"
 ON storage.objects FOR UPDATE
 USING (
   bucket_id = 'user-uploads' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
-
 CREATE POLICY "Users can delete own uploads"
 ON storage.objects FOR DELETE
 USING (
   bucket_id = 'user-uploads' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
-
 -- ============================================================================
 -- 2. GENERATED REPORTS BUCKET
 -- ============================================================================
@@ -55,7 +50,6 @@ VALUES (
   ARRAY['application/pdf', 'application/json', 'text/markdown', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 )
 ON CONFLICT (id) DO NOTHING;
-
 -- Generated reports RLS policies
 CREATE POLICY "Users can view own reports"
 ON storage.objects FOR SELECT
@@ -63,20 +57,17 @@ USING (
   bucket_id = 'generated-reports' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
-
 CREATE POLICY "System can create reports"
 ON storage.objects FOR INSERT
 WITH CHECK (
   bucket_id = 'generated-reports'
 );
-
 CREATE POLICY "Users can delete own reports"
 ON storage.objects FOR DELETE
 USING (
   bucket_id = 'generated-reports' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
-
 -- ============================================================================
 -- 3. PROJECT ASSETS BUCKET
 -- ============================================================================
@@ -89,7 +80,6 @@ VALUES (
   ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'application/pdf']
 )
 ON CONFLICT (id) DO NOTHING;
-
 -- Project assets RLS policies
 CREATE POLICY "Users can manage project assets"
 ON storage.objects FOR ALL
@@ -101,7 +91,6 @@ USING (
     AND projects.user_id = auth.uid()
   )
 );
-
 -- ============================================================================
 -- 4. PUBLIC ASSETS BUCKET
 -- ============================================================================
@@ -114,19 +103,16 @@ VALUES (
   ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
 )
 ON CONFLICT (id) DO NOTHING;
-
 -- Public assets policies (anyone can view)
 CREATE POLICY "Public assets are viewable by all"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'public-assets');
-
 CREATE POLICY "Authenticated users can upload public assets"
 ON storage.objects FOR INSERT
 WITH CHECK (
   bucket_id = 'public-assets' AND
   auth.role() = 'authenticated'
 );
-
 CREATE POLICY "Users can manage own public assets"
 ON storage.objects FOR ALL
 USING (
