@@ -1,0 +1,55 @@
+openapi: 3.1.0
+info:
+  title: StartupAI Public API
+  version: 2025-10
+servers:
+  - url: https://app-startupai-site.netlify.app
+paths:
+  /api/public/plans:
+    get:
+      summary: List public pricing plans
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plans:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        price:
+                          type: string
+                        tagline:
+                          type: string
+  /api/public/lead:
+    post:
+      summary: Submit marketing lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, source]
+              properties:
+                email:
+                  type: string
+                name:
+                  type: string
+                plan:
+                  type: string
+                source:
+                  type: string
+      responses:
+        '202':
+          description: Lead accepted for processing
+        '400':
+          description: Validation error

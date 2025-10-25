@@ -1,116 +1,21 @@
-# app.startupai.site Documentation
-
-**Status:** REFERENCES SHARED DOCS  
-**Last Updated:** October 2, 2025  
-
+---
+purpose: "Private technical documentation index for the StartupAI application"
+status: "active"
+last_reviewed: "2025-10-25"
 ---
 
-## Two-Site Architecture
+# StartupAI App Documentation
 
-This repository (`app.startupai.site`) is the **Product Platform** in StartupAI's two-site architecture:
+| Section | Summary |
+| --- | --- |
+| [`overview/`](overview/) | Platform overview, architecture, and SLOs. |
+| [`adrs/`](adrs/) | Architectural decision records. |
+| [`specs/`](specs/) | Authentication, data, Supabase, onboarding API, frontend, CrewAI. |
+| [`ops/`](ops/) | Deployment, database, router, and analytics runbooks. |
+| [`testing/`](testing/) | Testing strategy and specification-driven guidance. |
+| [`status/`](status/) | Rolling implementation status and release notes. |
+| [`public-interfaces/`](public-interfaces/) | Marketing/public exports (plans, status, changelog, OpenAPI). |
+| [`work/`](work/) | Phases, roadmap, backlog, and feature templates. |
+| [`archive/`](archive/) | Completion reports and legacy docs with deprecation pointers. |
 
-- **startupai.site** (The Promise) - Convert Prospects to customers
-- **app.startupai.site** (The Product) - Deliver value and create advocates ← **YOU ARE HERE**
-
----
-
-## Documentation Location
-
-All **shared documentation** lives in the StartupAI repository:
-
-**[/home/chris/startupai.site/docs/](/home/chris/startupai.site/docs/)**
-
-### Quick Navigation for Product Platform Development:
-
-#### Core Requirements
-- **MVP Specification:** [Two-Site Architecture](../startupai.site/docs/product/mvp-specification.md#02-product-platform-appstartupaisite-the-product)
-- **User Stories:** [Product Platform Stories](../startupai.site/docs/product/user-stories.md)
-- **UX Design:** [Product Platform UX](../startupai.site/docs/design/user-experience.md#phase-2-onboarding-first-value-appstartupaisite-10-20-minutes)
-
-#### Technical Implementation
-- **Master Implementation Guide:** [Complete Technical Reference](../startupai.site/docs/technical/two-site-implementation-plan.md) - Single source for architecture, roadmap, and status
-- **System Architecture:** [Product Platform Stack](../startupai.site/docs/technical/two-site-implementation-plan.md#32-product-site-stack-appstartupaisite)
-- **Database Architecture:** [Supabase Configuration](../startupai.site/docs/technical/two-site-implementation-plan.md#33-database-architecture)
-- **Implementation Phases:** [Phase 1-5](../startupai.site/docs/technical/two-site-implementation-plan.md#4-implementation-phases)
-- **Current Status:** [All Status Tracking](../startupai.site/docs/technical/two-site-implementation-plan.md#2-current-implementation-status)
-- **Vector Search:** [Semantic Search Implementation](../startupai.site/docs/technical/two-site-implementation-plan.md#vector-search-functions)
-
-#### Cross-Site Integration
-- **Handoff Process:** [Secure Token Validation](../startupai.site/docs/product/user-stories.md#story-02-token-validation-session-creation-appstartupaisite)
-- **Shared Services:** [Supabase Integration](../startupai.site/docs/technical/two-site-implementation-plan.md#33-database-architecture)
-- **Authentication:** [Cross-Site Auth Flow](../startupai.site/docs/technical/two-site-implementation-plan.md#23-authentication)
-
----
-
-## Development Quick Start
-
-### For Product Platform Development:
-1. **Read:** [MVP Spec - Product Platform Section](../startupai.site/docs/product/mvp-specification.md#02-product-platform-appstartupaisite-the-product)
-2. **Implement:** [Implementation Plan - Phase 3](../startupai.site/docs/technical/two-site-implementation-plan.md#4-phase-3-product-platform-core-features-appstartupaisite)
-3. **Test:** [User Stories - Product Platform](../startupai.site/docs/product/user-stories.md)
-
-### Key Features to Implement:
-- [ ] JWT token validation endpoint (`/api/auth/handoff`)
-- [ ] Supabase database integration with Drizzle ORM
-- [ ] Vector search implementation with pgvector
-- [ ] User onboarding flow with database persistence
-- [ ] Project creation wizard with evidence storage
-- [ ] Evidence collection system with semantic search
-- [ ] AI-powered report generation with storage
-- [ ] CrewAI integration with database logging
-- [ ] File upload system with Supabase Storage
-
----
-
-## Local Documentation (Archived)
-
-The following documents in this repository are **archived** and kept for historical reference only:
-
-{{ ... }}
-
-### Migration Summary:
-- All requirements moved to shared StartupAI docs
-- Two-site architecture documented
-- Cross-site authentication specified
-- Product platform requirements detailed
-- Implementation roadmap created
-
----
-
-## Development Workflow
-
-**For app.startupai.site development:**
-1. **Reference:** `/home/chris/startupai.site/docs/` for all specifications
-2. **Implement:** Code in `/home/chris/app.startupai.site/`
-3. **Focus:** Product platform features (authentication receiver, core platform, AI workflows)
-4. **Integration:** Secure handoff from startupai.site
-
-**For cross-site features:**
-- Authentication handoff testing with JWT tokens
-- Shared Supabase database integration with Drizzle ORM
-- Vector search implementation with pgvector
-- Storage integration with Supabase Storage
-- Cross-site analytics implementation
-
----
-
----
-
-## Implementation Guides
-
-**Current implementation documentation for this repository:**
-
-### Setup & Configuration
-- **[Supabase Setup](engineering/30-data/supabase-setup.md)** - ✅ Complete - Database infrastructure setup
-- **[CrewAI Implementation](../backend/CREW_AI.md)** - 6-agent AI workflow implementation (pending)
-- **[Implementation Status](operations/implementation-status.md)** - Current progress tracking (updated Oct 1, 2025)
-
-### Engineering Documentation
-- **[Data Architecture](engineering/30-data/)** - Database, migrations, retention
-- **[Testing](engineering/50-testing/)** - Testing strategies and frameworks
-- **[Operations](operations/)** - Implementation status, runbooks and procedures
-
----
-
-**Last Updated:** October 1, 2025  
-**Architecture:** Two-Site Marketing → Product Flow
+See [`docs/migration-report.md`](migration-report.md) for details on the latest restructuring.

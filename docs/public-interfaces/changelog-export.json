@@ -1,0 +1,13 @@
+{
+  "updated_at": "2025-10-25T21:30:00Z",
+  "items": [
+    {
+      "date": "2025-10-24",
+      "title": "Onboarding wizard launched",
+      "summary": "Users now see guided conversation after sign-up. CrewAI outputs coming soon.",
+      "links": [
+        "https://github.com/chris00walker/app.startupai.site/pull/410"
+      ]
+    }
+  ]
+}

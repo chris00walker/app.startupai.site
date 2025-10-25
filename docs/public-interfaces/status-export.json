@@ -1,0 +1,14 @@
+{
+  "updated_at": "2025-10-25T21:30:00Z",
+  "status": "operational",
+  "components": [
+    {
+      "name": "Authentication",
+      "status": "operational"
+    },
+    {
+      "name": "Onboarding API",
+      "status": "operational"
+    }
+  ]
+}
