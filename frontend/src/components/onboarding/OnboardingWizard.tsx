@@ -306,7 +306,27 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         throw new Error(data.error?.message || 'Failed to complete onboarding');
       }
 
-      toast.success('Onboarding completed! Redirecting to your project...');
+      if (data.deliverables) {
+        try {
+          sessionStorage.setItem('startupai:lastAnalysis', JSON.stringify(data.deliverables));
+        } catch (storageError) {
+          console.warn('Unable to persist analysis summary to sessionStorage:', storageError);
+        }
+      }
+
+      const summarySnippet = data.deliverables?.summary
+        ? `${data.deliverables.summary}`.slice(0, 160)
+        : null;
+
+      if (data.workflowTriggered && summarySnippet) {
+        toast.success(`Onboarding complete. CrewAI summary: ${summarySnippet}${summarySnippet.length === 160 ? '…' : ''}`);
+      } else {
+        toast.success('Onboarding completed! Redirecting to your project...');
+      }
+
+      if (!data.workflowTriggered) {
+        toast.warning('AI analysis is still running. Your project will update as soon as the deliverables are ready.');
+      }
       
       // Announce completion to screen readers
       announceToScreenReader('Onboarding completed successfully. Redirecting to your new project dashboard.');

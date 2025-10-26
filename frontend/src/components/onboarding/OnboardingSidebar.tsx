@@ -161,7 +161,6 @@ export function OnboardingSidebar({
                                 : 'hover:bg-muted/30'
                             }
                           `}
-                          role="listitem"
                           aria-current={stage.isActive ? 'step' : undefined}
                         >
                           {/* Stage Icon */}

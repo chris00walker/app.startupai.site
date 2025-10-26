@@ -34,16 +34,27 @@ interface CompleteOnboardingResponse {
     priority: 'high' | 'medium' | 'low';
   }[];
   deliverables: {
-    executiveSummary: string;
-    strategicRecommendations: string[];
-    validationPlan: any; // ValidationPlan
-    businessModelCanvas: any; // BusinessModelCanvas
+    analysisId: string;
+    summary: string | null;
+    insights: CrewInsight[];
+    rawOutput?: string;
   };
   dashboardRedirect: string;
   projectCreated: {
     projectId: string;
     projectName: string;
     projectUrl: string;
+  };
+  analysisMetadata?: {
+    evidenceCount?: number;
+    evidenceCreated?: number;
+    reportCreated?: boolean;
+    error?: string;
+    rateLimit?: {
+      limit: number;
+      remaining: number;
+      windowSeconds: number;
+    };
   };
 }
 
@@ -55,6 +66,39 @@ interface CompleteOnboardingError {
     retryable: boolean;
   };
 }
+
+interface CrewInsight {
+  id: string;
+  headline: string;
+  confidence?: string;
+  support?: string;
+}
+
+interface CrewAnalyzeApiResponse {
+  success: boolean;
+  analysisId: string;
+  summary?: string;
+  insights?: CrewInsight[];
+  rawOutput?: string;
+  evidenceCount?: number;
+  evidenceCreated?: number;
+  reportCreated?: boolean;
+  metadata?: {
+    project_id?: string;
+    user_id?: string;
+    rate_limit?: {
+      limit: number;
+      remaining: number;
+      window_seconds: number;
+    };
+  };
+}
+
+type RateLimitInfo = {
+  limit: number;
+  remaining: number;
+  windowSeconds: number;
+};
 
 // ============================================================================
 // Helper Functions
@@ -91,10 +135,6 @@ function generateWorkflowId(): string {
   return `wf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function generateProjectId(): string {
-  return `proj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
 async function createEntrepreneurBrief(
   client: SupabaseClient,
   sessionId: string,
@@ -110,7 +150,7 @@ async function createEntrepreneurBrief(
     
     const { data, error } = await client
       .from('entrepreneur_briefs')
-      .insert({
+      .upsert({
         session_id: sessionId,
         user_id: userId,
         
@@ -167,7 +207,7 @@ async function createEntrepreneurBrief(
         
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      })
+      }, { onConflict: 'session_id' })
       .select()
       .single();
     
@@ -244,6 +284,24 @@ function calculateConsistencyScore(briefData: any): number {
   return Math.min(100, consistencyScore);
 }
 
+function buildCrewAnalysisInputs(briefData: any) {
+  const question = `What strategic actions should ${briefData.solution_description ? briefData.solution_description.slice(0, 80) : 'this startup'} prioritize to validate the problem "${briefData.problem_description || 'their core assumption'}"?`;
+
+  const contextSections = [
+    briefData.problem_description && `Problem: ${briefData.problem_description}`,
+    Array.isArray(briefData.customer_segments) && briefData.customer_segments.length > 0 && `Customer Segments: ${briefData.customer_segments.join(', ')}`,
+    briefData.solution_description && `Solution: ${briefData.solution_description}`,
+    Array.isArray(briefData.unique_value_proposition) ? `Value Proposition: ${briefData.unique_value_proposition}` : briefData.unique_value_proposition && `Value Proposition: ${briefData.unique_value_proposition}`,
+    briefData.business_stage && `Stage: ${briefData.business_stage}`,
+    briefData.budget_range && `Budget: ${briefData.budget_range}`,
+  ].filter(Boolean);
+
+  return {
+    strategicQuestion: question,
+    projectContext: contextSections.join(' | '),
+  };
+}
+
 async function createProjectFromOnboarding(
   client: SupabaseClient,
   sessionId: string,
@@ -251,24 +309,35 @@ async function createProjectFromOnboarding(
   briefData: any,
 ) {
   try {
-    // Generate project name from brief data
-    const projectName = briefData.unique_value_proposition || 
-                       briefData.solution_description?.substring(0, 50) || 
-                       `Project from ${new Date().toLocaleDateString()}`;
-    
-    const projectId = generateProjectId();
-    
+    const projectName = (briefData.unique_value_proposition || briefData.solution_description || `Project ${new Date().toLocaleDateString()}`).slice(0, 100);
+    const stageMap: Record<string, 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'> = {
+      idea: 'DESIRABILITY',
+      validation: 'DESIRABILITY',
+      early_traction: 'FEASIBILITY',
+      scaling: 'VIABILITY',
+      growth: 'SCALE',
+    };
+
+    const stage = stageMap[briefData.business_stage as string] ?? 'DESIRABILITY';
+
+    const metadata = {
+      onboardingSessionId: sessionId,
+      createdViaOnboarding: true,
+      briefQualityScore: briefData.overall_quality_score,
+      problemStatement: briefData.problem_description,
+      targetMarket: briefData.customer_segments,
+    };
+
     const { data, error } = await client
       .from('projects')
       .insert({
-        id: projectId,
         user_id: userId,
-        name: projectName.substring(0, 100), // Ensure it fits in the field
+        name: projectName,
         description: briefData.problem_description || 'Project created from onboarding session',
-        stage: briefData.business_stage || 'idea',
-        onboarding_session_id: sessionId,
-        onboarding_completed_at: new Date().toISOString(),
-        onboarding_quality_score: briefData.overall_quality_score || 70,
+        stage,
+        status: 'active',
+        gate_status: 'Pending',
+        metadata,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -292,6 +361,7 @@ async function updateSessionComplete(
   sessionId: string,
   workflowId: string,
   userFeedback?: any,
+  aiContext?: Record<string, any>,
 ) {
   try {
     const { data, error } = await client
@@ -303,6 +373,7 @@ async function updateSessionComplete(
         ai_context: {
           workflowId,
           completedAt: new Date().toISOString(),
+          ...(aiContext || {}),
         },
       })
       .eq('session_id', sessionId)
@@ -457,6 +528,9 @@ export async function POST(request: NextRequest) {
       error: userError,
     } = await sessionClient.auth.getUser();
 
+    const { data: sessionInfo } = await sessionClient.auth.getSession();
+    const accessToken = sessionInfo?.session?.access_token;
+
     if (userError || !user) {
       return NextResponse.json(
         {
@@ -464,6 +538,20 @@ export async function POST(request: NextRequest) {
           error: {
             code: 'INVALID_SESSION',
             message: 'User session is required',
+            retryable: false,
+          },
+        } as CompleteOnboardingError,
+        { status: 401 },
+      );
+    }
+
+    if (!accessToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_SESSION',
+            message: 'Authentication token missing',
             retryable: false,
           },
         } as CompleteOnboardingError,
@@ -510,46 +598,119 @@ export async function POST(request: NextRequest) {
       ...entrepreneurBrief,
     };
     
-    // Generate workflow ID
-    const workflowId = generateWorkflowId();
+    // Generate workflow ID (can be replaced by Crew analysis run id)
+    let workflowId = generateWorkflowId();
     
     try {
-      // Create entrepreneur brief in database
       const brief = await createEntrepreneurBrief(supabaseClient, sessionId, session.user_id, finalBriefData);
-      
-      // Create project from onboarding
+
       const project = await createProjectFromOnboarding(supabaseClient, sessionId, session.user_id, {
         ...finalBriefData,
         overall_quality_score: brief.overall_quality_score,
       });
-      
-      // Update session to completed
-      await updateSessionComplete(supabaseClient, sessionId, workflowId, userFeedback);
-      
-      // Generate strategic analysis
-      const analysis = generateStrategicAnalysis(finalBriefData, session);
-      
-      // Generate next steps
+
+      const { strategicQuestion, projectContext } = buildCrewAnalysisInputs(finalBriefData);
+
+      let analysisResult: CrewAnalyzeApiResponse | null = null;
+      let crewError: string | null = null;
+      let rateLimitInfo: RateLimitInfo | undefined;
+
+      try {
+        const analyzeUrl = new URL('/api/analyze', request.url);
+        const analyzeResponse = await fetch(analyzeUrl.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            strategic_question: strategicQuestion,
+            project_context: projectContext,
+            project_id: project.id,
+            priority_level: 'high',
+            session_id: sessionId,
+          }),
+        });
+
+        if (analyzeResponse.ok) {
+          const payload = await analyzeResponse.json() as CrewAnalyzeApiResponse;
+          if (payload?.success) {
+            analysisResult = payload;
+            workflowId = payload.analysisId || workflowId;
+
+            if (payload.metadata?.rate_limit) {
+              rateLimitInfo = {
+                limit: payload.metadata.rate_limit.limit,
+                remaining: payload.metadata.rate_limit.remaining,
+                windowSeconds: payload.metadata.rate_limit.window_seconds,
+              };
+            }
+          } else {
+            crewError = 'CrewAI response missing success flag';
+          }
+        } else {
+          crewError = `CrewAI responded with status ${analyzeResponse.status}`;
+        }
+      } catch (analysisErr) {
+        crewError = analysisErr instanceof Error ? analysisErr.message : 'CrewAI request failed';
+      }
+
+      const fallbackAnalysis = analysisResult ? null : generateStrategicAnalysis(finalBriefData, session);
+
+      const fallbackInsights: CrewInsight[] = fallbackAnalysis?.strategicRecommendations
+        ? (fallbackAnalysis.strategicRecommendations as string[]).map((recommendation: string, index: number) => ({
+            id: `fallback-${index}`,
+            headline: recommendation,
+          }))
+        : [];
+
+      const deliverableInsights = analysisResult?.insights ?? fallbackInsights;
+      const deliverableSummary = analysisResult?.summary ?? fallbackAnalysis?.executiveSummary ?? null;
+
+      if (crewError) {
+        console.error('[onboarding/complete] CrewAI analysis error:', crewError);
+      }
+
+      await updateSessionComplete(supabaseClient, sessionId, workflowId, userFeedback, {
+        analysisId: analysisResult?.analysisId,
+        crewError,
+      });
+
       const nextSteps = generateNextSteps(finalBriefData, finalBriefData.business_stage || 'idea');
-      
-      // Prepare response
+
       const response: CompleteOnboardingResponse = {
         success: true,
         workflowId,
-        workflowTriggered: true,
-        estimatedCompletionTime: '15-20 minutes',
+        workflowTriggered: Boolean(analysisResult),
+        estimatedCompletionTime: analysisResult ? '5-10 minutes' : '15-20 minutes',
         nextSteps,
-        deliverables: analysis,
-        dashboardRedirect: `/project/${project.id}`,
+        deliverables: {
+          analysisId: workflowId,
+          summary: deliverableSummary,
+          insights: deliverableInsights,
+          rawOutput: analysisResult?.rawOutput ?? (fallbackAnalysis ? JSON.stringify(fallbackAnalysis, null, 2) : undefined),
+        },
+        dashboardRedirect: `/project/${project.id}/gate`,
         projectCreated: {
           projectId: project.id,
           projectName: project.name,
-          projectUrl: `/project/${project.id}`,
+          projectUrl: `/project/${project.id}/gate`,
         },
+        analysisMetadata: analysisResult
+          ? {
+              evidenceCount: analysisResult.evidenceCount,
+              evidenceCreated: analysisResult.evidenceCreated,
+              reportCreated: analysisResult.reportCreated,
+              ...(rateLimitInfo ? { rateLimit: rateLimitInfo } : {}),
+            }
+          : crewError
+            ? {
+                error: crewError,
+              }
+            : undefined,
       };
-      
+
       return NextResponse.json(response);
-      
     } catch (error) {
       console.error('Error in completion workflow:', error);
       

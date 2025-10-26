@@ -5,10 +5,8 @@
  * Imports global styles and sets up the HTML structure.
  */
 
+import '@fontsource/inter/latin.css';
 import '@/styles/globals.css';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'StartupAI - Evidence-Led Strategy Platform',
@@ -22,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className="font-sans antialiased">
         {children}
       </body>
     </html>

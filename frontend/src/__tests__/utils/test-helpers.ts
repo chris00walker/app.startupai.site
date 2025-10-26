@@ -88,25 +88,32 @@ export class APIResponseBuilder {
   static successfulConversationCompletion(sessionId: string = 'test-session-123') {
     return new Response(JSON.stringify({
       success: true,
-      sessionId,
-      conversationSummary: {
-        totalStages: 7,
-        completedStages: 7,
-        totalDuration: 23, // minutes
-        qualityScore: 4.1
-      },
+      workflowId: 'analysis_mock_123',
       workflowTriggered: true,
-      analysisEstimate: '15-20 minutes',
+      estimatedCompletionTime: '5-10 minutes',
+      nextSteps: [
+        { step: 'Discovery', description: 'Interview five target customers', estimatedTime: '1 week', priority: 'high' },
+        { step: 'Prototype', description: 'Prototype the core workflow', estimatedTime: '2 weeks', priority: 'medium' }
+      ],
       deliverables: {
-        executiveSummary: 'Strategic analysis of your SaaS platform concept...',
-        customerProfile: { segment: 'B2B SMEs', painPoints: ['manual processes'] },
-        competitivePositioning: { competitors: ['Competitor A'], differentiation: 'AI-powered automation' },
-        valuePropositionCanvas: { jobs: ['efficiency'], pains: ['time waste'], gains: ['automation'] },
-        validationRoadmap: [
-          { phase: 'Customer Interviews', duration: '2 weeks' },
-          { phase: 'MVP Development', duration: '6 weeks' }
-        ],
-        businessModelCanvas: { keyPartners: ['Tech vendors'], keyActivities: ['Software development'] }
+        analysisId: 'analysis_mock_123',
+        summary: 'CrewAI identified customer acquisition as the critical next step with emphasis on rapid discovery interviews.',
+        insights: [
+          { id: 'insight-1', headline: 'Prioritise 10 customer discovery interviews to validate desirability.' },
+          { id: 'insight-2', headline: 'Document recurring pains and align them with the proposed automation benefits.' }
+        ]
+      },
+      dashboardRedirect: `/project/${sessionId}/gate`,
+      projectCreated: {
+        projectId: sessionId,
+        projectName: 'AI Validation Project',
+        projectUrl: `/project/${sessionId}/gate`
+      },
+      analysisMetadata: {
+        evidenceCount: 3,
+        evidenceCreated: 2,
+        reportCreated: true,
+        rateLimit: { limit: 10, remaining: 9, windowSeconds: 900 }
       }
     }), { status: 200 });
   }
@@ -235,15 +242,26 @@ export class AccessibilityTester {
     return hasProperLabels || hasSemanticHTML;
   }
 
-  static async testTouchTargets(container: HTMLElement): Promise<Array<{ width: number; height: number; element: Element }>> {
+  static async testTouchTargets(container: HTMLElement): Promise<Array<{ width: number; height: number; element: Element; classes: string[] }>> {
     const interactiveElements = container.querySelectorAll('button, a, input[type="button"], input[type="submit"]');
     
     return Array.from(interactiveElements).map(element => {
       const rect = element.getBoundingClientRect();
+      const styles = window.getComputedStyle(element as HTMLElement);
+      const paddingX = (parseFloat(styles.paddingLeft) || 0) + (parseFloat(styles.paddingRight) || 0);
+      const paddingY = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
+      const fontSize = parseFloat(styles.fontSize) || 0;
+      const estimatedWidth = rect.width || parseFloat(styles.width) || paddingX + fontSize;
+      const estimatedHeight = rect.height || parseFloat(styles.height) || paddingY + fontSize;
+
+      const classNames = (element as HTMLElement).getAttribute('class') || '';
+      const classes = classNames.split(/\s+/).filter(Boolean);
+
       return {
-        width: rect.width,
-        height: rect.height,
-        element
+        width: estimatedWidth,
+        height: estimatedHeight,
+        element,
+        classes
       };
     });
   }

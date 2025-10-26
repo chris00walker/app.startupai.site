@@ -15,7 +15,9 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Dict, Any, List
+import uuid
+import re
 
 # Add backend src to path
 backend_path = Path(__file__).parent.parent.parent / "backend" / "src"
@@ -61,6 +63,149 @@ def check_rate_limit(user_id: str) -> tuple[bool, int]:
     return True, remaining
 
 
+def normalize_result_payload(result: Any) -> str:
+    """
+    Convert crew result payload into a readable string for downstream processing.
+    Falls back gracefully if the result cannot be serialized.
+    """
+    if result is None:
+        return ""
+
+    if isinstance(result, str):
+        return result
+
+    if hasattr(result, "raw"):
+        try:
+            raw_value = getattr(result, "raw")
+            if isinstance(raw_value, str):
+                return raw_value
+        except Exception:
+            pass
+
+    if hasattr(result, "output"):
+        try:
+            output_value = getattr(result, "output")
+            if isinstance(output_value, str):
+                return output_value
+        except Exception:
+            pass
+
+    try:
+        return json.dumps(result, ensure_ascii=False, indent=2)
+    except TypeError:
+        return str(result)
+
+
+def extract_sentences(text: str, max_sentences: int = 3) -> str:
+    """Return the first N sentences from the provided text."""
+    if not text:
+        return ""
+
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    selected = [s.strip() for s in sentences if s.strip()]
+    return " ".join(selected[:max_sentences])
+
+
+def extract_bullets(text: str, limit: int = 5) -> List[str]:
+    """
+    Pull bullet-style insights from the analysis output.
+    Supports '-', '*', and numbered bullets.
+    """
+    bullets: List[str] = []
+    for line in text.splitlines():
+        cleaned = line.strip(" •\t")
+        if not cleaned:
+            continue
+
+        if cleaned.startswith(("-", "*")):
+            bullets.append(cleaned.lstrip("-* ").strip())
+        else:
+            match = re.match(r"^\d+[\).\s-]+(.+)$", cleaned)
+            if match:
+                bullets.append(match.group(1).strip())
+
+        if len(bullets) >= limit:
+            break
+
+    return [b for b in bullets if b]
+
+
+def build_structured_payload(
+    *,
+    raw_text: str,
+    inputs: Dict[str, Any],
+    user_id: str,
+    analysis_id: str,
+) -> Dict[str, Any]:
+    """
+    Craft a structured payload from the CrewAI raw output. The structure includes
+    insights, evidence candidates, report metadata, and brief scaffolding so the
+    frontend and Next.js API route can persist rich data in Supabase.
+    """
+    summary = extract_sentences(raw_text, max_sentences=3)
+    bullets = extract_bullets(raw_text, limit=6)
+
+    if not summary and raw_text:
+        summary = raw_text[:350]
+
+    if not bullets and summary:
+        bullets = [summary]
+
+    insight_summaries = [
+        {
+            "id": str(uuid.uuid4()),
+            "headline": bullet,
+            "confidence": "medium",
+            "support": "Derived from CrewAI synthesis",
+        }
+        for bullet in bullets
+    ]
+
+    evidence_items = [
+        {
+            "id": str(uuid.uuid4()),
+            "title": bullet[:90],
+            "content": bullet,
+            "source": "CrewAI synthesis",
+            "strength": "medium",
+            "tags": ["ai_generated", "crew_analysis"],
+        }
+        for bullet in bullets[:3]
+    ]
+
+    report_payload = {
+        "title": f"Strategic Analysis – {inputs.get('strategic_question', 'Unknown Question')}",
+        "report_type": "recommendation",
+        "content": raw_text or summary,
+        "model": "crewai",
+        "generated_at": datetime.utcnow().isoformat(),
+    }
+
+    brief_payload = {
+        "problem_description": summary,
+        "solution_description": inputs.get("strategic_question"),
+        "unique_value_proposition": bullets[0] if bullets else summary,
+        "differentiation_factors": bullets[:3],
+        "business_stage": "validation",
+        "recommended_next_steps": bullets[:3],
+        "ai_confidence_scores": {"analysis": 0.6},
+        "validation_flags": [],
+    }
+
+    return {
+        "analysis_id": analysis_id,
+        "run_started_at": datetime.utcnow().isoformat(),
+        "summary": summary,
+        "insight_summaries": insight_summaries,
+        "evidence_items": evidence_items,
+        "report": report_payload,
+        "entrepreneur_brief": brief_payload,
+        "raw_output": raw_text,
+        "inputs": inputs,
+        "user_id": user_id,
+    }
+
+
 def log_request(event: dict, user_id: str = None, status: str = "started"):
     """Log request for monitoring"""
     timestamp = datetime.utcnow().isoformat()
@@ -96,7 +241,8 @@ def handler(event, context):
             'statusCode': 405,
             'body': json.dumps({'error': 'Method not allowed. Use POST.'})
         }
-    
+    remaining = RATE_LIMIT_MAX_REQUESTS  # default until we run rate limiter
+
     try:
         # Parse request body
         if not event.get('body'):
@@ -172,6 +318,22 @@ def handler(event, context):
             
             print(f"Authenticated user: {user_email} (ID: {user_id})")
             
+            allowed, remaining = check_rate_limit(user_id)
+            if not allowed:
+                log_request(event, user_id=user_id, status="rate_limited")
+                return {
+                    'statusCode': 429,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'X-RateLimit-Limit': str(RATE_LIMIT_MAX_REQUESTS),
+                        'X-RateLimit-Remaining': '0'
+                    },
+                    'body': json.dumps({
+                        'error': 'Rate limit exceeded. Please wait before running another analysis.',
+                        'retry_after_seconds': int(RATE_LIMIT_WINDOW.total_seconds()),
+                    })
+                }
+            
         except Exception as auth_error:
             print(f"Authentication error: {str(auth_error)}")
             return {
@@ -199,6 +361,15 @@ def handler(event, context):
         
         crew = StartupAICrew()
         result = crew.kickoff(inputs=inputs)
+        raw_text = normalize_result_payload(result)
+
+        analysis_id = f"analysis_{uuid.uuid4()}"
+        structured_payload = build_structured_payload(
+            raw_text=raw_text,
+            inputs=inputs,
+            user_id=user_id,
+            analysis_id=analysis_id,
+        )
         
         # Calculate execution time
         execution_time = (datetime.now() - request_start).total_seconds()
@@ -217,12 +388,18 @@ def handler(event, context):
             },
             'body': json.dumps({
                 'success': True,
-                'result': str(result),  # CrewAI result as string
+                'analysis_id': analysis_id,
+                'result': structured_payload,
                 'metadata': {
                     'project_id': inputs['project_id'],
                     'question': inputs['strategic_question'],
                     'user_id': user_id,
-                    'execution_time_seconds': round(execution_time, 2)
+                    'execution_time_seconds': round(execution_time, 2),
+                    'rate_limit': {
+                        'limit': RATE_LIMIT_MAX_REQUESTS,
+                        'remaining': remaining,
+                        'window_seconds': int(RATE_LIMIT_WINDOW.total_seconds()),
+                    }
                 }
             })
         }

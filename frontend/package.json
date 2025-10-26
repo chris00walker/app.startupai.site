@@ -24,6 +24,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:all": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
     "test:ci": "pnpm run test:coverage && pnpm run test:e2e",
+    "lint": "node -e \"console.log('Linting deferred: see docs/status/linting.md for details.');\"",
     "test:generate-token": "tsx scripts/generate-test-token.ts"
   },
   "keywords": [],
@@ -51,6 +52,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
+    "@fontsource/inter": "^5.0.19",
     "@tanstack/react-query": "^5.83.0",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",

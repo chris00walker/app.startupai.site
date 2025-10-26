@@ -404,32 +404,29 @@ describe('API Contract Validation', () => {
       expect(data).toEqual(
         expect.objectContaining({
           success: true,
-          sessionId: expect.any(String),
-          conversationSummary: expect.any(Object),
-          workflowTriggered: true,
-          analysisEstimate: expect.any(String),
-          deliverables: expect.any(Object)
+          workflowId: expect.any(String),
+          workflowTriggered: expect.any(Boolean),
+          estimatedCompletionTime: expect.any(String),
+          deliverables: expect.any(Object),
+          projectCreated: expect.objectContaining({
+            projectId: expect.any(String),
+            projectUrl: expect.any(String),
+          }),
         })
       );
 
       // Validate deliverables structure matches marketing promises
       expect(data.deliverables).toEqual(
         expect.objectContaining({
-          executiveSummary: expect.any(String),
-          customerProfile: expect.any(Object),
-          competitivePositioning: expect.any(Object),
-          valuePropositionCanvas: expect.any(Object),
-          validationRoadmap: expect.any(Array),
-          businessModelCanvas: expect.any(Object)
+          analysisId: expect.any(String),
+          summary: expect.any(String),
+          insights: expect.any(Array),
         })
       );
 
-      // Validate conversation summary
-      expect(data.conversationSummary.totalStages).toBe(7);
-      expect(data.conversationSummary.completedStages).toBe(7);
-      expect(data.conversationSummary.totalDuration).toBeGreaterThan(0);
-      expect(data.conversationSummary.qualityScore).toBeGreaterThanOrEqual(1);
-      expect(data.conversationSummary.qualityScore).toBeLessThanOrEqual(5);
+      // Validate next steps array
+      expect(Array.isArray(data.nextSteps)).toBe(true);
+      expect(data.nextSteps.length).toBeGreaterThan(0);
     });
 
     it('should handle incomplete conversations gracefully', async () => {
@@ -449,18 +446,31 @@ describe('API Contract Validation', () => {
       mockFetch.mockResolvedValueOnce(
         new Response(JSON.stringify({
           success: true,
-          sessionId: 'incomplete-session',
-          conversationSummary: incompleteRequest.conversationSummary,
+          workflowId: 'analysis_partial_001',
           workflowTriggered: false,
-          partialResults: {
-            availableInsights: ['customer_segment', 'problem_definition'],
-            missingData: ['solution_concept', 'competitive_analysis', 'resource_assessment']
+          estimatedCompletionTime: 'pending user input',
+          nextSteps: [
+            {
+              step: 'Resume Onboarding',
+              description: 'Complete the remaining onboarding stages to trigger CrewAI analysis.',
+              estimatedTime: '15 minutes',
+              priority: 'high'
+            }
+          ],
+          deliverables: {
+            analysisId: 'analysis_partial_001',
+            summary: null,
+            insights: []
           },
-          recommendedActions: [
-            'Complete remaining conversation stages',
-            'Schedule follow-up session',
-            'Review partial insights'
-          ]
+          dashboardRedirect: '/project/incomplete-session/gate',
+          projectCreated: {
+            projectId: 'incomplete-session',
+            projectName: 'Draft Validation Project',
+            projectUrl: '/project/incomplete-session/gate'
+          },
+          analysisMetadata: {
+            error: 'Conversation incomplete. CrewAI analysis deferred.'
+          }
         }), { status: 200 })
       );
 
@@ -474,9 +484,9 @@ describe('API Contract Validation', () => {
       
       expect(data.success).toBe(true);
       expect(data.workflowTriggered).toBe(false);
-      expect(data.partialResults).toBeDefined();
-      expect(data.recommendedActions).toBeDefined();
-      expect(Array.isArray(data.recommendedActions)).toBe(true);
+      expect(data.deliverables.summary).toBeNull();
+      expect(Array.isArray(data.nextSteps)).toBe(true);
+      expect(data.analysisMetadata.error).toContain('Conversation incomplete');
     });
   });
 
@@ -544,7 +554,7 @@ describe('API Contract Validation', () => {
       const completeData = await completeResponse.json();
       expect(completeData.success).toBe(true);
       expect(completeData.workflowTriggered).toBe(true);
-      expect(completeData.sessionId).toBe('flow-session-123');
+      expect(completeData.deliverables.analysisId).toBeDefined();
     });
 
     it('should maintain session consistency across endpoints', async () => {
@@ -603,7 +613,7 @@ describe('API Contract Validation', () => {
       });
       
       const completeData = await completeResponse.json();
-      expect(completeData.sessionId).toBe(sessionId);
+      expect(completeData.projectCreated.projectId).toBe(sessionId);
     });
   });
 

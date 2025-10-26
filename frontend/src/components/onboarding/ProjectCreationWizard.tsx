@@ -47,6 +47,18 @@ interface AIInsight {
   priority: 'high' | 'medium' | 'low'
 }
 
+interface AnalysisResult {
+  analysisId: string
+  summary?: string
+  insights?: Array<{
+    id: string
+    headline: string
+    confidence?: string
+    support?: string
+  }>
+  rawOutput?: string
+}
+
 export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps = {}) {
   const [currentStep, setCurrentStep] = useState(1)
   const [projectData, setProjectData] = useState<ProjectData>({
@@ -58,11 +70,15 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
     stage: 'DESIRABILITY',
     clientId: clientId
   })
+  const [projectId, setProjectId] = useState<string | null>(null)
+  const [projectClientId, setProjectClientId] = useState<string | undefined>(clientId)
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false)
   const [isCreatingProject, setIsCreatingProject] = useState(false)
   const [aiProgress, setAiProgress] = useState<string>('')
   const [aiError, setAiError] = useState<string>('')
+  const [analysisLoaded, setAnalysisLoaded] = useState(false)
   const [pending, startTransition] = useTransition()
   const { user } = useAuth()
   const router = useRouter()
@@ -73,63 +89,124 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
 
   const handleInputChange = (field: keyof ProjectData, value: string) => {
     setProjectData(prev => ({ ...prev, [field]: value }))
+    if (['name', 'description', 'problemStatement', 'targetMarket', 'businessModel'].includes(field)) {
+      setAnalysisLoaded(false)
+      setAnalysisResult(null)
+      setAiInsights([])
+    }
   }
 
-  const generateAIInsights = async () => {
+  const ensureProjectCreated = async (): Promise<string> => {
+    if (projectId) {
+      return projectId
+    }
+
+    setAiProgress('Creating project...')
+
+    const response = await fetch('/api/projects/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(projectData),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || 'Failed to create project before analysis')
+    }
+
+    const { project, clientId: createdClientId } = await response.json()
+    setProjectId(project.id)
+    if (createdClientId) {
+      setProjectClientId(createdClientId)
+    }
+    return project.id as string
+  }
+
+  const generateAIInsights = async (force = false) => {
+    if (!force && analysisLoaded) {
+      return
+    }
+
     setIsGeneratingInsights(true)
     setAiProgress('Starting AI analysis...')
     setAiError('')
+    setAnalysisResult(null)
+    setAnalysisLoaded(false)
     
     try {
-      // Get auth token for CrewAI API call
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session?.access_token) {
         throw new Error('Authentication required for AI analysis')
       }
       
+      const ensuredProjectId = await ensureProjectCreated()
+
       setAiProgress('Connecting to AI analysis engine...')
       
-      // Call CrewAI backend for real strategic analysis
-      const response = await fetch('/.netlify/functions/crew-analyze', {
+      const strategicQuestion = `What strategic moves should ${projectData.name || 'this startup'} prioritize to validate the problem "${projectData.problemStatement}"?`
+      const projectContext = [
+        projectData.description && `Description: ${projectData.description}`,
+        projectData.problemStatement && `Problem: ${projectData.problemStatement}`,
+        projectData.targetMarket && `Target Market: ${projectData.targetMarket}`,
+        projectData.businessModel && `Business Model: ${projectData.businessModel}`,
+      ]
+        .filter(Boolean)
+        .join(' | ')
+
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          strategic_question: `Analyze ${projectData.name} for market validation and strategic positioning`,
-          project_context: `${projectData.description}. Problem: ${projectData.problemStatement}. Target Market: ${projectData.targetMarket}. Business Model: ${projectData.businessModel}`,
-          project_id: `new-project-${Date.now()}`,
-          priority_level: 'high'
+          strategic_question: strategicQuestion,
+          project_context: projectContext,
+          project_id: ensuredProjectId,
+          priority_level: 'high' as const,
         })
       })
       
       setAiProgress('AI agents analyzing your startup...')
       
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`AI analysis failed: ${response.statusText}. ${errorText}`)
+        const errorText = await response.text().catch(() => '')
+        throw new Error(`AI analysis failed: ${response.statusText}${errorText ? ` – ${errorText}` : ''}`)
       }
       
       setAiProgress('Processing AI analysis results...')
-      const aiResult = await response.json()
-      
-      // Parse CrewAI result into insights format
-      const crewaiInsights = parseCrewAIResult(aiResult.result)
+      const aiResult = await response.json() as { success: boolean; summary?: string; insights?: any[]; analysisId?: string; rawOutput?: string }
+
+      if (!aiResult?.success) {
+        throw new Error('Analysis completed without success flag')
+      }
+
+      const crewaiInsights = parseCrewAIResult({
+        summary: aiResult.summary,
+        insights: aiResult.insights,
+        rawOutput: aiResult.rawOutput,
+      })
       
       setAiProgress('AI analysis complete')
       setAiInsights(crewaiInsights)
+      setAnalysisResult({
+        analysisId: aiResult.analysisId || '',
+        summary: aiResult.summary,
+        insights: aiResult.insights,
+        rawOutput: aiResult.rawOutput,
+      })
+      setAnalysisLoaded(true)
       
     } catch (error) {
       console.error('AI analysis error:', error)
       
-      // Set accessible error message
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       setAiError(`AI analysis error: ${errorMessage}. Using fallback recommendations.`)
       setAiProgress('Using fallback recommendations...')
       
-      // Fallback to enhanced mock insights if AI fails
       const fallbackInsights: AIInsight[] = [
         {
           type: 'hypothesis',
@@ -159,101 +236,118 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
       
       setAiInsights(fallbackInsights)
       setAiProgress('Fallback recommendations ready')
+      setAnalysisResult(null)
     } finally {
       setIsGeneratingInsights(false)
     }
   }
   
   // Helper function to parse CrewAI result into insights
-  const parseCrewAIResult = (crewaiResult: string): AIInsight[] => {
+  const parseCrewAIResult = (analysis: { summary?: string; insights?: any[]; rawOutput?: string }): AIInsight[] => {
     const insights: AIInsight[] = []
-    
-    // Extract key insights from CrewAI markdown result
-    // This is a simplified parser - in production, you'd want more sophisticated parsing
-    
-    if (crewaiResult.includes('hypothesis') || crewaiResult.includes('Hypothesis')) {
+    const raw = (analysis.rawOutput || analysis.summary || '').toLowerCase()
+
+    analysis.insights?.slice(0, 4).forEach((item: any) => {
+      insights.push({
+        type: 'opportunity',
+        title: item.headline || 'AI Strategic Insight',
+        description: item.support || item.headline || 'AI generated insight',
+        priority: item.confidence === 'high' ? 'high' : item.confidence === 'low' ? 'low' : 'medium',
+      })
+    })
+
+    if (insights.length === 0 && raw.includes('hypothesis')) {
       insights.push({
         type: 'hypothesis',
         title: 'AI-Generated Value Hypothesis',
         description: 'Based on strategic analysis, key value propositions have been identified for validation',
-        priority: 'high'
+        priority: 'high',
       })
     }
-    
-    if (crewaiResult.includes('experiment') || crewaiResult.includes('validation')) {
+
+    if (insights.length === 0 && (raw.includes('experiment') || raw.includes('validation'))) {
       insights.push({
         type: 'experiment',
         title: 'AI-Recommended Validation Experiments',
         description: 'Strategic analysis suggests specific experiments to validate core assumptions',
-        priority: 'high'
+        priority: 'high',
       })
     }
-    
-    if (crewaiResult.includes('risk') || crewaiResult.includes('challenge')) {
+
+    if (raw.includes('risk') || raw.includes('challenge')) {
       insights.push({
         type: 'risk',
         title: 'AI-Identified Strategic Risks',
         description: 'Analysis has identified potential risks that require mitigation strategies',
-        priority: 'medium'
+        priority: 'medium',
       })
     }
-    
-    if (crewaiResult.includes('opportunity') || crewaiResult.includes('market')) {
+
+    if (raw.includes('opportunity') || raw.includes('market')) {
       insights.push({
         type: 'opportunity',
         title: 'AI-Discovered Market Opportunities',
         description: 'Strategic analysis reveals market opportunities for competitive advantage',
-        priority: 'high'
+        priority: 'high',
       })
     }
-    
-    // Ensure we always have at least one insight
+
     if (insights.length === 0) {
       insights.push({
         type: 'hypothesis',
         title: 'AI Strategic Analysis Complete',
         description: 'Comprehensive strategic analysis has been completed with actionable recommendations',
-        priority: 'high'
+        priority: 'high',
       })
     }
-    
+
     return insights
   }
 
   const createProject = async () => {
     if (!user) return
-    
-    setIsCreatingProject(true)
-    
-    try {
-      // Call the API endpoint to create project with AI integration
-      const response = await fetch('/api/projects/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(projectData)
-      })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create project')
+    setIsCreatingProject(true)
+
+    try {
+      const ensuredProjectId = await ensureProjectCreated()
+
+      const metadata = {
+        problemStatement: projectData.problemStatement,
+        targetMarket: projectData.targetMarket,
+        businessModel: projectData.businessModel,
+        createdViaWizard: true,
+        aiInsightsGenerated: analysisLoaded,
+        ...(projectClientId ? { clientId: projectClientId } : {}),
       }
 
-      const { project, clientId: responseClientId } = await response.json()
-      
+      const { error: updateError } = await supabase
+        .from('projects')
+        .update({
+          name: projectData.name,
+          description: projectData.description,
+          stage: projectData.stage,
+          status: 'active',
+          metadata,
+          updated_at: new Date().toISOString(),
+          last_activity: new Date().toISOString(),
+        })
+        .eq('id', ensuredProjectId)
+
+      if (updateError) {
+        throw new Error(updateError.message || 'Failed to update project')
+      }
+
       startTransition(() => {
-        // If created for a client, redirect to client dashboard
-        // Otherwise redirect to project gate page
-        if (responseClientId) {
-          router.push(`/client/${responseClientId}`)
+        if (projectClientId) {
+          router.push(`/client/${projectClientId}`)
         } else {
-          router.push(`/project/${project.id}/gate`)
+          router.push(`/project/${ensuredProjectId}/gate`)
         }
       })
     } catch (error) {
       console.error('Error creating project:', error)
-      // TODO: Show error message to user
+      setAiError(error instanceof Error ? error.message : 'Failed to finalize project')
     } finally {
       setIsCreatingProject(false)
     }
@@ -458,37 +552,61 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {/* Accessibility: Announce insights count to screen readers */}
-                  <div className="sr-only" role="status" aria-live="polite">
-                    Found {aiInsights.length} AI-generated insights for your startup
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div className="sr-only" role="status" aria-live="polite">
+                      Found {aiInsights.length} AI-generated insights for your startup
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {analysisResult?.analysisId ? `Analysis run ID: ${analysisResult.analysisId}` : 'AI insights ready'}
+                      </p>
+                      {analysisResult?.summary && (
+                        <p className="text-base font-medium text-foreground mt-1">
+                          {analysisResult.summary}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => generateAIInsights(true)}
+                      disabled={isGeneratingInsights}
+                    >
+                      Regenerate insights
+                    </Button>
                   </div>
-                  
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {aiInsights.map((insight, index) => (
-                      <Card 
-                        key={index} 
-                        className="border-l-4 border-l-blue-500"
-                        role="article"
-                        aria-label={`${insight.type}: ${insight.title}`}
-                      >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <Badge variant={insight.priority === 'high' ? 'default' : 'secondary'}>
-                              {insight.type}
-                            </Badge>
-                            <Badge variant="outline">
-                              {insight.priority} priority
-                            </Badge>
-                          </div>
-                          <CardTitle className="text-lg">{insight.title}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-muted-foreground">{insight.description}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                  
+
+                  {aiInsights.length > 0 ? (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {aiInsights.map((insight, index) => (
+                        <Card 
+                          key={index} 
+                          className="border-l-4 border-l-blue-500"
+                          role="article"
+                          aria-label={`${insight.type}: ${insight.title}`}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <Badge variant={insight.priority === 'high' ? 'default' : 'secondary'}>
+                                {insight.type}
+                              </Badge>
+                              <Badge variant="outline">
+                                {insight.priority} priority
+                              </Badge>
+                            </div>
+                            <CardTitle className="text-lg">{insight.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground">{insight.description}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border border-dashed border-blue-200 rounded-lg p-6 text-center text-sm text-muted-foreground">
+                      AI insights will appear here after the analysis finishes.
+                    </div>
+                  )}
+
                   <div 
                     className="bg-blue-50 border border-blue-200 rounded-lg p-4"
                     role="complementary"
@@ -499,12 +617,22 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
                       <div>
                         <h4 className="font-medium text-blue-900">AI Recommendation</h4>
                         <p className="text-sm text-blue-700 mt-1">
-                          Start with the <strong>Desirability</strong> stage to validate that customers actually want your solution. 
-                          Focus on customer interviews and problem validation before building anything.
+                          {analysisResult?.summary
+                            ? analysisResult.summary
+                            : 'Start with the Desirability stage to validate demand before investing further effort.'}
                         </p>
                       </div>
                     </div>
                   </div>
+
+                  {analysisResult?.rawOutput && (
+                    <details className="bg-muted/30 border border-muted rounded-lg p-4">
+                      <summary className="text-sm font-medium cursor-pointer">View raw AI output</summary>
+                      <p className="mt-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                        {analysisResult.rawOutput}
+                      </p>
+                    </details>
+                  )}
                 </div>
               )}
             </div>

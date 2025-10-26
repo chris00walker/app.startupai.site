@@ -13,11 +13,6 @@
   directory = "netlify/functions"
 
 [[redirects]]
-  from = "/api/analyze"
-  to = "/.netlify/functions/crew-analyze"
-  status = 200
-
-[[redirects]]
   from = "/api/analyze-background"
   to = "/.netlify/functions/crew-analyze-background"
   status = 200

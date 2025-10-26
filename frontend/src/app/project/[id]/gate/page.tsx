@@ -7,19 +7,26 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { GateDashboard } from '@/components/gates/GateDashboard';
 import { useGateEvaluation } from '@/hooks/useGateEvaluation';
 import { useGateAlerts } from '@/hooks/useGateAlerts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Bell, RefreshCw } from 'lucide-react';
-import { useEffect } from 'react';
+import { Bell, RefreshCw, Sparkles, Loader2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function ProjectGatePage() {
   const params = useParams();
   const projectId = params?.id as string;
-  
+
+  const [analysisSummary, setAnalysisSummary] = useState<string | null>(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [analysisInsights, setAnalysisInsights] = useState<string[]>([]);
+
   if (!projectId) {
     return <div>Project not found</div>;
   }
@@ -48,6 +55,73 @@ export default function ProjectGatePage() {
   useEffect(() => {
     requestNotificationPermission();
   }, [requestNotificationPermission]);
+
+  // Prefill from session storage for immediate feedback
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('startupai:lastAnalysis');
+      if (stored) {
+        const parsed = JSON.parse(stored) as { summary?: string; analysisId?: string; insights?: { headline: string }[] };
+        if (parsed.summary) {
+          setAnalysisSummary(parsed.summary);
+        }
+        if (parsed.analysisId) {
+          setAnalysisId(parsed.analysisId);
+        }
+        if (Array.isArray(parsed.insights) && parsed.insights.length > 0) {
+          setAnalysisInsights(parsed.insights.map((item) => item.headline));
+        }
+        sessionStorage.removeItem('startupai:lastAnalysis');
+      }
+    } catch (error) {
+      console.warn('Unable to read cached analysis summary', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const loadCrewAnalysis = async () => {
+      if (!projectId) return;
+
+      setAnalysisLoading(true);
+      setAnalysisError(null);
+
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('reports')
+          .select('id, title, content, generation_metadata, generated_at')
+          .eq('project_id', projectId)
+          .contains('generation_metadata', { kind: 'crew_analysis' })
+          .order('generated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          setAnalysisId((data.generation_metadata as any)?.analysis_id ?? data.id);
+          const summary = data.content?.slice(0, 320) ?? null;
+          setAnalysisSummary(summary);
+
+          const insights = Array.isArray((data.generation_metadata as any)?.insights)
+            ? ((data.generation_metadata as any).insights as string[])
+            : [];
+          if (insights.length > 0) {
+            setAnalysisInsights(insights);
+          }
+        }
+      } catch (loadError) {
+        console.error('Failed to load CrewAI analysis summary:', loadError);
+        setAnalysisError('Unable to load the latest CrewAI deliverable at the moment.');
+      } finally {
+        setAnalysisLoading(false);
+      }
+    };
+
+    loadCrewAnalysis();
+  }, [projectId]);
 
   if (isLoading && !result) {
     return (
@@ -101,6 +175,47 @@ export default function ProjectGatePage() {
           Refresh
         </Button>
       </div>
+
+      <Card className="border-primary/20 bg-primary/5 p-6" role="region" aria-label="CrewAI strategic summary">
+        <div className="flex items-start gap-3">
+          <Sparkles className="h-6 w-6 text-primary mt-1" aria-hidden="true" />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <h2 className="text-lg font-semibold text-primary">CrewAI Strategic Summary</h2>
+                {analysisId && (
+                  <p className="text-xs text-primary/70">Run ID: {analysisId}</p>
+                )}
+              </div>
+              {analysisLoading && <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />}
+            </div>
+            {analysisError && (
+              <p className="text-sm text-destructive" role="alert">{analysisError}</p>
+            )}
+            {analysisSummary ? (
+              <p className="text-sm text-gray-800 dark:text-gray-200" aria-live="polite">
+                {analysisSummary}
+              </p>
+            ) : (
+              !analysisLoading && (
+                <p className="text-sm text-muted-foreground">
+                  AI deliverables will appear here once the CrewAI workflow finishes processing this project.
+                </p>
+              )
+            )}
+            {analysisInsights.length > 0 && (
+              <ul className="mt-3 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                {analysisInsights.slice(0, 3).map((insight, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+                    <span>{insight}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </Card>
 
       {/* Active Alerts */}
       {alerts.length > 0 && (

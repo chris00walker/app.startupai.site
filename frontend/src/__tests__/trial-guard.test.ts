@@ -22,8 +22,8 @@ describe('assertTrialAllowance', () => {
     mockGetUserProfile.mockResolvedValue({
       id: 'user-1',
       role: 'founder',
-      planStatus: 'active',
-      subscriptionStatus: 'active',
+      plan_status: 'active',
+      subscription_status: 'active',
     });
 
     const result = await assertTrialAllowance({ userId: 'user-1', action: 'projects.create' });
@@ -35,7 +35,7 @@ describe('assertTrialAllowance', () => {
   });
 
   it('allows unknown actions by default', async () => {
-    mockGetUserProfile.mockResolvedValue({ id: 'user-2', role: 'trial', planStatus: 'trial', subscriptionStatus: 'trial' });
+    mockGetUserProfile.mockResolvedValue({ id: 'user-2', role: 'trial', plan_status: 'trial', subscription_status: 'trial' });
 
     const result = await assertTrialAllowance({ userId: 'user-2', action: 'unknown.action' });
 
@@ -45,7 +45,7 @@ describe('assertTrialAllowance', () => {
   });
 
   it('increments usage when under the limit', async () => {
-    mockGetUserProfile.mockResolvedValue({ id: 'user-3', role: 'trial', planStatus: 'trial', subscriptionStatus: 'trial' });
+    mockGetUserProfile.mockResolvedValue({ id: 'user-3', role: 'trial', plan_status: 'trial', subscription_status: 'trial' });
     mockFindTrialUsageCounter.mockResolvedValue({ count: 1 });
 
     const now = new Date('2025-10-04T12:00:00Z');
@@ -64,7 +64,7 @@ describe('assertTrialAllowance', () => {
   });
 
   it('blocks when limit exhausted', async () => {
-    mockGetUserProfile.mockResolvedValue({ id: 'user-4', role: 'trial', planStatus: 'trial', subscriptionStatus: 'trial' });
+    mockGetUserProfile.mockResolvedValue({ id: 'user-4', role: 'trial', plan_status: 'trial', subscription_status: 'trial' });
     mockFindTrialUsageCounter.mockResolvedValue({ count: 3 });
 
     const result = await assertTrialAllowance({ userId: 'user-4', action: 'projects.create' });
