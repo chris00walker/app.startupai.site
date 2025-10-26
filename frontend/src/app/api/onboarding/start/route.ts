@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { BYPASS_LIMITS } from '@/lib/env';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 
@@ -86,6 +87,14 @@ async function checkPlanLimits(
   userId: string,
   planType: string
 ) {
+  if (BYPASS_LIMITS) {
+    return {
+      allowed: true,
+      reason: null,
+      message: null,
+    };
+  }
+
   try {
     // Get user's current month sessions
     const startOfMonth = new Date();
