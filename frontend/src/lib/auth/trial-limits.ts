@@ -1,3 +1,4 @@
+import { BYPASS_LIMITS } from '@/lib/env';
 import type { UserRole } from '@/db/schema';
 import { deriveRole, isTrialReadonly } from './roles';
 
@@ -11,6 +12,11 @@ type TrialActionConfig = {
 
 export type TrialAction = keyof typeof TRIAL_LIMITS;
 
+/**
+ * ⚠️ TEMPORARY TESTING OVERRIDE
+ * The onboarding usage guard is globally disabled while NEXT_PUBLIC_ONBOARDING_BYPASS=true.
+ * TODO(RELEASE): Set NEXT_PUBLIC_ONBOARDING_BYPASS=false and verify plan-based limits before enabling purchases.
+ */
 export const TRIAL_LIMITS = {
   'reports.generate': {
     limit: 3,
@@ -87,6 +93,10 @@ export function evaluateTrialAllowance({
   allowed: boolean;
   remaining: number;
 } {
+  if (BYPASS_LIMITS) {
+    return { allowed: true, remaining: Number.POSITIVE_INFINITY };
+  }
+
   const remaining = Math.max(config.limit - currentCount, 0);
   return {
     allowed: remaining > 0,

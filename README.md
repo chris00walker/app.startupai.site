@@ -11,6 +11,22 @@ This repository implements the **Product Platform** (`app.startupai.site`) in St
 
 **Latest Updates:** October 6, 2025 - CrewAI backend 15% implemented, trial guardrails deployed, deployment fixed
 
+## ⚠️ Temporary Testing Override: Onboarding Guard Disabled
+
+The monthly onboarding guard is temporarily disabled across all plans to unblock QA.
+
+- Effective toggle: `NEXT_PUBLIC_ONBOARDING_BYPASS=true`
+- Location: Netlify → Site settings → Environment variables (add to `.env.local` when testing locally)
+
+**Do not launch paid access with this enabled.** Before enabling purchases, set:
+
+```
+NEXT_PUBLIC_ONBOARDING_BYPASS=false
+```
+
+and verify plan limits behave as expected.  
+Owner note: re-enable guard before pricing/checkout go live.
+
 ## 🚀 What This Platform Does
 
 **Evidence-Led Strategy Platform** that helps entrepreneurs validate business ideas through systematic experimentation:
