@@ -23,6 +23,71 @@ interface SendMessageRequest {
   };
 }
 
+interface CrewQualityScore {
+  label: string;
+  score: number;
+}
+
+interface CrewQualitySignals {
+  clarity: CrewQualityScore;
+  completeness: CrewQualityScore;
+  detail_score: number;
+  overall: number;
+  quality_tags?: string[];
+  suggestions?: string[];
+  encouragement?: string;
+}
+
+interface CrewStageSnapshot {
+  stage: number;
+  coverage: number;
+  quality: {
+    clarity: CrewQualityScore;
+    completeness: CrewQualityScore;
+    detail_score: number;
+  };
+  brief_fields: string[];
+  last_message_excerpt?: string;
+  updated_at: string;
+  notes?: string;
+}
+
+interface CrewConversationMessage {
+  agent_response: string;
+  follow_up_question?: string;
+  quality_signals: CrewQualitySignals;
+  brief_update: Record<string, any>;
+  stage_state: {
+    previous_stage: number;
+    current_stage: number;
+    stage_progress: number;
+    overall_progress: number;
+    stage_name: string;
+    next_stage_name?: string;
+    total_stages: number;
+    is_stage_complete: boolean;
+  };
+  stage_snapshot: CrewStageSnapshot;
+  system_actions: {
+    trigger_workflow: boolean;
+    save_checkpoint: boolean;
+    request_clarification: boolean;
+    needs_review?: boolean;
+  };
+  conversation_metrics: {
+    stage_progress: number;
+    overall_progress: number;
+    clarity_label: 'high' | 'medium' | 'low';
+    completeness_label: 'complete' | 'partial' | 'insufficient';
+  };
+}
+
+interface CrewConversationMessageResponse {
+  success: boolean;
+  kind: 'conversation_message';
+  message: CrewConversationMessage;
+}
+
 interface SendMessageResponse {
   success: boolean;
   messageId: string;
@@ -35,6 +100,8 @@ interface SendMessageResponse {
     nextStageName?: string;
   };
   briefUpdate: Partial<any>; // EntrepreneurBrief
+  qualitySignals: CrewQualitySignals;
+  stageSnapshot: CrewStageSnapshot;
   validationFeedback?: {
     clarity: 'high' | 'medium' | 'low';
     completeness: 'complete' | 'partial' | 'insufficient';
@@ -51,6 +118,7 @@ interface SendMessageResponse {
     triggerWorkflow?: boolean;
     saveCheckpoint?: boolean;
     requestClarification?: boolean;
+    needsReview?: boolean;
   };
 }
 
@@ -151,6 +219,23 @@ const CONVERSATION_STAGES = {
 // Helper Functions
 // ============================================================================
 
+function resolveCrewFunctionUrl(request: NextRequest): string {
+  if (process.env.CREW_ANALYZE_URL) {
+    return process.env.CREW_ANALYZE_URL;
+  }
+
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto');
+  const host = forwardedHost ?? request.headers.get('host');
+
+  if (host) {
+    const protocol = forwardedProto ?? (host.includes('localhost') ? 'http' : 'https');
+    return `${protocol}://${host}/.netlify/functions/crew-analyze`;
+  }
+
+  return 'http://localhost:8888/.netlify/functions/crew-analyze';
+}
+
 async function getOnboardingSession(client: SupabaseClient, sessionId: string, expectedUserId?: string) {
   try {
     const { data: session, error } = await client
@@ -200,195 +285,6 @@ function generateResponseId(): string {
   return `resp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-async function processUserMessage(params: {
-  sessionId: string;
-  userMessage: string;
-  messageType: string;
-  conversationHistory: any[];
-  currentStage: number;
-  stageData: any;
-}) {
-  // This is a sophisticated AI processing simulation
-  // TODO: Replace with actual CrewAI integration
-  
-  const { userMessage, currentStage, conversationHistory, stageData } = params;
-  const stage = CONVERSATION_STAGES[currentStage as keyof typeof CONVERSATION_STAGES];
-  
-  // Analyze message content
-  const messageLength = userMessage.length;
-  const hasDetails = messageLength > 50;
-  const hasSpecifics = /\b(specifically|exactly|particularly|mainly|primarily)\b/i.test(userMessage);
-  
-  // Calculate stage progress based on message quality and stage requirements
-  let stageProgress = Math.min(100, (conversationHistory.length * 15) + (hasDetails ? 20 : 10) + (hasSpecifics ? 15 : 0));
-  let overallProgress = Math.min(100, ((currentStage - 1) * 14) + (stageProgress * 0.14));
-  
-  // Determine if stage is complete
-  const isStageComplete = stageProgress >= (stage?.progressThreshold || 75);
-  const nextStage = isStageComplete && currentStage < 7 ? currentStage + 1 : currentStage;
-  
-  // Generate contextual AI response
-  let agentResponse = '';
-  let followUpQuestion = '';
-  let briefUpdate: any = {};
-  
-  if (currentStage === 1) {
-    // Welcome & Introduction stage
-    if (userMessage.toLowerCase().includes('app') || userMessage.toLowerCase().includes('software')) {
-      agentResponse = "A software solution - that's exciting! The digital space offers incredible opportunities for scalability and impact. ";
-      briefUpdate.business_stage = 'idea';
-      briefUpdate.solution_type = 'software';
-    } else if (userMessage.toLowerCase().includes('service') || userMessage.toLowerCase().includes('consulting')) {
-      agentResponse = "A service-based business can be a great way to start with lower upfront costs and direct customer feedback. ";
-      briefUpdate.business_stage = 'idea';
-      briefUpdate.solution_type = 'service';
-    } else {
-      agentResponse = "Thank you for sharing that with me! I can hear the passion in your description. ";
-    }
-    
-    if (isStageComplete) {
-      agentResponse += "Now that I understand your core concept, let's dive deeper into who this would serve. ";
-      followUpQuestion = "Who do you envision as your ideal customer? Think about the specific type of person or business that would get the most value from what you're creating.";
-    } else {
-      followUpQuestion = "Can you tell me more about what inspired this idea? What problem or opportunity did you notice that led you here?";
-    }
-  } else if (currentStage === 2) {
-    // Customer Discovery stage
-    if (userMessage.toLowerCase().includes('business') || userMessage.toLowerCase().includes('company')) {
-      agentResponse = "B2B customers can be fantastic - they often have bigger budgets and longer-term relationships. ";
-      briefUpdate.customer_type = 'b2b';
-    } else if (userMessage.toLowerCase().includes('people') || userMessage.toLowerCase().includes('individual')) {
-      agentResponse = "Consumer markets offer great opportunities for scale and direct impact. ";
-      briefUpdate.customer_type = 'b2c';
-    }
-    
-    agentResponse += "Understanding your customers deeply is crucial for success. ";
-    
-    if (isStageComplete) {
-      followUpQuestion = "Perfect! Now let's get specific about the problem you're solving. What exact pain point or challenge do these customers face that your solution addresses?";
-    } else {
-      followUpQuestion = "Can you be more specific about this customer segment? What characteristics do they share? What's their situation that makes them need your solution?";
-    }
-  } else if (currentStage === 3) {
-    // Problem Definition stage
-    const painWords = ['painful', 'frustrating', 'difficult', 'expensive', 'time-consuming', 'annoying'];
-    const hasPainLanguage = painWords.some(word => userMessage.toLowerCase().includes(word));
-    
-    if (hasPainLanguage) {
-      agentResponse = "I can tell this is a real pain point - that emotional language tells me customers would be motivated to find a solution. ";
-      briefUpdate.problem_pain_level = 8;
-    } else {
-      agentResponse = "Thanks for explaining that. Understanding the problem clearly is essential for building the right solution. ";
-      briefUpdate.problem_pain_level = 6;
-    }
-    
-    briefUpdate.problem_description = userMessage.substring(0, 500); // Store first 500 chars
-    
-    if (isStageComplete) {
-      followUpQuestion = "Excellent! Now I'd love to understand your solution. How exactly do you plan to solve this problem? What's your approach?";
-    } else {
-      followUpQuestion = "Help me understand the impact of this problem. How often do your customers encounter it, and what does it cost them when they do?";
-    }
-  } else if (currentStage === 4) {
-    // Solution Validation stage
-    briefUpdate.solution_description = userMessage.substring(0, 500);
-    
-    if (userMessage.toLowerCase().includes('unique') || userMessage.toLowerCase().includes('different')) {
-      agentResponse = "I love that you're thinking about differentiation! That's what will make customers choose you over alternatives. ";
-    } else {
-      agentResponse = "That's a solid approach to solving the problem. ";
-    }
-    
-    if (isStageComplete) {
-      followUpQuestion = "Great solution! Now let's look at the competitive landscape. Who else is trying to solve this problem, and how are customers handling it today?";
-    } else {
-      followUpQuestion = "What makes your solution unique? Why would customers choose your approach over other ways of solving this problem?";
-    }
-  } else if (currentStage === 5) {
-    // Competitive Analysis stage
-    agentResponse = "Understanding the competition helps you position yourself effectively and identify opportunities. ";
-    
-    if (userMessage.toLowerCase().includes('no competition') || userMessage.toLowerCase().includes('no one else')) {
-      agentResponse += "While it might seem like there's no direct competition, customers are always solving this problem somehow - even if it's manual processes or workarounds. ";
-    }
-    
-    if (isStageComplete) {
-      followUpQuestion = "Perfect! Now let's talk resources. What's your budget range for getting this business started, and what skills or assets do you already have?";
-    } else {
-      followUpQuestion = "What would convince a customer to switch from their current solution to yours? What's the compelling reason to change?";
-    }
-  } else if (currentStage === 6) {
-    // Resources & Constraints stage
-    if (userMessage.match(/\$[\d,]+/) || userMessage.toLowerCase().includes('thousand') || userMessage.toLowerCase().includes('budget')) {
-      agentResponse = "Having a clear budget helps with planning and prioritization. ";
-      briefUpdate.budget_range = userMessage.match(/\$[\d,]+/)?.[0] || 'specified';
-    }
-    
-    agentResponse += "Understanding your resources helps us create a realistic roadmap. ";
-    
-    if (isStageComplete) {
-      followUpQuestion = "Excellent! For our final topic, let's set some strategic goals. What do you want to achieve with this business in the next 3 months?";
-    } else {
-      followUpQuestion = "What skills, connections, or assets do you already have that could help with this business? And what are your biggest constraints or limitations?";
-    }
-  } else if (currentStage === 7) {
-    // Goals & Next Steps stage
-    agentResponse = "Setting clear, measurable goals is crucial for making progress and staying motivated. ";
-    briefUpdate.three_month_goals = [userMessage.substring(0, 200)];
-    
-    if (isStageComplete) {
-      agentResponse += "Fantastic! We've covered all the key areas. I have everything I need to create your comprehensive strategic analysis. ";
-      followUpQuestion = "Before I generate your personalized strategic report, is there anything else about your business idea that you think is important for me to know?";
-    } else {
-      followUpQuestion = "How will you measure success? What specific metrics or milestones will tell you that you're making progress?";
-    }
-  }
-  
-  // Generate validation feedback
-  const clarity = hasDetails ? (hasSpecifics ? 'high' : 'medium') : 'low';
-  const completeness = isStageComplete ? 'complete' : (stageProgress > 50 ? 'partial' : 'insufficient');
-  
-  const validationFeedback = {
-    clarity: clarity as 'high' | 'medium' | 'low',
-    completeness: completeness as 'complete' | 'partial' | 'insufficient',
-    suggestions: [] as string[],
-    encouragement: "You're making great progress! Your insights are helping build a comprehensive picture of your business opportunity.",
-  };
-  
-  if (!hasDetails) {
-    validationFeedback.suggestions.push("Try to provide more specific details to help me understand your situation better.");
-  }
-  
-  if (stageProgress < 50) {
-    validationFeedback.suggestions.push("Consider sharing examples or specific scenarios to illustrate your points.");
-  }
-  
-  return {
-    response: agentResponse,
-    followUpQuestion: isStageComplete && nextStage > currentStage ? '' : followUpQuestion,
-    stageProgress: {
-      currentStage: nextStage,
-      stageProgress: nextStage > currentStage ? 0 : stageProgress,
-      overallProgress,
-      nextStageName: nextStage < 7 ? CONVERSATION_STAGES[(nextStage + 1) as keyof typeof CONVERSATION_STAGES]?.name : undefined,
-    },
-    briefUpdate,
-    validationFeedback,
-    conversationState: {
-      isStageComplete,
-      canAdvanceStage: isStageComplete && currentStage < 7,
-      requiredDataMissing: stageProgress < 50 ? ['more_details'] : [],
-      nextStage: nextStage > currentStage ? CONVERSATION_STAGES[nextStage as keyof typeof CONVERSATION_STAGES] : undefined,
-    },
-    systemActions: {
-      triggerWorkflow: currentStage === 7 && isStageComplete,
-      saveCheckpoint: isStageComplete,
-      requestClarification: stageProgress < 30,
-    },
-    newStage: nextStage > currentStage ? nextStage : undefined,
-  };
-}
-
 async function updateOnboardingSession(
   client: SupabaseClient,
   sessionId: string,
@@ -397,6 +293,8 @@ async function updateOnboardingSession(
     currentStage: number;
     stageData: any;
     lastActivity: Date;
+    stageProgress: number;
+    overallProgress: number;
   },
 ) {
   try {
@@ -406,6 +304,8 @@ async function updateOnboardingSession(
         conversation_history: updates.conversationHistory,
         current_stage: updates.currentStage,
         stage_data: updates.stageData,
+        stage_progress: updates.stageProgress,
+        overall_progress: updates.overallProgress,
         last_activity: updates.lastActivity.toISOString(),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Extend expiry
       })
@@ -468,13 +368,18 @@ async function getCachedResponse(sessionId: string, messageId: string) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, userMessage, messageType, timestamp, messageId, conversationContext }: SendMessageRequest = body;
+    const { sessionId, userMessage, messageType, timestamp, messageId }: SendMessageRequest = body;
 
     const sessionClient = await createServerClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await sessionClient.auth.getUser();
+    const [
+      {
+        data: { user },
+        error: userError,
+      },
+      sessionResult,
+    ] = await Promise.all([sessionClient.auth.getUser(), sessionClient.auth.getSession()]);
+
+    const accessToken = sessionResult.data.session?.access_token;
 
     if (userError || !user) {
       return NextResponse.json(
@@ -490,6 +395,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!accessToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_SESSION',
+            message: 'Authentication token missing',
+            retryable: false,
+          },
+        } as MessageError,
+        { status: 401 },
+      );
+    }
+
     let supabaseClient: SupabaseClient;
     try {
       supabaseClient = createAdminClient();
@@ -498,32 +417,35 @@ export async function POST(request: NextRequest) {
       supabaseClient = sessionClient;
     }
 
-    // Validate required fields
     if (!sessionId || !userMessage || !messageId) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: 'Missing required fields: sessionId, userMessage, messageId',
-          retryable: false,
-        },
-      } as MessageError, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: 'Missing required fields: sessionId, userMessage, messageId',
+            retryable: false,
+          },
+        } as MessageError,
+        { status: 400 },
+      );
     }
 
-    // Validate session
     const session = await getOnboardingSession(supabaseClient, sessionId, user.id);
     if (!session || session.status !== 'active') {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: 'INVALID_SESSION',
-          message: 'Session not found, expired, or inactive',
-          retryable: false,
-        },
-      } as MessageError, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INVALID_SESSION',
+            message: 'Session not found, expired, or inactive',
+            retryable: false,
+          },
+        } as MessageError,
+        { status: 404 },
+      );
     }
 
-    // Check for duplicate message
     const isDuplicate = await checkDuplicateMessage(supabaseClient, sessionId, messageId);
     if (isDuplicate) {
       const cachedResponse = await getCachedResponse(sessionId, messageId);
@@ -531,67 +453,188 @@ export async function POST(request: NextRequest) {
         return cachedResponse;
       }
     }
-    
-    // Process message with AI agent
-    const agentResponse = await processUserMessage({
-      sessionId,
-      userMessage,
-      messageType: messageType || 'text',
-      conversationHistory: session.conversation_history || [],
-      currentStage: session.current_stage || 1,
-      stageData: session.stage_data || {},
-    });
-    
-    // Update conversation history
+
+    let crewPayload: CrewConversationMessageResponse;
+    try {
+      const crewUrl = resolveCrewFunctionUrl(request);
+      const crewResponse = await fetch(crewUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          action: 'conversation_message',
+          session_id: sessionId,
+          message: userMessage,
+          message_type: messageType || 'text',
+          current_stage: session.current_stage || 1,
+          conversation_history: session.conversation_history || [],
+          stage_data: session.stage_data || {},
+        }),
+      });
+
+      if (crewResponse.status === 429) {
+        const rateLimitPayload = await crewResponse.json().catch(() => ({}));
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'RATE_LIMITED',
+              message: rateLimitPayload?.error || 'CrewAI rate limit reached. Please wait and try again.',
+              retryable: true,
+            },
+          } as MessageError,
+          { status: 429 },
+        );
+      }
+
+      if (!crewResponse.ok) {
+        const errorText = await crewResponse.text();
+        throw new Error(`CrewAI message failed (${crewResponse.status}): ${errorText}`);
+      }
+
+      const payload = (await crewResponse.json()) as CrewConversationMessageResponse;
+      if (!payload?.success || !payload.message) {
+        throw new Error('CrewAI message payload was invalid');
+      }
+
+      crewPayload = payload;
+    } catch (crewError) {
+      console.error('[onboarding/message] CrewAI conversation error:', crewError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'PROCESSING_ERROR',
+            message: 'Unable to process message right now. Please try again.',
+            retryable: true,
+          },
+        } as MessageError,
+        { status: 502 },
+      );
+    }
+
+    const crewMessage = crewPayload.message;
+    const timestampIso = timestamp || new Date().toISOString();
+    const stageSnapshot = crewMessage.stage_snapshot;
+    const stageKey = `stage_${stageSnapshot.stage ?? session.current_stage ?? 1}`;
+
+    const existingStageData = session.stage_data || {};
+    const previousBrief =
+      existingStageData && typeof (existingStageData as any).brief === 'object'
+        ? (existingStageData as any).brief
+        : existingStageData;
+    const previousCoverage =
+      existingStageData && typeof (existingStageData as any).coverage === 'object'
+        ? (existingStageData as any).coverage
+        : {};
+
+    const updatedStageData = {
+      brief: {
+        ...(previousBrief ?? {}),
+        ...crewMessage.brief_update,
+      },
+      coverage: {
+        ...(previousCoverage ?? {}),
+        [stageKey]: {
+          ...stageSnapshot,
+          quality_signals: crewMessage.quality_signals,
+          system_actions: crewMessage.system_actions,
+        },
+      },
+    };
+
     const newConversationEntry = {
       messageId,
       userMessage,
-      agentResponse: agentResponse.response,
-      timestamp: timestamp || new Date().toISOString(),
-      stage: session.current_stage,
+      agentResponse: crewMessage.agent_response,
+      timestamp: timestampIso,
+      stage: crewMessage.stage_state.previous_stage ?? session.current_stage,
       messageType: messageType || 'text',
+      qualitySignals: crewMessage.quality_signals,
+      systemActions: crewMessage.system_actions,
     };
 
     const updatedHistory = [...(session.conversation_history || []), newConversationEntry];
-    const updatedStageData = { ...(session.stage_data || {}), ...agentResponse.briefUpdate };
-    
-    // Update session state
+    const stageProgressValue = Math.round(
+      Math.max(0, Math.min(100, crewMessage.conversation_metrics.stage_progress ?? 0)),
+    );
+    const overallProgressValue = Math.round(
+      Math.max(0, Math.min(100, crewMessage.conversation_metrics.overall_progress ?? 0)),
+    );
+
     await updateOnboardingSession(supabaseClient, sessionId, {
       conversationHistory: updatedHistory,
-      currentStage: agentResponse.newStage || session.current_stage,
+      currentStage: crewMessage.stage_state.current_stage,
       stageData: updatedStageData,
+      stageProgress: stageProgressValue,
+      overallProgress: overallProgressValue,
       lastActivity: new Date(),
     });
-    
-    // Prepare response
+
+    const systemActions = {
+      triggerWorkflow: crewMessage.system_actions.trigger_workflow,
+      saveCheckpoint: crewMessage.system_actions.save_checkpoint,
+      requestClarification: crewMessage.system_actions.request_clarification,
+      needsReview: crewMessage.system_actions.needs_review ?? false,
+    };
+
+    const validationFeedback = {
+      clarity: crewMessage.conversation_metrics.clarity_label,
+      completeness: crewMessage.conversation_metrics.completeness_label,
+      suggestions: crewMessage.quality_signals.suggestions ?? [],
+      encouragement:
+        crewMessage.quality_signals.encouragement ??
+        "You're making great progress! Your insights are helping build a comprehensive picture of your business opportunity.",
+    };
+
+    const nextStageInfo =
+      CONVERSATION_STAGES[crewMessage.stage_state.current_stage as keyof typeof CONVERSATION_STAGES];
+
     const response: SendMessageResponse = {
       success: true,
       messageId: generateResponseId(),
-      agentResponse: agentResponse.response,
-      followUpQuestion: agentResponse.followUpQuestion,
-      stageProgress: agentResponse.stageProgress,
-      briefUpdate: agentResponse.briefUpdate,
-      validationFeedback: agentResponse.validationFeedback,
-      conversationState: agentResponse.conversationState,
-      systemActions: agentResponse.systemActions,
+      agentResponse: crewMessage.agent_response,
+      followUpQuestion: crewMessage.follow_up_question,
+      stageProgress: {
+        currentStage: crewMessage.stage_state.current_stage,
+        stageProgress: stageProgressValue,
+        overallProgress: overallProgressValue,
+        nextStageName: crewMessage.stage_state.next_stage_name ?? nextStageInfo?.name,
+      },
+      briefUpdate: crewMessage.brief_update,
+      qualitySignals: crewMessage.quality_signals,
+      stageSnapshot,
+      validationFeedback,
+      conversationState: {
+        isStageComplete: crewMessage.stage_state.is_stage_complete,
+        canAdvanceStage:
+          crewMessage.stage_state.is_stage_complete &&
+          crewMessage.stage_state.current_stage < crewMessage.stage_state.total_stages,
+        requiredDataMissing: systemActions.requestClarification ? ['more_details'] : [],
+        nextStage: nextStageInfo,
+      },
+      systemActions,
     };
-    
-    // Cache response for deduplication
+
     await cacheResponse(sessionId, messageId, response);
-    
+
     return NextResponse.json(response);
-    
   } catch (error) {
     console.error('Message processing error:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: {
-        code: 'PROCESSING_ERROR',
-        message: 'Unable to process message. Please try again.',
-        retryable: true,
-      },
-    } as MessageError, { status: 500 });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: 'PROCESSING_ERROR',
+          message: 'Unable to process message. Please try again.',
+          retryable: true,
+        },
+      } as MessageError,
+      { status: 500 },
+    );
   }
 }
 

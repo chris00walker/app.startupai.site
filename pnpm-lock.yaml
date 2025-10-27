@@ -23,6 +23,9 @@ importers:
       supabase:
         specifier: ^2.53.6
         version: 2.53.6
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
 
   frontend:
     dependencies:

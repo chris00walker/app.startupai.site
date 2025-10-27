@@ -14,12 +14,29 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 // Types and Interfaces
 // ============================================================================
 
+interface QualitySignals {
+  clarity: { label: 'high' | 'medium' | 'low'; score: number };
+  completeness: { label: 'complete' | 'partial' | 'insufficient'; score: number };
+  detailScore: number;
+  overall: number;
+  qualityTags?: string[];
+  suggestions?: string[];
+  encouragement?: string;
+}
+
 interface ConversationMessage {
   id: string;
   type: 'user' | 'ai' | 'system';
   content: string;
   timestamp: string;
   stage: number;
+  isPending?: boolean;
+  qualitySignals?: QualitySignals;
+  systemActions?: {
+    triggerWorkflow?: boolean;
+    requestClarification?: boolean;
+    needsReview?: boolean;
+  };
 }
 
 interface OnboardingSession {
@@ -96,6 +113,10 @@ export function ConversationInterface({
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     }
+  }, [session.conversationHistory]);
+
+  useEffect(() => {
+    setIsTyping(session.conversationHistory.some((msg) => msg.isPending));
   }, [session.conversationHistory]);
 
   // Focus textarea on mount
@@ -239,7 +260,45 @@ export function ConversationInterface({
                   }
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
-                  
+
+                  {message.isPending && (
+                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                      <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                      <span>Analyzing your response…</span>
+                    </div>
+                  )}
+
+                  {message.type === 'ai' && message.qualitySignals && !message.isPending && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant="outline" className="capitalize">
+                        Clarity: {message.qualitySignals.clarity.label}
+                      </Badge>
+                      <Badge variant="outline" className="capitalize">
+                        Completeness: {message.qualitySignals.completeness.label}
+                      </Badge>
+                      <span>
+                        Detail: {Math.round(message.qualitySignals.detailScore * 100)}%
+                      </span>
+                    </div>
+                  )}
+
+                  {message.type === 'ai' && message.qualitySignals?.qualityTags?.length && !message.isPending && (
+                    <div className="mt-2 text-xs text-yellow-600">
+                      {message.qualitySignals.qualityTags.includes('clarity_low') && (
+                        <div>Tip: add concrete examples or specifics so we can refine the analysis.</div>
+                      )}
+                      {message.qualitySignals.qualityTags.includes('incomplete') && (
+                        <div>We need a bit more information before we can advance to the next stage.</div>
+                      )}
+                    </div>
+                  )}
+
+                  {message.type === 'ai' && message.systemActions?.requestClarification && !message.isPending && (
+                    <div className="mt-2 text-xs text-amber-600">
+                      The AI flagged this response for clarification. Try expanding on the details above.
+                    </div>
+                  )}
+
                   {/* Message metadata */}
                   <div className={`
                     flex items-center justify-between mt-2 text-xs

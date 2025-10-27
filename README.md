@@ -9,7 +9,7 @@ This repository implements the **Product Platform** (`app.startupai.site`) in St
 - **🎯 startupai.site** (The Promise) - Convert prospects to customers - ✅ 95% Complete
 - **⚡ app.startupai.site** (The Product) - Deliver value and create advocates ← **THIS REPO** - ⚠️ 65-70% Complete
 
-**Latest Updates:** October 6, 2025 - CrewAI backend 15% implemented, trial guardrails deployed, deployment fixed
+**Latest Updates:** October 27, 2025 - CrewAI-powered onboarding flow live (start/message routes, quality signals, contract-check tooling)
 
 ## ⚠️ Temporary Testing Override: Onboarding Guard Disabled
 
@@ -191,6 +191,7 @@ The **SINGLE SOURCE OF TRUTH** for all StartupAI development (located in marketi
 #### Deployment
 - [Docker Configuration](docs/engineering/deployment/docker.md)
 - [Netlify Environment Variables](docs/engineering/deployment/NETLIFY_ENV_VARS.md) (Oct 5, 2025)
+- **CrewAI Variables:** `CREW_ANALYZE_URL` (optional function override), `CREW_CONTRACT_BEARER` (local contract check token)
 
 ### 🎯 Features & Integrations
 
@@ -198,6 +199,8 @@ The **SINGLE SOURCE OF TRUTH** for all StartupAI development (located in marketi
 - [CrewAI Implementation Spec](backend/CREW_AI.md) - Complete 6-agent workflow specification
 - [CrewAI Status Report](docs/integrations/crewai/CREWAI_STATUS_REPORT.md) (Oct 5, 2025)
 - [Netlify Functions Guide](netlify/functions/README.md)
+- [Frontend Integration Guide](docs/specs/crewai-integration.md) — start/message routes now proxy CrewAI quality signals (Oct 27, 2025)
+- Contract check script: `pnpm crew:contract-check` (requires `CREW_CONTRACT_BEARER` + optional `CREW_ANALYZE_URL`)
 
 #### Feature Documentation
 - [Gate Scoring Integration](docs/features/gate-scoring-integration.md) (Oct 4, 2025)

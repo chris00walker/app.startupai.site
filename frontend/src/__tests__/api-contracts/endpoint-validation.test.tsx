@@ -94,22 +94,38 @@ describe('API Contract Validation', () => {
           agentIntroduction: expect.any(String),
           firstQuestion: expect.any(String),
           estimatedDuration: '20-25 minutes',
-          stageInfo: {
-            currentStage: 1,
-            totalStages: 7,
-            stageName: expect.any(String)
-          },
-          conversationContext: {
+          stageInfo: expect.objectContaining({
+            currentStage: expect.any(Number),
+            totalStages: expect.any(Number),
+            stageName: expect.any(String),
+            stageDescription: expect.any(String),
+          }),
+          conversationContext: expect.objectContaining({
             agentPersonality: expect.any(Object),
             expectedOutcomes: expect.any(Array),
-            privacyNotice: expect.any(String)
-          }
+            privacyNotice: expect.any(String),
+          }),
+          qualitySignals: expect.objectContaining({
+            clarity: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+            completeness: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+            detail_score: expect.any(Number),
+            overall: expect.any(Number),
+          }),
+          stageSnapshot: expect.objectContaining({
+            stage: expect.any(Number),
+            coverage: expect.any(Number),
+            quality: expect.objectContaining({
+              clarity: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+              completeness: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+              detail_score: expect.any(Number),
+            }),
+          }),
         })
       );
 
       // Validate specific field types and constraints
-      expect(data.sessionId).toMatch(/^[a-zA-Z0-9-_]+$/); // Valid session ID format
-      expect(data.stageInfo.currentStage).toBe(1);
+      expect(data.sessionId).toMatch(/^[a-zA-Z0-9-_]+$/);
+      expect(data.stageInfo.currentStage).toBeGreaterThanOrEqual(1);
       expect(data.stageInfo.totalStages).toBe(7);
       expect(data.conversationContext.agentPersonality).toHaveProperty('name');
       expect(data.conversationContext.agentPersonality).toHaveProperty('role');
@@ -243,16 +259,26 @@ describe('API Contract Validation', () => {
           success: true,
           messageId: expect.any(String),
           agentResponse: expect.any(String),
-          stageProgress: {
+          stageProgress: expect.objectContaining({
             currentStage: expect.any(Number),
+            stageProgress: expect.any(Number),
             overallProgress: expect.any(Number),
-            nextQuestion: expect.any(String)
-          },
-          conversationQuality: {
-            responseClarity: expect.any(Number),
-            relevanceScore: expect.any(Number),
-            engagementLevel: expect.any(Number)
-          }
+          }),
+          qualitySignals: expect.objectContaining({
+            clarity: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+            completeness: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+            detail_score: expect.any(Number),
+            overall: expect.any(Number),
+          }),
+          stageSnapshot: expect.objectContaining({
+            stage: expect.any(Number),
+            coverage: expect.any(Number),
+            quality: expect.objectContaining({
+              clarity: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+              completeness: expect.objectContaining({ label: expect.any(String), score: expect.any(Number) }),
+              detail_score: expect.any(Number),
+            }),
+          }),
         })
       );
 
@@ -262,8 +288,8 @@ describe('API Contract Validation', () => {
       expect(data.stageProgress.currentStage).toBeLessThanOrEqual(7);
       expect(data.stageProgress.overallProgress).toBeGreaterThanOrEqual(0);
       expect(data.stageProgress.overallProgress).toBeLessThanOrEqual(100);
-      expect(data.conversationQuality.responseClarity).toBeGreaterThanOrEqual(1);
-      expect(data.conversationQuality.responseClarity).toBeLessThanOrEqual(5);
+      expect(data.qualitySignals.detail_score).toBeGreaterThanOrEqual(0);
+      expect(data.qualitySignals.detail_score).toBeLessThanOrEqual(1);
     });
 
     it('should handle message validation errors', async () => {
@@ -310,13 +336,34 @@ describe('API Contract Validation', () => {
             agentResponse: `Stage ${stage} response`,
             stageProgress: {
               currentStage: stage,
-              overallProgress: (stage / 7) * 100,
-              nextQuestion: stage < 7 ? `Stage ${stage + 1} question` : 'Conversation complete'
+              stageProgress: stage === 1 ? 30 : 5,
+              overallProgress: Math.min(100, (stage / 7) * 100),
+              nextStageName: stage < 7 ? `Stage ${stage + 1}` : 'Complete'
             },
-            conversationQuality: {
-              responseClarity: 4.0,
-              relevanceScore: 4.2,
-              engagementLevel: 4.1
+            qualitySignals: {
+              clarity: { label: 'medium', score: 0.7 },
+              completeness: { label: stage === 1 ? 'partial' : 'complete', score: stage === 1 ? 0.6 : 0.9 },
+              detail_score: stage === 1 ? 0.3 : 0.95,
+              overall: 0.8,
+              quality_tags: stage === 1 ? ['needs_detail'] : [],
+            },
+            stageSnapshot: {
+              stage,
+              coverage: stage === 1 ? 0.3 : 0.95,
+              quality: {
+                clarity: { label: 'medium', score: 0.7 },
+                completeness: { label: stage === 1 ? 'partial' : 'complete', score: stage === 1 ? 0.6 : 0.9 },
+                detail_score: stage === 1 ? 0.3 : 0.95,
+              },
+              brief_fields: ['field_a'],
+              last_message_excerpt: `Stage ${stage} excerpt`,
+              updated_at: new Date().toISOString(),
+              notes: 'Auto-generated for test'
+            },
+            systemActions: {
+              triggerWorkflow: stage === 7,
+              saveCheckpoint: true,
+              requestClarification: stage === 1,
             }
           }), { status: 200 })
         );

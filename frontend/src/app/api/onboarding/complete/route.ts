@@ -594,7 +594,7 @@ export async function POST(request: NextRequest) {
     
     // Merge session data with final brief
     const finalBriefData = {
-      ...session.stage_data,
+      ...(session.stage_data?.brief ?? session.stage_data ?? {}),
       ...entrepreneurBrief,
     };
     

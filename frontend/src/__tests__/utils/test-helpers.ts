@@ -46,7 +46,8 @@ export class APIResponseBuilder {
       stageInfo: {
         currentStage: 1,
         totalStages: 7,
-        stageName: 'Customer Discovery'
+        stageName: 'Customer Discovery',
+        stageDescription: 'Understanding your target customers'
       },
       agentIntroduction: 'Hello! I\'m your AI strategic consultant.',
       firstQuestion: 'What brings you here today?',
@@ -63,6 +64,28 @@ export class APIResponseBuilder {
           'Solution differentiation strategy'
         ],
         privacyNotice: 'Your conversation data is encrypted and secure.'
+      },
+      qualitySignals: {
+        clarity: { label: 'medium', score: 0.68 },
+        completeness: { label: 'partial', score: 0.66 },
+        detail_score: 0.05,
+        overall: 0.46,
+        quality_tags: ['needs_detail'],
+        suggestions: ['Share a bit more about your idea so I can tailor the next question.'],
+        encouragement: 'You are off to a great start—let’s build the full picture together.'
+      },
+      stageSnapshot: {
+        stage: 1,
+        coverage: 0,
+        quality: {
+          clarity: { label: 'medium', score: 0.68 },
+          completeness: { label: 'partial', score: 0.66 },
+          detail_score: 0.05
+        },
+        brief_fields: [],
+        last_message_excerpt: '',
+        updated_at: new Date().toISOString(),
+        notes: 'Stage initialized'
       }
     }), { status: 200, statusText: 'OK' });
   }
@@ -72,15 +95,42 @@ export class APIResponseBuilder {
       success: true,
       messageId,
       agentResponse: 'That sounds interesting! Tell me more about your target customers.',
-      stageProgress: { 
-        currentStage: 1, 
-        overallProgress: 15,
-        nextQuestion: 'Who specifically would benefit most from this solution?'
+      followUpQuestion: 'Who specifically would benefit most from this solution?',
+      stageProgress: {
+        currentStage: 1,
+        stageProgress: 35,
+        overallProgress: 18,
+        nextStageName: 'Customer Discovery'
       },
-      conversationQuality: {
-        responseClarity: 4.2,
-        relevanceScore: 4.5,
-        engagementLevel: 4.0
+      briefUpdate: {
+        customer_segments: ['independent consultants'],
+      },
+      qualitySignals: {
+        clarity: { label: 'medium', score: 0.7 },
+        completeness: { label: 'partial', score: 0.65 },
+        detail_score: 0.35,
+        overall: 0.56,
+        quality_tags: ['needs_detail'],
+        suggestions: ['Consider sharing an example customer scenario to increase clarity.'],
+        encouragement: 'Great context so far—let’s dig a little deeper.'
+      },
+      stageSnapshot: {
+        stage: 1,
+        coverage: 0.35,
+        quality: {
+          clarity: { label: 'medium', score: 0.7 },
+          completeness: { label: 'partial', score: 0.65 },
+          detail_score: 0.35
+        },
+        brief_fields: ['customer_segments'],
+        last_message_excerpt: 'Independent consultants who struggle to track billable hours',
+        updated_at: new Date().toISOString(),
+        notes: 'Customer segment insight recorded'
+      },
+      systemActions: {
+        triggerWorkflow: false,
+        saveCheckpoint: true,
+        requestClarification: false
       }
     }), { status: 200 });
   }
@@ -297,7 +347,15 @@ export class APIContractValidator {
   }
 
   static validateStartOnboardingResponse(response: any): boolean {
-    const requiredFields = ['success', 'sessionId', 'agentIntroduction', 'firstQuestion', 'stageInfo'];
+    const requiredFields = [
+      'success',
+      'sessionId',
+      'agentIntroduction',
+      'firstQuestion',
+      'stageInfo',
+      'qualitySignals',
+      'stageSnapshot',
+    ];
     return requiredFields.every(field => field in response);
   }
 
@@ -307,7 +365,14 @@ export class APIContractValidator {
   }
 
   static validateMessageResponse(response: any): boolean {
-    const requiredFields = ['success', 'messageId', 'agentResponse', 'stageProgress'];
+    const requiredFields = [
+      'success',
+      'messageId',
+      'agentResponse',
+      'stageProgress',
+      'qualitySignals',
+      'stageSnapshot',
+    ];
     return requiredFields.every(field => field in response);
   }
 }
