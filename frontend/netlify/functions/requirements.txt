@@ -1,0 +1,17 @@
+# Netlify Function Dependencies
+# These are installed in the serverless environment
+
+# Core dependencies for Python functions
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# Supabase authentication
+supabase>=2.0.0
+
+# Optional CrewAI dependencies (used only for full analysis workflow)
+# The conversation engine works without these
+crewai[tools]>=0.80.0
+openai>=1.0.0
+anthropic>=0.25.0
+google-generativeai>=0.3.0
+ddgs>=0.1.0
