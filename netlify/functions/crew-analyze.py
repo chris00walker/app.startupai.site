@@ -17,13 +17,18 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
-# Ensure backend modules are importable before loading helpers
-backend_src = Path(__file__).parent.parent.parent / "backend" / "src"
-backend_src_str = str(backend_src)
-if backend_src_str not in sys.path:
-    sys.path.insert(0, backend_src_str)
-
-from crew_runtime import ConversationEngine, CrewAnalysisEngine  # type: ignore
+# Import runtime engines (these work standalone without backend dependencies)
+try:
+    from crew_runtime import ConversationEngine, CrewAnalysisEngine  # type: ignore
+    # Import StartupAICrew availability status for health checks
+    import crew_runtime
+    StartupAICrew = crew_runtime.StartupAICrew
+except ImportError as import_error:
+    # Log detailed error for debugging
+    print(f"[IMPORT ERROR] Failed to import crew_runtime: {import_error}")
+    print(f"[IMPORT ERROR] Python path: {sys.path}")
+    print(f"[IMPORT ERROR] Current directory: {Path(__file__).parent}")
+    raise
 
 # ============================================================================
 # Rate Limiting (in-memory; resets per cold start)
@@ -95,40 +100,64 @@ def json_response(status_code: int, body: Dict[str, Any], *, headers: Dict[str, 
 
 def authenticate_request(token: str) -> Tuple[str, str]:
     """Validate Supabase JWT and return (user_id, user_email)."""
-    from supabase import Client, create_client
+    try:
+        from supabase import Client, create_client
+    except ImportError as import_err:
+        print(f"[AUTH ERROR] Failed to import supabase: {import_err}")
+        raise RuntimeError("Supabase client not available - check requirements.txt")
 
     supabase_url = os.environ.get("SUPABASE_URL")
     supabase_key = os.environ.get("SUPABASE_ANON_KEY")
-    if not supabase_url or not supabase_key:
-        raise RuntimeError("Supabase credentials not configured")
 
-    client: Client = create_client(supabase_url, supabase_key)
-    user_response = client.auth.get_user(token)
-    if not user_response or not user_response.user:
-        raise PermissionError("Invalid or expired token")
+    if not supabase_url:
+        print("[AUTH ERROR] SUPABASE_URL environment variable not set")
+        raise RuntimeError("Supabase URL not configured")
+    if not supabase_key:
+        print("[AUTH ERROR] SUPABASE_ANON_KEY environment variable not set")
+        raise RuntimeError("Supabase key not configured")
 
-    return user_response.user.id, user_response.user.email  # type: ignore[attr-defined]
+    try:
+        client: Client = create_client(supabase_url, supabase_key)
+        user_response = client.auth.get_user(token)
+        if not user_response or not user_response.user:
+            raise PermissionError("Invalid or expired token")
+
+        return user_response.user.id, user_response.user.email  # type: ignore[attr-defined]
+    except Exception as auth_err:
+        print(f"[AUTH ERROR] Supabase authentication failed: {auth_err}")
+        raise
 
 
 def handle_conversation_start(body: Dict[str, Any], user_id: str) -> Dict[str, Any]:
+    """Handle conversation_start action - seeds onboarding session context."""
     plan_type = (body.get("plan_type") or "trial").lower()
     user_context = body.get("user_context") or {}
 
-    seed = conversation_engine.start_session(plan_type=plan_type, user_context=user_context)
-    return {
-        "success": True,
-        "kind": "conversation_start",
-        "session": {
-            "agent_introduction": seed["introduction"],
-            "first_question": seed["first_question"],
-            "context": seed["context"],
-            "stage_state": seed["stage_state"],
-            "stage_snapshot": seed["stage_snapshot"],
-            "quality_signals": seed["quality_signals"],
-            "estimated_duration": seed["estimated_duration"],
-            "user_context": seed["user_context"],
-        },
-    }
+    print(f"[CONVERSATION_START] Starting session for user={user_id}, plan={plan_type}")
+
+    try:
+        seed = conversation_engine.start_session(plan_type=plan_type, user_context=user_context)
+        print(f"[CONVERSATION_START] Session created successfully for user={user_id}")
+
+        return {
+            "success": True,
+            "kind": "conversation_start",
+            "session": {
+                "agent_introduction": seed["introduction"],
+                "first_question": seed["first_question"],
+                "context": seed["context"],
+                "stage_state": seed["stage_state"],
+                "stage_snapshot": seed["stage_snapshot"],
+                "quality_signals": seed["quality_signals"],
+                "estimated_duration": seed["estimated_duration"],
+                "user_context": seed["user_context"],
+            },
+        }
+    except Exception as conv_err:
+        print(f"[CONVERSATION_START ERROR] Failed to start session: {conv_err}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 def handle_conversation_message(body: Dict[str, Any], user_id: str) -> Tuple[Dict[str, Any], Dict[str, str]]:
@@ -215,11 +244,30 @@ def handle_analysis(body: Dict[str, Any], user_id: str) -> Tuple[Dict[str, Any],
 def handler(event, context):  # noqa: D401, pylint: disable=unused-argument
     """Entry point invoked by Netlify for both foreground and local testing."""
     request_start = datetime.utcnow()
+
+    # Health check endpoint
+    if event.get("httpMethod") == "GET":
+        return json_response(200, {
+            "status": "healthy",
+            "service": "crew-analyze",
+            "timestamp": datetime.utcnow().isoformat(),
+            "capabilities": {
+                "conversation_start": True,
+                "conversation_message": True,
+                "analysis": StartupAICrew is not None,
+            },
+            "environment": {
+                "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+                "has_supabase_config": bool(os.environ.get("SUPABASE_URL")),
+                "startup_ai_crew_available": StartupAICrew is not None,
+            },
+        })
+
     log_request(event, status="received")
 
     if event.get("httpMethod") != "POST":
         log_request(event, status="method_not_allowed")
-        return json_response(405, {"error": "Method not allowed. Use POST."})
+        return json_response(405, {"error": "Method not allowed. Use POST or GET for health check."})
 
     if not event.get("body"):
         return json_response(400, {"error": "Request body is required"})
