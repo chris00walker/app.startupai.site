@@ -43,27 +43,38 @@ class StartupAICrew:
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load YAML configuration file."""
         # Try multiple path resolution strategies
-        backend_dir = Path(__file__).parent.parent.parent
-        full_path = backend_dir / config_path
-        
-        # If not found, try from current working directory
+
+        # 1. Try relative to parent directory (Netlify deployment)
+        # From netlify/functions/startupai/crew.py -> netlify/functions/config/
+        parent_dir = Path(__file__).parent.parent
+        full_path = parent_dir / config_path
+
+        # 2. If not found, try from backend directory (local development)
+        if not full_path.exists():
+            backend_dir = Path(__file__).parent.parent.parent
+            full_path = backend_dir / config_path
+
+        # 3. If not found, try from current working directory
         if not full_path.exists():
             full_path = Path.cwd() / config_path
-        
-        # If still not found, try relative to backend directory
+
+        # 4. If still not found, try resolving absolute path
         if not full_path.exists():
-            # Resolve to absolute path
             backend_dir = Path(__file__).resolve().parent.parent.parent
             full_path = backend_dir / config_path
-        
+
         if not full_path.exists():
             raise FileNotFoundError(
                 f"Configuration file not found: {config_path}\n"
-                f"Tried: {full_path}\n"
+                f"Tried paths:\n"
+                f"  1. {Path(__file__).parent.parent / config_path}\n"
+                f"  2. {Path(__file__).parent.parent.parent / config_path}\n"
+                f"  3. {Path.cwd() / config_path}\n"
+                f"  4. {full_path}\n"
                 f"Current dir: {Path.cwd()}\n"
                 f"File location: {Path(__file__)}"
             )
-        
+
         with open(full_path, "r") as f:
             return yaml.safe_load(f)
     

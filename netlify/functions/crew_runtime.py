@@ -18,12 +18,18 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
 
-# Attempt to import StartupAICrew from backend (optional - used only for full analysis)
+# Attempt to import StartupAICrew (required for full analysis)
 # The ConversationEngine works standalone without this dependency
 try:
-    # Try to add backend path for local development
     import sys
     from pathlib import Path
+
+    # Try local directory first (Netlify deployment - startupai module is in same directory)
+    local_path = Path(__file__).parent
+    if str(local_path) not in sys.path:
+        sys.path.insert(0, str(local_path))
+
+    # Try backend path for local development
     backend_src = Path(__file__).parent.parent.parent / "backend" / "src"
     if backend_src.exists() and str(backend_src) not in sys.path:
         sys.path.insert(0, str(backend_src))
@@ -31,8 +37,10 @@ try:
     from startupai import StartupAICrew  # type: ignore
     print("[CREW_RUNTIME] StartupAICrew loaded successfully")
 except Exception as crew_import_error:
-    # This is expected in Netlify deployment - ConversationEngine works without it
-    print(f"[CREW_RUNTIME] StartupAICrew not available (expected in Netlify): {crew_import_error}")
+    # This should only happen if dependencies are missing
+    print(f"[CREW_RUNTIME ERROR] Failed to import StartupAICrew: {crew_import_error}")
+    import traceback
+    traceback.print_exc()
     StartupAICrew = None  # type: ignore
 
 # =============================================================================
