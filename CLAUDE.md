@@ -2,396 +2,326 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository Overview
+## Project Overview
 
-This is the **Product Platform** (`app.startupai.site`) in StartupAI's two-site architecture. It implements an evidence-led strategy platform that helps entrepreneurs validate business ideas through systematic experimentation, powered by CrewAI agents for AI-driven insights.
+**StartupAI Product Platform** (`app.startupai.site`) - Evidence-led strategy platform that helps entrepreneurs validate business ideas through systematic experimentation. Part of a two-site architecture:
 
-**Sister Repository:** `startupai.site` (marketing site) - located at `../startupai.site/`
-**Master Plan:** `../startupai.site/docs/technical/two-site-implementation-plan.md` (single source of truth)
+- **startupai.site** (Marketing) - Convert prospects to customers
+- **app.startupai.site** (Product) - Deliver value and create advocates ← **THIS REPO**
+
+**Tech Stack:**
+- Frontend: Next.js 15.5.3 (TypeScript 5.8.3) with hybrid routing (Pages + App Router)
+- Backend: Netlify Functions (Python) running CrewAI workflows
+- Database: Supabase PostgreSQL with pgvector for semantic search
+- ORM: Drizzle ORM for type-safe database operations
+- Package Manager: pnpm 9.12.1
+- Node Version: 22.18.0 (managed via `.nvmrc`)
 
 ## Development Commands
 
-### Local Development
+### Setup and Development
+
 ```bash
-# Install dependencies (uses pnpm 9.12.1)
-pnpm install
+# Initial setup
+nvm use                    # Load Node 22.18.0
+pnpm install              # Install dependencies
 
-# Start dev server (uses Turbopack for Next.js 15.5.3)
-pnpm dev                    # Runs on http://localhost:3000
+# Development
+pnpm dev                  # Start Next.js dev server (localhost:3000)
 
-# Start both sites for cross-site testing
-pnpm dev                    # Terminal 1: app site (port 3000)
-pnpm --dir ../startupai.site dev  # Terminal 2: marketing site (port 3001)
-```
+# Building
+pnpm build                # Production build
 
-### Building & Testing
-```bash
-# Build for production
-pnpm build
-
-# Run all tests
-pnpm test                   # Jest unit tests (162 passing)
-pnpm test:watch             # Jest watch mode
-pnpm test:e2e               # Playwright E2E tests (45 tests)
-pnpm test:e2e:ui            # Playwright with UI
-pnpm test:e2e:backend       # Backend integration tests only
-pnpm test:all               # Run unit + integration + E2E
-
-# Run specific test types
-pnpm test:unit              # Unit tests only
-pnpm test:integration       # Integration tests only
-pnpm test:coverage          # With coverage report
+# Testing
+pnpm test                 # Run Jest unit tests
+pnpm test:watch           # Jest in watch mode
+pnpm test:coverage        # Generate coverage report
+pnpm test:e2e             # Run Playwright E2E tests
+pnpm test:e2e:ui          # Playwright with UI
+pnpm test:all             # Run all tests
 ```
 
 ### Database Operations
+
 ```bash
-# Generate Drizzle schema from code
-pnpm db:generate            # Creates migration files
+# Drizzle ORM (run from repo root)
+pnpm db:generate          # Generate migrations from schema
+pnpm db:push              # Push schema changes to database
+pnpm db:migrate           # Run pending migrations
+pnpm db:studio            # Open Drizzle Studio UI
+pnpm db:introspect        # Introspect existing database
 
-# Push schema to database
-pnpm db:push                # Apply schema changes
-
-# Run migrations
-pnpm db:migrate             # Execute pending migrations
-
-# Open Drizzle Studio (visual database browser)
-pnpm db:studio              # Web UI at https://local.drizzle.studio
-
-# Seed database with test data
-pnpm --filter frontend run db:seed
+# Database seeding (run from frontend/)
+cd frontend && pnpm db:seed
 ```
+
+**Important:** Drizzle config (`drizzle.config.ts`) loads env from `frontend/.env.local`. Schema is in `frontend/src/db/schema/index.ts`.
 
 ### CrewAI Backend
+
 ```bash
-# Check CrewAI contract compliance
-pnpm crew:contract-check    # Requires CREW_CONTRACT_BEARER env var
+# Python virtual environment setup
+cd backend
+python3 -m venv crewai-env
+source crewai-env/bin/activate
+pip install -r requirements.txt
+
+# Run CrewAI locally (from backend/)
+cd src/startupai && python main.py
 
 # Test Netlify function locally
-pnpm test:function          # Invoke onboarding-start function
+pnpm test:function        # Invoke onboarding-start function
+
+# Contract check (validates CrewAI API contract)
+pnpm crew:contract-check  # Requires CREW_CONTRACT_BEARER env var
 ```
 
-### Documentation & Linting
+### Linting and Documentation
+
 ```bash
-# Validate markdown documentation
-pnpm lint:md                # Check docs/ for linting errors
-pnpm lint:md:fix            # Auto-fix markdown issues
-
-# Note: Frontend linting is deferred (see docs/status/linting.md)
-pnpm lint                   # Currently outputs deferred message
+pnpm lint                 # Frontend linting (deferred - see docs/status/linting.md)
+pnpm lint:md              # Lint markdown docs
+pnpm lint:md:fix          # Auto-fix markdown issues
+pnpm docs:validate        # Validate documentation
 ```
 
-## Architecture Overview
+## Architecture
 
-### Tech Stack
-- **Frontend:** Next.js 15.5.3 with TypeScript 5.8.3, Hybrid Router (Pages + App Router)
-- **Backend:** Netlify Functions (Python 3.10) for CrewAI workflows
-- **Database:** Supabase PostgreSQL with Drizzle ORM
-- **Vector Search:** pgvector with `match_evidence()` function
-- **AI:** CrewAI 0.201.1 with 6-agent workflow
-- **Auth:** Supabase JWT with GitHub OAuth (primary) and email fallback
-- **Analytics:** PostHog (shared with marketing site)
-- **Package Manager:** pnpm 9.12.1 (migrated from npm Sept 2025)
-- **Deployment:** Netlify at https://app-startupai-site.netlify.app
+### Hybrid Routing (Next.js Pages + App Router)
 
-### Hybrid Router Strategy
-This application uses BOTH Pages Router (`pages/`) and App Router (`app/`) intentionally:
-- **Pages Router:** Dashboard, canvas tools, legacy features (stable, proven)
-- **App Router:** Auth flows, onboarding wizard, new API routes (modern, streaming-capable)
-- **Decision:** Vercel recommends gradual migration; see `docs/adrs/adr-0002-routing-strategy.md`
-- **Do NOT consolidate routers** - this is by design for stability during feature development
+**DO NOT consolidate routers.** Vercel officially supports hybrid routing and it's documented as a deliberate architectural choice (see `docs/operations/routing-consolidation-plan.md`).
 
-### Data Flow
+**App Router** (`frontend/src/app/`):
+- `/api/*` - API routes (server-side endpoints)
+- `/signup`, `/login` - Authentication flows
+- `/onboarding` - AI-powered onboarding wizard
+- `/project/*`, `/projects` - Project management
+- Modern features: Server Components, streaming, parallel routes
 
-1. **Authentication:**
-   - Marketing site (`startupai.site`) captures plan selection → redirects to `/signup?plan=trial|sprint|founder|enterprise`
-   - Supabase Auth completes GitHub OAuth or email signup
-   - `handle_new_user` trigger (migration `00010`) creates `user_profiles` row
-   - Session cookie set, user lands in authenticated App Router
+**Pages Router** (`frontend/src/pages/`):
+- `/dashboard` - Main dashboard
+- `/founder-dashboard` - Founder-specific view
+- `/clients` - Client management
+- `/canvas/*` - Business model canvas tools
+- `/workflows`, `/analytics`, `/settings` - Core features
+- Stable, well-tested pages with established patterns
 
-2. **Onboarding (CrewAI-Powered):**
-   - `POST /api/onboarding/start` → Creates session, proxies to Netlify function with `action=conversation_start`
-   - `POST /api/onboarding/message` → Validates session, forwards to CrewAI, persists conversation + quality signals
-   - `POST /api/onboarding/complete` → Upserts entrepreneur brief, creates project, triggers full analysis
-   - Quality signals (`clarity_low`, `incomplete`) surface guardrails to prevent premature stage advancement
+### Database Layer
 
-3. **CrewAI Analysis Pipeline:**
-   - Six agents: research, analysis, validation, synthesis, reporting, orchestration
-   - Configured via `backend/config/agents.yaml`, orchestrated by `backend/src/startupai/crew.py`
-   - Tools: `EvidenceStoreTool`, `WebSearchTool`, `ReportGenerator` (in `backend/src/startupai/tools.py`)
-   - Netlify function at `/.netlify/functions/crew-analyze` authenticates JWTs, enforces rate limits (10 req/15min), writes evidence back to Supabase
+**Schema** (`frontend/src/db/schema/`):
+- `users.ts` - User profiles and authentication
+- `projects.ts` - Project metadata and settings
+- `evidence.ts` - Evidence storage with pgvector embeddings
+- `reports.ts` - AI-generated reports
+- `hypotheses.ts` - Hypothesis tracking
+- `experiments.ts` - Experiment data
+- `usage-quota.ts` - Trial and plan limits
 
-4. **Dashboard & Evidence:**
-   - `useProjects` hook (`frontend/src/hooks/useProjects.ts`) fetches projects from Supabase
-   - Evidence ledger integrates pgvector semantic search via `match_evidence()` RPC
-   - Gate scoring calculates project readiness based on evidence quality
-   - PostHog captures completion, drop-off, and feedback events
+**Queries** (`frontend/src/db/queries/`):
+- Type-safe database operations using Drizzle ORM
+- Always prefer using existing queries over raw SQL
+- New queries should be added to appropriate query files
 
-### Database Schema (Supabase + Drizzle)
+**Migrations** (`supabase/migrations/`):
+- All schema changes go through Supabase migrations
+- Never modify schema directly in production
+- Latest migrations include onboarding schema (00009) and user profile triggers (00010)
 
-**Core Tables:**
-- `user_profiles` - User accounts, roles, plan tiers (RLS: own profile only)
-- `trial_usage_counters` - Enforces free-tier limits (unique on user, action, period)
-- `projects` - Portfolio data + onboarding metadata (links to `onboarding_sessions`, `entrepreneur_briefs`)
-- `evidence` - Validation artifacts with 1536-dim pgvector embeddings
-- `reports` - AI-generated deliverables
-- `hypotheses` / `experiments` - Validation workflows
-- `onboarding_sessions` - Conversation history, stage data, quality scores
-- `entrepreneur_briefs` - Structured onboarding outputs
+### CrewAI Integration
 
-**Key Migrations:**
-- `00001_initial_schema.sql` - User profiles and core tables
-- `00005_user_roles_and_plans.sql` - Roles enum + timestamp triggers
-- `00007_trial_usage_counters.sql` - Trial quotas
-- `00009_onboarding_schema.sql` - Onboarding tables + helper functions
-- `00010_user_profile_trigger.sql` - Auto-create profiles on signup
-- `20251004082434_vector_search_function.sql` - pgvector `match_evidence()` function
+**Six-Agent Sequential Workflow:**
+1. Onboarding Agent → Entrepreneur Brief
+2. Customer Researcher → Customer Profile
+3. Competitor Analyst → Positioning Map
+4. Value Designer → Value Proposition Canvas
+5. Validation Agent → Validation Roadmap
+6. QA Agent → Quality Audit
 
-**Schema Source of Truth:**
-- Drizzle models: `frontend/src/db/schema/*.ts`
-- SQL migrations: `frontend/src/db/migrations/*.sql` (generated by Drizzle, reviewed manually)
-- Always run `pnpm db:generate` after schema changes, review SQL, then `pnpm db:push`
+**Critical Files:**
+- `backend/config/agents.yaml` - Agent definitions (YAML-driven, no hardcoding)
+- `backend/config/tasks.yaml` - Task definitions
+- `backend/src/startupai/crew.py` - Main crew orchestration
+- `backend/src/startupai/tools.py` - Supabase, pgvector, web search tools
+- `netlify/functions/crew-analyze.py` - Main serverless endpoint
+- `netlify/functions/crew-runtime.py` - Shared runtime utilities
 
-**Database Queries:**
-- Repository pattern: `frontend/src/db/queries/*.ts` (projects, evidence, reports, etc.)
-- Admin operations: `frontend/src/lib/supabase/admin.ts` (service-role client, server-only)
-- Client operations: `frontend/src/lib/supabase/client.ts` and `server.ts`
+**Deployment:**
+- Functions deploy automatically via Netlify on push to main
+- JWT authentication with Supabase required
+- Rate limiting: 10 requests per 15 minutes per user
+- Standard timeout: 26 seconds (Pro tier)
+- Background function available for long-running analyses (15 min timeout)
 
-### Authentication & Authorization
+**API Flow:**
+1. Frontend calls `/api/onboarding/start` or `/api/onboarding/message`
+2. Next.js route validates session and proxies to `/.netlify/functions/crew-analyze`
+3. Netlify function runs CrewAI agents and returns structured JSON
+4. Next.js route persists results to Supabase and returns to client
+5. Frontend displays progress and surfaces quality signals
 
-**Auth Flow:**
-- Primary: GitHub OAuth via Supabase
-- Fallback: Email/password (Supabase Auth)
-- JWT stored in HTTP-only cookie, validated by middleware (`frontend/src/middleware.ts`)
-- Role-based routing: `frontend/src/lib/auth/roles.ts` defines `UserRole` enum (founder, consultant, admin)
+See `docs/specs/crewai-integration.md` for complete integration details.
 
-**Trial Guards:**
-- `frontend/src/lib/auth/trial-guard.ts` - Checks usage quotas before allowing actions
-- `frontend/src/lib/auth/trial-limits.ts` - Plan limit definitions
-- `/api/trial/allow` - Endpoint for quota validation (used by trial users)
-- **Temporary Override:** `NEXT_PUBLIC_ONBOARDING_BYPASS=true` disables guards for QA (remove before launch!)
+### Component Organization
 
-**RLS Policies:**
-- All tables enforce `auth.uid()` checks
-- Service-role operations use `frontend/src/lib/supabase/admin.ts` (server-only!)
-- Never expose `SUPABASE_SERVICE_ROLE_KEY` to client
+```
+frontend/src/components/
+├── auth/              # Authentication components
+├── onboarding/        # AI-powered onboarding wizard
+├── dashboard/         # Dashboard-specific components
+├── gates/             # Gate scoring UI
+├── canvas/            # Business model canvas tools
+├── hypothesis/        # Hypothesis management
+├── analytics/         # Analytics and charts
+└── ui/                # Shared UI primitives (Radix UI + shadcn)
+```
 
-### Important File Locations
+**UI Library:** Built on Radix UI primitives with Tailwind CSS. Components in `ui/` follow shadcn conventions.
 
-**API Routes (App Router):**
-- `frontend/src/app/api/onboarding/start/route.ts` - Initialize onboarding session
-- `frontend/src/app/api/onboarding/message/route.ts` - Handle conversation turns
-- `frontend/src/app/api/onboarding/complete/route.ts` - Finalize onboarding, create project
-- `frontend/src/app/api/analyze/route.ts` - Proxy to CrewAI, enforce plan limits
-- `frontend/src/app/api/trial/allow/route.ts` - Trial usage validation
-- `frontend/src/app/auth/callback/route.ts` - OAuth callback handler
+### Environment Variables
 
-**Key Components:**
-- `frontend/src/components/onboarding/OnboardingWizard.tsx` - Main onboarding flow
-- `frontend/src/components/onboarding/ProjectCreationWizard.tsx` - Post-onboarding project setup
-- `frontend/src/components/dashboard/MetricsCards.tsx` - Dashboard metrics
-- `frontend/src/components/gates/GateDashboard.tsx` - Gate scoring UI
-- `frontend/src/components/canvas/*.tsx` - Business Model Canvas, Value Prop Canvas, Testing Business Ideas Canvas
+**Required** (set in `frontend/.env.local`):
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (server-side only)
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - JWT signing secret
+- `OPENAI_API_KEY` - OpenAI API key for CrewAI
 
-**Hooks:**
-- `frontend/src/hooks/useProjects.ts` - Fetch and manage projects
-- `frontend/src/hooks/useGateEvaluation.ts` - Calculate gate readiness
-- `frontend/src/hooks/useDemoMode.ts` - Demo data for unauthenticated users
+**Optional:**
+- `ANTHROPIC_API_KEY` - Claude models fallback
+- `GOOGLE_AI_API_KEY` - Gemini models for creative tasks
+- `CREW_ANALYZE_URL` - Override CrewAI function URL
+- `CREW_CONTRACT_BEARER` - Token for contract checks
+- `NEXT_PUBLIC_ONBOARDING_BYPASS` - Disable trial limits (QA only, **must be false in production**)
 
-**Backend (CrewAI):**
-- `backend/src/startupai/crew.py` - Crew orchestration
-- `backend/src/startupai/tools.py` - Tool implementations
-- `backend/config/agents.yaml` - Agent configurations
-- `netlify/functions/crew-analyze.py` - Netlify function wrapper
+See `.env.example` for complete template.
 
-## Common Development Tasks
+### Testing Infrastructure
 
-### Adding a New Database Table
+**Jest Configuration** (`frontend/jest.config.js`):
+- Test environment: jsdom
+- Module aliases: `@/*` maps to `src/*`
+- Coverage threshold: 80% (branches, functions, lines, statements)
+- Test organization: `__tests__/` directories and `*.test.*` files
 
-1. Define Drizzle schema in `frontend/src/db/schema/your-table.ts`
-2. Export from `frontend/src/db/schema/index.ts`
-3. Generate migration: `pnpm db:generate`
-4. Review generated SQL in `frontend/src/db/migrations/`
-5. Apply locally: `pnpm db:push`
-6. Add RLS policies manually in migration file (Drizzle doesn't generate RLS)
-7. Create repository file in `frontend/src/db/queries/your-table.ts`
-8. Update Supabase: `supabase db push --include-all` (in production)
+**Test Types:**
+- Unit tests: `src/__tests__/**/*.test.{ts,tsx}`
+- Component tests: `src/components/**/__tests__/*.test.{ts,tsx}`
+- Integration tests: `src/__tests__/integration/**`
+- E2E tests: Playwright (`frontend/e2e/`)
 
-### Testing Cross-Site Authentication
-
-1. Start both servers (see commands above)
-2. Visit http://localhost:3001 (marketing site)
-3. Click "Get Started" or "Sign Up"
-4. Complete OAuth flow
-5. Verify redirect to http://localhost:3000 with valid session
-6. Check `user_profiles` in Drizzle Studio to confirm trigger fired
-
-### Working with CrewAI Backend
-
-1. Ensure `.env.local` has `OPENAI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`
-2. Check contract: `pnpm crew:contract-check` (requires `CREW_CONTRACT_BEARER`)
-3. Test function locally: `netlify dev` then `curl` to `http://localhost:8888/.netlify/functions/crew-analyze`
-4. View logs in Netlify dashboard: Functions → crew-analyze → Function log
-5. Python backend runs in Netlify serverless environment (26s timeout for Pro, 10s for Free)
-
-### Debugging Onboarding Flow
-
-1. Enable bypass for testing: Set `NEXT_PUBLIC_ONBOARDING_BYPASS=true` in Netlify env vars
-2. Check session state in Supabase: `SELECT * FROM onboarding_sessions WHERE user_id = 'uuid'`
-3. Verify quality signals in `stage_data` JSON column
-4. Check conversation history in `conversation_history` JSONB column
-5. Confirm entrepreneur brief created: `SELECT * FROM entrepreneur_briefs WHERE user_id = 'uuid'`
-6. Review CrewAI function logs in Netlify dashboard
-7. **Remember:** Remove bypass flag before enabling paid access!
-
-### Adding New Plan Limits
-
-1. Update `PLAN_LIMITS` in `frontend/src/app/api/onboarding/start/route.ts`
-2. Add action to `trial_usage_counters` table (migration if new action type)
-3. Update trial guard logic in `frontend/src/lib/auth/trial-guard.ts`
-4. Update docs in marketing repo: `../startupai.site/docs/product/PRD.md`
-5. Test with bypass disabled to ensure limits enforce correctly
-
-## Testing Strategy
-
-### Test Organization
-- **Unit Tests:** `frontend/src/__tests__/*.test.tsx` (162 passing)
-- **Integration Tests:** `frontend/src/__tests__/integration/*.test.ts`
-- **E2E Tests:** `frontend/src/__tests__/e2e/*.spec.ts` (Playwright, 45 tests)
-- **Specification-Driven:** `frontend/src/components/onboarding/__tests__/*.specification.test.tsx` (validates marketing contracts)
-
-### Running Focused Tests
+**Running Single Tests:**
 ```bash
-# Single test file
-pnpm test path/to/file.test.tsx
+# Jest
+pnpm test -- path/to/file.test.ts
+pnpm test:watch -- --testNamePattern="test name"
 
-# Pattern matching
-pnpm test:watch --testNamePattern="OnboardingWizard"
-
-# E2E headed mode (see browser)
-pnpm test:e2e:headed
-
-# Backend integration only
-pnpm test:e2e:backend
+# Playwright
+pnpm test:e2e -- tests/specific-test.spec.ts
+pnpm test:e2e:headed -- tests/specific-test.spec.ts
 ```
 
-### Test Fixtures
-- Mock data: `frontend/src/data/demoData.ts`, `frontend/src/data/portfolioMockData.ts`
-- Test helpers: `frontend/src/__tests__/utils/test-helpers.ts`
-- Specification data: `frontend/src/__tests__/utils/specification-data.ts`
+## Important Conventions
 
-## Environment Variables
+### Database Operations
 
-**Required for Local Development:**
-```bash
-# Copy example and populate
-cp frontend/.env.example frontend/.env.local
+1. **Always use service-role client for admin operations:**
+   ```typescript
+   import { createAdminClient } from '@/lib/supabase/server';
+   const supabase = createAdminClient();
+   ```
 
-# Essential variables:
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key  # Server-only!
-DATABASE_URL=postgresql://postgres:[password]@db.[project].supabase.co:6543/postgres?workaround=supabase-pooler.vercel
-JWT_SECRET=your-jwt-secret
-OPENAI_API_KEY=your-openai-key
+2. **User-scoped operations use regular client:**
+   ```typescript
+   import { createClient } from '@/lib/supabase/server';
+   const supabase = createClient();
+   ```
 
-# Optional:
-ANTHROPIC_API_KEY=your-anthropic-key
-GOOGLE_AI_API_KEY=your-gemini-key
-```
+3. **Never expose service-role key to client:** Service-role operations must stay in API routes or server components.
 
-**CrewAI Testing:**
-```bash
-CREW_CONTRACT_BEARER=test-token-for-local-contract-check
-CREW_ANALYZE_URL=http://localhost:8888/.netlify/functions/crew-analyze  # Optional override
-```
+4. **Use Drizzle for type safety:** Prefer Drizzle queries over raw SQL for maintainability.
 
-**Temporary QA Override (remove before launch!):**
-```bash
-NEXT_PUBLIC_ONBOARDING_BYPASS=true  # Disables monthly onboarding limit
-```
+### File Organization
 
-**Netlify Deployment:**
-- Set in Netlify UI: Site settings → Environment variables
-- See `docs/archive/legacy/NETLIFY_ENV_VARS.md` for full list
+- **No mock data in production code paths** - All components use real Supabase data
+- **Colocate tests with components** - Use `__tests__/` directories next to the code
+- **API routes in App Router** - All new API endpoints go in `frontend/src/app/api/`
+- **Pages stay in Pages Router** - Don't migrate existing pages unless necessary
 
-## Documentation Structure
+### Code Quality
 
-This repository follows a strict documentation hierarchy. Always check these locations:
+- **TypeScript strict mode** - All code must type-check
+- **No unused imports** - Clean up imports before committing
+- **Explicit error handling** - All async operations should handle errors
+- **Accessibility** - All interactive elements need proper ARIA labels
+- **Security** - Never commit secrets, use environment variables
 
-**Master Reference (External):**
-- `../startupai.site/docs/technical/two-site-implementation-plan.md` - Single source of truth for both sites
+### Git Workflow
 
-**Active Documentation (This Repo):**
-- `docs/overview/` - Platform overview, architecture, two-site plan reference
-- `docs/specs/` - API contracts, data schema, CrewAI integration, frontend components
-- `docs/testing/` - Testing strategy, specification-driven testing
-- `docs/work/` - Roadmap, phases, backlog, in-progress work, done items
-- `docs/adrs/` - Architecture Decision Records (e.g., two-site architecture, routing strategy)
-- `docs/status/` - Implementation status, linting status, release notes
+- **Never force push to main/master** without explicit permission
+- **Follow existing commit message style** - Check `git log` for patterns
+- **Test before committing** - Run `pnpm test` and `pnpm build`
+- **Document breaking changes** - Update relevant docs
 
-**Archived Documentation:**
-- `docs/archive/legacy/` - Historical docs superseded by current specs
-- `docs/archive/completion-reports/` - Feature completion reports (CrewAI, PostHog, Gates, TDD)
+## Key Documentation
 
-**External Dependencies:**
-- Marketing site docs: `../startupai.site/docs/` (business, product, design)
-- Shared design system: `../startupai.site/docs/design/design-system.md`
-- Product requirements: `../startupai.site/docs/product/PRD.md`
+### Engineering Docs (`docs/engineering/`)
+- **10-authentication/** - OAuth setup, JWT validation, role-based routing
+- **30-data/** - Supabase setup, Drizzle schema, migrations, data retention
+- **50-testing/** - Testing infrastructure and TDD practices
+- **deployment/** - Docker, Netlify environment variables
 
-## Key Constraints & Gotchas
+### Specifications (`docs/specs/`)
+- **crewai-integration.md** - Complete CrewAI integration guide (CRITICAL for AI features)
+- **api-onboarding.md** - Onboarding API contract
+- **data-schema.md** - Database structure and functions
+- **mvp-specification.md** - Core feature requirements
 
-### DO NOT:
-- **Consolidate routers** - Hybrid Pages/App Router is intentional (ADR-0002)
-- **Create new files unnecessarily** - Prefer editing existing files
-- **Expose service-role key to client** - Use `admin.ts` server-side only
-- **Skip RLS policies** - Drizzle doesn't generate them; add manually to migrations
-- **Launch with bypass enabled** - Set `NEXT_PUBLIC_ONBOARDING_BYPASS=false` before enabling purchases
-- **Commit `.env.local`** - Already in `.gitignore`, contains secrets
-- **Use Cursor/Copilot rules from other projects** - None exist in this repo
+### Backend (`backend/`)
+- **CREW_AI.md** - Complete CrewAI implementation guide with YAML configs
+- **README.md** - Quick start for CrewAI backend
 
-### DO:
-- **Read master plan first** - `../startupai.site/docs/technical/two-site-implementation-plan.md` before major changes
-- **Update both Drizzle and SQL** - Schema changes require both to stay in sync
-- **Test cross-site flows** - Run both servers when changing auth or onboarding
-- **Check specification tests** - `*.specification.test.tsx` validates marketing promises
-- **Use pnpm** - This project uses `pnpm@9.12.1`, not npm or yarn
-- **Review migration SQL** - Don't blindly trust `drizzle-kit generate`; add RLS policies manually
-- **Follow TDD** - See `frontend/TDD_IMPLEMENTATION_COMPLETE.md` for testing culture
-- **Validate accessibility** - PostHog tracks Core Web Vitals (LCP < 2.2s, INP < 200ms)
+### Master Documentation
+- **README.md** - This file (project overview and status)
+- **docs/DOCUMENTATION_INDEX.md** - Complete doc index
 
-### Current Status Reminders:
-- **Onboarding bypass active** - Temp override disables plan limits for QA; remove before paid launch
-- **CrewAI 70% complete** - Onboarding flow integrated (start/message routes live), full analysis pipeline operational
-- **Hybrid router stable** - No consolidation planned; App Router for new features, Pages Router for stable dashboards
-- **162 unit tests + 45 E2E tests** - Maintain test coverage when adding features
-- **8 database migrations deployed** - Always generate new numbered migrations, never edit existing
+### External References
+- **Two-Site Implementation Plan:** `../startupai.site/docs/technical/two-site-implementation-plan.md` - Single source of truth for all StartupAI development (lives in marketing repo)
 
-## Runtime Requirements
+## Common Pitfalls
 
-- **Node.js:** 22.18.0 (use `nvm use` to load from `.nvmrc`)
-- **Package Manager:** pnpm 9.12.1 (enable via `corepack enable pnpm`)
-- **Supabase CLI:** Available via `pnpm exec supabase` (installed as dev dependency)
-- **Python:** 3.10 for Netlify functions (managed by Netlify)
+1. **Don't bypass trial limits in production:** Ensure `NEXT_PUBLIC_ONBOARDING_BYPASS=false` before launch
+2. **Don't hardcode agent definitions:** All CrewAI agents must be YAML-configured in `backend/config/`
+3. **Don't mix routing paradigms carelessly:** Understand when to use Pages vs App Router
+4. **Don't skip migrations:** All schema changes require Supabase migrations
+5. **Don't use `npm`:** This project uses `pnpm` exclusively
+6. **Don't modify `.next/` or `node_modules/`:** These are generated directories
+7. **Don't store secrets in code:** Use environment variables and `.env.local`
 
-## Production Deployment
+## Project Status
 
-- **Live URL:** https://app-startupai-site.netlify.app
-- **Future Domain:** https://app.startupai.site (pending DNS)
-- **Auto-Deploy:** Push to `main` branch triggers Netlify build
-- **Environment:** Set in Netlify UI (see `docs/archive/legacy/NETLIFY_ENV_VARS.md`)
-- **Database:** Supabase managed Postgres 15 (local dev uses Postgres 17 via CLI)
-- **Functions:** Netlify serverless (10s timeout free, 26s Pro, 15min background)
+**Overall:** ~65-70% Complete
+- ✅ Infrastructure: 95% (Auth, DB, Deployment)
+- ✅ UI Components: 70% (50+ components, Radix UI + Tailwind)
+- ✅ Backend Integration: 70% (Dashboard, projects, evidence connected)
+- ⚠️ AI Backend: CrewAI workflows deployed and operational
 
-## Related Resources
+**Recent Updates (Oct 2025):**
+- CrewAI onboarding flow live with start/message routes
+- Quality signal detection and guardrails
+- Contract-check tooling for CrewAI validation
+- Onboarding guard configurable via environment variable
 
-- **Netlify Functions:** `netlify/functions/README.md`
-- **CrewAI Spec:** `backend/CREW_AI.md`
-- **E2E Testing Guide:** `frontend/E2E_TESTING_GUIDE.md`
-- **TDD Report:** `frontend/TDD_IMPLEMENTATION_COMPLETE.md`
-- **Gate Integration:** `docs/archive/completion-reports/GATE_INTEGRATION_COMPLETE.md`
-- **PostHog Setup:** `docs/archive/completion-reports/POSTHOG_PRODUCTION_COMPLETE.md`
+**Next Priorities:**
+1. Complete frontend integration with CrewAI endpoints
+2. Real-time progress tracking for AI workflows
+3. End-to-end workflow testing
+4. Production readiness checklist (disable bypass, verify limits)
 
----
+## Getting Help
 
-**Last Updated:** 2025-10-27
-**Codebase Status:** 65-70% complete, CrewAI onboarding flow live, dashboard integration ongoing
+- **Documentation Issues:** Check `docs/DOCUMENTATION_INDEX.md` first
+- **Build Errors:** Ensure `nvm use` and `pnpm install` completed successfully
+- **Test Failures:** Review test output and check `frontend/jest.config.js` for paths
+- **Database Issues:** Verify `frontend/.env.local` has correct `DATABASE_URL`
+- **CrewAI Issues:** See `backend/CREW_AI.md` and `docs/specs/crewai-integration.md`
