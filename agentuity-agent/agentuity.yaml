@@ -68,3 +68,6 @@ agents:
     name: Onboarding
     # The description of the Agent which is editable
     description: An Agent that works with entrepreneurs to help them gather all the details about their idea
+    # Authentication configuration for API access
+    auth:
+      type: bearer
