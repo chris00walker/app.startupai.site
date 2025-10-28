@@ -23,6 +23,7 @@ try:
     # Import StartupAICrew availability status for health checks
     import crew_runtime
     StartupAICrew = crew_runtime.StartupAICrew
+    print(f"[CREW-ANALYZE] Successfully imported crew_runtime and StartupAICrew")
 except ImportError as import_error:
     # Log detailed error for debugging
     print(f"[IMPORT ERROR] Failed to import crew_runtime: {import_error}")
