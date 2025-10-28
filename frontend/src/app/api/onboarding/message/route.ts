@@ -219,21 +219,20 @@ const CONVERSATION_STAGES = {
 // Helper Functions
 // ============================================================================
 
-function resolveCrewFunctionUrl(request: NextRequest): string {
+function resolveAgentUrl(): string {
+  // Use Agentuity agent URL if configured
+  if (process.env.AGENTUITY_AGENT_URL) {
+    return process.env.AGENTUITY_AGENT_URL;
+  }
+
+  // Fallback to legacy CrewAI URL if still using Netlify functions
   if (process.env.CREW_ANALYZE_URL) {
+    console.warn('[onboarding] Using legacy CREW_ANALYZE_URL - consider migrating to Agentuity');
     return process.env.CREW_ANALYZE_URL;
   }
 
-  const forwardedHost = request.headers.get('x-forwarded-host');
-  const forwardedProto = request.headers.get('x-forwarded-proto');
-  const host = forwardedHost ?? request.headers.get('host');
-
-  if (host) {
-    const protocol = forwardedProto ?? (host.includes('localhost') ? 'http' : 'https');
-    return `${protocol}://${host}/.netlify/functions/crew-analyze`;
-  }
-
-  return 'http://localhost:8888/.netlify/functions/crew-analyze';
+  // Default to local Agentuity agent for development
+  return 'http://localhost:8000/onboarding';
 }
 
 async function getOnboardingSession(client: SupabaseClient, sessionId: string, expectedUserId?: string) {
@@ -456,21 +455,19 @@ export async function POST(request: NextRequest) {
 
     let crewPayload: CrewConversationMessageResponse;
     try {
-      const crewUrl = resolveCrewFunctionUrl(request);
-      const crewResponse = await fetch(crewUrl, {
+      const agentUrl = resolveAgentUrl();
+      const crewResponse = await fetch(agentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          action: 'conversation_message',
+          action: 'message',  // Agentuity agent uses 'message' instead of 'conversation_message'
           session_id: sessionId,
           message: userMessage,
-          message_type: messageType || 'text',
-          current_stage: session.current_stage || 1,
-          conversation_history: session.conversation_history || [],
-          stage_data: session.stage_data || {},
+          intent: messageType || 'text',
+          user_id: user.id,
         }),
       });
 

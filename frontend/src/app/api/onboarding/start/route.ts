@@ -139,21 +139,20 @@ const PLAN_LIMITS = {
 // Helper Functions
 // ============================================================================
 
-function resolveCrewFunctionUrl(request: NextRequest): string {
+function resolveAgentUrl(): string {
+  // Use Agentuity agent URL if configured
+  if (process.env.AGENTUITY_AGENT_URL) {
+    return process.env.AGENTUITY_AGENT_URL;
+  }
+
+  // Fallback to legacy CrewAI URL if still using Netlify functions
   if (process.env.CREW_ANALYZE_URL) {
+    console.warn('[onboarding] Using legacy CREW_ANALYZE_URL - consider migrating to Agentuity');
     return process.env.CREW_ANALYZE_URL;
   }
 
-  const forwardedHost = request.headers.get('x-forwarded-host');
-  const forwardedProto = request.headers.get('x-forwarded-proto');
-  const host = forwardedHost ?? request.headers.get('host');
-
-  if (host) {
-    const protocol = forwardedProto ?? (host.includes('localhost') ? 'http' : 'https');
-    return `${protocol}://${host}/.netlify/functions/crew-analyze`;
-  }
-
-  return 'http://localhost:8888/.netlify/functions/crew-analyze';
+  // Default to local Agentuity agent for development
+  return 'http://localhost:8000/onboarding';
 }
 
 async function checkPlanLimits(
@@ -382,17 +381,19 @@ export async function POST(request: NextRequest) {
 
     let crewSession: CrewConversationStartSession;
     try {
-      const crewUrl = resolveCrewFunctionUrl(request);
-      const crewResponse = await fetch(crewUrl, {
+      const agentUrl = resolveAgentUrl();
+      const crewResponse = await fetch(agentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
-          action: 'conversation_start',
+          action: 'start',  // Agentuity agent uses 'start' instead of 'conversation_start'
+          user_id: user.id,
           plan_type: planType,
           user_context: userContext ?? {},
+          resume_session_id: resumeSessionId,
         }),
       });
 
