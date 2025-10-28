@@ -1,8 +1,9 @@
 ---
 purpose: "Technical specification for Agentuity agent integration"
-status: "active"
+status: "implemented"
 created: "2025-10-28"
 last_reviewed: "2025-10-28"
+updated: "2025-10-28"
 ---
 
 # CrewAI on Agentuity Integration Specification
@@ -153,17 +154,93 @@ class ReportGeneratorTool:
         return result.data
 ```
 
-## CrewAI Agent Implementation on Agentuity
+## Onboarding Flow Integration
 
-### Core Agent Structure
+### Complete User Journey
+
+1. **User selects plan** on pricing page (startupai.site)
+2. **Authenticates** via GitHub or Email (Supabase Auth)
+3. **Redirects to /onboarding** page (app.startupai.site)
+4. **Frontend UI** displays beautiful onboarding wizard
+5. **API routes** call Agentuity agent for conversation
+6. **Agentuity agent** manages conversation state and personality
+7. **CrewAI analysis** triggered upon completion
+8. **Results displayed** in user dashboard
+
+### Frontend-to-Backend Connection
+
+#### Environment Configuration
+
+```bash
+# frontend/.env.local
+AGENTUITY_AGENT_URL=https://your-agent.agentuity.com/onboarding
+# For local development:
+# AGENTUITY_AGENT_URL=http://localhost:8000/onboarding
+```
+
+#### API Routes (Next.js → Agentuity)
+
+**`/api/onboarding/start/route.ts`:**
+- Calls Agentuity agent with action: "start"
+- Passes user_id, plan_type, and optional resume_session_id
+- Returns session_id, first question, and stage info
+
+**`/api/onboarding/message/route.ts`:**
+- Calls Agentuity agent with action: "message"
+- Sends user message and session_id
+- Returns AI response, follow-up questions, and progress
+
+**`/api/onboarding/complete/route.ts`:**
+- Triggers completion and CrewAI analysis
+- Stores entrepreneur brief in database
+- Returns workflow_id and next steps
+
+### Onboarding Agent Implementation
 
 **Location:** `agentuity-agent/agentuity_agents/Onboarding/agent.py`
+
+#### Key Features
+
+1. **5-Stage Conversation Flow:**
+   - Business Idea (Understanding the concept)
+   - Target Market (Identifying customers)
+   - Value Proposition (Defining uniqueness)
+   - Business Model (Revenue strategy)
+   - Validation Plan (Testing approach)
+
+2. **Conversation Personality System:**
+   - Empathetic, encouraging, professional traits
+   - Sentiment analysis for adaptive responses
+   - Stage-specific prompts and questions
+   - Intelligent follow-up generation
+
+3. **Session Management:**
+   - KV storage with 24-hour TTL
+   - Session resumption capability
+   - Progress tracking across stages
+   - Conversation history preservation
+
+4. **Plan Limits (Disabled for Testing):**
+   ```python
+   ENFORCE_LIMITS = False  # Toggle for production
+   ```
+   When enabled:
+   - Trial: 3 sessions/month, 100 messages/session
+   - Founder: 10 sessions/month, 200 messages/session
+   - Consultant: 50 sessions/month, 500 messages/session
+
+5. **Accessibility Compliance:**
+   - WCAG 2.2 AA standards
+   - Screen reader metadata
+   - Plain language error messages
+   - Progress indicators with ARIA labels
+
+#### Core Agent Structure
 
 ```python
 from agentuity import AgentRequest, AgentResponse, AgentContext
 from backend.src.startupai.crew import StartupAICrew
-import json
-import os
+from .conversation_handler import OnboardingPersonality, ConversationEnhancer
 
 async def run(
     request: AgentRequest,
@@ -171,38 +248,75 @@ async def run(
     context: AgentContext
 ) -> AgentResponse:
     """
-    Main agent handler wrapping CrewAI for onboarding and strategic analysis
+    Main onboarding agent handler with full conversation flow
     """
-    # Set environment variables from Agentuity context
-    os.environ["OPENAI_API_KEY"] = context.env.get("OPENAI_API_KEY")
-    os.environ["SUPABASE_URL"] = context.env.get("SUPABASE_URL")
-    os.environ["SUPABASE_SERVICE_ROLE_KEY"] = context.env.get("SUPABASE_SERVICE_ROLE_KEY")
-    
     # Extract request data
-    action = request.get("action", "analyze")
-    user_id = request.get("user_id")
-    project_data = request.data.json if request.data else {}
+    data = await request.data.json()
+    action = data.get("action", "start")
     
-    # Initialize CrewAI
-    crew = StartupAICrew()
+    # Route to appropriate handler
+    if action == "start":
+        result = await handle_onboarding_start(data, context)
+    elif action == "message":
+        result = await handle_onboarding_message(data, context)
+    elif action == "complete":
+        result = await handle_onboarding_complete(data, context)
+    elif action == "analyze":
+        # Trigger CrewAI analysis
+        result = await trigger_crewai_analysis(data, context)
     
-    # Route to appropriate CrewAI workflow
-    if action == "analyze":
-        # Run the full CrewAI pipeline
-        result = crew.kickoff(inputs={
-            "entrepreneur_brief": project_data.get("brief", ""),
-            "project_id": project_data.get("id"),
-            "user_id": user_id
-        })
-        
-        return response.json({
-            "success": True,
-            "analysis": result.raw,
-            "summary": result.summary if hasattr(result, 'summary') else str(result)
-        })
-    else:
-        return response.json({"error": "Unknown action"}, metadata={"status": 400})
+    # Add accessibility metadata
+    result = AccessibilityHelper.format_for_screen_readers(result)
+    
+    return response.json(result)
 ```
+
+### Seamless User Experience
+
+#### Frontend UI Components
+
+**`OnboardingWizard.tsx`:**
+- Beautiful, responsive conversation interface
+- Real-time progress tracking sidebar
+- Smooth animations and transitions
+- Voice input support (future)
+- Auto-save and resume capability
+
+**`ConversationInterface.tsx`:**
+- Chat-like message display
+- Typing indicators for AI responses
+- Quality signals visualization
+- Stage progress indicators
+- Accessibility-first design
+
+#### Data Flow
+
+1. **User Input** → Frontend validates and formats
+2. **API Route** → Adds auth token and forwards to Agentuity
+3. **Agentuity Agent** → Processes with personality and context
+4. **Response** → Enhanced with metadata and accessibility
+5. **Frontend** → Updates UI with smooth transitions
+6. **Database** → Session state persisted for resumption
+
+#### Session Persistence
+
+```python
+# Agentuity KV Storage
+await context.kv.set(
+    "onboarding_sessions",
+    session_id,
+    session_data,
+    {"ttl": 86400}  # 24 hours
+)
+```
+
+#### CrewAI Integration
+
+When onboarding completes, the agent:
+1. Builds comprehensive entrepreneur brief
+2. Triggers CrewAI analysis with brief data
+3. Returns workflow ID for tracking
+4. Stores results in Supabase
 
 ### CrewAI Configuration
 

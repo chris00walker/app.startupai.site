@@ -1,12 +1,22 @@
 ---
 purpose: "Private technical source of truth for onboarding API contracts"
 status: "active"
-last_reviewed: "2025-10-27"
+last_reviewed: "2025-10-28"
+updated: "2025-10-28"
 ---
 
 # Onboarding API Specification
 
 Implementation lives in `frontend/src/app/api/onboarding/{start,message,complete}/route.ts`. All routes are authenticated (Supabase server client derived from cookies) and return JSON.
+
+## Backend Integration
+
+**Agentuity Agent:** The API routes now forward requests to the Agentuity-hosted onboarding agent instead of Netlify Functions. Configure via:
+```bash
+AGENTUITY_AGENT_URL=https://your-agent.agentuity.com/onboarding
+```
+
+The agent handles conversation flow, personality, session management, and CrewAI integration.
 
 ## Endpoint Summary
 
