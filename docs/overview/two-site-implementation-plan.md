@@ -10,10 +10,10 @@ last_reviewed: "2025-10-26"
 **System:** StartupAI Evidence-Led Strategy Platform  
 **Author:** AI Assistant  
 **Created:** September 2025  
-**Last Updated:** October 24, 2025, 21:20 - **ONBOARDING FLOW RESTORED IN PRODUCTION**  
-**Status:** **AUTH + ONBOARDING OPERATIONAL** - AI insights still stubbed, accessibility remediation pending  
-**Breakthrough:** Supabase migrations applied in production; `/onboarding` conversation live end-to-end  
-**Est. Time to Launch:** 18-22 hours core polish (AI + dashboards) | Additional 8-10 hours for accessibility  
+**Last Updated:** October 28, 2025, 10:35 - **DEPLOYING CREWAI ON AGENTUITY**  
+**Status:** **AUTH + ONBOARDING OPERATIONAL** - Deploying existing CrewAI agents on Agentuity cloud platform  
+**Breakthrough:** Agentuity natively supports CrewAI framework; no need to rewrite agents  
+**Est. Time to Launch:** 12-15 hours (CrewAI on Agentuity + dashboards) | Additional 8-10 hours for accessibility  
 
 ---
 
@@ -41,8 +41,10 @@ All implementation details, architecture decisions, status tracking, and next st
 - [`docs/specs/auth.md`](../specs/auth.md)  Authentication system
 - [`docs/specs/supabase.md`](../specs/supabase.md)  Database setup
 - [`docs/testing/README.md`](../testing/README.md)  Testing infrastructure
-- [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md)  **CrewAI integration specification**
-- [`backend/CREW_AI.md`](../../backend/CREW_AI.md)  CrewAI implementation spec
+- [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md)  **[DEPRECATED] CrewAI integration specification**
+- [`docs/specs/agentuity-integration.md`](../specs/agentuity-integration.md)  **CrewAI on Agentuity deployment specification** (NEW)
+- [`backend/CREW_AI.md`](../../backend/CREW_AI.md)  [DEPRECATED] CrewAI implementation spec
+- [`agentuity-agent/README.md`](../../agentuity-agent/README.md)  Agentuity agent implementation
 
 **Operations & Status:**
 - [`docs/status/implementation-status.md`](../status/implementation-status.md)  Weekly progress audit
@@ -180,15 +182,15 @@ startupai.site/login
 ```
 POST /api/projects/create ............  Create project endpoint
 POST /api/trial/allow ................  Trial guardrails (Oct 4)
-POST /api/analyze ....................  CrewAI backend (15% complete)
-POST /api/analyze-background .........  CrewAI background job
+POST /api/analyze ....................  CrewAI via Agentuity endpoint (deploying)
+POST /api/analyze-background .........  CrewAI background via Agentuity
 ```
 
 ** Navigation Status:**
 -  **20/20 pages** deployed
 -  **2/2 API routes** implemented
 -  **Role-based routing** working
--  **2 API routes** pending (CrewAI)
+-  **2 API routes** pending (CrewAI on Agentuity deployment in progress)
 
 ** Identified Gaps:**
 -  **Missing:** Project detail page (`/project/[id]`)
@@ -197,7 +199,7 @@ POST /api/analyze-background .........  CrewAI background job
 -  **Missing:** Experiment detail page (`/experiment/[id]`)
 -  **Missing:** Report detail page (`/report/[id]`)
 -  **Orphaned:** `/test-auth` (testing only, no nav link)
--  **Incomplete:** `/projects/new` (UI exists, CrewAI integration pending)
+-  **Incomplete:** `/projects/new` (UI exists, CrewAI on Agentuity pending)
 -  **Incomplete:** Canvas tools (UI complete, AI auto-fill pending)
 
 ** Component  Page Gaps:**
@@ -216,7 +218,7 @@ ReportCard component   No /report/[id] detail page
 **High Priority (Blocks User Flow):**
 1.  `/project/[id]` - Project detail/overview page
 2.  `/report/[id]` - View generated reports
-3.  Complete CrewAI `/api/analyze` integration
+3. Complete CrewAI on Agentuity `/api/analyze` integration
 
 **Medium Priority (Enhances UX):**
 4.  `/hypothesis/[id]` - Hypothesis detail/edit
@@ -239,12 +241,13 @@ ReportCard component   No /report/[id] detail page
 - GitHub OAuth + Supabase session propagation now stable end-to-end
 - `/onboarding` route implemented with stateful wizard and Supabase persistence
 
-** BLOCKER 1: AI Output Still Stubbed**
--  CrewAI backend integration unfinished; onboarding responses scripted
--  `/api/analyze` + `/api/analyze-background` still route to placeholder logic
--  Project creation/dashboard lack generated insights or reports
-- **Impact:** Users experience guided conversation but receive no AI-generated deliverables
-- **Time to Fix:** 10-12 hours (CrewAI tools, workflow trigger, surfaced insights)
+** BLOCKER 1: AI Output Still Stubbed (DEPLOYING CREWAI ON AGENTUITY)**
+-  **UPDATE Oct 28:** Deploying existing CrewAI agents on Agentuity cloud platform
+-  Agentuity natively supports CrewAI framework - no rewrite needed
+-  `/api/analyze` + `/api/analyze-background` will call CrewAI on Agentuity
+-  Project creation/dashboard will receive CrewAI-generated insights via Agentuity
+- **Impact:** Users experience guided conversation but receive no AI-generated deliverables (until deployment complete)
+- **Time to Fix:** 6-8 hours (CrewAI deployment on Agentuity, API integration)
 
 ** BLOCKER 2: Marketing vs Reality Gap (Partial Progress)**
 -  Conversation UI now demonstrates AI presence
@@ -303,8 +306,8 @@ ReportCard component   No /report/[id] detail page
 1. **Database Schema Updates** (2-3 hours)   Supabase migrations 00009 & 00010 applied in production
 2. **API Endpoints Implementation** (4-6 hours)   `/api/onboarding/{start,message,complete}` deployed (CrewAI hook still pending)
 3. **Frontend Components Development** (6-8 hours)   Wizard, sidebar, conversation UI live; polish + theming backlog
-4. **AI Conversation Logic** (4-6 hours)   7-stage flow operational with scripted responses; integrate CrewAI for real data
-5. **Integration & Testing** (4-6 hours)   Smoke-tested in production signup; follow-up tests required post CrewAI integration
+4. **AI Conversation Logic** (4-6 hours)   7-stage flow operational with scripted responses; integrate CrewAI via Agentuity for real data
+5. **Integration & Testing** (4-6 hours)   Smoke-tested in production signup; follow-up tests required post CrewAI on Agentuity deployment
 
 **Phase 5: Critical Accessibility Fixes (8-10 hours) - LAUNCH BLOCKER**
 1. Add semantic HTML landmarks (`<main>`, `<nav>`, `<aside>`) (2h)
@@ -858,7 +861,7 @@ export async function upsertTrialUsageCounter(params: {
 
 #### Step 7: Enhance Mock AI for MVP Launch (2-3 hours)
 
-**Strategic Decision:** Launch with enhanced mock AI, add real CrewAI later
+**Strategic Decision:** Deploy CrewAI on Agentuity for immediate production AI capabilities
 
 **Why This Works:**
 -  Users get functional conversation interface
@@ -1055,7 +1058,7 @@ on_auth_user_created | INSERT | users
 
 **Step 7: Enhanced Mock AI** 
 - Current mock AI functional for auth testing
-- Real CrewAI integration is Phase 2 priority
+- CrewAI on Agentuity deployment is immediate priority (in progress)
 - Estimate: 2-3 hours when prioritized
 
 ####  Git Commits
@@ -1173,7 +1176,7 @@ e8290ab - Progress documentation (consolidated here)
 - Verify user_profiles table population via Supabase dashboard
 - Test onboarding conversation flow
 - Plan Phase 1: Accessibility fixes (8-10 hours)
-- Plan Phase 2: Replace mock AI with CrewAI (6-8 hours)
+- Plan Phase 2: Complete CrewAI on Agentuity deployment (6-8 hours)
 
 ---
 
@@ -1188,7 +1191,7 @@ e8290ab - Progress documentation (consolidated here)
 ** Netlify Best Practices:**
 - TypeScript functions for serverless
 - Environment variables for secrets
-- External services for Python/CrewAI
+- Agentuity cloud for CrewAI Python agents
 - Mock implementations acceptable for MVP
 
 ** Next.js App Router:**
@@ -1211,11 +1214,11 @@ e8290ab - Progress documentation (consolidated here)
 - Screen reader optimization
 - Required for launch
 
-**Phase 2 (12-17 hours):** Real CrewAI Integration (POST-LAUNCH)
-- Deploy CrewAI as external service (Render/Railway)
-- Implement streaming responses
-- Connect to Netlify via HTTP
-- Enhanced AI quality
+**Phase 2 (6-8 hours):** CrewAI on Agentuity Deployment (IN PROGRESS)
+- Deploy existing CrewAI agents to Agentuity cloud
+- Wrap CrewAI in Agentuity agent handler
+- Connect Next.js to CrewAI via Agentuity endpoints
+- Production-ready CrewAI with built-in scaling
 
 **Phase 3 (4-6 hours):** Polish & Optimization (POST-LAUNCH)
 - Error handling refinement
@@ -1387,47 +1390,50 @@ export function createClient() {
   - Pages Router: 16 main app pages
   - Decision: KEEP HYBRID (documented in router-consolidation-analysis.md)
 
-### 2.5 Backend & AI ( 15% Complete - LAUNCH BLOCKER)
+### 2.5 Backend & AI (CrewAI on Agentuity - LAUNCH BLOCKER)
 
 **User Testing Results (Oct 6, 2025):** Product tested - **NO AI FUNCTIONALITY VISIBLE**
 
 #### AI Framework Strategy ( FINALIZED Oct 4, 2025)
 
-**Decision:** Hybrid approach using BOTH CrewAI + Vercel AI SDK
+**Decision:** CrewAI on Agentuity for agent orchestration + Vercel AI SDK for UI features
 
 **Architecture Validated by Vercel:**
 -  App Router for AI API routes (streaming support)
 -  Pages Router for main application UI (stability)
 -  Hybrid approach officially recommended by Vercel docs
 
-**CrewAI (Complex Workflows)**
+**CrewAI on Agentuity (Complex Workflows)**
 - Purpose: Multi-agent orchestration for report generation
-- Deployment: Netlify Functions (Python)
-- Status:  15% implemented (Steps 1-2 of 10 complete)
+- Deployment: CrewAI framework on Agentuity Cloud Platform
+- Status: Deployment in progress (wrapping CrewAI in Agentuity agent)
 - Priority: CRITICAL - Phase 3 blocker
+- Advantages: Keep existing CrewAI code, cloud-native deployment, auto-scaling
 
 **Vercel AI SDK (Simple Interactions)**
 - Purpose: Lightweight AI features in UI
 - Integration: React hooks + streaming
 - Status: Not started (Phase 4)
-- Priority: Medium - after CrewAI working
+- Priority: Medium - after CrewAI on Agentuity working
 
-#### CrewAI Backend Status (Updated Oct 4, 2025)
+#### AI Backend Status (Updated Oct 28, 2025 - CREWAI ON AGENTUITY)
 
-** Completed (Steps 1-2):**
--  CrewAI 0.201.1 installed (exceeds minimum 0.80.0) - Oct 4, 2025
--  All dependencies installed and verified
--  Import and initialization tested successfully
--  Agent configs: `backend/config/agents.yaml` (100 lines, 6 agents)
--  Task configs: `backend/config/tasks.yaml` (120 lines, 6 tasks)
--  Source code: `backend/src/startupai/` (832 lines total)
-  - `__init__.py`: Package exports (24 lines)
-  - `crew.py`: Crew orchestration (268 lines)
-  - `main.py`: CLI entry point (246 lines)
-  - `tools.py`: Custom tools (294 lines)
--  Environment checker: `backend/verify_setup.py`
--  OpenAI API key configured and tested
--  Supabase credentials configured
+** CrewAI on Agentuity Status (Oct 28, 2025):**
+- ✅ Agentuity CLI installed and configured
+- ✅ Agentuity supports CrewAI natively (confirmed in docs)
+- ✅ Agent wrapper created for CrewAI: `agentuity-agent/`
+- ✅ Python 3.12 environment with uv package manager
+- 🔄 Migrate CrewAI code to Agentuity structure
+- 🔄 Deploy CrewAI via `agentuity deploy`
+- 🔄 API endpoint integration needed
+- 🔄 Frontend connection to CrewAI via Agentuity
+
+**Existing CrewAI Implementation (Being Deployed):**
+- Agent configs: `backend/config/agents.yaml` (6 agents)
+- Task configs: `backend/config/tasks.yaml` (6 tasks)
+- Tools: Evidence Store, WebSearch, ReportGenerator
+- Crew orchestration: `backend/src/startupai/crew.py`
+- All will run unchanged on Agentuity platform
 -  direnv setup for automatic environment loading
 -  Multi-provider LLM documentation: `docs/engineering/multi-provider-llm-setup.md`
 
@@ -1550,12 +1556,13 @@ export function createClient() {
 
 #### Backend (In Progress)
 
-**CrewAI Multi-Agent System:**
-- **CrewAI 0.80+** multi-agent framework (NOT IMPLEMENTED)
-- **Python >=3.10 <3.14** runtime (VERIFIED)
-- **LangChain** for LLM integration (CrewAI dependency)
-- **Netlify Functions** for serverless Python deployment
-- **Installation:** `pip install crewai` or `pip install 'crewai[tools]'`
+**CrewAI on Agentuity System:**
+- **CrewAI 0.201.1** multi-agent framework (existing)
+- **Agentuity Platform** for cloud deployment
+- **Python 3.12** runtime with uv package manager
+- **OpenAI GPT-4** via CrewAI/LangChain integration
+- **6 Specialized Agents** (research, analysis, validation, synthesis, reporting, orchestration)
+- **Deployment:** `agentuity deploy` for production CrewAI
 
 **Vercel AI SDK (Planned Phase 4):**
 - **ai** - Core AI SDK package
@@ -1639,7 +1646,7 @@ export function createClient() {
 - **Use Cases:** Full business analysis, comprehensive reports, complex research
 - **Deployment:** Netlify Functions (Python backend)
 - **Models:** Hot-swappable via LangChain (OpenAI, Claude, Gemini)
-- **Status:** 0% implemented (CRITICAL BLOCKER)
+- **Status:** Deploying CrewAI on Agentuity (CRITICAL BLOCKER)
 
 **Vercel AI SDK - Lightweight UI Interactions**
 - **Purpose:** Simple AI features directly in frontend
@@ -2601,7 +2608,7 @@ export async function POST(req: Request) {
 - **Support Overhead:** Self-service options, error messages (pending backend)
 
 ### Development Risks
-- **Backend Delay:** CrewAI implementation critical path (CURRENT BLOCKER)
+- **Backend Deployment:** CrewAI on Agentuity critical path (IN PROGRESS)
 - **Technical Debt:** Router consolidation recommended (low priority)
 - **Documentation Drift:** **SOLVED** - Single source of truth established (Oct 4, 2025)
 
@@ -2665,7 +2672,29 @@ export async function POST(req: Request) {
 - **Review Cycle:** Weekly during active development
 - **Last Review:** October 24, 2025 (Critical root cause analysis & Phase 0 roadmap)
 
+### CrewAI on Agentuity Deployment Timeline (Oct 28, 2025)
+
+**Day 1 (Today):**
+- ✅ Discovered CrewAI incompatibility with Netlify
+- ✅ Researched Agentuity - found native CrewAI support
+- ✅ Created Agentuity wrapper for CrewAI agents
+- ✅ Updated documentation for deployment strategy
+
+**Day 2 (Oct 29):**
+- 🔄 Migrate CrewAI code to Agentuity structure (2-3 hours)
+- 🔄 Configure environment variables (1 hour)
+- 🔄 Deploy CrewAI to Agentuity cloud (1-2 hours)
+
+**Day 3-4 (Oct 30-31):**
+- 🔄 Frontend API integration (2-3 hours)
+- 🔄 Remove mock AI responses (1 hour)
+- 🔄 End-to-end testing (2-3 hours)
+
+**Expected Completion:** October 31, 2025
+**Total Deployment Time:** 8-12 hours
+
 ### Change Log
+- **Oct 28, 2025 10:35:** **CREWAI ON AGENTUITY DEPLOYMENT** - Discovered Agentuity natively supports CrewAI framework. Updated strategy from migration to deployment - keeping all existing CrewAI code. Created Agentuity wrapper in `agentuity-agent/` to host CrewAI. Updated `docs/specs/agentuity-integration.md` to show CrewAI deployment pattern. Revised timeline to October 31 completion. Total deployment time: 8-12 hours. Key advantage: No code rewrite needed, just deploy existing CrewAI on cloud platform.
 - **Oct 24, 2025 09:20:** **BREAKTHROUGH: ROOT CAUSE ANALYSIS & PHASE 0 ROADMAP** - Added comprehensive Section 1.4 "Critical Fixes & Implementation Roadmap" with systematic troubleshooting results. Identified 3 critical root causes: (1) Insufficient OAuth scopes (only requesting email), (2) Missing database infrastructure (no tables/triggers), (3) Build failures from missing DB functions. Validated solutions against official Supabase/Netlify documentation. Created detailed Phase 0 implementation plan (4-6 hours, 7 sequential steps) with SQL migrations, TypeScript code examples, and verification criteria. Strategic decision: Launch with enhanced mock AI, defer real CrewAI to Phase 2. Updated time-to-launch estimate: 4-6 hours to 90% launch ready. Complete with OAuth scope fixes, database trigger creation, stub function replacement, and enhanced mock AI implementation. This represents the most actionable and validated roadmap to date.
 - **Oct 23, 2025 13:12:** **SHADCN FRONTEND OPTIMIZATION** - Updated Phase 4 frontend components section to reflect Shadcn/ui integration, added Shadcn component checklist item to launch readiness, updated frontend components description to include WCAG 2.2 AA compliance and Shadcn optimization
 - **Oct 23, 2025 12:45:** **ONBOARDING SYSTEM INTEGRATION** - Added BLOCKER 4 (Onboarding 404 Error) as critical launch blocker, created comprehensive Phase 4 (20-25 hours) for AI-guided onboarding system, updated launch readiness checklist with onboarding requirements, cross-referenced 8 new documentation files for complete implementation logic
