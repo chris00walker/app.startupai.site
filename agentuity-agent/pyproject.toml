@@ -1,0 +1,9 @@
+[project]
+name = "startupai"
+version = "0.1.0"
+description = "A project to bring AI founders to assist in the development of Startups"
+requires-python = ">=3.10, <3.13"
+dependencies = [
+    "agentuity>=0.0.106",
+    "openai>=2.6.1",
+]
