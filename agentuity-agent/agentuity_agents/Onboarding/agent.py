@@ -10,9 +10,15 @@ import hashlib
 # Add backend directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
-# Import CrewAI components
-from backend.src.startupai.crew import StartupAICrew
-from backend.src.startupai.tools import EvidenceStoreTool, WebSearchTool, ReportGeneratorTool
+# Try to import CrewAI components (only needed for "complete" action)
+try:
+    from backend.src.startupai.crew import StartupAICrew
+    from backend.src.startupai.tools import EvidenceStoreTool, WebSearchTool, ReportGeneratorTool
+    CREWAI_AVAILABLE = True
+except ImportError as e:
+    CREWAI_AVAILABLE = False
+    print(f"Warning: CrewAI components not available: {e}")
+    print("The 'complete' action will not work, but 'start' and 'message' actions will function normally.")
 
 # Import conversation handlers
 from .conversation_handler import OnboardingPersonality, ConversationEnhancer, AccessibilityHelper
@@ -454,6 +460,19 @@ async def handle_onboarding_complete(request_data: Dict, context: AgentContext) 
     # Trigger CrewAI analysis
     context.logger.info("Triggering CrewAI analysis for session: %s", session_id)
     
+    # Check if CrewAI is available
+    if not CREWAI_AVAILABLE:
+        context.logger.error("CrewAI components not available for analysis")
+        return {
+            "success": False,
+            "error": {
+                "code": "ANALYSIS_UNAVAILABLE",
+                "message": "Analysis service is not configured. Please contact support.",
+                "retryable": False,
+                "details": "CrewAI components not available in this deployment"
+            }
+        }
+    
     try:
         # Initialize CrewAI
         crew = StartupAICrew()
@@ -543,6 +562,20 @@ async def run(request: AgentRequest, response: AgentResponse, context: AgentCont
         elif action == "analyze":
             # Direct analysis request (bypassing onboarding)
             context.logger.info("Direct CrewAI analysis requested")
+            
+            if not CREWAI_AVAILABLE:
+                return response.json(
+                    {
+                        "success": False,
+                        "error": {
+                            "code": "ANALYSIS_UNAVAILABLE",
+                            "message": "Analysis service is not configured",
+                            "retryable": False
+                        }
+                    },
+                    metadata={"status": 503}
+                )
+            
             crew = StartupAICrew()
             result = crew.kickoff(inputs={
                 "entrepreneur_brief": request_data.get("entrepreneur_brief", ""),
