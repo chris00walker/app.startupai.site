@@ -28,46 +28,44 @@ All implementation details, architecture decisions, status tracking, and next st
 ### Documentation Navigation
 
 **Complete Documentation Indexes:**
-- [`startupai.site/docs/DOCUMENTATION_INDEX.md`](../DOCUMENTATION_INDEX.md)  Marketing site documentation catalog
-- [`app.startupai.site/docs/DOCUMENTATION_INDEX.md`](../../../app.startupai.site/docs/DOCUMENTATION_INDEX.md)  Product platform documentation catalog
+- [`docs/DOCUMENTATION_INDEX.md`](../DOCUMENTATION_INDEX.md)  Product platform documentation catalog
 
 ### Critical Reference Documents
 
 **Product & Business:**
-- [`docs/product/PRD.md`](../product/PRD.md)  Product Requirements Document
-- [`docs/product/mvp-specification.md`](../product/mvp-specification.md)  MVP feature specifications
-- [`docs/business/7-overview.md`](../business/7-overview.md)  Business case executive summary
+- [`docs/specs/product-requirements.md`](../specs/product-requirements.md)  Product Requirements Document
+- [`docs/specs/mvp-specification.md`](../specs/mvp-specification.md)  MVP feature specifications
+- [`docs/overview/business-overview.md`](business-overview.md)  Business case executive summary
 
 **Engineering & Architecture:**
-- [`app.startupai.site/docs/engineering/10-authentication/authentication-setup.md`](../../../app.startupai.site/docs/engineering/10-authentication/authentication-setup.md)  Authentication system
-- [`app.startupai.site/docs/engineering/30-data/supabase-setup.md`](../../../app.startupai.site/docs/engineering/30-data/supabase-setup.md)  Database setup
-- [`app.startupai.site/docs/engineering/50-testing/README.md`](../../../app.startupai.site/docs/engineering/50-testing/README.md)  Testing infrastructure
-- [`app.startupai.site/docs/engineering/50-testing/specification-driven-test-plan.md`](../../../app.startupai.site/docs/engineering/50-testing/specification-driven-test-plan.md)  **Specification-driven test strategy** (validates business requirements)
-- [`app.startupai.site/backend/CREW_AI.md`](../../../app.startupai.site/backend/CREW_AI.md)  CrewAI implementation spec
+- [`docs/specs/auth.md`](../specs/auth.md)  Authentication system
+- [`docs/specs/supabase.md`](../specs/supabase.md)  Database setup
+- [`docs/testing/README.md`](../testing/README.md)  Testing infrastructure
+- [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md)  **CrewAI integration specification**
+- [`backend/CREW_AI.md`](../../backend/CREW_AI.md)  CrewAI implementation spec
 
 **Operations & Status:**
-- [`app.startupai.site/docs/operations/implementation-status.md`](../../../app.startupai.site/docs/operations/implementation-status.md)  Weekly progress audit
-- [`app.startupai.site/docs/operations/DASHBOARD_INTEGRATION_PRIORITIES.md`](../../../app.startupai.site/docs/operations/DASHBOARD_INTEGRATION_PRIORITIES.md)  Integration priorities
+- [`docs/status/implementation-status.md`](../status/implementation-status.md)  Weekly progress audit
+- [`docs/work/in-progress.md`](../work/in-progress.md)  Integration priorities
 
 **Completion Reports Archive:**
--  [`app.startupai.site/docs/features/completion-reports/`](../../../app.startupai.site/docs/features/completion-reports/)  **All completion reports** (11 reports organized)
-  - [`README.md`](../../../app.startupai.site/docs/features/completion-reports/README.md)  Complete index with categories and timeline
+-  [`docs/archive/completion-reports/`](../archive/completion-reports/)  **All completion reports** (11 reports organized)
+  - [`README.md`](../archive/completion-reports/README.md)  Complete index with categories and timeline
   - **Implementation Completions (6):** CrewAI, TDD Framework, Gate Integration, Consultant Enhancements, PostHog Setup/Production
   - **Status Reports (2):** Implementation Status, CrewAI Status
   - **Analysis & Summaries (2):** Execution Summary, Marketing vs Product Reality Check
   - **Organization (1):** Documentation Organization Complete
 
 **Strategic Proposals (Under Consideration):**
--  [`app.startupai.site/docs/strategy/proposals/`](../../../app.startupai.site/docs/strategy/proposals/)  **Future strategic options** (not yet approved)
-  - [`README.md`](../../../app.startupai.site/docs/strategy/proposals/README.md)  Proposals overview and decision framework
+-  [`docs/work/strategic-proposals.md`](../work/strategic-proposals.md)  **Future strategic options** (not yet approved)
   - **Executive Decision:** Option A/B/C analysis for product/marketing alignment
   - **Integration Strategy:** Platform play vs standalone product (Option C details)
   - **Roadmaps:** 8-week MVP and 12-week Q1 2025 execution plans
   -  **Note:** These are proposals, not current implementation plans
 
 **Integrations & Migration:**
-- [`docs/integrations/posthog/POSTHOG_PRODUCTION_COMPLETE.md`](../integrations/posthog/POSTHOG_PRODUCTION_COMPLETE.md)  PostHog analytics (Oct 5, 2025)
-- [`docs/engineering/releases/migration-npm-pnpm.md`](../engineering/releases/migration-npm-pnpm.md)  npmpnpm migration (Sept 26, 2025)
+- [`docs/archive/completion-reports/POSTHOG_PRODUCTION_COMPLETE.md`](../archive/completion-reports/POSTHOG_PRODUCTION_COMPLETE.md)  PostHog analytics (Oct 5, 2025)
+- [`docs/migration-report.md`](../migration-report.md)  Documentation migration report (Oct 25, 2025)
 
 ---
 
@@ -175,8 +173,8 @@ startupai.site/login
      Consultant enhancements ......  Complete (Oct 5)
 ```
 -  **Completion Reports:**
-  - [`GATE_INTEGRATION_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/GATE_INTEGRATION_COMPLETE.md)  Gate system implementation
-  - [`CONSULTANT_GATE_ENHANCEMENTS_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/CONSULTANT_GATE_ENHANCEMENTS_COMPLETE.md)  Consultant-specific features
+  - [`GATE_INTEGRATION_COMPLETE.md`](../archive/completion-reports/GATE_INTEGRATION_COMPLETE.md)  Gate system implementation
+  - [`CONSULTANT_GATE_ENHANCEMENTS_COMPLETE.md`](../archive/completion-reports/CONSULTANT_GATE_ENHANCEMENTS_COMPLETE.md)  Consultant-specific features
 
 ** API Routes:**
 ```
@@ -254,7 +252,7 @@ ReportCard component   No /report/[id] detail page
 -  No evidence of strategic analysis after onboarding completes
 - **Impact:** Users still miss tangible value; need at least one surfaced artifact (brief, report, insight)
 - **Time to Fix:** 4-5 hours once AI backend is wired (UI wiring + success states)
--  **Reference:** [`MARKETING_VS_PRODUCT_REALITY_CHECK.md`](../../../app.startupai.site/docs/features/completion-reports/MARKETING_VS_PRODUCT_REALITY_CHECK.md)
+-  **Reference:** [`MARKETING_VS_PRODUCT_REALITY_CHECK.md`](../archive/completion-reports/MARKETING_VS_PRODUCT_REALITY_CHECK.md)
 
 ** BLOCKER 3: Critical Accessibility Failures**
 -  **WCAG Compliance:** Fails at all levels (A, AA, AAA)
@@ -1262,8 +1260,8 @@ e8290ab - Progress documentation (consolidated here)
 -  Playwright: 45 E2E tests (15 scenarios  3 browsers)
 -  `playwright.config.ts` configured
 -  Test separation: `*.test.*` (Jest) vs `*.spec.ts` (Playwright)
--  Documentation: `docs/engineering/50-testing/README.md`
--  **Completion Report:** [`TDD_IMPLEMENTATION_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/TDD_IMPLEMENTATION_COMPLETE.md)
+-  Documentation: `docs/testing/README.md`
+-  **Completion Report:** [`TDD_IMPLEMENTATION_COMPLETE.md`](../archive/completion-reports/TDD_IMPLEMENTATION_COMPLETE.md)
 
 #### Build Verification ( Complete Oct 4, 2025)
 -  Marketing site: All 21 routes building successfully
@@ -1280,8 +1278,8 @@ e8290ab - Progress documentation (consolidated here)
 -  Type-safe analytics helpers: `src/lib/analytics.ts` (both sites)
 -  Security fix applied: API key removed from documentation (Oct 5, 2025)
 -  **Completion Reports:**
-  - [`POSTHOG_SETUP_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/POSTHOG_SETUP_COMPLETE.md)  Initial setup
-  - [`POSTHOG_PRODUCTION_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/POSTHOG_PRODUCTION_COMPLETE.md)  Production deployment
+  - [`POSTHOG_SETUP_COMPLETE.md`](../archive/completion-reports/POSTHOG_SETUP_COMPLETE.md)  Initial setup
+  - [`POSTHOG_PRODUCTION_COMPLETE.md`](../archive/completion-reports/POSTHOG_PRODUCTION_COMPLETE.md)  Production deployment
 -  Event tracking implementation pending (custom events)
 
 ### 2.2 Database ( 100% Complete - Oct 4, 2025)
@@ -1310,9 +1308,9 @@ e8290ab - Progress documentation (consolidated here)
 **BREAKTHROUGH:** GitHub OAuth now working in production with PKCE flow configuration
 
 ** Complete Authentication Documentation:**
-- [`authentication-setup.md`](../../../app.startupai.site/docs/engineering/10-authentication/authentication-setup.md)  **Main setup guide** with PKCE configuration details
-- [`oauth-setup-guide.md`](../../../app.startupai.site/docs/engineering/10-authentication/oauth-setup-guide.md)  **Provider setup** with PKCE requirements  
-- [`authentication-troubleshooting.md`](../../../app.startupai.site/docs/engineering/10-authentication/authentication-troubleshooting.md)  **Troubleshooting guide** updated with PKCE fix
+- [`auth.md`](../specs/auth.md)  **Main setup guide** with PKCE configuration details
+- [`auth.md`](../specs/auth.md)  **Provider setup** with PKCE requirements  
+- [`auth.md`](../specs/auth.md)  **Troubleshooting guide** updated with PKCE fix
 
 #### PKCE Flow Fix Implementation (Oct 22, 2025)
 
@@ -1320,7 +1318,7 @@ e8290ab - Progress documentation (consolidated here)
 
 **Root Cause:** Supabase client using PKCE flow by default but not properly configured
 
-**Solution Applied:** (See [`authentication-setup.md#pkce-flow-configuration`](../../../app.startupai.site/docs/engineering/10-authentication/authentication-setup.md#pkce-flow-configuration) for complete details)
+**Solution Applied:** (See [`auth.md`](../specs/auth.md) for complete details)
 
 ```typescript
 // Both sites now have matching PKCE configuration
@@ -1361,8 +1359,8 @@ export function createClient() {
 **Status:** **AUTHENTICATION WORKING** - GitHub OAuth functional, PKCE flow configured
 
 ** Related Documentation:**
-- [`mvp-oauth-setup.md`](../../../app.startupai.site/docs/engineering/10-authentication/mvp-oauth-setup.md)  MVP OAuth implementation guide
-- [`ROLE_BASED_ROUTING_SETUP.md`](../../../app.startupai.site/docs/engineering/10-authentication/ROLE_BASED_ROUTING_SETUP.md)  Role-based routing configuration
+- [`auth.md`](../specs/auth.md)  MVP OAuth implementation guide
+- [`auth.md`](../specs/auth.md)  Role-based routing configuration
 
 ** Implementation Status:** See complete authentication documentation links above for technical details, setup procedures, and troubleshooting guides.
 
@@ -1460,9 +1458,9 @@ export function createClient() {
 **Status:** 15% complete (2 of 10 steps done) - Estimated 10-13 hours remaining
 
 ** Status Documentation:**
-- [`CREWAI_IMPLEMENTATION_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/CREWAI_IMPLEMENTATION_COMPLETE.md)  Implementation completion report
-- [`CREWAI_STATUS_REPORT.md`](../../../app.startupai.site/docs/features/completion-reports/CREWAI_STATUS_REPORT.md)  Evidence Store resolution & database integration
-- [`IMPLEMENTATION_STATUS_REPORT.md`](../../../app.startupai.site/docs/features/completion-reports/IMPLEMENTATION_STATUS_REPORT.md)  Backend tools status
+- [`CREWAI_IMPLEMENTATION_COMPLETE.md`](../archive/completion-reports/CREWAI_IMPLEMENTATION_COMPLETE.md)  Implementation completion report
+- [`CREWAI_STATUS_REPORT.md`](../archive/completion-reports/CREWAI_STATUS_REPORT.md)  Evidence Store resolution & database integration
+- [`IMPLEMENTATION_STATUS_REPORT.md`](../archive/completion-reports/IMPLEMENTATION_STATUS_REPORT.md)  Backend tools status
 
 #### **Critical AI Issues Found (Oct 6 Testing)**
 
@@ -1701,8 +1699,8 @@ app/api/ai/generate-report/route.ts
 ## 4. Implementation Phases & Current Status
 
 ** Implementation Tracking:**
-- [`IMPLEMENTATION_EXECUTION_SUMMARY.md`](../../../app.startupai.site/docs/features/completion-reports/IMPLEMENTATION_EXECUTION_SUMMARY.md)  Phase-by-phase execution summary
-- [`DOCUMENTATION_ORGANIZATION_COMPLETE.md`](../../../app.startupai.site/docs/features/completion-reports/DOCUMENTATION_ORGANIZATION_COMPLETE.md)  Documentation organization (Oct 22, 2025)
+- [`IMPLEMENTATION_EXECUTION_SUMMARY.md`](../archive/completion-reports/IMPLEMENTATION_EXECUTION_SUMMARY.md)  Phase-by-phase execution summary
+- [`DOCUMENTATION_ORGANIZATION_COMPLETE.md`](../archive/completion-reports/DOCUMENTATION_ORGANIZATION_COMPLETE.md)  Documentation organization (Oct 22, 2025)
 
 ### Phase 1: Foundation  **99% COMPLETE**
 
@@ -2085,14 +2083,14 @@ def _run(self, action: str, project_id: str = "", evidence_data: Optional[Dict[s
 ##  Related Documentation
 
 ### Implementation Guides
-- [`app.startupai.site/backend/CREW_AI.md`](../../../app.startupai.site/backend/CREW_AI.md) - Complete CrewAI specification
-- [`app.startupai.site/docs/engineering/multi-provider-llm-setup.md`](../../../app.startupai.site/docs/engineering/multi-provider-llm-setup.md) - LLM configuration
-- [`app.startupai.site/netlify/functions/README.md`](../../../app.startupai.site/netlify/functions/README.md) - Netlify Functions API
+- [`backend/CREW_AI.md`](../../backend/CREW_AI.md) - Complete CrewAI specification
+- [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md) - LLM configuration
+- [`netlify/functions/README.md`](../../netlify/functions/README.md) - Netlify Functions API
 
 ### Status Reports
-- [`app.startupai.site/docs/integrations/crewai/CREWAI_STATUS_REPORT.md`](../../../app.startupai.site/docs/integrations/crewai/CREWAI_STATUS_REPORT.md) - Current status (Oct 5)
-- [`app.startupai.site/docs/operations/DASHBOARD_INTEGRATION_PRIORITIES.md`](../../../app.startupai.site/docs/operations/DASHBOARD_INTEGRATION_PRIORITIES.md) - Integration priorities
-- [`app.startupai.site/docs/operations/implementation-status.md`](../../../app.startupai.site/docs/operations/implementation-status.md) - Weekly progress
+- [`docs/archive/completion-reports/CREWAI_STATUS_REPORT.md`](../archive/completion-reports/CREWAI_STATUS_REPORT.md) - Current status (Oct 5)
+- [`docs/work/in-progress.md`](../work/in-progress.md) - Integration priorities
+- [`docs/status/implementation-status.md`](../status/implementation-status.md) - Weekly progress
 
 ### Cross-References
 - See **Section 2.5** for detailed CrewAI backend status
@@ -2684,17 +2682,17 @@ export async function POST(req: Request) {
 ### Related Documents
 
 ** CRITICAL ONBOARDING DOCUMENTATION (Oct 23, 2025):**
-- **Onboarding Agent Integration:** [`app.startupai.site/docs/features/onboarding-agent-integration.md`](../../app.startupai.site/docs/features/onboarding-agent-integration.md) - Complete UI/UX specification for AI-guided onboarding
-- **AI Conversation Interface:** [`app.startupai.site/docs/features/ai-conversation-interface.md`](../../app.startupai.site/docs/features/ai-conversation-interface.md) - Chat-like interface design and implementation
-- **CrewAI Frontend Integration:** [`app.startupai.site/docs/engineering/crewai-frontend-integration.md`](../../app.startupai.site/docs/engineering/crewai-frontend-integration.md) - API endpoints and streaming responses
-- **Onboarding Journey Map:** [`app.startupai.site/docs/user-experience/onboarding-journey-map.md`](../../app.startupai.site/docs/user-experience/onboarding-journey-map.md) - Complete user experience flow
-- **Onboarding Agent Personality:** [`app.startupai.site/docs/features/onboarding-agent-personality.md`](../../app.startupai.site/docs/features/onboarding-agent-personality.md) - AI conversation design and personality
-- **Onboarding API Endpoints:** [`app.startupai.site/docs/engineering/onboarding-api-endpoints.md`](../../app.startupai.site/docs/engineering/onboarding-api-endpoints.md) - Complete API specification
-- **Frontend Components:** [`app.startupai.site/docs/engineering/frontend-components-specification.md`](../../app.startupai.site/docs/engineering/frontend-components-specification.md) - Shadcn-optimized React component architecture with WCAG 2.2 AA compliance
-- **Database Schema Updates:** [`app.startupai.site/docs/engineering/database-schema-updates.md`](../../app.startupai.site/docs/engineering/database-schema-updates.md) - Supabase schema extensions
+- **Onboarding Agent Integration:** [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md) - Complete UI/UX specification for AI-guided onboarding
+- **AI Conversation Interface:** [`docs/specs/frontend-components.md`](../specs/frontend-components.md) - Chat-like interface design and implementation
+- **CrewAI Frontend Integration:** [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md) - API endpoints and streaming responses
+- **Onboarding Journey Map:** [`docs/specs/frontend-components.md`](../specs/frontend-components.md) - Complete user experience flow
+- **Onboarding Agent Personality:** [`docs/specs/crewai-integration.md`](../specs/crewai-integration.md) - AI conversation design and personality
+- **Onboarding API Endpoints:** [`docs/specs/api-onboarding.md`](../specs/api-onboarding.md) - Complete API specification
+- **Frontend Components:** [`docs/specs/frontend-components.md`](../specs/frontend-components.md) - Shadcn-optimized React component architecture with WCAG 2.2 AA compliance
+- **Database Schema Updates:** [`docs/specs/data-schema.md`](../specs/data-schema.md) - Supabase schema extensions
 
 **Existing Documentation:**
-- **Accessibility Standards:** [`docs/design/accessibility-standards.md`](../design/accessibility-standards.md) - WCAG compliance requirements and implementation details
+- **Accessibility Standards:** [`docs/specs/accessibility-standards.md`](../specs/accessibility-standards.md) - WCAG compliance requirements and implementation details
 - Operational guides: `app.startupai.site/docs/operations/`
 - Engineering specs: `app.startupai.site/docs/engineering/`
 - Backend spec: `app.startupai.site/backend/CREW_AI.md`
