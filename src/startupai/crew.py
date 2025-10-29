@@ -30,7 +30,13 @@ class StartupAICrew:
     StartupAI Evidence-Led Strategy Crew
     
     Official CrewAI structure for AMP deployment.
-    Coordinates 6 specialized agents for comprehensive strategic analysis.
+    Coordinates 6 specialized agents for comprehensive strategic analysis:
+    - Research Agent: Evidence discovery
+    - Analysis Agent: Pattern recognition
+    - Validation Agent: Quality verification
+    - Synthesis Agent: Insight combination
+    - Reporting Agent: Report generation
+    - Orchestration Agent: Workflow coordination
     """
     
     agents_config = "config/agents.yaml"
@@ -91,11 +97,21 @@ class StartupAICrew:
             verbose=True,
         )
     
+    @agent
+    def orchestration_agent(self) -> Agent:
+        """Orchestration Agent - Workflow coordination and quality control."""
+        return Agent(
+            config=self.agents_config['orchestration_agent'], # type: ignore[index]
+            tools=[self.evidence_store],
+            verbose=True,
+        )
+    
     @task
     def evidence_collection_task(self) -> Task:
         """Task for evidence discovery and collection."""
         return Task(
             config=self.tasks_config['evidence_collection'], # type: ignore[index]
+            agent=self.research_agent(),
         )
     
     @task
@@ -103,6 +119,7 @@ class StartupAICrew:
         """Task for pattern recognition in evidence."""
         return Task(
             config=self.tasks_config['evidence_analysis'], # type: ignore[index]
+            agent=self.analysis_agent(),
         )
     
     @task
@@ -110,6 +127,7 @@ class StartupAICrew:
         """Task for evidence quality verification."""
         return Task(
             config=self.tasks_config['evidence_validation'], # type: ignore[index]
+            agent=self.validation_agent(),
         )
     
     @task
@@ -117,6 +135,7 @@ class StartupAICrew:
         """Task for combining insights into narrative."""
         return Task(
             config=self.tasks_config['insight_synthesis'], # type: ignore[index]
+            agent=self.synthesis_agent(),
         )
     
     @task
@@ -124,7 +143,16 @@ class StartupAICrew:
         """Task for generating final report."""
         return Task(
             config=self.tasks_config['report_generation'], # type: ignore[index]
+            agent=self.reporting_agent(),
             output_file='output/strategic_analysis.md',
+        )
+    
+    @task
+    def workflow_orchestration_task(self) -> Task:
+        """Task for workflow coordination and quality control."""
+        return Task(
+            config=self.tasks_config['workflow_orchestration'], # type: ignore[index]
+            agent=self.orchestration_agent(),
         )
     
     @crew
