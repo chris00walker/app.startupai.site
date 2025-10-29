@@ -24,6 +24,13 @@ except ImportError:
     )
 
 
+# Initialize tools at module level (official CrewAI pattern)
+evidence_store = EvidenceStoreTool()
+vector_search = VectorSearchTool()
+web_search = WebSearchTool()
+report_generator = ReportGeneratorTool()
+
+
 @CrewBase
 class StartupAICrew:
     """
@@ -45,19 +52,12 @@ class StartupAICrew:
     agents: List[BaseAgent]
     tasks: List[Task]
     
-    def __init__(self):
-        """Initialize tools."""
-        self.evidence_store = EvidenceStoreTool()
-        self.vector_search = VectorSearchTool()
-        self.web_search = WebSearchTool()
-        self.report_generator = ReportGeneratorTool()
-    
     @agent
     def research_agent(self) -> Agent:
         """Research Agent - Evidence discovery and collection."""
         return Agent(
             config=self.agents_config['research_agent'], # type: ignore[index]
-            tools=[self.web_search, self.evidence_store],
+            tools=[web_search, evidence_store],
             verbose=True,
         )
     
@@ -66,7 +66,7 @@ class StartupAICrew:
         """Analysis Agent - Pattern recognition and insight extraction."""
         return Agent(
             config=self.agents_config['analysis_agent'], # type: ignore[index]
-            tools=[self.evidence_store, self.vector_search],
+            tools=[evidence_store, vector_search],
             verbose=True,
         )
     
@@ -75,7 +75,7 @@ class StartupAICrew:
         """Validation Agent - Evidence quality and credibility verification."""
         return Agent(
             config=self.agents_config['validation_agent'], # type: ignore[index]
-            tools=[self.web_search, self.evidence_store],
+            tools=[web_search, evidence_store],
             verbose=True,
         )
     
@@ -84,7 +84,7 @@ class StartupAICrew:
         """Synthesis Agent - Insight combination and narrative building."""
         return Agent(
             config=self.agents_config['synthesis_agent'], # type: ignore[index]
-            tools=[self.evidence_store],
+            tools=[evidence_store],
             verbose=True,
         )
     
@@ -93,7 +93,7 @@ class StartupAICrew:
         """Reporting Agent - Professional report generation."""
         return Agent(
             config=self.agents_config['reporting_agent'], # type: ignore[index]
-            tools=[self.report_generator],
+            tools=[report_generator],
             verbose=True,
         )
     
@@ -102,7 +102,7 @@ class StartupAICrew:
         """Orchestration Agent - Workflow coordination and quality control."""
         return Agent(
             config=self.agents_config['orchestration_agent'], # type: ignore[index]
-            tools=[self.evidence_store],
+            tools=[evidence_store],
             verbose=True,
         )
     
