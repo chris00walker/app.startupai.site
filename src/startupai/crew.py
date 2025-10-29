@@ -259,6 +259,16 @@ class StartupAICrew:
         )
         return crew
     
+    def crew(self) -> Crew:
+        """
+        Get the configured crew (alias for create_crew).
+        CrewAI AMP expects this method name.
+        
+        Returns:
+            Configured Crew instance
+        """
+        return self.create_crew()
+    
     def kickoff(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """
         Start the crew execution with given inputs.
