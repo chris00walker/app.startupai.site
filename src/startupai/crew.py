@@ -3,7 +3,7 @@ StartupAI CrewAI Crew - Official Structure
 Follows CrewAI AMP deployment requirements
 """
 
-from typing import List
+from typing import List, Optional
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
@@ -22,13 +22,6 @@ except ImportError:
         WebSearchTool,
         ReportGeneratorTool,
     )
-
-
-# Initialize tools at module level (official CrewAI pattern)
-evidence_store = EvidenceStoreTool()
-vector_search = VectorSearchTool()
-web_search = WebSearchTool()
-report_generator = ReportGeneratorTool()
 
 
 @CrewBase
@@ -52,12 +45,46 @@ class StartupAICrew:
     agents: List[BaseAgent]
     tasks: List[Task]
     
+    # Lazy-initialized tools (created on first access)
+    _evidence_store: Optional[EvidenceStoreTool] = None
+    _vector_search: Optional[VectorSearchTool] = None
+    _web_search: Optional[WebSearchTool] = None
+    _report_generator: Optional[ReportGeneratorTool] = None
+    
+    @property
+    def evidence_store(self) -> EvidenceStoreTool:
+        """Lazy-initialize evidence store tool."""
+        if self._evidence_store is None:
+            self._evidence_store = EvidenceStoreTool()
+        return self._evidence_store
+    
+    @property
+    def vector_search(self) -> VectorSearchTool:
+        """Lazy-initialize vector search tool."""
+        if self._vector_search is None:
+            self._vector_search = VectorSearchTool()
+        return self._vector_search
+    
+    @property
+    def web_search(self) -> WebSearchTool:
+        """Lazy-initialize web search tool."""
+        if self._web_search is None:
+            self._web_search = WebSearchTool()
+        return self._web_search
+    
+    @property
+    def report_generator(self) -> ReportGeneratorTool:
+        """Lazy-initialize report generator tool."""
+        if self._report_generator is None:
+            self._report_generator = ReportGeneratorTool()
+        return self._report_generator
+    
     @agent
     def research_agent(self) -> Agent:
         """Research Agent - Evidence discovery and collection."""
         return Agent(
             config=self.agents_config['research_agent'], # type: ignore[index]
-            tools=[web_search, evidence_store],
+            tools=[self.web_search, self.evidence_store],
             verbose=True,
         )
     
@@ -66,7 +93,7 @@ class StartupAICrew:
         """Analysis Agent - Pattern recognition and insight extraction."""
         return Agent(
             config=self.agents_config['analysis_agent'], # type: ignore[index]
-            tools=[evidence_store, vector_search],
+            tools=[self.evidence_store, self.vector_search],
             verbose=True,
         )
     
@@ -75,7 +102,7 @@ class StartupAICrew:
         """Validation Agent - Evidence quality and credibility verification."""
         return Agent(
             config=self.agents_config['validation_agent'], # type: ignore[index]
-            tools=[web_search, evidence_store],
+            tools=[self.web_search, self.evidence_store],
             verbose=True,
         )
     
@@ -84,7 +111,7 @@ class StartupAICrew:
         """Synthesis Agent - Insight combination and narrative building."""
         return Agent(
             config=self.agents_config['synthesis_agent'], # type: ignore[index]
-            tools=[evidence_store],
+            tools=[self.evidence_store],
             verbose=True,
         )
     
@@ -93,7 +120,7 @@ class StartupAICrew:
         """Reporting Agent - Professional report generation."""
         return Agent(
             config=self.agents_config['reporting_agent'], # type: ignore[index]
-            tools=[report_generator],
+            tools=[self.report_generator],
             verbose=True,
         )
     
@@ -102,7 +129,7 @@ class StartupAICrew:
         """Orchestration Agent - Workflow coordination and quality control."""
         return Agent(
             config=self.agents_config['orchestration_agent'], # type: ignore[index]
-            tools=[evidence_store],
+            tools=[self.evidence_store],
             verbose=True,
         )
     
