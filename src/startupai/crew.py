@@ -9,12 +9,20 @@ from pathlib import Path
 import yaml
 from crewai import Agent, Task, Crew, Process
 
-from .tools import (
-    EvidenceStoreTool,
-    VectorSearchTool,
-    WebSearchTool,
-    ReportGeneratorTool,
-)
+try:
+    from .tools import (
+        EvidenceStoreTool,
+        VectorSearchTool,
+        WebSearchTool,
+        ReportGeneratorTool,
+    )
+except ImportError:
+    from startupai.tools import (
+        EvidenceStoreTool,
+        VectorSearchTool,
+        WebSearchTool,
+        ReportGeneratorTool,
+    )
 
 
 class StartupAICrew:
