@@ -29,6 +29,9 @@ const nextConfig = {
     },
   },
   
+  // Fix for multiple lockfiles warning - explicitly set workspace root
+  outputFileTracingRoot: __dirname,
+  
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
     // Optimize for production builds
