@@ -48,7 +48,7 @@
 # NETLIFY DEV LOCAL SERVER
 # ============================================================================
 [dev]
-  command = "cd frontend && pnpm dev"
+  command = "cd frontend && npx next dev --turbopack"
   port = 8889
   targetPort = 3000
   autoLaunch = false
