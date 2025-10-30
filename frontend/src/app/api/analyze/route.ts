@@ -72,22 +72,16 @@ const PLAN_ANALYSIS_LIMITS: Record<string, number> = {
   enterprise: 200,
 };
 
-function resolveCrewFunctionUrl(request: NextRequest): string {
-  if (process.env.CREW_ANALYZE_URL) {
-    return process.env.CREW_ANALYZE_URL;
+function resolveCrewAIUrl(): string {
+  // CrewAI AMP endpoint - deployed Value Proposition Design crew
+  const crewAIUrl = process.env.CREWAI_API_URL;
+  
+  if (!crewAIUrl) {
+    console.error('[api/analyze] CREWAI_API_URL environment variable not configured');
+    throw new Error('CrewAI API endpoint not configured. Please set CREWAI_API_URL environment variable.');
   }
 
-  const forwardedHost = request.headers.get('x-forwarded-host');
-  const forwardedProto = request.headers.get('x-forwarded-proto');
-  const host = forwardedHost ?? request.headers.get('host');
-
-  if (host) {
-    const protocol = forwardedProto ?? (host.includes('localhost') ? 'http' : 'https');
-    return `${protocol}://${host}/.netlify/functions/crew-analyze`;
-  }
-
-  // Development fallback (Netlify dev server default port)
-  return 'http://localhost:8888/.netlify/functions/crew-analyze';
+  return crewAIUrl;
 }
 
 function mapPlanTier(subscriptionTier?: string | null): keyof typeof PLAN_ANALYSIS_LIMITS {
@@ -408,16 +402,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const functionUrl = resolveCrewFunctionUrl(request);
-    const payloadForCrew = {
-      strategic_question: parsedPayload.strategic_question,
-      project_id: parsedPayload.project_id,
-      project_context: parsedPayload.project_context,
-      target_sources: parsedPayload.target_sources,
-      report_format: parsedPayload.report_format,
-      project_deadline: parsedPayload.project_deadline,
-      priority_level: parsedPayload.priority_level,
-      session_id: parsedPayload.session_id,
+    const crewAIUrl = resolveCrewAIUrl();
+    
+    // Format payload for CrewAI AMP
+    // CrewAI expects a simple text input that our agents will process
+    const crewAIPayload = {
+      inputs: {
+        strategic_question: parsedPayload.strategic_question,
+        project_context: parsedPayload.project_context || '',
+        business_stage: 'validation',
+        priority: parsedPayload.priority_level || 'medium',
+      },
+      // Metadata for tracking
+      metadata: {
+        project_id: parsedPayload.project_id,
+        session_id: parsedPayload.session_id,
+        user_id: userId,
+      }
     };
 
     let crewResponse: Response | null = null;
@@ -426,13 +427,16 @@ export async function POST(request: NextRequest) {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        crewResponse = await fetch(functionUrl, {
+        console.log(`[api/analyze] Calling CrewAI AMP (attempt ${attempt}/${maxAttempts}):`, crewAIUrl);
+        
+        crewResponse = await fetch(crewAIUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
+            // Include CrewAI token if configured
+            ...(process.env.CREWAI_API_TOKEN && { 'Authorization': `Bearer ${process.env.CREWAI_API_TOKEN}` }),
           },
-          body: JSON.stringify(payloadForCrew),
+          body: JSON.stringify(crewAIPayload),
         });
 
         if (crewResponse.ok) {

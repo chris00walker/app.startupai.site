@@ -9,10 +9,10 @@ type RedirectOptions = {
 };
 
 const ROLE_REDIRECTS: Record<UserRole, string> = {
-  admin: '/dashboard',
-  consultant: '/dashboard',
-  founder: '/founder-dashboard',
-  trial: '/founder-dashboard?mode=trial'
+  admin: '/onboarding',
+  consultant: '/onboarding',
+  founder: '/onboarding',
+  trial: '/onboarding'
 };
 
 export function getRedirectForRole({ role, planStatus, next }: RedirectOptions): string {

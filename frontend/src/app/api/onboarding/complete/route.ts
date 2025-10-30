@@ -616,43 +616,57 @@ export async function POST(request: NextRequest) {
       let rateLimitInfo: RateLimitInfo | undefined;
 
       try {
-        const analyzeUrl = new URL('/api/analyze', request.url);
-        const analyzeResponse = await fetch(analyzeUrl.toString(), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            strategic_question: strategicQuestion,
-            project_context: projectContext,
-            project_id: project.id,
-            priority_level: 'high',
-            session_id: sessionId,
-          }),
+        // Use CrewAI AMP for strategic analysis
+        const { createCrewAIClient } = await import('@/lib/crewai/amp-client');
+
+        const crewClient = createCrewAIClient({
+          apiUrl: process.env.CREWAI_API_URL,
+          apiToken: process.env.CREWAI_API_TOKEN,
         });
 
-        if (analyzeResponse.ok) {
-          const payload = await analyzeResponse.json() as CrewAnalyzeApiResponse;
-          if (payload?.success) {
-            analysisResult = payload;
-            workflowId = payload.analysisId || workflowId;
+        console.log('[onboarding/complete] Starting CrewAI AMP analysis...');
 
-            if (payload.metadata?.rate_limit) {
-              rateLimitInfo = {
-                limit: payload.metadata.rate_limit.limit,
-                remaining: payload.metadata.rate_limit.remaining,
-                windowSeconds: payload.metadata.rate_limit.window_seconds,
-              };
-            }
-          } else {
-            crewError = 'CrewAI response missing success flag';
+        // Kickoff crew with strategic inputs
+        const crewResult = await crewClient.kickoffAndWait(
+          {
+            inputs: {
+              strategic_question: strategicQuestion,
+              project_context: projectContext,
+              business_stage: finalBriefData.business_stage || 'validation',
+              priority: 'high',
+            },
+          },
+          (status) => {
+            console.log(`[onboarding/complete] CrewAI status: ${status.status}`);
           }
-        } else {
-          crewError = `CrewAI responded with status ${analyzeResponse.status}`;
-        }
+        );
+
+        // Parse crew output
+        const output = typeof crewResult.output === 'string'
+          ? JSON.parse(crewResult.output)
+          : crewResult.output;
+
+        analysisResult = {
+          success: true,
+          analysisId: crewResult.kickoff_id,
+          summary: output?.summary || output?.executive_summary || 'Strategic analysis completed',
+          insights: output?.insights || output?.recommendations || [],
+          rawOutput: JSON.stringify(output, null, 2),
+          evidenceCount: output?.evidence_count,
+          evidenceCreated: output?.evidence_created,
+          reportCreated: output?.report_created,
+          metadata: {
+            project_id: project.id,
+            user_id: user.id,
+          },
+        };
+
+        workflowId = crewResult.kickoff_id;
+
+        console.log('[onboarding/complete] CrewAI AMP analysis completed successfully');
       } catch (analysisErr) {
-        crewError = analysisErr instanceof Error ? analysisErr.message : 'CrewAI request failed';
+        crewError = analysisErr instanceof Error ? analysisErr.message : 'CrewAI AMP request failed';
+        console.error('[onboarding/complete] CrewAI AMP error:', crewError);
       }
 
       const fallbackAnalysis = analysisResult ? null : generateStrategicAnalysis(finalBriefData, session);

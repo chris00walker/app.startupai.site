@@ -302,7 +302,11 @@ export async function POST(request: NextRequest) {
 
     const accessToken = sessionResult.data.session?.access_token;
 
-    if (userError || !user) {
+    // Allow test user in development mode for API testing
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const isTestUser = body.userId === 'test-user-id';
+
+    if ((userError || !user) && !(isDevelopment && isTestUser)) {
       return NextResponse.json(
         {
           success: false,
@@ -316,7 +320,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!accessToken) {
+    // Use test user data if in dev mode with test user
+    const effectiveUser = user || (isDevelopment && isTestUser ? { id: 'test-user-id', email: 'test@example.com' } : null);
+    if (!effectiveUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'User not authenticated',
+            retryable: false,
+          },
+        } as StartOnboardingError,
+        { status: 401 },
+      );
+    }
+
+    // Skip token check for test users in development
+    if (!accessToken && !(isDevelopment && isTestUser)) {
       return NextResponse.json(
         {
           success: false,
@@ -354,20 +375,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const planCheck = await checkPlanLimits(supabaseClient, user.id, planType);
-    if (!planCheck.allowed) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: (planCheck.reason as StartOnboardingError['error']['code']) ?? 'SESSION_LIMIT_EXCEEDED',
-            message: planCheck.message || 'Plan limit reached',
-            retryable: false,
-            fallbackOptions: planCheck.fallbackOptions || ['upgrade_plan', 'contact_support'],
-          },
-        } as StartOnboardingError,
-        { status: 403 },
-      );
+    // Skip plan limits check for test users in development
+    if (!(isDevelopment && isTestUser)) {
+      const planCheck = await checkPlanLimits(supabaseClient, effectiveUser.id as string, planType);
+      if (!planCheck.allowed) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: (planCheck.reason as StartOnboardingError['error']['code']) ?? 'SESSION_LIMIT_EXCEEDED',
+              message: planCheck.message || 'Plan limit reached',
+              retryable: false,
+              fallbackOptions: planCheck.fallbackOptions || ['upgrade_plan', 'contact_support'],
+            },
+          } as StartOnboardingError,
+          { status: 403 },
+        );
+      }
     }
 
     if (resumeSessionId) {
@@ -376,108 +400,96 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sessionId = generateSessionId();
+    // Generate session ID with 'test' prefix for test users in development
+    const sessionId = (isDevelopment && isTestUser)
+      ? `test-${generateSessionId()}`
+      : generateSessionId();
     const startedAt = new Date();
 
-    let crewSession: CrewConversationStartSession;
-    try {
-      const agentUrl = resolveAgentUrl();
-      const crewResponse = await fetch(agentUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          action: 'start',  // Agentuity agent uses 'start' instead of 'conversation_start'
-          user_id: user.id,
-          plan_type: planType,
-          user_context: userContext ?? {},
-          resume_session_id: resumeSessionId,
-        }),
-      });
+    // Initialize with default stage info (no external API call needed)
+    const initialStage = {
+      currentStage: 1,
+      totalStages: 7,
+      stageName: 'Welcome & Introduction',
+      stageDescription: 'Getting to know you and your business idea',
+    };
 
-      if (!crewResponse.ok) {
-        const errorText = await crewResponse.text();
-        throw new Error(`CrewAI start failed (${crewResponse.status}): ${errorText}`);
-      }
-
-      const payload = (await crewResponse.json()) as CrewConversationStartResponse;
-      if (!payload?.success || !payload.session) {
-        throw new Error('CrewAI start payload was invalid');
-      }
-
-      crewSession = payload.session;
-    } catch (error) {
-      console.error('[onboarding/start] CrewAI start error:', error);
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'AI_SERVICE_UNAVAILABLE',
-            message: 'The AI onboarding agent is unavailable right now. Please try again shortly.',
-            retryable: true,
-            fallbackOptions: ['retry', 'contact_support'],
-          },
-        } as StartOnboardingError,
-        { status: 503 },
-      );
-    }
-
-    const stageSnapshot = crewSession.stage_snapshot;
-    const stageKey = `stage_${stageSnapshot.stage ?? crewSession.stage_state.current_stage}`;
     const initialStageData = {
       brief: {},
       coverage: {
-        [stageKey]: {
-          ...stageSnapshot,
-          quality_signals: crewSession.quality_signals,
+        stage_1: {
+          stage: 1,
+          coverage: 0,
+          quality: {
+            clarity: { label: 'medium' as const, score: 0.5 },
+            completeness: { label: 'partial' as const, score: 0.5 },
+            detail_score: 0.5,
+          },
+          brief_fields: [],
+          updated_at: startedAt.toISOString(),
         },
       },
     };
 
-    const stageDescription =
-      crewSession.stage_state.summary ?? 'Getting to know you and your business idea';
-
     const aiContext = {
-      persona: crewSession.context.agentPersonality,
-      qualitySignals: crewSession.quality_signals,
+      persona: {
+        name: 'Alex',
+        role: 'Strategic Business Consultant',
+        tone: 'friendly, encouraging, professionally direct',
+        expertise: 'Lean Startup, Customer Development, Business Model Design',
+      },
+      qualitySignals: {
+        clarity: { label: 'medium' as const, score: 0.5 },
+        completeness: { label: 'partial' as const, score: 0.5 },
+        detail_score: 0.5,
+        overall: 0.5,
+      },
     };
 
-    await saveOnboardingSession(supabaseClient, {
-      sessionId,
-      userId: user.id,
-      planType,
-      status: 'active',
-      startedAt,
-      stageData: initialStageData,
-      aiContext,
-      stageState: {
-        currentStage: crewSession.stage_state.current_stage,
-        totalStages: crewSession.stage_state.total_stages,
-        stageName: crewSession.stage_state.stage_name,
-        stageDescription,
-      },
-      stageProgress: Math.round((stageSnapshot.coverage ?? 0) * 100),
-      overallProgress: Math.round((stageSnapshot.coverage ?? 0) * 100),
-      userContext,
-    });
+    // Save session to database (skip for test users in development)
+    if (!(isDevelopment && isTestUser)) {
+      await saveOnboardingSession(supabaseClient, {
+        sessionId,
+        userId: effectiveUser.id as string,
+        planType,
+        status: 'active',
+        startedAt,
+        stageData: initialStageData,
+        aiContext,
+        stageState: initialStage,
+        stageProgress: 0,
+        overallProgress: 0,
+        userContext,
+      });
+    } else {
+      console.log('[onboarding/start] Skipping database save for test user in development mode');
+    }
 
     const response: StartOnboardingResponse = {
       success: true,
       sessionId,
-      agentIntroduction: crewSession.agent_introduction,
-      firstQuestion: crewSession.first_question,
-      estimatedDuration: crewSession.estimated_duration,
-      stageInfo: {
-        currentStage: crewSession.stage_state.current_stage,
-        totalStages: crewSession.stage_state.total_stages,
-        stageName: crewSession.stage_state.stage_name,
-        stageDescription,
+      agentIntroduction: `Hi there! I'm Alex, and I'm excited to help you think through your business idea using proven validation methods.
+
+Over the next 15-20 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your goals. This isn't a pitch session - it's a strategic conversation to help you identify what assumptions you need to test and what experiments you should run first.
+
+There are no wrong answers here. In fact, "I don't know yet" is often the most honest and valuable response because it helps us identify what you need to learn.`,
+      firstQuestion: `Ready to dive in? Let's start with the most important question:
+
+**What business idea are you most excited about right now?**`,
+      estimatedDuration: '15-20 minutes',
+      stageInfo: initialStage,
+      conversationContext: {
+        agentPersonality: aiContext.persona,
+        expectedOutcomes: [
+          'Clear understanding of your target customer',
+          'Validated problem statement',
+          'Defined unique value proposition',
+          'Strategic validation roadmap',
+        ],
+        privacyNotice: 'Your responses are confidential and used only to generate strategic recommendations.',
       },
-      conversationContext: crewSession.context,
-      qualitySignals: crewSession.quality_signals,
-      stageSnapshot,
+      qualitySignals: aiContext.qualitySignals,
+      stageSnapshot: initialStageData.coverage.stage_1,
     };
 
     return NextResponse.json(response);
