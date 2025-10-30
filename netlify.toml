@@ -13,10 +13,24 @@
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_SERVICE_ROLE_KEY,DATABASE_URL,SUPABASE_URL"
 
 # ============================================================================
-# DEV CONTEXT (netlify dev - Staging Environment)
+# STAGING CONTEXT (staging branch - Deployed Environment)
 # ============================================================================
-# This context provides environment variables for local staging with netlify dev
-# The [dev] section below configures the dev server itself
+# Branch deploy from 'staging' git branch
+# URL: https://staging--app-startupai-site.netlify.app
+[context.staging]
+  command = "cd frontend && pnpm build"
+
+[context.staging.environment]
+  NODE_ENV = "staging"
+  NEXT_PUBLIC_MARKETING_URL = "https://staging--startupai-site.netlify.app"
+  NEXT_PUBLIC_APP_URL = "https://staging--app-startupai-site.netlify.app"
+  NEXT_PUBLIC_SITE_URL = "https://staging--app-startupai-site.netlify.app"
+
+# ============================================================================
+# DEV CONTEXT (local netlify dev only - for testing Functions)
+# ============================================================================
+# This context is for local 'netlify dev' command
+# Used for testing Netlify Functions locally
 [context.dev.environment]
   NODE_ENV = "development"
   NEXT_PUBLIC_MARKETING_URL = "http://localhost:8888"
