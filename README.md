@@ -9,7 +9,7 @@ This repository implements the **Product Platform** (`app.startupai.site`) in St
 - **🎯 startupai.site** (The Promise) - Convert prospects to customers - ✅ 95% Complete
 - **⚡ app.startupai.site** (The Product) - Deliver value and create advocates ← **THIS REPO** - ⚠️ 65-70% Complete
 
-**Latest Updates:** October 27, 2025 - CrewAI-powered onboarding flow live (start/message routes, quality signals, contract-check tooling)
+**Latest Updates:** October 30, 2025 - AI-powered onboarding with Vercel AI SDK + OpenAI GPT-4.1-nano (streaming chat, stage progression, quality assessment)
 
 ## ⚠️ Temporary Testing Override: Onboarding Guard Disabled
 
@@ -34,7 +34,7 @@ Owner note: re-enable guard before pricing/checkout go live.
 - **Secure Authentication Handoff** - ✅ Working with token-based session (Oct 4, 2025)
 - **Project Management** - ✅ UI complete, DB integration working via useProjects hook (Oct 3, 2025)
 - **Hypothesis Testing** - ✅ Complete UI with database integration
-- **AI-Powered Insights** - ⚠️ CrewAI backend 15% implemented (Oct 4, 2025)
+- **AI-Powered Onboarding** - ✅ Vercel AI SDK with OpenAI/Anthropic (90% complete)
 - **Professional Reports** - ⚠️ Display UI ready, generation backend in progress
 - **Progress Tracking** - ✅ Gate scoring integrated (Oct 4, 2025)
 - **Trial Usage Guardrails** - ✅ Implemented with /api/trial/allow endpoint (Oct 4, 2025)
@@ -42,21 +42,21 @@ Owner note: re-enable guard before pricing/checkout go live.
 ## 🛠️ Technology Stack
 
 - **Frontend:** Next.js 15.5.3 with TypeScript 5.8.3 (`/frontend/`)
-- **Backend:** Netlify Functions (Python) for CrewAI workflows - ⚠️ 15% Implemented (Oct 4, 2025)
-- **Database:** Supabase PostgreSQL with pgvector - ✅ 100% Complete (8 migrations deployed)
+- **AI Provider:** Vercel AI SDK v5 with OpenAI GPT-4.1-nano (primary) + Anthropic Claude (fallback) - ✅ 90% Complete
+- **Database:** Supabase PostgreSQL with pgvector - ✅ 100% Complete (12 migrations deployed)
 - **ORM:** Drizzle ORM for type-safe operations - ✅ Complete
 - **Storage:** Supabase Storage with RLS policies - ✅ Buckets created (Oct 3, 2025)
 - **Vector Search:** pgvector with match_evidence() function - ✅ Complete (Oct 4, 2025)
-- **AI:** CrewAI 0.201.1 + Netlify Functions - ⚠️ 15% Implemented
+- **Legacy Backend:** CrewAI on CrewAI AMP platform - ⚠️ Deprecated for onboarding (available for future batch workflows)
 - **Authentication:** JWT token validation - ✅ Working with role-based routing (Oct 4, 2025)
 - **Package Manager:** pnpm 9.12.1 (✅ migrated Sept 26, 2025)
 - **Deployment:** Netlify (✅ live at https://app-startupai-site.netlify.app)
 
 **Current Status:**
 - ✅ Infrastructure: 95% (Supabase, Auth, Deployment, Environment Variables)
-- ✅ UI Components: 70% (50+ components, 160KB canvas code, DB integrated)
-- ✅ Backend Integration: 70% (Dashboard, projects, evidence all connected to Supabase)
-- ⚠️ AI Backend: 15% (CrewAI installed, Netlify functions created, needs completion)
+- ✅ UI Components: 95% (50+ components, 160KB canvas code, DB integrated)
+- ✅ Backend Integration: 90% (Dashboard, projects, evidence, onboarding all connected to Supabase)
+- ✅ AI Onboarding: 90% (Vercel AI SDK with streaming chat, stage progression via AI tools)
 
 
 ### Development Setup
@@ -132,36 +132,38 @@ app.startupai.site/
 **Overall Progress:** 65-70% Complete  
 **Last Updated:** October 6, 2025
 
-**✅ What's Working (Oct 3-6, 2025):**
+**✅ What's Working (Oct 30, 2025):**
 - ✅ 20 pages deployed (16 Pages Router + 4 App Router)
 - ✅ 50+ UI components including 9 canvas tools (160KB code)
 - ✅ Complete validation UI with database integration
 - ✅ GitHub OAuth working in production with role-based routing
 - ✅ Dashboard connected to Supabase via useProjects hook
-- ✅ 8 database migrations deployed (including trial guardrails)
+- ✅ **12 database migrations deployed** (including onboarding_sessions, entrepreneur_briefs tables)
 - ✅ Type-safe query layer complete with read/write operations
-- ✅ 162 tests passing (Jest) + 45 E2E tests (Playwright)
+- ✅ **19+ test files** (Jest + Playwright E2E framework)
 - ✅ Mock data removed from production code paths
 - ✅ Storage buckets created with RLS policies
-- ✅ Vector search function deployed (match_evidence)
+- ✅ Vector search function deployed (match_evidence with 1536-dim embeddings)
 - ✅ Trial usage guardrails with /api/trial/allow endpoint
 - ✅ Netlify deployment environment variables configured
-- ✅ CrewAI backend 15% implemented (agents, tasks, Netlify functions)
+- ✅ **AI Onboarding: Vercel AI SDK with OpenAI GPT-4.1-nano + streaming chat**
+- ✅ **Stage progression with AI tools** (assessQuality, advanceStage, completeOnboarding)
+- ✅ **7-stage conversation flow** with quality assessment and progress tracking
 
 **⚠️ In Progress:**
-- ⚠️ CrewAI backend completion (85% remaining - 10-13 hours)
-- ⚠️ Frontend integration with CrewAI endpoints
-- ⚠️ Real-time progress tracking for AI workflows
+- ⚠️ E2E test coverage expansion
+- ⚠️ Post-onboarding workflow integration
+- ⚠️ Complete project creation wizard
 
 **✅ Architecture Decisions:**
 - ✅ Router consolidation: KEEP HYBRID (Vercel recommended, documented Oct 4)
 - ✅ Database integration: COMPLETE (all components use real data)
+- ✅ AI Provider: **Migrated from CrewAI to Vercel AI SDK** for onboarding (better streaming, lower costs, simpler architecture)
 
 **Next Steps (Prioritized):**
-1. 🚨 Complete CrewAI backend (Steps 3-10) - 10-13 hours - CRITICAL
-2. ⚡ Frontend integration (ProjectCreationWizard) - 4 hours - HIGH
-3. ⚡ Real-time progress tracking - 3 hours - HIGH
-4. 📋 End-to-end workflow testing - 2 hours - MEDIUM
+1. ⚡ Expand E2E test coverage - 6 hours - HIGH
+2. ⚡ Complete post-onboarding project creation flow - 4 hours - HIGH
+3. 📋 CrewAI integration for batch analysis workflows (optional future feature) - BACKLOG
 
 ## 📚 Documentation
 

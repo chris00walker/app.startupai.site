@@ -1,10 +1,36 @@
 ---
 purpose: "Private technical source of truth for CrewAI integration"
-status: "active"
-last_reviewed: "2025-10-27"
+status: "deprecated"
+last_reviewed: "2025-10-30"
+deprecated_date: "2025-10-30"
+replacement: "Vercel AI SDK with OpenAI/Anthropic (see frontend/src/app/api/chat/route.ts)"
 ---
 
 # CrewAI Integration
+
+## ⚠️ DEPRECATION NOTICE
+
+**Status:** This integration is **DEPRECATED** as of October 30, 2025.
+
+**Reason:** Onboarding has migrated from CrewAI/Netlify Functions to **Vercel AI SDK** with streaming chat for better performance, lower costs, and simpler architecture.
+
+**Current Implementation:**
+- **Onboarding:** Uses Vercel AI SDK (`/api/chat`) with OpenAI GPT-4.1-nano (primary) and Anthropic Claude (fallback)
+- **Stage Progression:** AI tools (assessQuality, advanceStage, completeOnboarding) handle stage management
+- **Streaming:** Real-time streaming responses via Vercel AI SDK `streamText()`
+- **Location:** `/frontend/src/app/api/chat/route.ts` (370 lines)
+
+**CrewAI Status:**
+- Netlify functions still exist but are **not called** by onboarding routes
+- CrewAI crew deployed at CrewAI AMP platform (UUID: `b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b`)
+- Available for **future batch analysis workflows** if needed
+
+**Migration Date:** October 2025
+**Active Replacement:** `/frontend/src/app/api/chat/route.ts`
+
+---
+
+# Historical CrewAI Integration (Archived)
 
 ## Agent Overview
 
