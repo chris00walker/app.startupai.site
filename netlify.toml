@@ -13,18 +13,6 @@
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_SERVICE_ROLE_KEY,DATABASE_URL,SUPABASE_URL"
 
 # ============================================================================
-# LOCAL DEVELOPMENT CONTEXT (netlify dev)
-# ============================================================================
-[context.dev]
-  command = "cd frontend && pnpm dev"
-  
-[context.dev.environment]
-  NODE_ENV = "development"
-  NEXT_PUBLIC_MARKETING_URL = "http://localhost:8888"
-  NEXT_PUBLIC_APP_URL = "http://localhost:8889"
-  NEXT_PUBLIC_SITE_URL = "http://localhost:8889"
-  
-# ============================================================================
 # PRODUCTION CONTEXT (main branch)
 # ============================================================================
 [context.production]
