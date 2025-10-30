@@ -1,3 +1,6 @@
+# ============================================================================
+# DEFAULT BUILD CONFIGURATION (Production)
+# ============================================================================
 [build]
   command = "cd frontend && pnpm build"
   publish = "frontend/.next"
@@ -8,6 +11,49 @@
   # Allow server-side environment variables in Next.js API routes
   # These are only accessed at runtime, not embedded in client code
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_SERVICE_ROLE_KEY,DATABASE_URL,SUPABASE_URL"
+
+# ============================================================================
+# LOCAL DEVELOPMENT CONTEXT (netlify dev)
+# ============================================================================
+[context.dev]
+  command = "cd frontend && pnpm dev"
+  
+[context.dev.environment]
+  NODE_ENV = "development"
+  NEXT_PUBLIC_MARKETING_URL = "http://localhost:8888"
+  NEXT_PUBLIC_APP_URL = "http://localhost:8889"
+  NEXT_PUBLIC_SITE_URL = "http://localhost:8889"
+  
+# ============================================================================
+# PRODUCTION CONTEXT (main branch)
+# ============================================================================
+[context.production]
+  command = "cd frontend && pnpm build"
+  
+[context.production.environment]
+  NODE_ENV = "production"
+  NEXT_PUBLIC_MARKETING_URL = "https://startupai-site.netlify.app"
+  NEXT_PUBLIC_APP_URL = "https://app-startupai-site.netlify.app"
+  NEXT_PUBLIC_SITE_URL = "https://app-startupai-site.netlify.app"
+
+# ============================================================================
+# BRANCH DEPLOY PREVIEWS
+# ============================================================================
+[context.branch-deploy]
+  command = "cd frontend && pnpm build"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "staging"
+
+# ============================================================================
+# NETLIFY DEV LOCAL SERVER
+# ============================================================================
+[dev]
+  command = "cd frontend && pnpm dev"
+  port = 8889
+  targetPort = 3000
+  autoLaunch = false
+  framework = "#custom"
 
 # Enable Next.js on Netlify
 [[plugins]]

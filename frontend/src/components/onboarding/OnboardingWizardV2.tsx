@@ -81,6 +81,68 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setInput(e.target.value);
   }, []);
 
+  // Initialize stages
+  const initializeStages = useCallback((currentStage: number = 1) => {
+    const stageNames = [
+      'Welcome & Introduction',
+      'Customer Discovery',
+      'Problem Definition',
+      'Solution Validation',
+      'Competitive Analysis',
+      'Resources & Constraints',
+      'Goals & Next Steps',
+    ];
+
+    const stageDescriptions = [
+      'Getting to know you and your business idea',
+      'Understanding your target customers',
+      'Defining the core problem you\'re solving',
+      'Exploring your proposed solution',
+      'Understanding the competitive landscape',
+      'Assessing your available resources',
+      'Setting strategic goals and priorities',
+    ];
+
+    return stageNames.map((name, index) => ({
+      stage: index + 1,
+      name,
+      description: stageDescriptions[index],
+      isComplete: index + 1 < currentStage,
+      isActive: index + 1 === currentStage,
+    }));
+  }, []);
+
+  // Refetch session status to get updated stage
+  const refetchSessionStatus = useCallback(async () => {
+    if (!session) return;
+
+    try {
+      const response = await fetch(`/api/onboarding/status?sessionId=${session.sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Update session state with new stage and progress
+          setSession(prev => prev ? {
+            ...prev,
+            currentStage: data.currentStage,
+            overallProgress: data.overallProgress,
+            stageProgress: data.stageProgress,
+          } : null);
+
+          // Update stages UI
+          setStages(initializeStages(data.currentStage));
+
+          console.log('[OnboardingWizard] Session status updated:', {
+            stage: data.currentStage,
+            progress: data.overallProgress,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[OnboardingWizard] Failed to refetch session status:', error);
+    }
+  }, [session, initializeStages]);
+
   // Handle form submit - stream AI response
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -192,6 +254,9 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       const progress = Math.min(95, Math.floor((messages.length + 2) / 30 * 100));
       setSession(prev => prev ? { ...prev, overallProgress: progress } : null);
 
+      // Refetch session status to get updated stage (if AI advanced stages)
+      await refetchSessionStatus();
+
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         console.error('[OnboardingWizard] Chat error:', error);
@@ -201,7 +266,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       setIsAILoading(false);
       abortControllerRef.current = null;
     }
-  }, [input, isAILoading, session, messages, isDemoMode]);
+  }, [input, isAILoading, session, messages, isDemoMode, refetchSessionStatus]);
 
   const announceToScreenReader = useCallback((message: string) => {
     const announcement = document.createElement('div');
@@ -214,37 +279,6 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setTimeout(() => {
       document.body.removeChild(announcement);
     }, 1000);
-  }, []);
-
-  // Initialize stages
-  const initializeStages = useCallback((currentStage: number = 1) => {
-    const stageNames = [
-      'Welcome & Introduction',
-      'Customer Discovery',
-      'Problem Definition',
-      'Solution Validation',
-      'Competitive Analysis',
-      'Resources & Constraints',
-      'Goals & Next Steps',
-    ];
-
-    const stageDescriptions = [
-      'Getting to know you and your business idea',
-      'Understanding your target customers',
-      'Defining the core problem you\'re solving',
-      'Exploring your proposed solution',
-      'Understanding the competitive landscape',
-      'Assessing your available resources',
-      'Setting strategic goals and priorities',
-    ];
-
-    return stageNames.map((name, index) => ({
-      stage: index + 1,
-      name,
-      description: stageDescriptions[index],
-      isComplete: index + 1 < currentStage,
-      isActive: index + 1 === currentStage,
-    }));
   }, []);
 
   // Initialize onboarding session

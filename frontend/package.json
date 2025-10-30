@@ -5,7 +5,11 @@
   "packageManager": "pnpm@9.12.1",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:local": "next dev --turbopack -p 3000",
+    "dev:staging": "cd .. && netlify dev",
     "build": "next build",
+    "build:staging": "NODE_ENV=staging next build",
+    "build:production": "NODE_ENV=production next build",
     "start": "next start",
     "db:migrate": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -25,7 +29,8 @@
     "test:all": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
     "test:ci": "pnpm run test:coverage && pnpm run test:e2e",
     "lint": "node -e \"console.log('Linting deferred: see docs/status/linting.md for details.');\"",
-    "test:generate-token": "tsx scripts/generate-test-token.ts"
+    "test:generate-token": "tsx scripts/generate-test-token.ts",
+    "env:check": "node -e \"console.log('Environment:', process.env.NODE_ENV || 'development'); console.log('Marketing URL:', process.env.NEXT_PUBLIC_MARKETING_URL); console.log('App URL:', process.env.NEXT_PUBLIC_APP_URL); console.log('Site URL:', process.env.NEXT_PUBLIC_SITE_URL);\""
   },
   "keywords": [],
   "author": "",

@@ -7,7 +7,20 @@
       "Bash(netlify status:*)",
       "Bash(python crew-analyze.py:*)",
       "Bash(curl:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.crewai.com)",
+      "WebFetch(domain:startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com)",
+      "WebFetch(domain:vercel.com)",
+      "WebFetch(domain:ai-sdk.dev)",
+      "Bash(pnpm add:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm dev)",
+      "Read(//home/chris/.secrets/**)",
+      "WebFetch(domain:platform.openai.com)",
+      "Bash(pnpm list:*)",
+      "Bash(PORT=3001 pnpm dev:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []
