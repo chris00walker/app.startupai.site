@@ -187,7 +187,7 @@ The **SINGLE SOURCE OF TRUTH** for all StartupAI development (located in marketi
 
 #### Testing (50-series)
 - [Testing Infrastructure](docs/engineering/50-testing/README.md)
-- [E2E Testing Guide](frontend/E2E_TESTING_GUIDE.md)
+- [E2E Testing Guide](docs/testing/e2e-guide.md)
 - [TDD Implementation Report](frontend/TDD_IMPLEMENTATION_COMPLETE.md)
 
 #### Deployment
