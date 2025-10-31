@@ -18,7 +18,7 @@
 # Branch deploy from 'staging' git branch
 # URL: https://staging--app-startupai-site.netlify.app
 [context.staging]
-  command = "cd frontend && pnpm build"
+  command = "pnpm install && cd frontend && pnpm build"
 
 [context.staging.environment]
   NODE_ENV = "staging"
@@ -41,7 +41,7 @@
 # PRODUCTION CONTEXT (main branch)
 # ============================================================================
 [context.production]
-  command = "cd frontend && pnpm build"
+  command = "pnpm install && cd frontend && pnpm build"
   
 [context.production.environment]
   NODE_ENV = "production"
@@ -53,7 +53,7 @@
 # BRANCH DEPLOY PREVIEWS
 # ============================================================================
 [context.branch-deploy]
-  command = "cd frontend && pnpm build"
+  command = "pnpm install && cd frontend && pnpm build"
 
 [context.branch-deploy.environment]
   NODE_ENV = "staging"
