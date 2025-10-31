@@ -1,4 +1,4 @@
-import { streamText, tool } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
@@ -47,7 +47,7 @@ function getAIModel() {
 
 const assessQualityTool = tool({
   description: 'Assess the quality and completeness of a user response for the current stage. Use this frequently after receiving substantial information from the user.',
-  parameters: z.object({
+  inputSchema: z.object({
     coverage: z.number().min(0).max(1).describe('How much of the required information has been collected (0.0 to 1.0)'),
     clarity: z.enum(['high', 'medium', 'low']).describe('How clear and specific are the responses'),
     completeness: z.enum(['complete', 'partial', 'insufficient']).describe('Is there enough information to move forward'),
@@ -63,7 +63,7 @@ const assessQualityTool = tool({
 
 const advanceStageTool = tool({
   description: 'Advance from the current stage to the next stage. Only use this when you have collected sufficient information (coverage above threshold) and the user has shown good clarity. Do not use this prematurely.',
-  parameters: z.object({
+  inputSchema: z.object({
     fromStage: z.number().min(1).max(7).describe('The current stage number'),
     toStage: z.number().min(1).max(7).describe('The next stage number (usually fromStage + 1)'),
     summary: z.string().describe('Brief summary of what was learned in this stage'),
@@ -79,7 +79,7 @@ const advanceStageTool = tool({
 
 const completeOnboardingTool = tool({
   description: 'Signal that all 7 stages are complete and the onboarding conversation is ready for strategic analysis. Only use this after Stage 7 is thoroughly completed with high-quality responses.',
-  parameters: z.object({
+  inputSchema: z.object({
     readinessScore: z.number().min(0).max(1).describe('Overall readiness for strategic analysis (0.0 to 1.0)'),
     keyInsights: z.array(z.string()).describe('3-5 key insights from the entire conversation'),
     recommendedNextSteps: z.array(z.string()).describe('3-5 recommended experiments or actions'),
@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
       messages,
       temperature: 0.7,
       tools: onboardingTools,
-      maxSteps: 10, // Allow multiple tool calls per response
+      stopWhen: stepCountIs(10), // Allow multiple tool calls per response
       onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
         try {
           console.log('[api/chat] onFinish triggered:', {
@@ -213,17 +213,17 @@ export async function POST(req: NextRequest) {
 
               console.log('[api/chat] Processing tool result:', {
                 toolName: toolCall.toolName,
-                args: toolCall.args,
+                input: toolCall.input,
               });
 
               // Handle advanceStage tool
               if (toolCall.toolName === 'advanceStage') {
-                const { toStage, summary, collectedData } = toolCall.args as any;
+                const { fromStage, toStage, summary, collectedData } = toolCall.input as any;
                 newStage = toStage;
 
                 // Store stage summary and collected data
-                newStageData[`stage_${toolCall.args.fromStage}_summary`] = summary;
-                newStageData[`stage_${toolCall.args.fromStage}_data`] = collectedData;
+                newStageData[`stage_${fromStage}_summary`] = summary;
+                newStageData[`stage_${fromStage}_data`] = collectedData;
 
                 // Merge collected data into brief
                 newStageData.brief = {
@@ -232,14 +232,14 @@ export async function POST(req: NextRequest) {
                 };
 
                 console.log('[api/chat] Stage advanced:', {
-                  from: toolCall.args.fromStage,
+                  from: fromStage,
                   to: toStage,
                 });
               }
 
               // Handle assessQuality tool
               if (toolCall.toolName === 'assessQuality') {
-                const { coverage, clarity, completeness, notes } = toolCall.args as any;
+                const { coverage, clarity, completeness, notes } = toolCall.input as any;
 
                 // Store quality assessment for current stage
                 newStageData[`stage_${currentStage}_quality`] = {
@@ -260,7 +260,7 @@ export async function POST(req: NextRequest) {
 
               // Handle completeOnboarding tool
               if (toolCall.toolName === 'completeOnboarding') {
-                const { readinessScore, keyInsights, recommendedNextSteps } = toolCall.args as any;
+                const { readinessScore, keyInsights, recommendedNextSteps } = toolCall.input as any;
 
                 isCompleted = true;
                 newStageData.completion = {

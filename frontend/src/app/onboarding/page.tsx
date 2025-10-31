@@ -34,7 +34,7 @@ async function OnboardingPage() {
   };
 
   // Get user profile to determine plan type (skip in test mode)
-  let profile = null;
+  let profile: { subscription_tier: any; role: any; } | null = null;
   if (user) {
     const { data: profileData } = await supabase
       .from('user_profiles')
