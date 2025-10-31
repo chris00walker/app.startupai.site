@@ -70,7 +70,9 @@
 
 # Enable Next.js on Netlify
 [[plugins]]
+  # Pin to 5.14.4 for Next.js 15 compatibility (fixes missing start-server module)
   package = "@netlify/plugin-nextjs"
+  pinned_version = "5.14.4"
 
 [functions]
   directory = "netlify/functions"
