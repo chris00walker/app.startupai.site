@@ -1,5 +1,10 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Required for Netlify deployment with pnpm workspace monorepo
+  output: 'standalone',
+
   reactStrictMode: true,
   trailingSlash: true,
   images: {
@@ -12,13 +17,13 @@ const nextConfig = {
   pageExtensions: ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'tsx', 'ts', 'jsx', 'js'].filter(
     (extension) => !extension.includes('test') && !extension.includes('spec')
   ),
-  
+
   // Performance optimizations
   experimental: {
     // Optimize bundle splitting
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-  
+
   // Turbopack configuration (replaces deprecated experimental.turbo)
   turbopack: {
     rules: {
@@ -28,9 +33,9 @@ const nextConfig = {
       },
     },
   },
-  
-  // Fix for multiple lockfiles warning - explicitly set workspace root
-  outputFileTracingRoot: __dirname,
+
+  // Fix for pnpm workspace - trace from monorepo root to include all dependencies
+  outputFileTracingRoot: path.join(__dirname, '../'),
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
