@@ -26,5 +26,6 @@
     "netlify",
     "supabase",
     "shadcn"
-  ]
+  ],
+  "enableAllProjectMcpServers": true
 }
