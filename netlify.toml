@@ -2,7 +2,7 @@
 # DEFAULT BUILD CONFIGURATION (Production)
 # ============================================================================
 [build]
-  command = "cd frontend && pnpm build"
+  command = "pnpm install && cd frontend && pnpm build"
   publish = "frontend/.next"
 
 [build.environment]
