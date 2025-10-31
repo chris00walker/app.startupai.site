@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -29,8 +31,8 @@ const nextConfig = {
     },
   },
   
-  // Fix for multiple lockfiles warning - explicitly set workspace root
-  outputFileTracingRoot: __dirname,
+  // Fix for pnpm workspace - trace from monorepo root to include all dependencies
+  outputFileTracingRoot: path.join(__dirname, '../'),
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
