@@ -20,7 +20,7 @@ ALTER TABLE user_profiles
 -- Backfill role for existing records based on subscription tier if missing
 UPDATE user_profiles
 SET role = CASE
-  WHEN role IS NOT NULL THEN role
+  WHEN role IS NOT NULL THEN role::user_role
   WHEN subscription_tier IN ('enterprise', 'pro') THEN 'consultant'::user_role
   ELSE 'trial'::user_role
 END

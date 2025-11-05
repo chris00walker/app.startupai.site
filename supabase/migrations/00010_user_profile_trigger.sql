@@ -42,7 +42,7 @@ BEGIN
     new.email,
     new.raw_user_meta_data->>'full_name',
     new.raw_user_meta_data->>'avatar_url',
-    COALESCE((new.raw_user_meta_data->>'role')::user_role, 'trial'::user_role),
+    COALESCE((new.raw_user_meta_data->>'role')::public.user_role, 'trial'::public.user_role),
     COALESCE(new.raw_user_meta_data->>'plan_type', 'trial'),
     'trialing'
   )
