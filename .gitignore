@@ -241,3 +241,7 @@ netlify.toml.backup
 frontend/create-*.mjs
 frontend/test-*.mjs
 frontend/debug-*.mjs
+
+# Claude Code local settings
+.claude/settings.local.json
+CLAUDE.md
