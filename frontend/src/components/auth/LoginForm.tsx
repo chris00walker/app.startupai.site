@@ -55,10 +55,15 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
     try {
       const email = formData.get('email') as string
       const password = formData.get('password') as string
-      await signIn(email, password)
+      const result = await signIn(email, password)
+
+      if (result.success) {
+        // Redirect to dashboard (role-based routing will happen on server)
+        window.location.href = '/dashboard'
+      }
     } catch (error) {
       console.error('Email sign in error:', error)
-    } finally {
+      alert(`Sign in failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
       setIsLoading(false)
     }
   }

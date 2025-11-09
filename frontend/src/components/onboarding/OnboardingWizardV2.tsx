@@ -329,6 +329,7 @@ Ready to dive in? Let's start with the most important question:
       }
 
       // Real mode - call API
+      console.log('📡 Calling /api/onboarding/start with:', { userId, planType });
       const response = await fetch('/api/onboarding/start/', {
         method: 'POST',
         headers: {
@@ -343,12 +344,17 @@ Ready to dive in? Let's start with the most important question:
             timeAvailable: 30,
           },
         }),
+        credentials: 'include', // Ensure cookies are sent
       });
 
+      console.log('📡 Response status:', response.status);
       const data = await response.json();
+      console.log('📡 Response data:', data);
 
       if (!data.success) {
-        throw new Error(data.error?.message || 'Failed to start onboarding session');
+        const errorMsg = data.error?.message || 'Failed to start onboarding session';
+        console.error('❌ Onboarding start failed:', errorMsg);
+        throw new Error(errorMsg);
       }
 
       const newSession: OnboardingSession = {
