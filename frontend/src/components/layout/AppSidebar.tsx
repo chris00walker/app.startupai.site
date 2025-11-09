@@ -118,9 +118,8 @@ const consultantNavigation = {
     },
     {
       title: "Logout",
-      url: "https://startupai-site.netlify.app",
+      url: "/api/auth/logout",
       icon: LogOut,
-      isExternal: true,
     },
   ],
 }
@@ -212,9 +211,8 @@ const founderNavigation = {
     },
     {
       title: "Logout",
-      url: "https://startupai-site.netlify.app",
+      url: "/api/auth/logout",
       icon: LogOut,
-      isExternal: true,
     },
   ],
 }
@@ -366,17 +364,10 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    {item.isExternal ? (
-                      <a href={item.url} target="_blank" rel="noopener noreferrer">
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </a>
-                    ) : (
-                      <a href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </a>
-                    )}
+                    <a href={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -393,10 +384,12 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
                 Trial mode: upgrade to unlock full AI automation.
               </div>
             )}
-            <Button variant="outline" size="sm" className="w-full">
-              <Brain className="h-4 w-4 mr-2" />
-              AI Assistant
-            </Button>
+            <Link href={resolvedType === "founder" ? "/onboarding/founder" : "/onboarding/consultant"} className="block">
+              <Button variant="outline" size="sm" className="w-full">
+                <Brain className="h-4 w-4 mr-2" />
+                AI Assistant
+              </Button>
+            </Link>
           </div>
         </div>
       </SidebarFooter>

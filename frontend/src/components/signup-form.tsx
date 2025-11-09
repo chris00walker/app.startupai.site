@@ -153,7 +153,7 @@ export function SignupForm({
         analytics.auth.signupCompleted("email", plan, result.user.id)
       }
 
-      setSuccess("Check your email to confirm your account. Once verified, you'll be redirected to your dashboard.")
+      setSuccess("Check your email to confirm your account. Click the verification link to get started - you can then close this tab.")
       setIsSubmitting(false)
     } catch (err) {
       console.error(err)
