@@ -53,7 +53,7 @@ export const DEFAULT_PLAN_OPTIONS: PlanOption[] = [
     name: "Free Trial",
     description: "Test the core evidence experience",
     price: "$0",
-    bestFor: "Founders exploring fit"
+    bestFor: "Getting started risk-free"
   }
 ]
 
