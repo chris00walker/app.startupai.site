@@ -467,8 +467,12 @@ Ready to dive in? Let's start with the most important question:
 
   const confirmExit = useCallback(() => {
     toast.info('Onboarding session saved. You can resume anytime.');
-    router.push('/dashboard');
-  }, [router]);
+
+    // Redirect to the appropriate dashboard based on plan type
+    // Consultants go to /clients to manage their client portfolio
+    const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+    router.push(dashboardRoute);
+  }, [router, planType]);
 
   // Initialize on mount
   useEffect(() => {
@@ -506,7 +510,10 @@ Ready to dive in? Let's start with the most important question:
             <Button onClick={() => window.location.reload()}>
               Try Again
             </Button>
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            <Button variant="outline" onClick={() => {
+              const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+              router.push(dashboardRoute);
+            }}>
               Go to Dashboard
             </Button>
           </div>
