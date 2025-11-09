@@ -11,7 +11,16 @@
       "WebFetch(domain:vercel.com)",
       "WebFetch(domain:ai-sdk.dev)",
       "WebFetch(domain:platform.openai.com)",
-      "WebFetch(domain:startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com)"
+      "WebFetch(domain:startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com)",
+      "mcp__netlify__netlify-project-services-reader",
+      "mcp__netlify__netlify-deploy-services-reader",
+      "mcp__supabase__get_logs",
+      "mcp__netlify__netlify-project-services-updater",
+      "mcp__netlify__netlify-team-services-reader",
+      "WebFetch(domain:www.netlify.com)",
+      "WebFetch(domain:app.netlify.com)",
+      "WebFetch(domain:answers.netlify.com)",
+      "Read(//mnt/c/Users/chris/OneDrive/Pictures/Screenshots/**)"
     ],
     "deny": [
       "Bash(rm:*)",
@@ -22,10 +31,10 @@
     ],
     "ask": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "netlify",
     "supabase",
     "shadcn"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

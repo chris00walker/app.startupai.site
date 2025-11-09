@@ -1,0 +1,12 @@
+{
+  "enabledMcpjsonServers": [
+    "netlify",
+    "supabase",
+    "shadcn"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(pnpm build:*)"
+    ]
+  }
+}
