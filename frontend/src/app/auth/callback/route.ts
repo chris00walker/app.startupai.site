@@ -82,17 +82,29 @@ export async function GET(request: NextRequest) {
     console.log('Session exchange successful!');
     console.log('User:', data?.user?.email);
     
-    // Update user metadata with plan selection if provided
+    // Update user metadata with plan and role selection if provided
     const plan = searchParams.get('plan');
-    if (plan && data.session?.user) {
-      console.log('Updating user metadata with plan:', plan);
+    const role = searchParams.get('role');
+
+    if ((plan || role) && data.session?.user) {
+      console.log('Updating user metadata - plan:', plan, 'role:', role);
       try {
+        const metadata: Record<string, string> = {};
+
+        if (plan) {
+          metadata.plan_type = plan;
+          metadata.subscription_tier = plan;
+        }
+
+        if (role) {
+          metadata.role = role;
+        } else if (plan === 'trial') {
+          // Default to founder for trial if no role specified
+          metadata.role = 'founder';
+        }
+
         await supabase.auth.updateUser({
-          data: {
-            plan_type: plan,
-            subscription_tier: plan,
-            role: 'trial',
-          }
+          data: metadata
         });
         console.log('User metadata updated successfully');
       } catch (metaError) {

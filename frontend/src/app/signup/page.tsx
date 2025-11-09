@@ -10,6 +10,7 @@ import { SignupForm, DEFAULT_PLAN_OPTIONS } from "@/components/signup-form"
 function SignupContent() {
   const searchParams = useSearchParams()
   const [selectedPlan, setSelectedPlan] = useState<string>()
+  const [selectedRole, setSelectedRole] = useState<string>()
 
   useEffect(() => {
     if (!searchParams) {
@@ -19,6 +20,11 @@ function SignupContent() {
     const planFromUrl = searchParams.get("plan")
     if (planFromUrl && DEFAULT_PLAN_OPTIONS.some((option) => option.id === planFromUrl)) {
       setSelectedPlan(planFromUrl)
+    }
+
+    const roleFromUrl = searchParams.get("role")
+    if (roleFromUrl && ['founder', 'consultant'].includes(roleFromUrl)) {
+      setSelectedRole(roleFromUrl)
     }
   }, [searchParams])
 
@@ -35,7 +41,12 @@ function SignupContent() {
 
       <div className="flex flex-1 items-center justify-center">
         <div className="w-full max-w-md">
-          <SignupForm selectedPlan={selectedPlan} onPlanChange={setSelectedPlan} />
+          <SignupForm
+            selectedPlan={selectedPlan}
+            selectedRole={selectedRole}
+            onPlanChange={setSelectedPlan}
+            onRoleChange={setSelectedRole}
+          />
         </div>
       </div>
     </div>

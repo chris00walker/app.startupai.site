@@ -21,7 +21,9 @@ type PlanOption = {
 type SignupFormProps = React.ComponentProps<"form"> & {
   planOptions?: PlanOption[]
   selectedPlan?: string
+  selectedRole?: string
   onPlanChange?: (plan: string) => void
+  onRoleChange?: (role: string) => void
 }
 
 export const DEFAULT_PLAN_OPTIONS: PlanOption[] = [
@@ -59,7 +61,9 @@ export function SignupForm({
   className,
   planOptions = DEFAULT_PLAN_OPTIONS,
   selectedPlan,
+  selectedRole,
   onPlanChange,
+  onRoleChange,
   ...props
 }: SignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -78,6 +82,12 @@ export function SignupForm({
     }
     return planOptions[0]?.id ?? "trial"
   })
+  const [localRole, setLocalRole] = useState(() => {
+    if (selectedRole && ['founder', 'consultant'].includes(selectedRole)) {
+      return selectedRole
+    }
+    return 'founder' // Default to founder if no role specified
+  })
 
   useEffect(() => {
     if (selectedPlan && planOptions.some((option) => option.id === selectedPlan)) {
@@ -85,7 +95,14 @@ export function SignupForm({
     }
   }, [selectedPlan, planOptions])
 
+  useEffect(() => {
+    if (selectedRole && ['founder', 'consultant'].includes(selectedRole)) {
+      setLocalRole(selectedRole)
+    }
+  }, [selectedRole])
+
   const plan = selectedPlan ?? localPlan
+  const role = selectedRole ?? localRole
 
   const handlePlanChange = (value: string) => {
     if (!planOptions.some((option) => option.id === value)) {
@@ -120,8 +137,9 @@ export function SignupForm({
             full_name: name,
             company,
             plan_choice: plan,
+            role: role,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/onboarding?plan=${plan}`)}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}`,
         },
       })
 
@@ -156,7 +174,7 @@ export function SignupForm({
         provider: 'github',
         options: {
           scopes: 'user:email read:user',
-          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&next=/onboarding`,
+          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
