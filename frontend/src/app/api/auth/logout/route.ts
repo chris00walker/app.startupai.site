@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   await supabase.auth.signOut();
 
   // Determine the marketing site URL based on environment
-  const marketingSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const marketingSiteUrl = process.env.NEXT_PUBLIC_MARKETING_URL || 'http://localhost:3000';
 
   // Redirect to marketing site homepage
   return NextResponse.redirect(marketingSiteUrl);
