@@ -1,141 +1,62 @@
-import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizardV2';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ConsultantOnboardingWizard } from '@/components/onboarding/ConsultantOnboardingWizard';
 
-// ============================================================================
-// Consultant Onboarding Page
-// ============================================================================
-// TODO: Customize this for consultant-specific onboarding flow with CrewAI
-// workflow for gathering practice information
+/**
+ * Consultant Onboarding Page
+ *
+ * This page handles the onboarding flow for consultants, gathering
+ * practice information and configuring their workspace.
+ *
+ * Related to Phase 3: Consultant Features
+ */
 
 export const metadata = {
   title: 'Consultant Onboarding | StartupAI',
-  description: 'Set up your consultancy practice profile and begin working with clients.',
+  description: 'Set up your consultant workspace and configure your practice',
 };
 
-async function ConsultantOnboardingPage() {
-  // Check authentication
+export default async function ConsultantOnboardingPage() {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
 
-  // For development/testing: allow access without auth
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const allowTestAccess = isDevelopment && !user;
+  // Verify authentication
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
-  if ((error || !user) && !allowTestAccess) {
-    // Redirect to login with return URL
+  if (authError || !user) {
     redirect('/login?returnUrl=/onboarding/consultant');
   }
 
-  // Use mock user for testing if not authenticated
-  const effectiveUser = user || {
-    id: 'test-user-id',
-    email: 'test@example.com',
-  };
+  // Check if user has consultant role
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('role, email')
+    .eq('id', user.id)
+    .single();
 
-  // Get user profile to determine plan type (skip in test mode)
-  let profile: { subscription_tier: any; role: any; } | null = null;
-  if (user) {
-    const { data: profileData } = await supabase
-      .from('user_profiles')
-      .select('subscription_tier, role')
-      .eq('id', user.id)
-      .single();
-    profile = profileData;
+  // If not a consultant, redirect to appropriate onboarding
+  if (profile?.role === 'founder') {
+    redirect('/onboarding/founder');
   }
 
-  // For consultants, map to agency tier
-  const planTypeMapping = {
-    'free': 'trial',
-    'trial': 'trial',
-    'sprint': 'sprint',
-    'agency-co-pilot': 'enterprise',
-    'agency': 'enterprise',
-    'pro': 'enterprise',
-    'enterprise': 'enterprise',
-  };
+  // Check if consultant onboarding already completed
+  const { data: consultantProfile } = await supabase
+    .from('consultant_profiles')
+    .select('onboarding_completed')
+    .eq('id', user.id)
+    .single();
 
-  const planType = (planTypeMapping[profile?.subscription_tier as keyof typeof planTypeMapping] || 'trial') as 'trial' | 'sprint' | 'founder' | 'enterprise';
+  if (consultantProfile?.onboarding_completed) {
+    // Already completed onboarding, redirect to dashboard
+    redirect('/dashboard');
+  }
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Development notice */}
-      {allowTestAccess && (
-        <div className="bg-yellow-100 border-b border-yellow-400 px-4 py-2 text-sm text-yellow-900">
-          ⚠️ <strong>Test Mode:</strong> Running without authentication for development testing
-        </div>
-      )}
-
-      {/* Skip navigation for accessibility */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50"
-      >
-        Skip to main content
-      </a>
-
-      {/* Main content with proper landmark */}
-      <div id="main-content" role="main" aria-label="Consultant onboarding conversation">
-        <Suspense fallback={<OnboardingLoadingSkeleton />}>
-          <OnboardingWizard
-            userId={effectiveUser.id as string}
-            planType={planType}
-            userEmail={effectiveUser.email || 'test@example.com'}
-          />
-        </Suspense>
-      </div>
-    </main>
+    <ConsultantOnboardingWizard
+      userId={user.id}
+      userEmail={profile?.email || user.email || ''}
+    />
   );
 }
-
-// ============================================================================
-// Loading Skeleton Component
-// ============================================================================
-
-function OnboardingLoadingSkeleton() {
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar skeleton */}
-      <div className="w-80 border-r bg-muted/10 p-6">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5, 6, 7].map((stage) => (
-              <div key={stage} className="flex items-center space-x-3">
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content skeleton */}
-      <div className="flex-1 flex flex-col">
-        {/* Header skeleton */}
-        <div className="border-b p-6">
-          <Skeleton className="h-6 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-
-        {/* Conversation area skeleton */}
-        <div className="flex-1 p-6 space-y-4">
-          <div className="space-y-3">
-            <Skeleton className="h-16 w-3/4" />
-            <Skeleton className="h-12 w-1/2 ml-auto" />
-            <Skeleton className="h-20 w-4/5" />
-          </div>
-        </div>
-
-        {/* Input area skeleton */}
-        <div className="border-t p-6">
-          <Skeleton className="h-12 w-full" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default ConsultantOnboardingPage;
