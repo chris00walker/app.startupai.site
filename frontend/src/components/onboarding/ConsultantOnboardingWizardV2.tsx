@@ -269,8 +269,8 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
         sessionId: data.sessionId,
         currentStage: data.stageInfo?.currentStage || 1,
         totalStages: data.stageInfo?.totalStages || 7,
-        overallProgress: 0,
-        stageProgress: 0,
+        overallProgress: data.overallProgress || 0,
+        stageProgress: data.stageProgress || 0,
         agentPersonality: data.conversationContext?.agentPersonality || {
           name: 'Maya',
           role: 'Consulting Practice Specialist',
@@ -283,24 +283,36 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
       setSession(newSession);
       setStages(initializeStages(newSession.currentStage));
 
-      // Add initial AI greeting message
-      const initialMessage = data.agentIntroduction
-        ? `${data.agentIntroduction}\n\n${data.firstQuestion || ''}`
-        : `Hi! I'm Maya, your consulting practice specialist. I'm here to help you set up your workspace and optimize your client management workflow.\n\nTo get started, could you tell me about your consulting practice? What's the name of your firm or agency?`;
+      // Check if resuming existing session
+      if (data.resuming && data.conversationHistory && data.conversationHistory.length > 0) {
+        // Restore conversation history
+        setMessages(data.conversationHistory);
 
-      setMessages([
-        {
-          role: 'assistant',
-          content: initialMessage,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+        // Announce to screen readers
+        const announcement = `Resuming onboarding session at stage ${newSession.currentStage}: ${data.stageInfo?.stageName}. Conversation history restored.`;
+        announceToScreenReader(announcement);
 
-      // Announce to screen readers
-      const announcement = `Onboarding session started. You're now in Welcome & Practice Overview. ${initialMessage}`;
-      announceToScreenReader(announcement);
+        toast.success('Resuming your conversation with Maya...');
+      } else {
+        // Add initial AI greeting message for new session
+        const initialMessage = data.agentIntroduction
+          ? `${data.agentIntroduction}\n\n${data.firstQuestion || ''}`
+          : `Hi! I'm Maya, your consulting practice specialist. I'm here to help you set up your workspace and optimize your client management workflow.\n\nTo get started, could you tell me about your consulting practice? What's the name of your firm or agency?`;
 
-      toast.success('Welcome! Let\'s set up your consulting workspace.');
+        setMessages([
+          {
+            role: 'assistant',
+            content: initialMessage,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+
+        // Announce to screen readers
+        const announcement = `Onboarding session started. You're now in Welcome & Practice Overview. ${initialMessage}`;
+        announceToScreenReader(announcement);
+
+        toast.success('Welcome! Let\'s set up your consulting workspace.');
+      }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to start onboarding';

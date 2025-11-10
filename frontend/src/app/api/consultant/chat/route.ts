@@ -3,6 +3,7 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { openai } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@/lib/supabase/admin';
 
 // Consultant-specific system prompt
 const CONSULTANT_SYSTEM_PROMPT = `You are Maya, a Consulting Practice Specialist helping consultants set up their workspace.
@@ -56,12 +57,76 @@ export async function POST(req: NextRequest) {
       return new Response('Session ID required', { status: 400 });
     }
 
+    // Get admin client for database operations
+    let supabaseClient;
+    try {
+      supabaseClient = createAdminClient();
+    } catch (error) {
+      console.warn('[ConsultantChat] SUPABASE_SERVICE_ROLE_KEY unavailable, using user-scoped client.');
+      supabaseClient = supabase;
+    }
+
+    // Fetch session from database
+    const { data: session, error: sessionError } = await supabaseClient
+      .from('consultant_onboarding_sessions')
+      .select('*')
+      .eq('session_id', sessionId)
+      .single();
+
+    if (sessionError || !session) {
+      console.error('[ConsultantChat] Session not found:', sessionId);
+      return new Response('Session not found', { status: 404 });
+    }
+
+    // Verify session ownership
+    if (session.user_id !== userId) {
+      return new Response('Session ownership mismatch', { status: 403 });
+    }
+
     // Stream AI response
     const result = streamText({
       model: getAIModel(),
       system: CONSULTANT_SYSTEM_PROMPT,
       messages,
       temperature: 0.7,
+      onFinish: async ({ text }) => {
+        try {
+          // Update conversation history
+          const updatedHistory = [
+            ...(session.conversation_history || []),
+            {
+              role: 'user',
+              content: messages[messages.length - 1].content,
+              timestamp: new Date().toISOString(),
+              stage: session.current_stage,
+            },
+            {
+              role: 'assistant',
+              content: text,
+              timestamp: new Date().toISOString(),
+              stage: session.current_stage,
+            },
+          ];
+
+          // Calculate simple progress based on message count
+          const messageCount = updatedHistory.length;
+          const progress = Math.min(95, Math.floor((messageCount / 30) * 100));
+
+          // Update session in database
+          await supabaseClient
+            .from('consultant_onboarding_sessions')
+            .update({
+              conversation_history: updatedHistory,
+              last_activity: new Date().toISOString(),
+              overall_progress: progress,
+            })
+            .eq('session_id', sessionId);
+
+          console.log(`[ConsultantChat] Session ${sessionId} updated: ${progress}% progress`);
+        } catch (error) {
+          console.error('[ConsultantChat] Error updating session:', error);
+        }
+      },
     });
 
     return result.toTextStreamResponse();
