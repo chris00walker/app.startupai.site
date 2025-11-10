@@ -394,9 +394,51 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check for existing active sessions to enable session resumption
+    const { data: existingSessions } = await supabaseClient
+      .from('onboarding_sessions')
+      .select('*')
+      .eq('user_id', effectiveUser.id)
+      .in('status', ['active', 'paused'])
+      .order('last_activity', { ascending: false })
+      .limit(1);
+
+    // If existing active session found, resume it
+    if (existingSessions && existingSessions.length > 0) {
+      const session = existingSessions[0];
+
+      console.log('[onboarding/start] Resuming existing session:', session.session_id);
+
+      // Return existing session data for resumption
+      return NextResponse.json({
+        success: true,
+        sessionId: session.session_id,
+        stageInfo: {
+          currentStage: session.current_stage,
+          totalStages: 7,
+          stageName: getStageName(session.current_stage),
+        },
+        conversationContext: {
+          agentPersonality: session.ai_context?.agentPersonality || {
+            name: 'Alex',
+            role: 'Strategic Consultant',
+            tone: 'Warm yet analytical',
+            expertise: 'early-stage validation and strategic planning',
+          },
+          userRole: 'founder',
+          planType: session.plan_type,
+        },
+        resuming: true,
+        conversationHistory: session.conversation_history || [],
+        overallProgress: session.overall_progress,
+        stageProgress: session.stage_progress,
+        stageData: session.stage_data,
+      } as any);
+    }
+
     if (resumeSessionId) {
       console.info(
-        `[onboarding/start] Received resumeSessionId (${resumeSessionId}) but resume flow is not yet implemented. Creating a new session instead.`,
+        `[onboarding/start] Received explicit resumeSessionId (${resumeSessionId}) but session not found. Creating new session.`,
       );
     }
 
@@ -508,6 +550,23 @@ There are no wrong answers here. In fact, "I don't know yet" is often the most h
       { status: 500 },
     );
   }
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+function getStageName(stage: number): string {
+  const stageNames = [
+    'Welcome & Introduction',
+    'Customer Segment',
+    'Problem Definition',
+    'Solution Concept',
+    'Competitive Landscape',
+    'Resources & Constraints',
+    'Business Goals',
+  ];
+  return stageNames[stage - 1] || 'Unknown Stage';
 }
 
 // ============================================================================

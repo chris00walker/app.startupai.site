@@ -361,8 +361,8 @@ Ready to dive in? Let's start with the most important question:
         sessionId: data.sessionId,
         currentStage: data.stageInfo.currentStage,
         totalStages: data.stageInfo.totalStages,
-        overallProgress: 0,
-        stageProgress: 0,
+        overallProgress: data.overallProgress || 0,
+        stageProgress: data.stageProgress || 0,
         agentPersonality: data.conversationContext.agentPersonality,
         isActive: true,
       };
@@ -370,21 +370,33 @@ Ready to dive in? Let's start with the most important question:
       setSession(newSession);
       setStages(initializeStages(data.stageInfo.currentStage));
 
-      // Add initial AI greeting message
-      const initialMessage = `${data.agentIntroduction}\n\n${data.firstQuestion}`;
-      setMessages([
-        {
-          role: 'assistant',
-          content: initialMessage,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      // Check if resuming existing session
+      if (data.resuming && data.conversationHistory && data.conversationHistory.length > 0) {
+        // Restore conversation history
+        setMessages(data.conversationHistory);
 
-      // Announce to screen readers
-      const announcement = `Onboarding session started. You're now in ${data.stageInfo.stageName}. ${data.agentIntroduction}`;
-      announceToScreenReader(announcement);
+        // Announce to screen readers
+        const announcement = `Resuming onboarding session at stage ${newSession.currentStage}: ${data.stageInfo.stageName}. Conversation history restored.`;
+        announceToScreenReader(announcement);
 
-      toast.success('Onboarding session started successfully!');
+        toast.success('Resuming your conversation with Alex...');
+      } else {
+        // Add initial AI greeting message for new session
+        const initialMessage = `${data.agentIntroduction}\n\n${data.firstQuestion}`;
+        setMessages([
+          {
+            role: 'assistant',
+            content: initialMessage,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+
+        // Announce to screen readers
+        const announcement = `Onboarding session started. You're now in ${data.stageInfo.stageName}. ${data.agentIntroduction}`;
+        announceToScreenReader(announcement);
+
+        toast.success('Onboarding session started successfully!');
+      }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to start onboarding';
