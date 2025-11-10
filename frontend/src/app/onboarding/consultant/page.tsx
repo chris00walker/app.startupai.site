@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ConsultantOnboardingWizard } from '@/components/onboarding/ConsultantOnboardingWizard';
+import { ConsultantOnboardingWizardV2 } from '@/components/onboarding/ConsultantOnboardingWizardV2';
 
 /**
- * Consultant Onboarding Page
+ * Consultant Onboarding Page V2
  *
- * This page handles the onboarding flow for consultants, gathering
- * practice information and configuring their workspace.
+ * This page handles the conversational onboarding flow for consultants,
+ * gathering practice information through AI-guided conversation and
+ * configuring their workspace.
  *
  * Related to Phase 3: Consultant Features
  */
@@ -54,7 +55,7 @@ export default async function ConsultantOnboardingPage() {
   }
 
   return (
-    <ConsultantOnboardingWizard
+    <ConsultantOnboardingWizardV2
       userId={user.id}
       userEmail={profile?.email || user.email || ''}
     />
