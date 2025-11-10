@@ -42,17 +42,10 @@ export default async function ConsultantOnboardingPage() {
     redirect('/onboarding/founder');
   }
 
-  // Check if consultant onboarding already completed
-  const { data: consultantProfile } = await supabase
-    .from('consultant_profiles')
-    .select('onboarding_completed')
-    .eq('id', user.id)
-    .single();
-
-  if (consultantProfile?.onboarding_completed) {
-    // Already completed onboarding, redirect to dashboard
-    redirect('/dashboard');
-  }
+  // Note: We intentionally do NOT check onboarding_completed here.
+  // This allows consultants to resume their onboarding session by clicking
+  // "AI Assistant" from the dashboard, matching the founder experience.
+  // The ConsultantOnboardingWizardV2 component handles session resumption.
 
   return (
     <ConsultantOnboardingWizardV2

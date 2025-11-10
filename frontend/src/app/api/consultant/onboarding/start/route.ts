@@ -22,19 +22,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Check if consultant profile already exists
-    const { data: existingProfile } = await supabase
-      .from('consultant_profiles')
-      .select('onboarding_completed')
-      .eq('id', userId)
-      .single();
-
-    if (existingProfile?.onboarding_completed) {
-      return NextResponse.json({
-        error: 'Onboarding already completed',
-        redirect: '/dashboard',
-      }, { status: 400 });
-    }
+    // Note: We intentionally allow re-entry to onboarding even if completed.
+    // This enables consultants to resume conversations with Maya at any time,
+    // matching the founder experience where users can return to their AI assistant.
 
     // Generate session ID
     const timestamp = Date.now();
