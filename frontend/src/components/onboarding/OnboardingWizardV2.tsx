@@ -524,8 +524,8 @@ Ready to dive in? Let's start with the most important question:
 
   // Main render
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full">
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex h-[100dvh] w-full overflow-hidden">
         {/* Sidebar with progress tracking */}
         <OnboardingSidebar
           stages={stages}
@@ -536,7 +536,7 @@ Ready to dive in? Let's start with the most important question:
         />
 
         {/* Main conversation area */}
-        <SidebarInset className="flex-1">
+        <SidebarInset className="flex-1 overflow-hidden">
           {session && (
             <ConversationInterface
               session={session}

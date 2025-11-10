@@ -58,13 +58,13 @@ export function OnboardingSidebar({
 
   return (
     <TooltipProvider>
-      <Sidebar className="w-80 border-r bg-muted/10">
+      <Sidebar collapsible="offcanvas" className="border-r bg-muted/10">
         {/* Header */}
-        <SidebarHeader className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold">AI Strategic Onboarding</h2>
-              <p className="text-sm text-muted-foreground">
+        <SidebarHeader className="p-4 md:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base md:text-lg font-semibold truncate">AI Strategic Onboarding</h2>
+              <p className="text-xs md:text-sm text-muted-foreground truncate">
                 Personalized business consultation
               </p>
             </div>
@@ -108,27 +108,27 @@ export function OnboardingSidebar({
         </SidebarHeader>
 
         {/* Content */}
-        <SidebarContent className="px-6">
+        <SidebarContent className="px-4 md:px-6">
           {/* AI Agent Info */}
           {agentPersonality && (
-            <div className="mb-6 p-4 rounded-lg bg-background border">
-              <div className="flex items-start gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-primary text-primary-foreground">
+            <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-lg bg-background border">
+              <div className="flex items-start gap-2 md:gap-3">
+                <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs md:text-sm">
                     {agentPersonality.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-sm">{agentPersonality.name}</h3>
-                    <Badge variant="secondary" className="text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-medium text-xs md:text-sm truncate">{agentPersonality.name}</h3>
+                    <Badge variant="secondary" className="text-[10px] md:text-xs px-1.5 py-0.5">
                       AI Consultant
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mt-1 truncate">
                     {agentPersonality.role}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-[10px] md:text-xs text-muted-foreground mt-1 line-clamp-2">
                     Specializes in {agentPersonality.expertise}
                   </p>
                 </div>
@@ -224,30 +224,30 @@ export function OnboardingSidebar({
         </SidebarContent>
 
         {/* Footer */}
-        <SidebarFooter className="p-6">
-          <div className="space-y-3">
+        <SidebarFooter className="p-4 md:p-6">
+          <div className="space-y-2 md:space-y-3">
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="grid grid-cols-2 gap-2 md:gap-3 text-center">
               <div className="p-2 rounded bg-muted/50">
-                <div className="text-lg font-semibold text-primary">
+                <div className="text-base md:text-lg font-semibold text-primary">
                   {currentStage}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[10px] md:text-xs text-muted-foreground">
                   Current Stage
                 </div>
               </div>
               <div className="p-2 rounded bg-muted/50">
-                <div className="text-lg font-semibold text-green-600">
+                <div className="text-base md:text-lg font-semibold text-green-600">
                   {completedStages}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[10px] md:text-xs text-muted-foreground">
                   Completed
                 </div>
               </div>
             </div>
 
             {/* Help Text */}
-            <div className="text-xs text-muted-foreground text-center">
+            <div className="text-[10px] md:text-xs text-muted-foreground text-center">
               <p>Your progress is automatically saved.</p>
               <p className="mt-1">You can resume anytime.</p>
             </div>
@@ -257,10 +257,10 @@ export function OnboardingSidebar({
               variant="outline"
               size="sm"
               onClick={onExit}
-              className="w-full"
+              className="w-full text-xs md:text-sm"
               aria-label="Save progress and exit onboarding"
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-3 w-3 md:h-4 md:w-4 mr-2" />
               Save & Exit
             </Button>
           </div>
