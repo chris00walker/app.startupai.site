@@ -1,6 +1,6 @@
 import { streamText, tool, stepCountIs } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { openai } from '@ai-sdk/openai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient as createServerClient } from '@/lib/supabase/server';
@@ -29,9 +29,16 @@ function getAIModel() {
     return anthropic('claude-3-5-sonnet-20241022');
   }
 
-  // Use OpenAI GPT-4.1-nano (fastest, most cost-effective with 1M token context)
+  // Use OpenAI directly, bypassing Netlify AI Gateway
   if (process.env.OPENAI_API_KEY) {
-    const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4.1-nano';
+    // Create OpenAI provider with explicit baseURL to bypass Netlify AI Gateway
+    const openai = createOpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: 'https://api.openai.com/v1',
+    });
+
+    const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
+    console.log('[api/chat] Using OpenAI model directly:', model);
     return openai(model);
   }
 
