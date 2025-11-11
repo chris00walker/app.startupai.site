@@ -13,13 +13,15 @@ import { EvidenceLedger } from "@/components/fit/EvidenceLedger"
 import { ExperimentsPage } from "@/components/fit/ExperimentsPage"
 import { StageSelector } from "@/components/founder/StageSelector"
 import { ProjectCreationWizard } from "@/components/onboarding/ProjectCreationWizard"
+import { DashboardAIAssistant } from "@/components/assistant/DashboardAIAssistant"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useProjects } from "@/hooks/useProjects"
+import { useAuth } from "@/lib/auth/hooks"
 import Link from "next/link"
-import { 
+import {
   Target,
   FileText,
   Beaker,
@@ -299,12 +301,13 @@ function EmptyState() {
 export default function FounderDashboard() {
   const [activeTab, setActiveTab] = React.useState('overview')
   const { projects, isLoading, error } = useProjects()
-  
+  const { user } = useAuth()
+
   // Get current project (first project for now, can be enhanced later)
   const currentProject = projects.length > 0 ? projects[0] : null
   const projectId = currentProject?.id
   const currentStage = currentProject?.stage || 'FEASIBILITY'
-  
+
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const tabFromUrl = urlParams.get('tab')
@@ -574,6 +577,15 @@ export default function FounderDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dashboard AI Assistant - Floating Panel */}
+      {user && (
+        <DashboardAIAssistant
+          userId={user.id}
+          userRole="founder"
+          projectId={projectId}
+        />
+      )}
     </DashboardLayout>
   )
 }
