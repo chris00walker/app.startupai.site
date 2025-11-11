@@ -6,7 +6,7 @@ const nextConfig = {
   output: 'standalone',
 
   reactStrictMode: true,
-  trailingSlash: true,
+  trailingSlash: false, // FIXED: API routes must NOT have trailing slashes - was causing 308 redirects that broke streaming
   images: {
     unoptimized: true,
   },
