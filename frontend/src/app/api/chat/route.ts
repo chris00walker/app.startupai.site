@@ -400,7 +400,17 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[api/chat] Returning stream response to client');
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+      onError: (error) => {
+        console.error('[api/chat] Stream error:', {
+          name: error.name,
+          message: error.message,
+          cause: error.cause,
+          stack: error.stack,
+        });
+        return `Error: ${error.message}`;
+      },
+    });
   } catch (error) {
     console.error('[api/chat] Error:', error);
     return new Response(

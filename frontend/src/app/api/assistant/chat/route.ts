@@ -364,7 +364,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+      onError: (error) => {
+        console.error('[AssistantChat] Stream error:', {
+          name: error.name,
+          message: error.message,
+          cause: error.cause,
+          stack: error.stack,
+        });
+        return `Error: ${error.message}`;
+      },
+    });
   } catch (error: any) {
     console.error('[AssistantChat] Error:', error);
     return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
