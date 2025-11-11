@@ -186,20 +186,46 @@ export async function POST(req: NextRequest) {
 
     const stageContext = getStageSystemContext(currentStage, briefData);
 
+    // Log request details for debugging
+    console.log('[api/chat] Creating stream:', {
+      sessionId,
+      currentStage,
+      messageCount: messages.length,
+      lastMessage: messages[messages.length - 1]?.content?.substring(0, 50),
+    });
+
+    // Get AI model with error handling
+    let model;
+    try {
+      model = getAIModel();
+      console.log('[api/chat] Model loaded successfully');
+    } catch (error: any) {
+      console.error('[api/chat] Failed to get AI model:', error);
+      return new Response(
+        JSON.stringify({ error: 'AI model configuration error', details: error.message }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Stream AI response
-    const result = streamText({
-      model: getAIModel(),
-      system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
-      messages,
-      temperature: 0.7,
-      tools: onboardingTools,
-      stopWhen: stepCountIs(10), // Allow multiple tool calls per response
-      onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
-        try {
-          console.log('[api/chat] onFinish triggered:', {
+    let result;
+    try {
+      result = streamText({
+        model,
+        system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
+        messages,
+        temperature: 0.7,
+        tools: onboardingTools,
+        stopWhen: stepCountIs(10), // Allow multiple tool calls per response
+        onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
+          console.log('[api/chat] Stream finished:', {
+            textLength: text.length,
+            finishReason,
             toolCallsCount: toolCalls?.length || 0,
             toolResultsCount: toolResults?.length || 0,
           });
+
+          try {
 
           // Process tool results
           let newStage = currentStage;
@@ -353,6 +379,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
+      console.log('[api/chat] streamText() completed successfully, preparing response');
+    } catch (streamError: any) {
+      console.error('[api/chat] Error creating stream:', streamError);
+      return new Response(
+        JSON.stringify({
+          error: 'Failed to create AI stream',
+          details: streamError.message,
+          stack: streamError.stack,
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[api/chat] Returning stream response to client');
     return result.toTextStreamResponse();
   } catch (error) {
     console.error('[api/chat] Error:', error);
