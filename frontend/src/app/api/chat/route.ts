@@ -1,4 +1,4 @@
-import { streamText, tool, stepCountIs } from 'ai';
+import { streamText, tool } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -29,7 +29,7 @@ function getAIModel() {
     baseURL: 'https://api.openai.com/v1',
   });
 
-  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
+  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-5-mini';
   console.log('[api/chat] Using OpenAI model:', model);
   return openai(model);
 }
@@ -229,7 +229,7 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        stopWhen: stepCountIs(10), // Allow multiple tool calls per response
+        toolChoice: 'required', // Force AI to call tools
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] Stream finished:', {
             textLength: text.length,
@@ -309,10 +309,96 @@ export async function POST(req: NextRequest) {
                   completedAt: new Date().toISOString(),
                 };
 
-                console.log('[api/chat] Onboarding completed:', {
-                  readinessScore,
-                  insightsCount: keyInsights.length,
-                });
+                console.log('[api/chat] Onboarding completed, triggering CrewAI workflow');
+
+                // ========================================
+                // CrewAI Integration - Kickoff Analysis
+                // ========================================
+
+                try {
+                  // Step 1: Extract structured brief from stage_data
+                  const briefData = {
+                    customer_segments: newStageData.brief?.target_customers || [],
+                    primary_customer_segment: newStageData.brief?.primary_segment || newStageData.brief?.target_customers,
+                    problem_description: newStageData.brief?.problem_description || newStageData.brief?.problem,
+                    problem_pain_level: newStageData.brief?.pain_level || 5,
+                    solution_description: newStageData.brief?.solution_description || newStageData.brief?.solution,
+                    unique_value_proposition: newStageData.brief?.unique_value_prop || newStageData.brief?.differentiation,
+                    differentiation_factors: newStageData.brief?.differentiation || newStageData.brief?.differentiators || [],
+                    competitors: newStageData.brief?.competitors || [],
+                    budget_range: newStageData.brief?.budget_range || newStageData.brief?.budget || 'not specified',
+                    available_channels: newStageData.brief?.available_channels || newStageData.brief?.channels || [],
+                    business_stage: newStageData.brief?.current_stage || newStageData.brief?.business_stage || 'idea',
+                    three_month_goals: newStageData.brief?.short_term_goals || newStageData.brief?.goals || [],
+                  };
+
+                  console.log('[api/chat] Extracted brief data:', {
+                    hasDescription: !!briefData.problem_description,
+                    hasSolution: !!briefData.solution_description,
+                    hasCustomers: !!briefData.primary_customer_segment,
+                  });
+
+                  // Step 2: Save to entrepreneur_briefs table
+                  const { data: brief, error: briefError } = await supabaseClient
+                    .rpc('upsert_entrepreneur_brief', {
+                      p_session_id: sessionId,
+                      p_user_id: effectiveUser.id,
+                      p_brief_data: briefData,
+                    });
+
+                  if (briefError) {
+                    console.error('[api/chat] Failed to save entrepreneur brief:', briefError);
+                  } else {
+                    console.log('[api/chat] Entrepreneur brief saved');
+                  }
+
+                  // Step 3: Create project from onboarding session
+                  const { data: projectId, error: projectError } = await supabaseClient
+                    .rpc('create_project_from_onboarding', {
+                      p_session_id: sessionId,
+                    });
+
+                  if (projectError) {
+                    console.error('[api/chat] Failed to create project:', projectError);
+                    throw projectError;
+                  }
+
+                  console.log('[api/chat] Project created:', projectId);
+
+                  // Step 4: Kick off CrewAI workflow
+                  const { kickoffCrewAIAnalysis } = await import('@/lib/crewai/client');
+                  const workflowId = await kickoffCrewAIAnalysis(
+                    briefData,
+                    projectId,
+                    effectiveUser.id
+                  );
+
+                  console.log('[api/chat] CrewAI workflow started:', workflowId);
+
+                  // Step 5: Store workflow ID in project
+                  await supabaseClient
+                    .from('projects')
+                    .update({
+                      initial_analysis_workflow_id: workflowId,
+                      status: 'analyzing',
+                    })
+                    .eq('id', projectId);
+
+                  // Step 6: Store projectId and workflowId in completion data for frontend
+                  newStageData.completion.projectId = projectId;
+                  newStageData.completion.workflowId = workflowId;
+
+                  console.log('[api/chat] CrewAI integration complete:', {
+                    projectId,
+                    workflowId,
+                  });
+
+                } catch (error) {
+                  console.error('[api/chat] Error in CrewAI integration:', error);
+                  // Don't fail the whole response - user still gets completion message
+                  // Store error info for debugging
+                  newStageData.completion.error = error instanceof Error ? error.message : 'Unknown error';
+                }
               }
             }
           }

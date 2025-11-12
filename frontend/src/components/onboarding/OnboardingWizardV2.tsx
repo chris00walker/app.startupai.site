@@ -24,6 +24,8 @@ import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 
 // ============================================================================
 // Types and Interfaces
@@ -76,6 +78,14 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [input, setInput] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Analysis state
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'running' | 'completed' | 'failed'>('idle');
+  const [workflowId, setWorkflowId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const analysisIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Handle input change
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -112,6 +122,78 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     }));
   }, []);
 
+  // Poll CrewAI analysis status
+  const startAnalysisPolling = useCallback((wid: string, pid: string) => {
+    // Clear any existing interval
+    if (analysisIntervalRef.current) {
+      clearInterval(analysisIntervalRef.current);
+    }
+
+    const pollStatus = async () => {
+      try {
+        const response = await fetch(`/api/crewai/status?kickoff_id=${wid}`);
+        if (response.ok) {
+          const data = await response.json();
+
+          console.log('[OnboardingWizard] Analysis status:', {
+            state: data.state,
+            progress: data.progress,
+          });
+
+          setAnalysisProgress(data.progress || 0);
+
+          if (data.state === 'COMPLETED') {
+            setAnalysisStatus('completed');
+            if (analysisIntervalRef.current) {
+              clearInterval(analysisIntervalRef.current);
+              analysisIntervalRef.current = null;
+            }
+
+            toast.success('Analysis complete! Redirecting to your project...');
+
+            // Redirect based on user type after short delay
+            setTimeout(() => {
+              // Consultants go to their client dashboard, founders to project view
+              const dashboardRoute = planType === 'sprint'
+                ? '/clients'
+                : `/dashboard/project/${pid}`;
+              router.push(dashboardRoute);
+            }, 2000);
+          } else if (data.state === 'FAILED') {
+            setAnalysisStatus('failed');
+            if (analysisIntervalRef.current) {
+              clearInterval(analysisIntervalRef.current);
+              analysisIntervalRef.current = null;
+            }
+
+            toast.error('Analysis failed. Redirecting to dashboard...');
+
+            setTimeout(() => {
+              // Consultants go to clients page, founders to founder dashboard
+              const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+              router.push(dashboardRoute);
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        console.error('[OnboardingWizard] Failed to poll analysis status:', error);
+      }
+    };
+
+    // Poll immediately, then every 5 seconds
+    pollStatus();
+    analysisIntervalRef.current = setInterval(pollStatus, 5000);
+  }, [router]);
+
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (analysisIntervalRef.current) {
+        clearInterval(analysisIntervalRef.current);
+      }
+    };
+  }, []);
+
   // Refetch session status to get updated stage
   const refetchSessionStatus = useCallback(async () => {
     if (!session) return;
@@ -136,12 +218,28 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             stage: data.currentStage,
             progress: data.overallProgress,
           });
+
+          // Check for completion with CrewAI integration
+          if (data.status === 'completed' && data.completion) {
+            const { projectId: pid, workflowId: wid } = data.completion;
+            if (pid && wid) {
+              console.log('[OnboardingWizard] Onboarding completed, starting analysis monitoring:', {
+                projectId: pid,
+                workflowId: wid,
+              });
+              setProjectId(pid);
+              setWorkflowId(wid);
+              setShowAnalysisModal(true);
+              setAnalysisStatus('running');
+              startAnalysisPolling(wid, pid);
+            }
+          }
         }
       }
     } catch (error) {
       console.error('[OnboardingWizard] Failed to refetch session status:', error);
     }
-  }, [session, initializeStages]);
+  }, [session, initializeStages, startAnalysisPolling]);
 
   // Handle form submit - stream AI response
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -609,6 +707,38 @@ Ready to dive in? Let's start with the most important question:
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Analysis Running Modal */}
+      <Dialog open={showAnalysisModal} onOpenChange={setShowAnalysisModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Analyzing Your Business Idea</DialogTitle>
+            <DialogDescription>
+              Our AI team is analyzing your responses and creating a comprehensive
+              value proposition and validation roadmap. This typically takes 3-5 minutes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-6 space-y-4">
+            <Progress value={analysisProgress} />
+            <p className="text-sm text-muted-foreground text-center">
+              {analysisStatus === 'running' && `${Math.round(analysisProgress)}% complete`}
+              {analysisStatus === 'completed' && 'Analysis complete! Redirecting...'}
+              {analysisStatus === 'failed' && 'Analysis encountered an error.'}
+            </p>
+
+            {analysisStatus === 'running' && (
+              <div className="text-xs text-muted-foreground text-center space-y-1">
+                <p>✓ Business concept validated</p>
+                <p>⟳ Customer profile analysis in progress...</p>
+                <p className="opacity-50">○ Competitive positioning</p>
+                <p className="opacity-50">○ Value proposition design</p>
+                <p className="opacity-50">○ Validation roadmap</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
