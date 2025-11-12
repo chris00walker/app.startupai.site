@@ -6,6 +6,41 @@
 
 ---
 
+## 🔗 Related Documentation
+
+**CRITICAL:** Do NOT implement Option B until (./ONBOARDING_TO_CREWAI_ARCHITECTURE.md) has been fully implemented, tested and is working. Please review these related documents:
+
+1. **[ONBOARDING_FAILURE_ANALYSIS.md](./ONBOARDING_FAILURE_ANALYSIS.md)** - Root cause analysis of current onboarding workflow failures
+   - Why progress shows 0% despite completing conversation
+   - Why AI tools (assessQuality, advanceStage, completeOnboarding) aren't being called
+   - Where conversation data is stored (testSessionState)
+   - Data flow diagrams and failure cascade analysis
+
+2. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Complete implementation plan to fix broken workflow
+   - **Phase 1**: Fix AI tool-calling (switch gpt-4o-mini → gpt-4o, add toolChoice: 'required')
+   - **Phase 2**: Add CrewAI integration (kickoff handler, status polling, project creation)
+   - **Phase 3**: Fix frontend UX (analysis modal, auto-redirect to project dashboard)
+   - Includes: Brief schema mapping, testing strategy, rollback plan
+   - Timeline: 11 hours (~1.5 days)
+
+3. **[SYSTEM_ENGINEER_HANDOFF.md](./SYSTEM_ENGINEER_HANDOFF.md)** - Original investigation into Forbidden errors
+   - Historical context: Netlify AI Gateway issue
+   - Why we removed Anthropic provider
+   - SSE streaming format parsing fix
+
+**Relationship between documents:**
+- `SYSTEM_ENGINEER_HANDOFF.md` → Led to Option A (fix streaming)
+- `ARCHITECTURE_RECOMMENDATIONS.md` (this file) → Original Option B vision (long-term architecture)
+- `ONBOARDING_FAILURE_ANALYSIS.md` → Forensic analysis of why current system is broken
+- `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` → **Actionable implementation plan** combining Option A fixes + Option B architecture
+
+**Recommended reading order:**
+1. `ONBOARDING_FAILURE_ANALYSIS.md` - Understand what's broken
+2. `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` - See the fix plan
+3. `ARCHITECTURE_RECOMMENDATIONS.md` (this file) - Understand long-term vision
+
+---
+
 ## Executive Summary
 
 This document outlines the recommended architecture for **Option B**: migrating from duplicated onboarding logic to a clean separation where the frontend handles conversational UX while CrewAI AMP handles all strategic analysis through a Supervisor Agent pattern.
