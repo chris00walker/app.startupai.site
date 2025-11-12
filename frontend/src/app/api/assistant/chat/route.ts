@@ -231,6 +231,12 @@ const assistantTools = {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[AssistantChat] Request received:', {
+      method: req.method,
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries()),
+    });
+
     const { messages, userId, userRole, projectId, clientId } = await req.json();
 
     // Authenticate
@@ -241,12 +247,16 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.error('[AssistantChat] Authentication failed:', { authError, hasUser: !!user });
       return new Response('Unauthorized', { status: 401 });
     }
 
     if (user.id !== userId) {
+      console.error('[AssistantChat] User ID mismatch:', { tokenUserId: user.id, requestUserId: userId });
       return new Response('Forbidden', { status: 403 });
     }
+
+    console.log('[AssistantChat] User authenticated:', { userId: user.id, email: user.email, userRole, projectId, clientId });
 
     // Get admin client for database operations
     let supabaseClient;
@@ -277,6 +287,13 @@ export async function POST(req: NextRequest) {
 
     // Select system prompt based on role
     const systemPrompt = userRole === 'founder' ? FOUNDER_SYSTEM_PROMPT : CONSULTANT_SYSTEM_PROMPT;
+
+    console.log('[AssistantChat] Calling streamText with:', {
+      systemPromptLength: (systemPrompt + contextMessage).length,
+      messagesCount: messages.length,
+      temperature: 0.7,
+      userRole,
+    });
 
     // Stream AI response with tools
     const result = streamText({
@@ -364,19 +381,33 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log('[AssistantChat] Returning stream response to client');
     return result.toUIMessageStreamResponse({
       onError: (error) => {
-        console.error('[AssistantChat] Stream error:', {
-          name: error.name,
-          message: error.message,
-          cause: error.cause,
-          stack: error.stack,
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error('[AssistantChat] Stream error in toUIMessageStreamResponse:', {
+          name: err.name,
+          message: err.message,
+          cause: err.cause,
+          stack: err.stack,
+          errorType: typeof error,
+          errorConstructor: error?.constructor?.name,
         });
-        return `Error: ${error.message}`;
+        return `Error: ${err.message}`;
       },
     });
   } catch (error: any) {
-    console.error('[AssistantChat] Error:', error);
+    console.error('[AssistantChat] Top-level error:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+      cause: error?.cause,
+      status: error?.status,
+      statusText: error?.statusText,
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      fullError: error,
+    });
     return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

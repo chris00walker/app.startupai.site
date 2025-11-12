@@ -111,6 +111,12 @@ const onboardingTools = {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[api/chat] Request received:', {
+      method: req.method,
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries()),
+    });
+
     // Parse request
     const { messages, sessionId, data } = await req.json();
 
@@ -126,13 +132,17 @@ export async function POST(req: NextRequest) {
     const isTestUser = sessionId?.startsWith('test-') || sessionId?.includes('demo');
 
     if ((userError || !user) && !(isDevelopment && isTestUser)) {
+      console.error('[api/chat] Authentication failed:', { userError, hasUser: !!user, isDevelopment, isTestUser });
       return new Response('Unauthorized', { status: 401 });
     }
 
     const effectiveUser = user || (isDevelopment && isTestUser ? { id: 'test-user-id', email: 'test@example.com' } : null);
     if (!effectiveUser) {
+      console.error('[api/chat] No effective user');
       return new Response('Unauthorized', { status: 401 });
     }
+
+    console.log('[api/chat] User authenticated:', { userId: effectiveUser.id, email: effectiveUser.email, isTestUser });
 
     if (!sessionId) {
       return new Response('Session ID required', { status: 400 });
@@ -217,6 +227,13 @@ export async function POST(req: NextRequest) {
     // Stream AI response
     let result;
     try {
+      console.log('[api/chat] Calling streamText with:', {
+        modelType: typeof model,
+        systemPromptLength: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`.length,
+        messagesCount: messages.length,
+        temperature: 0.7,
+      });
+
       result = streamText({
         model,
         system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
@@ -388,7 +405,16 @@ export async function POST(req: NextRequest) {
 
       console.log('[api/chat] streamText() completed successfully, preparing response');
     } catch (streamError: any) {
-      console.error('[api/chat] Error creating stream:', streamError);
+      console.error('[api/chat] Error creating stream:', {
+        name: streamError?.name,
+        message: streamError?.message,
+        stack: streamError?.stack,
+        cause: streamError?.cause,
+        status: streamError?.status,
+        statusText: streamError?.statusText,
+        response: streamError?.response,
+        fullError: streamError,
+      });
       return new Response(
         JSON.stringify({
           error: 'Failed to create AI stream',
@@ -402,17 +428,30 @@ export async function POST(req: NextRequest) {
     console.log('[api/chat] Returning stream response to client');
     return result.toUIMessageStreamResponse({
       onError: (error) => {
-        console.error('[api/chat] Stream error:', {
-          name: error.name,
-          message: error.message,
-          cause: error.cause,
-          stack: error.stack,
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error('[api/chat] Stream error in toUIMessageStreamResponse:', {
+          name: err.name,
+          message: err.message,
+          cause: err.cause,
+          stack: err.stack,
+          errorType: typeof error,
+          errorConstructor: error?.constructor?.name,
         });
-        return `Error: ${error.message}`;
+        return `Error: ${err.message}`;
       },
     });
-  } catch (error) {
-    console.error('[api/chat] Error:', error);
+  } catch (error: any) {
+    console.error('[api/chat] Top-level error:', {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+      cause: error?.cause,
+      status: error?.status,
+      statusText: error?.statusText,
+      errorType: typeof error,
+      errorConstructor: error?.constructor?.name,
+      fullError: error,
+    });
     return new Response(
       JSON.stringify({
         error: 'Failed to process chat request',
