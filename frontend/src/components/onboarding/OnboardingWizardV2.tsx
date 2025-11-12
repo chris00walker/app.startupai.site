@@ -213,40 +213,65 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         throw new Error(`API error: ${response.status}`);
       }
 
-      // Handle streaming response
+      // Handle streaming response - parse SSE format
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = '';
+      let buffer = '';
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedText += chunk;
+          // Decode chunk and add to buffer
+          buffer += decoder.decode(value, { stream: true });
+
+          // Process complete SSE messages
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6); // Remove 'data: ' prefix
+
+              // Skip metadata events, only process text deltas
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.type === 'text-delta' && parsed.delta) {
+                  accumulatedText += parsed.delta;
+                }
+              } catch (e) {
+                // Ignore parse errors for non-JSON lines
+              }
+            }
+          }
 
           // Update AI message in real-time
-          setMessages(prev => {
-            const lastMessage = prev[prev.length - 1];
-            if (lastMessage?.role === 'assistant') {
-              // Update existing assistant message
-              return [
-                ...prev.slice(0, -1),
-                { ...lastMessage, content: accumulatedText },
-              ];
-            } else {
-              // Add new assistant message
-              return [
-                ...prev,
-                {
-                  role: 'assistant',
-                  content: accumulatedText,
-                  timestamp: new Date().toISOString(),
-                },
-              ];
-            }
-          });
+          if (accumulatedText) {
+            setMessages(prev => {
+              const lastMessage = prev[prev.length - 1];
+              if (lastMessage?.role === 'assistant') {
+                // Update existing assistant message
+                return [
+                  ...prev.slice(0, -1),
+                  { ...lastMessage, content: accumulatedText },
+                ];
+              } else {
+                // Add new assistant message
+                return [
+                  ...prev,
+                  {
+                    role: 'assistant',
+                    content: accumulatedText,
+                    timestamp: new Date().toISOString(),
+                  },
+                ];
+              }
+            });
+          }
         }
       }
 
