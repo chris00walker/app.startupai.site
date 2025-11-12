@@ -1,5 +1,4 @@
 import { streamText, tool, stepCountIs } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -24,25 +23,15 @@ export const testSessionState = new Map<string, any>();
 // ============================================================================
 
 function getAIModel() {
-  // Prefer Anthropic Claude for conversational quality
-  if (process.env.ANTHROPIC_API_KEY) {
-    return anthropic('claude-3-5-sonnet-20241022');
-  }
+  // Use OpenAI with explicit baseURL to bypass Netlify AI Gateway
+  const openai = createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+  });
 
-  // Use OpenAI directly, bypassing Netlify AI Gateway
-  if (process.env.OPENAI_API_KEY) {
-    // Create OpenAI provider with explicit baseURL to bypass Netlify AI Gateway
-    const openai = createOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      baseURL: 'https://api.openai.com/v1',
-    });
-
-    const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
-    console.log('[api/chat] Using OpenAI model directly:', model);
-    return openai(model);
-  }
-
-  throw new Error('No AI provider configured. Set ANTHROPIC_API_KEY or OPENAI_API_KEY');
+  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
+  console.log('[api/chat] Using OpenAI model:', model);
+  return openai(model);
 }
 
 // ============================================================================

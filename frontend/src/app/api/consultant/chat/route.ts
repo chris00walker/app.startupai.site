@@ -1,5 +1,4 @@
 import { streamText, tool } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -29,19 +28,15 @@ Guidelines:
 - Use the assessment tools to evaluate response quality and advance stages appropriately`;
 
 function getAIModel() {
-  if (process.env.ANTHROPIC_API_KEY) {
-    return anthropic('claude-3-5-sonnet-20241022');
-  }
-  if (process.env.OPENAI_API_KEY) {
-    // Create OpenAI provider with explicit baseURL to bypass Netlify AI Gateway
-    const openai = createOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      baseURL: 'https://api.openai.com/v1',
-    });
-    const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
-    return openai(model);
-  }
-  throw new Error('No AI provider configured');
+  // Use OpenAI with explicit baseURL to bypass Netlify AI Gateway
+  const openai = createOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    baseURL: 'https://api.openai.com/v1',
+  });
+
+  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
+  console.log('[api/consultant/chat] Using OpenAI model:', model);
+  return openai(model);
 }
 
 // ============================================================================
