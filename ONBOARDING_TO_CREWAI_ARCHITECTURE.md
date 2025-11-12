@@ -313,7 +313,7 @@ function formatBriefForCrew(brief: EntrepreneurBrief): Record<string, any> {
    const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-5-mini'; // was gpt-4o-mini
    ```
 
-2. ✅ Add forced tool usage:
+2. ⚠️ **UPDATED**: Use `toolChoice: 'auto'` (NOT 'required'):
    ```typescript
    result = streamText({
      model,
@@ -321,10 +321,11 @@ function formatBriefForCrew(brief: EntrepreneurBrief): Record<string, any> {
      messages,
      temperature: 0.7,
      tools: onboardingTools,
-     toolChoice: 'required', // ← ADD THIS
-     maxSteps: 10,
+     toolChoice: 'auto', // ← Let AI decide when to use tools (guided by strong prompt)
    });
    ```
+
+   **CRITICAL NOTE**: Do NOT use `toolChoice: 'required'` - it forces tools on EVERY response and breaks normal conversation. Use 'auto' and rely on strengthened prompts to guide tool usage.
 
 3. ✅ Strengthen prompt instructions:
    ```typescript
@@ -338,9 +339,35 @@ function formatBriefForCrew(brief: EntrepreneurBrief): Record<string, any> {
    These are NOT optional suggestions - they are REQUIRED for the system to function.
    ```
 
-**Testing:**
-- Create test session, answer 1-2 questions
-- Verify AI calls `assessQuality` tool (check console logs)
+**Testing (CRITICAL - DO NOT SKIP):**
+
+**Local Testing:**
+```bash
+cd frontend
+pnpm dev
+# Open http://localhost:3000/onboarding/founder
+# Answer 1-2 questions
+# Check browser console for: [api/chat] Processing tool result: { toolName: 'assessQuality' }
+```
+
+**Staging Testing:**
+```bash
+pnpm build:staging
+netlify deploy --build --context=staging
+# Test on staging URL
+# Verify same tool calling behavior
+```
+
+**Production Deploy (ONLY after staging passes):**
+```bash
+git push origin main  # Triggers production deploy
+```
+
+**LESSONS LEARNED:**
+- ❌ `toolChoice: 'required'` breaks normal conversation - NEVER use it
+- ✅ Use `toolChoice: 'auto'` + strong prompts instead
+- ⚠️ Test backward compatibility with existing sessions
+- 🔥 ALWAYS test: local → staging → production (NEVER skip stages)
 - Verify `onFinish` receives tool results
 - Verify session state updates with new stage/progress
 
@@ -779,16 +806,76 @@ After implementation, the following should be TRUE:
 
 ---
 
+## Phase 4: Backward Compatibility (CRITICAL)
+
+### Problem: Existing Broken Sessions
+
+Users who completed onboarding BEFORE this fix will have:
+- Sessions stuck at 0% progress
+- No project created
+- No CrewAI analysis triggered
+
+**Solution: Recovery Endpoint**
+
+### Create `/api/onboarding/recover/route.ts`
+
+**Purpose:** Manually trigger CrewAI analysis for existing broken sessions
+
+**Features:**
+- Extracts brief data from session conversation history
+- Saves to `entrepreneur_briefs` table
+- Creates project via `create_project_from_onboarding()`
+- Kicks off CrewAI workflow
+- Updates session to `status = 'completed'`
+
+**Usage:**
+```bash
+curl -X POST https://app.startupai.site/api/onboarding/recover \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "user-session-id-here"}'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "projectId": "uuid-here",
+  "workflowId": "crewai-workflow-id",
+  "message": "Onboarding recovered successfully. Analysis is now running."
+}
+```
+
+**Testing:**
+1. Identify users with broken sessions (`status != 'completed'` AND `current_stage >= 7`)
+2. Call recovery endpoint for each session
+3. Verify project created and CrewAI workflow started
+4. Check user can access project dashboard
+
+---
+
 ## Next Steps
 
 **Ready to implement?**
 
-1. Start with Phase 1 (fix tool calling) and test immediately
-2. Then Phase 2 (CrewAI integration)
-3. Then Phase 3 (frontend UX)
+1. ✅ Start with Phase 1 (fix tool calling) - **TEST LOCALLY FIRST**
+2. ✅ Then Phase 2 (CrewAI integration) - **TEST LOCALLY FIRST**
+3. ✅ Then Phase 3 (frontend UX) - **TEST LOCALLY FIRST**
+4. ✅ Phase 4 (recovery endpoint) - **For backward compatibility**
+5. 🔥 **MANDATORY: Test local → staging → production**
+6. 🔥 **NEVER skip testing stages**
+
+**Testing Checklist:**
+- [ ] Local: AI responds normally AND calls tools appropriately
+- [ ] Local: Progress updates in real-time
+- [ ] Local: Analysis modal appears on completion
+- [ ] Local: Redirect works for both user types
+- [ ] Staging: All above tests pass
+- [ ] Staging: Test with existing broken session (recovery endpoint)
+- [ ] Production: Monitor logs for 24 hours after deploy
 
 ---
 
 **End of Architecture Document**
 
 *Generated: 2025-11-12 for fixing onboarding → CrewAI workflow*
+*Updated: 2025-11-12 after production incident - added backward compatibility*
