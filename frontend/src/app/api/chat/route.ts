@@ -229,7 +229,7 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        toolChoice: 'required', // Force AI to call tools
+        toolChoice: 'auto', // Let AI decide when to call tools (strengthened prompt will guide it)
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] Stream finished:', {
             textLength: text.length,
