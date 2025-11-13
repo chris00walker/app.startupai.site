@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { createClient } from "@/lib/supabase/client"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { PortfolioGrid } from "@/components/portfolio/PortfolioGrid"
 import { PortfolioMetrics } from "@/components/portfolio/PortfolioMetrics"
@@ -11,10 +13,12 @@ import { GateAlerts } from "@/components/portfolio/GateAlerts"
 import { GuidedTour, DemoBanner } from "@/components/demo/GuidedTour"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { useProjects } from "@/hooks/useProjects"
+import { useClients } from "@/hooks/useClients"
+import { useAuth } from "@/lib/auth/hooks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
+import {
   Users,
   Settings,
   Shield,
@@ -134,12 +138,35 @@ function PortfolioOverview() {
 
 function Dashboard() {
   const demoMode = useDemoMode()
-  const { projects, isLoading, error } = useProjects()
-  
+  const { user } = useAuth()
+  const [userRole, setUserRole] = React.useState<string | null>(null)
+
+  // Fetch user role
+  React.useEffect(() => {
+    async function fetchUserRole() {
+      if (!user) return
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      setUserRole(data?.role || null)
+    }
+    fetchUserRole()
+  }, [user])
+
+  // Use appropriate hook based on user role
+  const isConsultant = userRole === 'consultant'
+  const projectsData = useProjects()
+  const clientsData = useClients()
+
+  const { projects, isLoading, error } = isConsultant ? clientsData : projectsData
+
   // Gate filtering state
   const [selectedStages, setSelectedStages] = React.useState<GateStage[]>([])
   const [selectedStatuses, setSelectedStatuses] = React.useState<GateStatus[]>([])
-  
+
   // Use real projects if available, fallback to mock data for demo
   const allProjects = projects.length > 0 ? projects : mockPortfolioProjects
   const usingRealData = projects.length > 0
@@ -176,8 +203,12 @@ function Dashboard() {
   }, [allProjects])
   
   const handleProjectClick = (project: PortfolioProject) => {
-    // Navigate to project gate details
-    window.location.href = `/project/${project.id}/gate`
+    // Navigate to appropriate page based on user role
+    if (isConsultant) {
+      window.location.href = `/client/${project.id}`
+    } else {
+      window.location.href = `/project/${project.id}/gate`
+    }
   }
 
   if (isLoading) {
@@ -214,7 +245,7 @@ function Dashboard() {
             </div>
             <div className="ml-3 flex-1">
               <p className="text-sm text-blue-700 leading-relaxed">
-                <strong>Demo Mode:</strong> Showing sample data. Create your first project to see real data.
+                <strong>Demo Mode:</strong> Showing sample data. {isConsultant ? 'Add your first client to see real data.' : 'Create your first project to see real data.'}
               </p>
             </div>
           </div>
@@ -251,10 +282,12 @@ function Dashboard() {
                 <Settings className="h-4 w-4 mr-2" />
                 Gate Policies
               </Button>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Project
-              </Button>
+              <Link href="/projects/new">
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Project
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -282,9 +315,9 @@ function Dashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Active Projects
+                  {isConsultant ? 'Active Clients' : 'Active Projects'}
                   <Badge variant="outline" className="ml-2">
-                    {displayProjects.length} Projects
+                    {displayProjects.length} {isConsultant ? 'Clients' : 'Projects'}
                   </Badge>
                   {usingRealData && (
                     <Badge variant="default" className="ml-2">
@@ -293,7 +326,7 @@ function Dashboard() {
                   )}
                 </CardTitle>
                 <CardDescription>
-                  Multi-client validation pipeline with evidence-based gates
+                  {isConsultant ? 'Client portfolio with evidence-based validation' : 'Multi-client validation pipeline with evidence-based gates'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
