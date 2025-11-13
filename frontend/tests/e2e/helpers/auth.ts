@@ -30,10 +30,7 @@ export const TEST_USER = CONSULTANT_USER;
  */
 export async function login(page: Page, user: TestUser = CONSULTANT_USER) {
   // Navigate directly to the login page
-  await page.goto('/login');
-
-  // Wait for page to load
-  await page.waitForLoadState('networkidle');
+  await page.goto('/login', { waitUntil: 'domcontentloaded' });
 
   // Check if we're already logged in and got redirected (look for dashboard or onboarding elements)
   const isLoggedIn = await page.locator('[data-testid="dashboard"], [data-testid="onboarding"]').isVisible().catch(() => false);
@@ -57,25 +54,37 @@ export async function login(page: Page, user: TestUser = CONSULTANT_USER) {
   const submitButton = page.locator('button[type="submit"]');
   await submitButton.click();
 
-  // Wait for navigation to dashboard after login
-  await page.waitForURL('**/dashboard**', { timeout: 30000 });
-  await page.waitForLoadState('networkidle');
+  // Wait for navigation based on user type
+  // Founders and Consultants get redirected to their specific onboarding pages
+  const expectedPattern = user.type === 'consultant'
+    ? '**/onboarding/consultant**'
+    : '**/onboarding**';
+
+  try {
+    await page.waitForURL(expectedPattern, { timeout: 15000 });
+    console.log(`${user.type} redirected to onboarding page`);
+  } catch (e) {
+    // If not redirected to onboarding, check if we're on dashboard
+    const currentUrl = page.url();
+    console.log(`Navigation timeout, current URL: ${currentUrl}`);
+
+    // If we're on dashboard, need to click AI Assistant button
+    if (currentUrl.includes('/dashboard')) {
+      console.log('On dashboard, clicking AI Assistant button');
+      const aiAssistantButton = page.locator('button:has-text("AI Assistant"), a:has-text("AI Assistant")').first();
+      await aiAssistantButton.waitFor({ state: 'visible', timeout: 10000 });
+      await aiAssistantButton.click();
+
+      // Wait for onboarding page to load
+      await page.waitForURL(expectedPattern, { timeout: 15000 });
+    }
+  }
+
+  // Wait for onboarding interface to be ready (no networkidle - too slow)
+  const onboardingElement = page.locator('[data-testid="onboarding"]');
+  await onboardingElement.waitFor({ state: 'visible', timeout: 20000 });
 
   console.log(`Login successful as ${user.type}: ${user.email}`);
-
-  // Click "AI Assistant" button in the sidebar to access onboarding
-  const aiAssistantButton = page.locator('button:has-text("AI Assistant"), a:has-text("AI Assistant"), [aria-label*="AI Assistant" i]').first();
-
-  // Wait for sidebar to be loaded
-  await page.waitForTimeout(2000);
-
-  if (await aiAssistantButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-    console.log('Clicking AI Assistant button in sidebar');
-    await aiAssistantButton.click();
-    await page.waitForLoadState('networkidle');
-  } else {
-    console.log('AI Assistant button not found, might already be on onboarding page');
-  }
 }
 
 /**
@@ -91,7 +100,8 @@ export async function logout(page: Page) {
     const logoutButton = page.locator('button:has-text("Log out"), button:has-text("Sign out"), a:has-text("Log out")').first();
     await logoutButton.click();
 
-    await page.waitForLoadState('networkidle');
+    // Wait for redirect to login page
+    await page.waitForURL('**/login**', { timeout: 10000 });
   }
 }
 

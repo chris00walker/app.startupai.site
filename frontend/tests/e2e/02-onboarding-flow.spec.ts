@@ -20,8 +20,9 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
       await navigateToOnboarding(page);
     }
 
-    // Wait for page to be ready
-    await page.waitForLoadState('networkidle');
+    // Wait for onboarding interface to be ready
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
   });
 
   test('should display chat interface with welcome message', async ({ page }) => {
@@ -251,8 +252,11 @@ test.describe('Onboarding Session Management - Founder User', () => {
     await waitForAIResponse(page, 45000);
 
     // Reload the page
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
+    // Wait for chat interface to reload
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]');
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
 
     // Verify the previous message is still visible
     const previousMessage = page.locator(`text="${testMessage}"`);

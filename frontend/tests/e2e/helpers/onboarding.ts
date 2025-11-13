@@ -111,9 +111,10 @@ export async function completeStage(page: Page, stageNumber: number, responses: 
  */
 export async function navigateToOnboarding(page: Page) {
   await page.goto('/onboarding');
-  await page.waitForLoadState('networkidle');
 
-  // Verify we're on the onboarding page
+  // Wait for onboarding interface to load (don't wait for networkidle - too slow with streaming)
   const onboardingElement = page.locator('[data-testid="onboarding"], [data-testid="chat-interface"]').first();
-  await expect(onboardingElement).toBeVisible({ timeout: 10000 });
+  await expect(onboardingElement).toBeVisible({ timeout: 20000 });
+
+  console.log('Onboarding page loaded');
 }

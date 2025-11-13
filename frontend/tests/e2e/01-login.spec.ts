@@ -26,10 +26,7 @@ test.describe('Authentication Flow - Consultant User', () => {
     // Login as consultant
     await login(page, CONSULTANT_USER);
 
-    // Wait for redirect
-    await page.waitForLoadState('networkidle');
-
-    // Consultants should NOT be on onboarding
+    // Login helper now waits for onboarding element, so we're ready
     const url = page.url();
     console.log(`Consultant redirected to: ${url}`);
 
@@ -63,10 +60,7 @@ test.describe('Authentication Flow - Founder User', () => {
     // Login as founder
     await login(page, FOUNDER_USER);
 
-    // Wait for redirect
-    await page.waitForLoadState('networkidle');
-
-    // Check if we're on onboarding page (expected for founders who haven't completed onboarding)
+    // Login helper now waits for onboarding element, so we're ready
     const url = page.url();
     const isOnboarding = url.includes('/onboarding') || url.includes('/chat');
 
@@ -90,10 +84,10 @@ test.describe('Authentication Flow - Founder User', () => {
 
     if (await loginButton.isVisible({ timeout: 5000 }).catch(() => false)) {
       await loginButton.click();
-      await page.waitForLoadState('networkidle');
 
-      // Fill in with invalid credentials
+      // Wait for login form to appear
       const emailInput = page.locator('input[type="email"], input[name="email"]').first();
+      await emailInput.waitFor({ state: 'visible', timeout: 10000 });
       const passwordInput = page.locator('input[type="password"]').first();
 
       if (await emailInput.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -129,15 +123,14 @@ test.describe('Authentication Flow - Founder User', () => {
     await login(page);
 
     // Reload the page
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
-    // Verify we're still logged in
+    // Wait for authenticated elements to reappear
     const authenticatedElements = page.locator(
       '[data-testid="dashboard"], [data-testid="onboarding"], [data-testid="user-menu"]'
     );
 
-    await expect(authenticatedElements.first()).toBeVisible({ timeout: 10000 });
+    await expect(authenticatedElements.first()).toBeVisible({ timeout: 15000 });
 
     console.log('Session maintained after reload');
   });
