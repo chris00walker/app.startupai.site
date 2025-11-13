@@ -48,7 +48,9 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm exec playwright install:*)",
       "Bash(pnpm test:e2e:*)",
-      "Bash(pnpm exec playwright test:*)"
+      "Bash(pnpm exec playwright test:*)",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__list_tables"
     ],
     "deny": [],
     "ask": []
