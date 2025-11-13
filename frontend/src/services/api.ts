@@ -1,24 +1,56 @@
 // Strategyzer AI Platform API Service
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
+// Helper function to handle API responses
+const handleResponse = async (response: Response) => {
+  // Check if response is ok (status 200-299)
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type');
+    let errorMessage = `API request failed with status ${response.status}`;
+
+    // Try to parse error message from response
+    if (contentType && contentType.includes('application/json')) {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorData.message || errorMessage;
+    } else {
+      const text = await response.text();
+      errorMessage = text || errorMessage;
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  // Parse JSON response
+  return response.json();
+};
+
 const api = {
-  get: (endpoint: string) => fetch(`${API_BASE_URL}${endpoint}`).then(r => r.json()),
-  post: (endpoint: string, data: any) => 
+  get: (endpoint: string) =>
+    fetch(`${API_BASE_URL}${endpoint}`, {
+      credentials: 'include' // Include cookies for authentication
+    }).then(handleResponse),
+
+  post: (endpoint: string, data: any) =>
     fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies for authentication
       body: JSON.stringify(data)
-    }).then(r => r.json()),
-  put: (endpoint: string, data: any) => 
+    }).then(handleResponse),
+
+  put: (endpoint: string, data: any) =>
     fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies for authentication
       body: JSON.stringify(data)
-    }).then(r => r.json()),
-  delete: (endpoint: string) => 
+    }).then(handleResponse),
+
+  delete: (endpoint: string) =>
     fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'DELETE'
-    }).then(r => r.json()),
+      method: 'DELETE',
+      credentials: 'include' // Include cookies for authentication
+    }).then(handleResponse),
 
   // Canvas-specific API methods
   canvas: {
