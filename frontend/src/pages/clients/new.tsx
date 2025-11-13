@@ -32,7 +32,7 @@ const NewClientPage: React.FC = () => {
         setWorkflowStatus({ stage: 'triggering-discovery', message: 'Client created! Starting AI discovery workflow in background...' });
         
         // Fire and forget - don't await this call
-        api.post(`/api/clients/${clientId}/discovery`, {}).catch(error => {
+        api.post(`/clients/${clientId}/discovery`, {}).catch(error => {
           console.warn('Discovery workflow failed to start (client still created):', error);
         });
         

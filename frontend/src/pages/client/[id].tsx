@@ -207,7 +207,7 @@ const ClientPage: React.FC = () => {
   // Workflow trigger mutation
   const workflowMutation = useMutation({
     mutationFn: async (workflowType: string) => {
-      return api.post(`/api/clients/${id}/${workflowType}`, {});
+      return api.post(`/clients/${id}/${workflowType}`, {});
     },
     onSuccess: () => {
       // Refresh client data to get updated workflow status
@@ -237,8 +237,9 @@ const ClientPage: React.FC = () => {
     );
   }
 
-  const clientName = displayClient?.name || 'Loading Client...';
-  const clientType = displayClient?.description || 'Loading client information...';
+  const clientName = displayClient?.company || 'Loading Client...';
+  const clientContact = displayClient?.name || '';
+  const clientType = displayClient?.description || clientContact || 'Loading client information...';
 
   return (
     <div className="min-h-screen business-gradient">
@@ -247,7 +248,7 @@ const ClientPage: React.FC = () => {
         <div className="business-container py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="text-primary hover:text-primary/80 font-medium">
+              <Link href="/dashboard" className="text-primary hover:text-primary/80 font-medium">
                 ← Back to Portfolio
               </Link>
               <div>
