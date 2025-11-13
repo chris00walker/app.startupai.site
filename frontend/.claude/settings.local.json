@@ -50,7 +50,11 @@
       "Bash(pnpm test:e2e:*)",
       "Bash(pnpm exec playwright test:*)",
       "mcp__supabase__apply_migration",
-      "mcp__supabase__list_tables"
+      "mcp__supabase__list_tables",
+      "Bash(chmod:*)",
+      "Bash(node scripts/migrate-existing-client.mjs:*)",
+      "Bash(node scripts/send-password-reset.mjs:*)",
+      "Bash(node scripts/create-auth-user.mjs:*)"
     ],
     "deny": [],
     "ask": []

@@ -19,12 +19,13 @@ export async function GET(
       )
     }
 
-    // Fetch the client by ID
+    // Fetch the client user_profile by ID
+    // Clients are user_profiles with consultant_id set
     const { data: client, error: fetchError } = await supabase
-      .from('clients')
-      .select('*')
+      .from('user_profiles')
+      .select('id, email, full_name, company, role, consultant_id, created_at, updated_at')
       .eq('id', id)
-      .eq('consultant_id', user.id) // Ensure user can only access their own clients
+      .eq('consultant_id', user.id) // Ensure consultant can only access their own clients
       .single()
 
     if (fetchError) {
@@ -41,27 +42,27 @@ export async function GET(
       )
     }
 
-    // Transform database format to match expected frontend format
+    // Transform user_profile to match expected frontend format
     return NextResponse.json({
       success: true,
       data: {
         client: {
           _id: client.id,
           id: client.id,
-          name: client.name,
+          name: client.full_name,
           email: client.email,
           company: client.company,
-          industry: client.industry,
-          description: client.description,
-          status: client.status,
-          businessModel: client.business_model,
-          targetMarket: client.target_market,
-          currentChallenges: client.current_challenges || [],
-          goals: client.goals || [],
-          budget: client.budget,
-          timeline: client.timeline,
-          assignedConsultant: client.assigned_consultant,
-          workflowStatus: client.metadata?.workflowStatus || {
+          industry: '', // Not stored in user_profiles
+          description: '', // Not stored in user_profiles
+          status: 'discovery', // Default status
+          businessModel: '',
+          targetMarket: '',
+          currentChallenges: [],
+          goals: [],
+          budget: null,
+          timeline: '',
+          assignedConsultant: user.id,
+          workflowStatus: {
             discovery: { status: 'not_started' },
             validation: { status: 'not_started' },
             scale: { status: 'not_started' }

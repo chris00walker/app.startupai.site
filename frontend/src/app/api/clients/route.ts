@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
 const createClientSchema = z.object({
@@ -17,6 +18,21 @@ const createClientSchema = z.object({
   assignedConsultant: z.string().optional()
 })
 
+// Helper function to generate a secure random password
+function generateSecurePassword(): string {
+  const length = 16
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*'
+  let password = ''
+  const crypto = require('crypto')
+  const randomValues = new Uint8Array(length)
+  crypto.getRandomValues(randomValues)
+
+  for (let i = 0; i < length; i++) {
+    password += charset[randomValues[i] % charset.length]
+  }
+  return password
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -24,84 +40,103 @@ export async function POST(request: NextRequest) {
     // Get the authenticated user (consultant)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError) {
+    if (authError || !user) {
       console.error('Auth error in POST /api/clients:', authError)
       return NextResponse.json(
-        { error: 'Authentication error', details: authError.message },
+        { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    if (!user) {
-      console.error('No user found in POST /api/clients')
-      return NextResponse.json(
-        { error: 'Unauthorized - no user session found' },
-        { status: 401 }
-      )
-    }
-
-    console.log('Creating client for user:', user.id, user.email)
+    console.log('Creating client for consultant:', user.id, user.email)
 
     // Parse and validate request body
     const body = await request.json()
     const validatedData = createClientSchema.parse(body)
 
-    // Convert budget to number if it's a string
-    const budget = validatedData.budget
-      ? (typeof validatedData.budget === 'string' ? parseFloat(validatedData.budget) : validatedData.budget)
-      : null
+    // Create admin client with service role key for user creation
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-    // Create client in database
-    const { data: client, error: createError } = await supabase
-      .from('clients')
-      .insert({
-        name: validatedData.name,
-        email: validatedData.email,
+    // Generate a temporary password for the client
+    const temporaryPassword = generateSecurePassword()
+
+    // Step 1: Create auth user
+    const { data: authUser, error: authCreateError } = await supabaseAdmin.auth.admin.createUser({
+      email: validatedData.email,
+      password: temporaryPassword,
+      email_confirm: true, // Auto-confirm email
+      user_metadata: {
+        full_name: validatedData.name,
         company: validatedData.company,
-        industry: validatedData.industry,
-        description: validatedData.description || '',
-        business_model: validatedData.businessModel || '',
-        target_market: validatedData.targetMarket || '',
-        current_challenges: validatedData.currentChallenges,
-        goals: validatedData.goals,
-        budget: budget,
-        timeline: validatedData.timeline || '',
-        assigned_consultant: validatedData.assignedConsultant || user.id,
-        consultant_id: user.id, // Link client to the consultant who created it
-        status: 'discovery', // Initial status
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        metadata: {
-          createdBy: user.email,
-          createdViaForm: true
-        }
-      })
-      .select()
-      .single()
+        role: 'founder' // Clients are founders working with a consultant
+      }
+    })
 
-    if (createError) {
-      console.error('Error creating client in database:', createError)
+    if (authCreateError || !authUser.user) {
+      console.error('Error creating auth user:', authCreateError)
       return NextResponse.json(
-        { error: 'Failed to create client', details: createError.message },
+        { error: 'Failed to create client user account', details: authCreateError?.message },
         { status: 500 }
       )
     }
 
-    console.log('Client created successfully:', client.id)
+    console.log('Auth user created:', authUser.user.id)
+
+    // Step 2: Create user_profile with consultant_id
+    const { data: userProfile, error: profileError } = await supabase
+      .from('user_profiles')
+      .insert({
+        id: authUser.user.id,
+        email: validatedData.email,
+        full_name: validatedData.name,
+        company: validatedData.company,
+        role: 'founder',
+        consultant_id: user.id, // Link to consultant
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (profileError) {
+      console.error('Error creating user profile:', profileError)
+      // Rollback: delete the auth user if profile creation fails
+      await supabaseAdmin.auth.admin.deleteUser(authUser.user.id)
+      return NextResponse.json(
+        { error: 'Failed to create client profile', details: profileError.message },
+        { status: 500 }
+      )
+    }
+
+    console.log('Client user profile created:', userProfile.id)
+
+    // Step 3: Send password reset email so client can set their own password
+    const { error: resetError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'recovery',
+      email: validatedData.email,
+    })
+
+    if (resetError) {
+      console.warn('Failed to send password reset email:', resetError)
+      // Don't fail the request, just log the warning
+    }
 
     return NextResponse.json({
       success: true,
       data: {
         client: {
-          _id: client.id, // Return as _id for compatibility with existing code
-          id: client.id,
-          name: client.name,
-          email: client.email,
-          company: client.company,
-          industry: client.industry,
-          status: client.status
+          _id: userProfile.id,
+          id: userProfile.id,
+          name: userProfile.full_name,
+          email: userProfile.email,
+          company: userProfile.company,
+          status: 'discovery'
         }
-      }
+      },
+      message: 'Client created successfully. A password reset email has been sent.'
     })
 
   } catch (error) {
@@ -122,11 +157,12 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint to fetch all clients for the logged-in consultant
+// Clients are user_profiles where consultant_id = consultant's user id
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
 
-    // Get the authenticated user
+    // Get the authenticated user (consultant)
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -136,10 +172,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Fetch all clients for this consultant
+    // Fetch all client user_profiles for this consultant
     const { data: clients, error: fetchError } = await supabase
-      .from('clients')
-      .select('*')
+      .from('user_profiles')
+      .select('id, email, full_name, company, role, consultant_id, created_at, updated_at')
       .eq('consultant_id', user.id)
       .order('created_at', { ascending: false })
 

@@ -2,6 +2,7 @@
  * useClients Hook
  *
  * Hook for fetching and managing consultant clients with Supabase auth integration
+ * Clients are user_profiles with consultant_id set - they are founders working with a consultant
  * Transforms clients into PortfolioProject format for display on consultant dashboard
  */
 
@@ -12,34 +13,24 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/hooks';
 import type { PortfolioProject } from '@/types/portfolio';
 
-// Database client type (snake_case from Supabase)
+// Database client type - user_profiles with consultant_id set
 interface DbClient {
   id: string;
-  name: string;
   email: string;
-  company: string;
-  industry: string;
-  consultant_id: string;
-  status: string;
-  description: string | null;
+  full_name: string | null;
+  company: string | null;
+  role: string;
+  consultant_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
-// Transform client to PortfolioProject for dashboard display
+// Transform client user_profile to PortfolioProject for dashboard display
 function transformClient(dbClient: DbClient): PortfolioProject {
-  // Map client status to project stage
-  const stageMap: Record<string, 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'> = {
-    'discovery': 'DESIRABILITY',
-    'validation': 'FEASIBILITY',
-    'scaling': 'VIABILITY',
-    'optimization': 'SCALE'
-  };
-
   return {
     id: dbClient.id,
-    clientName: dbClient.company,
-    stage: stageMap[dbClient.status] || 'DESIRABILITY',
+    clientName: dbClient.company || dbClient.full_name || dbClient.email,
+    stage: 'DESIRABILITY', // Default to DESIRABILITY for new clients
     gateStatus: 'Pending',
     riskBudget: {
       planned: 100,
@@ -88,15 +79,17 @@ export function useClients() {
 
       try {
         setIsLoading(true);
+        // Query user_profiles where consultant_id matches current user
+        // These are clients (founders) working with this consultant
         const { data, error: fetchError } = await supabase
-          .from('clients')
-          .select('*')
+          .from('user_profiles')
+          .select('id, email, full_name, company, role, consultant_id, created_at, updated_at')
           .eq('consultant_id', user.id)
           .order('updated_at', { ascending: false });
 
         if (fetchError) throw fetchError;
 
-        // Transform database clients to PortfolioProject type for display
+        // Transform user_profiles to PortfolioProject type for display
         const transformedClients = (data as DbClient[] || []).map(transformClient);
         setClients(transformedClients);
         setError(null);
@@ -116,8 +109,8 @@ export function useClients() {
 
     try {
       const { data, error: fetchError } = await supabase
-        .from('clients')
-        .select('*')
+        .from('user_profiles')
+        .select('id, email, full_name, company, role, consultant_id, created_at, updated_at')
         .eq('consultant_id', user.id)
         .order('updated_at', { ascending: false });
 
