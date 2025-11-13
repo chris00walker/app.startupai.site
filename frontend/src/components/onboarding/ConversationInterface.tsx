@@ -194,7 +194,7 @@ export function ConversationInterface({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full" data-testid="chat-interface">
         {/* Header */}
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
           <div className="flex items-center justify-between">

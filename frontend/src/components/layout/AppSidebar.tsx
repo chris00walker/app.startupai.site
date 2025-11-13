@@ -250,7 +250,7 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
   const showFounderMenu = roleInfo.canAccessFounder || roleInfo.role === "founder"
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r-0" {...props}>
+    <Sidebar collapsible="offcanvas" className="border-r-0" data-testid="user-menu" {...props}>
       <SidebarHeader className="border-b-0">
         <Link href={showConsultantMenu ? "/dashboard" : "/founder-dashboard"} className="block">
           <div className="flex items-center gap-2 px-2 py-2 hover:bg-accent rounded-lg transition-colors cursor-pointer">

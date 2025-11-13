@@ -411,7 +411,7 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
   // Main render
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-[100dvh] w-full overflow-hidden">
+      <div className="flex h-[100dvh] w-full overflow-hidden" data-testid="onboarding">
         {/* Sidebar with progress tracking */}
         <OnboardingSidebar
           stages={stages}

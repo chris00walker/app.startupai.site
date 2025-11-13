@@ -74,7 +74,7 @@ async function OnboardingPage() {
       </a>
 
       {/* Main content with proper landmark */}
-      <div id="main-content" role="main" aria-label="AI-guided onboarding conversation">
+      <div id="main-content" data-testid="onboarding" role="main" aria-label="AI-guided onboarding conversation">
         <Suspense fallback={<OnboardingLoadingSkeleton />}>
           <OnboardingWizard
             userId={effectiveUser.id as string}

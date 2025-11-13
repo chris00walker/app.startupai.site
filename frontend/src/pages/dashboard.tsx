@@ -200,12 +200,12 @@ function Dashboard() {
   return (
     <>
       {demoMode.isDemo && (
-        <DemoBanner 
+        <DemoBanner
           onExitDemo={demoMode.exitDemo}
           onRestartTour={demoMode.restartTour}
         />
       )}
-      
+
       {!usingRealData && (
         <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-r-md">
           <div className="flex items-start">
@@ -220,13 +220,13 @@ function Dashboard() {
           </div>
         </div>
       )}
-      
+
       <DashboardLayout
         breadcrumbs={[
           { title: "Portfolio Dashboard", href: "/dashboard" },
         ]}
       >
-        <div className="space-y-6">
+        <div data-testid="dashboard" className="space-y-6">
           {/* Welcome Section */}
           <div className="flex items-center justify-between">
             <div>
