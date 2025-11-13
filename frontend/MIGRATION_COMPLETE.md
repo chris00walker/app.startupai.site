@@ -188,6 +188,36 @@ If issues occur:
 2. Restore old API routes from git
 3. Re-enable clients table queries
 
+## Issues Resolved
+
+### Duplicate Profile Issue ✅
+**Problem:** Consultant (chris00walker@gmail.com) had TWO user_profiles:
+1. Founder profile (cc134c5e-7463-4386-938b-8fc72971a227) - WRONG
+   - Role: founder
+   - Company: null
+   - No auth.users entry (orphaned)
+   - Caused demo mode to appear instead of consultant dashboard
+
+2. Consultant profile (e0dc74ab-8222-4c5f-af20-11e972f24c03) - CORRECT ✅
+   - Role: consultant
+   - Company: Chris Walker Consulting
+   - Linked to auth.users
+
+**Solution:** Deleted orphaned founder profile. Only consultant profile remains.
+
+**Resolution Steps:**
+1. Identified duplicate profiles via SQL query
+2. Verified correct profile linked to auth.users
+3. Deleted orphaned founder profile
+4. Verified client relationship intact
+5. Instructed user to log out and back in to refresh session
+
+**Result:** Consultant dashboard now loads correctly with:
+- Company: Chris Walker Consulting
+- Role: Consultant
+- 1 Active Client: Elias Food Imports
+- Live Data (no demo mode)
+
 ## Support
 
 If you encounter any issues:
@@ -195,9 +225,11 @@ If you encounter any issues:
 2. Verify environment variables are set (SUPABASE_SERVICE_ROLE_KEY)
 3. Ensure password reset emails are being delivered
 4. Check Supabase auth dashboard for user status
+5. **If seeing wrong dashboard:** Check for duplicate user_profiles with same email
 
 ---
 
 **Migration completed:** 2025-11-13 20:35 UTC
+**Duplicate profile fixed:** 2025-11-13 20:45 UTC
 **Migrated by:** Claude Code
 **Status:** ✅ SUCCESS
