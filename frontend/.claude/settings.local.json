@@ -41,7 +41,14 @@
       "Bash(claude mcp add --transport stdio crewai-enterprise -- uv --directory /home/chris/projects/crewai-mcp run --with mcp[cli] mcp run /home/chris/projects/crewai-mcp/crewai_enterprise_server.py)",
       "Bash(cat:*)",
       "Bash(python3:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm add:*)",
+      "Bash(rm:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm exec playwright install:*)",
+      "Bash(pnpm test:e2e:*)",
+      "Bash(pnpm exec playwright test:*)"
     ],
     "deny": [],
     "ask": []

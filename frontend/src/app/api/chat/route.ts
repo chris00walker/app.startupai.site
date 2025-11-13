@@ -29,7 +29,7 @@ function getAIModel() {
     baseURL: 'https://api.openai.com/v1',
   });
 
-  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-5-mini';
+  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o';
   console.log('[api/chat] Using OpenAI model:', model);
   return openai(model);
 }

@@ -241,19 +241,50 @@ git push origin main
 
 ---
 
+## Automated E2E Testing (NEW - 2025-11-12)
+
+### Playwright Test Suite
+
+**Status:** ✅ Implemented
+**Location:** `frontend/tests/e2e/`
+**Run Command:** `cd frontend && npx playwright test`
+
+**Test Coverage:**
+- Authentication flows (Consultant and Founder)
+- Onboarding conversation flows
+- Session management and persistence
+- Progress tracking and UI updates
+
+**Current Test Results:**
+- Total: 15 tests
+- Passing: 1 test (Consultant redirect)
+- Failing: 14 tests (missing `data-testid` attributes)
+
+**Required Next Steps:**
+1. Add `data-testid` attributes to UI components
+2. Fix network idle timeout issues
+3. Re-run tests to verify fixes
+
+**See:** `E2E_TEST_IMPLEMENTATION.md` for full details
+
+---
+
 ## Summary
 
 **Current Status:**
 - [x] Documentation updated
 - [x] Hotfix committed (toolChoice: 'auto')
 - [x] Recovery endpoint created
+- [x] Automated E2E tests implemented
+- [ ] UI data-testid attributes PENDING
 - [ ] Local testing PENDING
 - [ ] Staging testing PENDING
 - [ ] Production deployment PENDING
 
-**Next Action:** Complete local testing above and report results.
+**Next Action:** Add data-testid attributes to components, then run automated tests.
 
 ---
 
 *Generated: 2025-11-12*
+*Updated: 2025-11-12 - Added E2E testing section*
 *Purpose: Prevent production incidents through proper testing*

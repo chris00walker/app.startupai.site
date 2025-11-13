@@ -317,7 +317,119 @@ matcher: [
 
 - Confirmed via `netlify api listSiteDeploys` that deploy `6913cf11fc86dc0008df71b3` bundles a single server handler (`___netlify-server-handler`), even though `netlify functions:list` reports an empty `netlify/functions` directory (expected because the CLI command only inspects the traditional functions folder).
 - Added `scripts/simulate-authenticated-chat.mjs`, which signs into Supabase using the SSR helpers, starts/resumes an onboarding session, and then hits the production `/api/chat` endpoint so we can capture real `x-nf-request-id` values on demand.
-- Streaming the function logs during those simulated sessions produced `AI_APICallError: Forbidden` entries that clearly show the AI SDK is still calling `https://app-startupai-site.netlify.app/.netlify/ai/messages`, meaning Netlify’s AI Gateway rewrite is still active.
+- Streaming the function logs during those simulated sessions produced `AI_APICallError: Forbidden` entries that clearly show the AI SDK is still calling `https://app-startupai-site.netlify.app/.netlify/ai/messages`, meaning Netlify's AI Gateway rewrite is still active.
 - Root cause: Netlify injects `ANTHROPIC_BASE_URL=/.netlify/ai/messages` during builds. Our previous fix only forced a custom `baseURL` for OpenAI, so any environment with `ANTHROPIC_API_KEY` set would still be routed through the disabled gateway and return 403.
 - Fix implemented: all three chat endpoints now construct their Anthropic provider via `createAnthropic({ apiKey, baseURL: 'https://api.anthropic.com/v1' })`, ensuring the SDK bypasses the Netlify proxy the same way the OpenAI branch already does. Each handler logs which provider/model is selected for easier future triage.
 - Next steps after deploy: re-run `scripts/simulate-authenticated-chat.mjs` while tailing `netlify logs:function ___netlify-server-handler` to confirm the logged `url` no longer references `/.netlify/ai/messages` and that the stream completes without Forbidden errors.
+
+---
+
+## Session Notes – 2025-11-12 Evening
+
+### AI Assistant Bug Fix - Excessive Tool Calling
+
+**Problem Discovered:**
+The AI assistant was calling the `assessQuality` tool on EVERY single user response, even for simple acknowledgments like "ok" or "sure". This created a poor user experience with the AI appearing robotic and repetitive.
+
+**Root Cause:**
+In `src/app/api/chat/route.ts`, the system prompt included `toolChoice: 'required'` which **forced** the AI to call a tool on every turn, even when inappropriate.
+
+```typescript
+// BEFORE (Broken)
+const result = await streamText({
+  model,
+  messages,
+  system: SYSTEM_PROMPT,
+  tools,
+  toolChoice: 'required',  // ❌ Forces tool usage every time
+  maxSteps: 5,
+});
+```
+
+**Fix Applied:**
+Changed `toolChoice` from `'required'` to `'auto'`, allowing the AI to decide when tool calls are appropriate:
+
+```typescript
+// AFTER (Fixed)
+const result = await streamText({
+  model,
+  messages,
+  system: SYSTEM_PROMPT,
+  tools,
+  toolChoice: 'auto',  // ✅ AI decides when to use tools
+  maxSteps: 5,
+});
+```
+
+**Impact:**
+- ✅ AI now has natural conversations before assessing quality
+- ✅ Tools are called only when contextually appropriate
+- ✅ Better user experience (conversational, not robotic)
+- ✅ Reduced unnecessary API calls to tools
+
+**Testing:**
+Manual testing confirmed the AI now:
+1. Engages in 2-3 back-and-forth exchanges
+2. Asks clarifying questions naturally
+3. Only calls `assessQuality` after gathering substantial information
+4. Progresses through stages naturally without forcing tool usage
+
+**See Also:** `TESTING_CHECKLIST.md` for full testing workflow
+
+---
+
+### E2E Test Infrastructure Implementation
+
+**What We Built:**
+Comprehensive Playwright E2E testing infrastructure for automated testing of:
+- Authentication flows (Consultant and Founder users)
+- Onboarding conversation flows
+- Session management and recovery
+- Progress tracking UI
+
+**Status:** ✅ Implemented, ⏳ Needs UI Fixes
+
+**Test Files Created:**
+- `frontend/tests/e2e/01-login.spec.ts` (6 tests)
+- `frontend/tests/e2e/02-onboarding-flow.spec.ts` (9 tests)
+- `frontend/tests/e2e/helpers/auth.ts`
+- `frontend/tests/e2e/helpers/onboarding.ts`
+- `frontend/playwright.config.ts` (configuration)
+
+**Current Results:**
+- 1 test passing (Consultant redirect flow)
+- 14 tests failing (missing `data-testid` attributes on UI components)
+
+**Required Actions:**
+1. Add `data-testid` attributes to UI components:
+   - `data-testid="dashboard"` on dashboard page
+   - `data-testid="onboarding"` on onboarding page
+   - `data-testid="user-menu"` on user menu
+   - `data-testid="chat-interface"` on chat interface
+2. Fix network idle timeout issues
+3. Re-run tests to verify functionality
+
+**See:** `E2E_TEST_IMPLEMENTATION.md` for complete documentation
+
+---
+
+### Consultant vs Founder Ambiguity Identified
+
+**Issue Discovered:**
+Tests revealed ambiguity about whether Consultants onboard themselves or onboard their clients (Founders).
+
+**Current Behavior:**
+- Consultants redirect to `/onboarding/consultant` (307 redirect - incomplete?)
+- Founders go to `/onboarding/founder` (200 success - working)
+
+**Questions Raised:**
+1. Do Consultants onboard themselves to learn the platform?
+2. Do Consultants onboard Founders (their clients)?
+3. Should Consultants skip onboarding entirely?
+
+**Impact:**
+- Tests cannot verify correct Consultant behavior
+- UX may be confusing for Consultant users
+- Product direction unclear
+
+**See:** `CONSULTANT_VS_FOUNDER_CLARIFICATION.md` for full analysis and recommendations

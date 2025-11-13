@@ -11,13 +11,18 @@ This document provides a structured index of all architectural and engineering d
 ### 🔴 Critical - Read First
 1. **[ONBOARDING_FAILURE_ANALYSIS.md](./ONBOARDING_FAILURE_ANALYSIS.md)** - Current system failures
 2. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Implementation plan to fix
+3. **[CONSULTANT_VS_FOUNDER_CLARIFICATION.md](./CONSULTANT_VS_FOUNDER_CLARIFICATION.md)** - 🆕 User role ambiguity analysis
 
 ### 🟡 Architecture & Planning
-3. **[ARCHITECTURE_RECOMMENDATIONS.md](./ARCHITECTURE_RECOMMENDATIONS.md)** - Long-term Option B vision
-4. **[SYSTEM_ENGINEER_HANDOFF.md](./SYSTEM_ENGINEER_HANDOFF.md)** - Historical context (Forbidden errors)
+4. **[ARCHITECTURE_RECOMMENDATIONS.md](./ARCHITECTURE_RECOMMENDATIONS.md)** - Long-term Option B vision
+5. **[SYSTEM_ENGINEER_HANDOFF.md](./SYSTEM_ENGINEER_HANDOFF.md)** - Historical context (Forbidden errors)
+
+### 🟢 Testing & Quality
+6. **[E2E_TEST_IMPLEMENTATION.md](./E2E_TEST_IMPLEMENTATION.md)** - 🆕 Playwright E2E test infrastructure
+7. **[TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md)** - Testing workflow and procedures
 
 ### 🟢 Reference
-5. **[docs/](./docs/)** - Additional documentation
+8. **[docs/](./docs/)** - Additional documentation
    - `docs/features/stage-progression.md` - Onboarding stage system design
    - `docs/engineering/database-schema-updates.md` - Database schema reference
 
@@ -143,6 +148,66 @@ This document provides a structured index of all architectural and engineering d
 **Historical commits**:
 - 98d88e8 - "refactor: remove Anthropic provider, simplify to OpenAI-only"
 - c3af469 - "fix: parse SSE format in onboarding chat instead of displaying raw stream"
+
+---
+
+### 6. E2E_TEST_IMPLEMENTATION.md (NEW)
+**Purpose**: Comprehensive Playwright E2E testing infrastructure documentation
+
+**When to read**: When implementing or debugging automated tests
+
+**Key sections**:
+- Test Infrastructure Setup (Playwright configuration)
+- Test Files Structure (`tests/e2e/` directory layout)
+- Test User Credentials (Consultant and Founder)
+- Test Coverage (15 tests: 1 passing, 14 failing)
+- Required UI Attributes (`data-testid` list)
+- Running Tests (commands and options)
+- Test Artifacts (screenshots, videos, traces)
+
+**Current Status**:
+- ✅ Playwright configured to use Chromium
+- ✅ Authentication tests implemented
+- ✅ Onboarding flow tests implemented
+- ❌ Tests failing due to missing `data-testid` attributes
+- ❌ Network idle timeout issues
+
+**Related files**:
+- `frontend/playwright.config.ts` - Playwright configuration
+- `frontend/tests/e2e/01-login.spec.ts` - Authentication tests
+- `frontend/tests/e2e/02-onboarding-flow.spec.ts` - Onboarding tests
+- `frontend/tests/e2e/helpers/auth.ts` - Auth helper functions
+- `frontend/tests/e2e/helpers/onboarding.ts` - Onboarding helper functions
+
+---
+
+### 7. CONSULTANT_VS_FOUNDER_CLARIFICATION.md (NEW)
+**Purpose**: Analysis of user role ambiguity discovered during testing
+
+**When to read**: When making product decisions about user workflows
+
+**Key sections**:
+- Problem Statement - Ambiguity about Consultant onboarding
+- Current Observed Behavior (test findings)
+- Analysis: Possible Interpretations (3 hypotheses)
+  1. Consultants onboard themselves
+  2. Consultants onboard their clients
+  3. Consultants skip onboarding
+- Impact on Testing
+- Recommendations (short-term and long-term)
+- Questions for User (decision points)
+
+**Critical Discovery**:
+- Consultants redirect to `/onboarding/consultant` (307 - incomplete?)
+- Founders go to `/onboarding/founder` (200 - working)
+- Tests cannot verify correct Consultant behavior
+- Product direction unclear
+
+**Requires Decision**:
+- [ ] What is the intended Consultant user journey?
+- [ ] Should Consultants see "AI Assistant" button?
+- [ ] What's the relationship between Consultants and Founders?
+- [ ] What happens when Consultant clicks "AI Assistant"?
 
 ---
 

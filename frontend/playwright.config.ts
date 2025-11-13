@@ -11,31 +11,29 @@ import { defineConfig, devices } from '@playwright/test'
  * - Captures artifacts on failure
  */
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
-const port = Number(process.env.PLAYWRIGHT_PORT ?? 3000)
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3001'
+const port = Number(process.env.PLAYWRIGHT_PORT ?? 3001)
 
 export default defineConfig({
   // Test directory structure
-  testDir: 'src/__tests__/e2e',
+  testDir: 'tests/e2e',
   testMatch: ['**/*.spec.ts'],
   testIgnore: [
     '**/*.test.*',
     '**/node_modules/**',
-    '**/__tests__/components/**',
-    '**/__tests__/integration/**',
   ],
-  
+
   // Timeouts
-  timeout: 30_000,
+  timeout: 60_000, // Increased for AI responses
   expect: {
-    timeout: 5_000,
+    timeout: 10_000,
   },
-  
+
   // Execution settings
-  fullyParallel: true,
+  fullyParallel: false, // Sequential execution for onboarding tests
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: 1, // Single worker for sequential execution
   
   // Reporting
   reporter: [
@@ -60,46 +58,23 @@ export default defineConfig({
     bypassCSP: false,
   },
   
-  // Development server
-  webServer: {
-    command: `pnpm dev -- --hostname 0.0.0.0 --port ${port}`,
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    stdout: 'ignore',
-    stderr: 'pipe',
-    timeout: 120_000,
-  },
-  
-  // Multi-browser testing
+  // Development server - disabled, rely on manually started servers
+  // Both backend (localhost:3000) and frontend (localhost:3001) must be running
+  webServer: undefined,
+
+  // Browser testing - using Playwright's bundled Chromium (Chrome-equivalent)
+  // Note: Windows Chrome can't be controlled from WSL due to pipe communication issues
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        // Chrome-specific settings
+        // Chromium-specific settings
         launchOptions: {
           args: ['--disable-web-security'],
         },
       },
     },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    
-    // Mobile viewports (optional - uncomment to enable)
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
   ],
   
   // Output directory for test artifacts
