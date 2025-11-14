@@ -265,7 +265,7 @@ git push origin main
 2. Fix network idle timeout issues
 3. Re-run tests to verify fixes
 
-**See:** `E2E_TEST_IMPLEMENTATION.md` for full details
+**See:** `E2E_TEST_IMPLEMENTATION.md` (in this directory) for full details
 
 ---
 

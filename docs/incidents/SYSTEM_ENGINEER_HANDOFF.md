@@ -473,30 +473,30 @@ Tests revealed ambiguity about whether Consultants onboard themselves or onboard
      - Updated login logic to use `deriveRole()` and `getRedirectForRole()` helpers
      - Fixed Settings page to load real user data
      - Updated `plan_status` to "active" for both accounts
-   - **Status:** Resolved, see `MIGRATION_COMPLETE.md` and `MIGRATION_SUMMARY.md`
+   - **Status:** Resolved, see `../status/MIGRATION_COMPLETE.md` and `../status/MIGRATION_SUMMARY.md`
 
 ### Remaining Issues ⚠️
 
 1. **Row Level Security Disabled**
    - RLS currently disabled on `user_profiles` table
    - Needs proper policies before re-enabling
-   - See `MIGRATION_SUMMARY.md` for details
+   - See `../status/MIGRATION_SUMMARY.md` for details
 
 2. **E2E Tests Failing**
    - Missing `data-testid` attributes on UI components
-   - See `E2E_TEST_IMPLEMENTATION.md` for requirements
+   - See `../testing/E2E_TEST_IMPLEMENTATION.md` for requirements
 
 3. **Onboarding Flow Issues**
    - Progress tracking not working properly
    - CrewAI integration not yet implemented
-   - See `ONBOARDING_FAILURE_ANALYSIS.md` and `ONBOARDING_TO_CREWAI_ARCHITECTURE.md`
+   - See `ONBOARDING_FAILURE_ANALYSIS.md` and `../overview/ONBOARDING_TO_CREWAI_ARCHITECTURE.md`
 
 ### Next Actions
 
 For current work, refer to:
-- `MIGRATION_COMPLETE.md` - Latest migration status
-- `MIGRATION_SUMMARY.md` - Technical architecture details
-- `DOCUMENTATION_INDEX.md` - Complete documentation index
+- `../status/MIGRATION_COMPLETE.md` - Latest migration status
+- `../status/MIGRATION_SUMMARY.md` - Technical architecture details
+- `../DOCUMENTATION_INDEX.md` - Complete documentation index
 
 ---
 

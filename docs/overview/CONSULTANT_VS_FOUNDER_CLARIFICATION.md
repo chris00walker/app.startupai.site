@@ -285,7 +285,7 @@ POST /api/consultant/onboarding/start 200 in 1428ms
 
 ## References
 
-- **Test Results:** See `E2E_TEST_IMPLEMENTATION.md`
+- **Test Results:** See `../testing/E2E_TEST_IMPLEMENTATION.md`
 - **Server Logs:** See test run output in session notes
 - **Current Routes:**
   - `/onboarding/founder` - Working, 200 success

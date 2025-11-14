@@ -10,7 +10,7 @@
 
 **CRITICAL:** Do NOT implement Option B until (./ONBOARDING_TO_CREWAI_ARCHITECTURE.md) has been fully implemented, tested and is working. Please review these related documents:
 
-1. **[ONBOARDING_FAILURE_ANALYSIS.md](./ONBOARDING_FAILURE_ANALYSIS.md)** - Root cause analysis of current onboarding workflow failures
+1. **[ONBOARDING_FAILURE_ANALYSIS.md](../incidents/ONBOARDING_FAILURE_ANALYSIS.md)** - Root cause analysis of current onboarding workflow failures
    - Why progress shows 0% despite completing conversation
    - Why AI tools (assessQuality, advanceStage, completeOnboarding) aren't being called
    - Where conversation data is stored (testSessionState)
@@ -23,7 +23,7 @@
    - Includes: Brief schema mapping, testing strategy, rollback plan
    - Timeline: 11 hours (~1.5 days)
 
-3. **[SYSTEM_ENGINEER_HANDOFF.md](./SYSTEM_ENGINEER_HANDOFF.md)** - Original investigation into Forbidden errors
+3. **[SYSTEM_ENGINEER_HANDOFF.md](../incidents/SYSTEM_ENGINEER_HANDOFF.md)** - Original investigation into Forbidden errors
    - Historical context: Netlify AI Gateway issue
    - Why we removed Anthropic provider
    - SSE streaming format parsing fix
@@ -31,12 +31,12 @@
 **Relationship between documents:**
 - `SYSTEM_ENGINEER_HANDOFF.md` → Led to Option A (fix streaming)
 - `ARCHITECTURE_RECOMMENDATIONS.md` (this file) → Original Option B vision (long-term architecture)
-- `ONBOARDING_FAILURE_ANALYSIS.md` → Forensic analysis of why current system is broken
-- `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` → **Actionable implementation plan** combining Option A fixes + Option B architecture
+- `../incidents/ONBOARDING_FAILURE_ANALYSIS.md` → Forensic analysis of why current system is broken
+- `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` (in this directory) → **Actionable implementation plan** combining Option A fixes + Option B architecture
 
 **Recommended reading order:**
-1. `ONBOARDING_FAILURE_ANALYSIS.md` - Understand what's broken
-2. `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` - See the fix plan
+1. `../incidents/ONBOARDING_FAILURE_ANALYSIS.md` - Understand what's broken
+2. `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` (in this directory) - See the fix plan
 3. `ARCHITECTURE_RECOMMENDATIONS.md` (this file) - Understand long-term vision
 
 ---
