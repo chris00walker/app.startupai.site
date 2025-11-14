@@ -46,7 +46,7 @@ const consultantNavigation = {
   main: [
     {
       title: "Dashboard",
-      url: "/",
+      url: "/dashboard",
       icon: LayoutDashboard,
     },
     {

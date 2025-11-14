@@ -6,16 +6,17 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Eye, 
-  MoreVertical, 
-  TrendingUp, 
+import {
+  Users,
+  Plus,
+  Search,
+  Eye,
+  MoreVertical,
+  TrendingUp,
   Calendar,
   Building,
-  Target
+  Target,
+  Loader2
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -25,6 +26,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { getDemoClient } from "@/data/demoData"
+import { useClients } from "@/hooks/useClients"
+import type { PortfolioProject } from "@/types/portfolio"
 
 interface Client {
   id: string
@@ -39,8 +42,32 @@ interface Client {
   revenue?: string
 }
 
+// Transform PortfolioProject to Client format
+function portfolioToClient(project: PortfolioProject): Client {
+  const stageMap: Record<string, "discovery" | "validation" | "scaling" | "optimization"> = {
+    'DESIRABILITY': 'discovery',
+    'FEASIBILITY': 'validation',
+    'VIABILITY': 'scaling',
+    'SCALE': 'optimization'
+  }
+
+  return {
+    id: project.id,
+    name: project.clientName,
+    industry: 'Technology', // Default since not in PortfolioProject
+    description: `Client with ${project.hypothesesCount || 0} hypotheses and ${project.experimentsCount || 0} experiments`,
+    stage: stageMap[project.stage] || 'discovery',
+    createdAt: new Date().toISOString().split('T')[0],
+    lastActivity: project.lastActivity,
+    canvasCount: project.evidenceCount || 0,
+    completionRate: project.evidenceQuality || 0,
+    revenue: 'TBD'
+  }
+}
+
 export default function ClientsPage() {
   const demoMode = useDemoMode()
+  const { projects: realClients, isLoading, error } = useClients()
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("all")
 
@@ -99,7 +126,10 @@ export default function ClientsPage() {
     }
   ]
 
-  const clients = demoMode.isDemo ? demoClients : []
+  // Use real clients if available, otherwise fall back to demo data
+  const transformedRealClients = realClients.map(portfolioToClient)
+  const clients = transformedRealClients.length > 0 ? transformedRealClients : demoClients
+  const usingRealData = transformedRealClients.length > 0
 
   // Filter clients based on search and tab
   const filteredClients = clients.filter(client => {
@@ -130,6 +160,23 @@ export default function ClientsPage() {
     }
   }
 
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        breadcrumbs={[
+          { title: "Client Portfolio", href: "/clients" },
+        ]}
+      >
+        <div className="flex items-center justify-center h-[400px]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading your clients...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout
       breadcrumbs={[
@@ -137,6 +184,36 @@ export default function ClientsPage() {
       ]}
     >
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        {/* Info Banner */}
+        {!usingRealData && (
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <Users className="h-5 w-5 text-blue-400 mt-0.5" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  <strong>Demo Mode:</strong> Showing sample data. Add your first client to see real data.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {usingRealData && (
+          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-md">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <Users className="h-5 w-5 text-green-400 mt-0.5" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm text-green-700 leading-relaxed">
+                  <strong>Live Data:</strong> Showing your real client portfolio.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between space-y-2">
           <div>
@@ -189,7 +266,7 @@ export default function ClientsPage() {
                 <CardContent>
                   <div className="text-2xl font-bold">{clients.length}</div>
                   <p className="text-xs text-muted-foreground">
-                    {demoMode.isDemo ? "Demo data" : "Active clients"}
+                    {usingRealData ? "Active clients" : "Demo data"}
                   </p>
                 </CardContent>
               </Card>

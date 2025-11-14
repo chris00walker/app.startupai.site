@@ -61,7 +61,8 @@
       "Bash(node scripts/debug-user.mjs:*)",
       "Bash(node scripts/check-plan-status.mjs:*)",
       "Bash(node scripts/fix-consultant-account.mjs:*)",
-      "Bash(node scripts/test-dashboard-logic.mjs:*)"
+      "Bash(node scripts/test-dashboard-logic.mjs:*)",
+      "Bash(node scripts/debug-dashboard.mjs:*)"
     ],
     "deny": [],
     "ask": []
