@@ -69,15 +69,20 @@ export function useClients() {
 
   useEffect(() => {
     async function fetchClients() {
-      if (authLoading) return;
+      if (authLoading) {
+        console.log('[useClients] Still loading auth...');
+        return;
+      }
 
       if (!user) {
+        console.log('[useClients] No user found, returning empty clients');
         setClients([]);
         setIsLoading(false);
         return;
       }
 
       try {
+        console.log('[useClients] Fetching clients for user:', user.id, user.email);
         setIsLoading(true);
         // Query user_profiles where consultant_id matches current user
         // These are clients (founders) working with this consultant
@@ -89,12 +94,17 @@ export function useClients() {
 
         if (fetchError) throw fetchError;
 
+        console.log('[useClients] Fetched clients from database:', data?.length || 0, 'clients');
+        if (data && data.length > 0) {
+          console.log('[useClients] Client details:', data.map(c => ({ email: c.email, company: c.company })));
+        }
+
         // Transform user_profiles to PortfolioProject type for display
         const transformedClients = (data as DbClient[] || []).map(transformClient);
         setClients(transformedClients);
         setError(null);
       } catch (err) {
-        console.error('Error fetching clients:', err);
+        console.error('[useClients] Error fetching clients:', err);
         setError(err as Error);
       } finally {
         setIsLoading(false);

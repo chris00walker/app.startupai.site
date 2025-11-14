@@ -144,13 +144,18 @@ function Dashboard() {
   // Fetch user role
   React.useEffect(() => {
     async function fetchUserRole() {
-      if (!user) return
+      if (!user) {
+        console.log('[Dashboard] No user found');
+        return;
+      }
+      console.log('[Dashboard] Fetching role for user:', user.id, user.email);
       const supabase = createClient()
       const { data } = await supabase
         .from('user_profiles')
         .select('role')
         .eq('id', user.id)
         .single()
+      console.log('[Dashboard] User role fetched:', data?.role || 'null');
       setUserRole(data?.role || null)
     }
     fetchUserRole()
@@ -162,6 +167,8 @@ function Dashboard() {
   const clientsData = useClients()
 
   const { projects, isLoading, error } = isConsultant ? clientsData : projectsData
+
+  console.log('[Dashboard] isConsultant:', isConsultant, '| projects count:', projects.length, '| isLoading:', isLoading);
 
   // Gate filtering state
   const [selectedStages, setSelectedStages] = React.useState<GateStage[]>([])
