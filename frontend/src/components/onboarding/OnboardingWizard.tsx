@@ -527,7 +527,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
   const confirmExit = useCallback(() => {
     toast.info('Onboarding session saved. You can resume anytime.');
-    router.push('/dashboard');
+    router.push('/founder-dashboard');
   }, [router]);
 
   // Initialize on mount
@@ -566,7 +566,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             <Button onClick={() => window.location.reload()}>
               Try Again
             </Button>
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            <Button variant="outline" onClick={() => router.push('/founder-dashboard')}>
               Go to Dashboard
             </Button>
           </div>

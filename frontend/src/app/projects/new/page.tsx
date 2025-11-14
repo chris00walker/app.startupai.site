@@ -37,7 +37,7 @@ export default function NewProjectPage() {
     detectUserType()
   }, [])
 
-  const dashboardHref = userType === "consultant" ? "/dashboard" : "/founder-dashboard"
+  const dashboardHref = userType === "consultant" ? "/consultant-dashboard" : "/founder-dashboard"
 
   if (isLoading) {
     return (

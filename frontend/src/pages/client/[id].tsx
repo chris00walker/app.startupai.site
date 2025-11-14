@@ -248,7 +248,7 @@ const ClientPage: React.FC = () => {
         <div className="business-container py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard" className="text-primary hover:text-primary/80 font-medium">
+              <Link href="/consultant-dashboard" className="text-primary hover:text-primary/80 font-medium">
                 ← Back to Portfolio
               </Link>
               <div>

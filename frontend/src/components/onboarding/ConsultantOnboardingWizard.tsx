@@ -180,7 +180,7 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
       toast.success('Welcome! Your consultant profile has been created.');
 
       // Redirect to consultant dashboard
-      router.push('/dashboard');
+      router.push('/consultant-dashboard');
     } catch (error: any) {
       console.error('[ConsultantOnboarding] Error:', error);
       toast.error(`Failed to complete onboarding: ${error.message}`);

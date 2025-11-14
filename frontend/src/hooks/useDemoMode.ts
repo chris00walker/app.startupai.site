@@ -100,11 +100,13 @@ export const useDemoMode = () => {
   }, [router.query.demo])
 
   const startDemo = () => {
-    router.push('/dashboard?demo=true')
+    const currentPath = router.pathname
+    router.push(`${currentPath}?demo=true`)
   }
 
   const exitDemo = () => {
-    router.push('/dashboard')
+    const currentPath = router.pathname
+    router.push(currentPath)
   }
 
   const nextStep = () => {

@@ -352,7 +352,7 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
       toast.success('Onboarding complete! Welcome to your consultant dashboard.');
 
       // Redirect to consultant dashboard
-      router.push('/dashboard');
+      router.push('/consultant-dashboard');
 
     } catch (error: any) {
       console.error('[ConsultantOnboarding] Complete error:', error);
@@ -367,7 +367,7 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
 
   const confirmExit = useCallback(() => {
     toast.info('Progress saved. You can resume anytime.');
-    router.push('/dashboard');
+    router.push('/consultant-dashboard');
   }, [router]);
 
   // Initialize session on mount
@@ -399,7 +399,7 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
             <Button onClick={() => window.location.reload()}>
               Try Again
             </Button>
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            <Button variant="outline" onClick={() => router.push('/consultant-dashboard')}>
               Go to Dashboard
             </Button>
           </div>
