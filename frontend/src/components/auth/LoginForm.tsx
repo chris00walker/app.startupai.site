@@ -58,8 +58,28 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
       const result = await signIn(email, password)
 
       if (result.success) {
-        // Let the server handle role-based redirect after authentication
-        window.location.href = '/auth/callback?next='
+        // After successful email/password login, fetch user role and redirect
+        const supabase = (await import('@/lib/supabase/client')).createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('role, plan_status')
+            .eq('id', user.id)
+            .single()
+
+          const role = profile?.role || 'trial'
+
+          // Redirect based on role
+          if (role === 'consultant' || role === 'admin') {
+            window.location.href = '/consultant-dashboard'
+          } else if (role === 'founder') {
+            window.location.href = '/founder-dashboard'
+          } else {
+            window.location.href = '/onboarding/founder'
+          }
+        }
       }
     } catch (error) {
       console.error('Email sign in error:', error)
