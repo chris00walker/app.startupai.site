@@ -62,7 +62,7 @@ cd /home/chris/projects/app.startupai.site/frontend
 pnpm dev
 
 # Navigate to:
-http://localhost:3001/dashboard
+http://localhost:3001/consultant-dashboard
 
 # Expected:
 ✅ See "Active Clients" heading (not "Active Projects")
@@ -227,9 +227,48 @@ If you encounter any issues:
 4. Check Supabase auth dashboard for user status
 5. **If seeing wrong dashboard:** Check for duplicate user_profiles with same email
 
+## Recent Updates (2025-11-13)
+
+### Authentication & Routing Improvements ✅
+
+**Changes Made:**
+1. **Role-Specific Dashboard Routing**
+   - Consultants now redirect to `/consultant-dashboard` after login
+   - Founders now redirect to `/founder-dashboard` after login
+   - Removed hardcoded `/dashboard` route (404 error fixed)
+
+2. **Login Redirect Fixes**
+   - Email/password login now fetches user profile and redirects to correct dashboard
+   - OAuth callback uses `getRedirectForRole()` helper for consistent redirects
+   - Both authentication methods use same role-based routing logic
+
+3. **Mock Data Removal**
+   - Settings page now loads real user profile data from database
+   - Consultant dashboard displays real client data (no more "Demo Mode")
+   - Client Portfolio page uses `useClients()` hook for live data
+
+4. **Trial Mode Resolution**
+   - Updated `plan_status` from "trialing" to "active" for both accounts
+   - Removed "Trial mode: upgrade to unlock full AI automation" banner
+   - Both consultant and founder accounts have full access
+
+**Related Commits:**
+- `d7e5122` - Refactor: use existing role redirect helpers in LoginForm
+- `62a61ab` - Fix: properly handle email/password login redirects
+- `52116bd` - Fix: redirect to role-specific dashboards after login
+- `4036643` - Feat: create role-specific dashboard routes
+
+**Testing:**
+- ✅ Consultant login (chris00walker@gmail.com) → `/consultant-dashboard`
+- ✅ Founder login (chris00walker@proton.me) → `/founder-dashboard`
+- ✅ Settings page shows real user data
+- ✅ Client portfolio shows "Elias Food Imports" with live data
+- ✅ No trial mode or demo mode banners
+
 ---
 
 **Migration completed:** 2025-11-13 20:35 UTC
 **Duplicate profile fixed:** 2025-11-13 20:45 UTC
+**Authentication fixes:** 2025-11-13 22:30 UTC
 **Migrated by:** Claude Code
 **Status:** ✅ SUCCESS

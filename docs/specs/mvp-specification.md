@@ -1,9 +1,9 @@
 # MVP Feature Specifications
 ## StartupAI Evidence-Led Strategy Platform
 
-**Document Status:** Active  
-**Last Updated:** October 27, 2025  
-**Version:** 1.5  
+**Document Status:** Active
+**Last Updated:** November 13, 2025
+**Version:** 1.6  
 
 ## MVP Definition
 
@@ -23,20 +23,32 @@
 ## MVP Feature Set
 
 ### 1. Authentication & User Management
-**Status:** ✅ Complete  
+**Status:** ✅ Complete (Updated 2025-11-13)
 **Priority:** P0 (Launch Blocker)
 
 #### Features
-- GitHub OAuth integration
-- Role-based routing (founder/consultant/trial)
-- User profile management
-- Session management across sites
+- ✅ GitHub OAuth integration
+- ✅ Email/password authentication
+- ✅ Role-based routing (founder/consultant/trial/admin)
+- ✅ User profile management with real database integration
+- ✅ Session management across sites
+
+#### Recent Improvements (2025-11-13)
+- ✅ Role-specific dashboard redirects implemented
+  - Consultants → `/consultant-dashboard`
+  - Founders → `/founder-dashboard`
+  - Trial → `/onboarding/founder`
+- ✅ Fixed 404 errors on login (removed hardcoded `/dashboard`)
+- ✅ Unified redirect logic across email/password and OAuth flows
+- ✅ Settings page now loads real user data (no mock data)
+- ✅ Removed "Demo Mode" and "Trial Mode" banners for active accounts
 
 #### Acceptance Criteria
-- [ ] User can sign up with GitHub in <30 seconds
-- [ ] Authentication persists across browser sessions
-- [ ] Role-based dashboard routing works correctly
-- [ ] Cross-site authentication handoff functional
+- [x] User can sign up with GitHub in <30 seconds
+- [x] Authentication persists across browser sessions
+- [x] Role-based dashboard routing works correctly
+- [x] User profile data loads from database
+- [ ] Cross-site authentication handoff functional (not yet implemented)
 
 ### 2. AI-Guided Onboarding
 **Status:** 🟡 In Progress  
@@ -103,20 +115,25 @@
 - [ ] Mobile-responsive viewing
 
 ### 5. Dashboard & Project Management
-**Status:** 🟡 Partial  
+**Status:** 🟡 Partial (Updated 2025-11-13)
 **Priority:** P1 (High)
 
 #### Features
-- Project overview dashboard
-- Analysis history and results
-- Progress tracking
-- Quick actions and shortcuts
+- ✅ Consultant dashboard with client portfolio view
+- ✅ Founder dashboard with project management
+- ✅ Real-time data loading from database
+- ✅ Role-based dashboard access
+- 🟡 Analysis history and results (partial)
+- 🟡 Progress tracking (in development)
+- ✅ Quick actions and shortcuts
 
 #### Acceptance Criteria
-- [ ] Dashboard loads in <2 seconds
-- [ ] Shows recent projects and analyses
-- [ ] Quick access to start new analysis
-- [ ] Mobile-responsive design
+- [x] Dashboard loads in <2 seconds
+- [x] Shows real client/project data (no mock data)
+- [x] Role-based dashboard routing
+- [x] Mobile-responsive design
+- [ ] Quick access to start new analysis (not yet complete)
+- [ ] Analysis history display (not yet complete)
 
 ### 6. Basic Canvas Tools
 **Status:** 🟡 Partial  

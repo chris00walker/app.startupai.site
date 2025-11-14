@@ -1,5 +1,11 @@
 # System Engineer Handoff: Diagnose and Resolve AI Streaming "Forbidden" Errors
 
+**⚠️ DOCUMENT STATUS: ISSUES RESOLVED (2025-11-13)**
+
+Most issues documented in this file have been resolved. See "Resolution Summary" section at the bottom.
+
+---
+
 ## Problem Statement
 
 The production Next.js application deployed on Netlify is experiencing "Forbidden" errors when calling AI streaming endpoints (`/api/chat`, `/api/assistant/chat`, `/api/consultant/chat`). The user discovered that **no functions are visible in Netlify** when running `netlify functions:list`, which may be related to the deployment issue.
@@ -433,3 +439,67 @@ Tests revealed ambiguity about whether Consultants onboard themselves or onboard
 - Product direction unclear
 
 **See:** `CONSULTANT_VS_FOUNDER_CLARIFICATION.md` for full analysis and recommendations
+
+---
+
+## Resolution Summary (2025-11-13)
+
+### Issues Resolved ✅
+
+1. **AI Streaming Forbidden Errors** ✅
+   - **Root Cause:** Netlify AI Gateway injection (`ANTHROPIC_BASE_URL=/.netlify/ai/messages`)
+   - **Fix:** Explicitly set `baseURL` for both OpenAI and Anthropic providers
+   - **Status:** Resolved in commit series ending at investigation notes above
+
+2. **Excessive Tool Calling** ✅
+   - **Root Cause:** `toolChoice: 'required'` forcing tool usage on every response
+   - **Fix:** Changed to `toolChoice: 'auto'` allowing AI to decide when appropriate
+   - **Status:** Resolved, documented in "AI Assistant Bug Fix" section
+
+3. **Function Deployment Confusion** ✅
+   - **Root Cause:** Misunderstanding of `netlify functions:list` (only shows traditional functions)
+   - **Reality:** Next.js routes bundled into `___netlify-server-handler` (correct behavior)
+   - **Status:** Not an issue, documented in investigation notes
+
+4. **Authentication & Dashboard Routing** ✅ (NEW)
+   - **Problems:**
+     - Users landing on `/dashboard` (404) after login
+     - Settings showing mock data ("Alex Thompson")
+     - Dashboard showing "Demo Mode" despite real data available
+     - "Trial Mode" banner showing for active accounts
+   - **Fixes:**
+     - Renamed `/dashboard` → `/consultant-dashboard`
+     - Implemented role-specific redirects (consultants → `/consultant-dashboard`, founders → `/founder-dashboard`)
+     - Updated login logic to use `deriveRole()` and `getRedirectForRole()` helpers
+     - Fixed Settings page to load real user data
+     - Updated `plan_status` to "active" for both accounts
+   - **Status:** Resolved, see `MIGRATION_COMPLETE.md` and `MIGRATION_SUMMARY.md`
+
+### Remaining Issues ⚠️
+
+1. **Row Level Security Disabled**
+   - RLS currently disabled on `user_profiles` table
+   - Needs proper policies before re-enabling
+   - See `MIGRATION_SUMMARY.md` for details
+
+2. **E2E Tests Failing**
+   - Missing `data-testid` attributes on UI components
+   - See `E2E_TEST_IMPLEMENTATION.md` for requirements
+
+3. **Onboarding Flow Issues**
+   - Progress tracking not working properly
+   - CrewAI integration not yet implemented
+   - See `ONBOARDING_FAILURE_ANALYSIS.md` and `ONBOARDING_TO_CREWAI_ARCHITECTURE.md`
+
+### Next Actions
+
+For current work, refer to:
+- `MIGRATION_COMPLETE.md` - Latest migration status
+- `MIGRATION_SUMMARY.md` - Technical architecture details
+- `DOCUMENTATION_INDEX.md` - Complete documentation index
+
+---
+
+**Document Created:** 2025-11-12
+**Issues Resolved:** 2025-11-12 to 2025-11-13
+**Last Updated:** 2025-11-13

@@ -154,3 +154,90 @@ If issues arise:
 - All new client creations will create proper user accounts
 - Consultants manage clients through `user_profiles.consultant_id` relationship
 - This architecture supports the principle: **Clients = Founders + Consultant relationship**
+
+## Authentication & Routing Improvements (2025-11-13)
+
+### Dashboard Routing Architecture
+
+**Problem Solved:**
+Users were landing on `/dashboard` (404) after login, regardless of their role.
+
+**Solution Implemented:**
+1. **Renamed Dashboard Route**
+   - `src/pages/dashboard.tsx` → `src/pages/consultant-dashboard.tsx`
+   - Updated all references in codebase
+
+2. **Role-Based Redirects** (`src/lib/auth/roles.ts`)
+   ```typescript
+   const ROLE_REDIRECTS: Record<UserRole, string> = {
+     admin: '/consultant-dashboard',
+     consultant: '/consultant-dashboard',
+     founder: '/founder-dashboard',
+     trial: '/onboarding/founder'
+   };
+   ```
+
+3. **Login Redirect Logic**
+   - **Email/Password** (`src/components/auth/LoginForm.tsx`):
+     - Fetches user profile after authentication
+     - Calls `deriveRole()` and `getRedirectForRole()` helpers
+     - Redirects to role-specific dashboard
+
+   - **OAuth Callback** (`src/app/auth/callback/route.ts`):
+     - Uses same `deriveRole()` and `getRedirectForRole()` helpers
+     - Consistent redirect logic across auth methods
+     - No hardcoded fallback to `/dashboard`
+
+4. **Sidebar Navigation** (`src/components/layout/AppSidebar.tsx`)
+   - Updated "Dashboard" link: `/dashboard` → `/consultant-dashboard`
+   - Logo click redirects based on user role
+
+### Mock Data Removal
+
+**Changes:**
+1. **Settings Page** (`src/pages/settings.tsx`)
+   - Removed hardcoded "Alex Thompson" mock data
+   - Added `useEffect` to fetch user profile from `user_profiles` table
+   - Real-time updates save to database via `handleSaveProfile()`
+
+2. **Consultant Dashboard** (`src/pages/consultant-dashboard.tsx`)
+   - `PortfolioOverview` now receives real `projects` prop (not mock data)
+   - Metrics calculated from actual project data via `useMemo`
+   - Displays "Live Data" badge when using real data
+
+3. **Client Portfolio** (`src/pages/clients.tsx`)
+   - Integrated `useClients()` hook
+   - Transforms `PortfolioProject` to `Client` format
+   - Shows "Elias Food Imports" with live data from database
+
+### Trial Mode Resolution
+
+**Issue:** Both accounts showed "Trial mode: upgrade to unlock full AI automation"
+
+**Fix:** Created scripts to update `plan_status`:
+- `scripts/fix-consultant-account.mjs` - Updated chris00walker@gmail.com
+- `scripts/fix-founder-account.mjs` - Updated chris00walker@proton.me
+- Both now have `plan_status: 'active'` and `subscription_status: 'active'`
+
+### Row Level Security Status
+
+**Current State:** RLS is **DISABLED** on `user_profiles` table
+
+**Reason:** Initial RLS policies blocked consultant queries for their clients
+
+**Action Required:**
+- Re-enable RLS with proper policies:
+  - Users can view their own profile
+  - Consultants can view profiles where `consultant_id = their_id`
+  - Admins can view all profiles
+
+**SQL to re-enable:**
+```sql
+ALTER TABLE "user_profiles" ENABLE ROW LEVEL SECURITY;
+
+-- Add proper policies here
+```
+
+---
+
+**Last Updated:** 2025-11-13 22:30 UTC

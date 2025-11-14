@@ -103,7 +103,7 @@ After seeding, verify the data:
 2. **Via the application:**
    - Run `pnpm dev`
    - Login with test credentials
-   - Navigate to `/clients` (consultant dashboard)
+   - Navigate to `/consultant-dashboard` (consultant dashboard)
    - Check that all 7 projects appear
 
 ## Troubleshooting
@@ -148,3 +148,17 @@ pnpm dev
 ```
 
 Happy developing! 🚀
+
+---
+
+## Recent Changes (2025-11-13)
+
+### Dashboard Routes Updated
+- Consultant dashboard moved from `/dashboard` to `/consultant-dashboard`
+- Founder dashboard at `/founder-dashboard`
+- Login now redirects to role-specific dashboards
+
+### Row Level Security Status
+- ⚠️ RLS currently **DISABLED** on `user_profiles` table
+- Required for production deployment
+- See `MIGRATION_SUMMARY.md` for re-enabling instructions

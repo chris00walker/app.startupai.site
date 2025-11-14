@@ -1,6 +1,6 @@
 # StartupAI Platform - Documentation Index
 
-**Last Updated**: 2025-11-12
+**Last Updated**: 2025-11-13
 
 This document provides a structured index of all architectural and engineering documentation for the StartupAI platform.
 
@@ -8,21 +8,27 @@ This document provides a structured index of all architectural and engineering d
 
 ## 📂 Quick Navigation
 
+### 🟢 Current & Active
+1. **[frontend/MIGRATION_COMPLETE.md](./frontend/MIGRATION_COMPLETE.md)** - ✅ Client migration + recent auth fixes (2025-11-13)
+2. **[frontend/MIGRATION_SUMMARY.md](./frontend/MIGRATION_SUMMARY.md)** - ✅ Technical migration details + routing architecture
+
 ### 🔴 Critical - Read First
-1. **[ONBOARDING_FAILURE_ANALYSIS.md](./ONBOARDING_FAILURE_ANALYSIS.md)** - Current system failures
-2. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Implementation plan to fix
-3. **[CONSULTANT_VS_FOUNDER_CLARIFICATION.md](./CONSULTANT_VS_FOUNDER_CLARIFICATION.md)** - 🆕 User role ambiguity analysis
+3. **[ONBOARDING_FAILURE_ANALYSIS.md](./ONBOARDING_FAILURE_ANALYSIS.md)** - Current system failures
+4. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Implementation plan to fix
+5. **[CONSULTANT_VS_FOUNDER_CLARIFICATION.md](./CONSULTANT_VS_FOUNDER_CLARIFICATION.md)** - User role ambiguity analysis
 
 ### 🟡 Architecture & Planning
-4. **[ARCHITECTURE_RECOMMENDATIONS.md](./ARCHITECTURE_RECOMMENDATIONS.md)** - Long-term Option B vision
-5. **[SYSTEM_ENGINEER_HANDOFF.md](./SYSTEM_ENGINEER_HANDOFF.md)** - Historical context (Forbidden errors)
+6. **[ARCHITECTURE_RECOMMENDATIONS.md](./ARCHITECTURE_RECOMMENDATIONS.md)** - Long-term Option B vision
+7. **[frontend/SYSTEM_ENGINEER_HANDOFF.md](./frontend/SYSTEM_ENGINEER_HANDOFF.md)** - ⚠️ Historical context (most issues resolved)
 
 ### 🟢 Testing & Quality
-6. **[E2E_TEST_IMPLEMENTATION.md](./E2E_TEST_IMPLEMENTATION.md)** - 🆕 Playwright E2E test infrastructure
-7. **[TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md)** - Testing workflow and procedures
+8. **[E2E_TEST_IMPLEMENTATION.md](./E2E_TEST_IMPLEMENTATION.md)** - Playwright E2E test infrastructure
+9. **[TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md)** - Testing workflow and procedures
 
 ### 🟢 Reference
-8. **[docs/](./docs/)** - Additional documentation
+10. **[docs/specs/auth.md](./docs/specs/auth.md)** - Authentication specification
+11. **[docs/specs/mvp-specification.md](./docs/specs/mvp-specification.md)** - MVP feature specifications
+12. **[docs/](./docs/)** - Additional documentation
    - `docs/features/stage-progression.md` - Onboarding stage system design
    - `docs/engineering/database-schema-updates.md` - Database schema reference
 
@@ -352,9 +358,32 @@ Read: `ARCHITECTURE_RECOMMENDATIONS.md`
 - Major changes should update the date
 - Breaking changes should create new versioned docs
 
+## Recent Changes (2025-11-13)
+
+### Authentication & Routing Fixes
+**Documentation Updated:** `frontend/MIGRATION_COMPLETE.md`, `frontend/MIGRATION_SUMMARY.md`
+
+**Key Changes:**
+- ✅ Role-specific dashboard routing (consultants → `/consultant-dashboard`, founders → `/founder-dashboard`)
+- ✅ Fixed 404 errors on login (removed hardcoded `/dashboard` route)
+- ✅ Email/password and OAuth now use same role-based redirect logic
+- ✅ Settings, dashboard, and client portfolio now display real user data
+- ✅ Removed "Demo Mode" and "Trial Mode" banners for active accounts
+
+**Files Modified:**
+- `src/pages/dashboard.tsx` → `src/pages/consultant-dashboard.tsx`
+- `src/lib/auth/roles.ts` - Updated ROLE_REDIRECTS
+- `src/components/auth/LoginForm.tsx` - Added role-based redirect logic
+- `src/app/auth/callback/route.ts` - Removed hardcoded fallbacks
+- `src/pages/settings.tsx` - Fetch real user profile
+- `src/components/layout/AppSidebar.tsx` - Updated navigation links
+
+**Status:**
+- ⚠️ RLS currently **DISABLED** on `user_profiles` - needs proper policies before re-enabling
+
 ---
 
-**Last Updated**: 2025-11-12
+**Last Updated**: 2025-11-13
 **Maintained By**: Engineering Team
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
