@@ -34,8 +34,8 @@ import {
 import { mockPortfolioProjects, mockPortfolioMetrics } from "@/data/portfolioMockData"
 import { PortfolioProject } from "@/types/portfolio"
 
-function PortfolioOverview() {
-  const highRiskProjects = mockPortfolioProjects.filter(p => p.riskBudget.delta > 0.2)
+function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
+  const highRiskProjects = projects.filter(p => p.riskBudget.delta > 0.2)
   const recentActivity = [
     {
       id: "1",
@@ -177,6 +177,29 @@ function Dashboard() {
   // Use real projects if available, fallback to mock data for demo
   const allProjects = projects.length > 0 ? projects : mockPortfolioProjects
   const usingRealData = projects.length > 0
+
+  // Calculate real metrics from projects
+  const realMetrics = React.useMemo(() => {
+    const activeProjectsByStage = {
+      DESIRABILITY: allProjects.filter(p => p.stage === 'DESIRABILITY').length,
+      FEASIBILITY: allProjects.filter(p => p.stage === 'FEASIBILITY').length,
+      VIABILITY: allProjects.filter(p => p.stage === 'VIABILITY').length,
+      SCALE: allProjects.filter(p => p.stage === 'SCALE').length,
+    };
+
+    // Use mock values for now for metrics we don't have in the data
+    // These can be calculated later when we have the actual evidence data
+    return {
+      activeProjectsByStage,
+      gatePassRate: 0.85, // Default placeholder
+      averageCycleTime: 0, // Not tracked yet
+      evidenceCoverage: allProjects.length > 0 ? allProjects.reduce((sum, p) => sum + (p.evidenceQuality || 0), 0) / allProjects.length / 100 : 0,
+      overrideRate: 0.05 // Default placeholder
+    };
+  }, [allProjects]);
+
+  // Use real metrics if we have real data, otherwise use mock
+  const displayMetrics = usingRealData ? realMetrics : mockPortfolioMetrics
   
   // Apply gate filters
   const displayProjects = React.useMemo(() => {
@@ -300,13 +323,13 @@ function Dashboard() {
 
           {/* Portfolio Metrics */}
           <div data-tour="portfolio-metrics">
-            <PortfolioMetrics metrics={mockPortfolioMetrics} />
+            <PortfolioMetrics metrics={displayMetrics} />
           </div>
 
           {/* Portfolio Overview & Gate Alerts */}
           <div data-tour="portfolio-overview" className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <PortfolioOverview />
+              <PortfolioOverview projects={allProjects} />
             </div>
             <div>
               <GateAlerts 
