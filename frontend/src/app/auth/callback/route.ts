@@ -147,14 +147,14 @@ async function resolveRedirect({
   supabase: ReturnType<typeof createServerClient>;
   userId?: string;
 }) {
-  const defaultPath = '/dashboard';
   const sanitizedNext = sanitizePath(next);
   if (sanitizedNext) {
     return buildRedirectUrl({ request, origin, path: sanitizedNext });
   }
 
   if (!userId) {
-    console.warn('resolveRedirect: Missing user ID, falling back to default path');
+    console.warn('resolveRedirect: Missing user ID, using default role redirect');
+    const defaultPath = getRedirectForRole({ role: 'trial', planStatus: null });
     return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
@@ -164,6 +164,7 @@ async function resolveRedirect({
     user = data.user;
   } catch (error) {
     console.warn('Failed to get user from Supabase:', error);
+    const defaultPath = getRedirectForRole({ role: 'trial', planStatus: null });
     return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
@@ -172,7 +173,8 @@ async function resolveRedirect({
     profile = await getUserProfile(userId);
   } catch (error) {
     console.warn('Failed to get user profile:', error);
-    profile = undefined;
+    const defaultPath = getRedirectForRole({ role: 'trial', planStatus: null });
+    return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
   const role = deriveRole({
@@ -183,6 +185,7 @@ async function resolveRedirect({
   const planStatus = profile?.plan_status ?? profile?.subscription_status ?? undefined;
 
   const resolvedPath = getRedirectForRole({ role, planStatus });
+  console.log(`Redirecting ${role} user to: ${resolvedPath}`);
   return buildRedirectUrl({ request, origin, path: resolvedPath });
 }
 

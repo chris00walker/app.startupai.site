@@ -58,8 +58,8 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
       const result = await signIn(email, password)
 
       if (result.success) {
-        // Redirect to dashboard (role-based routing will happen on server)
-        window.location.href = '/dashboard'
+        // Let the server handle role-based redirect after authentication
+        window.location.href = '/auth/callback?next='
       }
     } catch (error) {
       console.error('Email sign in error:', error)
