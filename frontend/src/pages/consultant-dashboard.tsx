@@ -245,7 +245,7 @@ function Dashboard() {
     return (
       <DashboardLayout
         breadcrumbs={[
-          { title: "Portfolio Dashboard", href: "/dashboard" },
+          { title: "Consultant Dashboard", href: "/consultant-dashboard" },
         ]}
       >
         <div className="flex items-center justify-center h-[400px]">
@@ -284,7 +284,7 @@ function Dashboard() {
 
       <DashboardLayout
         breadcrumbs={[
-          { title: "Portfolio Dashboard", href: "/dashboard" },
+          { title: "Consultant Dashboard", href: "/consultant-dashboard" },
         ]}
       >
         <div data-testid="dashboard" className="space-y-6">

@@ -46,7 +46,7 @@ const consultantNavigation = {
   main: [
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: "/consultant-dashboard",
       icon: LayoutDashboard,
     },
     {
@@ -252,7 +252,7 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
   return (
     <Sidebar collapsible="offcanvas" className="border-r-0" data-testid="user-menu" {...props}>
       <SidebarHeader className="border-b-0">
-        <Link href={showConsultantMenu ? "/dashboard" : "/founder-dashboard"} className="block">
+        <Link href={showConsultantMenu ? "/consultant-dashboard" : "/founder-dashboard"} className="block">
           <div className="flex items-center gap-2 px-2 py-2 hover:bg-accent rounded-lg transition-colors cursor-pointer">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Brain className="h-4 w-4" />
