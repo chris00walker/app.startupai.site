@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,11 +10,11 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Settings, 
-  User, 
-  Bell, 
-  Shield, 
+import {
+  Settings,
+  User,
+  Bell,
+  Shield,
   Palette,
   Database,
   Key,
@@ -26,9 +26,12 @@ import {
   Eye,
   EyeOff,
   Download,
-  Upload
+  Upload,
+  Loader2
 } from "lucide-react"
 import { useDemoMode } from "@/hooks/useDemoMode"
+import { useAuth } from "@/lib/auth/hooks"
+import { createClient } from "@/lib/supabase/client"
 
 interface UserProfile {
   name: string
@@ -58,19 +61,53 @@ interface SecuritySettings {
 
 export default function SettingsPage() {
   const demoMode = useDemoMode()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("profile")
   const [showApiKey, setShowApiKey] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Demo user profile data
+  // User profile data - loaded from Supabase
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: "Alex Thompson",
-    email: "alex.thompson@techstart.com",
-    company: "TechStart Inc.",
-    role: "Strategic Consultant",
+    name: "",
+    email: "",
+    company: "",
+    role: "",
     timezone: "America/New_York",
     language: "English",
-    bio: "Strategic business consultant specializing in AI-powered business model innovation and validation."
+    bio: ""
   })
+
+  // Fetch real user profile from Supabase
+  useEffect(() => {
+    async function fetchUserProfile() {
+      if (!user) {
+        setIsLoading(false)
+        return
+      }
+
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('full_name, email, company, role')
+        .eq('id', user.id)
+        .single()
+
+      if (data) {
+        setUserProfile({
+          name: data.full_name || '',
+          email: data.email || user.email || '',
+          company: data.company || '',
+          role: data.role || '',
+          timezone: "America/New_York",
+          language: "English",
+          bio: ""
+        })
+      }
+      setIsLoading(false)
+    }
+
+    fetchUserProfile()
+  }, [user])
 
   // Demo notification settings
   const [notifications, setNotifications] = useState<NotificationSettings>({
@@ -90,9 +127,27 @@ export default function SettingsPage() {
     lastPasswordChange: "2024-11-15"
   })
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
+    if (!user) return
+
     console.log('Saving profile:', userProfile)
-    // TODO: Implement profile save functionality
+    const supabase = createClient()
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        full_name: userProfile.name,
+        company: userProfile.company,
+        // email and role are read-only, managed by auth
+      })
+      .eq('id', user.id)
+
+    if (error) {
+      console.error('Error saving profile:', error)
+      alert('Error saving profile: ' + error.message)
+    } else {
+      alert('Profile saved successfully!')
+    }
   }
 
   const handleSaveNotifications = () => {
@@ -103,6 +158,23 @@ export default function SettingsPage() {
   const handleSaveSecurity = () => {
     console.log('Saving security settings:', security)
     // TODO: Implement security settings save
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        breadcrumbs={[
+          { title: "Settings", href: "/settings" },
+        ]}
+      >
+        <div className="flex items-center justify-center h-[400px]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="text-muted-foreground">Loading your settings...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
