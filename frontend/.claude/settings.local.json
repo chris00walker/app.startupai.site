@@ -62,7 +62,20 @@
       "Bash(node scripts/check-plan-status.mjs:*)",
       "Bash(node scripts/fix-consultant-account.mjs:*)",
       "Bash(node scripts/test-dashboard-logic.mjs:*)",
-      "Bash(node scripts/debug-dashboard.mjs:*)"
+      "Bash(node scripts/debug-dashboard.mjs:*)",
+      "Bash(lsof:*)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Bash(pwdx:*)",
+      "Bash(npx supabase:*)",
+      "Bash(node scripts/check-production-auth.mjs:*)",
+      "Bash(node scripts/fix-rls-now.mjs:*)",
+      "Bash(for file in canvas.tsx workflows.tsx analytics.tsx)",
+      "Bash(do if [ -f \"src/pages/$file\" ])",
+      "Bash(then echo \"=== $file ===\" grep -n \"Alex\\|mock\\|demo\" \"src/pages/$file\")",
+      "Bash(done)",
+      "Bash(node scripts/fix-founder-account.mjs:*)",
+      "Bash(full AI automation\" banner.\n\nChanges:\n- Created fix-founder-account.mjs to update founder user profile\n- Sets plan_status: ''active'' and subscription_status: ''active''\n- Confirms role is ''founder''\n\nThis matches the fix previously applied to the consultant account,\nensuring both user types have proper active status.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
