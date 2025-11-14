@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Brain, Loader2, Github } from "lucide-react"
 import { signIn, signInWithGitHub } from "@/lib/auth/actions"
+import { getRedirectForRole, deriveRole } from "@/lib/auth/roles"
+import { createClient } from "@/lib/supabase/client"
 
 interface LoginFormProps extends React.ComponentProps<"div"> {
   className?: string
@@ -58,27 +60,26 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
       const result = await signIn(email, password)
 
       if (result.success) {
-        // After successful email/password login, fetch user role and redirect
-        const supabase = (await import('@/lib/supabase/client')).createClient()
+        // Fetch user profile and use existing role redirect logic
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
           const { data: profile } = await supabase
             .from('user_profiles')
-            .select('role, plan_status')
+            .select('role, plan_status, subscription_status')
             .eq('id', user.id)
             .single()
 
-          const role = profile?.role || 'trial'
+          const role = deriveRole({
+            profileRole: profile?.role,
+            appRole: user.app_metadata?.role as string | undefined,
+          })
 
-          // Redirect based on role
-          if (role === 'consultant' || role === 'admin') {
-            window.location.href = '/consultant-dashboard'
-          } else if (role === 'founder') {
-            window.location.href = '/founder-dashboard'
-          } else {
-            window.location.href = '/onboarding/founder'
-          }
+          const planStatus = profile?.plan_status ?? profile?.subscription_status ?? null
+
+          const redirectPath = getRedirectForRole({ role, planStatus })
+          window.location.href = redirectPath
         }
       }
     } catch (error) {
