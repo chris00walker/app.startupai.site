@@ -54,7 +54,14 @@
       "Bash(chmod:*)",
       "Bash(node scripts/migrate-existing-client.mjs:*)",
       "Bash(node scripts/send-password-reset.mjs:*)",
-      "Bash(node scripts/create-auth-user.mjs:*)"
+      "Bash(node scripts/create-auth-user.mjs:*)",
+      "Bash(psql:*)",
+      "Bash(claude mcp call:*)",
+      "Bash(env)",
+      "Bash(node scripts/debug-user.mjs:*)",
+      "Bash(node scripts/check-plan-status.mjs:*)",
+      "Bash(node scripts/fix-consultant-account.mjs:*)",
+      "Bash(node scripts/test-dashboard-logic.mjs:*)"
     ],
     "deny": [],
     "ask": []
