@@ -60,7 +60,14 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  await supabase.auth.getUser();
+  // Handle auth errors gracefully (e.g., expired/invalid refresh tokens)
+  try {
+    await supabase.auth.getUser();
+  } catch (error) {
+    // Log the error for debugging but don't crash
+    // The auth hooks on the client will handle redirecting to login if needed
+    console.error('Auth middleware error:', error);
+  }
 
   return response;
 }
