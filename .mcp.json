@@ -7,11 +7,19 @@
         "-y",
         "@netlify/mcp"
       ],
-      "env": {}
+      "env": {
+        "NETLIFY_AUTH_TOKEN": "nfp_EoBkKMRiN9N1UmoU5iQzU13DdU8RXWhE0e18",
+        "NETLIFY_SITE_ID": "d92f884b-1113-4821-b0a5-54bb8ff8612a"
+      }
     },
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp"
+      "url": "https://mcp.supabase.com/mcp",
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_b3c3c4579d28e374f2f66278f1c3f93d7de2f04f",
+        "SUPABASE_PROJECT_ID": "eqxropalhxjeyvfcoyxg",
+        "SUPABASE_URL": "https://eqxropalhxjeyvfcoyxg.supabase.co"
+      }
     },
     "shadcn": {
       "type": "stdio",

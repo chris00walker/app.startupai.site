@@ -16,6 +16,7 @@ backend/.env
 .envrc.local
 *.env.secrets
 secrets.env
+.mcp.json
 
 # Logs
 *.log
