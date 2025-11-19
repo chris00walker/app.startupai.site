@@ -16,6 +16,8 @@ type PlanOption = {
   price: string
   bestFor: string
   badge?: string
+  disabled?: boolean
+  disabledMessage?: string
 }
 
 type SignupFormProps = React.ComponentProps<"form"> & {
@@ -28,32 +30,37 @@ type SignupFormProps = React.ComponentProps<"form"> & {
 
 export const DEFAULT_PLAN_OPTIONS: PlanOption[] = [
   {
+    id: "trial",
+    name: "Free Trial",
+    description: "Test the core evidence experience",
+    price: "$0",
+    bestFor: "Getting started risk-free"
+  },
+  {
+    id: "beta-lifetime",
+    name: "Beta Lifetime Deal",
+    description: "Unlimited access to all beta features",
+    price: "$497 one-time",
+    bestFor: "Early adopters who want lifetime access",
+    badge: "Limited Time"
+  },
+  {
     id: "founder-platform",
     name: "Founder Platform",
     description: "Continuous validation with AI strategist",
     price: "$199/mo",
-    bestFor: "Founders scaling validated ideas"
-  },
-  {
-    id: "strategy-sprint",
-    name: "Strategy Sprint",
-    description: "One-week evidence-backed strategy",
-    price: "$1,500",
-    bestFor: "Teams needing rapid direction"
+    bestFor: "Founders scaling validated ideas",
+    disabled: true,
+    disabledMessage: "Unlocked After Sprint"
   },
   {
     id: "agency-co-pilot",
     name: "Agency Co-Pilot",
     description: "White-label AI workflows for agencies",
     price: "$499/mo",
-    bestFor: "Consultancies serving multiple clients"
-  },
-  {
-    id: "trial",
-    name: "Free Trial",
-    description: "Test the core evidence experience",
-    price: "$0",
-    bestFor: "Getting started risk-free"
+    bestFor: "Consultancies serving multiple clients",
+    disabled: true,
+    disabledMessage: "Unlocked After Sprint"
   }
 ]
 
@@ -77,10 +84,15 @@ export function SignupForm({
   const [confirmPassword, setConfirmPassword] = useState("")
   const supabase = useMemo(() => createClient(), [])
   const [localPlan, setLocalPlan] = useState(() => {
-    if (selectedPlan && planOptions.some((option) => option.id === selectedPlan)) {
-      return selectedPlan
+    if (selectedPlan) {
+      const option = planOptions.find((opt) => opt.id === selectedPlan)
+      if (option && !option.disabled) {
+        return selectedPlan
+      }
     }
-    return planOptions[0]?.id ?? "trial"
+    // Find first non-disabled plan
+    const firstEnabledPlan = planOptions.find((opt) => !opt.disabled)
+    return firstEnabledPlan?.id ?? "trial"
   })
   const [localRole, setLocalRole] = useState(() => {
     if (selectedRole && ['founder', 'consultant'].includes(selectedRole)) {
@@ -90,8 +102,11 @@ export function SignupForm({
   })
 
   useEffect(() => {
-    if (selectedPlan && planOptions.some((option) => option.id === selectedPlan)) {
-      setLocalPlan(selectedPlan)
+    if (selectedPlan) {
+      const option = planOptions.find((opt) => opt.id === selectedPlan)
+      if (option && !option.disabled) {
+        setLocalPlan(selectedPlan)
+      }
     }
   }, [selectedPlan, planOptions])
 
@@ -105,7 +120,8 @@ export function SignupForm({
   const role = selectedRole ?? localRole
 
   const handlePlanChange = (value: string) => {
-    if (!planOptions.some((option) => option.id === value)) {
+    const selectedOption = planOptions.find((option) => option.id === value)
+    if (!selectedOption || selectedOption.disabled) {
       return
     }
     if (!selectedPlan) {
@@ -213,8 +229,11 @@ export function SignupForm({
                 key={option.id}
                 htmlFor={`plan-${option.id}`}
                 className={cn(
-                  "flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition focus-within:ring-2 focus-within:ring-primary",
-                  plan === option.id ? "border-primary bg-primary/5" : "border-border"
+                  "relative flex items-start gap-3 rounded-lg border p-4 transition",
+                  option.disabled
+                    ? "cursor-not-allowed opacity-60"
+                    : "cursor-pointer focus-within:ring-2 focus-within:ring-primary",
+                  plan === option.id && !option.disabled ? "border-primary bg-primary/5" : "border-border"
                 )}
               >
                 <input
@@ -222,14 +241,20 @@ export function SignupForm({
                   id={`plan-${option.id}`}
                   name="plan"
                   value={option.id}
-                  checked={plan === option.id}
+                  checked={plan === option.id && !option.disabled}
                   onChange={(event) => handlePlanChange(event.target.value)}
-                  className="mt-1 h-4 w-4 border border-primary text-primary focus-visible:outline-none"
+                  disabled={option.disabled}
+                  className="mt-1 h-4 w-4 border border-primary text-primary focus-visible:outline-none disabled:cursor-not-allowed"
                 />
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{option.name}</span>
                     {option.badge && <Badge variant="secondary">{option.badge}</Badge>}
+                    {option.disabled && option.disabledMessage && (
+                      <Badge variant="outline" className="bg-muted text-muted-foreground">
+                        {option.disabledMessage}
+                      </Badge>
+                    )}
                     <span className="text-sm text-muted-foreground">{option.price}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{option.description}</p>
