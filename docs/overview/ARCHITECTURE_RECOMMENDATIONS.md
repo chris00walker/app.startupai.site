@@ -1,113 +1,290 @@
-# Architecture Recommendations: Option B - CrewAI AMP Integration
+# Architecture Analysis & Implementation Roadmap
 
-**Date**: November 12, 2025
-**Status**: Ready for Implementation
-**Prerequisites**: ✅ Option A Complete (Streaming chat working with OpenAI)
+**Date**: November 8, 2025
+**Status**: Implementation In Progress
+**Version**: 3.0 (Merged November 20, 2025)
+**Last Updated**: November 20, 2025
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
-**CRITICAL:** Do NOT implement Option B until (./ONBOARDING_TO_CREWAI_ARCHITECTURE.md) has been fully implemented, tested and is working. Please review these related documents:
+**CRITICAL:** Review these related documents for full context:
 
-1. **[ONBOARDING_FAILURE_ANALYSIS.md](../incidents/ONBOARDING_FAILURE_ANALYSIS.md)** - Root cause analysis of current onboarding workflow failures
+1. **[ONBOARDING_FAILURE_ANALYSIS.md](../incidents/ONBOARDING_FAILURE_ANALYSIS.md)** - Root cause analysis of onboarding workflow failures
    - Why progress shows 0% despite completing conversation
    - Why AI tools (assessQuality, advanceStage, completeOnboarding) aren't being called
-   - Where conversation data is stored (testSessionState)
    - Data flow diagrams and failure cascade analysis
 
-2. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Complete implementation plan to fix broken workflow
-   - **Phase 1**: Fix AI tool-calling (switch gpt-4o-mini → gpt-4o, add toolChoice: 'required')
-   - **Phase 2**: Add CrewAI integration (kickoff handler, status polling, project creation)
-   - **Phase 3**: Fix frontend UX (analysis modal, auto-redirect to project dashboard)
-   - Includes: Brief schema mapping, testing strategy, rollback plan
-   - Timeline: 11 hours (~1.5 days)
+2. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Implementation plan to fix broken workflow
+   - Phase 1: Fix AI tool-calling
+   - Phase 2: Add CrewAI integration
+   - Phase 3: Fix frontend UX
 
 3. **[SYSTEM_ENGINEER_HANDOFF.md](../incidents/SYSTEM_ENGINEER_HANDOFF.md)** - Original investigation into Forbidden errors
-   - Historical context: Netlify AI Gateway issue
-   - Why we removed Anthropic provider
-   - SSE streaming format parsing fix
 
-**Relationship between documents:**
-- `SYSTEM_ENGINEER_HANDOFF.md` → Led to Option A (fix streaming)
-- `ARCHITECTURE_RECOMMENDATIONS.md` (this file) → Original Option B vision (long-term architecture)
-- `../incidents/ONBOARDING_FAILURE_ANALYSIS.md` → Forensic analysis of why current system is broken
-- `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` (in this directory) → **Actionable implementation plan** combining Option A fixes + Option B architecture
-
-**Recommended reading order:**
-1. `../incidents/ONBOARDING_FAILURE_ANALYSIS.md` - Understand what's broken
-2. `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` (in this directory) - See the fix plan
-3. `ARCHITECTURE_RECOMMENDATIONS.md` (this file) - Understand long-term vision
+**Document relationship:**
+- `ONBOARDING_FAILURE_ANALYSIS.md` → Forensic analysis of what's broken
+- `ONBOARDING_TO_CREWAI_ARCHITECTURE.md` → Actionable fix plan
+- `ARCHITECTURE_RECOMMENDATIONS.md` (this file) → Complete status tracking + long-term vision
 
 ---
 
 ## Executive Summary
 
-This document outlines the recommended architecture for **Option B**: migrating from duplicated onboarding logic to a clean separation where the frontend handles conversational UX while CrewAI AMP handles all strategic analysis through a Supervisor Agent pattern.
+### Current Assessment (November 20, 2025)
 
-**Key Benefits**:
-- ✅ Single source of truth for AI logic (CrewAI AMP)
-- ✅ Clean separation: Frontend = UX, CrewAI = Intelligence
-- ✅ Uses official CrewAI Enterprise MCP server
-- ✅ Eliminates logic duplication
-- ✅ Scalable for multiple crew workflows
+The 3-repository architecture is **working well**. Phases 1-3A (user flow, role-based routing, onboarding conversational UI) are **complete**.
 
----
+**However**, the core value proposition is **only ~40% complete**. The critical gap is the **Dashboard AI Assistant** - the conversational interface that bridges users and CrewAI crews for continuous strategic support.
 
-## Current State (Option A - Complete)
+### What's Working
 
-### What's Working Now
-```
-Frontend: Vercel AI SDK streaming chat
-    ↓ Direct OpenAI API calls
-Netlify Function: /api/chat
-    ↓ OpenAI gpt-4.1-nano
-Streaming Response → Rendered correctly ✅
+- Onboarding conversational AI (Alex for Founders, Maya for Consultants) - excellent UX
+- Role-based routing end-to-end (Marketing → Signup → Onboarding → Dashboard)
+- Founder CrewAI integration at onboarding completion
+- CrewAI AMP client library and infrastructure
+- Database schema for storing analysis results
+- Session persistence for both roles
 
-Separate System:
-CrewAI AMP Deployment
-    ↓ 6-agent sequential workflow
-    Agent 1: "Onboarding Agent" ← DUPLICATE LOGIC
-    Agents 2-6: Analysis agents
-```
+### What's Missing (Critical)
 
-### Problems with Current State
-1. **Logic Duplication**: Onboarding logic exists in both frontend chat AND CrewAI "Onboarding Agent"
-2. **Disconnected Systems**: Chat collects data, but doesn't trigger analysis automatically
-3. **Manual Handoff**: No automated flow from chat → crew execution
-4. **Misnamed Agent**: "Onboarding Agent" doesn't actually onboard users - it processes already-collected data
+1. **Dashboard AI Assistant** for both Founders and Consultants
+2. **Consultant CrewAI workflow integration** (0% implemented)
+3. **Notification system** for CrewAI completion
+4. **Follow-up workflow dispatch** capability
+5. **Bi-directional AI ↔ CrewAI conversation loop**
+
+**This is not a routing problem - it's a feature completeness problem.** The vision of "AI crews supporting every user" is partially realized for founders and not at all for consultants.
 
 ---
 
-## Target State (Option B - Recommended)
+## Current State Analysis
 
-### Clean Architecture
+### Architecture Overview
+
+```yaml
+architecture:
+  marketing_site:
+    repo: 'startupai.site'
+    tech: 'Next.js 15 static export'
+    purpose: 'Promise - sell the value proposition'
+    status: '✅ Working well'
+
+  product_app:
+    repo: 'app.startupai.site'
+    tech: 'Next.js with Vercel AI SDK + CrewAI integration'
+    purpose: 'Product - deliver the value'
+    auth: 'Supabase (working)'
+    dashboards:
+      - 'Founder dashboard exists'
+      - 'Consultant dashboard exists'
+      - 'Role-based navigation implemented'
+    status: '✅ Core features working'
+
+  crewai_service:
+    repo: 'startupai-crew'
+    deployment: 'CrewAI AMP Platform'
+    api: 'https://startupai-[uuid].crewai.com'
+    integration: '✅ Called from app via CrewAIAMPClient'
+    workflow: '6-agent strategic analysis'
+    status: '✅ Deployed and functioning'
+```
+
+### Key Achievements
+
+1. **Onboarding conversational AI is excellent**: Both Alex (Founder) and Maya (Consultant) have:
+   - Conversational AI interface with 7-stage guided onboarding
+   - Session resumption with conversation history persistence
+   - AI tool calling for intelligent stage progression
+   - Quality-based progress tracking with coverage metrics
+   - Real-time streaming responses using Vercel AI SDK
+   - Responsive and accessible UI
+
+2. **Role-based routing working end-to-end**:
+   - Marketing site → Pricing (role-filtered) → Signup (role-captured) → Auth → Onboarding (role-specific) → Dashboard (role-specific)
+
+3. **Database architecture solid**:
+   - consultant_profiles table with practice information
+   - consultant_onboarding_sessions table with conversation history
+   - onboarding_sessions table with session resumption for founders
+   - Projects, reports, evidence, entrepreneur_briefs tables for founder analysis results
+
+4. **Founder CrewAI integration partially working**:
+   - CrewAI AMP client library functional
+   - CrewAI triggered automatically at onboarding completion
+   - Manual `/api/analyze` endpoint for strategic analysis
+   - Results properly saved to Supabase
+
+---
+
+## Critical Architectural Gap
+
+### The Value Proposition is NOT Fully Realized
+
+The core vision is that "the entire system is supported by a crew of AIs" - but this is only partially true:
+
+**Intended Architecture:**
+
+```
+Customer (Founder/Consultant)
+    ↕ conversational dialogue
+AI Assistant (Onboarding & Dashboard)
+    ↕ API calls with context/briefs
+CrewAI Multi-Agent Teams (on AMP Platform)
+    ↓ async execution, saves results
+Supabase Database
+    ↑ alerts customer via AI Assistant
+AI Assistant discusses findings, gathers follow-up questions
+    ↓ dispatches new CrewAI workflows
+[CONTINUOUS LOOP]
+```
+
+**Current Implementation:**
+
+```
+✅ Customer → AI Assistant (Onboarding only)
+✅ (Founders only) AI Assistant → CrewAI (one-time at completion)
+✅ CrewAI → Supabase
+❌ [DEAD END - No dashboard AI Assistant]
+❌ No notification system
+❌ No follow-up workflow dispatch
+❌ No consultant CrewAI integration at all
+```
+
+**The Missing Piece**: The AI Assistant exists only during onboarding. After onboarding, there's no conversational AI interface in the dashboards to:
+
+- Alert users when CrewAI analysis completes
+- Discuss findings with users
+- Gather follow-up questions/context
+- Dispatch new strategic analysis tasks to CrewAI
+- Create the continuous value delivery loop
+
+---
+
+## Implementation Status
+
+### ✅ Phase 1: App Routing Fixes - **100% COMPLETE**
+
+- ✅ Deleted confusing landing page (commit 4461490)
+- ✅ Updated auth callback with role routing (commit 369a71e)
+- ✅ Updated signup to capture role parameter (commit 369a71e)
+- ✅ Created separate onboarding routes for founder and consultant (commit 84251f0)
+- ✅ Fixed post-onboarding redirects to role-specific dashboards (commit 663a265)
+- ✅ Fixed logout flow to redirect to marketing site (commit 07101c8)
+- ✅ Fixed email login redirect behavior (commit 62a18a8)
+
+### ✅ Phase 2: Marketing Site Updates - **100% COMPLETE**
+
+- ✅ Homepage redesign with two-path conversion
+- ✅ Pricing page role-based filtering implemented (commit fe1b7b7)
+- ✅ Free trial copy made inclusive of all roles (commit 22b1b95)
+
+### ✅ Phase 3A: Onboarding Conversational UI - **100% COMPLETE**
+
+- ✅ Consultant profile database tables created (commits ea64d14, 2e04b1c)
+- ✅ Consultant onboarding wizard V2 with conversational UI (commit fe1ce88)
+- ✅ Consultant API routes (start, chat, status, complete) (commit fe1ce88)
+- ✅ Full session resumption with database persistence (commit 2e04b1c)
+- ✅ AI tool calling (assessQuality, advanceStage, completeOnboarding) (commit 975f5d8)
+- ✅ Quality-based progress tracking (commit 975f5d8)
+- ✅ Feature parity with Founder onboarding conversational UI (commit 975f5d8)
+- ✅ Founder session resumption added (commit 975f5d8)
+- ✅ Bug fixes and responsive UI (commits a83505d, e8889f5, 47c1276, 4f4bfc8, 517b3d6)
+
+### 🚧 Phase 3B: CrewAI Multi-Agent Integration - **~40% COMPLETE**
+
+**Founder Implementation (~60% complete):**
+
+- ✅ Onboarding AI Assistant (Alex) gathering context
+- ✅ CrewAI AMP client library (`lib/crewai/amp-client.ts`)
+- ✅ CrewAI triggered at onboarding completion (`/api/onboarding/complete`)
+- ✅ `/api/analyze` endpoint for manual CrewAI workflow triggers
+- ✅ Results saved to Supabase (projects, reports, evidence, entrepreneur_briefs)
+- ❌ **MISSING**: Dashboard AI Assistant to discuss CrewAI findings
+- ❌ **MISSING**: Follow-up CrewAI task dispatch from AI Assistant
+- ❌ **MISSING**: Notification system for CrewAI completion
+- ❌ **MISSING**: Bi-directional AI ↔ CrewAI conversation loop
+
+**Consultant Implementation (~20% complete):**
+
+- ✅ Onboarding AI Assistant (Maya) gathering practice context
+- ✅ consultant_profiles and consultant_onboarding_sessions tables
+- ❌ **MISSING**: CrewAI integration (onboarding completion does NOT trigger workflow)
+- ❌ **MISSING**: Per-client AI Assistant interface
+- ❌ **MISSING**: Per-client CrewAI workflow system
+- ❌ **MISSING**: Dashboard AI Assistant for consultants
+- ❌ **MISSING**: Client-specific project/report management
+
+### ❌ Phase 4: Conversion Tracking & Notifications - **NOT STARTED**
+
+- ⏸️ Notification bell component
+- ⏸️ Conversion offer system for Strategy Sprint → Platform upgrades
+- ⏸️ User notifications database table
+
+---
+
+## Required User Flows
+
+### Founder Flow
+
+```mermaid
+graph TD
+    A[Marketing Homepage] -->|Click: For Founders| B[Pricing Page role=founder]
+    B -->|Select Plan| C[Signup role=founder&plan=X]
+    C -->|Supabase Auth| D[Auth Callback]
+    D -->|Store role=founder| E[/onboarding/founder]
+    E -->|Complete| F[/founder-dashboard]
+
+    G[Strategy Sprint User] -->|After completion| H[Bell Icon Notification]
+    H -->|Click| I[Convert to Platform offer]
+    I -->|Accept| J[Update to Platform + free month]
+```
+
+### Consultant Flow
+
+```mermaid
+graph TD
+    A[Marketing Homepage] -->|Click: For Consultants| B[Pricing Page role=consultant]
+    B -->|Select Plan| C[Signup role=consultant&plan=X]
+    C -->|Supabase Auth| D[Auth Callback]
+    D -->|Store role=consultant| E[/onboarding/consultant]
+    E -->|CrewAI gathers info| F[Consultant Profile Created]
+    F -->|Complete| G[/dashboard consultant view]
+```
+
+### Trial User Flow
+
+```mermaid
+graph TD
+    A[Either Homepage Path] -->|Click: Free Trial| B[Pricing Page role=X]
+    B -->|Free Trial Button| C[Signup role=X&plan=trial]
+    C -->|Supabase Auth| D[Auth Callback]
+    D -->|Route by role| E{Role?}
+    E -->|Founder| F[/onboarding/founder]
+    E -->|Consultant| G[/onboarding/consultant]
+    F -->|Complete| H[/founder-dashboard trial mode]
+    G -->|Complete| I[/dashboard consultant trial mode]
+```
+
+---
+
+## Target Architecture (Option B - Clean Separation)
+
+### Architecture Diagram
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Frontend (Next.js on Netlify)                               │
 │                                                             │
 │  Vercel AI SDK Streaming Chat                              │
 │  - Conversational onboarding UX                            │
+│  - Dashboard AI Assistant (NEW)                            │
 │  - Collects: entrepreneur_input (JSON)                     │
 │  - Real-time streaming responses                           │
-│  - 7 stages of questions                                   │
 │                                                             │
 │  When onboarding complete:                                 │
-│  └─> Calls CrewAI Enterprise MCP Server                    │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           │ MCP Protocol
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│ CrewAI Enterprise MCP Server (Local)                        │
-│                                                             │
-│  Tools:                                                     │
-│  - kickoff_crew(inputs: {entrepreneur_input})              │
-│  - get_crew_status(crew_id)                                │
-│                                                             │
-│  Configuration:                                             │
-│  - URL: https://startupai-[uuid].crewai.com                │
-│  - Token: f4cc39d92520                                     │
+│  └─> Calls CrewAI Enterprise API                          │
 └─────────────────────────────────────────────────────────────┘
                            │
                            │ HTTPS REST API
@@ -117,26 +294,16 @@ CrewAI AMP Deployment
 │                                                             │
 │  StartupAI Crew - 6 Agent Sequential Workflow              │
 │                                                             │
-│  Agent 1: Supervisor Agent ← RENAMED & REFACTORED          │
-│  ├─ Receives entrepreneur_input from MCP                   │
+│  Agent 1: Supervisor Agent                                 │
+│  ├─ Receives entrepreneur_input                            │
 │  ├─ Validates data completeness                            │
-│  ├─ Orchestrates workflow                                  │
 │  └─ Distributes context to analysis agents                 │
 │                                                             │
 │  Agent 2: Customer Researcher                              │
-│  └─ Jobs, Pains, Gains analysis                            │
-│                                                             │
 │  Agent 3: Competitor Analyst                               │
-│  └─ Market positioning & differentiation                   │
-│                                                             │
 │  Agent 4: Value Designer                                   │
-│  └─ Value Proposition Canvas creation                      │
-│                                                             │
 │  Agent 5: Validation Agent                                 │
-│  └─ 3-tier validation roadmap                              │
-│                                                             │
 │  Agent 6: QA Agent                                         │
-│  └─ Quality assurance & compliance check                   │
 │                                                             │
 │  Output: Complete strategic analysis package               │
 └─────────────────────────────────────────────────────────────┘
@@ -144,207 +311,177 @@ CrewAI AMP Deployment
 
 ---
 
-## Implementation Phases
+## Phase 3B: Dashboard AI Assistant (CRITICAL)
 
-### Phase 1: Refactor CrewAI Crew (No Frontend Changes)
-
-**Objective**: Rename and refactor the first agent to be a true Supervisor
-
-#### 1.1 Update Agent Configuration
-
-**File**: `~/projects/startupai-crew/src/startupai/config/agents.yaml`
+### 3B.1 Dashboard AI Assistant Component
 
 ```yaml
-supervisor_agent:  # Renamed from onboarding_agent
-  role: Workflow Supervisor & Context Distributor
-  goal: >
-    Receive structured entrepreneur input from the frontend, validate completeness,
-    and orchestrate the analysis workflow by distributing relevant context to
-    specialized agents
-  backstory: >
-    You are an experienced strategic consultant who excels at coordinating teams
-    of specialists. Your role is to ensure all agents have the context they need
-    and that the workflow produces comprehensive, high-quality analysis. You don't
-    conduct interviews - you receive pre-collected data and ensure it flows
-    through the system effectively.
-  verbose: true
-  allow_delegation: true
-  max_iter: 5  # Reduced - supervisor doesn't need many iterations
+task: 'Create persistent AI Assistant for dashboards'
+priority: 'CRITICAL - Core value proposition'
+location: 'app.startupai.site/frontend/src/components/assistant/'
+status: '❌ NOT STARTED'
+
+component_architecture:
+  shared_component:
+    name: 'DashboardAIAssistant'
+    file: 'components/assistant/DashboardAIAssistant.tsx'
+    purpose: 'Conversational AI interface for ongoing strategic support'
+    features:
+      - 'Collapsible panel or modal interface'
+      - "Context-aware of user's projects/clients"
+      - 'Session persistence across page navigation'
+      - 'Real-time streaming responses (Vercel AI SDK)'
+      - 'Can trigger CrewAI workflows via tool calling'
+      - 'Displays CrewAI analysis results when available'
+      - 'Notification badge for new reports'
+
+  founder_integration:
+    dashboard: '/founder-dashboard'
+    context_awareness:
+      - 'Current project status'
+      - 'Recent CrewAI analysis reports'
+      - 'Entrepreneur brief data'
+      - 'Evidence and insights collected'
+    capabilities:
+      - 'Discuss strategic analysis findings'
+      - 'Answer questions about reports'
+      - 'Gather follow-up context for deeper analysis'
+      - 'Dispatch new CrewAI workflows via /api/analyze'
+
+  consultant_integration:
+    dashboard: '/dashboard (consultant view)'
+    context_awareness:
+      - 'Consultant practice profile'
+      - 'Active clients list'
+      - 'Per-client analysis reports'
+      - 'Client project status'
+    capabilities:
+      - 'Discuss client-specific findings'
+      - 'Help consultants prepare client reports'
+      - 'Dispatch CrewAI analysis for each client'
+      - 'Generate client-facing deliverables'
+
+implementation:
+  new_files:
+    - 'frontend/src/components/assistant/DashboardAIAssistant.tsx'
+    - 'frontend/src/components/assistant/AssistantPanel.tsx'
+    - 'frontend/src/components/assistant/ConversationThread.tsx'
+    - 'frontend/src/components/assistant/AssistantTrigger.tsx'
+    - 'frontend/src/app/api/assistant/chat/route.ts'
+
+  api_endpoint:
+    path: '/api/assistant/chat'
+    features:
+      - 'Stream responses using Vercel AI SDK'
+      - 'Tool calling for CrewAI dispatch'
+      - 'Context injection (project, reports, briefs)'
+      - 'Session management per user/project'
+
+  tools_for_ai:
+    triggerAnalysis:
+      description: 'Dispatch new CrewAI strategic analysis'
+      inputs: ['strategic_question', 'project_id', 'additional_context']
+      implementation: 'Calls /api/analyze endpoint'
+
+    getReportSummary:
+      description: 'Retrieve and summarize a specific report'
+      inputs: ['report_id', 'project_id']
+      implementation: 'Queries reports table'
+
+    getProjectStatus:
+      description: 'Get current project status and recent activity'
+      inputs: ['project_id']
+      implementation: 'Queries projects, evidence, reports tables'
+
+effort: '3-5 days'
+risk: 'Medium - reusing onboarding patterns but new context'
 ```
 
-**Changes**:
-- ❌ Remove interview/questioning language
-- ✅ Add orchestration & coordination focus
-- ✅ Expect structured JSON input, not conversation
-- ✅ Reduce max_iter from 10 to 5 (less reasoning needed)
-
-#### 1.2 Update Task Configuration
-
-**File**: `~/projects/startupai-crew/src/startupai/config/tasks.yaml`
+### 3B.2 Consultant CrewAI Workflow Integration
 
 ```yaml
-supervision_task:  # Renamed from onboarding_task
-  description: |
-    Receive and validate the entrepreneur_input data structure from the frontend.
+task: 'Integrate CrewAI workflows for consultant practice analysis'
+priority: 'CRITICAL - Consultant value proposition missing'
+repo: 'startupai-crew'
+status: '❌ NOT STARTED (0% complete)'
 
-    Input format (JSON):
-    {
-      "business_idea": "Description of the startup concept",
-      "target_customers": "Customer segment details",
-      "problem": "Core problem being solved",
-      "solution": "Proposed solution approach",
-      "competitors": "Known competitors (if any)",
-      "resources": "Available budget, timeline, assets",
-      "goals": "Validation goals and success metrics"
-    }
+consultant_onboarding_workflow:
+  trigger: 'Consultant completes onboarding with Maya'
+  location: '/api/consultant/onboarding/complete'
+  implementation:
+    - 'Call CrewAI AMP client with consultant practice context'
+    - 'Inputs: practice_size, industries, services, pain_points, clients'
+    - 'Outputs: practice analysis, workspace setup, client acquisition strategy'
+    - 'Save to consultant_profiles and consultant_analysis_reports table'
 
-    Your job:
-    1. Validate all required fields are present
-    2. Extract key insights for downstream agents
-    3. Create a structured brief for the analysis team
-    4. Flag any critical missing information
+  crewai_workflow:
+    repo: 'startupai-crew'
+    new_crew: 'consultant_practice_crew'
+    agents:
+      - 'Practice Analyst Agent'
+      - 'Client Acquisition Strategist'
+      - 'Workflow Optimization Agent'
 
-    DO NOT conduct interviews or ask questions - the data is already collected.
+per_client_workflow:
+  trigger: 'Consultant requests analysis for a client via Dashboard AI Assistant'
+  endpoint: '/api/consultant/analyze-client'
 
-  expected_output: |
-    A validated Entrepreneur Brief JSON containing:
-    - business_concept: Refined business idea statement
-    - target_segment: Customer segment definition
-    - core_problem: Problem statement
-    - solution_vision: Solution approach
-    - competitive_context: Competitor landscape (if known)
-    - resource_constraints: Budget, timeline, available assets
-    - validation_goals: What success looks like
-    - completeness_score: 0-100 rating of data completeness
-    - flagged_gaps: List of any critical missing information
-
-  agent: supervisor_agent
+effort: '5-7 days'
 ```
 
-**Changes**:
-- ❌ Remove conversational prompts
-- ✅ Expect structured JSON input
-- ✅ Focus on validation & orchestration
-- ✅ Clear output contract for downstream agents
+### 3B.3 Notification System for CrewAI Completion
 
-#### 1.3 Update Python Crew Implementation
+```yaml
+task: "Alert users when CrewAI analysis completes"
+priority: "HIGH - Completes the feedback loop"
+status: "❌ NOT STARTED"
 
-**File**: `~/projects/startupai-crew/src/startupai/crew.py`
+notification_types:
+  crewai_analysis_complete:
+    trigger: "CrewAI workflow finishes, results saved"
+    recipients: "User who requested analysis"
+    delivery:
+      - "In-app notification badge on AI Assistant icon"
+      - "Dashboard banner/toast"
+      - "Optional email notification"
+    message: "Your strategic analysis is ready! Click to discuss findings with your AI Assistant."
 
-```python
-@agent
-def supervisor_agent(self) -> Agent:
-    """Supervisor Agent - Workflow orchestration and context distribution."""
-    return Agent(
-        config=self.agents_config['supervisor_agent'],
-        verbose=True,
-    )
+implementation:
+  database:
+    table: "user_notifications"
+    columns:
+      - id: "UUID PRIMARY KEY"
+      - user_id: "UUID REFERENCES auth.users(id)"
+      - type: "TEXT (analysis_complete, analysis_failed, system)"
+      - title: "TEXT"
+      - message: "TEXT"
+      - metadata: "JSONB (project_id, report_id, analysis_id)"
+      - read: "BOOLEAN DEFAULT false"
+      - action_url: "TEXT"
+      - created_at: "TIMESTAMPTZ"
 
-@task
-def supervision_task(self) -> Task:
-    """Task for validating input and orchestrating workflow."""
-    return Task(
-        config=self.tasks_config['supervision_task'],
-        agent=self.supervisor_agent(),
-    )
-```
+  api_endpoints:
+    - "/api/notifications/list"
+    - "/api/notifications/mark-read"
+    - "/api/notifications/create"
 
-**Changes**:
-- Rename method from `onboarding_agent()` to `supervisor_agent()`
-- Rename method from `onboarding_task()` to `supervision_task()`
-- Update docstrings
+  ui_components:
+    - "NotificationBell component in dashboard header"
+    - "NotificationDropdown with list of recent notifications"
+    - "Integration with DashboardAIAssistant"
 
-#### 1.4 Update Crew Assembly
-
-**File**: `~/projects/startupai-crew/src/startupai/crew.py`
-
-```python
-@crew
-def crew(self) -> Crew:
-    """
-    Creates the StartupAI Crew with sequential process.
-
-    Workflow:
-    1. Supervisor validates entrepreneur_input
-    2. Customer Researcher analyzes Jobs/Pains/Gains
-    3. Competitor Analyst maps competitive landscape
-    4. Value Designer creates Value Proposition Canvas
-    5. Validation Agent designs 3-tier roadmap
-    6. QA Agent performs quality checks
-    """
-    return Crew(
-        agents=self.agents,
-        tasks=self.tasks,
-        process=Process.sequential,
-        verbose=True,
-    )
-```
-
-#### 1.5 Deploy to CrewAI AMP
-
-```bash
-cd ~/projects/startupai-crew
-
-# Test locally first
-crewai run
-
-# If successful, deploy
-crewai deploy push --uuid b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b
-
-# Monitor deployment
-crewai deploy status --uuid b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b
-crewai deploy logs --uuid b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b
-```
-
-**Verification**:
-```bash
-# Test with sample input
-curl -X POST https://startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com/kickoff \
-  -H "Authorization: Bearer f4cc39d92520" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "inputs": {
-      "entrepreneur_input": {
-        "business_idea": "B2B SaaS for small manufacturing maintenance tracking",
-        "target_customers": "Facilities managers at 50-200 employee companies",
-        "problem": "Using spreadsheets, experiencing unexpected equipment failures",
-        "solution": "Cloud-based maintenance tracking platform",
-        "competitors": "Not sure yet",
-        "resources": "6 months runway, $10k budget",
-        "goals": "Validate problem exists before building MVP"
-      }
-    }
-  }'
+effort: "2-3 days"
 ```
 
 ---
 
-### Phase 2: Frontend Integration with MCP
+## Technical Implementation Details
 
-**Objective**: Wire up frontend to call CrewAI crew via MCP when onboarding completes
+### CrewAI Integration Service
 
-#### 2.1 Environment Configuration
-
-**File**: `~/projects/app.startupai.site/frontend/.env.local`
-
-Already configured:
-```bash
-MCP_CREWAI_ENTERPRISE_SERVER_URL=https://startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com
-MCP_CREWAI_ENTERPRISE_BEARER_TOKEN=f4cc39d92520
-```
-
-#### 2.2 Create CrewAI Integration Service
-
-**File**: `~/projects/app.startupai.site/frontend/src/lib/crewai/client.ts` (NEW)
+**File**: `frontend/src/lib/crewai/client.ts`
 
 ```typescript
-/**
- * CrewAI Enterprise Integration Client
- *
- * Provides typed interface to CrewAI AMP via direct API calls.
- * Note: MCP server is for Claude Code usage, not frontend runtime.
- */
-
 export interface EntrepreneurInput {
   business_idea: string;
   target_customers: string;
@@ -364,21 +501,8 @@ export interface CrewStatus {
   status: string;
   result: any | null;
   result_json: any | null;
-  last_step: any | null;
-  last_executed_task: any | null;
-  source: string;
 }
 
-const CREWAI_BASE_URL = process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL;
-const CREWAI_TOKEN = process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN;
-
-if (!CREWAI_BASE_URL || !CREWAI_TOKEN) {
-  throw new Error('CrewAI configuration missing. Check MCP env vars.');
-}
-
-/**
- * Kick off the StartupAI strategic analysis crew
- */
 export async function kickoffCrewAnalysis(
   entrepreneurInput: EntrepreneurInput
 ): Promise<KickoffResponse> {
@@ -394,216 +518,34 @@ export async function kickoffCrewAnalysis(
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`CrewAI kickoff failed: ${response.status} - ${error}`);
+    throw new Error(`CrewAI kickoff failed: ${response.status}`);
   }
 
   return response.json();
 }
 
-/**
- * Get the status and results of a crew execution
- */
 export async function getCrewStatus(kickoffId: string): Promise<CrewStatus> {
   const response = await fetch(`${CREWAI_BASE_URL}/status/${kickoffId}`, {
-    method: 'GET',
     headers: {
       'Authorization': `Bearer ${CREWAI_TOKEN}`,
-      'Content-Type': 'application/json',
     },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`CrewAI status check failed: ${response.status} - ${error}`);
-  }
-
   return response.json();
 }
 
-/**
- * Poll for crew completion with exponential backoff
- */
 export async function waitForCrewCompletion(
   kickoffId: string,
-  options: {
-    maxAttempts?: number;
-    initialDelay?: number;
-    maxDelay?: number;
-    onProgress?: (status: CrewStatus) => void;
-  } = {}
+  options: { maxAttempts?: number; onProgress?: (status: CrewStatus) => void }
 ): Promise<CrewStatus> {
-  const {
-    maxAttempts = 60, // ~5 minutes with exponential backoff
-    initialDelay = 2000,
-    maxDelay = 30000,
-    onProgress,
-  } = options;
-
-  let delay = initialDelay;
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const status = await getCrewStatus(kickoffId);
-
-    if (onProgress) {
-      onProgress(status);
-    }
-
-    if (status.state === 'COMPLETED') {
-      return status;
-    }
-
-    if (status.state === 'FAILED') {
-      throw new Error(`Crew execution failed: ${status.status}`);
-    }
-
-    // Exponential backoff with jitter
-    const jitter = Math.random() * 1000;
-    await new Promise(resolve => setTimeout(resolve, delay + jitter));
-    delay = Math.min(delay * 1.5, maxDelay);
-  }
-
-  throw new Error(`Crew execution timeout after ${maxAttempts} attempts`);
+  // Poll with exponential backoff
+  // See full implementation in codebase
 }
 ```
 
-#### 2.3 Update Onboarding Completion Handler
-
-**File**: `~/projects/app.startupai.site/frontend/src/components/onboarding/OnboardingWizardV2.tsx`
-
-Add after imports:
-```typescript
-import { kickoffCrewAnalysis, waitForCrewCompletion, type EntrepreneurInput } from '@/lib/crewai/client';
-```
-
-Add new state:
-```typescript
-const [crewKickoffId, setCrewKickoffId] = useState<string | null>(null);
-const [crewStatus, setCrewStatus] = useState<'idle' | 'running' | 'completed' | 'failed'>('idle');
-```
-
-Add crew kickoff handler:
-```typescript
-const handleOnboardingComplete = useCallback(async () => {
-  try {
-    // Extract entrepreneur input from conversation
-    const entrepreneurInput: EntrepreneurInput = {
-      business_idea: extractFromMessages('business idea'),
-      target_customers: extractFromMessages('target customers'),
-      problem: extractFromMessages('problem'),
-      solution: extractFromMessages('solution'),
-      competitors: extractFromMessages('competitors') || 'Not specified',
-      resources: extractFromMessages('resources') || 'To be determined',
-      goals: extractFromMessages('goals') || 'Validate core assumptions',
-    };
-
-    // Kick off CrewAI analysis
-    setCrewStatus('running');
-    const { kickoff_id } = await kickoffCrewAnalysis(entrepreneurInput);
-    setCrewKickoffId(kickoff_id);
-
-    toast.success('Strategic analysis started!', {
-      description: 'Our AI team is analyzing your business concept...',
-    });
-
-    // Poll for completion
-    const result = await waitForCrewCompletion(kickoff_id, {
-      onProgress: (status) => {
-        console.log('[Crew Progress]', status.last_executed_task?.name);
-      },
-    });
-
-    setCrewStatus('completed');
-
-    // Save results to database
-    await saveAnalysisResults(result);
-
-    // Redirect to dashboard with results
-    router.push(`/dashboard?analysis=${kickoff_id}`);
-
-  } catch (error) {
-    console.error('[Crew Kickoff Error]', error);
-    setCrewStatus('failed');
-    toast.error('Analysis failed', {
-      description: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-}, [messages, router]);
-
-// Helper to extract data from conversation
-function extractFromMessages(topic: string): string {
-  // Simple extraction - can be enhanced with AI summarization
-  const relevant = messages
-    .filter(m => m.role === 'user')
-    .map(m => m.content)
-    .join(' ');
-  return relevant;
-}
-```
-
-Add completion trigger when stage 7 finishes:
-```typescript
-useEffect(() => {
-  if (session?.currentStage === 7 && session?.overallProgress >= 95) {
-    handleOnboardingComplete();
-  }
-}, [session, handleOnboardingComplete]);
-```
-
-#### 2.4 Create Analysis Results API
-
-**File**: `~/projects/app.startupai.site/frontend/src/app/api/analysis/save/route.ts` (NEW)
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-
-export async function POST(req: NextRequest) {
-  try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await req.json();
-    const { kickoff_id, result, result_json } = body;
-
-    // Save to analysis_results table
-    const { error: dbError } = await supabase
-      .from('analysis_results')
-      .insert({
-        user_id: user.id,
-        kickoff_id,
-        result,
-        result_json,
-        created_at: new Date().toISOString(),
-      });
-
-    if (dbError) {
-      console.error('[Analysis Save Error]', dbError);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-
-  } catch (error) {
-    console.error('[Analysis Save Error]', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-#### 2.5 Database Migration
-
-**File**: `~/projects/app.startupai.site/frontend/src/db/migrations/add_analysis_results.sql` (NEW)
+### Database Migration for Analysis Results
 
 ```sql
--- Analysis Results Table
 CREATE TABLE IF NOT EXISTS analysis_results (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -614,141 +556,16 @@ CREATE TABLE IF NOT EXISTS analysis_results (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Indexes
 CREATE INDEX idx_analysis_results_user_id ON analysis_results(user_id);
 CREATE INDEX idx_analysis_results_kickoff_id ON analysis_results(kickoff_id);
-CREATE INDEX idx_analysis_results_created_at ON analysis_results(created_at DESC);
 
--- RLS Policies
 ALTER TABLE analysis_results ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view their own analysis results"
-  ON analysis_results
-  FOR SELECT
-  USING (auth.uid() = user_id);
+  ON analysis_results FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert their own analysis results"
-  ON analysis_results
-  FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- Updated timestamp trigger
-CREATE TRIGGER update_analysis_results_updated_at
-  BEFORE UPDATE ON analysis_results
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
-```
-
-Run migration:
-```bash
-# Apply via Supabase CLI or dashboard SQL editor
-```
-
----
-
-### Phase 3: Dashboard Results Display
-
-**Objective**: Show crew analysis results in the dashboard
-
-#### 3.1 Create Analysis Results Component
-
-**File**: `~/projects/app.startupai.site/frontend/src/components/analysis/AnalysisResults.tsx` (NEW)
-
-```typescript
-'use client';
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import ReactMarkdown from 'react-markdown';
-
-interface AnalysisResultsProps {
-  result: {
-    entrepreneur_brief: any;
-    customer_profile: string;
-    competitor_analysis: string;
-    value_proposition_canvas: string;
-    validation_roadmap: string;
-    qa_report: string;
-  };
-}
-
-export function AnalysisResults({ result }: AnalysisResultsProps) {
-  const tabs = [
-    { id: 'customer', label: 'Customer Profile', content: result.customer_profile },
-    { id: 'competitor', label: 'Competitor Analysis', content: result.competitor_analysis },
-    { id: 'value-prop', label: 'Value Proposition', content: result.value_proposition_canvas },
-    { id: 'validation', label: 'Validation Roadmap', content: result.validation_roadmap },
-    { id: 'qa', label: 'Quality Assessment', content: result.qa_report },
-  ];
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Strategic Analysis Results</h1>
-        <p className="text-muted-foreground mt-2">
-          Comprehensive analysis from our AI strategy team
-        </p>
-      </div>
-
-      {/* Results Tabs */}
-      <Tabs defaultValue="customer" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          {tabs.map(tab => (
-            <TabsTrigger key={tab.id} value={tab.id}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {tabs.map(tab => (
-          <TabsContent key={tab.id} value={tab.id}>
-            <Card>
-              <CardHeader>
-                <CardTitle>{tab.label}</CardTitle>
-              </CardHeader>
-              <CardContent className="prose dark:prose-invert max-w-none">
-                <ReactMarkdown>{tab.content}</ReactMarkdown>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
-
-      {/* Export Options */}
-      <div className="flex gap-4">
-        <button className="btn btn-primary">
-          Export as PDF
-        </button>
-        <button className="btn btn-secondary">
-          Share with Team
-        </button>
-      </div>
-    </div>
-  );
-}
-```
-
-#### 3.2 Update Dashboard to Show Results
-
-**File**: `~/projects/app.startupai.site/frontend/src/app/dashboard/page.tsx`
-
-```typescript
-import { AnalysisResults } from '@/components/analysis/AnalysisResults';
-
-// In page component:
-const { data: analysisResults } = await supabase
-  .from('analysis_results')
-  .select('*')
-  .eq('user_id', user.id)
-  .order('created_at', { ascending: false })
-  .limit(1)
-  .single();
-
-if (analysisResults?.result_json) {
-  return <AnalysisResults result={analysisResults.result_json} />;
-}
+  ON analysis_results FOR INSERT WITH CHECK (auth.uid() = user_id);
 ```
 
 ---
@@ -756,6 +573,7 @@ if (analysisResults?.result_json) {
 ## Testing Strategy
 
 ### Unit Tests
+
 ```bash
 # Frontend
 cd ~/projects/app.startupai.site/frontend
@@ -768,60 +586,46 @@ crewai test
 
 ### Integration Tests
 
-**1. Test Supervisor Agent Locally**
+1. **Test Supervisor Agent Locally**
 ```bash
 cd ~/projects/startupai-crew
-cat > test_input.json <<EOF
-{
-  "entrepreneur_input": {
-    "business_idea": "Test business concept",
-    "target_customers": "Test segment",
-    "problem": "Test problem",
-    "solution": "Test solution",
-    "competitors": "None known",
-    "resources": "Test resources",
-    "goals": "Test goals"
-  }
-}
-EOF
-
 crewai run --input test_input.json
 ```
 
-**2. Test MCP Integration**
+2. **Test Full Flow**
+   - Complete onboarding (stages 1-7)
+   - Verify crew kickoff happens automatically
+   - Monitor execution in CrewAI AMP dashboard
+   - Verify results appear in dashboard
+   - Check database for saved results
 
-Use Claude Code with the CrewAI Enterprise MCP server already configured.
+### Test Cases
 
-**3. Test Full Flow**
-1. Complete onboarding in frontend (stage 1-7)
-2. Verify crew kickoff happens automatically
-3. Monitor crew execution in CrewAI AMP dashboard
-4. Verify results appear in dashboard
-5. Check database for saved results
+```yaml
+founder_flow:
+  - name: 'Free trial founder signup'
+    steps:
+      - 'Homepage → For Founders → Pricing'
+      - 'Complete signup with role=founder&plan=trial'
+      - 'Verify redirect to /onboarding/founder'
+      - 'Complete onboarding'
+      - 'Verify redirect to /founder-dashboard'
 
----
-
-## Rollback Plan
-
-If Option B causes issues:
-
-### Quick Rollback
-```bash
-cd ~/projects/app.startupai.site
-git revert HEAD~3..HEAD  # Revert last 3 commits
-git push origin main
+consultant_flow:
+  - name: 'Agency co-pilot signup'
+    steps:
+      - 'Pricing → Agency Co-Pilot'
+      - 'Complete signup with role=consultant'
+      - 'Complete consultant onboarding'
+      - 'Verify workspace setup recommendations'
 ```
-
-### Gradual Rollback
-1. Disable auto-kickoff in frontend (comment out `useEffect`)
-2. Keep crew changes (Supervisor Agent is better anyway)
-3. Manually trigger analysis when ready
 
 ---
 
 ## Monitoring & Observability
 
 ### CrewAI AMP Logs
+
 ```bash
 # Real-time logs
 crewai deploy logs --uuid b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b --follow
@@ -830,9 +634,9 @@ crewai deploy logs --uuid b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b --follow
 crewai deploy logs --uuid b4d5c1dd-27e2-4163-b9fb-a18ca06ca13b | grep supervision_task
 ```
 
-### Frontend Monitoring
+### Frontend Analytics
+
 ```typescript
-// Add to onboarding completion handler
 import { track } from '@/lib/analytics';
 
 track('crew_kickoff', {
@@ -843,58 +647,61 @@ track('crew_kickoff', {
 
 track('crew_completed', {
   kickoff_id,
-  user_id: userId,
   execution_duration_seconds: executionTime,
   success: true,
 });
 ```
 
 ### Database Queries
+
 ```sql
 -- Check recent analyses
-SELECT
-  id,
-  user_id,
-  kickoff_id,
-  created_at,
-  result_json->>'qa_report'->>'pass' as passed_qa
+SELECT id, user_id, kickoff_id, created_at
 FROM analysis_results
-ORDER BY created_at DESC
-LIMIT 10;
+ORDER BY created_at DESC LIMIT 10;
 
 -- Success rate
 SELECT
   COUNT(*) as total,
-  SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END) as successful,
-  ROUND(100.0 * SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*), 2) as success_rate
+  SUM(CASE WHEN result IS NOT NULL THEN 1 ELSE 0 END) as successful
 FROM analysis_results
 WHERE created_at > NOW() - INTERVAL '7 days';
 ```
 
 ---
 
+## Rollback Plan
+
+### Quick Rollback
+
+```bash
+cd ~/projects/app.startupai.site
+git revert HEAD~3..HEAD
+git push origin main
+```
+
+### Gradual Rollback
+
+1. Disable auto-kickoff in frontend (comment out `useEffect`)
+2. Keep crew changes (Supervisor Agent is better anyway)
+3. Manually trigger analysis when ready
+
+---
+
 ## Success Criteria
 
-### Phase 1 Complete When:
-- ✅ Supervisor Agent deployed to CrewAI AMP
-- ✅ Test kickoff completes with structured input
-- ✅ All 6 agents execute successfully
-- ✅ Output format matches expectations
+### Phase 3B Complete When:
 
-### Phase 2 Complete When:
-- ✅ Frontend can call `kickoffCrewAnalysis()`
-- ✅ Status polling works correctly
-- ✅ Results saved to database
-- ✅ No errors in production logs
-
-### Phase 3 Complete When:
-- ✅ Dashboard displays analysis results
-- ✅ All 6 analysis sections render correctly
-- ✅ Export functionality works
-- ✅ User can share results
+- ✅ Dashboard AI Assistant component exists for both roles
+- ✅ Users can discuss CrewAI analysis results
+- ✅ AI Assistant can dispatch new CrewAI workflows
+- ✅ Notification system alerts users to new results
+- ✅ Consultant CrewAI workflow integration functional
+- ✅ Per-client management for consultants working
 
 ### Overall Success:
-- ✅ End-to-end flow: Chat → Crew → Results
+
+- ✅ End-to-end flow: Chat → Crew → Results → Discussion → Follow-up
 - ✅ No manual intervention required
 - ✅ <5% error rate over 1 week
 - ✅ Average execution time <10 minutes
@@ -904,55 +711,61 @@ WHERE created_at > NOW() - INTERVAL '7 days';
 
 ## Timeline Estimate
 
-| Phase | Estimated Time | Complexity |
-|-------|---------------|------------|
-| Phase 1: Refactor Crew | 2-4 hours | Medium |
-| Phase 2: Frontend Integration | 4-6 hours | High |
-| Phase 3: Dashboard Display | 2-3 hours | Low |
-| Testing & Debugging | 3-5 hours | Medium |
-| **Total** | **11-18 hours** | **1-2 days** |
+| Phase | Estimated Time | Status |
+|-------|---------------|--------|
+| Phase 1: App Routing | - | ✅ Complete |
+| Phase 2: Marketing Updates | - | ✅ Complete |
+| Phase 3A: Onboarding UI | - | ✅ Complete |
+| Phase 3B: Dashboard AI Assistant | 3-5 days | ❌ Not Started |
+| Phase 3B: Consultant CrewAI | 5-7 days | ❌ Not Started |
+| Phase 3B: Notifications | 2-3 days | ❌ Not Started |
+| Phase 4: Conversion Tracking | 2-3 days | ❌ Not Started |
+| **Total Remaining** | **12-18 days** | |
 
 ---
 
-## Notes & Considerations
+## Risks & Mitigation
 
-### Why This Architecture?
+```yaml
+risk_1_breaking_existing_users:
+  risk: 'Current users have undefined roles'
+  mitigation:
+    - 'Add migration to set default role=founder for existing users'
+    - 'Gracefully handle missing role with fallback to founder'
 
-1. **Separation of Concerns**: Frontend handles UX, CrewAI handles intelligence
-2. **Official Patterns**: Uses CrewAI's recommended MCP server
-3. **Scalability**: Easy to add more crews (e.g., consultant onboarding, project analysis)
-4. **Maintainability**: Single source of truth for AI logic
-5. **Observability**: CrewAI AMP provides built-in monitoring
+risk_2_crewai_complexity:
+  risk: 'Consultant workflow may be complex'
+  mitigation:
+    - 'Start simple with basic profile gathering'
+    - 'Iterate on workflow based on feedback'
+    - 'Can fall back to manual form if needed'
 
-### Alternative Considered: Vercel AI SDK + CrewAI Streaming
-
-**Why not?**: CrewAI doesn't support SSE streaming for conversational agents. It only provides batch `/kickoff` and `/status` endpoints.
-
-**Future possibility**: If CrewAI adds streaming in the future, we could migrate to that.
-
-### Technical Debt Addressed
-
-- ✅ Eliminates duplicated onboarding logic
-- ✅ Removes confusion about "Onboarding Agent" name
-- ✅ Establishes clear integration pattern for future crews
-- ✅ Makes testing easier (backend testable independently)
-
----
-
-## References
-
-- **CrewAI Documentation**: https://docs.crewai.com
-- **CrewAI AMP Dashboard**: https://app.crewai.com/deployments
-- **CrewAI Enterprise MCP Server**: https://github.com/crewAIInc/enterprise-mcp-server
-- **Vercel AI SDK**: https://sdk.vercel.ai
-- **Option A Implementation**: See commits 98d88e8, c3af469
+risk_3_dashboard_assistant_scope_creep:
+  risk: 'AI Assistant may become too complex'
+  mitigation:
+    - 'Start with read-only features (discuss reports)'
+    - 'Add CrewAI dispatch as second phase'
+    - 'Follow onboarding patterns for consistency'
+```
 
 ---
 
-**Last Updated**: November 12, 2025
-**Author**: System Architecture Team
-**Status**: ✅ Ready for Implementation
+## Document Control
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+**Status**: Phases 1-3A Complete, Phase 3B-4 Pending
+**Version**: 3.0 (Merged from marketing + app versions)
+**Created**: November 8, 2025
+**Updated**: November 20, 2025
+**Next Steps**: Phase 3B - Dashboard AI Assistant (CRITICAL)
+
+**Version History**:
+- 1.0 (Nov 8): Initial analysis and routing fixes
+- 2.0 (Nov 10): Status tracking with completion commits
+- 2.1 (Nov 12): Option B technical implementation details
+- 3.0 (Nov 20): Merged marketing + app versions with complete status tracking
+
+---
+
+Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
