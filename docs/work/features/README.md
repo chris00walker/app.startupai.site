@@ -22,3 +22,9 @@ work/features/onboarding-crewai/
   checklist.md
   delivery-notes.md
 ```
+
+## Ecosystem Context
+
+- **Master Architecture**: `startupai-crew/docs/master-architecture/`
+- **API Contracts**: `startupai-crew/docs/master-architecture/reference/api-contracts.md`
+- **Approval Workflows**: `startupai-crew/docs/master-architecture/reference/approval-workflows.md`

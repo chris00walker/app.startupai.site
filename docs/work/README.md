@@ -21,6 +21,7 @@ last_reviewed: "2025-11-21"
 ## Master Architecture
 
 Source of truth for ecosystem architecture: `startupai-crew/docs/master-architecture/`
-- `ecosystem.md` - Three-service overview
-- `organizational-structure.md` - 6 founders, 18 agents
-- `internal-validation-system-spec.md` - Technical blueprint
+- `01-ecosystem.md` - Three-service overview
+- `02-organization.md` - 6 founders, 18 agents
+- `03-validation-spec.md` - Technical blueprint
+- `04-status.md` - Current state assessment
