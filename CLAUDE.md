@@ -271,18 +271,47 @@ const projects = await db.execute(sql`SELECT * FROM projects WHERE user_id = ${u
 The **single source of truth** for cross-service architecture lives in:
 ```
 startupai-crew/docs/master-architecture/
-├── ecosystem.md              # Three-service reality diagram
-├── organizational-structure.md # C-suite → Agent hierarchy
-├── current-state.md          # Honest status assessment
-└── validation-backlog.md     # Hypothesis-driven feature queue
+├── 01-ecosystem.md           # Three-service reality diagram
+├── 02-organization.md        # C-suite → Agent hierarchy
+├── 03-validation-spec.md     # Technical implementation guide
+├── 04-status.md              # Honest status assessment
+└── reference/                # API contracts, approval workflows
 ```
 
 For anything that spans services (auth flow, API contracts, data flow), refer to the crew's master architecture.
 
+## Cross-Repo Coordination
+
+**⚠️ This repo is blocked by CrewAI and blocks Marketing.**
+
+### Before Starting Work
+- Check `docs/work/cross-repo-blockers.md` for current dependencies
+- If working on blocked items, verify upstream status first:
+  - CrewAI Phase 1 criteria: `startupai-crew/docs/work/phases.md`
+
+### When Blockers Are Resolved
+1. Update `docs/work/cross-repo-blockers.md` status
+2. Move items from "Blocked" to "In Progress" in `docs/work/in-progress.md`
+3. Notify downstream (marketing) if this unblocks their work
+
+### When Completing Work That Unblocks Others
+1. Update `docs/work/cross-repo-blockers.md`
+2. Update marketing blockers: `startupai.site/docs/work/cross-repo-blockers.md`
+
+### Dependency Chain
+```
+CrewAI → Product App (this repo) → Marketing Site
+```
+
+**Current blockers**: See `docs/work/cross-repo-blockers.md`
+
 ## Documentation
-- Authentication: `docs/engineering/10-authentication/`
-- CrewAI Integration: `docs/integrations/crewai/`
+- Authentication: `docs/specs/auth.md`
+- CrewAI Integration: `docs/overview/ONBOARDING_TO_CREWAI_ARCHITECTURE.md`
+- Architecture: `docs/overview/`
+- Specs: `docs/specs/`
 - Features: `docs/features/`
+- Work Tracking: `docs/work/`
 
 ---
 **Last Updated**: 2025-11-21

@@ -2,19 +2,18 @@
 
 **End-to-End User Experience Specification**
 
-**Status:** 🔴 **MISSING** - Required for launch  
-**Priority:** **P0 - LAUNCH BLOCKER**  
-**Cross-Reference:** [`two-site-implementation-plan.md`](../../startupai.site/docs/technical/two-site-implementation-plan.md) - Section 1.2.5 Launch Readiness Assessment  
+**Status:** 🟡 **REFERENCE** - UX specification for onboarding flow
+**Last Updated:** 2025-11-21
+**Cross-Reference:** [`features/stage-progression.md`](../features/stage-progression.md) - Implementation details  
 
 ---
 
 ## 📋 Document Purpose
 
-This document maps the complete user journey from marketing site signup to receiving AI-generated strategic insights. Currently, users hit a 404 error after authentication, breaking the entire promised experience. This journey map defines the expected flow that marketing promises but the product doesn't deliver.
+This document maps the complete user journey from marketing site signup to receiving AI-generated strategic insights. Use this as a UX reference for the intended user experience and validation checklist.
 
-**Marketing Promise:** "AI-guided strategy session" leading to "comprehensive strategic analysis"  
-**Current Reality:** 404 error after signup  
-**Required Solution:** Complete end-to-end AI-powered onboarding experience  
+**Marketing Promise:** "AI-guided strategy session" leading to "comprehensive strategic analysis"
+**Implementation:** See `features/stage-progression.md` for current stage system  
 
 ---
 

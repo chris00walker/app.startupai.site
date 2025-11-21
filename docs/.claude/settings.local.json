@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(sed:*)",
+      "Bash(git mv:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "disabledMcpjsonServers": [
+    "netlify",
+    "supabase",
+    "shadcn"
+  ]
+}

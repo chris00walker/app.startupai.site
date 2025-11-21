@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "version": "1.0",
+  "project_name": "StartupAI Product Platform",
+  "description": "Next.js 15 hybrid app with Supabase backend and AI integrations",
+  
+  "security": {
+    "mode": "paranoid",
+    "deny_file_access": [
+      ".env*",
+      "*.pem",
+      "*.key",
+      "netlify.toml",
+      ".netlify/**",
+      "node_modules/**",
+      ".git/**",
+      "**/migrations/*.sql"
+    ],
+    "deny_file_edit": [
+      ".env*",
+      ".env.example",
+      "netlify.toml",
+      "drizzle.config.ts"
+    ],
+    "sensitive_patterns": [
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "DATABASE_URL",
+      "JWT_SECRET",
+      "OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY",
+      "CREW_CONTRACT_BEARER"
+    ],
+    "redact_in_logs": true
+  },
+
+  "permissions": {
+    "allowed_commands_no_confirm": [
+      "git status",
+      "git log",
+      "git diff",
+      "pnpm dev",
+      "pnpm lint",
+      "pnpm type-check",
+      "pnpm format:check",
+      "pnpm test",
+      "supabase status",
+      "ls",
+      "cat",
+      "pwd"
+    ],
+    "require_confirmation": [
+      "pnpm add*",
+      "pnpm remove*",
+      "pnpm install",
+      "pnpm build",
+      "pnpm db:*",
+      "supabase db push",
+      "supabase migration*",
+      "git push*",
+      "git commit*",
+      "netlify deploy*",
+      "rm *",
+      "mv *"
+    ],
+    "blocked_commands": [
+      "sudo*",
+      "chmod*",
+      "npm*",
+      "supabase db reset --db-url*"
+    ]
+  },
+
+  "hooks": {
+    "pre_file_edit": {
+      "enabled": true,
+      "commands": [
+        {
+          "name": "type_check_before_edit",
+          "command": "pnpm type-check --noEmit",
+          "on_failure": "warn"
+        }
+      ]
+    },
+    "post_file_edit": {
+      "enabled": true,
+      "commands": [
+        {
+          "name": "auto_format",
+          "command": "pnpm format ${edited_file}",
+          "on_failure": "continue"
+        },
+        {
+          "name": "auto_lint_fix",
+          "command": "pnpm lint --fix ${edited_file}",
+          "on_failure": "continue"
+        },
+        {
+          "name": "update_lockfile_if_package_json",
+          "command": "if [[ '${edited_file}' == 'package.json' ]]; then pnpm install --frozen-lockfile=false; fi",
+          "on_failure": "warn"
+        }
+      ]
+    },
+    "post_schema_edit": {
+      "enabled": true,
+      "trigger_on_files": ["**/schema/*.ts", "drizzle.config.ts"],
+      "commands": [
+        {
+          "name": "generate_migration",
+          "command": "pnpm db:generate",
+          "on_failure": "warn"
+        }
+      ]
+    },
+    "pre_git_commit": {
+      "enabled": true,
+      "commands": [
+        {
+          "name": "pre_commit_checks",
+          "command": "pnpm lint && pnpm type-check && pnpm test --passWithNoTests",
+          "on_failure": "block"
+        }
+      ]
+    }
+  },
+
+  "project_context": {
+    "framework": "Next.js 15.5.3 (Hybrid: App Router + Pages Router)",
+    "architecture": "Microservices (Frontend → Supabase → Vercel AI SDK → CrewAI AMP)",
+    "deployment": "Netlify (considering Vercel migration)",
+    "node_version": "22.18.0",
+    "package_manager": "pnpm 9.12.1+",
+    "purpose": "Evidence-led strategy platform with AI-powered validation",
+    "completion_status": "65-70%",
+    "critical_integrations": [
+      "Supabase Auth (JWT + GitHub OAuth)",
+      "Vercel AI SDK (onboarding chat)",
+      "CrewAI AMP (strategic analysis)",
+      "Drizzle ORM (type-safe queries)",
+      "pgvector (embeddings)"
+    ]
+  },
+
+  "coding_standards": {
+    "component_structure": "Shadcn New York theme",
+    "css_framework": "Tailwind CSS",
+    "form_validation": "React Hook Form + Zod",
+    "state_management": "React hooks + custom hooks (e.g., useProjects)",
+    "api_routes": "Next.js API routes + Netlify Functions",
+    "database": "Drizzle ORM (no raw SQL unless necessary)",
+    "testing": "Jest + Playwright E2E",
+    "no_mock_data": "All components must use real Supabase data"
+  },
+
+  "workflow": {
+    "planning_mode": "hybrid",
+    "require_plan_for": [
+      "database_schema_changes",
+      "authentication_flows",
+      "api_route_creation",
+      "crewai_integration",
+      "payment_flows",
+      "migration_scripts"
+    ],
+    "yolo_mode_for": [
+      "ui_tweaks",
+      "typo_fixes",
+      "style_adjustments",
+      "comment_additions",
+      "test_updates"
+    ]
+  },
+
+  "quality_gates": {
+    "before_production": [
+      "NO mock data in any component",
+      "NO console.log statements (use proper logging)",
+      "NO hardcoded API keys or secrets",
+      "NEXT_PUBLIC_ONBOARDING_BYPASS must be false",
+      "Test coverage > 70% for critical paths",
+      "All TypeScript errors resolved",
+      "All ESLint errors resolved"
+    ]
+  }
+}
