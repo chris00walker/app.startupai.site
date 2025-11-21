@@ -1,12 +1,14 @@
 ---
-purpose: "Private technical source of truth for the application platform overview"
+purpose: "Product platform overview and operational details"
 status: "active"
-last_reviewed: "2025-10-25"
+last_reviewed: "2025-11-21"
 ---
 
 # Platform Overview
 
-This private overview complements the public marketing plan and details how the product platform operates.
+This overview details how the product platform operates within the three-service architecture.
+
+> **Architecture Source of Truth**: See `startupai-crew/docs/master-architecture/` for cross-service architecture.
 
 ## Domains & Ownership
 
@@ -16,7 +18,7 @@ This private overview complements the public marketing plan and details how the 
 | Auth & Identity | Platform Engineering | Supabase Auth (GitHub OAuth, email) with profile trigger (`handle_new_user`) keeping `user_profiles` in sync. |
 | Application site (`app.startupai.site`) | Platform Engineering | Next.js App Router. Onboarding wizard, dashboards, and automation live here. |
 | Database & Storage | Platform Engineering | Supabase Postgres + pgvector. Migrations in `supabase/migrations`. Storage buckets currently paused. |
-| AI Workflows | AI Platform | Python CrewAI backend under `backend/src/startupai` + Netlify wrappers. Not live yet. |
+| AI Workflows | AI Platform | CrewAI agents deployed via AMP. Backend under `backend/src/startupai`. Integration in progress. |
 | Analytics | Shared (Growth + Platform) | PostHog instrumentation via `frontend/src/lib/analytics`. Product and marketing share dashboards with segmented properties. |
 | Ops & Incident Response | Platform (primary), Ops (secondary) | Pager coverage when Netlify/Supabase incidents occur. Runbooks tracked in private ops docs. |
 
