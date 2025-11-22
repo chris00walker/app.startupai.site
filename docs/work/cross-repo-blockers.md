@@ -20,6 +20,22 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 **Phase 1 Complete Criteria**: See `startupai-crew/docs/work/phases.md`
 
+## This Repo Provides
+
+### CrewAI Backend (`startupai-crew`)
+
+| Item | Status | Description | Unblocks |
+|------|--------|-------------|----------|
+| Learning tables migration | Not Started | pgvector tables for flywheel learning system | CrewAI learning tools can persist/query |
+
+**Required Migration:**
+- Enable pgvector extension
+- Create tables: `learnings`, `patterns`, `outcomes`, `domain_expertise`
+- Create `match_learnings` function for similarity search
+- Schema: See `startupai-crew/docs/master-architecture/reference/flywheel-learning.md`
+
+**Priority**: High - This is StartupAI's competitive moat
+
 ## This Repo Blocks
 
 ### Marketing Site (`startupai.site`)
@@ -44,6 +60,12 @@ Results → Supabase persistence
 Product App Results Display UI
          ↓
 Marketing Phase 4 Validation Cycles
+
+Learning Tables Migration (parallel)
+         ↓
+CrewAI Flywheel Tools
+         ↓
+AI Founders Get Smarter
 ```
 
 ## Coordination Notes
