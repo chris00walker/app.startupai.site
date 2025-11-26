@@ -117,6 +117,8 @@ app.startupai.site/
 
 **Overall Progress:** 65-70% Complete
 
+> **Reality Check:** CrewAI integration works, but outputs are LLM-generated synthetic data until real analysis tools are built. See [cross-repo-blockers.md](docs/work/cross-repo-blockers.md) for the full gap analysis.
+
 ### What's Working
 - 20 pages deployed (hybrid App + Pages Router)
 - 50+ UI components including 9 canvas tools
