@@ -71,57 +71,28 @@
   },
 
   "hooks": {
-    "pre_file_edit": {
-      "enabled": true,
-      "commands": [
-        {
-          "name": "type_check_before_edit",
-          "command": "pnpm type-check --noEmit",
-          "on_failure": "warn"
-        }
-      ]
-    },
-    "post_file_edit": {
-      "enabled": true,
-      "commands": [
-        {
-          "name": "auto_format",
-          "command": "pnpm format ${edited_file}",
-          "on_failure": "continue"
-        },
-        {
-          "name": "auto_lint_fix",
-          "command": "pnpm lint --fix ${edited_file}",
-          "on_failure": "continue"
-        },
-        {
-          "name": "update_lockfile_if_package_json",
-          "command": "if [[ '${edited_file}' == 'package.json' ]]; then pnpm install --frozen-lockfile=false; fi",
-          "on_failure": "warn"
-        }
-      ]
-    },
-    "post_schema_edit": {
-      "enabled": true,
-      "trigger_on_files": ["**/schema/*.ts", "drizzle.config.ts"],
-      "commands": [
-        {
-          "name": "generate_migration",
-          "command": "pnpm db:generate",
-          "on_failure": "warn"
-        }
-      ]
-    },
-    "pre_git_commit": {
-      "enabled": true,
-      "commands": [
-        {
-          "name": "pre_commit_checks",
-          "command": "pnpm lint && pnpm type-check && pnpm test --passWithNoTests",
-          "on_failure": "block"
-        }
-      ]
-    }
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && pnpm format 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_INPUT\" == *\"git commit\"* ]]; then cd \"$CLAUDE_PROJECT_DIR\" && pnpm lint && pnpm type-check && pnpm test --passWithNoTests; fi"
+          }
+        ]
+      }
+    ]
   },
 
   "project_context": {
