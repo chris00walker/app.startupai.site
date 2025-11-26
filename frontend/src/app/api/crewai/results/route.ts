@@ -1,10 +1,10 @@
 /**
- * CrewAI Results Webhook Endpoint
+ * CrewAI Results Webhook Endpoint (LEGACY)
  *
  * POST /api/crewai/results
  *
- * Receives structured validation results from CrewAI Flow completion
- * and persists them to Supabase (reports, evidence tables).
+ * DEPRECATED: Use /api/crewai/webhook with flow_type: "founder_validation" instead.
+ * This route forwards requests to the unified webhook for backwards compatibility.
  *
  * Authentication: Bearer token (CREW_CONTRACT_BEARER)
  */
@@ -12,6 +12,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+
+// NOTE: This is a legacy endpoint. New integrations should use /api/crewai/webhook
+// with flow_type: "founder_validation" in the payload.
 
 // Schema for validation report from CrewAI Flow
 const validationReportSchema = z.object({

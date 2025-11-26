@@ -1,7 +1,10 @@
 /**
- * CrewAI Consultant Onboarding Results Webhook
+ * CrewAI Consultant Onboarding Results Webhook (LEGACY)
  *
  * POST /api/crewai/consultant
+ *
+ * DEPRECATED: Use /api/crewai/webhook with flow_type: "consultant_onboarding" instead.
+ * This route is kept for backwards compatibility.
  *
  * Receives AI-generated recommendations from the ConsultantOnboardingFlow
  * and updates the consultant_profiles table with personalized guidance.
@@ -12,6 +15,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+
+// NOTE: This is a legacy endpoint. New integrations should use /api/crewai/webhook
+// with flow_type: "consultant_onboarding" in the payload.
 
 // Schema for consultant onboarding results from CrewAI Flow
 const consultantResultsSchema = z.object({
