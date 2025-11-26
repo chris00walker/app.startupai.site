@@ -1,6 +1,21 @@
 /**
  * CrewAI Enterprise Integration Client
  *
+ * @deprecated This file is deprecated. Use amp-client.ts instead.
+ * Migration: Replace imports from '@/lib/crewai/client' with '@/lib/crewai/amp-client'
+ *
+ * Example migration:
+ * ```typescript
+ * // Before:
+ * import { kickoffCrewAIAnalysis, getCrewAIStatus } from '@/lib/crewai/client';
+ *
+ * // After:
+ * import { createCrewAIClient } from '@/lib/crewai/amp-client';
+ * const client = createCrewAIClient();
+ * await client.kickoff({ inputs: { entrepreneur_input: '...' } });
+ * await client.getStatus(kickoffId);
+ * ```
+ *
  * Provides typed interface to CrewAI AMP via direct API calls.
  * Handles kickoff, status polling, and result retrieval for the StartupAI crew.
  */
@@ -12,11 +27,12 @@ import type {
   CrewStatus,
 } from './types';
 
-const CREWAI_BASE_URL = process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL;
-const CREWAI_TOKEN = process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN;
+// Use standardized env vars, with fallback to legacy names for backwards compatibility
+const CREWAI_BASE_URL = process.env.CREWAI_API_URL || process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL;
+const CREWAI_TOKEN = process.env.CREWAI_API_TOKEN || process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN;
 
 if (!CREWAI_BASE_URL || !CREWAI_TOKEN) {
-  console.error('[CrewAI Client] Missing configuration:', {
+  console.error('[CrewAI Client] Missing configuration. Set CREWAI_API_URL and CREWAI_API_TOKEN:', {
     hasUrl: !!CREWAI_BASE_URL,
     hasToken: !!CREWAI_TOKEN,
   });
@@ -50,7 +66,7 @@ export async function kickoffCrewAIAnalysis(
   userId: string
 ): Promise<string> {
   if (!CREWAI_BASE_URL || !CREWAI_TOKEN) {
-    throw new Error('CrewAI configuration missing. Check MCP env vars.');
+    throw new Error('CrewAI configuration missing. Set CREWAI_API_URL and CREWAI_API_TOKEN.');
   }
 
   console.log('[CrewAI Client] Kicking off analysis:', {
@@ -95,7 +111,7 @@ export async function kickoffCrewAIAnalysis(
  */
 export async function getCrewAIStatus(kickoffId: string): Promise<CrewStatus> {
   if (!CREWAI_BASE_URL || !CREWAI_TOKEN) {
-    throw new Error('CrewAI configuration missing. Check MCP env vars.');
+    throw new Error('CrewAI configuration missing. Set CREWAI_API_URL and CREWAI_API_TOKEN.');
   }
 
   const response = await fetch(`${CREWAI_BASE_URL}/status/${kickoffId}`, {

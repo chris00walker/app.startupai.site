@@ -120,9 +120,15 @@ describe('CrewAI Client', () => {
     });
 
     it('should throw error if environment variables are missing', async () => {
-      const originalUrl = process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL;
-      const originalToken = process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN;
+      // Save all possible env vars
+      const originalUrl = process.env.CREWAI_API_URL;
+      const originalToken = process.env.CREWAI_API_TOKEN;
+      const originalLegacyUrl = process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL;
+      const originalLegacyToken = process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN;
 
+      // Delete both new and legacy env vars
+      delete process.env.CREWAI_API_URL;
+      delete process.env.CREWAI_API_TOKEN;
       delete process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL;
       delete process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN;
 
@@ -132,8 +138,11 @@ describe('CrewAI Client', () => {
         kickoffCrewAIAnalysis(briefData, 'project-123', 'user-456')
       ).rejects.toThrow('CrewAI configuration missing');
 
-      process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL = originalUrl;
-      process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN = originalToken;
+      // Restore env vars
+      process.env.CREWAI_API_URL = originalUrl;
+      process.env.CREWAI_API_TOKEN = originalToken;
+      process.env.MCP_CREWAI_ENTERPRISE_SERVER_URL = originalLegacyUrl;
+      process.env.MCP_CREWAI_ENTERPRISE_BEARER_TOKEN = originalLegacyToken;
     });
   });
 

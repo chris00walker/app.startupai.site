@@ -16,12 +16,14 @@ export interface CrewAIKickoffResponse {
 
 export interface CrewAIStatusResponse {
   kickoff_id: string;
-  status: 'QUEUED' | 'RUNNING' | 'COMPLETE' | 'ERROR';
-  output?: string | Record<string, any>;
+  state: 'STARTED' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+  status: string; // Human-readable status message
+  result?: any;
+  result_json?: any;
+  last_step?: any;
+  last_executed_task?: any;
+  source?: string;
   error?: string;
-  created_at?: string;
-  started_at?: string;
-  completed_at?: string;
 }
 
 export interface CrewAIClientConfig {
@@ -164,19 +166,19 @@ export class CrewAIAMPClient {
       }
 
       console.log(
-        `[CrewAI AMP] Status check ${attempt + 1}/${this.config.maxPollAttempts}: ${status.status}`
+        `[CrewAI AMP] Status check ${attempt + 1}/${this.config.maxPollAttempts}: ${status.state}`
       );
 
-      if (status.status === 'COMPLETE') {
+      if (status.state === 'COMPLETED') {
         console.log('[CrewAI AMP] Crew execution completed successfully');
         return status;
       }
 
-      if (status.status === 'ERROR') {
-        throw new Error(`CrewAI execution failed: ${status.error || 'Unknown error'}`);
+      if (status.state === 'FAILED') {
+        throw new Error(`CrewAI execution failed: ${status.error || status.status || 'Unknown error'}`);
       }
 
-      // Continue polling if QUEUED or RUNNING
+      // Continue polling if STARTED or RUNNING
     }
 
     throw new Error(
