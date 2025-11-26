@@ -1,7 +1,7 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2025-11-21"
+last_reviewed: "2025-11-26"
 ---
 
 # Cross-Repository Blockers
@@ -14,9 +14,12 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 | Blocker | Status | Description | Impact |
 |---------|--------|-------------|--------|
-| Phase 1 Completion | In Progress | Service, Analysis, Governance crews + Flow | Cannot complete Phase Alpha without functional crews |
+| Phase 1 Completion | ⚠️ Partial | Flow works, outputs synthetic | Can display results, but quality is fiction |
 | Results → Supabase | Not Started | Persist CrewAI outputs to database | Cannot display analysis results in dashboard |
+| Real Analysis Tools | Not Started | Tools for web research, data retrieval | Outputs will remain synthetic without this |
 | Resume/Webhook API | Not Started | Human-in-the-loop approval workflow | Cannot implement approval UI |
+
+**Important Note:** Even when CrewAI Phase 1 "completes", the outputs will be LLM-generated synthetic data, not real analysis. This affects all downstream features that depend on "real" validation results.
 
 **Phase 1 Complete Criteria**: See `startupai-crew/docs/work/phases.md`
 
