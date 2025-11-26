@@ -41,8 +41,8 @@ const approvalWebhookSchema = z.object({
   // Content
   title: z.string(),
   description: z.string(),
-  task_output: z.record(z.any()).default({}),
-  evidence_summary: z.record(z.any()).optional(),
+  task_output: z.record(z.string(), z.any()).default({}),
+  evidence_summary: z.record(z.string(), z.any()).optional(),
   options: z.array(z.object({
     id: z.string(),
     label: z.string(),
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     let shouldAutoApprove = false;
-    let autoApproveReason = null;
+    let autoApproveReason: string | null = null;
 
     if (preferences) {
       // Check if this type is in auto-approve list

@@ -20,6 +20,7 @@ export interface CrewAIStatusResponse {
   status: string; // Human-readable status message
   result?: any;
   result_json?: any;
+  output?: string | Record<string, unknown>; // Crew execution output (may be JSON string or parsed)
   last_step?: any;
   last_executed_task?: any;
   source?: string;

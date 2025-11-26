@@ -55,7 +55,7 @@ const desirabilityEvidenceSchema = z.object({
 
 // Schema for feasibility evidence
 const feasibilityEvidenceSchema = z.object({
-  core_features_feasible: z.record(z.string()).default({}),
+  core_features_feasible: z.record(z.string(), z.string()).default({}),
   downgrade_required: z.boolean().optional(),
   downgrade_impact: z.string().optional(),
   api_costs: z.number().optional(),
@@ -94,7 +94,7 @@ const crewAIResultsSchema = z.object({
   validation_report: validationReportSchema,
 
   // Value proposition canvas (segment -> profile/value_map)
-  value_proposition_canvas: z.record(z.object({
+  value_proposition_canvas: z.record(z.string(), z.object({
     customer_profile: customerProfileSchema.nullable(),
     value_map: valueMapSchema.nullable(),
   })).default({}),

@@ -106,7 +106,7 @@ export function useClientValidationProgress(): UseClientValidationProgressResult
           const project = projects?.[0] || null;
 
           // Fetch latest validation report for the project
-          let report = null;
+          let report: { id: string; validation_outcome: string | null; pivot_recommendation: string | null; created_at: string } | null = null;
           if (project) {
             const { data: reports } = await supabase
               .from('reports')
@@ -227,7 +227,7 @@ export function useClientProgress(clientId: string | null) {
         const project = projects?.[0] || null;
 
         // Fetch latest report
-        let report = null;
+        let report: { id: string; validation_outcome: string | null; pivot_recommendation: string | null; evidence_summary: Record<string, unknown> | null; next_steps: string[] | null; created_at: string } | null = null;
         if (project) {
           const { data: reports } = await supabase
             .from('reports')

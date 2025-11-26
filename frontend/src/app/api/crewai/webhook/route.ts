@@ -81,7 +81,7 @@ const desirabilityEvidenceSchema = z.object({
 }).passthrough().nullable();
 
 const feasibilityEvidenceSchema = z.object({
-  core_features_feasible: z.record(z.string()).default({}),
+  core_features_feasible: z.record(z.string(), z.string()).default({}),
   downgrade_required: z.boolean().optional(),
   downgrade_impact: z.string().optional(),
   api_costs: z.number().optional(),
@@ -113,7 +113,7 @@ const founderValidationSchema = z.object({
   kickoff_id: z.string().optional(),
   session_id: z.string().optional(),
   validation_report: validationReportSchema,
-  value_proposition_canvas: z.record(z.object({
+  value_proposition_canvas: z.record(z.string(), z.object({
     customer_profile: customerProfileSchema.nullable(),
     value_map: valueMapSchema.nullable(),
   })).default({}),
@@ -147,7 +147,7 @@ const consultantOnboardingSchema = z.object({
   onboarding_tips: z.array(z.string()).default([]),
   suggested_templates: z.array(z.string()).default([]),
   suggested_workflows: z.array(z.string()).default([]),
-  white_label_suggestions: z.record(z.any()).default({}),
+  white_label_suggestions: z.record(z.string(), z.any()).default({}),
   completed_at: z.string().optional(),
 });
 

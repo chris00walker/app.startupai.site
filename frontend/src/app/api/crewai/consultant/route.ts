@@ -39,7 +39,7 @@ const consultantResultsSchema = z.object({
   onboarding_tips: z.array(z.string()).default([]),
   suggested_templates: z.array(z.string()).default([]),
   suggested_workflows: z.array(z.string()).default([]),
-  white_label_suggestions: z.record(z.any()).default({}),
+  white_label_suggestions: z.record(z.string(), z.any()).default({}),
 
   // Metadata
   completed_at: z.string().optional(),
