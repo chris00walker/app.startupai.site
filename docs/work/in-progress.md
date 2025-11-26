@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for active work"
 status: "active"
-last_reviewed: "2025-11-21"
+last_reviewed: "2025-11-26"
 ---
 
 # In Progress
@@ -15,22 +15,30 @@ Work these items in order. Items marked "Ready" can start immediately.
 | Priority | Item | Status | Owner | Notes |
 |----------|------|--------|-------|-------|
 | 1 | Accessibility (WCAG 2.1 AA) | **Ready** | @design-systems | 8-10 hours. Voice controls, skip links, ARIA labels. Launch blocker. |
-| 2 | Onboarding data modelling | **Ready** | @platform-eng | Drizzle models, repositories, API tests. GH Issue #189 |
-| 3 | PostHog instrumentation | **Ready** | @ops | Event schemas, onboarding funnel, alert thresholds. GH Issue #175 |
+| 2 | PostHog instrumentation | **Ready** | @ops | Event schemas, onboarding funnel, alert thresholds. GH Issue #175 |
 
 ### P1: In Progress
 
 | Priority | Item | Status | Owner | Notes |
 |----------|------|--------|-------|-------|
-| 4 | CrewAI Netlify integration | In Progress | @ai-platform | PR #412. Note: Limited value until CrewAI Phase 1 complete upstream. |
-| 5 | Specification-driven test refresh | In Progress | @qa-lead | Update fixtures, Playwright journeys. GH Issue #189 |
+| 3 | Specification-driven test refresh | In Progress | @qa-lead | Update fixtures, Playwright journeys. GH Issue #189 |
 
-### P2: Blocked by CrewAI
+### P2: Recently Completed (2025-11-26)
+
+| Item | Status | Notes |
+|------|--------|-------|
+| CrewAI webhook infrastructure | ✅ Done | Unified `/api/crewai/webhook` endpoint |
+| Results display UI | ✅ Done | `ValidationResultsSummary` wired to dashboard |
+| Flywheel learning tables | ✅ Done | pgvector tables + search functions deployed |
+| HITL approval system | ✅ Done | Approval requests table + API routes |
+| Consultant onboarding integration | ✅ Done | Profile persistence + AI analysis webhook |
+
+### P3: Blocked by CrewAI
 
 | Priority | Item | Status | Blocked By | Notes |
 |----------|------|--------|------------|-------|
-| 6 | Results display UI | **Blocked** | CrewAI Phase 1 | Dashboard for analysis results. Requires Supabase persistence. |
-| 7 | AI visibility in UI | **Blocked** | CrewAI Phase 1 | Progress indicators, insights display. |
+| 4 | E2E validation flow | **Blocked** | CrewAI webhook call | Product app ready; waiting for CrewAI to POST |
+| 5 | Real analysis data quality | **Blocked** | CrewAI real tools | Web search, financial data tools needed |
 
 ---
 
@@ -38,22 +46,41 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 ```
 startupai-crew (CrewAI Phase 1)
-    ↓ Creates validation results
+    ↓ Needs to POST to /api/crewai/webhook  ← CURRENT BLOCKER
 app.startupai.site (This repo)
-    ↓ Displays results, captures leads
+    ↓ Displays results (ready), captures leads
 startupai.site (Marketing)
     ↓ Shows activity, validates cycles
 ```
 
-**Blocking Chain**: CrewAI Phase 1 → Results Display UI → Marketing Validation Cycles
+**Blocking Chain**: CrewAI webhook integration → E2E flow works → Marketing Validation Cycles
 
 ---
 
 ## Immediate Actions
 
-1. **Start accessibility work** - This is the #1 launch blocker and has no dependencies
-2. **Continue onboarding data modelling** - Sets up for CrewAI integration
-3. **Monitor CrewAI Phase 1 progress** - Unblocks P2 items when complete
+1. **Start accessibility work** - #1 launch blocker, no dependencies
+2. **Start PostHog instrumentation** - No dependencies
+3. **Coordinate with CrewAI repo** - Wire Flow to call `/api/crewai/webhook`
+
+---
+
+## What's Ready for CrewAI
+
+The following infrastructure is complete and awaiting CrewAI integration:
+
+```
+POST /api/crewai/webhook
+Authorization: Bearer {CREW_CONTRACT_BEARER}
+Content-Type: application/json
+
+{
+  "flow_type": "founder_validation" | "consultant_onboarding",
+  // ... payload per flow type
+}
+```
+
+See `frontend/src/app/api/crewai/webhook/route.ts` for full schema.
 
 ---
 
@@ -66,4 +93,4 @@ startupai.site (Marketing)
 
 ---
 
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-11-26
