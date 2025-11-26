@@ -1,116 +1,187 @@
-// TODO: implement Agents/AgentStatus UI component
+/**
+ * AgentStatus Component
+ *
+ * Displays real-time status of the 6 AI Founders in the StartupAI system.
+ * Polls the /api/agents/status endpoint for workflow progress.
+ */
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import api from '../../services/api';
-
-// Simple badge component for demo (replace with actual ShadCN UI when available)
-const Badge: React.FC<{ children: React.ReactNode; variant?: string }> = ({ children, variant }) => {
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'outline': return 'bg-green-100 text-green-800 border border-green-300';
-      case 'secondary': return 'bg-gray-100 text-gray-800';
-      case 'destructive': return 'bg-red-100 text-red-800';
-      default: return 'bg-blue-100 text-blue-800';
-    }
-  };
-  
-  return (
-    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getVariantClasses()}`}>
-      {children}
-    </span>
-  );
-};
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Brain,
+  Hammer,
+  TrendingUp,
+  Compass,
+  Shield,
+  Calculator,
+  Loader2,
+  CheckCircle,
+  Circle,
+  AlertCircle,
+} from 'lucide-react';
 
 interface AgentInfo {
+  id: string;
   name: string;
-  status: 'running' | 'idle' | 'error';
+  title: string;
+  role: string;
+  status: 'running' | 'idle' | 'completed' | 'error';
   lastUpdated: string;
+  currentTask?: string;
+}
+
+interface AgentStatusResponse {
+  success: boolean;
+  data: {
+    agents: AgentInfo[];
+    timestamp: string;
+  };
+}
+
+// Map founder IDs to icons
+const founderIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  sage: Brain,
+  forge: Hammer,
+  pulse: TrendingUp,
+  compass: Compass,
+  guardian: Shield,
+  ledger: Calculator,
+};
+
+// Map founder IDs to colors
+const founderColors: Record<string, string> = {
+  sage: 'text-blue-600',
+  forge: 'text-orange-600',
+  pulse: 'text-pink-600',
+  compass: 'text-purple-600',
+  guardian: 'text-green-600',
+  ledger: 'text-yellow-600',
+};
+
+function getStatusIcon(status: AgentInfo['status']) {
+  switch (status) {
+    case 'running':
+      return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
+    case 'completed':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'error':
+      return <AlertCircle className="h-4 w-4 text-red-500" />;
+    default:
+      return <Circle className="h-4 w-4 text-gray-300" />;
+  }
+}
+
+function getStatusBadgeVariant(status: AgentInfo['status']): 'default' | 'secondary' | 'destructive' | 'outline' {
+  switch (status) {
+    case 'running':
+      return 'default';
+    case 'completed':
+      return 'outline';
+    case 'error':
+      return 'destructive';
+    default:
+      return 'secondary';
+  }
 }
 
 export const AgentStatus: React.FC = () => {
-  const { data, isLoading, error, refetch } = useQuery<AgentInfo[]>({
+  const { data, isLoading, error } = useQuery<AgentStatusResponse>({
     queryKey: ['agentsStatus'],
     queryFn: async () => {
-      const response = await api.get('/agents/status');
-      return response?.data?.agents ?? [];
+      const response = await fetch('/api/agents/status');
+      if (!response.ok) throw new Error('Failed to fetch agent status');
+      return response.json();
     },
-    refetchInterval: 5000,
-    retry: false,
+    refetchInterval: 5000, // Poll every 5 seconds
+    retry: 1,
     refetchOnWindowFocus: false,
   });
 
-  if (isLoading) return <div>Loading agents...</div>;
-  
-  if (error) {
-    // Demo data when API is not available
-    const demoAgents: AgentInfo[] = [
-      { name: 'DiscoveryAgent', status: 'running', lastUpdated: new Date().toISOString() },
-      { name: 'ValidationAgent', status: 'idle', lastUpdated: new Date(Date.now() - 300000).toISOString() },
-      { name: 'ScaleAgent', status: 'running', lastUpdated: new Date(Date.now() - 60000).toISOString() },
-      { name: 'RiskAgent', status: 'error', lastUpdated: new Date(Date.now() - 600000).toISOString() },
-    ];
-    
+  if (isLoading) {
     return (
-      <div>
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded mb-4 text-sm">
-          Demo Mode: Showing sample agent status (backend not connected)
-        </div>
-        <table className="w-full table-auto">
-          <thead>
-            <tr>
-              <th className="text-left p-2">Agent</th>
-              <th className="text-left p-2">Status</th>
-              <th className="text-left p-2">Last Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {demoAgents.map((agent) => (
-              <tr key={agent.name} className="border-t">
-                <td className="p-2">{agent.name}</td>
-                <td className="p-2">
-                  <Badge variant={
-                    agent.status === 'running'
-                      ? 'outline'
-                      : agent.status === 'idle'
-                      ? 'secondary'
-                      : 'destructive'
-                  }>{agent.status}</Badge>
-                </td>
-                <td className="p-2">{new Date(agent.lastUpdated).toLocaleTimeString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400 mr-2" />
+          <span className="text-gray-500">Loading AI Founders status...</span>
+        </CardContent>
+      </Card>
     );
   }
 
+  if (error || !data?.success) {
+    return (
+      <Card className="border-amber-200">
+        <CardContent className="py-4">
+          <p className="text-sm text-amber-600">
+            Unable to connect to agent status service. The AI Founders are operating in the background.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const agents = data.data.agents;
+  const hasRunningAgents = agents.some(a => a.status === 'running');
+
   return (
-    <table className="w-full table-auto">
-      <thead>
-        <tr>
-          <th className="text-left p-2">Agent</th>
-          <th className="text-left p-2">Status</th>
-          <th className="text-left p-2">Last Updated</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data!.map((agent) => (
-          <tr key={agent.name} className="border-t">
-            <td className="p-2">{agent.name}</td>
-            <td className="p-2">
-              <Badge variant={
-                agent.status === 'running'
-                  ? 'outline'
-                  : agent.status === 'idle'
-                  ? 'secondary'
-                  : 'destructive'
-              }>{agent.status}</Badge>
-            </td>
-            <td className="p-2">{new Date(agent.lastUpdated).toLocaleTimeString()}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">AI Founders Team</CardTitle>
+          {hasRunningAgents && (
+            <Badge variant="default" className="animate-pulse">
+              Processing
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-3">
+          {agents.map((agent) => {
+            const Icon = founderIcons[agent.id] || Brain;
+            const colorClass = founderColors[agent.id] || 'text-gray-600';
+
+            return (
+              <div
+                key={agent.id}
+                className={`flex items-center justify-between p-3 rounded-lg border ${
+                  agent.status === 'running'
+                    ? 'bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800'
+                    : 'bg-gray-50 dark:bg-gray-900'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full bg-white dark:bg-gray-800 ${colorClass}`}>
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm">{agent.name}</span>
+                      <span className="text-xs text-gray-500">({agent.title})</span>
+                    </div>
+                    <p className="text-xs text-gray-500">{agent.role}</p>
+                    {agent.currentTask && (
+                      <p className="text-xs text-blue-600 mt-1 truncate max-w-[200px]">
+                        {agent.currentTask}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(agent.status)}
+                  <Badge variant={getStatusBadgeVariant(agent.status)} className="text-xs">
+                    {agent.status}
+                  </Badge>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-3 text-center">
+          Last updated: {new Date(data.data.timestamp).toLocaleTimeString()}
+        </p>
+      </CardContent>
+    </Card>
   );
 };

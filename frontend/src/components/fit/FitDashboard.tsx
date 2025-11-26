@@ -9,53 +9,41 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { 
-  Heart, 
-  Cog, 
-  DollarSign, 
+import {
+  Heart,
+  Cog,
+  DollarSign,
   ChevronRight,
   Users,
   Target,
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Lock
+  Lock,
+  Loader2
 } from "lucide-react"
+import { useFitData, type FitData } from "@/hooks/useFitData"
 
-interface FitData {
-  score: number
-  band: "High Fit" | "Medium Fit" | "Low Fit"
-  confidence: "High confidence" | "Medium confidence" | "Low confidence"
-  isLocked?: boolean
-  assumptions: Array<{
-    id: string
-    description: string
-    strength: "weak" | "medium" | "strong"
-    evidenceCount: number
-  }>
-  evidenceCounts: {
-    supporting: number
-    contradicting: number
-  }
+// Extended FitData type for internal use (adds icon for rendering)
+interface FitDataWithIcons extends Omit<FitData, 'qaInsights'> {
   qaInsights: Array<{
     id: string
     type: "satisfaction" | "validation" | "copy"
     title: string
     description: string
-    icon: React.ComponentType<any>
+    icon: React.ComponentType<{ className?: string }>
   }>
 }
 
 interface FitCardProps {
   title: string
   type: "desirability" | "feasibility" | "viability"
-  data: FitData
-  icon: React.ComponentType<any>
+  data: FitDataWithIcons
+  icon: React.ComponentType<{ className?: string }>
   color: {
     primary: string
     bg: string
@@ -328,94 +316,90 @@ function FitCard({ title, type, data, icon: Icon, color }: FitCardProps) {
   )
 }
 
-// Mock data for demonstration
-const mockFitData = {
-  desirability: {
-    score: 73,
-    band: "High Fit" as const,
-    confidence: "High confidence" as const,
-    assumptions: [
-      {
-        id: "1",
-        description: "Small business owners struggle with inventory management",
-        strength: "strong" as const,
-        evidenceCount: 12
-      },
-      {
-        id: "2", 
-        description: "Users prefer mobile-first solutions",
-        strength: "medium" as const,
-        evidenceCount: 8
-      },
-      {
-        id: "3",
-        description: "Price sensitivity is below $50/month",
-        strength: "weak" as const,
-        evidenceCount: 3
-      }
-    ],
-    evidenceCounts: {
-      supporting: 18,
-      contradicting: 2
-    },
-    qaInsights: [
-      {
-        id: "1",
-        type: "satisfaction" as const,
-        title: "Predicted Customer Satisfaction: 4.2/5",
-        description: "Based on feature set and user feedback patterns",
-        icon: Users
-      },
-      {
-        id: "2",
-        type: "validation" as const,
-        title: "Recommended: User Interview Round 2",
-        description: "Focus on pricing model and feature prioritization",
-        icon: Target
-      }
-    ]
-  },
-  feasibility: {
-    score: 45,
-    band: "Medium Fit" as const,
-    confidence: "Medium confidence" as const,
-    assumptions: [
-      {
-        id: "4",
-        description: "Technical team can deliver MVP in 6 months",
-        strength: "medium" as const,
-        evidenceCount: 5
-      }
-    ],
-    evidenceCounts: {
-      supporting: 8,
-      contradicting: 4
-    },
-    qaInsights: [
-      {
-        id: "3",
-        type: "validation" as const,
-        title: "Technical Risk Assessment Needed",
-        description: "Consider prototype development to validate architecture",
-        icon: Cog
-      }
-    ]
-  },
-  viability: {
-    score: 0,
-    band: "Low Fit" as const,
-    confidence: "Low confidence" as const,
-    isLocked: true,
-    assumptions: [],
-    evidenceCounts: {
-      supporting: 0,
-      contradicting: 0
-    },
-    qaInsights: []
+// Helper to add icons to insights from hook data
+function addIconsToFitData(data: FitData, defaultIcon: React.ComponentType<{ className?: string }>): FitDataWithIcons {
+  return {
+    ...data,
+    qaInsights: data.qaInsights.map(insight => ({
+      ...insight,
+      icon: insight.type === 'satisfaction' ? Users :
+            insight.type === 'validation' ? Target : TrendingUp
+    }))
   }
 }
 
-export function FitDashboard() {
+// Default empty data when loading
+const emptyFitData: FitDataWithIcons = {
+  score: 0,
+  band: "Low Fit",
+  confidence: "Low confidence",
+  assumptions: [],
+  evidenceCounts: { supporting: 0, contradicting: 0 },
+  qaInsights: []
+}
+
+interface FitDashboardProps {
+  projectId?: string
+}
+
+export function FitDashboard({ projectId }: FitDashboardProps) {
+  const { data, isLoading, error } = useFitData(projectId)
+
+  if (!projectId) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Project Overview</h1>
+          <p className="text-muted-foreground">
+            Select a project to view validation status
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Project Overview</h1>
+          <p className="text-muted-foreground">
+            Track your business idea validation across the three critical dimensions
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Loading fit data...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Project Overview</h1>
+          <p className="text-muted-foreground">
+            Track your business idea validation across the three critical dimensions
+          </p>
+        </div>
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <p className="text-destructive">Error loading fit data: {error.message}</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Use real data or empty defaults
+  const fitData = {
+    desirability: data ? addIconsToFitData(data.desirability, Heart) : emptyFitData,
+    feasibility: data ? addIconsToFitData(data.feasibility, Cog) : emptyFitData,
+    viability: data ? addIconsToFitData(data.viability, DollarSign) : emptyFitData,
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -424,26 +408,26 @@ export function FitDashboard() {
           Track your business idea validation across the three critical dimensions
         </p>
       </div>
-      
+
       <div className="grid gap-6 md:grid-cols-3">
         <FitCard
           title="Desirability"
           type="desirability"
-          data={mockFitData.desirability}
+          data={fitData.desirability}
           icon={Heart}
           color={fitTypes.desirability.color}
         />
         <FitCard
           title="Feasibility"
           type="feasibility"
-          data={mockFitData.feasibility}
+          data={fitData.feasibility}
           icon={Cog}
           color={fitTypes.feasibility.color}
         />
         <FitCard
           title="Viability"
           type="viability"
-          data={mockFitData.viability}
+          data={fitData.viability}
           icon={DollarSign}
           color={fitTypes.viability.color}
         />

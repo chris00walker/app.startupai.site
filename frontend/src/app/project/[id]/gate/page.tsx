@@ -102,7 +102,8 @@ export default function ProjectGatePage() {
 
         if (data) {
           setAnalysisId((data.generation_metadata as any)?.analysis_id ?? data.id);
-          const summary = data.content?.slice(0, 320) ?? null;
+          // Show full report content - no truncation
+          const summary = data.content ?? null;
           setAnalysisSummary(summary);
 
           const insights = Array.isArray((data.generation_metadata as any)?.insights)
@@ -193,9 +194,12 @@ export default function ProjectGatePage() {
               <p className="text-sm text-destructive" role="alert">{analysisError}</p>
             )}
             {analysisSummary ? (
-              <p className="text-sm text-gray-800 dark:text-gray-200" aria-live="polite">
+              <div
+                className="text-sm text-gray-800 dark:text-gray-200 max-h-96 overflow-y-auto whitespace-pre-wrap"
+                aria-live="polite"
+              >
                 {analysisSummary}
-              </p>
+              </div>
             ) : (
               !analysisLoading && (
                 <p className="text-sm text-muted-foreground">

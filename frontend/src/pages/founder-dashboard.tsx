@@ -414,7 +414,7 @@ export default function FounderDashboard() {
 
           {/* Gate Dashboard - Replace FitDashboard with GateDashboard */}
           {projectId ? (
-            <GateDashboard 
+            <GateDashboard
               projectId={projectId}
               stage={currentStage as any}
               gateStatus={currentProject?.gateStatus || 'Pending'}
@@ -423,7 +423,7 @@ export default function FounderDashboard() {
               experimentsCount={0} // Will be calculated by the component
             />
           ) : (
-            <FitDashboard />
+            <FitDashboard projectId={projectId} />
           )}
 
           {/* Bottom Grid */}
