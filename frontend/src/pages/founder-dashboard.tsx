@@ -4,6 +4,7 @@ import * as React from "react"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { FitDashboard } from "@/components/fit/FitDashboard"
 import { GateDashboard } from "@/components/gates/GateDashboard"
+import { ValidationResultsSummary } from "@/components/validation/ValidationResultsSummary"
 import { GateStatusBadge } from "@/components/gates/GateStatusBadge"
 import { GateReadinessIndicator } from "@/components/gates/GateReadinessIndicator"
 import { useGateEvaluation } from "@/hooks/useGateEvaluation"
@@ -425,6 +426,9 @@ export default function FounderDashboard() {
           ) : (
             <FitDashboard projectId={projectId} />
           )}
+
+          {/* AI Validation Results Summary */}
+          <ValidationResultsSummary projectId={projectId} />
 
           {/* Bottom Grid */}
           <div className="grid gap-6 lg:grid-cols-2">

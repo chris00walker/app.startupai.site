@@ -2,6 +2,31 @@ import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Extract practice size from session data
+ */
+function extractPracticeSize(practiceInfo: any): string | null {
+  if (!practiceInfo) return null;
+  const size = practiceInfo.team_size || practiceInfo.practice_size || practiceInfo.size;
+  if (typeof size === 'string') {
+    if (size.includes('solo') || size === '1') return 'solo';
+    if (size.includes('2-10') || (parseInt(size) >= 2 && parseInt(size) <= 10)) return '2-10';
+    if (size.includes('11-50') || (parseInt(size) >= 11 && parseInt(size) <= 50)) return '11-50';
+    if (size.includes('51+') || parseInt(size) > 50) return '51+';
+  }
+  return 'solo'; // Default
+}
+
+/**
+ * Extract arrays from session data
+ */
+function extractArray(data: any): string[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data.map(String);
+  if (typeof data === 'string') return data.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -32,7 +57,7 @@ export async function POST(request: NextRequest) {
       supabaseClient = supabase;
     }
 
-    // Fetch session from database to get full conversation history
+    // Fetch session from database to get full conversation history and stage data
     const { data: session, error: sessionError } = await supabaseClient
       .from('consultant_onboarding_sessions')
       .select('*')
@@ -44,25 +69,70 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    // Extract information from conversation history
-    const conversationHistory = session.conversation_history || messages || [];
-    const conversationText = conversationHistory.map((m: any) => m.content).join('\n');
+    // Extract structured data from session fields
+    const practiceInfo = session.practice_info || {};
+    const industriesData = session.industries || [];
+    const servicesData = session.services || [];
+    const toolsData = session.tools_used || [];
+    const painPointsData = session.pain_points || [];
+    const goalsData = session.goals || {};
+    const clientManagement = session.client_management || {};
 
-    // Parse out key information (simple keyword extraction)
-    const companyNameMatch = conversationText.match(/(?:company|firm|agency)(?:\s+name)?(?:\s+is)?[:\s]+([A-Z][A-Za-z\s&]+)/i);
-    const companyName = companyNameMatch ? companyNameMatch[1].trim() : '';
+    // Extract company name from practice_info or conversation
+    let companyName = practiceInfo.company_name || practiceInfo.name || '';
+    if (!companyName) {
+      const conversationHistory = session.conversation_history || messages || [];
+      const conversationText = conversationHistory.map((m: any) => m.content).join('\n');
+      const companyNameMatch = conversationText.match(/(?:company|firm|agency|practice)(?:\s+name)?(?:\s+is)?[:\s]+([A-Z][A-Za-z\s&]+)/i);
+      companyName = companyNameMatch ? companyNameMatch[1].trim() : '';
+    }
+
+    // Ensure user_profiles entry exists (consultant_profiles has FK to user_profiles)
+    const { error: profileCheckError } = await supabaseClient
+      .from('user_profiles')
+      .upsert({
+        id: userId,
+        role: 'consultant',
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'id',
+        ignoreDuplicates: false,
+      });
+
+    if (profileCheckError) {
+      console.warn('[ConsultantComplete] user_profiles upsert warning:', profileCheckError.message);
+    }
+
+    // Build consultant profile data
+    const profileData = {
+      id: userId,
+      company_name: companyName || 'My Consulting Practice',
+      practice_size: extractPracticeSize(practiceInfo),
+      current_clients: practiceInfo.current_clients || clientManagement.client_count || 0,
+      industries: extractArray(industriesData),
+      services: extractArray(servicesData),
+      tools_used: extractArray(toolsData),
+      pain_points: Array.isArray(painPointsData) ? painPointsData.join('; ') : (painPointsData || ''),
+      white_label_enabled: goalsData.white_label_interest === true,
+      white_label_config: goalsData.white_label_config || {},
+      onboarding_completed: true,
+      last_session_id: sessionId,
+      last_onboarding_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    console.log('[ConsultantComplete] Saving profile data:', {
+      userId,
+      companyName: profileData.company_name,
+      practiceSize: profileData.practice_size,
+      industriesCount: profileData.industries.length,
+      servicesCount: profileData.services.length,
+    });
 
     // Upsert consultant profile
     const { data: profile, error: upsertError } = await supabaseClient
       .from('consultant_profiles')
-      .upsert({
-        id: userId,
-        company_name: companyName || 'My Consulting Practice',
-        onboarding_completed: true,
-        last_session_id: sessionId,
-        last_onboarding_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }, {
+      .upsert(profileData, {
         onConflict: 'id',
       })
       .select()
@@ -85,6 +155,15 @@ export async function POST(request: NextRequest) {
         overall_progress: 100,
       })
       .eq('session_id', sessionId);
+
+    // Update user_profiles to mark onboarding complete
+    await supabaseClient
+      .from('user_profiles')
+      .update({
+        onboarding_completed: true,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId);
 
     console.log('[ConsultantComplete] Onboarding completed for user:', userId);
 
