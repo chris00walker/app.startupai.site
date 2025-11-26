@@ -163,7 +163,6 @@ function buildReportRow(payload: FounderValidationPayload) {
 
   return {
     project_id: payload.project_id,
-    user_id: payload.user_id,
     title: `Validation Report: ${report.business_idea.slice(0, 50)}`,
     report_type: 'value_proposition_analysis',
     content: {
@@ -173,22 +172,21 @@ function buildReportRow(payload: FounderValidationPayload) {
       next_steps: report.next_steps,
       value_proposition_canvas: payload.value_proposition_canvas,
       qa_report: payload.qa_report,
-    },
-    ai_model: 'crewai-flows',
-    generation_metadata: {
-      kind: 'crew_validation',
-      validation_id: report.id,
-      kickoff_id: payload.kickoff_id,
-      completed_at: payload.completed_at || nowIso,
-      evidence_phases: {
-        desirability: !!payload.evidence.desirability,
-        feasibility: !!payload.evidence.feasibility,
-        viability: !!payload.evidence.viability,
+      // Store metadata in content since reports table doesn't have dedicated columns
+      _metadata: {
+        user_id: payload.user_id,
+        validation_id: report.id,
+        kickoff_id: payload.kickoff_id,
+        completed_at: payload.completed_at || nowIso,
+        evidence_phases: {
+          desirability: !!payload.evidence.desirability,
+          feasibility: !!payload.evidence.feasibility,
+          viability: !!payload.evidence.viability,
+        },
       },
     },
-    file_url: null,
-    file_format: null,
-    created_at: nowIso,
+    model: 'crewai-flows',
+    generated_at: nowIso,
     updated_at: nowIso,
   };
 }
