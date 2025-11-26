@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
+import { createCrewAIClient } from '@/lib/crewai/amp-client';
 
 /**
  * Extract practice size from session data
@@ -167,6 +168,12 @@ export async function POST(request: NextRequest) {
 
     console.log('[ConsultantComplete] Onboarding completed for user:', userId);
 
+    // Trigger CrewAI consultant onboarding flow (async, fire-and-forget)
+    // This generates AI recommendations based on practice data
+    triggerConsultantOnboardingFlow(userId, sessionId, profileData).catch(err => {
+      console.error('[ConsultantComplete] CrewAI trigger failed (non-blocking):', err.message);
+    });
+
     return NextResponse.json({
       success: true,
       profile,
@@ -179,5 +186,64 @@ export async function POST(request: NextRequest) {
       { error: 'Internal server error', details: error.message },
       { status: 500 }
     );
+  }
+}
+
+/**
+ * Trigger the CrewAI consultant onboarding flow (async, non-blocking).
+ *
+ * This kicks off the AI analysis in the background. Results will be
+ * persisted via the /api/crewai/consultant webhook when complete.
+ */
+async function triggerConsultantOnboardingFlow(
+  userId: string,
+  sessionId: string,
+  profileData: Record<string, any>
+): Promise<void> {
+  const crewaiUrl = process.env.CREWAI_API_URL;
+  const crewaiToken = process.env.CREWAI_API_TOKEN;
+
+  if (!crewaiUrl) {
+    console.warn('[ConsultantComplete] CREWAI_API_URL not configured, skipping AI analysis');
+    return;
+  }
+
+  console.log('[ConsultantComplete] Triggering CrewAI consultant onboarding flow...');
+
+  try {
+    const client = createCrewAIClient({
+      apiUrl: crewaiUrl,
+      apiToken: crewaiToken,
+    });
+
+    // Build practice data for the flow
+    const practiceData = {
+      company_name: profileData.company_name || '',
+      practice_size: profileData.practice_size || 'solo',
+      current_clients: profileData.current_clients || 0,
+      industries: profileData.industries || [],
+      services: profileData.services || [],
+      tools_used: profileData.tools_used || [],
+      pain_points: profileData.pain_points || '',
+      white_label_enabled: profileData.white_label_enabled || false,
+      goals: profileData.white_label_config || {},
+    };
+
+    // Kick off the flow (fire and forget - don't wait for completion)
+    const response = await client.kickoff({
+      inputs: {
+        flow_type: 'consultant_onboarding',
+        user_id: userId,
+        session_id: sessionId,
+        practice_data: practiceData,
+      },
+    });
+
+    console.log('[ConsultantComplete] CrewAI kickoff started:', response.kickoff_id);
+
+  } catch (error: any) {
+    // Log but don't fail - this is a background enhancement
+    console.error('[ConsultantComplete] CrewAI kickoff error:', error.message);
+    throw error; // Re-throw so caller can log
   }
 }
