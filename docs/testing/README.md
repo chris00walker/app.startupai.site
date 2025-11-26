@@ -1,99 +1,202 @@
 # Testing Documentation
 
-This directory contains testing documentation for the StartupAI platform.
+Testing infrastructure for the StartupAI platform.
 
-## Current Status
+## Overview
 
-The testing infrastructure is currently **planned but not yet implemented**. This document describes the target testing strategy for when implementation begins.
+The platform uses **Jest** for unit/integration testing and **Playwright** for end-to-end testing, with React Testing Library for component testing and axe-core for accessibility checks.
 
-## Planned Testing Strategy
+## Test Stack
 
-The StartupAI testing strategy will follow specification-driven testing principles, ensuring that all features deliver exactly what marketing promises to users.
-
-## Planned Testing Categories
-
-### 1. Business Requirements Tests
-- **Purpose**: Validate that the product delivers on marketing promises
-- **Planned Location**: `frontend/__tests__/business-requirements/`
-- **Coverage**: Marketing promise delivery, universal access, AI-powered analysis
-
-### 2. User Journey Tests
-- **Purpose**: Validate complete user experience from signup to value delivery
-- **Planned Location**: `frontend/__tests__/user-journey/`
-- **Coverage**: 15-step onboarding journey, conversation flow, results delivery
-
-### 3. Accessibility Tests
-- **Purpose**: Ensure WCAG 2.2 AA compliance and inclusive design
-- **Planned Location**: `frontend/__tests__/accessibility/`
-- **Coverage**: WCAG 2.0/2.1/2.2 standards, AI-specific accessibility patterns
-
-### 4. API Contract Tests
-- **Purpose**: Validate API endpoints meet specification requirements
-- **Planned Location**: `frontend/__tests__/api-contracts/`
-- **Coverage**: Request/response validation, error handling, authentication
-
-### 5. Success Metrics Tests
-- **Purpose**: Measure and validate business success metrics
-- **Planned Location**: `frontend/__tests__/success-metrics/`
-- **Coverage**: Conversation quality, data quality, workflow success
-
-## Planned Test Framework
-
-### Core Technologies
-- **Vitest**: Primary testing framework (aligned with Vite toolchain)
-- **Testing Library**: React component testing with accessibility focus
-- **Axe-core**: Automated accessibility testing
-- **Playwright**: End-to-end testing for user journeys
+| Purpose | Tool | Location |
+|---------|------|----------|
+| Unit/Integration | Jest + React Testing Library | `*.test.tsx`, `*.spec.ts` |
+| E2E | Playwright | `e2e/`, `*.spec.ts` |
+| Accessibility | axe-core + @axe-core/react | Integrated in component tests |
 
 ## Running Tests
-
-Once implemented:
 
 ```bash
 # All tests
 pnpm test
 
-# Watch mode
+# Watch mode (development)
 pnpm test:watch
 
-# Coverage
+# Coverage report
 pnpm test:coverage
+
+# Unit tests only
+pnpm test:unit
+
+# Integration tests only
+pnpm test:integration
+
+# E2E tests (Playwright)
+pnpm test:e2e
+
+# E2E with UI (visual debugging)
+pnpm test:e2e:ui
+
+# Backend integration E2E
+pnpm test:e2e:backend
+
+# Run all test types
+pnpm test:all
+
+# CI pipeline (coverage + E2E)
+pnpm test:ci
 ```
 
-## Implementation Priority
+## Test Structure
 
-1. **Unit tests** for critical business logic
-2. **Integration tests** for API endpoints
-3. **E2E tests** for key user journeys
-4. **Accessibility tests** for WCAG compliance
+```
+frontend/
+├── src/
+│   ├── __tests__/           # Unit and integration tests
+│   │   └── production/      # Production validation tests
+│   └── components/
+│       └── *.test.tsx       # Component-adjacent tests
+├── e2e/                     # Playwright E2E tests
+│   └── *.spec.ts
+└── jest.config.js           # Jest configuration
+```
 
-## Backend Tests
+## Test Categories
 
-The backend has a separate test structure in `backend/tests/` using pytest.
+### Unit Tests
 
-```bash
-cd backend
-pytest
+Test individual functions and utilities in isolation.
+
+```typescript
+// Example: src/__tests__/utils/validation.test.ts
+import { validateEmail } from '@/lib/validation';
+
+describe('validateEmail', () => {
+  it('accepts valid emails', () => {
+    expect(validateEmail('user@example.com')).toBe(true);
+  });
+});
+```
+
+### Component Tests
+
+Test React components with React Testing Library.
+
+```typescript
+// Example: src/components/Button.test.tsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('calls onClick when clicked', async () => {
+    const onClick = jest.fn();
+    render(<Button onClick={onClick}>Click me</Button>);
+
+    await userEvent.click(screen.getByRole('button'));
+    expect(onClick).toHaveBeenCalled();
+  });
+});
+```
+
+### Integration Tests
+
+Test API routes and database interactions.
+
+```typescript
+// Example: src/__tests__/integration/api.test.ts
+describe('API /api/projects', () => {
+  it('returns user projects', async () => {
+    const response = await fetch('/api/projects');
+    expect(response.status).toBe(200);
+  });
+});
+```
+
+### E2E Tests (Playwright)
+
+Test complete user journeys.
+
+```typescript
+// Example: e2e/onboarding.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('user can complete onboarding', async ({ page }) => {
+  await page.goto('/onboarding');
+  await page.fill('[data-testid="business-idea"]', 'My startup idea');
+  await page.click('[data-testid="submit"]');
+  await expect(page).toHaveURL(/dashboard/);
+});
+```
+
+### Accessibility Tests
+
+Integrated with component tests using axe-core.
+
+```typescript
+// Example: src/components/Form.test.tsx
+import { axe, toHaveNoViolations } from 'jest-axe';
+expect.extend(toHaveNoViolations);
+
+it('has no accessibility violations', async () => {
+  const { container } = render(<Form />);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+## Configuration
+
+### Jest (`jest.config.js`)
+
+```javascript
+module.exports = {
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
+};
+```
+
+### Playwright (`playwright.config.ts`)
+
+```typescript
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  use: {
+    baseURL: 'http://localhost:3000',
+  },
+});
 ```
 
 ## Quality Gates
 
-### Pre-Deployment Requirements (Target)
-- All tests passing
-- Minimum 80% code coverage for critical paths
-- 100% WCAG 2.2 AA compliance
-- All API contracts validated
+### Pre-Deployment Requirements
 
-## Documentation
+- [ ] All unit tests passing
+- [ ] All integration tests passing
+- [ ] All E2E tests passing
+- [ ] Coverage targets met for critical paths
+- [ ] No accessibility violations in component tests
 
-Test specifications will be added as implementation progresses:
-- Business Requirements Testing
-- User Journey Validation
-- Accessibility Testing
-- API Contract Testing
+### CI Pipeline
+
+The `test:ci` script runs:
+1. `test:coverage` - Unit/integration with coverage
+2. `test:e2e` - Playwright end-to-end tests
+
+## Related Documentation
+
+- [Business Requirements Testing](./business-requirements-testing.md)
+- [User Journey Validation](./user-journey-validation.md)
+- [Accessibility Testing](./accessibility-testing.md)
 
 ---
 
-**Last Updated**: November 21, 2025
-**Status**: Planning phase - test infrastructure not yet implemented
-**Next Step**: Set up Vitest configuration and initial test structure
+**Last Updated**: 2025-11-26
+**Status**: Jest + Playwright infrastructure implemented
