@@ -305,6 +305,30 @@ CrewAI → Product App (this repo) → Marketing Site
 
 **Current blockers**: See `docs/work/cross-repo-blockers.md`
 
+## Claude Code Customizations
+
+### Available Agents (Project-Level)
+See `.claude/agents/` for repo-specific agents:
+- **database-architect**: Database schema design, Drizzle ORM, Supabase PostgreSQL, pgvector embeddings, migrations, and data modeling
+- **testing-specialist**: Jest unit testing, Playwright E2E testing, test-driven development, coverage optimization, and testing strategy
+
+### User-Level Agents (Available Across All Repos)
+See `~/.claude/agents/` for cross-repo agents:
+- **ecosystem-coordinator**: Cross-repo dependency management and blocker tracking
+- **backend-developer**: Supabase, Drizzle ORM, API design, database architecture
+- **frontend-developer**: Next.js, React, shadcn/ui, component patterns
+- **ai-engineer**: CrewAI Flows, Vercel AI SDK, LLM integration
+
+### Available Skills
+See `~/.claude/skills/` for cross-repo skills:
+- **frontend-design**: Creative UI design guidance emphasizing distinctive aesthetics (typography, bold colors, motion, atmospheric backgrounds) - avoid generic "AI slop" patterns
+- **cross-repo-sync**: Update blocker files across all 3 repos
+- **quality-gate**: Comprehensive pre-commit checks (lint, type-check, test, build)
+- **crewai-integration-check**: Validate CrewAI API contracts and deployment connectivity
+
+### Usage
+Agents are automatically invoked based on context and trigger words in their descriptions. Skills are discovered and used when relevant to the current task. See individual agent/skill files for detailed capabilities.
+
 ## Documentation
 - Authentication: `docs/specs/auth.md`
 - CrewAI Integration: `docs/overview/ONBOARDING_TO_CREWAI_ARCHITECTURE.md`
