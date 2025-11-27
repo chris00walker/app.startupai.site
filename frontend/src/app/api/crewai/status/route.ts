@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
       state: status.state,
       status: status.status,
       progress: calculateProgress(status),
-      current_agent: status.last_executed_task?.name || status.current_agent,
+      current_agent: status.last_executed_task?.name || 'Unknown',
       result: status.result,
       result_json: status.result_json,
     });
