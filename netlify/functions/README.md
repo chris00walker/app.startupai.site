@@ -4,6 +4,8 @@
 
 This directory contains Netlify serverless functions for the StartupAI platform.
 
+> **Note**: The primary backend is implemented via **Next.js API routes** in `frontend/src/app/api/`. These Netlify functions provide supplementary endpoints for specific use cases (Python-based CrewAI integration, background processing). For most API work, see `frontend/src/app/api/`.
+
 ## Structure
 
 ```
@@ -118,12 +120,44 @@ Check function logs in Netlify dashboard:
 - [ ] Add integration tests
 - [ ] Set up error alerting
 
+## API Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Client Requests                          │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+         ┌─────────────┼─────────────┐
+         ▼                           ▼
+┌─────────────────────┐    ┌─────────────────────┐
+│   Next.js API       │    │   Netlify Functions │
+│   (Primary)         │    │   (Supplementary)   │
+│                     │    │                     │
+│ /api/analyze        │    │ /.netlify/functions/│
+│ /api/crewai/*       │    │   crewai-analyze    │
+│ /api/onboarding/*   │    │   gate-evaluate     │
+│ /api/projects/*     │    │                     │
+└─────────────────────┘    └─────────────────────┘
+         │                           │
+         └───────────┬───────────────┘
+                     ▼
+         ┌───────────────────────┐
+         │  CrewAI AMP Platform  │
+         │  (8-crew/18-agent)    │
+         └───────────────────────┘
+```
+
+**When to use which:**
+- **Next.js API routes** - TypeScript handlers, Supabase integration, streaming responses
+- **Netlify Functions** - Python-specific operations, long-running background tasks
+
 ## Resources
 
 - [Netlify Functions Docs](https://docs.netlify.com/functions/overview/)
 - [Python Functions Guide](https://docs.netlify.com/functions/python/)
 - [CrewAI Documentation](https://docs.crewai.com/)
+- [Next.js API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
 
 ---
 
-**Last Updated**: November 21, 2025
+**Last Updated**: 2025-11-26

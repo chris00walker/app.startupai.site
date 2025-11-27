@@ -1,7 +1,7 @@
 ---
 purpose: "Documentation index for the StartupAI product platform"
 status: "active"
-last_reviewed: "2025-11-21"
+last_reviewed: "2025-11-26"
 ---
 
 # StartupAI App Documentation
@@ -50,8 +50,9 @@ For new contributors, start with:
 
 ## Cross-References
 
-- **Master Architecture**: `startupai-crew/docs/master-architecture/` (ecosystem-level)
+- **Master Architecture**: `startupai-crew/docs/master-architecture/` (ecosystem source of truth)
+- **CrewAI Backend**: 8-crew/18-agent Flows with Innovation Physics routers (Phase 2D complete)
 - **Marketing Site**: `startupai.site/docs/` (lead capture)
 
 ---
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-11-26

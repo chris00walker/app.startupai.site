@@ -140,9 +140,10 @@ app.startupai.site/
 The platform connects to the AI Founders engine via:
 - `/api/analyze` - Triggers CrewAI workflow
 - `/api/crewai/status` - Polls for completion
+- `/api/crewai/webhook` - Receives results on flow completion
 - Results stored in `reports` and `evidence` tables
 
-**Note:** Currently integrated with 6-agent crew. Will be updated as startupai-crew rebuilds to 8-crew/18-agent Flows architecture.
+**Architecture:** 8-crew/18-agent Flows with Innovation Physics routers (Phase 2D complete in startupai-crew).
 
 ---
 
