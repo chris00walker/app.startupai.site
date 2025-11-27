@@ -2,6 +2,7 @@
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
 last_reviewed: "2025-11-26"
+last_synced: "2025-11-26 - Synced with startupai-crew Phase 2D completion"
 ---
 
 # Cross-Repository Blockers
@@ -10,17 +11,27 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 ## This Repo Blocked By
 
-### CrewAI Backend (`startupai-crew`)
+### CrewAI Backend (`startupai-crew`) - **UPDATED 2025-11-26**
 
 | Blocker | Status | Description | Impact |
 |---------|--------|-------------|--------|
-| Phase 1 Completion | ⚠️ Partial | Flow works, outputs synthetic | Can display results, but quality is fiction |
-| Flow → Webhook Call | ⏳ Pending | CrewAI Flow needs to POST to our webhook | Results won't persist until this is wired |
-| Real Analysis Tools | Not Started | Tools for web research, data retrieval | Outputs will remain synthetic without this |
+| Phase 2D Completion | ✅ Complete | 8 crews, 18 agents, 18 tools, HITL, Flywheel | Can display results with real web research |
+| Flow → Webhook Call | ✅ Implemented | `_persist_to_supabase()` POSTs to our webhook | Results will persist when flow completes |
+| Real Analysis Tools | ✅ Implemented | TavilySearchTool + 4 research tools | Real web research available |
+| Flywheel Learning Tables | ✅ Done | Tables created in Supabase | CrewAI can persist/query learnings |
 
-**Important Note:** Even when CrewAI Phase 1 "completes", the outputs will be LLM-generated synthetic data, not real analysis. This affects all downstream features that depend on "real" validation results.
+**Status Update (2025-11-26):** CrewAI backend is ~85% complete. Core engine fully functional with:
+- 18 tools implemented (research, financial, build, HITL, flywheel, privacy)
+- `_persist_to_supabase()` webhook implemented in flow
+- Resume handler for HITL approvals (`webhooks/resume_handler.py`)
+- 192 integration tests passing
 
-**Phase 1 Complete Criteria**: See `startupai-crew/docs/work/phases.md`
+**Remaining Gaps (not blocking this repo):**
+- Activity Feed API for marketing site (❌ Not Started)
+- Metrics API for marketing site (❌ Not Started)
+- Ad platform integration (Meta/Google) - explicitly deferred
+
+**Phase Status**: See `startupai-crew/docs/work/phases.md`
 
 ## This Repo Provides
 
@@ -46,38 +57,39 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 | Blocked Item | Status | Description | Impact |
 |--------------|--------|-------------|--------|
-| Results Display UI | ✅ Done | Dashboard showing analysis results | Ready when CrewAI posts to webhook |
-| E2E Validation Flow | ⏳ Pending | Full flow: onboarding → analysis → results | Blocked by CrewAI webhook integration |
+| Results Display UI | ✅ Done | Dashboard showing analysis results | Ready to receive CrewAI results |
+| E2E Validation Flow | ⚠️ Ready to Test | Full flow: onboarding → analysis → results | Webhook implemented, needs E2E testing |
 
 ## Phase Alpha Dependencies
 
 Phase Alpha (CrewAI Delivery & Onboarding Hardening) requires:
-1. **CrewAI Phase 1 complete** → ⚠️ Partial (Flow exists, outputs synthetic)
-2. **Results persistence** → ✅ Webhook ready, awaiting CrewAI integration
+1. **CrewAI Phase 2D complete** → ✅ Complete (18 tools, real web research)
+2. **Results persistence** → ✅ Webhook implemented (`_persist_to_supabase()`)
 3. **Results display** → ✅ `ValidationResultsSummary` wired to dashboard
 
-### Dependency Chain
+### Dependency Chain - UPDATED 2025-11-26
 ```
-CrewAI Phase 1 Complete
+✅ CrewAI Phase 2D Complete (8 crews, 18 agents, 18 tools)
          ↓
-CrewAI Flow calls POST /api/crewai/webhook  ← CURRENT BLOCKER
+✅ CrewAI Flow calls POST /api/crewai/webhook (implemented)
          ↓
-Product App displays real results (ready)
+⚠️ Product App displays real results  ← CURRENT FOCUS
          ↓
 Marketing Phase 4 Validation Cycles
 
 ✅ Learning Tables Migration (done)
          ↓
-CrewAI Flywheel Tools (pending integration)
+✅ CrewAI Flywheel Tools (implemented)
          ↓
-AI Founders Get Smarter
+AI Founders Get Smarter (operational)
 ```
 
 ## Coordination Notes
 
-- **Primary blocker**: CrewAI Flow needs to POST to `/api/crewai/webhook`
-- Product App is ready to receive and display results
-- Can proceed with onboarding hardening, PostHog, accessibility work in parallel
+- **CrewAI backend is UNBLOCKED** - All dependencies on CrewAI are resolved
+- **Product App focus**: E2E testing of webhook → display flow
+- **Marketing site waiting on**: Activity Feed API and Metrics API (not yet built)
+- Can proceed with onboarding hardening, PostHog, accessibility work
 
 ## Cross-Repo Links
 

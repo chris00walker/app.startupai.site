@@ -33,35 +33,40 @@ Work these items in order. Items marked "Ready" can start immediately.
 | HITL approval system | ✅ Done | Approval requests table + API routes |
 | Consultant onboarding integration | ✅ Done | Profile persistence + AI analysis webhook |
 
-### P3: Blocked by CrewAI
+### P3: UNBLOCKED - Ready for E2E Testing (Updated 2025-11-26)
 
-| Priority | Item | Status | Blocked By | Notes |
-|----------|------|--------|------------|-------|
-| 4 | E2E validation flow | **Blocked** | CrewAI webhook call | Product app ready; waiting for CrewAI to POST |
-| 5 | Real analysis data quality | **Blocked** | CrewAI real tools | Web search, financial data tools needed |
+| Priority | Item | Status | Notes |
+|----------|------|--------|-------|
+| 4 | E2E validation flow | **Ready to Test** | CrewAI webhook implemented (`_persist_to_supabase()`), product app ready |
+| 5 | Real analysis data quality | **Available** | TavilySearchTool + 4 research tools now provide real web data |
+
+**CrewAI Status (2025-11-26):** Phase 2D complete (~85%). 18 tools implemented including:
+- TavilySearchTool for real web research
+- UnitEconomicsCalculatorTool for financial analysis
+- LandingPageGeneratorTool + Netlify deployment
 
 ---
 
-## Cross-Repo Dependencies
+## Cross-Repo Dependencies - UPDATED 2025-11-26
 
 ```
-startupai-crew (CrewAI Phase 1)
-    ↓ Needs to POST to /api/crewai/webhook  ← CURRENT BLOCKER
-app.startupai.site (This repo)
+✅ startupai-crew (CrewAI Phase 2D Complete - 85%)
+    ↓ Webhook implemented (`_persist_to_supabase()`)
+⚠️ app.startupai.site (This repo) ← CURRENT FOCUS: E2E Testing
     ↓ Displays results (ready), captures leads
 startupai.site (Marketing)
-    ↓ Shows activity, validates cycles
+    ↓ Waiting on Activity Feed + Metrics APIs (not yet built)
 ```
 
-**Blocking Chain**: CrewAI webhook integration → E2E flow works → Marketing Validation Cycles
+**Focus**: E2E testing of webhook → results display flow
 
 ---
 
-## Immediate Actions
+## Immediate Actions (Updated 2025-11-26)
 
 1. **Start accessibility work** - #1 launch blocker, no dependencies
 2. **Start PostHog instrumentation** - No dependencies
-3. **Coordinate with CrewAI repo** - Wire Flow to call `/api/crewai/webhook`
+3. **E2E testing** - CrewAI webhook is implemented; test full onboarding → analysis → results flow
 
 ---
 
