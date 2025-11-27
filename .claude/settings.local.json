@@ -24,7 +24,11 @@
       "mcp__shadcn__get_project_registries",
       "mcp__shadcn__search_items_in_registries",
       "mcp__shadcn__view_items_in_registries",
-      "mcp__shadcn__get_item_examples_from_registries"
+      "mcp__shadcn__get_item_examples_from_registries",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_migrations",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql"
     ],
     "deny": [
       "Bash(rm:*)",
