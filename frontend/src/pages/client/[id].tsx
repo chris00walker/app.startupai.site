@@ -12,6 +12,7 @@ import { Separator } from '../../components/ui/separator';
 import { AlertCircle, CheckCircle, Clock, Play, RotateCcw, Activity, X, Eye, Plus } from 'lucide-react';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Progress } from '../../components/ui/progress';
+import { VPCSummaryCard } from '@/components/vpc';
 
 interface Client {
   _id: string;
@@ -360,6 +361,14 @@ const ClientPage: React.FC = () => {
 
           {/* Right Column - Agent Status & Artefacts */}
           <div className="space-y-8">
+            {/* Value Proposition Analysis */}
+            {id && typeof id === 'string' && (
+              <VPCSummaryCard
+                projectId={id}
+                onClick={() => router.push(`/project/${id}/analysis`)}
+              />
+            )}
+
             {/* Agent Status */}
             <Card className="business-card">
               <CardHeader className="business-card-header">

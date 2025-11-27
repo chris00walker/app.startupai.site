@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Clock,
+  AlertTriangle,
+  CheckCircle,
   XCircle,
   TrendingUp,
   Users,
@@ -16,6 +16,8 @@ import {
   BarChart3
 } from "lucide-react"
 import { PortfolioProject } from "@/types/portfolio"
+import { VPCFitDotsGroup } from "@/components/vpc"
+import { useFitData } from "@/hooks/useFitData"
 
 interface PortfolioGridProps {
   projects: PortfolioProject[]
@@ -70,13 +72,16 @@ const gateStatusConfig = {
   }
 }
 
-function ProjectCard({ project, onClick }: { 
+function ProjectCard({ project, onClick }: {
   project: PortfolioProject
-  onClick?: (project: PortfolioProject) => void 
+  onClick?: (project: PortfolioProject) => void
 }) {
   const stageStyle = stageConfig[project.stage]
   const statusStyle = gateStatusConfig[project.gateStatus]
   const StatusIcon = statusStyle.icon
+
+  // Fetch fit data for VPC fit dots
+  const { data: fitData } = useFitData(project.id)
 
   const getRiskColor = (delta: number) => {
     if (delta <= 0) return "text-green-600"
@@ -103,6 +108,13 @@ function ProjectCard({ project, onClick }: {
                 <Badge variant={statusStyle.badge} className="text-xs">
                   {project.gateStatus}
                 </Badge>
+                {fitData && (
+                  <VPCFitDotsGroup
+                    desirabilityBand={fitData.desirability.band}
+                    feasibilityBand={fitData.feasibility.band}
+                    viabilityBand={fitData.viability.band}
+                  />
+                )}
               </div>
             </div>
           </div>

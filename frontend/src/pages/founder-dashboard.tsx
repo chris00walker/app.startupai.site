@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button"
 import { useProjects } from "@/hooks/useProjects"
 import { useAuth } from "@/lib/auth/hooks"
 import Link from "next/link"
+import { useRouter } from "next/router"
+import { VPCSummaryCard } from "@/components/vpc"
 import {
   Target,
   FileText,
@@ -303,6 +305,7 @@ export default function FounderDashboard() {
   const [activeTab, setActiveTab] = React.useState('overview')
   const { projects, isLoading, error } = useProjects()
   const { user } = useAuth()
+  const router = useRouter()
 
   // Get current project (first project for now, can be enhanced later)
   const currentProject = projects.length > 0 ? projects[0] : null
@@ -430,8 +433,15 @@ export default function FounderDashboard() {
           {/* AI Validation Results Summary */}
           <ValidationResultsSummary projectId={projectId} />
 
-          {/* Bottom Grid */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          {/* Bottom Grid with VPC Summary */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Value Proposition Canvas Summary */}
+            {projectId && (
+              <VPCSummaryCard
+                projectId={projectId}
+                onClick={() => router.push(`/project/${projectId}/analysis`)}
+              />
+            )}
             <RecentActivity />
             <NextSteps />
           </div>
