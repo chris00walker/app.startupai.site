@@ -366,7 +366,7 @@ export async function POST(req: NextRequest) {
                   console.log('[api/chat] Project created:', projectId);
 
                   // Step 4: Kick off CrewAI workflow
-                  const { kickoffCrewAIAnalysis } = await import('@/lib/crewai/client');
+                  const { kickoffCrewAIAnalysis } = await import('@/lib/crewai/amp-client');
                   const workflowId = await kickoffCrewAIAnalysis(
                     briefData,
                     projectId,

@@ -83,8 +83,13 @@ cp frontend/.env.example frontend/.env.local
 ```
 
 ### Local Access
-- **Development:** http://localhost:3000
-- **With Marketing Site:** Run `pnpm dev` in both repos (3000 + 3001)
+- **Development:** http://localhost:3001 (This repo - Product App)
+- **With Marketing Site:** Run `pnpm dev` in both repos (Marketing: 3000, App: 3001)
+
+**Development Ports (Canonical):**
+- **Marketing Site** (`startupai.site`): `localhost:3000`
+- **This repo (Product App)**: `localhost:3001`
+- **CrewAI Backend** (`startupai-crew`): Deployed on CrewAI AMP (no local port)
 
 ### Production
 - **Live:** https://app-startupai-site.netlify.app
@@ -151,10 +156,10 @@ The platform connects to the AI Founders engine via:
 
 ### Ecosystem Source of Truth
 **`startupai-crew/docs/master-architecture/`** contains:
-- `ecosystem.md` - Three-service overview
-- `organizational-structure.md` - 6 founders, 18 agents
-- `internal-validation-system-spec.md` - Technical blueprint
-- `current-state.md` - Status assessment
+- `01-ecosystem.md` - Three-service overview
+- `02-organization.md` - 6 founders, 18 agents
+- `03-validation-spec.md` - Technical blueprint
+- `04-status.md` - Status assessment
 
 ### Platform-Specific Docs
 

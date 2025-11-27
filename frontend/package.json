@@ -4,8 +4,8 @@
   "main": "postcss.config.js",
   "packageManager": "pnpm@9.12.1",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "dev:local": "next dev --turbopack -p 3000",
+    "dev": "next dev --turbopack -p 3001",
+    "dev:local": "next dev --turbopack -p 3001",
     "dev:staging": "cd .. && netlify dev",
     "build": "next build",
     "build:staging": "NODE_ENV=staging next build",

@@ -235,3 +235,65 @@ export function createCrewAIClient(config?: Partial<CrewAIClientConfig>): CrewAI
     pollIntervalMs: config?.pollIntervalMs,
   });
 }
+
+// ============================================================================
+// Backward Compatibility Helpers (for migration from deprecated client.ts)
+// ============================================================================
+
+/**
+ * Format entrepreneur brief data from database into CrewAI crew input format
+ * @deprecated Use the class-based API directly. This helper exists for backward compatibility.
+ */
+export function formatBriefForCrew(brief: Record<string, any>): Record<string, any> {
+  return {
+    target_customer: brief.primary_customer_segment ||
+      JSON.stringify(brief.customer_segments || []),
+    problem_description: brief.problem_description || '',
+    pain_level: brief.problem_pain_level || 5,
+    solution_description: `${brief.solution_description || ''}. Unique Value: ${brief.unique_value_proposition || ''}`,
+    key_differentiators: brief.differentiation_factors || [],
+    competitors: brief.competitors || [],
+    available_channels: brief.available_channels || [],
+    budget_range: brief.budget_range || 'not specified',
+    business_stage: brief.business_stage || 'idea',
+    goals: JSON.stringify(brief.three_month_goals || []),
+  };
+}
+
+/**
+ * Kick off the StartupAI strategic analysis crew
+ * @deprecated Use createCrewAIClient().kickoff() instead. This function exists for backward compatibility.
+ */
+export async function kickoffCrewAIAnalysis(
+  briefData: Record<string, any>,
+  projectId: string,
+  userId: string
+): Promise<string> {
+  console.log('[CrewAI Client] Kicking off analysis:', {
+    projectId,
+    userId,
+    hasData: !!briefData,
+  });
+
+  const client = createCrewAIClient();
+  const entrepreneurInput = formatBriefForCrew(briefData);
+
+  const response = await client.kickoff({
+    inputs: { entrepreneur_input: entrepreneurInput },
+  });
+
+  console.log('[CrewAI Client] Kickoff successful:', {
+    kickoffId: response.kickoff_id,
+  });
+
+  return response.kickoff_id;
+}
+
+/**
+ * Get the status and results of a crew execution
+ * @deprecated Use createCrewAIClient().getStatus() instead. This function exists for backward compatibility.
+ */
+export async function getCrewAIStatus(kickoffId: string): Promise<CrewAIStatusResponse> {
+  const client = createCrewAIClient();
+  return await client.getStatus(kickoffId);
+}

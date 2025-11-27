@@ -95,4 +95,4 @@ AI Founders Get Smarter (operational)
 
 - CrewAI blockers: `startupai-crew/docs/work/cross-repo-blockers.md`
 - Marketing blockers: `startupai.site/docs/work/cross-repo-blockers.md`
-- Master architecture: `startupai-crew/docs/master-architecture/ecosystem.md`
+- Master architecture: `startupai-crew/docs/master-architecture/01-ecosystem.md`

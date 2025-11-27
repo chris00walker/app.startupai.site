@@ -11,12 +11,13 @@ Implementation lives in `frontend/src/app/api/onboarding/{start,message,complete
 
 ## Backend Integration
 
-**Agentuity Agent:** The API routes now forward requests to the Agentuity-hosted onboarding agent instead of Netlify Functions. Configure via:
-```bash
-AGENTUITY_AGENT_URL=https://your-agent.agentuity.com/onboarding
-```
+**CrewAI AMP Platform:** The API routes integrate with CrewAI flows deployed on the CrewAI AMP platform. The onboarding completion triggers the strategic analysis workflow.
 
-The agent handles conversation flow, personality, session management, and CrewAI integration.
+- **Onboarding:** Vercel AI SDK handles the conversational UI (frontend/src/app/api/chat/route.ts)
+- **Analysis Workflow:** CrewAI Flows on AMP (kickoff triggered from /api/onboarding/complete)
+- **Configuration:** See `docs/master-architecture/reference/amp-configuration.md`
+
+The CrewAI backend handles the strategic validation workflow with 8 crews and 18 specialist agents.
 
 ## Endpoint Summary
 

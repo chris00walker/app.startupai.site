@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
-import { kickoffCrewAIAnalysis } from '@/lib/crewai/client';
+import { kickoffCrewAIAnalysis } from '@/lib/crewai/amp-client';
 
 export async function POST(req: NextRequest) {
   try {

@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { getCrewAIStatus } from '@/lib/crewai/client';
+import { getCrewAIStatus } from '@/lib/crewai/amp-client';
 
 export async function GET(req: NextRequest) {
   try {
