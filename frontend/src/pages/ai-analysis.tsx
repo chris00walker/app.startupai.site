@@ -18,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
+import {
   Brain,
   Sparkles,
   FileText,
@@ -34,19 +34,15 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/auth/hooks"
+import { FounderStatusPanel } from "@/components/founders"
+import { useFounderStatus } from "@/hooks/useFounderStatus"
+import { getAllFounders, type FounderStatus as FounderStatusType } from "@/lib/founders/founder-mapping"
 
 interface AnalysisRequest {
   strategicQuestion: string
   projectContext: string
   targetSources: string
   priorityLevel: 'low' | 'medium' | 'high'
-}
-
-interface AgentStatus {
-  name: string
-  status: 'pending' | 'running' | 'completed' | 'error'
-  progress: number
-  description: string
 }
 
 interface AnalysisResult {
@@ -60,15 +56,6 @@ interface AnalysisResult {
   }
 }
 
-const AGENTS: AgentStatus[] = [
-  { name: "Research Analyst", status: 'pending', progress: 0, description: "Gathering market intelligence and competitive data" },
-  { name: "Strategy Consultant", status: 'pending', progress: 0, description: "Analyzing strategic positioning and opportunities" },
-  { name: "Evidence Curator", status: 'pending', progress: 0, description: "Collecting and validating supporting evidence" },
-  { name: "Risk Assessor", status: 'pending', progress: 0, description: "Identifying potential risks and mitigation strategies" },
-  { name: "Market Validator", status: 'pending', progress: 0, description: "Validating market assumptions and hypotheses" },
-  { name: "Report Generator", status: 'pending', progress: 0, description: "Synthesizing insights into strategic recommendations" }
-]
-
 export default function AIAnalysisPage() {
   const [analysisRequest, setAnalysisRequest] = useState<AnalysisRequest>({
     strategicQuestion: '',
@@ -77,66 +64,29 @@ export default function AIAnalysisPage() {
     priorityLevel: 'medium'
   })
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [agents, setAgents] = useState<AgentStatus[]>(AGENTS)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [currentStep, setCurrentStep] = useState<'input' | 'analyzing' | 'results'>('input')
-  
+
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
+
+  // Use real founder status from the API
+  const { founders, isAnalyzing: foundersAnalyzing, activeFounder } = useFounderStatus({
+    enabled: currentStep === 'analyzing',
+    refetchInterval: 3000,
+  })
 
   const handleInputChange = (field: keyof AnalysisRequest, value: string) => {
     setAnalysisRequest(prev => ({ ...prev, [field]: value }))
   }
 
-  const simulateAgentProgress = () => {
-    let currentAgentIndex = 0
-    const interval = setInterval(() => {
-      setAgents(prev => {
-        const updated = [...prev]
-        
-        // Complete previous agent
-        if (currentAgentIndex > 0) {
-          updated[currentAgentIndex - 1].status = 'completed'
-          updated[currentAgentIndex - 1].progress = 100
-        }
-        
-        // Start current agent
-        if (currentAgentIndex < updated.length) {
-          updated[currentAgentIndex].status = 'running'
-          updated[currentAgentIndex].progress = 50
-        }
-        
-        return updated
-      })
-      
-      currentAgentIndex++
-      
-      // Complete all agents
-      if (currentAgentIndex >= AGENTS.length) {
-        setAgents(prev => {
-          const final = [...prev]
-          final[final.length - 1].status = 'completed'
-          final[final.length - 1].progress = 100
-          return final
-        })
-        clearInterval(interval)
-      }
-    }, 3000) // Each agent takes ~3 seconds
-  }
-
   const startAnalysis = async () => {
     if (!user || !analysisRequest.strategicQuestion.trim()) return
-    
+
     setIsAnalyzing(true)
     setCurrentStep('analyzing')
-    
-    // Reset agents
-    setAgents(AGENTS.map(agent => ({ ...agent, status: 'pending', progress: 0 })))
-    
-    // Start agent progress simulation
-    simulateAgentProgress()
-    
+
     try {
       // Get auth token for CrewAI API call
       const { data: { session } } = await supabase.auth.getSession()
@@ -171,11 +121,7 @@ export default function AIAnalysisPage() {
       
     } catch (error) {
       console.error('AI analysis error:', error)
-      // Set error state for agents
-      setAgents(prev => prev.map(agent => ({ 
-        ...agent, 
-        status: agent.status === 'running' ? 'error' : agent.status 
-      })))
+      // Error state will be shown in founder status panel
     } finally {
       setIsAnalyzing(false)
     }
@@ -184,17 +130,7 @@ export default function AIAnalysisPage() {
   const resetAnalysis = () => {
     setCurrentStep('input')
     setAnalysisResult(null)
-    setAgents(AGENTS.map(agent => ({ ...agent, status: 'pending', progress: 0 })))
     setIsAnalyzing(false)
-  }
-
-  const getStatusIcon = (status: AgentStatus['status']) => {
-    switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'running': return <Clock className="h-4 w-4 text-blue-500 animate-spin" />
-      case 'error': return <AlertTriangle className="h-4 w-4 text-red-500" />
-      default: return <Clock className="h-4 w-4 text-gray-400" />
-    }
   }
 
   return (
@@ -217,7 +153,7 @@ export default function AIAnalysisPage() {
                 AI Strategic Analysis
               </h1>
               <p className="text-muted-foreground">
-                Get comprehensive strategic insights powered by our 6-agent AI system
+                Get comprehensive strategic insights powered by our 6 AI Founders
               </p>
             </div>
           </div>
@@ -310,43 +246,25 @@ export default function AIAnalysisPage() {
           </Card>
         )}
 
-        {/* Agent Progress */}
+        {/* AI Founders Progress */}
         {currentStep === 'analyzing' && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 animate-pulse" />
-                AI Analysis in Progress
+                AI Founders Analysis in Progress
               </CardTitle>
               <CardDescription>
-                Our 6-agent system is analyzing your strategic question
+                Our 6 AI Founders are analyzing your strategic question
+                {activeFounder && (
+                  <span className="ml-2 text-blue-600">
+                    - {activeFounder.name} ({activeFounder.title}) is currently working
+                  </span>
+                )}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {agents.map((agent, index) => (
-                <div key={agent.name} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(agent.status)}
-                      <span className="font-medium">{agent.name}</span>
-                      <Badge variant={
-                        agent.status === 'completed' ? 'default' :
-                        agent.status === 'running' ? 'secondary' :
-                        agent.status === 'error' ? 'destructive' : 'outline'
-                      }>
-                        {agent.status}
-                      </Badge>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {agent.progress}%
-                    </span>
-                  </div>
-                  <Progress value={agent.progress} className="h-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {agent.description}
-                  </p>
-                </div>
-              ))}
+            <CardContent>
+              <FounderStatusPanel variant="sidebar" defaultExpanded />
             </CardContent>
           </Card>
         )}
@@ -376,8 +294,8 @@ export default function AIAnalysisPage() {
                     <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
                       <h4 className="text-blue-800 font-semibold mb-2">AI-Generated Strategic Insights</h4>
                       <p className="text-blue-700 text-sm">
-                        Based on comprehensive analysis by our 6-agent system including market research, 
-                        competitive intelligence, and strategic frameworks.
+                        Based on comprehensive analysis by our 6 AI Founders: Sage (Strategy), Forge (Technical),
+                        Pulse (Growth), Compass (Synthesis), Guardian (Governance), and Ledger (Finance).
                       </p>
                     </div>
                   </div>

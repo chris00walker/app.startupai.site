@@ -24,6 +24,7 @@ import {
   List,
   Filter
 } from 'lucide-react'
+import { FounderBadge } from '@/components/founders'
 import { createClient } from '@/lib/supabase/client'
 import { useProjects } from '@/hooks/useProjects'
 import { ExperimentCard } from './ExperimentCard'
@@ -317,7 +318,10 @@ export function ExperimentCardsGrid({ projectId: propProjectId }: ExperimentCard
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Experiment Cards</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold">Experiment Cards</h2>
+            <FounderBadge founderId="pulse" variant="badge" size="sm" />
+          </div>
           <p className="text-muted-foreground">
             Design and track experiments to validate your assumptions
           </p>

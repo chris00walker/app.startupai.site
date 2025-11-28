@@ -21,6 +21,8 @@ import { SignalDotsGroup } from './SignalBadge'
 import { useInnovationSignals, getOverallHealth, getRecommendedAction } from '@/hooks/useCrewAIState'
 import { pivotConfig } from '@/components/strategyzer/types'
 import type { Phase, PivotType } from '@/types/crewai'
+import { FounderBadge } from '@/components/founders'
+import { getFounderByDataType } from '@/lib/founders/founder-mapping'
 
 export interface InnovationPhysicsPanelProps {
   projectId: string
@@ -246,14 +248,19 @@ interface SignalCardProps {
 }
 
 function SignalCard({ icon: Icon, title, description, signalType, signal, evidence }: SignalCardProps) {
+  const founder = getFounderByDataType(signalType)
+
   return (
-    <div className="p-3 bg-gray-50 rounded-lg space-y-2">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-gray-500" />
-        <div>
-          <p className="text-sm font-medium">{title}</p>
-          <p className="text-xs text-gray-500">{description}</p>
+    <div className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-gray-500" />
+          <div>
+            <p className="text-sm font-medium">{title}</p>
+            <p className="text-xs text-gray-500">{description}</p>
+          </div>
         </div>
+        <FounderBadge founderId={founder.id} variant="minimal" size="sm" />
       </div>
       <SignalGauge
         signalType={signalType}

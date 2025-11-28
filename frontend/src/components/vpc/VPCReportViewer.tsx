@@ -43,6 +43,7 @@ import {
   Plus,
   Loader2,
 } from 'lucide-react';
+import { FounderBadge } from '@/components/founders';
 
 export interface VPCReportViewerProps {
   projectId: string;
@@ -213,6 +214,7 @@ export function VPCReportViewer({
             <div className="flex items-center gap-2">
               <LayoutGrid className="h-5 w-5 text-muted-foreground" />
               <CardTitle>Value Proposition Canvas</CardTitle>
+              <FounderBadge founderId="sage" variant="badge" size="sm" />
               {segmentCount > 1 && (
                 <Badge variant="secondary">
                   {segmentCount} segments

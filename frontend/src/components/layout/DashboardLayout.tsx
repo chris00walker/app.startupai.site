@@ -17,6 +17,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useRoleInfo } from "@/lib/auth/hooks"
+import { FounderStatusPanel } from "@/components/founders"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -75,6 +76,9 @@ export function DashboardLayout({ children, breadcrumbs = [], userType = "consul
               </BreadcrumbList>
             </Breadcrumb>
           )}
+          <div className="ml-auto">
+            <FounderStatusPanel variant="header" />
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {children}

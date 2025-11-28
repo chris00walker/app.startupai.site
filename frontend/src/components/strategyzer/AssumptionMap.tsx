@@ -26,6 +26,7 @@ import {
   FileText,
   FlaskConical
 } from 'lucide-react'
+import { FounderBadge } from '@/components/founders'
 import { EvidenceStrengthIndicator } from './EvidenceStrengthIndicator'
 import { createClient } from '@/lib/supabase/client'
 import { useProjects } from '@/hooks/useProjects'
@@ -189,7 +190,10 @@ export function AssumptionMap({ projectId: propProjectId }: AssumptionMapProps) 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Assumption Map</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold">Assumption Map</h2>
+            <FounderBadge founderId="sage" variant="badge" size="sm" />
+          </div>
           <p className="text-muted-foreground">
             Identify, prioritize, and validate your riskiest business assumptions
           </p>
