@@ -74,6 +74,10 @@ export type ArtifactApprovalStatus =
   | 'approved'
   | 'rejected'
 
+export type PolicyVersion = 'yaml_baseline' | 'retrieval_v1'
+
+export type EnforcementMode = 'hard' | 'soft'
+
 // =======================================================================================
 // APPROVAL REQUEST TYPES
 // =======================================================================================
@@ -784,6 +788,27 @@ export interface StartupValidationState {
   // Business Model
   business_model_type?: BusinessModelType
   business_model_inferred_from?: string
+
+  // Policy Versioning (Area 3 - A/B testing of learning strategies)
+  current_policy_version?: 'yaml_baseline' | 'retrieval_v1'
+  experiment_config_source?: string  // "yaml" or "retrieval"
+  policy_selection_reason?: string   // Why this policy was chosen
+
+  // Creative Artifacts - Landing Pages
+  landing_pages: Record<string, unknown>[]          // Generated LP variants
+  creative_review_results: unknown[]                // GuardianReviewResult objects
+  creatives_needing_human_review: Record<string, unknown>[]  // Artifacts flagged for HITL
+  auto_approved_creatives: string[]                 // Artifact IDs that passed auto-QA
+
+  // Viability HITL - Decision State
+  viability_analysis?: Record<string, unknown>      // ViabilityApprovalResult for dashboard
+  viability_decision?: Record<string, unknown>      // Human decision from /resume webhook
+
+  // HITL Bookkeeping
+  last_human_decision_task_id?: string
+  last_human_decision_run_id?: string
+  guardian_last_issues: string[]
+  audit_log_ids: string[]
 }
 
 // =======================================================================================
