@@ -3,19 +3,30 @@
  *
  * Full display of CrewAI VPC analysis with segment selection,
  * fit scores, and validation metadata.
+ *
+ * Uses EnhancedValuePropositionCanvas for rich data display including:
+ * - Job dimensions (functional, emotional, social, importance)
+ * - Pain intensity and reliever mappings
+ * - Gain importance and creator mappings
+ * - Fit indicators and resonance scores
  */
 
 'use client';
 
 import * as React from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useVPCReport, VPCUISegment } from '@/hooks/useVPCReport';
+import { Button } from '@/components/ui/button';
+import { useVPCReport } from '@/hooks/useVPCReport';
+import { useVPC } from '@/hooks/useVPC';
+import type { VPCUISegment } from '@/lib/crewai/vpc-transformer';
 import { VPCFitBadge } from './VPCFitBadge';
-import ValuePropositionCanvas from '@/components/canvas/ValuePropositionCanvas';
+import EnhancedValuePropositionCanvas from '@/components/canvas/EnhancedValuePropositionCanvas';
+import EditableValuePropositionCanvas from '@/components/canvas/EditableValuePropositionCanvas';
 import { cn } from '@/lib/utils';
 import {
   LayoutGrid,
@@ -26,6 +37,11 @@ import {
   ArrowRight,
   Lightbulb,
   RefreshCw,
+  ExternalLink,
+  Edit2,
+  Eye,
+  Plus,
+  Loader2,
 } from 'lucide-react';
 
 export interface VPCReportViewerProps {
@@ -34,38 +50,6 @@ export interface VPCReportViewerProps {
   showFitScores?: boolean;
   showMetadata?: boolean;
   className?: string;
-}
-
-/**
- * Convert VPCUISegment to the format expected by ValuePropositionCanvas
- */
-function segmentToCanvasData(segment: VPCUISegment) {
-  return {
-    valuePropositionTitle: segment.valuePropositionTitle,
-    customerSegmentTitle: segment.customerSegmentTitle,
-    valueMap: {
-      productsAndServices: segment.valueMap.productsAndServices.length > 0
-        ? segment.valueMap.productsAndServices
-        : [''],
-      gainCreators: segment.valueMap.gainCreators.length > 0
-        ? segment.valueMap.gainCreators
-        : [''],
-      painRelievers: segment.valueMap.painRelievers.length > 0
-        ? segment.valueMap.painRelievers
-        : [''],
-    },
-    customerProfile: {
-      gains: segment.customerProfile.gains.length > 0
-        ? segment.customerProfile.gains
-        : [''],
-      pains: segment.customerProfile.pains.length > 0
-        ? segment.customerProfile.pains
-        : [''],
-      jobs: segment.customerProfile.jobs.length > 0
-        ? segment.customerProfile.jobs
-        : [''],
-    },
-  };
 }
 
 function formatDate(dateString: string | null): string {
@@ -90,6 +74,11 @@ export function VPCReportViewer({
   showMetadata = true,
   className,
 }: VPCReportViewerProps) {
+  // View/Edit mode toggle
+  const [editMode, setEditMode] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+
+  // VPC report data (read-only display from CrewAI)
   const {
     segments,
     activeSegment,
@@ -103,6 +92,37 @@ export function VPCReportViewer({
     segmentCount,
     refetch,
   } = useVPCReport(projectId);
+
+  // Editable VPC data (from value_proposition_canvas table)
+  const vpc = useVPC({ projectId });
+
+  // Check if editable VPC data exists
+  const hasEditableData = vpc.segments.length > 0;
+
+  // Initialize editable VPC from CrewAI data
+  const handleInitializeEditable = async () => {
+    if (!hasVPCData) return;
+
+    setIsInitializing(true);
+    try {
+      await vpc.initializeFromCrewAI();
+      setEditMode(true);
+    } catch (err) {
+      console.error('Failed to initialize editable VPC:', err);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  // Toggle edit mode - initialize if needed
+  const handleToggleEditMode = async () => {
+    if (!editMode && !hasEditableData) {
+      // Need to initialize first
+      await handleInitializeEditable();
+    } else {
+      setEditMode(!editMode);
+    }
+  };
 
   // Loading state
   if (isLoading) {
@@ -199,15 +219,44 @@ export function VPCReportViewer({
                 </Badge>
               )}
             </div>
-            {reportMetadata.generatedAt && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(reportMetadata.generatedAt)}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {reportMetadata.generatedAt && (
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formatDate(reportMetadata.generatedAt)}</span>
+                </div>
+              )}
+              {/* Edit Mode Toggle */}
+              <Button
+                variant={editMode ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={handleToggleEditMode}
+                disabled={isInitializing || vpc.isLoading}
+              >
+                {isInitializing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                    Initializing...
+                  </>
+                ) : editMode ? (
+                  <>
+                    <Eye className="h-4 w-4 mr-1.5" />
+                    View Mode
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="h-4 w-4 mr-1.5" />
+                    Edit
+                  </>
+                )}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={refetch}>
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <CardDescription>
-            AI-generated customer profile and value map analysis
+            AI-generated customer profile and value map analysis with fit scoring
           </CardDescription>
         </CardHeader>
 
@@ -235,42 +284,117 @@ export function VPCReportViewer({
         )}
       </Card>
 
-      {/* Segment Tabs + VPC Canvas */}
+      {/* Segment Tabs + VPC Canvas (View or Edit Mode) */}
       <Card>
         <CardContent className="pt-6">
-          {segmentCount > 1 ? (
-            <Tabs
-              value={activeSegment?.segmentKey || segments[0]?.segmentKey}
-              onValueChange={(value) => {
-                const index = segments.findIndex((s) => s.segmentKey === value);
-                if (index !== -1) setActiveSegmentIndex(index);
-              }}
-            >
-              <TabsList className="mb-4">
-                {segments.map((segment) => (
-                  <TabsTrigger key={segment.segmentKey} value={segment.segmentKey}>
-                    {segment.segmentName}
-                  </TabsTrigger>
+          {editMode && vpc.activeSegment ? (
+            // Edit mode - show editable canvas
+            vpc.segments.length > 1 ? (
+              <Tabs
+                value={vpc.activeSegmentKey || vpc.segments[0]?.segmentKey}
+                onValueChange={(value) => vpc.setActiveSegmentKey(value)}
+              >
+                <TabsList className="mb-4">
+                  {vpc.segments.map((segment) => (
+                    <TabsTrigger key={segment.segmentKey} value={segment.segmentKey}>
+                      {segment.segmentName}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {vpc.segments.map((segment) => (
+                  <TabsContent key={segment.segmentKey} value={segment.segmentKey}>
+                    <EditableValuePropositionCanvas
+                      segment={segment}
+                      onAddJob={vpc.addJob}
+                      onUpdateJob={vpc.updateJob}
+                      onRemoveJob={vpc.removeJob}
+                      onAddPain={vpc.addPain}
+                      onUpdatePain={vpc.updatePain}
+                      onRemovePain={vpc.removePain}
+                      onAddGain={vpc.addGain}
+                      onUpdateGain={vpc.updateGain}
+                      onRemoveGain={vpc.removeGain}
+                      onAddProductOrService={vpc.addProductOrService}
+                      onUpdateProductOrService={vpc.updateProductOrService}
+                      onRemoveProductOrService={vpc.removeProductOrService}
+                      onAddPainReliever={vpc.addPainReliever}
+                      onUpdatePainReliever={vpc.updatePainReliever}
+                      onRemovePainReliever={vpc.removePainReliever}
+                      onAddGainCreator={vpc.addGainCreator}
+                      onUpdateGainCreator={vpc.updateGainCreator}
+                      onRemoveGainCreator={vpc.removeGainCreator}
+                      onAddDifferentiator={vpc.addDifferentiator}
+                      onUpdateDifferentiator={vpc.updateDifferentiator}
+                      onRemoveDifferentiator={vpc.removeDifferentiator}
+                      onResetToCrewAI={vpc.resetToCrewAI}
+                      isSaving={vpc.isSaving}
+                    />
+                  </TabsContent>
                 ))}
-              </TabsList>
-              {segments.map((segment) => (
-                <TabsContent key={segment.segmentKey} value={segment.segmentKey}>
-                  <ValuePropositionCanvas
-                    canvasId={`report-${projectId}-${segment.segmentKey}`}
-                    initialData={segmentToCanvasData(segment)}
-                    readOnly={true}
-                  />
-                </TabsContent>
-              ))}
-            </Tabs>
-          ) : (
-            // Single segment - no tabs needed
-            activeSegment && (
-              <ValuePropositionCanvas
-                canvasId={`report-${projectId}-${activeSegment.segmentKey}`}
-                initialData={segmentToCanvasData(activeSegment)}
-                readOnly={true}
+              </Tabs>
+            ) : (
+              // Single segment - no tabs needed
+              <EditableValuePropositionCanvas
+                segment={vpc.activeSegment}
+                onAddJob={vpc.addJob}
+                onUpdateJob={vpc.updateJob}
+                onRemoveJob={vpc.removeJob}
+                onAddPain={vpc.addPain}
+                onUpdatePain={vpc.updatePain}
+                onRemovePain={vpc.removePain}
+                onAddGain={vpc.addGain}
+                onUpdateGain={vpc.updateGain}
+                onRemoveGain={vpc.removeGain}
+                onAddProductOrService={vpc.addProductOrService}
+                onUpdateProductOrService={vpc.updateProductOrService}
+                onRemoveProductOrService={vpc.removeProductOrService}
+                onAddPainReliever={vpc.addPainReliever}
+                onUpdatePainReliever={vpc.updatePainReliever}
+                onRemovePainReliever={vpc.removePainReliever}
+                onAddGainCreator={vpc.addGainCreator}
+                onUpdateGainCreator={vpc.updateGainCreator}
+                onRemoveGainCreator={vpc.removeGainCreator}
+                onAddDifferentiator={vpc.addDifferentiator}
+                onUpdateDifferentiator={vpc.updateDifferentiator}
+                onRemoveDifferentiator={vpc.removeDifferentiator}
+                onResetToCrewAI={vpc.resetToCrewAI}
+                isSaving={vpc.isSaving}
               />
+            )
+          ) : (
+            // View mode - show read-only enhanced canvas
+            segmentCount > 1 ? (
+              <Tabs
+                value={activeSegment?.segmentKey || segments[0]?.segmentKey}
+                onValueChange={(value) => {
+                  const index = segments.findIndex((s) => s.segmentKey === value);
+                  if (index !== -1) setActiveSegmentIndex(index);
+                }}
+              >
+                <TabsList className="mb-4">
+                  {segments.map((segment) => (
+                    <TabsTrigger key={segment.segmentKey} value={segment.segmentKey}>
+                      {segment.segmentName}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {segments.map((segment) => (
+                  <TabsContent key={segment.segmentKey} value={segment.segmentKey}>
+                    <EnhancedValuePropositionCanvas
+                      segment={segment}
+                      showFitLines={true}
+                    />
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : (
+              // Single segment - no tabs needed
+              activeSegment && (
+                <EnhancedValuePropositionCanvas
+                  segment={activeSegment}
+                  showFitLines={true}
+                />
+              )
             )
           )}
         </CardContent>

@@ -24,3 +24,4 @@ export * from './experiments';
 export * from './usage-quota';
 export * from './crewai-validation-states';
 export * from './business-model-canvas';
+export * from './value-proposition-canvas';

@@ -1,17 +1,32 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ChevronRight, ChevronLeft, CheckCircle, Users, Gift, TrendingUp, Pill, Smile, Frown, List, ArrowRight, Lightbulb } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ChevronRight, ChevronLeft, CheckCircle, Users, Gift, TrendingUp, Pill, Smile, Frown, List, ArrowRight, Lightbulb, Loader2, Bot } from 'lucide-react';
+import { useVPC } from '@/hooks/useVPC';
+import type {
+  VPCJobItem,
+  VPCPainItem,
+  VPCGainItem,
+  VPCItem,
+  ValuePropositionCanvas,
+} from '@/db/schema/value-proposition-canvas';
 
 interface GuidedValuePropositionCanvasProps {
-  canvasId?: string;
-  clientId: string;
+  projectId?: string;
+  segmentKey?: string; // Optional: edit existing segment
+  clientId?: string; // Legacy prop
+  canvasId?: string; // Legacy prop for localStorage fallback
   initialData?: any;
   onSave?: (data: any) => void;
+  onComplete?: () => void;
   readOnly?: boolean;
 }
 
@@ -102,32 +117,67 @@ const vpcSteps = [
   }
 ];
 
-export default function GuidedValuePropositionCanvas({ 
-  canvasId, 
-  clientId, 
-  initialData, 
-  onSave, 
-  readOnly = false 
+export default function GuidedValuePropositionCanvas({
+  projectId,
+  segmentKey: initialSegmentKey,
+  canvasId,
+  clientId,
+  initialData,
+  onSave,
+  onComplete,
+  readOnly = false
 }: GuidedValuePropositionCanvasProps) {
   const [canvasData, setCanvasData] = useState<VPCData>(defaultVPC);
   const [currentStep, setCurrentStep] = useState(0);
   const [newItem, setNewItem] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [segmentName, setSegmentName] = useState('');
+  const [showSegmentNameDialog, setShowSegmentNameDialog] = useState(false);
 
+  // Use VPC hook when projectId is provided
+  const vpc = useVPC({ projectId: projectId || undefined });
+
+  // Sync data from VPC hook if editing an existing segment
   useEffect(() => {
-    if (initialData) {
-      setCanvasData({ ...defaultVPC, ...initialData });
-    } else if (canvasId) {
-      const saved = localStorage.getItem(`guided-vpc-${canvasId}`);
-      if (saved) {
-        try {
-          setCanvasData({ ...defaultVPC, ...JSON.parse(saved) });
-        } catch (error) {
-          console.error('Error parsing saved canvas data:', error);
+    if (projectId && vpc.activeSegment && initialSegmentKey) {
+      // Convert VPC format to wizard format
+      const segment = vpc.activeSegment;
+      const jobs = (segment.jobs as VPCJobItem[]) || [];
+      const pains = (segment.pains as VPCPainItem[]) || [];
+      const gains = (segment.gains as VPCGainItem[]) || [];
+      const products = (segment.productsAndServices as VPCItem[]) || [];
+      const painRelievers = (segment.painRelievers as any[]) || [];
+      const gainCreators = (segment.gainCreators as any[]) || [];
+
+      setCanvasData({
+        customerJobs: jobs.map(j => `${j.functional}${j.emotional ? ` | ${j.emotional}` : ''}${j.social ? ` | ${j.social}` : ''}`),
+        customerPains: pains.map(p => p.description),
+        customerGains: gains.map(g => g.description),
+        productsAndServices: products.map(p => p.text),
+        painRelievers: painRelievers.map(p => `${p.painDescription}: ${p.relief}`),
+        gainCreators: gainCreators.map(g => `${g.gainDescription}: ${g.creator}`),
+      });
+      setSegmentName(segment.segmentName);
+    }
+  }, [projectId, vpc.activeSegment, initialSegmentKey]);
+
+  // Legacy localStorage support
+  useEffect(() => {
+    if (!projectId) {
+      if (initialData) {
+        setCanvasData({ ...defaultVPC, ...initialData });
+      } else if (canvasId) {
+        const saved = localStorage.getItem(`guided-vpc-${canvasId}`);
+        if (saved) {
+          try {
+            setCanvasData({ ...defaultVPC, ...JSON.parse(saved) });
+          } catch (error) {
+            console.error('Error parsing saved canvas data:', error);
+          }
         }
       }
     }
-  }, [initialData, canvasId]);
+  }, [initialData, canvasId, projectId]);
 
   const currentStepData = vpcSteps[currentStep];
   const currentItems = canvasData[currentStepData.id as keyof VPCData];
@@ -152,20 +202,143 @@ export default function GuidedValuePropositionCanvas({
     }));
   };
 
-  const handleSave = () => {
-    if (onSave) {
+  // Convert wizard format to VPC format and save
+  const handleSave = useCallback(async () => {
+    if (projectId && segmentName) {
+      // Convert wizard data to VPC format
+      const timestamp = new Date().toISOString();
+      const generateId = () => crypto.randomUUID();
+
+      // Convert jobs (simplified format -> full format)
+      const jobs: VPCJobItem[] = canvasData.customerJobs.map(text => {
+        // Try to parse "functional | emotional | social" format
+        const parts = text.split('|').map(p => p.trim());
+        return {
+          id: generateId(),
+          functional: parts[0] || text,
+          emotional: parts[1] || '',
+          social: parts[2] || '',
+          importance: 5,
+          source: 'manual' as const,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+      });
+
+      // Convert pains
+      const pains: VPCPainItem[] = canvasData.customerPains.map(text => ({
+        id: generateId(),
+        description: text,
+        intensity: 5,
+        source: 'manual' as const,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }));
+
+      // Convert gains
+      const gains: VPCGainItem[] = canvasData.customerGains.map(text => ({
+        id: generateId(),
+        description: text,
+        importance: 5,
+        source: 'manual' as const,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }));
+
+      // Convert products & services
+      const productsAndServices: VPCItem[] = canvasData.productsAndServices.map(text => ({
+        id: generateId(),
+        text,
+        source: 'manual' as const,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }));
+
+      // Convert pain relievers (try to parse "pain: relief" format)
+      const painRelievers = canvasData.painRelievers.map(text => {
+        const colonIdx = text.indexOf(':');
+        return {
+          id: generateId(),
+          painDescription: colonIdx > 0 ? text.slice(0, colonIdx).trim() : '',
+          relief: colonIdx > 0 ? text.slice(colonIdx + 1).trim() : text,
+          source: 'manual' as const,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+      });
+
+      // Convert gain creators (try to parse "gain: creator" format)
+      const gainCreators = canvasData.gainCreators.map(text => {
+        const colonIdx = text.indexOf(':');
+        return {
+          id: generateId(),
+          gainDescription: colonIdx > 0 ? text.slice(0, colonIdx).trim() : '',
+          creator: colonIdx > 0 ? text.slice(colonIdx + 1).trim() : text,
+          source: 'manual' as const,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        };
+      });
+
+      // Save via API
+      try {
+        const response = await fetch(`/api/vpc/${projectId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            segmentKey: segmentName.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+            segmentName,
+            source: 'manual',
+            jobs,
+            pains,
+            gains,
+            productsAndServices,
+            painRelievers,
+            gainCreators,
+            differentiators: [],
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save VPC');
+        }
+
+        // Refresh data
+        await vpc.refetch();
+        onComplete?.();
+      } catch (error) {
+        console.error('Error saving VPC:', error);
+      }
+    } else if (onSave) {
       onSave(canvasData);
     } else if (canvasId) {
       localStorage.setItem(`guided-vpc-${canvasId}`, JSON.stringify(canvasData));
     }
-  };
+  }, [projectId, segmentName, canvasData, canvasId, onSave, onComplete, vpc]);
 
   const canGoNext = currentItems.length > 0 || currentStep === vpcSteps.length - 1;
   const canGoPrevious = currentStep > 0;
+  const isLastStep = currentStep === vpcSteps.length - 1;
 
   const nextStep = () => {
     if (currentStep < vpcSteps.length - 1) {
       setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleComplete = () => {
+    // If using projectId and no segment name, prompt for it
+    if (projectId && !segmentName) {
+      setShowSegmentNameDialog(true);
+    } else {
+      handleSave();
+    }
+  };
+
+  const handleSegmentNameSubmit = () => {
+    if (segmentName.trim()) {
+      setShowSegmentNameDialog(false);
+      handleSave();
     }
   };
 
@@ -296,28 +469,31 @@ export default function GuidedValuePropositionCanvas({
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={previousStep}
           disabled={!canGoPrevious}
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Previous
         </Button>
-        
+
         <div className="flex items-center gap-4">
-          {!readOnly && (
-            <Button variant="outline" onClick={handleSave}>
+          {!readOnly && !isLastStep && (
+            <Button variant="outline" onClick={handleSave} disabled={vpc.isSaving}>
+              {vpc.isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Save Progress
             </Button>
           )}
-          
-          <Button 
-            onClick={nextStep}
-            disabled={!canGoNext}
+
+          <Button
+            onClick={isLastStep ? handleComplete : nextStep}
+            disabled={!canGoNext || vpc.isSaving}
             className="min-w-[100px]"
           >
-            {currentStep === vpcSteps.length - 1 ? (
+            {vpc.isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isLastStep ? (
               <>
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Complete
@@ -429,6 +605,51 @@ export default function GuidedValuePropositionCanvas({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Segment Name Dialog (for Supabase saving) */}
+      {projectId && (
+        <Dialog open={showSegmentNameDialog} onOpenChange={setShowSegmentNameDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Name Your Customer Segment</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="segmentName">Segment Name</Label>
+                <Input
+                  id="segmentName"
+                  placeholder="e.g., Small Business Owners, Enterprise IT Managers"
+                  value={segmentName}
+                  onChange={(e) => setSegmentName(e.target.value)}
+                  autoFocus
+                />
+                <p className="text-sm text-muted-foreground">
+                  Give your customer segment a descriptive name. This will help you identify it later.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSegmentNameDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSegmentNameSubmit} disabled={!segmentName.trim() || vpc.isSaving}>
+                {vpc.isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Save VPC
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Loading/Initializing from CrewAI indicator */}
+      {projectId && vpc.isLoading && (
+        <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50">
+          <div className="flex items-center gap-3 p-4 bg-card rounded-lg shadow-lg">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Loading VPC data...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
