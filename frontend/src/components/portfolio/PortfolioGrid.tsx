@@ -22,7 +22,9 @@ import {
 import Link from "next/link"
 import { PortfolioProject } from "@/types/portfolio"
 import { VPCFitDotsGroup } from "@/components/vpc"
+import { SignalDotsGroup } from "@/components/signals"
 import { useFitData } from "@/hooks/useFitData"
+import { useInnovationSignals } from "@/hooks/useCrewAIState"
 
 interface PortfolioGridProps {
   projects: PortfolioProject[]
@@ -88,6 +90,9 @@ function ProjectCard({ project, onClick }: {
   // Fetch fit data for VPC fit dots
   const { data: fitData } = useFitData(project.id)
 
+  // Fetch CrewAI innovation signals
+  const { signals } = useInnovationSignals(project.id)
+
   const getRiskColor = (delta: number) => {
     if (delta <= 0) return "text-green-600"
     if (delta <= 0.2) return "text-yellow-600"
@@ -113,7 +118,15 @@ function ProjectCard({ project, onClick }: {
                 <Badge variant={statusStyle.badge} className="text-xs">
                   {project.gateStatus}
                 </Badge>
-                {fitData && (
+                {signals && (
+                  <SignalDotsGroup
+                    desirability={signals.desirability}
+                    feasibility={signals.feasibility}
+                    viability={signals.viability}
+                    size="sm"
+                  />
+                )}
+                {!signals && fitData && (
                   <VPCFitDotsGroup
                     desirabilityBand={fitData.desirability.band}
                     feasibilityBand={fitData.feasibility.band}

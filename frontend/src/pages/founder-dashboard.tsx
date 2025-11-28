@@ -22,6 +22,7 @@ import { useAuth } from "@/lib/auth/hooks"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { VPCSummaryCard } from "@/components/vpc"
+import { InnovationPhysicsPanel } from "@/components/signals"
 // Strategyzer Components
 import { AssumptionMap, ExperimentCardsGrid, CanvasesGallery } from "@/components/strategyzer"
 // Hooks for real data
@@ -458,6 +459,15 @@ export default function FounderDashboard() {
         <TabsContent value="overview" className="space-y-6">
           {/* Quick Stats */}
           <QuickStats projectId={projectId} currentStage={currentStage} />
+
+          {/* Innovation Physics Signals - D-F-V visualization */}
+          {projectId && (
+            <InnovationPhysicsPanel
+              projectId={projectId}
+              variant="full"
+              showEvidence={true}
+            />
+          )}
 
           {/* Validation Journey Stage Selector */}
           <StageSelector currentStage="validation" className="mb-6" />

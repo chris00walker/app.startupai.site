@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { 
+import {
   Search,
   Plus,
   Download,
@@ -36,6 +36,7 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useProjects } from "@/hooks/useProjects"
+import { EvidenceInputForm, type EvidenceFormData } from "@/components/evidence"
 
 interface EvidenceItem {
   id: string
@@ -290,6 +291,8 @@ export function EvidenceLedger() {
   const [evidenceItems, setEvidenceItems] = React.useState<EvidenceItem[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [showEvidenceForm, setShowEvidenceForm] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   const fetchEvidence = React.useCallback(async () => {
     if (!activeProjectId) {
@@ -325,6 +328,42 @@ export function EvidenceLedger() {
     if (projectsLoading) return
     fetchEvidence()
   }, [projectsLoading, fetchEvidence])
+
+  const handleAddEvidence = React.useCallback(async (data: EvidenceFormData) => {
+    if (!activeProjectId) return
+
+    setIsSubmitting(true)
+    try {
+      const { error: insertError } = await supabase
+        .from('evidence')
+        .insert({
+          project_id: activeProjectId,
+          title: data.title,
+          category: data.category,
+          summary: data.summary,
+          full_text: data.fullText || null,
+          fit_type: data.fitType,
+          strength: data.strength,
+          is_contradiction: data.isContradiction,
+          source: data.source || null,
+          author: data.author || null,
+          occurred_on: data.occurredOn?.toISOString().split('T')[0] || null,
+          linked_assumptions: data.linkedAssumptions || [],
+          content: data.summary, // content is required, use summary as fallback
+        })
+
+      if (insertError) throw insertError
+
+      // Success - close form and refresh list
+      setShowEvidenceForm(false)
+      await fetchEvidence()
+    } catch (err) {
+      console.error('Error adding evidence:', err)
+      setError((err as Error).message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [activeProjectId, supabase, fetchEvidence])
 
   const filteredEvidence = React.useMemo(() => {
     return evidenceItems.filter(evidence => {
@@ -390,12 +429,21 @@ export function EvidenceLedger() {
             <Download className="h-4 w-4 mr-2" />
             Export Evidence Pack
           </Button>
-          <Button disabled={isLoading}>
+          <Button disabled={isLoading} onClick={() => setShowEvidenceForm(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Evidence
           </Button>
         </div>
       </div>
+
+      {/* Evidence Input Form */}
+      <EvidenceInputForm
+        open={showEvidenceForm}
+        onOpenChange={setShowEvidenceForm}
+        onSubmit={handleAddEvidence}
+        projectId={activeProjectId}
+        isSubmitting={isSubmitting}
+      />
 
       {(projectsError || error) && (
         <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
@@ -505,7 +553,7 @@ export function EvidenceLedger() {
                 : "Start building your evidence base by adding your first piece of evidence."
               }
             </p>
-            <Button>
+            <Button onClick={() => setShowEvidenceForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Your First Evidence
             </Button>

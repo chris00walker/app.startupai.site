@@ -10,6 +10,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { VPCReportViewer } from '@/components/vpc';
+import { InnovationPhysicsPanel } from '@/components/signals';
 import { ArrowLeft, Download, Share2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -62,6 +63,13 @@ export default function ProjectAnalysisPage() {
           </Button>
         </div>
       </div>
+
+      {/* Innovation Physics Signals - Compact view */}
+      <InnovationPhysicsPanel
+        projectId={projectId}
+        variant="compact"
+        showEvidence={false}
+      />
 
       {/* VPC Report Viewer */}
       <VPCReportViewer
