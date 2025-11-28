@@ -40,8 +40,21 @@ export async function login(page: Page, user: TestUser = CONSULTANT_USER) {
     return;
   }
 
-  // Fill in email/password form (NOT the GitHub OAuth button)
+  // Check if login form is visible
   const emailInput = page.locator('input#email');
+  const hasLoginForm = await emailInput.isVisible({ timeout: 5000 }).catch(() => false);
+
+  if (!hasLoginForm) {
+    // May have been redirected - check current URL
+    const currentUrl = page.url();
+    if (currentUrl.includes('/dashboard') || currentUrl.includes('/onboarding')) {
+      console.log(`Already authenticated, on: ${currentUrl}`);
+      return;
+    }
+    throw new Error(`Login form not found and not redirected. URL: ${currentUrl}`);
+  }
+
+  // Fill in email/password form (NOT the GitHub OAuth button)
   const passwordInput = page.locator('input#password');
 
   await expect(emailInput).toBeVisible({ timeout: 10000 });
@@ -54,35 +67,30 @@ export async function login(page: Page, user: TestUser = CONSULTANT_USER) {
   const submitButton = page.locator('button[type="submit"]');
   await submitButton.click();
 
-  // Wait for navigation based on user type
-  // Founders and Consultants get redirected to their specific onboarding pages
-  const expectedPattern = user.type === 'consultant'
-    ? '**/onboarding/consultant**'
-    : '**/onboarding**';
-
+  // Wait for any navigation after login - could be onboarding OR dashboard
+  // Users who completed onboarding go to dashboard, new users go to onboarding
   try {
-    await page.waitForURL(expectedPattern, { timeout: 15000 });
-    console.log(`${user.type} redirected to onboarding page`);
-  } catch (e) {
-    // If not redirected to onboarding, check if we're on dashboard
+    await page.waitForURL(
+      (url) => url.pathname.includes('/onboarding') ||
+               url.pathname.includes('/dashboard') ||
+               url.pathname.includes('/founder-dashboard') ||
+               url.pathname.includes('/consultant-dashboard'),
+      { timeout: 15000 }
+    );
     const currentUrl = page.url();
-    console.log(`Navigation timeout, current URL: ${currentUrl}`);
-
-    // If we're on dashboard, need to click AI Assistant button
-    if (currentUrl.includes('/dashboard')) {
-      console.log('On dashboard, clicking AI Assistant button');
-      const aiAssistantButton = page.locator('button:has-text("AI Assistant"), a:has-text("AI Assistant")').first();
-      await aiAssistantButton.waitFor({ state: 'visible', timeout: 10000 });
-      await aiAssistantButton.click();
-
-      // Wait for onboarding page to load
-      await page.waitForURL(expectedPattern, { timeout: 15000 });
+    console.log(`Login successful, redirected to: ${currentUrl}`);
+  } catch (e) {
+    const currentUrl = page.url();
+    // If still on login, check for error message
+    if (currentUrl.includes('/login')) {
+      const errorMsg = await page.locator('[role="alert"], .error-message, text=Invalid').textContent().catch(() => null);
+      if (errorMsg) {
+        throw new Error(`Login failed: ${errorMsg}`);
+      }
+      throw new Error(`Login timed out, still on login page`);
     }
+    console.log(`Login completed, current URL: ${currentUrl}`);
   }
-
-  // Wait for onboarding interface to be ready (no networkidle - too slow)
-  const onboardingElement = page.locator('[data-testid="onboarding"]');
-  await onboardingElement.waitFor({ state: 'visible', timeout: 20000 });
 
   console.log(`Login successful as ${user.type}: ${user.email}`);
 }

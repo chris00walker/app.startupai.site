@@ -2,42 +2,72 @@
  * Tests for CrewAI status polling endpoint
  */
 
-import { GET } from '@/app/api/crewai/status/route';
-import { NextRequest } from 'next/server';
-
-// Mock dependencies
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: jest.fn(() => ({
-    auth: {
-      getUser: jest.fn(),
+// Mock NextResponse.json since it doesn't work in Jest's Node.js environment
+jest.mock('next/server', () => {
+  return {
+    NextRequest: jest.fn(),
+    NextResponse: {
+      json: (body: unknown, init?: ResponseInit) => {
+        return new Response(JSON.stringify(body), {
+          ...init,
+          headers: {
+            'content-type': 'application/json',
+            ...init?.headers,
+          },
+        });
+      },
     },
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          single: jest.fn(),
-        })),
-      })),
-      insert: jest.fn(),
-      update: jest.fn(() => ({
-        eq: jest.fn(),
-      })),
+  };
+});
+
+// Mock Supabase client
+const mockGetUser = jest.fn();
+const mockFrom = jest.fn(() => ({
+  select: jest.fn(() => ({
+    eq: jest.fn(() => ({
+      single: jest.fn(),
     })),
+  })),
+  insert: jest.fn(),
+  update: jest.fn(() => ({
+    eq: jest.fn(),
   })),
 }));
 
-jest.mock('@/lib/crewai/client', () => ({
-  getCrewAIStatus: jest.fn(),
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(() =>
+    Promise.resolve({
+      auth: {
+        getUser: mockGetUser,
+      },
+      from: mockFrom,
+    })
+  ),
 }));
+
+// Mock CrewAI client
+const mockGetCrewAIStatus = jest.fn();
+jest.mock('@/lib/crewai/amp-client', () => ({
+  getCrewAIStatus: (...args: unknown[]) => mockGetCrewAIStatus(...args),
+}));
+
+// Import after mocks are set up
+import { GET } from '@/app/api/crewai/status/route';
+
+// Helper to create mock Request
+function createMockRequest(url: string): Request {
+  return new Request(url);
+}
 
 describe('GET /api/crewai/status', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should return 400 if kickoff_id is missing', async () => {
-    const req = new NextRequest('http://localhost:3000/api/crewai/status');
+    const req = createMockRequest('http://localhost:3000/api/crewai/status');
 
-    const response = await GET(req);
+    const response = await GET(req as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -45,18 +75,16 @@ describe('GET /api/crewai/status', () => {
   });
 
   it('should return 401 if user is not authenticated', async () => {
-    const { createClient } = await import('@/lib/supabase/server');
-    const mockSupabase = createClient();
-    jest.mocked(mockSupabase.auth.getUser).mockResolvedValue({
+    mockGetUser.mockResolvedValue({
       data: { user: null },
       error: new Error('Not authenticated'),
-    } as any);
+    });
 
-    const req = new NextRequest(
+    const req = createMockRequest(
       'http://localhost:3000/api/crewai/status?kickoff_id=test-123'
     );
 
-    const response = await GET(req);
+    const response = await GET(req as any);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -64,26 +92,22 @@ describe('GET /api/crewai/status', () => {
   });
 
   it('should return status for valid authenticated request', async () => {
-    const { createClient } = await import('@/lib/supabase/server');
-    const { getCrewAIStatus } = await import('@/lib/crewai/client');
-
-    const mockSupabase = createClient();
-    jest.mocked(mockSupabase.auth.getUser).mockResolvedValue({
+    mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-123', email: 'test@example.com' } },
       error: null,
     });
 
-    jest.mocked(getCrewAIStatus).mockResolvedValue({
+    mockGetCrewAIStatus.mockResolvedValue({
       state: 'RUNNING',
       status: 'Processing...',
       progress: 0.5,
     });
 
-    const req = new NextRequest(
+    const req = createMockRequest(
       'http://localhost:3000/api/crewai/status?kickoff_id=test-123'
     );
 
-    const response = await GET(req);
+    const response = await GET(req as any);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -91,26 +115,22 @@ describe('GET /api/crewai/status', () => {
     expect(data.progress).toBeGreaterThan(0);
   });
 
-  it('should calculate progress correctly for running state', async () => {
-    const { createClient } = await import('@/lib/supabase/server');
-    const { getCrewAIStatus } = await import('@/lib/crewai/client');
-
-    const mockSupabase = createClient();
-    jest.mocked(mockSupabase.auth.getUser).mockResolvedValue({
+  it('should calculate progress correctly for completed state', async () => {
+    mockGetUser.mockResolvedValue({
       data: { user: { id: 'user-123', email: 'test@example.com' } },
       error: null,
     });
 
-    jest.mocked(getCrewAIStatus).mockResolvedValue({
+    mockGetCrewAIStatus.mockResolvedValue({
       state: 'COMPLETED',
       status: 'Done',
     });
 
-    const req = new NextRequest(
+    const req = createMockRequest(
       'http://localhost:3000/api/crewai/status?kickoff_id=test-123'
     );
 
-    const response = await GET(req);
+    const response = await GET(req as any);
     const data = await response.json();
 
     expect(data.progress).toBe(100);

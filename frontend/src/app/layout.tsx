@@ -7,6 +7,7 @@
 
 import '@fontsource/inter/latin.css';
 import '@/styles/globals.css';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 export const metadata = {
   title: 'StartupAI - Evidence-Led Strategy Platform',
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

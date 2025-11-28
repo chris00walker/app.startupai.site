@@ -252,12 +252,14 @@ export function ConversationInterface({
                   `}
                   role={message.type === 'system' ? 'status' : undefined}
                   aria-label={
-                    message.type === 'ai' 
+                    message.type === 'ai'
                       ? `AI response: ${message.content}`
                       : message.type === 'user'
                       ? `Your message: ${message.content}`
                       : `System message: ${message.content}`
                   }
+                  data-role={message.type === 'ai' ? 'assistant' : message.type}
+                  data-testid={message.type === 'ai' ? 'ai-message' : `${message.type}-message`}
                 >
                   <p className="whitespace-pre-wrap">{message.content}</p>
 
@@ -329,7 +331,7 @@ export function ConversationInterface({
 
             {/* Typing Indicator */}
             {isTyping && (
-              <div className="flex gap-3 justify-start">
+              <div className="flex gap-3 justify-start" data-testid="ai-loading">
                 <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                     {session.agentPersonality?.name?.charAt(0) || 'AI'}
@@ -433,6 +435,7 @@ export function ConversationInterface({
                       disabled={!currentMessage.trim() || isSending || currentMessage.length > 1000}
                       size="sm"
                       aria-label="Send message"
+                      data-testid="send-button"
                     >
                       {isSending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

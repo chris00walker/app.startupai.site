@@ -84,6 +84,7 @@ export function ApprovalCard({
         className
       )}
       onClick={onClick}
+      data-testid="approval-card"
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-4">

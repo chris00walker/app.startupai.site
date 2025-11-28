@@ -415,7 +415,7 @@ export default function FounderDashboard() {
       ]}
       userType="founder"
     >
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" data-testid="dashboard">
         <div className="flex items-center justify-between">
           <TabsList className="grid w-full max-w-3xl grid-cols-5">
             <TabsTrigger value="overview">

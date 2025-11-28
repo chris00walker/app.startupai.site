@@ -106,7 +106,7 @@ function ProjectCard({ project, onClick }: {
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onClick?.(project)}>
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onClick?.(project)} data-testid="client-card">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -234,7 +234,7 @@ function ProjectCard({ project, onClick }: {
 
 export function PortfolioGrid({ projects, onProjectClick }: PortfolioGridProps) {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="portfolio-grid">
       {projects.map((project) => (
         <ProjectCard 
           key={project.id} 

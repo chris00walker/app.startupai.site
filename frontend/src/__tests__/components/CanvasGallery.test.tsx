@@ -40,11 +40,23 @@ jest.mock('@/components/canvas/TestingBusinessIdeasCanvas', () => {
 
 // Mock demo data
 jest.mock('@/data/demoData', () => ({
-  demoValuePropositionCanvas: {
+  getDemoValuePropositionCanvas: () => ({
     id: 'demo-vpc-1',
     title: 'Demo VPC',
-    type: 'Value Proposition Canvas'
-  }
+    type: 'Value Proposition Canvas',
+    customerProfile: { jobs: [], pains: [], gains: [] },
+    valueMap: { productsServices: [], painRelievers: [], gainCreators: [] }
+  }),
+  getDemoBusinessModelCanvas: () => ({
+    id: 'demo-bmc-1',
+    title: 'Demo BMC',
+    type: 'Business Model Canvas'
+  }),
+  getDemoTestingBusinessIdeasCanvas: () => ({
+    id: 'demo-tbi-1',
+    title: 'Demo TBI',
+    type: 'Testing Business Ideas Canvas'
+  })
 }))
 
 describe('CanvasGallery', () => {

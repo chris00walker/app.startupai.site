@@ -153,7 +153,7 @@ export function ApprovalDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="max-w-2xl max-h-[90vh]" data-testid="approval-modal">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="space-y-1">
