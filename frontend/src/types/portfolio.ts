@@ -1,9 +1,16 @@
 // Portfolio types for consultant dashboard transformation
+
+// Validation stages in order of progression
+export type ValidationStage = 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'
+
+// Gate status for progress tracking
+export type GateStatus = 'Pending' | 'Passed' | 'Failed' | 'At Risk'
+
 export interface PortfolioProject {
   id: string
   clientName: string
-  stage: 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'
-  gateStatus: 'Pending' | 'Passed' | 'Failed'
+  stage: ValidationStage
+  gateStatus: GateStatus
   riskBudget: { 
     planned: number
     actual: number

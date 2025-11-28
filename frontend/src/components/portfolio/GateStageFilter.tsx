@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
@@ -12,9 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Filter, Target } from "lucide-react"
+import type { ValidationStage, GateStatus } from "@/types/portfolio"
 
-export type GateStage = 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'
-export type GateStatus = 'Pending' | 'Passed' | 'Failed'
+// Re-export for backwards compatibility
+export type GateStage = ValidationStage
+export type { GateStatus }
 
 interface GateStageFilterProps {
   selectedStages: GateStage[]
@@ -52,10 +54,11 @@ const stageConfig = {
   }
 }
 
-const statusConfig = {
+const statusConfig: Record<GateStatus, { label: string; color: string }> = {
   Pending: { label: "Pending", color: "bg-yellow-500" },
   Passed: { label: "Passed", color: "bg-green-500" },
-  Failed: { label: "Failed", color: "bg-red-500" }
+  Failed: { label: "Failed", color: "bg-red-500" },
+  "At Risk": { label: "At Risk", color: "bg-orange-500" },
 }
 
 export function GateStageFilter({
@@ -68,7 +71,7 @@ export function GateStageFilter({
 }: GateStageFilterProps) {
   const totalFilters = selectedStages.length + selectedStatuses.length
   const allStages: GateStage[] = ['DESIRABILITY', 'FEASIBILITY', 'VIABILITY', 'SCALE']
-  const allStatuses: GateStatus[] = ['Pending', 'Passed', 'Failed']
+  const allStatuses: GateStatus[] = ['Pending', 'Passed', 'Failed', 'At Risk']
 
   const handleStageToggle = (stage: GateStage) => {
     if (selectedStages.includes(stage)) {

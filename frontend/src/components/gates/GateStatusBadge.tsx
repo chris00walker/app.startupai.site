@@ -1,15 +1,14 @@
 /**
  * Gate Status Badge Component
- * 
- * Displays the current gate status (Passed/Failed/Pending) with appropriate styling.
+ *
+ * Displays the current gate status (Passed/Failed/Pending/At Risk) with appropriate styling.
  * WCAG 2.2 AA compliant with accessible colors and labels.
  */
 
 'use client';
 
 import { cn } from '@/lib/utils';
-
-type GateStatus = 'Passed' | 'Failed' | 'Pending';
+import type { GateStatus } from '@/types/portfolio';
 
 interface GateStatusBadgeProps {
   status: GateStatus;
@@ -17,7 +16,7 @@ interface GateStatusBadgeProps {
 }
 
 export function GateStatusBadge({ status, className }: GateStatusBadgeProps) {
-  const statusConfig = {
+  const statusConfig: Record<GateStatus, { bg: string; text: string; border: string; icon: string; label: string }> = {
     Passed: {
       bg: 'bg-green-100 dark:bg-green-900/30',
       text: 'text-green-800 dark:text-green-300',
@@ -38,6 +37,13 @@ export function GateStatusBadge({ status, className }: GateStatusBadgeProps) {
       border: 'border-yellow-300 dark:border-yellow-700',
       icon: '●',
       label: 'Gate Pending',
+    },
+    'At Risk': {
+      bg: 'bg-orange-100 dark:bg-orange-900/30',
+      text: 'text-orange-800 dark:text-orange-300',
+      border: 'border-orange-300 dark:border-orange-700',
+      icon: '⚠',
+      label: 'Gate At Risk',
     },
   };
 

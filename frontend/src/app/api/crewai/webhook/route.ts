@@ -106,6 +106,7 @@ const qaReportSchema = z.object({
   completeness: z.number().optional(),
 }).passthrough().nullable();
 
+// Extended schema to capture full StartupValidationState fields
 const founderValidationSchema = z.object({
   flow_type: z.literal('founder_validation'),
   project_id: z.string().uuid(),
@@ -124,6 +125,37 @@ const founderValidationSchema = z.object({
   }),
   qa_report: qaReportSchema,
   completed_at: z.string().optional(),
+  // Extended fields for full StartupValidationState persistence
+  iteration: z.number().optional(),
+  phase: z.string().optional(),
+  current_risk_axis: z.string().optional(),
+  problem_fit: z.string().optional(),
+  current_segment: z.string().optional(),
+  current_value_prop: z.string().optional(),
+  desirability_signal: z.string().optional(),
+  feasibility_signal: z.string().optional(),
+  viability_signal: z.string().optional(),
+  last_pivot_type: z.string().optional(),
+  pending_pivot_type: z.string().optional(),
+  pivot_recommendation: z.string().optional(),
+  human_approval_status: z.string().optional(),
+  human_comment: z.string().optional(),
+  human_input_required: z.boolean().optional(),
+  human_input_reason: z.string().optional(),
+  assumptions: z.array(z.any()).optional(),
+  desirability_experiments: z.array(z.any()).optional(),
+  downgrade_active: z.boolean().optional(),
+  last_feasibility_artifact: z.any().optional(),
+  last_viability_metrics: z.any().optional(),
+  competitor_report: z.any().optional(),
+  target_segments: z.array(z.string()).optional(),
+  problem_statement: z.string().optional(),
+  solution_description: z.string().optional(),
+  revenue_model: z.string().optional(),
+  segment_fit_scores: z.record(z.string(), z.number()).optional(),
+  analysis_insights: z.array(z.string()).optional(),
+  business_model_type: z.string().optional(),
+  budget_status: z.string().optional(),
 });
 
 type FounderValidationPayload = z.infer<typeof founderValidationSchema>;
@@ -280,6 +312,167 @@ function buildEvidenceRows(payload: FounderValidationPayload) {
   return evidenceRows;
 }
 
+/**
+ * Build row for crewai_validation_states table (full state persistence)
+ */
+function buildValidationStateRow(payload: FounderValidationPayload) {
+  const nowIso = new Date().toISOString();
+  const canvas = payload.value_proposition_canvas;
+  const segments = Object.keys(canvas);
+
+  // Transform VPC data into the expected format
+  const customerProfiles: Record<string, any> = {};
+  const valueMaps: Record<string, any> = {};
+
+  for (const [segmentName, segmentData] of Object.entries(canvas)) {
+    if (segmentData.customer_profile) {
+      customerProfiles[segmentName] = segmentData.customer_profile;
+    }
+    if (segmentData.value_map) {
+      valueMaps[segmentName] = segmentData.value_map;
+    }
+  }
+
+  // Derive signals from evidence if not explicitly provided
+  const desirabilitySignal = payload.desirability_signal ||
+    (payload.evidence.desirability?.problem_resonance
+      ? payload.evidence.desirability.problem_resonance > 0.6
+        ? 'strong_commitment'
+        : payload.evidence.desirability.problem_resonance > 0.3
+          ? 'weak_interest'
+          : 'no_interest'
+      : 'no_signal');
+
+  const feasibilitySignal = payload.feasibility_signal ||
+    (payload.evidence.feasibility
+      ? payload.evidence.feasibility.downgrade_required
+        ? 'orange_constrained'
+        : 'green'
+      : 'unknown');
+
+  const viabilitySignal = payload.viability_signal ||
+    (payload.evidence.viability?.ltv_cac_ratio
+      ? payload.evidence.viability.ltv_cac_ratio >= 3
+        ? 'profitable'
+        : payload.evidence.viability.ltv_cac_ratio >= 1
+          ? 'marginal'
+          : 'underwater'
+      : 'unknown');
+
+  return {
+    project_id: payload.project_id,
+    user_id: payload.user_id,
+    session_id: payload.session_id || null,
+    kickoff_id: payload.kickoff_id || null,
+    iteration: payload.iteration || 1,
+    phase: payload.phase || 'desirability',
+    current_risk_axis: payload.current_risk_axis || 'desirability',
+    problem_fit: payload.problem_fit || 'unknown',
+    current_segment: payload.current_segment || segments[0] || null,
+    current_value_prop: payload.current_value_prop || null,
+
+    // Innovation Physics Signals
+    desirability_signal: desirabilitySignal,
+    feasibility_signal: feasibilitySignal,
+    viability_signal: viabilitySignal,
+
+    // Pivot tracking
+    last_pivot_type: payload.last_pivot_type || 'none',
+    pending_pivot_type: payload.pending_pivot_type || 'none',
+    pivot_recommendation: payload.pivot_recommendation ||
+      payload.validation_report.pivot_recommendation || null,
+
+    // Human approval
+    human_approval_status: payload.human_approval_status || 'not_required',
+    human_comment: payload.human_comment || null,
+    human_input_required: payload.human_input_required || false,
+    human_input_reason: payload.human_input_reason || null,
+
+    // Evidence containers
+    desirability_evidence: payload.evidence.desirability || null,
+    feasibility_evidence: payload.evidence.feasibility || null,
+    viability_evidence: payload.evidence.viability || null,
+
+    // VPC data
+    customer_profiles: Object.keys(customerProfiles).length > 0 ? customerProfiles : null,
+    value_maps: Object.keys(valueMaps).length > 0 ? valueMaps : null,
+    competitor_report: payload.competitor_report || null,
+
+    // Assumptions and artifacts
+    assumptions: payload.assumptions || null,
+    desirability_experiments: payload.desirability_experiments || null,
+    downgrade_active: payload.downgrade_active || false,
+    last_feasibility_artifact: payload.last_feasibility_artifact || null,
+    last_viability_metrics: payload.last_viability_metrics || null,
+
+    // QA and Governance
+    qa_reports: payload.qa_report ? [payload.qa_report] : null,
+    current_qa_status: payload.qa_report?.status || null,
+    framework_compliance: typeof payload.qa_report?.framework_compliance === 'number'
+      ? payload.qa_report.framework_compliance > 0.7
+      : false,
+    logical_consistency: typeof payload.qa_report?.logical_consistency === 'number'
+      ? payload.qa_report.logical_consistency > 0.7
+      : false,
+    completeness: typeof payload.qa_report?.completeness === 'number'
+      ? payload.qa_report.completeness > 0.7
+      : false,
+
+    // Service Crew outputs
+    business_idea: payload.validation_report.business_idea,
+    entrepreneur_input: payload.validation_report.business_idea,
+    target_segments: payload.target_segments || segments,
+    problem_statement: payload.problem_statement || null,
+    solution_description: payload.solution_description || null,
+    revenue_model: payload.revenue_model || null,
+
+    // Analysis outputs
+    segment_fit_scores: payload.segment_fit_scores || null,
+    analysis_insights: payload.analysis_insights || null,
+
+    // Growth outputs (from desirability evidence)
+    ad_impressions: payload.evidence.desirability?.impressions || 0,
+    ad_clicks: payload.evidence.desirability?.clicks || 0,
+    ad_signups: payload.evidence.desirability?.signups || 0,
+    ad_spend: payload.evidence.desirability?.spend_usd || 0,
+
+    // Build outputs (from feasibility evidence)
+    api_costs: payload.evidence.feasibility?.api_costs
+      ? { total: payload.evidence.feasibility.api_costs }
+      : null,
+    infra_costs: payload.evidence.feasibility?.infra_costs
+      ? { total: payload.evidence.feasibility.infra_costs }
+      : null,
+    total_monthly_cost: payload.evidence.feasibility?.total_monthly_cost || 0,
+
+    // Finance outputs (from viability evidence)
+    cac: payload.evidence.viability?.cac || 0,
+    ltv: payload.evidence.viability?.ltv || 0,
+    ltv_cac_ratio: payload.evidence.viability?.ltv_cac_ratio || 0,
+    gross_margin: payload.evidence.viability?.gross_margin || 0,
+    tam: payload.evidence.viability?.tam_usd || 0,
+
+    // Synthesis outputs
+    synthesis_confidence: 0.7, // Default confidence
+    evidence_summary: payload.validation_report.evidence_summary,
+    final_recommendation: payload.validation_report.validation_outcome,
+    next_steps: payload.validation_report.next_steps,
+
+    // Budget tracking
+    budget_status: payload.budget_status || 'ok',
+    budget_escalation_triggered: false,
+    budget_kill_triggered: false,
+
+    // Business model
+    business_model_type: payload.business_model_type || null,
+    business_model_inferred_from: null,
+
+    // Timestamps
+    created_at: nowIso,
+    updated_at: nowIso,
+  };
+}
+
 function buildEntrepreneurBriefRow(payload: FounderValidationPayload) {
   const nowIso = new Date().toISOString();
   const report = payload.validation_report;
@@ -408,11 +601,30 @@ async function handleFounderValidation(payload: FounderValidationPayload): Promi
     await admin.from('entrepreneur_briefs').upsert(briefRow, { onConflict: 'session_id' });
   }
 
+  // Persist full validation state to crewai_validation_states table
+  const validationStateRow = buildValidationStateRow(payload);
+  const { data: validationState, error: stateError } = await admin
+    .from('crewai_validation_states')
+    .upsert(validationStateRow, {
+      onConflict: 'project_id',
+      ignoreDuplicates: false,
+    })
+    .select('id')
+    .single();
+
+  if (stateError) {
+    // Log but don't fail the request - other data was already saved
+    console.error('[api/crewai/webhook] Failed to persist validation state:', stateError);
+  } else {
+    console.log('[api/crewai/webhook] Validation state persisted:', validationState?.id);
+  }
+
   return NextResponse.json({
     success: true,
     flow_type: 'founder_validation',
     report_id: insertedReport?.id,
     evidence_created: evidenceCreated,
+    validation_state_id: validationState?.id || null,
     message: 'Founder validation results persisted successfully',
   });
 }

@@ -17,6 +17,10 @@ import type {
   DesirabilityEvidence,
   FeasibilityEvidence,
   ViabilityEvidence,
+  CustomerProfile,
+  ValueMap,
+  RiskAxis,
+  ProblemFit,
 } from '@/types/crewai'
 
 // ============================================================================
@@ -111,35 +115,116 @@ export function useCrewAIState(options: CrewAIStateOptions = {}): UseCrewAIState
         }
       } else if (data) {
         // Map database record to StartupValidationState
+        // Note: snake_case fields from DB are kept as-is to match StartupValidationState interface
         setValidationState({
+          // Identity
           id: data.id,
           project_id: data.project_id,
+          session_id: data.session_id,
+          kickoff_id: data.kickoff_id,
+          iteration: data.iteration || 1,
+
+          // Phase & Risk
           phase: data.phase || 'ideation',
+          current_risk_axis: data.current_risk_axis || 'desirability',
+
+          // Problem/Solution Fit
+          problem_fit: data.problem_fit || 'unknown',
+          current_segment: data.current_segment,
+          current_value_prop: data.current_value_prop,
+          vpc_document_url: data.vpc_document_url,
+          bmc_document_url: data.bmc_document_url,
+
+          // Innovation Physics Signals
           desirability_signal: data.desirability_signal || 'no_signal',
           feasibility_signal: data.feasibility_signal || 'unknown',
           viability_signal: data.viability_signal || 'unknown',
+
+          // Pivot Tracking
           last_pivot_type: data.last_pivot_type || 'none',
           pending_pivot_type: data.pending_pivot_type || 'none',
+          pivot_recommendation: data.pivot_recommendation,
+
+          // Human Approval
           human_approval_status: data.human_approval_status || 'not_required',
+          human_comment: data.human_comment,
           human_input_required: data.human_input_required || false,
-          // Evidence containers
+          human_input_reason: data.human_input_reason,
+
+          // Evidence Containers (JSONB)
           desirability_evidence: data.desirability_evidence,
           feasibility_evidence: data.feasibility_evidence,
           viability_evidence: data.viability_evidence,
-          // Metrics
-          cac: data.cac,
-          ltv: data.ltv,
-          ltv_cac_ratio: data.ltv_cac_ratio,
-          gross_margin: data.gross_margin,
-          tam: data.tam,
-          // Budget
-          daily_spend_usd: data.daily_spend_usd,
-          campaign_spend_usd: data.campaign_spend_usd,
-          budget_status: data.budget_status,
-          // Output
+
+          // VPC Data (JSONB) - Critical for VPC visualization
+          customer_profiles: data.customer_profiles || {},
+          value_maps: data.value_maps || {},
+          competitor_report: data.competitor_report,
+
+          // Assumptions
+          assumptions: data.assumptions || [],
+
+          // Desirability Artifacts
+          desirability_experiments: data.desirability_experiments || [],
+          downgrade_active: data.downgrade_active || false,
+
+          // Feasibility/Viability Artifacts
+          last_feasibility_artifact: data.last_feasibility_artifact,
+          last_viability_metrics: data.last_viability_metrics,
+
+          // QA and Governance
+          qa_reports: data.qa_reports || [],
+          current_qa_status: data.current_qa_status,
+          framework_compliance: data.framework_compliance || false,
+          logical_consistency: data.logical_consistency || false,
+          completeness: data.completeness || false,
+
+          // Service Crew Outputs
+          business_idea: data.business_idea,
+          entrepreneur_input: data.entrepreneur_input,
+          target_segments: data.target_segments || [],
+          problem_statement: data.problem_statement,
+          solution_description: data.solution_description,
+          revenue_model: data.revenue_model,
+
+          // Analysis Crew Outputs
+          segment_fit_scores: data.segment_fit_scores || {},
+          analysis_insights: data.analysis_insights || [],
+
+          // Growth Crew Outputs
+          ad_impressions: data.ad_impressions || 0,
+          ad_clicks: data.ad_clicks || 0,
+          ad_signups: data.ad_signups || 0,
+          ad_spend: data.ad_spend || 0,
+
+          // Build Crew Outputs
+          api_costs: data.api_costs || {},
+          infra_costs: data.infra_costs || {},
+          total_monthly_cost: data.total_monthly_cost || 0,
+
+          // Finance Crew Outputs
+          cac: data.cac || 0,
+          ltv: data.ltv || 0,
+          ltv_cac_ratio: data.ltv_cac_ratio || 0,
+          gross_margin: data.gross_margin || 0,
+          tam: data.tam || 0,
+
+          // Synthesis Crew Outputs
+          synthesis_confidence: data.synthesis_confidence || 0,
           evidence_summary: data.evidence_summary,
           final_recommendation: data.final_recommendation,
           next_steps: data.next_steps || [],
+
+          // Budget Tracking
+          daily_spend_usd: data.daily_spend_usd || 0,
+          campaign_spend_usd: data.campaign_spend_usd || 0,
+          budget_status: data.budget_status || 'ok',
+          budget_escalation_triggered: data.budget_escalation_triggered || false,
+          budget_kill_triggered: data.budget_kill_triggered || false,
+
+          // Business Model
+          business_model_type: data.business_model_type,
+          business_model_inferred_from: data.business_model_inferred_from,
         })
       }
     } catch (err) {
@@ -212,6 +297,70 @@ export function useInnovationSignals(projectId?: string): UseInnovationSignalsRe
     desirabilityEvidence: validationState?.desirability_evidence || null,
     feasibilityEvidence: validationState?.feasibility_evidence || null,
     viabilityEvidence: validationState?.viability_evidence || null,
+    isLoading,
+    error,
+    refetch,
+  }
+}
+
+// ============================================================================
+// useVPCData - Hook for Value Proposition Canvas visualization
+// ============================================================================
+
+export interface UseVPCDataResult {
+  customerProfiles: Record<string, CustomerProfile>
+  valueMaps: Record<string, ValueMap>
+  currentSegment: string | null
+  currentValueProp: string | null
+  problemFit: ProblemFit
+  segments: string[]
+  hasData: boolean
+  isLoading: boolean
+  error: Error | null
+  refetch: () => Promise<void>
+}
+
+/**
+ * Hook focused on VPC data for Value Proposition Canvas visualization
+ *
+ * @param projectId - Project ID to fetch VPC data for
+ * @returns VPC-specific data structures for canvas rendering
+ *
+ * @example
+ * ```tsx
+ * const { customerProfiles, valueMaps, currentSegment } = useVPCData(projectId)
+ *
+ * const profile = customerProfiles[currentSegment]
+ * const valueMap = valueMaps[currentSegment]
+ * ```
+ */
+export function useVPCData(projectId?: string): UseVPCDataResult {
+  const { validationState, isLoading, error, refetch } = useCrewAIState({ projectId })
+
+  const customerProfiles = useMemo(() => {
+    return validationState?.customer_profiles || {}
+  }, [validationState])
+
+  const valueMaps = useMemo(() => {
+    return validationState?.value_maps || {}
+  }, [validationState])
+
+  const segments = useMemo(() => {
+    return Object.keys(customerProfiles)
+  }, [customerProfiles])
+
+  const hasData = useMemo(() => {
+    return segments.length > 0
+  }, [segments])
+
+  return {
+    customerProfiles,
+    valueMaps,
+    currentSegment: validationState?.current_segment || null,
+    currentValueProp: validationState?.current_value_prop || null,
+    problemFit: validationState?.problem_fit || 'unknown',
+    segments,
+    hasData,
     isLoading,
     error,
     refetch,

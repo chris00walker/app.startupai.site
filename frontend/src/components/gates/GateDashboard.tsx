@@ -1,6 +1,6 @@
 /**
  * Gate Dashboard Component
- * 
+ *
  * Comprehensive gate status display for project dashboard.
  * Shows current status, readiness, and actionable feedback.
  */
@@ -11,11 +11,12 @@ import { GateStatusBadge } from './GateStatusBadge';
 import { GateReadinessIndicator } from './GateReadinessIndicator';
 import { Card } from '@/components/ui/card';
 import { AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import type { ValidationStage, GateStatus } from '@/types/portfolio';
 
 interface GateDashboardProps {
   projectId: string;
-  stage: 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE';
-  gateStatus: 'Passed' | 'Failed' | 'Pending';
+  stage: ValidationStage;
+  gateStatus: GateStatus;
   readinessScore: number;
   evidenceCount: number;
   experimentsCount: number;
@@ -37,7 +38,10 @@ export function GateDashboard({
         return <CheckCircle2 className="h-6 w-6 text-green-600" aria-hidden="true" />;
       case 'Failed':
         return <AlertCircle className="h-6 w-6 text-red-600" aria-hidden="true" />;
+      case 'At Risk':
+        return <AlertCircle className="h-6 w-6 text-orange-600" aria-hidden="true" />;
       case 'Pending':
+      default:
         return <Clock className="h-6 w-6 text-yellow-600" aria-hidden="true" />;
     }
   };
@@ -120,6 +124,19 @@ export function GateDashboard({
             <p className="text-sm text-yellow-800 dark:text-yellow-400">
               Keep collecting evidence to evaluate this gate. The gate will be automatically
               evaluated as you add evidence.
+            </p>
+          </div>
+        )}
+
+        {/* At Risk Message */}
+        {gateStatus === 'At Risk' && (
+          <div
+            className="rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 p-4"
+            role="alert"
+          >
+            <p className="text-sm text-orange-800 dark:text-orange-400">
+              ⚠️ Warning signals detected. Review the evidence and consider pivoting or
+              strengthening your approach before progressing.
             </p>
           </div>
         )}
