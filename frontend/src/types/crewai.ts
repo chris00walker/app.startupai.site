@@ -423,15 +423,33 @@ export interface SynthesisCrewOutput {
 
 // =======================================================================================
 // EXPERIMENT RESULT (from Growth Crew)
+// Extended with Strategyzer Testing Business Ideas fields
 // =======================================================================================
 
 export interface ExperimentResult {
+  // Core CrewAI fields (from crew_outputs.py)
   name: string
   hypothesis: string
   method: string
   success_criteria: string
   results?: Record<string, unknown>
   passed?: boolean
+
+  // Extended Strategyzer fields (Testing Business Ideas methodology)
+  id?: string
+  metric?: string                                      // What we're measuring
+  expected_outcome?: 'pivot' | 'iterate' | 'kill'      // Expected decision
+  actual_outcome?: 'pivot' | 'iterate' | 'kill'        // Actual decision after test
+  actual_metric_value?: string                         // The measured value
+  cost_time?: string                                   // Time investment
+  cost_money?: number                                  // Financial investment (USD)
+  evidence_strength?: EvidenceStrength                 // Strength of evidence gathered
+  assumption_id?: string                               // Linked assumption
+  learning_card_id?: string                            // Post-experiment learnings
+  status?: 'draft' | 'planned' | 'running' | 'completed' | 'cancelled'
+  start_date?: string
+  end_date?: string
+  owner?: string
 }
 
 // =======================================================================================

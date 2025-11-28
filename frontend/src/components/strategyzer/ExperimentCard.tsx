@@ -29,9 +29,10 @@ import {
   type StrategyzerExperimentCard,
   type ExperimentStatus,
   experimentMethodConfig,
-  evidenceLevelConfig,
+  evidenceStrengthConfig,
   outcomeConfig
 } from './types'
+import { EvidenceStrengthBadge } from './EvidenceStrengthIndicator'
 
 interface ExperimentCardProps {
   experiment: StrategyzerExperimentCard
@@ -99,15 +100,14 @@ export function ExperimentCard({
     )
   }
 
-  // Get evidence strength config safely
+  // Get evidence strength (CrewAI 3-value system)
   const evidenceStrength = experiment.evidence_strength || 'none'
-  const evidenceConfig = evidenceLevelConfig[evidenceStrength] || evidenceLevelConfig.none
 
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge className={statusConfig[experiment.status].color}>
               <StatusIcon className="h-3 w-3 mr-1" />
               {statusConfig[experiment.status].label}
@@ -116,9 +116,22 @@ export function ExperimentCard({
               <Beaker className="h-3 w-3 mr-1" />
               {methodInfo.label}
             </Badge>
-            <Badge className={evidenceConfig.color}>
-              {evidenceConfig.label} Evidence
-            </Badge>
+            <EvidenceStrengthBadge strength={evidenceStrength} />
+            {/* Show passed/failed status if experiment is completed */}
+            {experiment.status === 'completed' && experiment.passed !== undefined && (
+              <Badge
+                className={experiment.passed
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+                }
+              >
+                {experiment.passed ? (
+                  <><CheckCircle className="h-3 w-3 mr-1" /> Passed</>
+                ) : (
+                  <><XCircle className="h-3 w-3 mr-1" /> Failed</>
+                )}
+              </Badge>
+            )}
           </div>
           <CardActions
             experiment={experiment}

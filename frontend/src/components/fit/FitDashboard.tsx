@@ -24,9 +24,16 @@ import {
   AlertTriangle,
   CheckCircle,
   Lock,
-  Loader2
+  Loader2,
+  Zap
 } from "lucide-react"
 import { useFitData, type FitData } from "@/hooks/useFitData"
+import { SignalBanner } from "./InnovationPhysicsSignals"
+import type {
+  DesirabilitySignal,
+  FeasibilitySignal,
+  ViabilitySignal
+} from "@/types/crewai"
 
 // Extended FitData type for internal use (adds icon for rendering)
 interface FitDataWithIcons extends Omit<FitData, 'qaInsights'> {
@@ -340,10 +347,22 @@ const emptyFitData: FitDataWithIcons = {
 
 interface FitDashboardProps {
   projectId?: string
+  signals?: {
+    desirability: DesirabilitySignal
+    feasibility: FeasibilitySignal
+    viability: ViabilitySignal
+  }
 }
 
-export function FitDashboard({ projectId }: FitDashboardProps) {
+export function FitDashboard({ projectId, signals }: FitDashboardProps) {
   const { data, isLoading, error } = useFitData(projectId)
+
+  // Default signals if not provided
+  const displaySignals = signals || {
+    desirability: 'no_signal' as DesirabilitySignal,
+    feasibility: 'unknown' as FeasibilitySignal,
+    viability: 'unknown' as ViabilitySignal
+  }
 
   if (!projectId) {
     return (
@@ -408,6 +427,13 @@ export function FitDashboard({ projectId }: FitDashboardProps) {
           Track your business idea validation across the three critical dimensions
         </p>
       </div>
+
+      {/* Innovation Physics Signals Banner */}
+      <SignalBanner
+        desirability={displaySignals.desirability}
+        feasibility={displaySignals.feasibility}
+        viability={displaySignals.viability}
+      />
 
       <div className="grid gap-6 md:grid-cols-3">
         <FitCard

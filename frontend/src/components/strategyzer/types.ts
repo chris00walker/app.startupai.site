@@ -15,7 +15,7 @@ import type {
   CommitmentType,
   CustomerProfile,
   ValueMap,
-  ExperimentResult as CrewAIExperimentResult,
+  ExperimentResult,
   DesirabilityEvidence,
   FeasibilityEvidence,
   ViabilityEvidence,
@@ -39,6 +39,7 @@ export type {
   CommitmentType,
   CustomerProfile,
   ValueMap,
+  ExperimentResult,
   DesirabilityEvidence,
   FeasibilityEvidence,
   ViabilityEvidence,
@@ -201,41 +202,26 @@ export const statusConfig: Record<AssumptionStatus, {
 export type ExperimentStatus = 'draft' | 'planned' | 'running' | 'completed' | 'cancelled'
 
 /**
- * Experiment aligned with CrewAI's ExperimentResult
- * Extended with Strategyzer Testing Business Ideas fields
+ * Strategyzer Experiment - extends CrewAI ExperimentResult
+ * with additional frontend/database tracking fields
+ *
+ * Core fields inherited from ExperimentResult:
+ * - name, hypothesis, method, success_criteria, results, passed
+ * - metric, expected_outcome, actual_outcome, cost_time, cost_money
+ * - evidence_strength, assumption_id, learning_card_id, status
+ * - start_date, end_date, owner
  */
-export interface StrategyzerExperiment {
+export interface StrategyzerExperiment extends ExperimentResult {
+  // Required fields for database operations
   id: string
   name: string
+  status: ExperimentStatus  // Override to make required
 
-  // Core CrewAI ExperimentResult fields
-  hypothesis: string
-  method: string  // Test method (alias: testMethod for backward compat)
-  success_criteria: string
-  results?: Record<string, unknown>
-  passed?: boolean
-
-  // Extended Strategyzer fields (from Testing Business Ideas)
-  metric?: string  // What we're measuring
-  expected_outcome?: 'pivot' | 'iterate' | 'kill'
-  actual_outcome?: 'pivot' | 'iterate' | 'kill'
-  actual_metric_value?: string  // The actual measured value
-  cost_time?: string
-  cost_money?: number
-  evidence_strength?: EvidenceStrength  // Strength of evidence from experiment
-
-  // Linking
-  assumption_id?: string
+  // Frontend/database specific fields
   project_id?: string
-  learning_card_id?: string
-
-  // Status tracking
-  status: ExperimentStatus
-  start_date?: string
-  end_date?: string
+  actual_metric_value?: string  // The actual measured value (extends results)
   created_at?: string
   updated_at?: string
-  owner?: string
 }
 
 // Legacy type alias
@@ -538,26 +524,39 @@ export function transformAssumptionToDb(assumption: Assumption): Omit<DbHypothes
 
 /**
  * Transform database experiment to StrategyzerExperiment
+ * Maps all CrewAI ExperimentResult fields + frontend extensions
  */
 export function transformDbToExperiment(record: DbExperimentRecord): StrategyzerExperiment {
+  // Map test method to evidence strength using config
+  const methodConfig = experimentMethodConfig[record.test_method || '']
+  const evidenceStrength: EvidenceStrength = methodConfig?.evidenceStrength || 'none'
+
   return {
+    // Core CrewAI ExperimentResult fields
     id: record.id,
     name: record.name,
     hypothesis: record.hypothesis || '',
     method: record.test_method || '',
     success_criteria: record.success_criteria || '',
+    results: undefined,  // Populated from experiment results if available
+    passed: undefined,   // Determined after experiment completion
+
+    // Extended Strategyzer fields (from ExperimentResult)
     metric: record.metric || undefined,
     expected_outcome: record.expected_outcome as 'pivot' | 'iterate' | 'kill' | undefined,
     actual_outcome: record.actual_outcome as 'pivot' | 'iterate' | 'kill' | undefined,
     cost_time: record.cost_time || undefined,
     cost_money: record.cost_money || undefined,
-    status: record.status as ExperimentStatus,
+    evidence_strength: evidenceStrength,
     assumption_id: record.hypothesis_id || undefined,
-    project_id: record.project_id,
     learning_card_id: record.learning_card_id || undefined,
+    status: record.status as ExperimentStatus,
     start_date: record.start_date || undefined,
     end_date: record.end_date || undefined,
     owner: record.owner || undefined,
+
+    // Frontend/database specific fields
+    project_id: record.project_id,
     created_at: record.created_at,
     updated_at: record.updated_at,
   }

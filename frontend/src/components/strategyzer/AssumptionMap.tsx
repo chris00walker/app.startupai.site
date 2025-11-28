@@ -22,8 +22,11 @@ import {
   Clock,
   Beaker,
   TrendingUp,
-  Heart
+  Heart,
+  FileText,
+  FlaskConical
 } from 'lucide-react'
+import { EvidenceStrengthIndicator } from './EvidenceStrengthIndicator'
 import { createClient } from '@/lib/supabase/client'
 import { useProjects } from '@/hooks/useProjects'
 import {
@@ -558,25 +561,42 @@ function QuadrantCard({
 
       <ScrollArea className="flex-1">
         <div className="space-y-2">
-          {assumptions.map(assumption => (
-            <div
-              key={assumption.id}
-              className="p-2 bg-white rounded border text-xs hover:shadow-sm transition-shadow"
-            >
-              <div className="flex items-center gap-1 mb-1">
-                {quadrant === 'test-first' && (
-                  <AlertTriangle className="h-3 w-3 text-red-600" />
-                )}
-                {quadrant === 'validated' && (
-                  <CheckCircle className="h-3 w-3 text-green-600" />
-                )}
-                <Badge className={categoryConfig[assumption.category].color} variant="outline">
-                  {categoryConfig[assumption.category].label}
-                </Badge>
+          {assumptions.map(assumption => {
+            const testCount = assumption.test_results?.length || 0
+            return (
+              <div
+                key={assumption.id}
+                className="p-2 bg-white rounded border text-xs hover:shadow-sm transition-shadow"
+              >
+                <div className="flex items-center gap-1 mb-1">
+                  {quadrant === 'test-first' && (
+                    <AlertTriangle className="h-3 w-3 text-red-600" />
+                  )}
+                  {quadrant === 'validated' && (
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                  )}
+                  <Badge className={categoryConfig[assumption.category].color} variant="outline">
+                    {categoryConfig[assumption.category].label}
+                  </Badge>
+                  <span className="text-muted-foreground">P{assumption.priority}</span>
+                  {/* Evidence strength indicator */}
+                  <EvidenceStrengthIndicator
+                    strength={assumption.evidence_strength || 'none'}
+                    size="sm"
+                    showDescription
+                  />
+                  {/* Test count */}
+                  {testCount > 0 && (
+                    <span className="flex items-center gap-0.5 text-muted-foreground">
+                      <FlaskConical className="h-2.5 w-2.5" />
+                      {testCount}
+                    </span>
+                  )}
+                </div>
+                <p className="line-clamp-2">{assumption.statement}</p>
               </div>
-              <p className="line-clamp-2">{assumption.statement}</p>
-            </div>
-          ))}
+            )
+          })}
           {assumptions.length === 0 && (
             <p className="text-xs text-muted-foreground text-center py-4">
               No assumptions in this quadrant
@@ -593,19 +613,15 @@ function AssumptionCard({ assumption }: { assumption: Assumption }) {
   const CategoryIcon = categoryIcons[assumption.category]
   const StatusIcon = statusIcons[assumption.status]
 
-  // Get evidence strength label safely
-  const evidenceLabel = assumption.evidence_strength
-    ? evidenceStrengthConfig[assumption.evidence_strength]?.label || 'Unknown'
-    : 'No Evidence'
-  const evidenceColor = assumption.evidence_strength
-    ? evidenceStrengthConfig[assumption.evidence_strength]?.color || 'bg-gray-100 text-gray-800'
-    : 'bg-gray-100 text-gray-800'
+  // Count of test results
+  const testCount = assumption.test_results?.length || 0
 
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-3">
+            {/* Badges row */}
             <div className="flex items-center gap-2 flex-wrap">
               <Badge className={categoryInfo.color}>
                 <CategoryIcon className="h-3 w-3 mr-1" />
@@ -614,15 +630,48 @@ function AssumptionCard({ assumption }: { assumption: Assumption }) {
               <Badge className={getPriorityColor(assumption.priority)}>
                 P{assumption.priority} - {getPriorityLabel(assumption.priority)}
               </Badge>
-              <Badge className={evidenceColor}>
-                {evidenceLabel}
-              </Badge>
+              {/* Evidence strength indicator */}
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted text-xs">
+                <EvidenceStrengthIndicator
+                  strength={assumption.evidence_strength || 'none'}
+                  size="sm"
+                />
+                <span className="text-muted-foreground">
+                  {assumption.evidence_strength
+                    ? evidenceStrengthConfig[assumption.evidence_strength]?.label
+                    : 'No Evidence'}
+                </span>
+              </div>
               <Badge className={statusConfig[assumption.status].color}>
                 <StatusIcon className="h-3 w-3 mr-1" />
                 {statusConfig[assumption.status].label}
               </Badge>
+              {/* Test results count badge */}
+              {testCount > 0 && (
+                <Badge variant="outline" className="gap-1">
+                  <FlaskConical className="h-3 w-3" />
+                  {testCount} test{testCount !== 1 ? 's' : ''}
+                </Badge>
+              )}
             </div>
+
+            {/* Statement */}
             <p className="text-sm leading-relaxed">{assumption.statement}</p>
+
+            {/* Evidence Needed (if available) */}
+            {assumption.evidence_needed && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-dashed">
+                <FileText className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    Evidence Needed
+                  </p>
+                  <p className="text-sm text-foreground">{assumption.evidence_needed}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Metadata row */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span>Source: {assumption.source || 'Not specified'}</span>
               <span>Created: {assumption.created_at ? new Date(assumption.created_at).toLocaleDateString() : 'N/A'}</span>
