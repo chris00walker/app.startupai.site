@@ -13,8 +13,13 @@ import {
   TrendingUp,
   Users,
   FileText,
-  BarChart3
+  BarChart3,
+  LayoutGrid,
+  Map,
+  Beaker,
+  BookOpen
 } from "lucide-react"
+import Link from "next/link"
 import { PortfolioProject } from "@/types/portfolio"
 import { VPCFitDotsGroup } from "@/components/vpc"
 import { useFitData } from "@/hooks/useFitData"
@@ -172,6 +177,34 @@ function ProjectCard({ project, onClick }: {
             </div>
             <div className="font-semibold text-sm">{project.evidenceCount}</div>
           </div>
+        </div>
+
+        {/* Artifact Quick Links */}
+        <div className="flex gap-1 pt-2 border-t">
+          <Link href={`/client/${project.id}?tab=canvases`} onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+              <LayoutGrid className="h-3 w-3 mr-1" />
+              Canvases
+            </Button>
+          </Link>
+          <Link href={`/client/${project.id}?tab=assumptions`} onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+              <Map className="h-3 w-3 mr-1" />
+              Map
+            </Button>
+          </Link>
+          <Link href={`/client/${project.id}?tab=experiments`} onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+              <Beaker className="h-3 w-3 mr-1" />
+              Experiments
+            </Button>
+          </Link>
+          <Link href={`/client/${project.id}?tab=evidence`} onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+              <BookOpen className="h-3 w-3 mr-1" />
+              Evidence
+            </Button>
+          </Link>
         </div>
 
         {/* Last Activity & Next Gate */}

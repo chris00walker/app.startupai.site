@@ -5,7 +5,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { PortfolioGrid } from "@/components/portfolio/PortfolioGrid"
-import { PortfolioMetrics } from "@/components/portfolio/PortfolioMetrics"
+import { PortfolioMetrics as PortfolioMetricsComponent } from "@/components/portfolio/PortfolioMetrics"
 import { StageProgressIndicator } from "@/components/portfolio/StageProgressIndicator"
 import { RiskBudgetWidget } from "@/components/portfolio/RiskBudgetWidget"
 import { GateStageFilter, type GateStage, type GateStatus } from "@/components/portfolio/GateStageFilter"
@@ -31,8 +31,7 @@ import {
   Loader2,
   Brain
 } from "lucide-react"
-import { mockPortfolioProjects, mockPortfolioMetrics } from "@/data/portfolioMockData"
-import { PortfolioProject } from "@/types/portfolio"
+import { PortfolioProject, PortfolioMetrics } from "@/types/portfolio"
 
 function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
   const highRiskProjects = projects.filter(p => p.riskBudget.delta > 0.2)
@@ -174,12 +173,11 @@ function Dashboard() {
   const [selectedStages, setSelectedStages] = React.useState<GateStage[]>([])
   const [selectedStatuses, setSelectedStatuses] = React.useState<GateStatus[]>([])
 
-  // Use real projects if available, fallback to mock data for demo
-  const allProjects = projects.length > 0 ? projects : mockPortfolioProjects
-  const usingRealData = projects.length > 0
+  // Use real projects only (no mock fallback)
+  const allProjects = projects
 
   // Calculate real metrics from projects
-  const realMetrics = React.useMemo(() => {
+  const displayMetrics: PortfolioMetrics = React.useMemo(() => {
     const activeProjectsByStage = {
       DESIRABILITY: allProjects.filter(p => p.stage === 'DESIRABILITY').length,
       FEASIBILITY: allProjects.filter(p => p.stage === 'FEASIBILITY').length,
@@ -187,19 +185,20 @@ function Dashboard() {
       SCALE: allProjects.filter(p => p.stage === 'SCALE').length,
     };
 
-    // Use mock values for now for metrics we don't have in the data
-    // These can be calculated later when we have the actual evidence data
+    // Calculate real metrics from actual project data
+    const passedGates = allProjects.filter(p => p.gateStatus === 'Passed').length
+    const totalAttempts = allProjects.filter(p => ['Passed', 'Failed'].includes(p.gateStatus)).length
+
     return {
       activeProjectsByStage,
-      gatePassRate: 0.85, // Default placeholder
+      gatePassRate: totalAttempts > 0 ? passedGates / totalAttempts : 0,
       averageCycleTime: 0, // Not tracked yet
-      evidenceCoverage: allProjects.length > 0 ? allProjects.reduce((sum, p) => sum + (p.evidenceQuality || 0), 0) / allProjects.length / 100 : 0,
-      overrideRate: 0.05 // Default placeholder
+      evidenceCoverage: allProjects.length > 0
+        ? allProjects.reduce((sum, p) => sum + (p.evidenceQuality || 0), 0) / allProjects.length
+        : 0,
+      overrideRate: 0 // Not tracked yet
     };
   }, [allProjects]);
-
-  // Use real metrics if we have real data, otherwise use mock
-  const displayMetrics = usingRealData ? realMetrics : mockPortfolioMetrics
   
   // Apply gate filters
   const displayProjects = React.useMemo(() => {
@@ -267,21 +266,6 @@ function Dashboard() {
         />
       )}
 
-      {!usingRealData && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4 rounded-r-md">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-blue-400 mt-0.5" />
-            </div>
-            <div className="ml-3 flex-1">
-              <p className="text-sm text-blue-700 leading-relaxed">
-                <strong>Demo Mode:</strong> Showing sample data. {isConsultant ? 'Add your first client to see real data.' : 'Create your first project to see real data.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       <DashboardLayout
         breadcrumbs={[
           { title: "Consultant Dashboard", href: "/consultant-dashboard" },
@@ -323,7 +307,7 @@ function Dashboard() {
 
           {/* Portfolio Metrics */}
           <div data-tour="portfolio-metrics">
-            <PortfolioMetrics metrics={displayMetrics} />
+            <PortfolioMetricsComponent metrics={displayMetrics} />
           </div>
 
           {/* Portfolio Overview & Gate Alerts */}
@@ -349,11 +333,6 @@ function Dashboard() {
                   <Badge variant="outline" className="ml-2">
                     {displayProjects.length} {isConsultant ? 'Clients' : 'Projects'}
                   </Badge>
-                  {usingRealData && (
-                    <Badge variant="default" className="ml-2">
-                      Live Data
-                    </Badge>
-                  )}
                 </CardTitle>
                 <CardDescription>
                   {isConsultant ? 'Client portfolio with evidence-based validation' : 'Multi-client validation pipeline with evidence-based gates'}
@@ -365,10 +344,26 @@ function Dashboard() {
                     Error loading projects: {error.message}
                   </div>
                 )}
-                <PortfolioGrid 
-                  projects={displayProjects} 
-                  onProjectClick={handleProjectClick}
-                />
+                {displayProjects.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No clients yet</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Start building your portfolio by adding your first client project.
+                    </p>
+                    <Link href="/projects/new">
+                      <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Client
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <PortfolioGrid
+                    projects={displayProjects}
+                    onProjectClick={handleProjectClick}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>

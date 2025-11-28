@@ -8,11 +8,14 @@ import { AgentStatus } from '../../components/Agents/AgentStatus';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
-import { Separator } from '../../components/ui/separator';
-import { AlertCircle, CheckCircle, Clock, Play, RotateCcw, Activity, X, Eye, Plus } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { AlertCircle, CheckCircle, Clock, Play, RotateCcw, Activity, X, Eye, Plus, LayoutGrid, Map, Beaker, BookOpen, Target } from 'lucide-react';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Progress } from '../../components/ui/progress';
 import { VPCSummaryCard } from '@/components/vpc';
+// Strategyzer Components
+import { AssumptionMap, ExperimentCardsGrid, CanvasesGallery } from '@/components/strategyzer';
+import { EvidenceLedger } from '@/components/fit/EvidenceLedger';
 
 interface Client {
   _id: string;
@@ -133,9 +136,20 @@ const getDemoArtefacts = (id: string): Artefact[] => {
 const ClientPage: React.FC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { id } = router.query;
+  const { id, tab } = router.query;
   const [selectedArtefact, setSelectedArtefact] = useState<Artefact | null>(null);
   const [showArtefactModal, setShowArtefactModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Set active tab from URL query parameter
+  useEffect(() => {
+    if (tab && typeof tab === 'string') {
+      const validTabs = ['overview', 'canvases', 'assumptions', 'experiments', 'evidence'];
+      if (validTabs.includes(tab)) {
+        setActiveTab(tab);
+      }
+    }
+  }, [tab]);
 
   const { data: client, isLoading: clientLoading, error: clientError } = useQuery<Client | null>({
     queryKey: ['client', id],
@@ -278,189 +292,263 @@ const ClientPage: React.FC = () => {
 
       {/* Main Dashboard Content */}
       <main className="business-container py-8">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Left Column - Kanban Board */}
-          <div className="xl:col-span-2">
-            <Card className="business-card">
-              <CardHeader className="business-card-header">
-                <CardTitle>Project Tasks & Milestones</CardTitle>
-                <CardDescription>Strategic initiatives and deliverables tracking</CardDescription>
-              </CardHeader>
-              <CardContent className="business-card-content">
-                <KanbanBoard clientId={id as string} />
-              </CardContent>
-            </Card>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5">
+            <TabsTrigger value="overview">
+              <Target className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="canvases">
+              <LayoutGrid className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Canvases
+            </TabsTrigger>
+            <TabsTrigger value="assumptions">
+              <Map className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Assumption Map
+            </TabsTrigger>
+            <TabsTrigger value="experiments">
+              <Beaker className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Experiment Cards
+            </TabsTrigger>
+            <TabsTrigger value="evidence">
+              <BookOpen className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Evidence
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Left Column - Artefacts */}
-          <Card className="business-card">
-            <CardHeader className="business-card-header">
-              <CardTitle>Strategic Artefacts</CardTitle>
-              <CardDescription>Generated insights and deliverables</CardDescription>
-            </CardHeader>
-            <CardContent className="business-card-content">
-              {artefactsLoading && (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <div className="text-muted-foreground">Loading strategic artefacts...</div>
-                </div>
-              )}
-              {artefactsError && (
-                <div className="mb-4 p-4 border border-amber-200 bg-amber-50 rounded-lg">
-                  <h3 className="font-semibold text-amber-800 mb-2">Demo Artefacts Available</h3>
-                  <p className="text-amber-700 text-sm">
-                    Backend services are offline. Displaying demo strategic artefacts and insights.
-                  </p>
-                </div>
-              )}
-              <div className="space-y-4">
-                {displayArtefacts.length > 0 ? (
-                  displayArtefacts.map((artefact) => (
-                    <div 
-                      key={artefact.id} 
-                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => {
-                        setSelectedArtefact(artefact);
-                        setShowArtefactModal(true);
-                      }}
-                    >
-                      <div className="flex-1">
-                        <h4 className="font-medium text-foreground">{artefact.name}</h4>
-                        <p className="text-sm text-muted-foreground">{artefact.type}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(artefact.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant={artefact.status === 'completed' ? 'default' : 
-                                 artefact.status === 'in-progress' ? 'secondary' : 'outline'}
-                        >
-                          {artefact.status}
-                        </Badge>
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-muted-foreground mb-4">
-                      <svg className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <p className="text-sm">No artefacts generated yet</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Generate Initial Analysis
-                    </Button>
-                  </div>
-                )}
+          {/* OVERVIEW TAB - Original client workspace content */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              {/* Left Column - Kanban Board */}
+              <div className="xl:col-span-2">
+                <Card className="business-card">
+                  <CardHeader className="business-card-header">
+                    <CardTitle>Project Tasks & Milestones</CardTitle>
+                    <CardDescription>Strategic initiatives and deliverables tracking</CardDescription>
+                  </CardHeader>
+                  <CardContent className="business-card-content">
+                    <KanbanBoard clientId={id as string} />
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Right Column - Agent Status & Artefacts */}
-          <div className="space-y-8">
-            {/* Value Proposition Analysis */}
-            {id && typeof id === 'string' && (
-              <VPCSummaryCard
-                projectId={id}
-                onClick={() => router.push(`/project/${id}/analysis`)}
-              />
-            )}
+              {/* Strategic Artefacts Column */}
+              <Card className="business-card">
+                <CardHeader className="business-card-header">
+                  <CardTitle>Strategic Artefacts</CardTitle>
+                  <CardDescription>Generated insights and deliverables</CardDescription>
+                </CardHeader>
+                <CardContent className="business-card-content">
+                  {artefactsLoading && (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <div className="text-muted-foreground">Loading strategic artefacts...</div>
+                    </div>
+                  )}
+                  {artefactsError && (
+                    <div className="mb-4 p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                      <h3 className="font-semibold text-amber-800 mb-2">Demo Artefacts Available</h3>
+                      <p className="text-amber-700 text-sm">
+                        Backend services are offline. Displaying demo strategic artefacts and insights.
+                      </p>
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    {displayArtefacts.length > 0 ? (
+                      displayArtefacts.map((artefact) => (
+                        <div
+                          key={artefact.id}
+                          className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                          onClick={() => {
+                            setSelectedArtefact(artefact);
+                            setShowArtefactModal(true);
+                          }}
+                        >
+                          <div className="flex-1">
+                            <h4 className="font-medium text-foreground">{artefact.name}</h4>
+                            <p className="text-sm text-muted-foreground">{artefact.type}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(artefact.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge
+                              variant={artefact.status === 'completed' ? 'default' :
+                                     artefact.status === 'in-progress' ? 'secondary' : 'outline'}
+                            >
+                              {artefact.status}
+                            </Badge>
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-muted-foreground mb-4">
+                          <svg className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <p className="text-sm">No artefacts generated yet</p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Generate Initial Analysis
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Agent Status */}
-            <Card className="business-card">
-              <CardHeader className="business-card-header">
-                <CardTitle>AI Agent Performance</CardTitle>
-                <CardDescription>Multi-agent system status and metrics</CardDescription>
+              {/* Right Column - Agent Status & Workflows */}
+              <div className="xl:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Value Proposition Analysis */}
+                {id && typeof id === 'string' && (
+                  <VPCSummaryCard
+                    projectId={id}
+                    onClick={() => router.push(`/project/${id}/analysis`)}
+                  />
+                )}
+
+                {/* Agent Status */}
+                <Card className="business-card">
+                  <CardHeader className="business-card-header">
+                    <CardTitle>AI Agent Performance</CardTitle>
+                    <CardDescription>Multi-agent system status and metrics</CardDescription>
+                  </CardHeader>
+                  <CardContent className="business-card-content">
+                    <AgentStatus />
+                  </CardContent>
+                </Card>
+
+                {/* AI Workflow Controls */}
+                <Card className="business-card">
+                  <CardHeader className="business-card-header">
+                    <CardTitle>AI Workflows</CardTitle>
+                    <CardDescription>Automated business intelligence</CardDescription>
+                  </CardHeader>
+                  <CardContent className="business-card-content">
+                    <div className="space-y-4">
+                      {/* Discovery Workflow */}
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'bg-green-500' :
+                            displayClient?.workflowStatus?.discovery?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
+                            'bg-gray-300'
+                          }`}></div>
+                          <div>
+                            <div className="font-medium text-sm">Discovery</div>
+                            <div className="text-xs text-muted-foreground">Business analysis</div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'outline' : 'default'}
+                          onClick={() => triggerWorkflow('discovery')}
+                        >
+                          {displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'Re-run' :
+                           displayClient?.workflowStatus?.discovery?.status === 'in_progress' ? 'Running...' : 'Start'}
+                        </Button>
+                      </div>
+
+                      {/* Validation Workflow */}
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            displayClient?.workflowStatus?.validation?.status === 'completed' ? 'bg-green-500' :
+                            displayClient?.workflowStatus?.validation?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
+                            'bg-gray-300'
+                          }`}></div>
+                          <div>
+                            <div className="font-medium text-sm">Validation</div>
+                            <div className="text-xs text-muted-foreground">Market testing</div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={displayClient?.workflowStatus?.validation?.status === 'completed' ? 'outline' : 'default'}
+                          onClick={() => triggerWorkflow('validation')}
+                        >
+                          {displayClient?.workflowStatus?.validation?.status === 'completed' ? 'Re-run' :
+                           displayClient?.workflowStatus?.validation?.status === 'in_progress' ? 'Running...' : 'Start'}
+                        </Button>
+                      </div>
+
+                      {/* Scale Workflow */}
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            displayClient?.workflowStatus?.scale?.status === 'completed' ? 'bg-green-500' :
+                            displayClient?.workflowStatus?.scale?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
+                            'bg-gray-300'
+                          }`}></div>
+                          <div>
+                            <div className="font-medium text-sm">Scale</div>
+                            <div className="text-xs text-muted-foreground">Growth strategy</div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={displayClient?.workflowStatus?.scale?.status === 'completed' ? 'outline' : 'default'}
+                          onClick={() => triggerWorkflow('scale')}
+                        >
+                          {displayClient?.workflowStatus?.scale?.status === 'completed' ? 'Re-run' :
+                           displayClient?.workflowStatus?.scale?.status === 'in_progress' ? 'Running...' : 'Start'}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* CANVASES TAB - Value Proposition Canvas + Business Model Canvas */}
+          <TabsContent value="canvases" className="space-y-6">
+            <CanvasesGallery projectId={id as string} />
+          </TabsContent>
+
+          {/* ASSUMPTION MAP TAB - Strategyzer terminology */}
+          <TabsContent value="assumptions" className="space-y-6">
+            <AssumptionMap projectId={id as string} />
+          </TabsContent>
+
+          {/* EXPERIMENT CARDS TAB - Strict Strategyzer format */}
+          <TabsContent value="experiments" className="space-y-6">
+            <ExperimentCardsGrid projectId={id as string} />
+          </TabsContent>
+
+          {/* EVIDENCE TAB - Evidence Ledger */}
+          <TabsContent value="evidence" className="space-y-6">
+            <EvidenceLedger />
+
+            {/* Learning Cards Summary */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Learning Cards
+                </CardTitle>
+                <CardDescription>
+                  Capture insights and decisions from experiments
+                </CardDescription>
               </CardHeader>
-              <CardContent className="business-card-content">
-                <AgentStatus />
-              </CardContent>
-            </Card>
-
-            {/* AI Workflow Controls */}
-            <Card className="business-card">
-              <CardHeader className="business-card-header">
-                <CardTitle>🤖 AI Workflows</CardTitle>
-                <CardDescription>Automated business intelligence & strategy</CardDescription>
-              </CardHeader>
-              <CardContent className="business-card-content">
-                <div className="space-y-4">
-                  {/* Discovery Workflow */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'bg-green-500' :
-                        displayClient?.workflowStatus?.discovery?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
-                        'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <div className="font-medium text-sm">Discovery</div>
-                        <div className="text-xs text-muted-foreground">Business analysis & strategy</div>
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant={displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'outline' : 'default'}
-                      onClick={() => triggerWorkflow('discovery')}
-                    >
-                      {displayClient?.workflowStatus?.discovery?.status === 'completed' ? 'Re-run' : 
-                       displayClient?.workflowStatus?.discovery?.status === 'in_progress' ? 'Running...' : 'Start'}
-                    </Button>
-                  </div>
-
-                  {/* Validation Workflow */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        displayClient?.workflowStatus?.validation?.status === 'completed' ? 'bg-green-500' :
-                        displayClient?.workflowStatus?.validation?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
-                        'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <div className="font-medium text-sm">Validation</div>
-                        <div className="text-xs text-muted-foreground">Market testing & validation</div>
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant={displayClient?.workflowStatus?.validation?.status === 'completed' ? 'outline' : 'default'}
-                      onClick={() => triggerWorkflow('validation')}
-                    >
-                      {displayClient?.workflowStatus?.validation?.status === 'completed' ? 'Re-run' : 
-                       displayClient?.workflowStatus?.validation?.status === 'in_progress' ? 'Running...' : 'Start'}
-                    </Button>
-                  </div>
-
-                  {/* Scale Workflow */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        displayClient?.workflowStatus?.scale?.status === 'completed' ? 'bg-green-500' :
-                        displayClient?.workflowStatus?.scale?.status === 'in_progress' ? 'bg-yellow-500 animate-pulse' :
-                        'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <div className="font-medium text-sm">Scale</div>
-                        <div className="text-xs text-muted-foreground">Growth & scaling strategy</div>
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant={displayClient?.workflowStatus?.scale?.status === 'completed' ? 'outline' : 'default'}
-                      onClick={() => triggerWorkflow('scale')}
-                    >
-                      {displayClient?.workflowStatus?.scale?.status === 'completed' ? 'Re-run' : 
-                       displayClient?.workflowStatus?.scale?.status === 'in_progress' ? 'Running...' : 'Start'}
-                    </Button>
-                  </div>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="mb-4">Learning cards will appear here after completing experiments.</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setActiveTab('experiments')}
+                  >
+                    <Beaker className="h-4 w-4 mr-2" />
+                    View Experiment Cards
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Artefact Modal */}

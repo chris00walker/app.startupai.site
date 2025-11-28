@@ -9,9 +9,7 @@ import { GateStatusBadge } from "@/components/gates/GateStatusBadge"
 import { GateReadinessIndicator } from "@/components/gates/GateReadinessIndicator"
 import { useGateEvaluation } from "@/hooks/useGateEvaluation"
 import { useGateAlerts } from "@/hooks/useGateAlerts"
-import HypothesisManager from "@/components/hypothesis/HypothesisManager"
 import { EvidenceLedger } from "@/components/fit/EvidenceLedger"
-import { ExperimentsPage } from "@/components/fit/ExperimentsPage"
 import { StageSelector } from "@/components/founder/StageSelector"
 import { ProjectCreationWizard } from "@/components/onboarding/ProjectCreationWizard"
 import { DashboardAIAssistant } from "@/components/assistant/DashboardAIAssistant"
@@ -24,6 +22,11 @@ import { useAuth } from "@/lib/auth/hooks"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { VPCSummaryCard } from "@/components/vpc"
+// Strategyzer Components
+import { AssumptionMap, ExperimentCardsGrid, CanvasesGallery } from "@/components/strategyzer"
+// Hooks for real data
+import { useRecentActivity, type ActivityItem } from "@/hooks/useRecentActivity"
+import { useRecommendedActions, type RecommendedAction } from "@/hooks/useRecommendedActions"
 import {
   Target,
   FileText,
@@ -34,7 +37,11 @@ import {
   Clock,
   Plus,
   Rocket,
-  Brain
+  Brain,
+  LayoutGrid,
+  Users,
+  BookOpen,
+  Map
 } from "lucide-react"
 
 function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
@@ -124,36 +131,30 @@ function QuickStats({ projectId, currentStage }: { projectId?: string, currentSt
   )
 }
 
-function RecentActivity() {
-  const activities = [
-    {
-      id: "1",
-      type: "evidence",
-      title: "New evidence added",
-      description: "Customer Interview #12 - Strong evidence for Desirability",
-      time: "2 hours ago",
-      icon: FileText,
-      color: "text-green-500"
-    },
-    {
-      id: "2", 
-      type: "experiment",
-      title: "Experiment completed",
-      description: "Technical Architecture Review - Updated Feasibility score",
-      time: "1 day ago",
-      icon: CheckCircle,
-      color: "text-blue-500"
-    },
-    {
-      id: "3",
-      type: "contradiction",
-      title: "Contradiction detected",
-      description: "Price Sensitivity Survey conflicts with previous assumptions",
-      time: "3 days ago",
-      icon: AlertTriangle,
-      color: "text-red-500"
+function RecentActivity({ projectId }: { projectId?: string }) {
+  const { activities, isLoading } = useRecentActivity({ projectId, limit: 5 })
+
+  const getActivityIcon = (type: ActivityItem['type']) => {
+    switch (type) {
+      case 'evidence': return { icon: FileText, color: 'text-green-500' }
+      case 'experiment': return { icon: Beaker, color: 'text-blue-500' }
+      case 'assumption': return { icon: Target, color: 'text-purple-500' }
+      case 'contradiction': return { icon: AlertTriangle, color: 'text-red-500' }
+      default: return { icon: Clock, color: 'text-gray-500' }
     }
-  ]
+  }
+
+  const formatTimeAgo = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
+    if (seconds < 60) return 'Just now'
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `${minutes}m ago`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours}h ago`
+    const days = Math.floor(hours / 24)
+    if (days < 7) return `${days}d ago`
+    return date.toLocaleDateString()
+  }
 
   return (
     <Card>
@@ -162,82 +163,113 @@ function RecentActivity() {
         <CardDescription>Latest updates to your validation project</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {activities.map((activity) => {
-            const Icon = activity.icon
-            return (
-              <div key={activity.id} className="flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-muted">
-                  <Icon className={`h-3 w-3 ${activity.color}`} />
+        {isLoading ? (
+          <div className="text-sm text-muted-foreground">Loading activity...</div>
+        ) : activities.length === 0 ? (
+          <div className="text-sm text-muted-foreground text-center py-4">
+            No activity yet. Start by adding assumptions or evidence.
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {activities.map((activity) => {
+              const { icon: Icon, color } = getActivityIcon(activity.type)
+              return (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-lg bg-muted">
+                    <Icon className={`h-3 w-3 ${color}`} />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <p className="text-xs text-muted-foreground">{activity.description}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{formatTimeAgo(activity.timestamp)}</span>
                 </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium">{activity.title}</p>
-                  <p className="text-xs text-muted-foreground">{activity.description}</p>
-                </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
 }
 
-function NextSteps() {
-  const steps = [
-    {
-      id: "1",
-      title: "Complete Customer Interview Round 2",
-      description: "Gather more evidence for Desirability validation",
-      priority: "High",
-      estimatedTime: "2 weeks"
-    },
-    {
-      id: "2",
-      title: "Address Price Sensitivity Contradiction",
-      description: "Resolve conflicting evidence about pricing assumptions",
-      priority: "Medium", 
-      estimatedTime: "1 week"
-    },
-    {
-      id: "3",
-      title: "Continue MVP Prototype Development",
-      description: "Progress on technical feasibility validation",
-      priority: "High",
-      estimatedTime: "6 weeks"
+function NextSteps({ projectId }: { projectId?: string }) {
+  const { actions, isLoading } = useRecommendedActions({ projectId, limit: 5 })
+
+  const getCategoryIcon = (category: RecommendedAction['category']) => {
+    switch (category) {
+      case 'assumption': return Target
+      case 'experiment': return Beaker
+      case 'evidence': return FileText
+      case 'canvas': return LayoutGrid
+      default: return CheckCircle
     }
-  ]
+  }
+
+  const getActionVerb = (actionType: RecommendedAction['actionType']) => {
+    switch (actionType) {
+      case 'create': return 'Create'
+      case 'complete': return 'Complete'
+      case 'review': return 'Review'
+      case 'resolve': return 'Resolve'
+      default: return 'Start'
+    }
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Recommended Next Steps</CardTitle>
-        <CardDescription>AI-suggested actions to improve your fit scores</CardDescription>
+        <CardDescription>AI-suggested actions based on your validation state</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {steps.map((step) => (
-            <div key={step.id} className="flex items-start justify-between p-3 rounded-lg border">
-              <div className="flex-1">
-                <h4 className="text-sm font-medium mb-1">{step.title}</h4>
-                <p className="text-xs text-muted-foreground mb-2">{step.description}</p>
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={step.priority === "High" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {step.priority} Priority
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">{step.estimatedTime}</span>
+        {isLoading ? (
+          <div className="text-sm text-muted-foreground">Analyzing your project...</div>
+        ) : actions.length === 0 ? (
+          <div className="text-sm text-muted-foreground text-center py-4">
+            <CheckCircle className="h-8 w-8 mx-auto mb-2 text-green-500" />
+            <p>Great progress! No immediate actions recommended.</p>
+            <p className="text-xs mt-1">Keep validating your assumptions.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {actions.map((action) => {
+              const Icon = getCategoryIcon(action.category)
+              return (
+                <div key={action.id} className="flex items-start justify-between p-3 rounded-lg border">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="p-1.5 rounded-lg bg-muted mt-0.5">
+                      <Icon className={`h-3 w-3 ${
+                        action.priority === 'high' ? 'text-red-500' :
+                        action.priority === 'medium' ? 'text-yellow-500' :
+                        'text-gray-500'
+                      }`} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-1">{action.title}</h4>
+                      <p className="text-xs text-muted-foreground mb-2">{action.description}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant={action.priority === 'high' ? 'destructive' :
+                                   action.priority === 'medium' ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {action.priority.charAt(0).toUpperCase() + action.priority.slice(1)}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {action.category}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    {getActionVerb(action.actionType)}
+                  </Button>
                 </div>
-              </div>
-              <Button variant="ghost" size="sm">
-                Start
-              </Button>
-            </div>
-          ))}
-        </div>
+              )
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -384,15 +416,29 @@ export default function FounderDashboard() {
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full max-w-3xl grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="gates">Gates</TabsTrigger>
-            <TabsTrigger value="hypotheses">Hypotheses</TabsTrigger>
-            <TabsTrigger value="experiments">Experiments</TabsTrigger>
-            <TabsTrigger value="evidence">Evidence</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsList className="grid w-full max-w-3xl grid-cols-5">
+            <TabsTrigger value="overview">
+              <Target className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="canvases">
+              <LayoutGrid className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Canvases
+            </TabsTrigger>
+            <TabsTrigger value="assumptions">
+              <Map className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Assumption Map
+            </TabsTrigger>
+            <TabsTrigger value="experiments">
+              <Beaker className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Experiment Cards
+            </TabsTrigger>
+            <TabsTrigger value="evidence">
+              <BookOpen className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Evidence & Learnings
+            </TabsTrigger>
           </TabsList>
-          
+
           <div className="flex gap-2">
             <Link href="/ai-analysis">
               <Button>
@@ -442,149 +488,52 @@ export default function FounderDashboard() {
                 onClick={() => router.push(`/project/${projectId}/analysis`)}
               />
             )}
-            <RecentActivity />
-            <NextSteps />
+            <RecentActivity projectId={projectId} />
+            <NextSteps projectId={projectId} />
           </div>
         </TabsContent>
 
-        <TabsContent value="gates" className="space-y-6">
-          {/* Dedicated Gates Tab */}
-          {projectId ? (
-            <div className="space-y-6">
-              {/* Gate Status Overview */}
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <Target className="h-8 w-8 text-blue-600" />
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Current Stage</p>
-                        <p className="text-2xl font-bold">{currentStage}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="h-8 w-8 text-green-600" />
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Gate Status</p>
-                        <GateStatusBadge status={currentProject?.gateStatus || 'Pending'} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-3">
-                      <TrendingUp className="h-8 w-8 text-orange-600" />
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Readiness</p>
-                        <GateReadinessIndicator 
-                          score={0} 
-                          stage={currentStage as any}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Full Gate Dashboard */}
-              <GateDashboard 
-                projectId={projectId}
-                stage={currentStage as any}
-                gateStatus={currentProject?.gateStatus || 'Pending'}
-                readinessScore={0}
-                evidenceCount={0}
-                experimentsCount={0}
-              />
-              
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Gate Actions</CardTitle>
-                  <CardDescription>
-                    Quick actions to improve your gate readiness
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                    <Link href="/founder-dashboard?tab=evidence">
-                      <Button variant="outline" className="w-full justify-start">
-                        <FileText className="h-4 w-4 mr-2" />
-                        Add Evidence
-                      </Button>
-                    </Link>
-                    <Link href="/founder-dashboard?tab=experiments">
-                      <Button variant="outline" className="w-full justify-start">
-                        <Beaker className="h-4 w-4 mr-2" />
-                        Run Experiment
-                      </Button>
-                    </Link>
-                    <Link href={`/project/${projectId}/gate`}>
-                      <Button variant="outline" className="w-full justify-start">
-                        <Target className="h-4 w-4 mr-2" />
-                        Full Gate View
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-12">
-                  <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Project Selected</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Create a project to access gate evaluation features.
-                  </p>
-                  <Link href="/projects/new">
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Project
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+        {/* CANVASES TAB - Value Proposition Canvas + Business Model Canvas */}
+        <TabsContent value="canvases" className="space-y-6">
+          <CanvasesGallery projectId={projectId} />
         </TabsContent>
 
-        <TabsContent value="hypotheses" className="space-y-6">
-          <HypothesisManager />
+        {/* ASSUMPTION MAP TAB - Strategyzer terminology */}
+        <TabsContent value="assumptions" className="space-y-6">
+          <AssumptionMap projectId={projectId} />
         </TabsContent>
 
-        <TabsContent value="experiments">
-          <ExperimentsPage />
+        {/* EXPERIMENT CARDS TAB - Strict Strategyzer format */}
+        <TabsContent value="experiments" className="space-y-6">
+          <ExperimentCardsGrid projectId={projectId} />
         </TabsContent>
 
-        <TabsContent value="evidence">
+        {/* EVIDENCE & LEARNINGS TAB - Combined view */}
+        <TabsContent value="evidence" className="space-y-6">
+          {/* Evidence Ledger */}
           <EvidenceLedger />
-        </TabsContent>
 
-        <TabsContent value="insights" className="space-y-6">
+          {/* Learning Cards Summary (placeholder for now) */}
           <Card>
             <CardHeader>
-              <CardTitle>AI-Powered Insights</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Learning Cards
+              </CardTitle>
               <CardDescription>
-                Advanced analytics and recommendations based on your validation data
+                Capture insights and decisions from your experiments
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12">
-                <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Advanced Insights Coming Soon</h3>
-                <p className="text-muted-foreground mb-4">
-                  We're building advanced AI analytics to provide deeper insights into your validation progress.
-                </p>
-                <Button variant="outline">
-                  Request Early Access
+              <div className="text-center py-8 text-muted-foreground">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="mb-4">Learning cards will appear here after completing experiments.</p>
+                <Button
+                  variant="outline"
+                  onClick={() => setActiveTab('experiments')}
+                >
+                  <Beaker className="h-4 w-4 mr-2" />
+                  View Experiment Cards
                 </Button>
               </div>
             </CardContent>
