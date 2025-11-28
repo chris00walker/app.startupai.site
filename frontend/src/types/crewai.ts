@@ -75,6 +75,208 @@ export type ArtifactApprovalStatus =
   | 'rejected'
 
 // =======================================================================================
+// APPROVAL REQUEST TYPES
+// =======================================================================================
+
+/**
+ * Approval types that can trigger human-in-the-loop decisions.
+ * These map to CrewAI task outputs that pause for human input.
+ */
+export type ApprovalType =
+  | 'segment_pivot'      // Change target customer segment
+  | 'value_pivot'        // Change value proposition
+  | 'feature_downgrade'  // Cut features for feasibility
+  | 'strategic_pivot'    // Major strategic direction change
+  | 'spend_increase'     // Increase ad/experiment budget
+  | 'campaign_launch'    // Launch new marketing campaign
+  | 'customer_contact'   // Direct customer outreach
+  | 'gate_progression'   // Phase gate advancement decision
+  | 'data_sharing'       // Share data with external parties
+
+/**
+ * AI Founder roles that own approval decisions.
+ * Each founder has a specific domain of expertise.
+ */
+export type OwnerRole =
+  | 'sage'      // CSO - Chief Strategy Officer (Strategic coordination)
+  | 'forge'     // CTO - Chief Technology Officer (Technical feasibility)
+  | 'pulse'     // CGO - Chief Growth Officer (Growth strategy)
+  | 'compass'   // CPO - Chief Product Officer (Product vision)
+  | 'guardian'  // CGO - Chief Governance Officer (QA/Compliance)
+  | 'ledger'    // CFO - Chief Financial Officer (Financial analysis)
+
+/**
+ * Option presented to user in approval decisions.
+ */
+export interface ApprovalOption {
+  id: string
+  label: string
+  description: string
+  recommended?: boolean
+  risk_level?: 'low' | 'medium' | 'high'
+}
+
+/**
+ * Full approval request from CrewAI webhook.
+ */
+export interface ApprovalRequest {
+  id: string
+  execution_id: string
+  task_id: string
+  kickoff_id: string | null
+  user_id: string
+  project_id: string | null
+  approval_type: ApprovalType
+  owner_role: OwnerRole
+  title: string
+  description: string
+  task_output: Record<string, unknown>
+  evidence_summary: Record<string, unknown>
+  options: ApprovalOption[]
+  status: 'pending' | 'approved' | 'rejected' | 'expired'
+  decision: string | null
+  human_feedback: string | null
+  decided_by: string | null
+  decided_at: string | null
+  auto_approvable: boolean
+  auto_approve_reason?: string
+  expires_at: string
+  created_at: string
+  updated_at: string
+  project?: {
+    id: string
+    name: string
+    stage?: string
+  } | null
+}
+
+/**
+ * User preferences for auto-approving certain decision types.
+ */
+export interface ApprovalPreferences {
+  user_id: string
+  auto_approve_types: ApprovalType[]
+  max_auto_approve_spend: number
+  auto_approve_low_risk: boolean
+  notify_email: boolean
+  notify_sms: boolean
+  escalation_email?: string
+}
+
+/**
+ * AI Founder metadata for display.
+ */
+export interface FounderInfo {
+  role: OwnerRole
+  name: string
+  title: string
+  specialty: string
+  avatarPath: string
+}
+
+/**
+ * Get founder display info for UI.
+ */
+export const FOUNDER_INFO: Record<OwnerRole, FounderInfo> = {
+  sage: {
+    role: 'sage',
+    name: 'Sage',
+    title: 'Chief Strategy Officer',
+    specialty: 'Strategic coordination and synthesis',
+    avatarPath: '/avatars/founders/sage.svg',
+  },
+  forge: {
+    role: 'forge',
+    name: 'Forge',
+    title: 'Chief Technology Officer',
+    specialty: 'Technical feasibility and architecture',
+    avatarPath: '/avatars/founders/forge.svg',
+  },
+  pulse: {
+    role: 'pulse',
+    name: 'Pulse',
+    title: 'Chief Growth Officer',
+    specialty: 'Growth strategy and experiments',
+    avatarPath: '/avatars/founders/pulse.svg',
+  },
+  compass: {
+    role: 'compass',
+    name: 'Compass',
+    title: 'Chief Product Officer',
+    specialty: 'Product vision and customer fit',
+    avatarPath: '/avatars/founders/compass.svg',
+  },
+  guardian: {
+    role: 'guardian',
+    name: 'Guardian',
+    title: 'Chief Governance Officer',
+    specialty: 'Quality assurance and compliance',
+    avatarPath: '/avatars/founders/guardian.svg',
+  },
+  ledger: {
+    role: 'ledger',
+    name: 'Ledger',
+    title: 'Chief Financial Officer',
+    specialty: 'Financial analysis and viability',
+    avatarPath: '/avatars/founders/ledger.svg',
+  },
+}
+
+/**
+ * Get approval type display info for UI.
+ */
+export function getApprovalTypeInfo(type: ApprovalType): { label: string; description: string; icon: string } {
+  const typeInfo: Record<ApprovalType, { label: string; description: string; icon: string }> = {
+    segment_pivot: {
+      label: 'Segment Pivot',
+      description: 'Change target customer segment',
+      icon: 'Users',
+    },
+    value_pivot: {
+      label: 'Value Pivot',
+      description: 'Change value proposition',
+      icon: 'Lightbulb',
+    },
+    feature_downgrade: {
+      label: 'Feature Downgrade',
+      description: 'Reduce scope for feasibility',
+      icon: 'Scissors',
+    },
+    strategic_pivot: {
+      label: 'Strategic Pivot',
+      description: 'Major direction change',
+      icon: 'Compass',
+    },
+    spend_increase: {
+      label: 'Budget Increase',
+      description: 'Increase experiment budget',
+      icon: 'DollarSign',
+    },
+    campaign_launch: {
+      label: 'Campaign Launch',
+      description: 'Launch marketing campaign',
+      icon: 'Rocket',
+    },
+    customer_contact: {
+      label: 'Customer Contact',
+      description: 'Direct customer outreach',
+      icon: 'MessageSquare',
+    },
+    gate_progression: {
+      label: 'Gate Progression',
+      description: 'Advance to next phase',
+      icon: 'ArrowRight',
+    },
+    data_sharing: {
+      label: 'Data Sharing',
+      description: 'Share data externally',
+      icon: 'Share2',
+    },
+  }
+  return typeInfo[type]
+}
+
+// =======================================================================================
 // ASSUMPTION TRACKING
 // =======================================================================================
 

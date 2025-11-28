@@ -3,45 +3,18 @@
  *
  * Fetches pending approval requests for the current user.
  * Includes both own approvals and client approvals (for consultants).
+ * Supports Supabase Realtime for live updates.
  */
 
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth/hooks';
+import { createClient } from '@/lib/supabase/client';
+import type { ApprovalRequest } from '@/types/crewai';
 
-export interface ApprovalRequest {
-  id: string;
-  execution_id: string;
-  task_id: string;
-  kickoff_id: string | null;
-  user_id: string;
-  project_id: string | null;
-  approval_type: string;
-  owner_role: string;
-  title: string;
-  description: string;
-  task_output: Record<string, any>;
-  evidence_summary: Record<string, any>;
-  options: Array<{
-    id: string;
-    label: string;
-    description?: string;
-  }>;
-  status: 'pending' | 'approved' | 'rejected' | 'expired';
-  decision: string | null;
-  human_feedback: string | null;
-  decided_by: string | null;
-  decided_at: string | null;
-  expires_at: string;
-  created_at: string;
-  updated_at: string;
-  projects?: {
-    id: string;
-    name: string;
-    stage: string;
-  } | null;
-}
+// Re-export the type for backward compatibility
+export type { ApprovalRequest } from '@/types/crewai';
 
 export interface UseApprovalsResult {
   approvals: ApprovalRequest[];
@@ -54,12 +27,17 @@ export interface UseApprovalsResult {
   reject: (id: string, feedback?: string) => Promise<boolean>;
 }
 
-export function useApprovals(status: 'pending' | 'all' = 'pending'): UseApprovalsResult {
+export function useApprovals(
+  status: 'pending' | 'all' = 'pending',
+  options?: { enableRealtime?: boolean }
+): UseApprovalsResult {
   const { user, loading: authLoading } = useAuth();
   const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
   const [clientApprovals, setClientApprovals] = useState<ApprovalRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const enableRealtime = options?.enableRealtime ?? true;
 
   const fetchApprovals = useCallback(async () => {
     if (authLoading || !user) {
@@ -92,9 +70,44 @@ export function useApprovals(status: 'pending' | 'all' = 'pending'): UseApproval
     }
   }, [user, authLoading, status]);
 
+  // Initial fetch
   useEffect(() => {
     fetchApprovals();
   }, [fetchApprovals]);
+
+  // Supabase Realtime subscription for live updates
+  useEffect(() => {
+    if (!enableRealtime || authLoading || !user) return;
+
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel('approval-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'approval_requests',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('[useApprovals] Realtime update:', payload.eventType);
+          // Refetch on any change to ensure consistency
+          fetchApprovals();
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('[useApprovals] Realtime subscription active');
+        }
+      });
+
+    return () => {
+      console.log('[useApprovals] Cleaning up Realtime subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [user, authLoading, enableRealtime, fetchApprovals]);
 
   const approve = async (
     id: string,

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
@@ -27,11 +28,14 @@ import {
   EyeOff,
   Download,
   Upload,
-  Loader2
+  Loader2,
+  Bot
 } from "lucide-react"
 import { useDemoMode } from "@/hooks/useDemoMode"
 import { useAuth } from "@/lib/auth/hooks"
 import { createClient } from "@/lib/supabase/client"
+import type { ApprovalType } from "@/types/crewai"
+import { getApprovalTypeInfo } from "@/types/crewai"
 
 interface UserProfile {
   name: string
@@ -58,6 +62,28 @@ interface SecuritySettings {
   apiKeyVisible: boolean
   lastPasswordChange: string
 }
+
+interface ApprovalSettings {
+  autoApproveTypes: ApprovalType[]
+  maxAutoApproveSpend: number
+  autoApproveLowRisk: boolean
+  notifyEmail: boolean
+  notifySms: boolean
+  escalationEmail: string
+}
+
+// All approval types that can be configured
+const ALL_APPROVAL_TYPES: ApprovalType[] = [
+  'segment_pivot',
+  'value_pivot',
+  'feature_downgrade',
+  'strategic_pivot',
+  'spend_increase',
+  'campaign_launch',
+  'customer_contact',
+  'gate_progression',
+  'data_sharing',
+]
 
 export default function SettingsPage() {
   const demoMode = useDemoMode()
@@ -127,6 +153,17 @@ export default function SettingsPage() {
     lastPasswordChange: "2024-11-15"
   })
 
+  // Approval settings
+  const [approvalSettings, setApprovalSettings] = useState<ApprovalSettings>({
+    autoApproveTypes: [],
+    maxAutoApproveSpend: 0,
+    autoApproveLowRisk: false,
+    notifyEmail: true,
+    notifySms: false,
+    escalationEmail: ""
+  })
+  const [approvalSettingsLoading, setApprovalSettingsLoading] = useState(false)
+
   const handleSaveProfile = async () => {
     if (!user) return
 
@@ -158,6 +195,77 @@ export default function SettingsPage() {
   const handleSaveSecurity = () => {
     console.log('Saving security settings:', security)
     // TODO: Implement security settings save
+  }
+
+  // Fetch approval settings
+  useEffect(() => {
+    async function fetchApprovalSettings() {
+      if (!user) return
+
+      try {
+        setApprovalSettingsLoading(true)
+        const response = await fetch('/api/settings/approvals')
+
+        if (response.ok) {
+          const data = await response.json()
+          setApprovalSettings({
+            autoApproveTypes: data.auto_approve_types || [],
+            maxAutoApproveSpend: data.max_auto_approve_spend || 0,
+            autoApproveLowRisk: data.auto_approve_low_risk || false,
+            notifyEmail: data.notify_email ?? true,
+            notifySms: data.notify_sms || false,
+            escalationEmail: data.escalation_email || ""
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching approval settings:', error)
+      } finally {
+        setApprovalSettingsLoading(false)
+      }
+    }
+
+    fetchApprovalSettings()
+  }, [user])
+
+  const handleSaveApprovalSettings = async () => {
+    if (!user) return
+
+    setApprovalSettingsLoading(true)
+    try {
+      const response = await fetch('/api/settings/approvals', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auto_approve_types: approvalSettings.autoApproveTypes,
+          max_auto_approve_spend: approvalSettings.maxAutoApproveSpend,
+          auto_approve_low_risk: approvalSettings.autoApproveLowRisk,
+          notify_email: approvalSettings.notifyEmail,
+          notify_sms: approvalSettings.notifySms,
+          escalation_email: approvalSettings.escalationEmail || null
+        })
+      })
+
+      if (response.ok) {
+        alert('Approval settings saved successfully!')
+      } else {
+        const error = await response.json()
+        alert('Error saving approval settings: ' + (error.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error saving approval settings:', error)
+      alert('Error saving approval settings')
+    } finally {
+      setApprovalSettingsLoading(false)
+    }
+  }
+
+  const toggleApprovalType = (type: ApprovalType) => {
+    setApprovalSettings(prev => ({
+      ...prev,
+      autoApproveTypes: prev.autoApproveTypes.includes(type)
+        ? prev.autoApproveTypes.filter(t => t !== type)
+        : [...prev.autoApproveTypes, type]
+    }))
   }
 
   if (isLoading) {
@@ -210,11 +318,12 @@ export default function SettingsPage() {
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="preferences">Preferences</TabsTrigger>
+            <TabsTrigger value="approvals">AI Approvals</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
           </TabsList>
 
@@ -570,6 +679,168 @@ export default function SettingsPage() {
                 <Button className="w-full">
                   <Save className="mr-2 h-4 w-4" />
                   Save Preferences
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* AI Approvals Tab */}
+          <TabsContent value="approvals" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Bot className="h-5 w-5" />
+                  <span>AI Approval Settings</span>
+                </CardTitle>
+                <CardDescription>
+                  Configure how AI recommendations are auto-approved or require your review
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Auto-approve low risk */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Auto-approve low-risk decisions</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically approve decisions marked as low risk by AI
+                    </p>
+                  </div>
+                  <Switch
+                    checked={approvalSettings.autoApproveLowRisk}
+                    onCheckedChange={(checked) =>
+                      setApprovalSettings({ ...approvalSettings, autoApproveLowRisk: checked })
+                    }
+                  />
+                </div>
+                <Separator />
+
+                {/* Auto-approve by type */}
+                <div className="space-y-4">
+                  <div className="space-y-0.5">
+                    <Label>Auto-approve by type</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Select which approval types should be automatically approved
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {ALL_APPROVAL_TYPES.map((type) => {
+                      const typeInfo = getApprovalTypeInfo(type)
+                      return (
+                        <div
+                          key={type}
+                          className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                          onClick={() => toggleApprovalType(type)}
+                        >
+                          <Checkbox
+                            id={type}
+                            checked={approvalSettings.autoApproveTypes.includes(type)}
+                            onCheckedChange={() => toggleApprovalType(type)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <Label htmlFor={type} className="cursor-pointer font-medium">
+                              {typeInfo.label}
+                            </Label>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {typeInfo.description}
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+                <Separator />
+
+                {/* Max auto-approve spend */}
+                <div className="space-y-2">
+                  <Label htmlFor="maxSpend">Maximum auto-approve spend ($)</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Auto-approve spend increases up to this amount
+                  </p>
+                  <Input
+                    id="maxSpend"
+                    type="number"
+                    min={0}
+                    value={approvalSettings.maxAutoApproveSpend}
+                    onChange={(e) =>
+                      setApprovalSettings({
+                        ...approvalSettings,
+                        maxAutoApproveSpend: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    className="max-w-xs"
+                  />
+                </div>
+                <Separator />
+
+                {/* Escalation email */}
+                <div className="space-y-2">
+                  <Label htmlFor="escalationEmail">Escalation email</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Backup contact for urgent approvals that you miss
+                  </p>
+                  <Input
+                    id="escalationEmail"
+                    type="email"
+                    placeholder="backup@example.com"
+                    value={approvalSettings.escalationEmail}
+                    onChange={(e) =>
+                      setApprovalSettings({
+                        ...approvalSettings,
+                        escalationEmail: e.target.value,
+                      })
+                    }
+                    className="max-w-md"
+                  />
+                </div>
+                <Separator />
+
+                {/* Notification preferences */}
+                <div className="space-y-4">
+                  <Label>Notification Preferences</Label>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Email notifications</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receive email for new approval requests
+                        </p>
+                      </div>
+                      <Switch
+                        checked={approvalSettings.notifyEmail}
+                        onCheckedChange={(checked) =>
+                          setApprovalSettings({ ...approvalSettings, notifyEmail: checked })
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>SMS notifications</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receive SMS for urgent approvals
+                        </p>
+                      </div>
+                      <Switch
+                        checked={approvalSettings.notifySms}
+                        onCheckedChange={(checked) =>
+                          setApprovalSettings({ ...approvalSettings, notifySms: checked })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleSaveApprovalSettings}
+                  disabled={approvalSettingsLoading}
+                  className="w-full"
+                >
+                  {approvalSettingsLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  Save Approval Settings
                 </Button>
               </CardContent>
             </Card>

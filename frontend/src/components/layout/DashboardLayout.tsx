@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useRoleInfo } from "@/lib/auth/hooks"
 import { FounderStatusPanel } from "@/components/founders"
+import { ApprovalBadge } from "@/components/approvals"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -76,7 +77,8 @@ export function DashboardLayout({ children, breadcrumbs = [], userType = "consul
               </BreadcrumbList>
             </Breadcrumb>
           )}
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <ApprovalBadge />
             <FounderStatusPanel variant="header" />
           </div>
         </header>
