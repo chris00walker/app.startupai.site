@@ -17,9 +17,8 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
   test('should display founder dashboard after login', async ({ page }) => {
     // Navigate to founder dashboard
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
 
-    // Verify dashboard is visible
+    // Wait for dashboard to load by checking for key element (not networkidle)
     const dashboard = page.locator('[data-testid="dashboard"]');
     await expect(dashboard).toBeVisible({ timeout: 15000 });
 
@@ -34,10 +33,13 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should show AI Strategic Analysis button on dashboard', async ({ page }) => {
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
 
-    // Look for AI Strategic Analysis button
-    const analysisButton = page.locator('button:has-text("AI Strategic Analysis"), a:has-text("AI Strategic Analysis")').first();
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
+
+    // Look for AI Strategic Analysis button (using data-testid for reliability)
+    const analysisButton = page.locator('[data-testid="ai-analysis-button"], button:has-text("AI Strategic Analysis")').first();
     await expect(analysisButton).toBeVisible({ timeout: 15000 });
 
     await page.screenshot({
@@ -50,10 +52,13 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should navigate to AI analysis page', async ({ page }) => {
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
 
-    // Click AI Strategic Analysis button
-    const analysisButton = page.locator('button:has-text("AI Strategic Analysis"), a:has-text("AI Strategic Analysis")').first();
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
+
+    // Click AI Strategic Analysis button (using data-testid for reliability)
+    const analysisButton = page.locator('[data-testid="ai-analysis-button"], button:has-text("AI Strategic Analysis")').first();
     await analysisButton.click();
 
     // Wait for AI analysis page
@@ -75,7 +80,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should display founder status panel', async ({ page }) => {
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
 
     // Check for founder status panel
     const founderStatusPanel = page.locator('[data-testid="founder-status-panel"]');
@@ -100,7 +108,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should display Innovation Physics Panel on dashboard', async ({ page }) => {
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
 
     // Look for Innovation Physics section
     const innovationPhysics = page.locator('text=Innovation Physics');
@@ -125,7 +136,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should navigate between dashboard tabs', async ({ page }) => {
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
 
     const tabs = ['overview', 'canvases', 'assumptions', 'experiments', 'evidence'];
 
@@ -134,7 +148,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
       if (await tabTrigger.isVisible({ timeout: 3000 }).catch(() => false)) {
         await tabTrigger.click();
-        await page.waitForTimeout(500);
+
+        // Wait for tab panel to be visible instead of fixed delay
+        const tabPanel = page.locator('[role="tabpanel"]');
+        await expect(tabPanel).toBeVisible({ timeout: 5000 });
 
         await page.screenshot({
           path: `test-results/journey1-tab-${tab}.png`,
@@ -148,7 +165,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should display VPC content in Canvases tab', async ({ page }) => {
     await page.goto('/founder-dashboard?tab=canvases');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
 
     // Look for VPC content
     const vpcContent = page.locator('text=Value Proposition Canvas');
@@ -168,7 +188,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should display Experiment Cards in Experiments tab', async ({ page }) => {
     await page.goto('/founder-dashboard?tab=experiments');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
 
     // Look for experiment cards content
     const experimentsContent = page.locator('text=Experiment Cards');
@@ -186,7 +209,10 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
   test('should display Evidence in Evidence tab', async ({ page }) => {
     await page.goto('/founder-dashboard?tab=evidence');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for dashboard to load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
 
     // Look for evidence content
     const evidenceContent = page.locator('text=Evidence');
@@ -212,8 +238,14 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
     });
 
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+
+    // Wait for dashboard to fully load
+    const dashboard = page.locator('[data-testid="dashboard"]');
+    await expect(dashboard).toBeVisible({ timeout: 15000 });
+
+    // Wait for any dynamic content to render
+    const tabPanel = page.locator('[role="tabpanel"]');
+    await expect(tabPanel).toBeVisible({ timeout: 5000 });
 
     if (errors.length > 0) {
       console.log('Console errors found:', errors);
@@ -229,9 +261,8 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
     await page.setViewportSize({ width: 375, height: 812 });
 
     await page.goto('/founder-dashboard');
-    await page.waitForLoadState('networkidle');
 
-    // Dashboard should still be visible
+    // Dashboard should still be visible (element-based wait instead of networkidle)
     const dashboard = page.locator('[data-testid="dashboard"]');
     await expect(dashboard).toBeVisible({ timeout: 15000 });
 
@@ -257,7 +288,9 @@ test.describe('Journey 1: Full Analysis Flow (Requires CrewAI)', () => {
 
   test('should trigger analysis and see progress', async ({ page }) => {
     await page.goto('/ai-analysis');
-    await page.waitForLoadState('networkidle');
+
+    // Wait for page content to load
+    await page.waitForLoadState('domcontentloaded');
 
     // Fill in strategic question
     const questionInput = page.locator('textarea[id="question"]');
@@ -269,10 +302,8 @@ test.describe('Journey 1: Full Analysis Flow (Requires CrewAI)', () => {
       if (await startButton.isVisible()) {
         await startButton.click();
 
-        // Wait for analysis to start (look for progress indicators)
-        await page.waitForTimeout(2000);
-
-        // Check for founder status updates
+        // Wait for analysis to start by checking for progress indicator or status panel
+        // This is more reliable than a fixed timeout
         const founderStatusPanel = page.locator('[data-testid="founder-status-panel"]');
         const hasPanel = await founderStatusPanel.isVisible({ timeout: 10000 }).catch(() => false);
 

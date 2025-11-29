@@ -442,7 +442,7 @@ export default function FounderDashboard() {
 
           <div className="flex gap-2">
             <Link href="/ai-analysis">
-              <Button>
+              <Button data-testid="ai-analysis-button">
                 <Brain className="h-4 w-4 mr-2" />
                 AI Strategic Analysis
               </Button>

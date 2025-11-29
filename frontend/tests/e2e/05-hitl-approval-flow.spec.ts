@@ -17,7 +17,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should navigate to approvals page', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Verify page loaded
       const pageTitle = page.locator('h1, h2').filter({ hasText: /approvals/i }).first();
@@ -33,7 +33,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should display approval stats cards', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for stats cards (Pending, Client Pending, Total Processed)
       const statsSection = page.locator('text=Pending').first();
@@ -51,7 +51,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should show approval tabs (Pending / All History)', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for tab triggers
       const pendingTab = page.locator('[role="tab"]:has-text("Pending")');
@@ -65,7 +65,10 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
       if (hasPendingTab) {
         await pendingTab.click();
-        await page.waitForTimeout(500);
+
+        // Wait for tab panel to be visible instead of fixed delay
+        const tabPanel = page.locator('[role="tabpanel"]');
+        await expect(tabPanel).toBeVisible({ timeout: 5000 });
 
         await page.screenshot({
           path: 'test-results/journey2-pending-tab.png',
@@ -75,7 +78,10 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
       if (hasHistoryTab) {
         await historyTab.click();
-        await page.waitForTimeout(500);
+
+        // Wait for tab panel to be visible instead of fixed delay
+        const tabPanel = page.locator('[role="tabpanel"]');
+        await expect(tabPanel).toBeVisible({ timeout: 5000 });
 
         await page.screenshot({
           path: 'test-results/journey2-history-tab.png',
@@ -86,7 +92,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should display approval cards if any pending', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for approval cards
       const approvalCards = page.locator('[data-testid="approval-card"]');
@@ -97,9 +103,8 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
         // Click first card to open modal
         await approvalCards.first().click();
-        await page.waitForTimeout(500);
 
-        // Check if modal opened
+        // Check if modal opened (element-based wait instead of fixed delay)
         const modal = page.locator('[data-testid="approval-modal"]');
         const hasModal = await modal.isVisible({ timeout: 5000 }).catch(() => false);
 
@@ -129,7 +134,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should show empty state when no approvals', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for empty state or approval cards
       const approvalCards = page.locator('[data-testid="approval-card"]');
@@ -155,7 +160,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should display founder avatar on approval cards', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for founder avatars in approval cards
       const founderAvatars = page.locator('[data-testid="approval-card"] [data-testid^="founder-avatar"]');
@@ -177,7 +182,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
       await page.setViewportSize({ width: 375, height: 812 });
 
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       await page.screenshot({
         path: 'test-results/journey2-mobile-approvals.png',
@@ -197,8 +202,11 @@ test.describe('Journey 2: HITL Approval Flow', () => {
       });
 
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(2000);
+      await page.waitForLoadState('domcontentloaded');
+
+      // Wait for page content to render (element-based wait instead of fixed delay)
+      const pageTitle = page.locator('h1, h2').filter({ hasText: /approvals/i }).first();
+      await expect(pageTitle).toBeVisible({ timeout: 15000 });
 
       if (errors.length > 0) {
         console.log('Console errors found:', errors);
@@ -218,7 +226,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should display decision options in modal', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       const approvalCards = page.locator('[data-testid="approval-card"]');
       const cardCount = await approvalCards.count();
@@ -258,7 +266,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should display evidence summary in modal', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       const approvalCards = page.locator('[data-testid="approval-card"]');
       const cardCount = await approvalCards.count();
@@ -291,7 +299,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should allow entering feedback', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       const approvalCards = page.locator('[data-testid="approval-card"]');
       const cardCount = await approvalCards.count();
@@ -327,7 +335,7 @@ test.describe('Journey 2: HITL Approval Flow', () => {
 
     test('should show client pending approvals for consultant', async ({ page }) => {
       await page.goto('/approvals');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for "Client Pending" stat
       const clientPending = page.locator('text=Client Pending').first();

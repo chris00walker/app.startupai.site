@@ -12,7 +12,10 @@ test.describe('AI Founder Attribution', () => {
     test('should display founder status panel in dashboard header', async ({ page }) => {
       // Navigate to any dashboard page
       await page.goto('/founder-dashboard');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for dashboard to load by checking for key element (not networkidle)
+      const dashboard = page.locator('[data-testid="dashboard"]');
+      await expect(dashboard).toBeVisible({ timeout: 15000 });
 
       // Check for founder status panel in header
       const founderStatusPanel = page.locator('[data-testid="founder-status-panel"]');
@@ -29,7 +32,10 @@ test.describe('AI Founder Attribution', () => {
 
     test('should show all 6 AI Founders in status panel', async ({ page }) => {
       await page.goto('/founder-dashboard');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for dashboard to load
+      const dashboard = page.locator('[data-testid="dashboard"]');
+      await expect(dashboard).toBeVisible({ timeout: 15000 });
 
       // The founder avatars should be visible
       const founderAvatars = page.locator('[data-testid^="founder-avatar-"]');
@@ -46,7 +52,9 @@ test.describe('AI Founder Attribution', () => {
     test('should show Sage attribution on VPC viewer', async ({ page }) => {
       // Navigate to the VPC viewer (through strategyzer or direct route)
       await page.goto('/strategyzer?tab=vpc');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for page content to load
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for the Sage founder badge on VPC
       const sageBadge = page.locator('[data-testid="founder-badge-sage"]');
@@ -73,7 +81,9 @@ test.describe('AI Founder Attribution', () => {
     test('should show Pulse attribution on Experiment Cards', async ({ page }) => {
       // Navigate to experiment cards
       await page.goto('/strategyzer?tab=experiments');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for page content to load
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for the Pulse founder badge
       const pulseBadge = page.locator('[data-testid="founder-badge-pulse"]');
@@ -100,7 +110,9 @@ test.describe('AI Founder Attribution', () => {
     test('should show Sage attribution on Assumption Map', async ({ page }) => {
       // Navigate to assumption map
       await page.goto('/strategyzer?tab=assumptions');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for page content to load
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for the Sage founder badge
       const sageBadge = page.locator('[data-testid="founder-badge-sage"]');
@@ -127,7 +139,10 @@ test.describe('AI Founder Attribution', () => {
     test('should show D-F-V founder badges on Innovation Physics Panel', async ({ page }) => {
       // Navigate to a page with Innovation Physics Panel
       await page.goto('/founder-dashboard');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for dashboard to load
+      const dashboard = page.locator('[data-testid="dashboard"]');
+      await expect(dashboard).toBeVisible({ timeout: 15000 });
 
       // Look for Innovation Physics Panel
       const innovationPanel = page.locator('text=Innovation Physics');
@@ -165,7 +180,9 @@ test.describe('AI Founder Attribution', () => {
     test('should reference AI Founders on AI Analysis page', async ({ page }) => {
       // Navigate to AI Analysis page
       await page.goto('/ai-analysis');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for page content to load
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for AI Founders reference in the page header
       const aiFoundersText = page.locator('text=AI Founders');
@@ -187,7 +204,9 @@ test.describe('AI Founder Attribution', () => {
 
     test('should show founder status during analysis', async ({ page }) => {
       await page.goto('/ai-analysis');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for page content to load
+      await page.waitForLoadState('domcontentloaded');
 
       // Check for strategic question input
       const questionInput = page.locator('textarea[id="question"]');

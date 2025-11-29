@@ -36,16 +36,17 @@ export async function waitForAIResponse(page: Page, timeout: number = 30000) {
   // Look for loading indicators to disappear
   const loadingIndicator = page.locator('[data-testid="ai-loading"], .loading, [aria-label*="loading" i]');
 
-  // Wait for loading to start (if it appears)
-  await page.waitForTimeout(500);
+  // Check if loading indicator appears (may be brief)
+  const loadingAppeared = await loadingIndicator.isVisible({ timeout: 2000 }).catch(() => false);
 
-  // Wait for loading to finish
-  if (await loadingIndicator.isVisible({ timeout: 2000 }).catch(() => false)) {
+  // Wait for loading to finish if it appeared
+  if (loadingAppeared) {
     await expect(loadingIndicator).toBeHidden({ timeout });
   }
 
-  // Additional wait to ensure response is rendered
-  await page.waitForTimeout(1000);
+  // Wait for assistant message to be visible (ensures response is rendered)
+  const assistantMessage = page.locator('[data-role="assistant"], [data-testid="ai-message"], .assistant-message');
+  await expect(assistantMessage.last()).toBeVisible({ timeout: 5000 });
 
   console.log('AI response received');
 }

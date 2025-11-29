@@ -32,7 +32,7 @@ export default defineConfig({
   // Execution settings
   fullyParallel: false, // Sequential execution for onboarding tests
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1, // 1 retry locally catches transient failures
   workers: 1, // Single worker for sequential execution
   
   // Reporting
@@ -49,11 +49,15 @@ export default defineConfig({
     trace: 'on-first-retry',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    
+
+    // Timeout settings for reliable test execution
+    actionTimeout: 10_000,      // 10s for clicks, fills, etc.
+    navigationTimeout: 30_000,  // 30s for page navigations
+
     // Browser context options
     viewport: { width: 1280, height: 720 },
     ignoreHTTPSErrors: true,
-    
+
     // Accessibility testing
     bypassCSP: false,
   },

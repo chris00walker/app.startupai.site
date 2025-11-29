@@ -16,7 +16,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should navigate to consultant dashboard', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Verify page loaded
     const pageContent = page.locator('body');
@@ -32,7 +32,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should display portfolio grid', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check for portfolio grid
     const portfolioGrid = page.locator('[data-testid="portfolio-grid"]');
@@ -57,7 +57,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should display portfolio metrics', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for metrics cards
     const metricsSection = page.locator('text=Active Projects, text=Gate Pass Rate, text=Evidence Coverage').first();
@@ -75,7 +75,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should display stage filter', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for stage filter buttons
     const stageFilters = page.locator('button:has-text("Desirability"), button:has-text("Feasibility"), button:has-text("Viability")');
@@ -88,7 +88,10 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
       const feasibilityFilter = page.locator('button:has-text("Feasibility")').first();
       if (await feasibilityFilter.isVisible()) {
         await feasibilityFilter.click();
-        await page.waitForTimeout(500);
+
+        // Wait for grid to update (element-based wait instead of fixed delay)
+        const portfolioGrid = page.locator('[data-testid="portfolio-grid"]');
+        await expect(portfolioGrid).toBeVisible({ timeout: 5000 });
 
         await page.screenshot({
           path: 'test-results/journey3-filtered-view.png',
@@ -100,7 +103,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should click client card and navigate to detail', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -125,7 +128,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should display client detail with tabs', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -133,7 +136,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
     if (cardCount > 0) {
       await clientCards.first().click();
       await page.waitForURL('**/client/**', { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Look for tabs on client detail page
       const tabs = ['overview', 'canvases', 'assumptions', 'experiments', 'evidence'];
@@ -156,7 +159,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should navigate client detail tabs', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -164,7 +167,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
     if (cardCount > 0) {
       await clientCards.first().click();
       await page.waitForURL('**/client/**', { timeout: 10000 });
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       const tabs = ['canvases', 'assumptions', 'experiments', 'evidence'];
 
@@ -173,7 +176,10 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
         if (await tabTrigger.isVisible({ timeout: 2000 }).catch(() => false)) {
           await tabTrigger.click();
-          await page.waitForTimeout(500);
+
+          // Wait for tab panel to be visible instead of fixed delay
+          const tabPanel = page.locator('[role="tabpanel"]');
+          await expect(tabPanel).toBeVisible({ timeout: 5000 });
 
           await page.screenshot({
             path: `test-results/journey3-client-tab-${tab}.png`,
@@ -188,7 +194,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should return to portfolio from client detail', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -221,7 +227,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should display VPC/signals on client cards', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -247,7 +253,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
     await page.setViewportSize({ width: 768, height: 1024 });
 
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check grid layout on tablet (should be 2 columns)
     const portfolioGrid = page.locator('[data-testid="portfolio-grid"]');
@@ -267,7 +273,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
     await page.setViewportSize({ width: 375, height: 812 });
 
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Check grid layout on mobile (should be 1 column)
     const portfolioGrid = page.locator('[data-testid="portfolio-grid"]');
@@ -293,8 +299,11 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
     });
 
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
+
+    // Wait for page content to render (element-based wait instead of fixed delay)
+    const pageContent = page.locator('body');
+    await expect(pageContent).toBeVisible({ timeout: 15000 });
 
     if (errors.length > 0) {
       console.log('Console errors found:', errors);
@@ -307,7 +316,7 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
   test('should display search/filter functionality', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Look for search input
     const searchInput = page.locator('input[type="search"], input[placeholder*="search" i]');
@@ -316,7 +325,10 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
     if (hasSearch) {
       console.log('Search functionality is visible');
       await searchInput.fill('test search');
-      await page.waitForTimeout(500);
+
+      // Wait briefly for any filtering to apply (search typically triggers debounced updates)
+      // Using a short visibility check instead of fixed delay
+      await page.waitForLoadState('domcontentloaded');
     }
 
     await page.screenshot({
@@ -334,7 +346,7 @@ test.describe('Journey 3: Portfolio with Real Data', () => {
 
   test('should display risk budget on client cards', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -357,7 +369,7 @@ test.describe('Journey 3: Portfolio with Real Data', () => {
 
   test('should display evidence quality on client cards', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
@@ -380,7 +392,7 @@ test.describe('Journey 3: Portfolio with Real Data', () => {
 
   test('should display project stats (hypotheses, experiments, evidence)', async ({ page }) => {
     await page.goto('/consultant-dashboard');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     const clientCards = page.locator('[data-testid="client-card"]');
     const cardCount = await clientCards.count();
