@@ -11,7 +11,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { VPCReportViewer } from '@/components/vpc';
 import { InnovationPhysicsPanel } from '@/components/signals';
-import { ArrowLeft, Download, Share2 } from 'lucide-react';
+import { ArrowLeft, Download, Share2, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProjectAnalysisPage() {
@@ -53,13 +53,15 @@ export default function ProjectAnalysisPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Link href={`/project/${projectId}/report`}>
+            <Button variant="default" size="sm">
+              <FileText className="h-4 w-4 mr-2" />
+              Full Report
+            </Button>
+          </Link>
           <Button variant="outline" size="sm" disabled>
             <Share2 className="h-4 w-4 mr-2" />
             Share
-          </Button>
-          <Button variant="outline" size="sm" disabled>
-            <Download className="h-4 w-4 mr-2" />
-            Export PDF
           </Button>
         </div>
       </div>
