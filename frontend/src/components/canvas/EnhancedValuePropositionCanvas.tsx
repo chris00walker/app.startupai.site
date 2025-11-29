@@ -8,9 +8,17 @@
  * - Fit indicators showing problem-solution alignment
  * - Differentiators and resonance scores
  *
+ * Features SVG-based geometric visualization on desktop:
+ * - Square shape for Value Map (left)
+ * - Circle shape for Customer Profile (right)
+ * - Animated bezier fit lines connecting pain↔reliever and gain↔creator pairs
+ * - Interactive hover highlighting
+ *
  * This component is READ-ONLY and designed for displaying CrewAI analysis results.
  * For editable VPC, use the standard ValuePropositionCanvas component.
  */
+
+'use client';
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +60,7 @@ import {
   getFitPercentage,
   getFitStatus,
 } from '@/lib/crewai/vpc-transformer';
+import { VPCCanvas } from './vpc';
 
 interface EnhancedValuePropositionCanvasProps {
   segment: VPCUISegment;
@@ -306,6 +315,227 @@ function ResonanceScore({ score }: { score: number | undefined }) {
 }
 
 // =======================================================================================
+// MOBILE FALLBACK COMPONENT
+// =======================================================================================
+
+/**
+ * Mobile-friendly card layout (shown on screens < 768px)
+ */
+function MobileCardLayout({ segment }: { segment: VPCUISegment }) {
+  return (
+    <div className="grid grid-cols-1 gap-6">
+      {/* VALUE MAP (Left Side - Square in Strategyzer format) */}
+      <Card className="border-2 border-purple-200 bg-purple-50/30">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-purple-800">
+            <Gift className="w-5 h-5" />
+            Value Map
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Products & Services */}
+          <div>
+            <h4 className="text-sm font-semibold text-purple-700 mb-3 flex items-center gap-2">
+              <Gift className="w-4 h-4" />
+              Products & Services
+            </h4>
+            <div className="space-y-2">
+              {segment.valueMap.productsAndServices.length > 0 ? (
+                segment.valueMap.productsAndServices.map((item, i) => (
+                  <div
+                    key={i}
+                    className="p-2 bg-white border border-purple-200 rounded-md text-sm"
+                  >
+                    {item}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No products/services defined
+                </p>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Pain Relievers */}
+          <div>
+            <h4 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
+              <Pill className="w-4 h-4" />
+              Pain Relievers
+              <Badge variant="secondary" className="ml-auto">
+                {Object.keys(segment.valueMap.painRelievers).length} mapped
+              </Badge>
+            </h4>
+            <div className="space-y-2">
+              {Object.entries(segment.valueMap.painRelievers).length > 0 ? (
+                Object.entries(segment.valueMap.painRelievers).map(
+                  ([pain, relief], i) => (
+                    <div
+                      key={i}
+                      className="p-2 bg-blue-50 border border-blue-200 rounded-md"
+                    >
+                      <div className="text-xs text-blue-600 mb-1">
+                        Relieves: &quot;{pain}&quot;
+                      </div>
+                      <div className="text-sm text-blue-900">{relief}</div>
+                    </div>
+                  )
+                )
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No pain relievers mapped
+                </p>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Gain Creators */}
+          <div>
+            <h4 className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Gain Creators
+              <Badge variant="secondary" className="ml-auto">
+                {Object.keys(segment.valueMap.gainCreators).length} mapped
+              </Badge>
+            </h4>
+            <div className="space-y-2">
+              {Object.entries(segment.valueMap.gainCreators).length > 0 ? (
+                Object.entries(segment.valueMap.gainCreators).map(
+                  ([gain, creator], i) => (
+                    <div
+                      key={i}
+                      className="p-2 bg-green-50 border border-green-200 rounded-md"
+                    >
+                      <div className="text-xs text-green-600 mb-1">
+                        Creates: &quot;{gain}&quot;
+                      </div>
+                      <div className="text-sm text-green-900">{creator}</div>
+                    </div>
+                  )
+                )
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No gain creators mapped
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Differentiators */}
+          {segment.valueMap.differentiators.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <h4 className="text-sm font-semibold text-amber-700 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Differentiators
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {segment.valueMap.differentiators.map((diff, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="bg-amber-50 border-amber-200 text-amber-800"
+                    >
+                      {diff}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* CUSTOMER PROFILE (Right Side - Circle in Strategyzer format) */}
+      <Card className="border-2 border-teal-200 bg-teal-50/30">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-teal-800">
+            <Users className="w-5 h-5" />
+            Customer Profile: {segment.customerSegmentTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Customer Jobs */}
+          <div>
+            <h4 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              Customer Jobs
+              <Badge variant="secondary" className="ml-auto">
+                {segment.customerProfile.jobs.length} jobs
+              </Badge>
+            </h4>
+            <div className="space-y-3">
+              {segment.customerProfile.jobs.length > 0 ? (
+                segment.customerProfile.jobs.map((job, i) => (
+                  <JobCard key={i} job={job} index={i} />
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No jobs defined
+                </p>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Pains */}
+          <div>
+            <h4 className="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
+              <Frown className="w-4 h-4" />
+              Pains
+              <Badge variant="secondary" className="ml-auto">
+                {segment.fit.painsAddressed}/{segment.fit.totalPains} addressed
+              </Badge>
+            </h4>
+            <div className="space-y-3">
+              {segment.customerProfile.pains.length > 0 ? (
+                segment.customerProfile.pains
+                  .sort((a, b) => (b.intensity || 0) - (a.intensity || 0))
+                  .map((pain, i) => <PainCard key={i} pain={pain} />)
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No pains defined
+                </p>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Gains */}
+          <div>
+            <h4 className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
+              <Smile className="w-4 h-4" />
+              Gains
+              <Badge variant="secondary" className="ml-auto">
+                {segment.fit.gainsCreated}/{segment.fit.totalGains} created
+              </Badge>
+            </h4>
+            <div className="space-y-3">
+              {segment.customerProfile.gains.length > 0 ? (
+                segment.customerProfile.gains
+                  .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+                  .map((gain, i) => <GainCard key={i} gain={gain} />)
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No gains defined
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// =======================================================================================
 // MAIN COMPONENT
 // =======================================================================================
 
@@ -330,215 +560,14 @@ export default function EnhancedValuePropositionCanvas({
         <FitIndicator segment={segment} />
       </div>
 
-      {/* Main Canvas - Two Columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* VALUE MAP (Left Side - Square in Strategyzer format) */}
-        <Card className="border-2 border-purple-200 bg-purple-50/30">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-purple-800">
-              <Gift className="w-5 h-5" />
-              Value Map
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Products & Services */}
-            <div>
-              <h4 className="text-sm font-semibold text-purple-700 mb-3 flex items-center gap-2">
-                <Gift className="w-4 h-4" />
-                Products & Services
-              </h4>
-              <div className="space-y-2">
-                {segment.valueMap.productsAndServices.length > 0 ? (
-                  segment.valueMap.productsAndServices.map((item, i) => (
-                    <div
-                      key={i}
-                      className="p-2 bg-white border border-purple-200 rounded-md text-sm"
-                    >
-                      {item}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No products/services defined
-                  </p>
-                )}
-              </div>
-            </div>
+      {/* SVG Canvas - Desktop (>= 768px) */}
+      <div className="hidden md:block">
+        <VPCCanvas segment={segment} mode="view" showFitLines={showFitLines} />
+      </div>
 
-            <Separator />
-
-            {/* Pain Relievers */}
-            <div>
-              <h4 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
-                <Pill className="w-4 h-4" />
-                Pain Relievers
-                <Badge variant="secondary" className="ml-auto">
-                  {Object.keys(segment.valueMap.painRelievers).length} mapped
-                </Badge>
-              </h4>
-              <div className="space-y-2">
-                {Object.entries(segment.valueMap.painRelievers).length > 0 ? (
-                  Object.entries(segment.valueMap.painRelievers).map(
-                    ([pain, relief], i) => (
-                      <div
-                        key={i}
-                        className="p-2 bg-blue-50 border border-blue-200 rounded-md"
-                      >
-                        <div className="text-xs text-blue-600 mb-1">
-                          Relieves: "{pain}"
-                        </div>
-                        <div className="text-sm text-blue-900">{relief}</div>
-                      </div>
-                    )
-                  )
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No pain relievers mapped
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Gain Creators */}
-            <div>
-              <h4 className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Gain Creators
-                <Badge variant="secondary" className="ml-auto">
-                  {Object.keys(segment.valueMap.gainCreators).length} mapped
-                </Badge>
-              </h4>
-              <div className="space-y-2">
-                {Object.entries(segment.valueMap.gainCreators).length > 0 ? (
-                  Object.entries(segment.valueMap.gainCreators).map(
-                    ([gain, creator], i) => (
-                      <div
-                        key={i}
-                        className="p-2 bg-green-50 border border-green-200 rounded-md"
-                      >
-                        <div className="text-xs text-green-600 mb-1">
-                          Creates: "{gain}"
-                        </div>
-                        <div className="text-sm text-green-900">{creator}</div>
-                      </div>
-                    )
-                  )
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No gain creators mapped
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Differentiators */}
-            {segment.valueMap.differentiators.length > 0 && (
-              <>
-                <Separator />
-                <div>
-                  <h4 className="text-sm font-semibold text-amber-700 mb-3 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    Differentiators
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {segment.valueMap.differentiators.map((diff, i) => (
-                      <Badge
-                        key={i}
-                        variant="outline"
-                        className="bg-amber-50 border-amber-200 text-amber-800"
-                      >
-                        {diff}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* CUSTOMER PROFILE (Right Side - Circle in Strategyzer format) */}
-        <Card className="border-2 border-teal-200 bg-teal-50/30">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-teal-800">
-              <Users className="w-5 h-5" />
-              Customer Profile: {segment.customerSegmentTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Customer Jobs */}
-            <div>
-              <h4 className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
-                <Briefcase className="w-4 h-4" />
-                Customer Jobs
-                <Badge variant="secondary" className="ml-auto">
-                  {segment.customerProfile.jobs.length} jobs
-                </Badge>
-              </h4>
-              <div className="space-y-3">
-                {segment.customerProfile.jobs.length > 0 ? (
-                  segment.customerProfile.jobs.map((job, i) => (
-                    <JobCard key={i} job={job} index={i} />
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No jobs defined
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Pains */}
-            <div>
-              <h4 className="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
-                <Frown className="w-4 h-4" />
-                Pains
-                <Badge variant="secondary" className="ml-auto">
-                  {segment.fit.painsAddressed}/{segment.fit.totalPains} addressed
-                </Badge>
-              </h4>
-              <div className="space-y-3">
-                {segment.customerProfile.pains.length > 0 ? (
-                  segment.customerProfile.pains
-                    .sort((a, b) => (b.intensity || 0) - (a.intensity || 0))
-                    .map((pain, i) => <PainCard key={i} pain={pain} />)
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No pains defined
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Gains */}
-            <div>
-              <h4 className="text-sm font-semibold text-green-700 mb-3 flex items-center gap-2">
-                <Smile className="w-4 h-4" />
-                Gains
-                <Badge variant="secondary" className="ml-auto">
-                  {segment.fit.gainsCreated}/{segment.fit.totalGains} created
-                </Badge>
-              </h4>
-              <div className="space-y-3">
-                {segment.customerProfile.gains.length > 0 ? (
-                  segment.customerProfile.gains
-                    .sort((a, b) => (b.importance || 0) - (a.importance || 0))
-                    .map((gain, i) => <GainCard key={i} gain={gain} />)
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">
-                    No gains defined
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Card Layout - Mobile (< 768px) */}
+      <div className="block md:hidden">
+        <MobileCardLayout segment={segment} />
       </div>
 
       {/* Legend */}

@@ -109,3 +109,55 @@
     @apply text-sm text-muted-foreground;
   }
 }
+
+/* VPC Canvas - Value Proposition Canvas Animations */
+@layer components {
+  /* Animated dash flow effect for fit lines */
+  @keyframes vpc-flow {
+    from {
+      stroke-dashoffset: 24;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .vpc-fit-line {
+    animation: vpc-flow 1.5s linear infinite;
+  }
+
+  .vpc-fit-line--highlighted {
+    stroke-width: 3;
+    filter: drop-shadow(0 0 4px currentColor);
+    animation-duration: 0.8s;
+  }
+
+  .vpc-fit-line--dimmed {
+    opacity: 0.15;
+    animation: none;
+  }
+
+  /* VPC Canvas container responsive behavior */
+  .vpc-canvas-container {
+    @apply relative w-full;
+  }
+
+  /* Hide SVG canvas on mobile, show stacked cards instead */
+  @media (max-width: 767px) {
+    .vpc-svg-canvas {
+      @apply hidden;
+    }
+    .vpc-mobile-fallback {
+      @apply block;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .vpc-svg-canvas {
+      @apply block;
+    }
+    .vpc-mobile-fallback {
+      @apply hidden;
+    }
+  }
+}
