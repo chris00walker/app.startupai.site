@@ -15,6 +15,7 @@ import {
   Users,
   Workflow,
   Target,
+  Search,
 } from "lucide-react"
 
 import {
@@ -160,6 +161,11 @@ const founderNavigation = {
       title: "Evidence Ledger",
       url: "/founder-dashboard?tab=evidence",
       icon: FileText,
+    },
+    {
+      title: "Evidence Explorer",
+      url: "/project/current/evidence",
+      icon: Search,
     },
     {
       title: "AI Insights",

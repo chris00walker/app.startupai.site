@@ -164,10 +164,12 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 
             {/* Form Error Alert */}
             {formError && (
-              <Alert variant="destructive" role="alert" aria-live="assertive">
-                <AlertCircle className="h-4 w-4" aria-hidden="true" />
-                <AlertDescription>{formError}</AlertDescription>
-              </Alert>
+              <div role="alert" aria-live="assertive">
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                  <AlertDescription>{formError}</AlertDescription>
+                </Alert>
+              </div>
             )}
 
             {/* Email/Password Form */}
