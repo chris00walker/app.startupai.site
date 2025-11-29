@@ -15,6 +15,9 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3001'
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 3001)
 
 export default defineConfig({
+  // Global setup - resets test user onboarding state before test run
+  globalSetup: './tests/e2e/global-setup.ts',
+
   // Test directory structure
   testDir: 'tests/e2e',
   testMatch: ['**/*.spec.ts'],
