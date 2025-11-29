@@ -29,6 +29,7 @@
     "test:all": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
     "test:ci": "pnpm run test:coverage && pnpm run test:e2e",
     "lint": "node -e \"console.log('Linting deferred: see docs/status/linting.md for details.');\"",
+    "lint:a11y": "eslint --config eslint.config.a11y.mjs src/",
     "test:generate-token": "tsx scripts/generate-test-token.ts",
     "env:check": "node -e \"console.log('Environment:', process.env.NODE_ENV || 'development'); console.log('Marketing URL:', process.env.NEXT_PUBLIC_MARKETING_URL); console.log('App URL:', process.env.NEXT_PUBLIC_APP_URL); console.log('Site URL:', process.env.NEXT_PUBLIC_SITE_URL);\""
   },
@@ -87,6 +88,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@axe-core/react": "^4.11.0",
     "@netlify/functions": "^5.0.1",
     "@playwright/test": "^1.54.1",
@@ -97,8 +99,12 @@
     "@types/node": "24.1.0",
     "@types/pg": "^8.15.5",
     "@types/react": "19.1.9",
+    "@typescript-eslint/parser": "^8.48.0",
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.5",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
     "jest": "^30.0.5",
     "jest-axe": "^10.0.0",
     "jest-environment-jsdom": "^30.0.5",

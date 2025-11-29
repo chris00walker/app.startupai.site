@@ -462,10 +462,11 @@ export function EvidenceLedger() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Search</label>
+              <label htmlFor="evidence-search" className="text-sm font-medium">Search</label>
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <Input
+                  id="evidence-search"
                   placeholder="Search evidence..."
                   className="pl-8"
                   value={filters.search}
@@ -473,14 +474,14 @@ export function EvidenceLedger() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Fit Type</label>
-              <Select 
-                value={filters.fitType} 
+              <label id="fit-type-label" className="text-sm font-medium">Fit Type</label>
+              <Select
+                value={filters.fitType}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, fitType: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-labelledby="fit-type-label">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -493,12 +494,12 @@ export function EvidenceLedger() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Evidence Strength</label>
-              <Select 
-                value={filters.strength} 
+              <label id="strength-label" className="text-sm font-medium">Evidence Strength</label>
+              <Select
+                value={filters.strength}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, strength: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-labelledby="strength-label">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -511,12 +512,12 @@ export function EvidenceLedger() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Contradictions</label>
-              <Select 
-                value={filters.contradictions} 
+              <label id="contradictions-label" className="text-sm font-medium">Contradictions</label>
+              <Select
+                value={filters.contradictions}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, contradictions: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-labelledby="contradictions-label">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

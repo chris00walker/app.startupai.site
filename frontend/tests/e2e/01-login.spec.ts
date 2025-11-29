@@ -1,10 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { login, logout, CONSULTANT_USER, FOUNDER_USER } from './helpers/auth';
+import { checkA11y } from './helpers/accessibility';
 
 test.describe('Authentication Flow - Consultant User', () => {
   test.beforeEach(async ({ page }) => {
     // Start from the login page
     await page.goto('/login');
+  });
+
+  test('login page should be accessible', async ({ page }) => {
+    // WCAG 2.1 AA accessibility check on login page
+    await checkA11y(page, 'login page');
   });
 
   test('should successfully login as Consultant', async ({ page }) => {
@@ -79,43 +85,34 @@ test.describe('Authentication Flow - Founder User', () => {
   });
 
   test('should display validation errors for invalid credentials', async ({ page }) => {
-    // Try to find login button/link
-    const loginButton = page.locator('button:has-text("Log in"), button:has-text("Sign in"), a:has-text("Log in")').first();
+    // Clear any existing session to ensure we're on the login page
+    await page.context().clearCookies();
+    await page.goto('/login', { waitUntil: 'domcontentloaded' });
 
-    if (await loginButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await loginButton.click();
+    // Wait for login form
+    const emailInput = page.locator('input#email, input[type="email"]').first();
+    const passwordInput = page.locator('input#password, input[type="password"]').first();
 
-      // Wait for login form to appear
-      const emailInput = page.locator('input[type="email"], input[name="email"]').first();
-      await emailInput.waitFor({ state: 'visible', timeout: 10000 });
-      const passwordInput = page.locator('input[type="password"]').first();
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(passwordInput).toBeVisible({ timeout: 10000 });
 
-      if (await emailInput.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await emailInput.fill('invalid@example.com');
-        await passwordInput.fill('wrongpassword');
+    // Fill with invalid credentials
+    await emailInput.fill('invalid@example.com');
+    await passwordInput.fill('wrongpassword');
 
-        const submitButton = page.locator('button[type="submit"], button:has-text("Log in")').first();
-        await submitButton.click();
+    const submitButton = page.locator('button[type="submit"]').first();
+    await submitButton.click();
 
-        // Wait for error message
-        await page.waitForTimeout(2000);
+    // Wait for either error message or to stay on login page
+    const errorMessage = page.locator('[role="alert"], .error, [data-testid="error-message"]');
 
-        // Look for error messages
-        const errorMessage = page.locator('[role="alert"], .error, [data-testid="error-message"]');
+    // Check if error appeared or we're still on login page (with email input visible)
+    const stillOnLoginPage = await emailInput.isVisible({ timeout: 5000 }).catch(() => false);
+    const hasErrorMessage = await errorMessage.isVisible({ timeout: 5000 }).catch(() => false);
 
-        // Check if error appeared or we're still on login page
-        const stillOnLoginPage = await emailInput.isVisible({ timeout: 3000 }).catch(() => false);
-        const hasErrorMessage = await errorMessage.isVisible({ timeout: 3000 }).catch(() => false);
+    expect(stillOnLoginPage || hasErrorMessage).toBeTruthy();
 
-        expect(stillOnLoginPage || hasErrorMessage).toBeTruthy();
-
-        console.log('Invalid credentials correctly rejected');
-      } else {
-        console.log('Login form not found, might be using different auth flow');
-      }
-    } else {
-      console.log('Login button not found, user might already be logged in');
-    }
+    console.log('Invalid credentials correctly rejected');
   });
 
   test('should maintain session across page reloads', async ({ page }) => {

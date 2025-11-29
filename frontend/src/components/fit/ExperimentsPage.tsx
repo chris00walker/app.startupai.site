@@ -299,18 +299,20 @@ function ExperimentDetails({ experiment }: { experiment: Experiment }) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Quantitative Results</label>
+              <label htmlFor="quantitative-results" className="text-sm font-medium">Quantitative Results</label>
               <Textarea
+                id="quantitative-results"
                 placeholder="Enter measurable results, metrics, and data points..."
                 value={quantitativeResults}
                 onChange={(e) => setQuantitativeResults(e.target.value)}
                 rows={3}
               />
             </div>
-            
+
             <div className="space-y-2">
-              <label className="text-sm font-medium">Qualitative Insights</label>
+              <label htmlFor="qualitative-results" className="text-sm font-medium">Qualitative Insights</label>
               <Textarea
+                id="qualitative-results"
                 placeholder="Enter observations, user feedback, and qualitative findings..."
                 value={qualitativeResults}
                 onChange={(e) => setQualitativeResults(e.target.value)}

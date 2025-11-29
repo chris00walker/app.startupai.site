@@ -7,6 +7,7 @@ import {
   getCurrentStage,
   getProgress,
 } from './helpers/onboarding';
+import { checkA11y } from './helpers/accessibility';
 
 test.describe('Onboarding Conversation Flow - Founder User', () => {
   test.beforeEach(async ({ page }) => {
@@ -23,6 +24,11 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     // Wait for onboarding interface to be ready
     const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
     await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+  });
+
+  test('onboarding interface should be accessible', async ({ page }) => {
+    // WCAG 2.1 AA accessibility check on onboarding interface
+    await checkA11y(page, 'onboarding interface');
   });
 
   test('should display chat interface with welcome message', async ({ page }) => {
@@ -86,7 +92,7 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     for (const response of stage1Responses) {
       await sendMessage(page, response);
       await waitForAIResponse(page, 45000);
-      await page.waitForTimeout(1000); // Brief pause between messages
+      // No fixed delay needed - waitForAIResponse ensures response is rendered
     }
 
     // Take screenshot after stage 1
@@ -120,7 +126,7 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     for (const response of stage2Responses) {
       await sendMessage(page, response);
       await waitForAIResponse(page, 45000);
-      await page.waitForTimeout(1000);
+      // No fixed delay needed - waitForAIResponse ensures response is rendered
     }
 
     // Take screenshot
@@ -170,14 +176,14 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     if (!isDisabled) {
       // If not disabled, try clicking and verify no empty message is sent
       await sendButton.click();
-      await page.waitForTimeout(1000);
 
-      // Look for empty message in chat - shouldn't exist
+      // Wait briefly for any potential message to appear
+      // Use a short visibility check instead of fixed delay
       const emptyMessage = page.locator('[data-role="user"]:has-text("")');
-      const count = await emptyMessage.count();
+      const emptyAppeared = await emptyMessage.isVisible({ timeout: 2000 }).catch(() => false);
 
       // This is a soft check - empty messages shouldn't appear
-      console.log(`Empty message prevention: ${count === 0 ? 'working' : 'not working'}`);
+      console.log(`Empty message prevention: ${!emptyAppeared ? 'working' : 'not working'}`);
     } else {
       console.log('Send button correctly disabled for empty input');
     }

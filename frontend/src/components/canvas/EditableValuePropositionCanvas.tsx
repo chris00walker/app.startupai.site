@@ -174,10 +174,11 @@ function EditableJobCard({
 
         <div className="space-y-2">
           <div>
-            <label className="text-xs text-muted-foreground flex items-center gap-1">
-              <Briefcase className="w-3 h-3" /> Functional
+            <label htmlFor="edit-functional" className="text-xs text-muted-foreground flex items-center gap-1">
+              <Briefcase className="w-3 h-3" aria-hidden="true" /> Functional
             </label>
             <Textarea
+              id="edit-functional"
               value={editData.functional}
               onChange={(e) => setEditData({ ...editData, functional: e.target.value })}
               placeholder="What task are they trying to accomplish?"
@@ -186,10 +187,11 @@ function EditableJobCard({
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground flex items-center gap-1">
-              <Heart className="w-3 h-3" /> Emotional
+            <label htmlFor="edit-emotional" className="text-xs text-muted-foreground flex items-center gap-1">
+              <Heart className="w-3 h-3" aria-hidden="true" /> Emotional
             </label>
             <Textarea
+              id="edit-emotional"
               value={editData.emotional}
               onChange={(e) => setEditData({ ...editData, emotional: e.target.value })}
               placeholder="How do they want to feel?"
@@ -198,10 +200,11 @@ function EditableJobCard({
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground flex items-center gap-1">
-              <Users className="w-3 h-3" /> Social
+            <label htmlFor="edit-social" className="text-xs text-muted-foreground flex items-center gap-1">
+              <Users className="w-3 h-3" aria-hidden="true" /> Social
             </label>
             <Textarea
+              id="edit-social"
               value={editData.social}
               onChange={(e) => setEditData({ ...editData, social: e.target.value })}
               placeholder="How do they want to be perceived?"
@@ -599,8 +602,9 @@ function AddJobForm({ onAdd, isSaving }: { onAdd: (job: any) => Promise<void>; i
   return (
     <div className="p-3 border-2 border-dashed border-blue-300 rounded-lg space-y-2 bg-blue-50/50">
       <div>
-        <label className="text-xs text-muted-foreground">Functional Job</label>
+        <label htmlFor="new-functional" className="text-xs text-muted-foreground">Functional Job</label>
         <Textarea
+          id="new-functional"
           value={data.functional}
           onChange={(e) => setData({ ...data, functional: e.target.value })}
           placeholder="What task are they trying to accomplish?"
@@ -609,8 +613,9 @@ function AddJobForm({ onAdd, isSaving }: { onAdd: (job: any) => Promise<void>; i
         />
       </div>
       <div>
-        <label className="text-xs text-muted-foreground">Emotional Job</label>
+        <label htmlFor="new-emotional" className="text-xs text-muted-foreground">Emotional Job</label>
         <Textarea
+          id="new-emotional"
           value={data.emotional}
           onChange={(e) => setData({ ...data, emotional: e.target.value })}
           placeholder="How do they want to feel?"
@@ -619,8 +624,9 @@ function AddJobForm({ onAdd, isSaving }: { onAdd: (job: any) => Promise<void>; i
         />
       </div>
       <div>
-        <label className="text-xs text-muted-foreground">Social Job</label>
+        <label htmlFor="new-social" className="text-xs text-muted-foreground">Social Job</label>
         <Textarea
+          id="new-social"
           value={data.social}
           onChange={(e) => setData({ ...data, social: e.target.value })}
           placeholder="How do they want to be perceived?"
