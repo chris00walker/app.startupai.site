@@ -8,6 +8,27 @@ last_reviewed: "2025-11-30"
 
 ## November 2025
 
+### Public APIs for Marketing Site (Nov 30)
+| Item | Status | Notes |
+|------|--------|-------|
+| Activity Feed API | ✅ Done | `GET /api/v1/public/activity` - anonymized agent activities |
+| Metrics API | ✅ Done | `GET /api/v1/public/metrics` - platform + founder statistics |
+| Database migration | ✅ Done | `public_activity_log` table with indexes |
+| Webhook activity logging | ✅ Done | CrewAI webhook now generates activity entries |
+
+**Files Created:**
+- `frontend/src/db/schema/public-activity-log.ts` - Drizzle schema
+- `frontend/src/app/api/v1/public/activity/route.ts` - Activity Feed API
+- `frontend/src/app/api/v1/public/metrics/route.ts` - Metrics API
+
+**Files Modified:**
+- `frontend/src/app/api/crewai/webhook/route.ts` - Activity logging integration
+- `frontend/src/db/schema/index.ts` - Export new schema
+
+**Impact**: Unblocks marketing site Phase 4 - can now display real agent activity and trust metrics.
+
+---
+
 ### PostHog Instrumentation (Nov 30)
 | Item | Status | Notes |
 |------|--------|-------|

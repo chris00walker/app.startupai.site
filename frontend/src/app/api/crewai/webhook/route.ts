@@ -161,6 +161,135 @@ const founderValidationSchema = z.object({
 type FounderValidationPayload = z.infer<typeof founderValidationSchema>;
 
 // =============================================================================
+// PUBLIC ACTIVITY LOG HELPERS
+// =============================================================================
+
+type FounderId = 'sage' | 'forge' | 'pulse' | 'compass' | 'guardian' | 'ledger';
+type ActivityType = 'analysis' | 'build' | 'validation' | 'research' | 'review';
+
+interface ActivityLogEntry {
+  founder_id: FounderId;
+  activity_type: ActivityType;
+  description: string;
+  project_id: string;
+  kickoff_id: string | null;
+}
+
+/**
+ * Detect industry from business idea for anonymization
+ */
+function detectIndustry(businessIdea: string): string {
+  const idea = businessIdea.toLowerCase();
+
+  const industries: Record<string, string[]> = {
+    'B2B SaaS': ['saas', 'software', 'platform', 'tool', 'dashboard', 'automation', 'api'],
+    'E-commerce': ['ecommerce', 'e-commerce', 'shop', 'store', 'retail', 'selling', 'products'],
+    'FinTech': ['finance', 'payment', 'banking', 'investment', 'trading', 'money', 'fintech'],
+    'HealthTech': ['health', 'medical', 'fitness', 'wellness', 'healthcare', 'patient', 'clinic'],
+    'EdTech': ['education', 'learning', 'course', 'training', 'school', 'teach', 'student'],
+    'Marketplace': ['marketplace', 'matching', 'booking', 'rental', 'connect', 'two-sided'],
+    'AI/ML': ['ai', 'machine learning', 'ml', 'artificial intelligence', 'gpt', 'llm', 'chatbot'],
+  };
+
+  for (const [industry, keywords] of Object.entries(industries)) {
+    if (keywords.some((kw) => idea.includes(kw))) {
+      return industry;
+    }
+  }
+
+  return 'tech startup';
+}
+
+/**
+ * Build anonymized activity log entries from validation payload
+ */
+function buildActivityLogEntries(payload: FounderValidationPayload): ActivityLogEntry[] {
+  const entries: ActivityLogEntry[] = [];
+  const industry = detectIndustry(payload.validation_report.business_idea);
+  const baseEntry = {
+    project_id: payload.project_id,
+    kickoff_id: payload.kickoff_id || null,
+  };
+
+  // Sage: VPC/Analysis activities
+  if (payload.value_proposition_canvas && Object.keys(payload.value_proposition_canvas).length > 0) {
+    const segmentCount = Object.keys(payload.value_proposition_canvas).length;
+    entries.push({
+      ...baseEntry,
+      founder_id: 'sage',
+      activity_type: 'analysis',
+      description: `Analyzed market positioning for a ${industry} across ${segmentCount} customer segment${segmentCount > 1 ? 's' : ''}`,
+    });
+  }
+
+  // Pulse: Desirability experiments
+  if (payload.evidence.desirability) {
+    const d = payload.evidence.desirability;
+    const expCount = d.experiments?.length || 0;
+    entries.push({
+      ...baseEntry,
+      founder_id: 'pulse',
+      activity_type: 'validation',
+      description:
+        expCount > 0
+          ? `Validated customer desirability with ${expCount}+ experiment${expCount > 1 ? 's' : ''}`
+          : `Assessed customer desirability signals for a ${industry}`,
+    });
+  }
+
+  // Forge: Feasibility assessment
+  if (payload.evidence.feasibility) {
+    const f = payload.evidence.feasibility;
+    const featureCount = Object.keys(f.core_features_feasible || {}).length;
+    entries.push({
+      ...baseEntry,
+      founder_id: 'forge',
+      activity_type: 'build',
+      description:
+        featureCount > 0
+          ? `Assessed technical feasibility for ${featureCount} core feature${featureCount > 1 ? 's' : ''}`
+          : `Evaluated technical feasibility for a ${industry}`,
+    });
+  }
+
+  // Ledger: Viability/unit economics
+  if (payload.evidence.viability) {
+    entries.push({
+      ...baseEntry,
+      founder_id: 'ledger',
+      activity_type: 'validation',
+      description: `Calculated unit economics and financial viability metrics`,
+    });
+  }
+
+  // Guardian: QA review
+  if (payload.qa_report && payload.qa_report.status) {
+    const compliance = payload.qa_report.framework_compliance;
+    entries.push({
+      ...baseEntry,
+      founder_id: 'guardian',
+      activity_type: 'review',
+      description:
+        typeof compliance === 'number'
+          ? `Completed quality review with ${Math.round(compliance * 100)}% framework compliance`
+          : `Completed quality assurance review for validation report`,
+    });
+  }
+
+  // Compass: Synthesis (if there's a final recommendation)
+  if (payload.validation_report.validation_outcome) {
+    entries.push({
+      ...baseEntry,
+      founder_id: 'compass',
+      activity_type: 'research',
+      description: `Synthesized findings into strategic recommendations for a ${industry}`,
+    });
+  }
+
+  return entries;
+}
+
+// =============================================================================
 // CONSULTANT ONBOARDING SCHEMAS
 // =============================================================================
 
@@ -619,12 +748,50 @@ async function handleFounderValidation(payload: FounderValidationPayload): Promi
     console.log('[api/crewai/webhook] Validation state persisted:', validationState?.id);
   }
 
+  // Persist public activity log entries for marketing feed
+  const activityEntries = buildActivityLogEntries(payload);
+  let activitiesCreated = 0;
+
+  if (activityEntries.length > 0) {
+    // Check for duplicate kickoff_id to ensure idempotency
+    if (payload.kickoff_id) {
+      const { data: existing } = await admin
+        .from('public_activity_log')
+        .select('id')
+        .eq('kickoff_id', payload.kickoff_id)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        console.log(
+          '[api/crewai/webhook] Skipping duplicate activity entries for kickoff_id:',
+          payload.kickoff_id
+        );
+      } else {
+        const { error: activityError } = await admin.from('public_activity_log').insert(activityEntries);
+        if (activityError) {
+          console.error('[api/crewai/webhook] Failed to insert activity log:', activityError);
+        } else {
+          activitiesCreated = activityEntries.length;
+          console.log(`[api/crewai/webhook] Created ${activitiesCreated} public activity entries`);
+        }
+      }
+    } else {
+      // No kickoff_id, insert without deduplication
+      const { error: activityError } = await admin.from('public_activity_log').insert(activityEntries);
+      if (!activityError) {
+        activitiesCreated = activityEntries.length;
+        console.log(`[api/crewai/webhook] Created ${activitiesCreated} public activity entries`);
+      }
+    }
+  }
+
   return NextResponse.json({
     success: true,
     flow_type: 'founder_validation',
     report_id: insertedReport?.id,
     evidence_created: evidenceCreated,
     validation_state_id: validationState?.id || null,
+    activities_created: activitiesCreated,
     message: 'Founder validation results persisted successfully',
   });
 }

@@ -41,8 +41,9 @@ Work these items in order. Items marked "Ready" can start immediately.
     ↓ Webhook implemented, real web research, 18 tools
 ✅ app.startupai.site (This repo) ← P0 BLOCKERS CLEARED
     ↓ PostHog done, E2E tests fixed, accessibility done, reports + evidence explorer done
-startupai.site (Marketing)
-    ↓ Waiting on Activity Feed + Metrics APIs
+    ↓ Activity Feed API + Metrics API shipped
+✅ startupai.site (Marketing) ← UNBLOCKED
+    ↓ All APIs available, ready for Phase 4 Validation
 ```
 
 **Current Focus**:

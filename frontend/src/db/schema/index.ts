@@ -25,3 +25,4 @@ export * from './usage-quota';
 export * from './crewai-validation-states';
 export * from './business-model-canvas';
 export * from './value-proposition-canvas';
+export * from './public-activity-log';

@@ -2,7 +2,7 @@
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
 last_reviewed: "2025-11-30"
-last_synced: "2025-11-30 - PostHog instrumentation complete, P0 blockers cleared"
+last_synced: "2025-11-30 - Activity Feed API + Metrics API shipped, marketing fully unblocked"
 ---
 
 # Cross-Repository Blockers
@@ -27,8 +27,8 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 - 192 integration tests passing
 
 **Remaining Gaps (not blocking this repo):**
-- Activity Feed API for marketing site (❌ Not Started)
-- Metrics API for marketing site (❌ Not Started)
+- Activity Feed API for marketing site (✅ Done - 2025-11-30)
+- Metrics API for marketing site (✅ Done - 2025-11-30)
 - Ad platform integration (Meta/Google) - explicitly deferred
 
 **Phase Status**: See `startupai-crew/docs/work/phases.md`
@@ -61,6 +61,8 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 | E2E Validation Flow | ✅ Ready to Test | Full flow: onboarding → analysis → results | Webhook + E2E infra fixed |
 | Accessibility Foundation | ✅ Done | WCAG 2.1 AA foundation | Legal compliance path cleared |
 | VPC Canvas | ✅ Done | Strategyzer-style SVG with fit lines | Professional canvas visualization |
+| Activity Feed API | ✅ Done | `GET /api/v1/public/activity` | Marketing can show live agent activity |
+| Metrics API | ✅ Done | `GET /api/v1/public/metrics` | Marketing can display trust metrics |
 
 ## Phase Alpha Dependencies
 
@@ -94,8 +96,8 @@ AI Founders Get Smarter (operational)
 
 - **CrewAI backend is UNBLOCKED** - All dependencies on CrewAI are resolved
 - **Product App P0 COMPLETE** - No remaining P0 blockers as of 2025-11-30
-- **Marketing site waiting on**: Activity Feed API and Metrics API (not yet built)
-- Major completions Nov 28-30: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas, PostHog
+- **Marketing site UNBLOCKED** - Activity Feed API and Metrics API now available
+- Major completions Nov 28-30: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas, PostHog, Public APIs
 
 ## Cross-Repo Links
 
