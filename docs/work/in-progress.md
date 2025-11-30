@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for active work"
 status: "active"
-last_reviewed: "2025-11-29"
+last_reviewed: "2025-11-30"
 ---
 
 # In Progress
@@ -14,7 +14,7 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 1 | PostHog instrumentation | **Ready** | @ops | 4-6h | Event schemas, onboarding funnel, alert thresholds. GH Issue #175 |
+| - | *No P0 blockers remaining* | ✅ | - | - | PostHog instrumentation completed 2025-11-30 |
 
 ### P1: High Priority (Should Fix Before Launch)
 
@@ -34,27 +34,27 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 ---
 
-## Cross-Repo Dependencies - UPDATED 2025-11-29
+## Cross-Repo Dependencies - UPDATED 2025-11-30
 
 ```
 ✅ startupai-crew (CrewAI Phase 2D Complete - 85%)
     ↓ Webhook implemented, real web research, 18 tools
-⚠️ app.startupai.site (This repo) ← CURRENT FOCUS: PostHog + Dashboard integration
-    ↓ E2E tests fixed, accessibility done, reports + evidence explorer done
+✅ app.startupai.site (This repo) ← P0 BLOCKERS CLEARED
+    ↓ PostHog done, E2E tests fixed, accessibility done, reports + evidence explorer done
 startupai.site (Marketing)
     ↓ Waiting on Activity Feed + Metrics APIs
 ```
 
 **Current Focus**:
-1. PostHog instrumentation (only remaining P0)
-2. Dashboard integration with real CrewAI data
+1. Dashboard integration with real CrewAI data (P1)
+2. Specification-driven test refresh (P1)
 
 ---
 
-## Immediate Actions (Updated 2025-11-29)
+## Immediate Actions (Updated 2025-11-30)
 
-1. **PostHog instrumentation** - Only remaining P0 blocker, 4-6 hours
-2. **Dashboard CrewAI integration** - Replace mock data with real AI insights
+1. **Dashboard CrewAI integration** - Replace mock data with real AI insights (P1)
+2. **Specification-driven test refresh** - Update fixtures, Playwright journeys (P1)
 
 ---
 
@@ -71,7 +71,6 @@ startupai.site (Marketing)
 - Accessibility foundation (WCAG 2.1 AA)
 
 **What's Missing:**
-- PostHog event instrumentation
 - Dashboard integration with real CrewAI data (some mock data remains)
 
 See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for details.
@@ -80,11 +79,11 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 ## How to Use This Document
 
-1. **Pick highest priority "Ready" item** from P0 table first
+1. **Pick highest priority "Ready" item** from P1 table (no P0 blockers remaining)
 2. **Update status** when you start work
 3. **Move to done.md** when complete
 4. **Check cross-repo-blockers.md** for upstream status
 
 ---
 
-**Last Updated**: 2025-11-29
+**Last Updated**: 2025-11-30

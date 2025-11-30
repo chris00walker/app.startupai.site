@@ -1,12 +1,36 @@
 ---
 purpose: "Private technical source of truth for recently delivered work"
 status: "active"
-last_reviewed: "2025-11-29"
+last_reviewed: "2025-11-30"
 ---
 
 # Recently Delivered
 
 ## November 2025
+
+### PostHog Instrumentation (Nov 30)
+| Item | Status | Notes |
+|------|--------|-------|
+| PostHog event tracking | ✅ Done | 17 events wired across user journey |
+| Onboarding funnel tracking | ✅ Done | session_started, stage_advanced, message_sent, exited_early, completed |
+| Auth event tracking | ✅ Done | login, logout (signup was already tracked) |
+| CrewAI analysis tracking | ✅ Done | analysis_started, analysis_completed, analysis_failed |
+| Page view tracking | ✅ Done | dashboard, analysis, report, evidence explorer |
+| UI interaction tracking | ✅ Done | button_clicked, report_exported, dashboard_tab_switched |
+
+**Commit**: `73510ec feat(analytics): wire PostHog instrumentation across user journey`
+
+**Files Modified** (9):
+- `src/lib/analytics.ts` - Extended ProductEvent type, added tracking helpers
+- `src/components/onboarding/OnboardingWizardV2.tsx` - Funnel tracking
+- `src/components/layout/AppSidebar.tsx` - Logout tracking
+- `src/pages/founder-dashboard.tsx` - Page view + tab switch tracking
+- `src/app/project/[id]/{analysis,report,evidence}/page.tsx` - Page views
+- `src/components/reports/export/PDFExporter.tsx` - Export tracking
+
+**Impact**: Clears the only remaining P0 blocker for Phase Alpha.
+
+---
 
 ### Late November Completions (Nov 28-29)
 | Item | Status | Notes |

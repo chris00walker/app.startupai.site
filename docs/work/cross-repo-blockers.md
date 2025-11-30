@@ -1,8 +1,8 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2025-11-29"
-last_synced: "2025-11-29 - Synced with Nov 28-29 completions"
+last_reviewed: "2025-11-30"
+last_synced: "2025-11-30 - PostHog instrumentation complete, P0 blockers cleared"
 ---
 
 # Cross-Repository Blockers
@@ -69,7 +69,7 @@ Phase Alpha (CrewAI Delivery & Onboarding Hardening) requires:
 2. **Results persistence** → ✅ Webhook implemented (`_persist_to_supabase()`)
 3. **Results display** → ✅ `ValidationResultsSummary` wired to dashboard
 
-### Dependency Chain - UPDATED 2025-11-29
+### Dependency Chain - UPDATED 2025-11-30
 ```
 ✅ CrewAI Phase 2D Complete (8 crews, 18 agents, 18 tools)
          ↓
@@ -79,7 +79,7 @@ Phase Alpha (CrewAI Delivery & Onboarding Hardening) requires:
          ↓
 ✅ E2E test infrastructure fixed
          ↓
-⚠️ PostHog instrumentation ← CURRENT FOCUS (only P0 remaining)
+✅ PostHog instrumentation (17 events wired - COMPLETED 2025-11-30)
          ↓
 Marketing Phase 4 Validation Cycles
 
@@ -93,9 +93,9 @@ AI Founders Get Smarter (operational)
 ## Coordination Notes
 
 - **CrewAI backend is UNBLOCKED** - All dependencies on CrewAI are resolved
-- **Product App focus**: PostHog instrumentation (only remaining P0 blocker)
+- **Product App P0 COMPLETE** - No remaining P0 blockers as of 2025-11-30
 - **Marketing site waiting on**: Activity Feed API and Metrics API (not yet built)
-- Major completions Nov 28-29: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas
+- Major completions Nov 28-30: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas, PostHog
 
 ## Cross-Repo Links
 
