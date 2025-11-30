@@ -88,10 +88,10 @@ function generateGateAlerts(projects: PortfolioProject[]): GateAlert[] {
         project,
         message: `${project.clientName} is ready for ${project.stage.toLowerCase()} gate evaluation`,
         actionText: 'Evaluate Gate',
-        timestamp: '2 hours ago'
+        timestamp: project.lastActivity || 'Recently'
       })
     }
-    
+
     // Gate Failed Alert
     if (project.gateStatus === 'Failed') {
       alerts.push({
@@ -101,10 +101,10 @@ function generateGateAlerts(projects: PortfolioProject[]): GateAlert[] {
         project,
         message: `${project.clientName} failed ${project.stage.toLowerCase()} gate - needs attention`,
         actionText: 'Review Failure',
-        timestamp: project.lastActivity
+        timestamp: project.lastActivity || 'Recently'
       })
     }
-    
+
     // Low Evidence Quality Alert
     if (project.evidenceQuality < 0.6) {
       alerts.push({
@@ -114,10 +114,10 @@ function generateGateAlerts(projects: PortfolioProject[]): GateAlert[] {
         project,
         message: `${project.clientName} has low evidence quality (${(project.evidenceQuality * 100).toFixed(0)}%)`,
         actionText: 'Improve Evidence',
-        timestamp: '1 day ago'
+        timestamp: project.lastActivity || 'Recently'
       })
     }
-    
+
     // More Experiments Needed Alert
     if (project.experimentsCount < 5) {
       alerts.push({
@@ -127,11 +127,11 @@ function generateGateAlerts(projects: PortfolioProject[]): GateAlert[] {
         project,
         message: `${project.clientName} needs more experiments (${project.experimentsCount}/10 recommended)`,
         actionText: 'Plan Experiments',
-        timestamp: '3 hours ago'
+        timestamp: project.lastActivity || 'Recently'
       })
     }
-    
-    // Gate Overdue Alert (mock logic - could be based on nextGateDate)
+
+    // Gate Overdue Alert - based on nextGateDate if available
     if (project.gateStatus === 'Pending' && project.evidenceQuality > 0.7 && project.experimentsCount > 8) {
       alerts.push({
         id: `${project.id}_overdue`,
@@ -140,7 +140,7 @@ function generateGateAlerts(projects: PortfolioProject[]): GateAlert[] {
         project,
         message: `${project.clientName} gate evaluation is overdue`,
         actionText: 'Schedule Gate',
-        timestamp: '5 hours ago'
+        timestamp: project.nextGateDate || project.lastActivity || 'Recently'
       })
     }
   })

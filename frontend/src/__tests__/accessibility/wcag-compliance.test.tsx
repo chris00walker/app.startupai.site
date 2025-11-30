@@ -58,7 +58,7 @@ const getOnboardingNav = (container?: HTMLElement) => {
   return null;
 };
 
-const waitForOnboardingReady = async (container: HTMLElement) => {
+const waitForOnboardingReady = async (container: HTMLElement): Promise<HTMLElement> => {
   let nav: HTMLElement | null = null;
 
   await waitFor(() => {
@@ -68,7 +68,8 @@ const waitForOnboardingReady = async (container: HTMLElement) => {
     }
   }, { timeout: 5000 });
 
-  return nav as HTMLElement;
+  // nav is guaranteed non-null here due to the waitFor check
+  return nav!;
 };
 
 describe('WCAG 2.2 AA Compliance Validation', () => {
@@ -245,16 +246,17 @@ describe('WCAG 2.2 AA Compliance Validation', () => {
           'button, a, input, select, textarea'
         );
 
-        focusableElements.forEach(element => {
+        focusableElements.forEach(el => {
+          const element = el as HTMLElement;
           act(() => {
             element.focus();
           });
           const styles = window.getComputedStyle(element);
-          const hasFocusIndicator = 
-            styles.outline !== 'none' || 
+          const hasFocusIndicator =
+            styles.outline !== 'none' ||
             styles.boxShadow !== 'none' ||
             element.matches(':focus-visible');
-          
+
           expect(hasFocusIndicator).toBe(true);
         });
       });
@@ -507,7 +509,8 @@ describe('WCAG 2.2 AA Compliance Validation', () => {
       // Test focus outline width on interactive elements
       const focusableElements = container.querySelectorAll('button, a, input, textarea');
       
-      focusableElements.forEach(element => {
+      focusableElements.forEach(el => {
+        const element = el as HTMLElement;
         act(() => {
           element.focus();
         });
@@ -518,7 +521,7 @@ describe('WCAG 2.2 AA Compliance Validation', () => {
         const outlineWidth = parseInt(styles.outlineWidth) || 0;
         const borderWidth = parseInt(styles.borderWidth) || 0;
         const hasFocusUtilityClass = /focus-visible:(ring|outline|border)/.test(classNames);
-        
+
         expect(
           outlineWidth + borderWidth >= ACCESSIBILITY_REQUIREMENTS.wcag22.focusOutlineWidth.min ||
           hasFocusUtilityClass

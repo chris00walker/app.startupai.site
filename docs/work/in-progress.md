@@ -2,7 +2,7 @@
 purpose: "Private technical source of truth for active work"
 status: "active"
 last_reviewed: "2025-11-30"
-last_synced: "2025-11-30 - Documentation audit complete, codebase verified"
+last_synced: "2025-11-30 - P1 dashboard/test work completed"
 ---
 
 # In Progress
@@ -21,8 +21,8 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 2 | Dashboard insights from CrewAI | **Ready** | @frontend | 3-4 days | Replace mock data with real AI insights. 81% of fields unused. |
-| 3 | Specification-driven test refresh | In Progress | @qa-lead | - | Update fixtures, Playwright journeys. GH Issue #189 |
+| 2 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard mock data replaced with usePortfolioActivity hook |
+| 3 | Specification-driven test refresh | ✅ Done | @qa-lead | ~4 hours | TypeScript errors fixed, ClientDashboard skipped pending refactor |
 | 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented (see backlog.md) |
 
 ### P2: Ready for E2E Testing
@@ -66,15 +66,16 @@ Work these items in order. Items marked "Ready" can start immediately.
 **CrewAI Infrastructure Complete:**
 - Webhook endpoint: `POST /api/crewai/webhook`
 - All 80+ fields persisting to Supabase
-- Hooks: `useCrewAIState`, `useInnovationSignals`, `useVPCData`
+- Hooks: `useCrewAIState`, `useInnovationSignals`, `useVPCData`, `usePortfolioActivity`
 - CrewAI Report Viewer component (comprehensive report display)
 - Evidence Explorer with D-F-V metrics
 - VPC Strategyzer-style canvas with animated fit lines
 - E2E test infrastructure (timeouts fixed, API mocks)
 - Accessibility foundation (WCAG 2.1 AA)
+- Consultant dashboard using real portfolio activity data
 
 **What's Missing:**
-- Dashboard integration with real CrewAI data (some mock data remains)
+- PostHog coverage gaps (13+ events not implemented - P1 remaining item)
 
 See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for details.
 

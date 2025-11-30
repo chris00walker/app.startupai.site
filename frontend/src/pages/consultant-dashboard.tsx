@@ -15,6 +15,7 @@ import { useDemoMode } from "@/hooks/useDemoMode"
 import { useProjects } from "@/hooks/useProjects"
 import { useClients } from "@/hooks/useClients"
 import { useAuth } from "@/lib/auth/hooks"
+import { usePortfolioActivity } from "@/hooks/usePortfolioActivity"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -35,32 +36,11 @@ import { PortfolioProject, PortfolioMetrics } from "@/types/portfolio"
 
 function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
   const highRiskProjects = projects.filter(p => p.riskBudget.delta > 0.2)
-  const recentActivity = [
-    {
-      id: "1",
-      action: "Gate Attempted",
-      client: "TechStart Inc.",
-      type: "Desirability Gate",
-      time: "2 hours ago",
-      status: "pending",
-    },
-    {
-      id: "2",
-      action: "Evidence Added",
-      client: "CloudCorp",
-      type: "User Interview",
-      time: "4 hours ago",
-      status: "success",
-    },
-    {
-      id: "3",
-      action: "Override Requested",
-      client: "AppVenture",
-      type: "Viability Gate",
-      time: "1 day ago",
-      status: "warning",
-    },
-  ]
+  const projectIds = React.useMemo(() => projects.map(p => p.id), [projects])
+  const { activities, isLoading: activitiesLoading } = usePortfolioActivity({
+    projectIds,
+    limit: 10,
+  })
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -115,20 +95,30 @@ function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
           <CardDescription>Latest validation activities across projects</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center gap-3">
-                {getStatusIcon(activity.status)}
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {activity.client} • {activity.type}
-                  </p>
+          {activitiesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="text-center text-muted-foreground text-sm py-8">
+              No recent activity across your portfolio
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activities.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-3">
+                  {getStatusIcon(activity.status)}
+                  <div className="flex-1 space-y-1">
+                    <p className="text-sm font-medium">{activity.action}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {activity.client} • {activity.type}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{activity.time}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
