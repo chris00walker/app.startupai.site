@@ -302,6 +302,41 @@ function buildCrewAnalysisInputs(briefData: any) {
   };
 }
 
+/**
+ * Build inputs for the CrewAI founder_validation flow.
+ * Transforms entrepreneur brief data to the schema expected by the flow.
+ */
+function buildFounderValidationInputs(
+  briefData: any,
+  projectId: string,
+  userId: string,
+  sessionId: string
+): Record<string, any> {
+  return {
+    flow_type: 'founder_validation',
+    project_id: projectId,
+    user_id: userId,
+    session_id: sessionId,
+    entrepreneur_brief: {
+      business_idea: briefData.solution_description || briefData.unique_value_proposition || '',
+      problem_description: briefData.problem_description || '',
+      solution_description: briefData.solution_description || '',
+      unique_value_proposition: briefData.unique_value_proposition || '',
+      customer_segments: briefData.customer_segments || [],
+      primary_customer_segment: briefData.primary_customer_segment || (briefData.customer_segments?.[0] ?? ''),
+      business_stage: briefData.business_stage || 'idea',
+      budget_range: briefData.budget_range || 'not specified',
+      competitors: briefData.competitors || [],
+      differentiation_factors: briefData.differentiation_factors || [],
+      available_channels: briefData.available_channels || [],
+      team_capabilities: briefData.team_capabilities || [],
+      three_month_goals: briefData.three_month_goals || [],
+      success_criteria: briefData.success_criteria || [],
+      key_metrics: briefData.key_metrics || [],
+    },
+  };
+}
+
 async function createProjectFromOnboarding(
   client: SupabaseClient,
   sessionId: string,
@@ -392,10 +427,15 @@ async function updateSessionComplete(
   }
 }
 
+/**
+ * @deprecated This mock fallback is no longer used.
+ * Real analysis comes from CrewAI founder_validation flow via webhook.
+ * Keeping for reference - can be removed in future cleanup.
+ */
 function generateStrategicAnalysis(briefData: any, session: any) {
   // Generate comprehensive strategic analysis based on collected data
   // This is a sophisticated analysis simulation
-  // TODO: Replace with actual CrewAI strategic analysis workflow
+  // DEPRECATED: Real analysis now comes from CrewAI founder_validation flow
   
   const businessStage = briefData.business_stage || 'idea';
   const hasCompetitors = briefData.competitors && briefData.competitors.length > 0;
@@ -609,77 +649,80 @@ export async function POST(request: NextRequest) {
         overall_quality_score: brief.overall_quality_score,
       });
 
-      const { strategicQuestion, projectContext } = buildCrewAnalysisInputs(finalBriefData);
-
       let analysisResult: CrewAnalyzeApiResponse | null = null;
       let crewError: string | null = null;
       let rateLimitInfo: RateLimitInfo | undefined;
 
       try {
-        // Use CrewAI AMP for strategic analysis
+        // Use CrewAI AMP for founder validation (async, fire-and-forget)
+        // Results will be persisted via webhook at /api/crewai/webhook
         const { createCrewAIClient } = await import('@/lib/crewai/amp-client');
 
-        const crewClient = createCrewAIClient({
-          apiUrl: process.env.CREWAI_API_URL,
-          apiToken: process.env.CREWAI_API_TOKEN,
-        });
+        const crewaiUrl = process.env.CREWAI_API_URL;
+        if (!crewaiUrl) {
+          console.warn('[onboarding/complete] CREWAI_API_URL not configured, skipping AI analysis');
+        } else {
+          const crewClient = createCrewAIClient({
+            apiUrl: crewaiUrl,
+            apiToken: process.env.CREWAI_API_TOKEN,
+          });
 
-        console.log('[onboarding/complete] Starting CrewAI AMP analysis...');
+          console.log('[onboarding/complete] Starting CrewAI founder_validation flow...');
 
-        // Kickoff crew with strategic inputs
-        const crewResult = await crewClient.kickoffAndWait(
-          {
-            inputs: {
-              strategic_question: strategicQuestion,
-              project_context: projectContext,
-              business_stage: finalBriefData.business_stage || 'validation',
-              priority: 'high',
+          // Build inputs for founder validation flow
+          const validationInputs = buildFounderValidationInputs(
+            finalBriefData,
+            project.id,
+            session.user_id,
+            sessionId
+          );
+
+          // Kick off the flow (fire and forget - don't wait for completion)
+          // Results will be persisted via webhook at /api/crewai/webhook
+          const response = await crewClient.kickoff({
+            inputs: validationInputs,
+          });
+
+          workflowId = response.kickoff_id;
+          console.log('[onboarding/complete] CrewAI kickoff started:', workflowId);
+
+          // Mark that we successfully triggered the workflow
+          analysisResult = {
+            success: true,
+            analysisId: workflowId,
+            summary: 'Your founder validation analysis is in progress. Results will appear on your dashboard within 3-5 minutes.',
+            insights: [],
+            metadata: {
+              project_id: project.id,
+              user_id: user.id,
             },
-          },
-          (status) => {
-            console.log(`[onboarding/complete] CrewAI status: ${status.status}`);
-          }
-        );
+          };
 
-        // Parse crew output
-        const output = typeof crewResult.output === 'string'
-          ? JSON.parse(crewResult.output)
-          : crewResult.output;
-
-        analysisResult = {
-          success: true,
-          analysisId: crewResult.kickoff_id,
-          summary: output?.summary || output?.executive_summary || 'Strategic analysis completed',
-          insights: output?.insights || output?.recommendations || [],
-          rawOutput: JSON.stringify(output, null, 2),
-          evidenceCount: output?.evidence_count,
-          evidenceCreated: output?.evidence_created,
-          reportCreated: output?.report_created,
-          metadata: {
-            project_id: project.id,
-            user_id: user.id,
-          },
-        };
-
-        workflowId = crewResult.kickoff_id;
-
-        console.log('[onboarding/complete] CrewAI AMP analysis completed successfully');
+          // Store kickoff_id in project metadata for webhook correlation
+          await supabaseClient
+            .from('projects')
+            .update({
+              metadata: {
+                ...(project.metadata || {}),
+                pending_kickoff_id: workflowId,
+                crewai_flow_type: 'founder_validation',
+                kickoff_started_at: new Date().toISOString(),
+              },
+            })
+            .eq('id', project.id);
+        }
       } catch (analysisErr) {
         crewError = analysisErr instanceof Error ? analysisErr.message : 'CrewAI AMP request failed';
         console.error('[onboarding/complete] CrewAI AMP error:', crewError);
       }
 
-      const fallbackAnalysis = analysisResult ? null : generateStrategicAnalysis(finalBriefData, session);
-
-      const fallbackInsights: CrewInsight[] = fallbackAnalysis?.strategicRecommendations
-        ? (fallbackAnalysis.strategicRecommendations as string[]).map((recommendation: string, index: number) => ({
-            id: `fallback-${index}`,
-            headline: recommendation,
-          }))
-        : [];
-
-      const deliverableInsights = analysisResult?.insights ?? fallbackInsights;
-      const deliverableSummary = analysisResult?.summary ?? fallbackAnalysis?.executiveSummary ?? null;
+      // No mock fallback - users will see "processing" state until webhook delivers real results
+      const deliverableInsights: CrewInsight[] = analysisResult?.insights ?? [];
+      const deliverableSummary = analysisResult?.summary ?? (
+        crewError
+          ? 'Unable to start analysis. Please refresh and try again.'
+          : 'Your founder validation analysis is being prepared. Results will appear on your dashboard shortly.'
+      );
 
       if (crewError) {
         console.error('[onboarding/complete] CrewAI analysis error:', crewError);
@@ -702,7 +745,7 @@ export async function POST(request: NextRequest) {
           analysisId: workflowId,
           summary: deliverableSummary,
           insights: deliverableInsights,
-          rawOutput: analysisResult?.rawOutput ?? (fallbackAnalysis ? JSON.stringify(fallbackAnalysis, null, 2) : undefined),
+          rawOutput: analysisResult?.rawOutput,
         },
         dashboardRedirect: `/project/${project.id}/gate`,
         projectCreated: {
