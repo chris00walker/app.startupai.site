@@ -523,9 +523,8 @@ Ready to dive in? Let's start with the most important question:
         toast.success('Resuming your conversation with Alex...');
       } else {
         // Add initial AI greeting message for new or empty session
-        const initialMessage = data.agentIntroduction && data.firstQuestion
-          ? `${data.agentIntroduction}\n\n${data.firstQuestion}`
-          : `Hi there! I'm Alex, and I'm excited to help you think through your business idea using proven validation methods.\n\nOver the next 15-20 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your goals. This isn't a pitch session - it's a strategic conversation to help you identify what assumptions you need to test and what experiments you should run first.\n\nThere are no wrong answers here. In fact, "I don't know yet" is often the most honest and valuable response because it helps us identify what you need to learn.\n\nReady to dive in? Let's start with the most important question:\n\n**What business idea are you most excited about right now?**`;
+        // The API always returns agentIntroduction and firstQuestion
+        const initialMessage = `${data.agentIntroduction}\n\n${data.firstQuestion}`;
 
         setMessages([
           {

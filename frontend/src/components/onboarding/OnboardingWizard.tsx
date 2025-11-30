@@ -589,7 +589,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         />
 
         {/* Main conversation area */}
-        <SidebarInset className="flex-1">
+        <SidebarInset className="flex-1" role="main" aria-label="Conversation area">
           {session && (
             <ConversationInterface
               session={session}

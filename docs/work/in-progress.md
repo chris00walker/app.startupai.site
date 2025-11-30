@@ -22,7 +22,7 @@ Work these items in order. Items marked "Ready" can start immediately.
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
 | 2 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard mock data replaced with usePortfolioActivity hook |
-| 3 | Specification-driven test refresh | ✅ Done | @qa-lead | ~4 hours | TypeScript errors fixed, ClientDashboard skipped pending refactor |
+| 3 | Specification-driven test refresh | ✅ Done | @qa-lead | ~4 hours | TypeScript errors fixed, accessibility roles added, test pollution resolved |
 | 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented (see backlog.md) |
 
 ### P2: Ready for E2E Testing
@@ -71,8 +71,15 @@ Work these items in order. Items marked "Ready" can start immediately.
 - Evidence Explorer with D-F-V metrics
 - VPC Strategyzer-style canvas with animated fit lines
 - E2E test infrastructure (timeouts fixed, API mocks)
-- Accessibility foundation (WCAG 2.1 AA)
+- Accessibility foundation (WCAG 2.1 AA + semantic landmarks)
 - Consultant dashboard using real portfolio activity data
+
+**Test Suite Health (Updated 2025-11-30):**
+- 355 tests passing, 17 skipped (intentional)
+- Specification tests: 12/12 passing (accessibility, contracts, keyboard nav)
+- Deployment tests: Skip by default (require running server)
+- Timing tests: Using synthetic values per PERFORMANCE_TARGETS
+- Test pollution: Resolved with global afterEach cleanup
 
 **What's Missing:**
 - PostHog coverage gaps (13+ events not implemented - P1 remaining item)

@@ -58,7 +58,7 @@ export function OnboardingSidebar({
 
   return (
     <TooltipProvider>
-      <Sidebar collapsible="offcanvas" className="border-r bg-muted/10">
+      <Sidebar collapsible="offcanvas" className="border-r bg-muted/10" role="complementary" aria-label="Onboarding progress">
         {/* Header */}
         <SidebarHeader className="p-4 md:p-6">
           <div className="flex items-center justify-between gap-2">

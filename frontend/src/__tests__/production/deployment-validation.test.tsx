@@ -1,17 +1,24 @@
 /**
  * Netlify Function Validation Tests
- * 
+ *
  * These tests validate Netlify Functions work correctly in the local dev environment.
  * Netlify handles production validation automatically through their platform.
- * 
+ *
  * Run with: pnpm test:netlify (starts netlify dev automatically)
  * Or manually: netlify dev & PRODUCTION_URL=http://localhost:8888 pnpm test
+ *
+ * These tests are SKIPPED by default in unit test runs (pnpm test) because they
+ * require a running server. Set PRODUCTION_URL to enable them.
  */
 
-describe('Production Deployment Validation', () => {
+// Skip these integration tests unless explicitly running against a server
+const SHOULD_RUN = Boolean(process.env.PRODUCTION_URL);
+const describeOrSkip = SHOULD_RUN ? describe : describe.skip;
+
+describeOrSkip('Production Deployment Validation', () => {
   const PRODUCTION_URL = process.env.PRODUCTION_URL || 'https://app-startupai-site.netlify.app';
   const TEST_USER_ID = process.env.TEST_USER_ID || 'test-user-id';
-  
+
   beforeAll(() => {
     if (!process.env.PRODUCTION_URL) {
       console.warn('⚠️  PRODUCTION_URL not set. Using default:', PRODUCTION_URL);
@@ -20,7 +27,7 @@ describe('Production Deployment Validation', () => {
 
   describe('Netlify Functions Validation', () => {
     it('should successfully call onboarding-start function', async () => {
-      const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+      const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +84,7 @@ describe('Production Deployment Validation', () => {
     }, 30000); // 30 second timeout for production calls
 
     it('should handle invalid requests gracefully', async () => {
-      const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+      const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +102,7 @@ describe('Production Deployment Validation', () => {
     });
 
     it('should handle CORS properly', async () => {
-      const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+      const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
         method: 'OPTIONS',
       });
 
@@ -141,7 +148,7 @@ describe('Production Deployment Validation', () => {
   describe('Environment Configuration Validation', () => {
     it('should have required environment variables configured', async () => {
       // Test that the function can access required env vars by making a request
-      const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+      const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -166,7 +173,7 @@ describe('Production Deployment Validation', () => {
 
   describe('Database Connectivity Validation', () => {
     it('should be able to connect to Supabase', async () => {
-      const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+      const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +206,7 @@ describe('Production Deployment Validation', () => {
     it('should respond within acceptable time limits', async () => {
       const startTime = Date.now();
       
-      const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+      const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -226,7 +233,7 @@ describe('Production Deployment Validation', () => {
 
     it('should handle concurrent requests', async () => {
       const requests = Array.from({ length: 3 }, (_, i) =>
-        fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+        fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -254,12 +261,9 @@ describe('Production Deployment Validation', () => {
 
   describe('Error Handling Validation', () => {
     it('should return structured errors for all failure cases', async () => {
+      // Note: userId is optional - the API uses session auth for user identification
+      // userId is only used for test mode detection (userId === 'test-user-id')
       const testCases = [
-        {
-          name: 'missing userId',
-          body: { planType: 'trial' },
-          expectedError: 'INVALID_REQUEST',
-        },
         {
           name: 'missing planType',
           body: { userId: 'test-user' },
@@ -273,7 +277,7 @@ describe('Production Deployment Validation', () => {
       ];
 
       for (const testCase of testCases) {
-        const response = await fetch(`${PRODUCTION_URL}/.netlify/functions/onboarding-start`, {
+        const response = await fetch(`${PRODUCTION_URL}/api/onboarding/start`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
