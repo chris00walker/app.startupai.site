@@ -8,7 +8,7 @@
 import posthog from 'posthog-js'
 
 // Product Platform Events
-export type ProductEvent = 
+export type ProductEvent =
   | 'page_view'
   | 'project_created'
   | 'project_updated'
@@ -17,11 +17,13 @@ export type ProductEvent =
   | 'evidence_uploaded'
   | 'experiment_planned'
   | 'report_generated'
+  | 'report_exported'
   | 'canvas_completed'
   | 'canvas_bmc_updated'
   | 'canvas_vpc_updated'
   | 'canvas_tbi_updated'
   | 'dashboard_viewed'
+  | 'dashboard_tab_switched'
   | 'analytics_viewed'
   | 'workflow_started'
   | 'ai_analysis_requested'
@@ -33,6 +35,17 @@ export type ProductEvent =
   | 'signup_completed'
   | 'signup_initiated_oauth'
   | 'signup_failed'
+  | 'button_clicked'
+  | 'user_login'
+  | 'user_logout'
+  | 'onboarding_session_started'
+  | 'onboarding_stage_advanced'
+  | 'onboarding_message_sent'
+  | 'onboarding_exited_early'
+  | 'onboarding_completed'
+  | 'crewai_analysis_started'
+  | 'crewai_analysis_completed'
+  | 'crewai_analysis_failed'
 
 interface EventProperties {
   [key: string]: string | number | boolean | undefined
@@ -153,4 +166,101 @@ export const resetUser = () => {
   if (typeof window !== 'undefined') {
     posthog.reset()
   }
+}
+
+// Alias for compatibility with analytics/index.ts
+export const resetAnalytics = resetUser
+
+/**
+ * Track page view
+ */
+export const trackPageView = (pageName?: string, properties?: EventProperties) => {
+  if (typeof window !== 'undefined') {
+    posthog.capture('$pageview', {
+      ...properties,
+      page: pageName || window.location.pathname,
+      timestamp: new Date().toISOString(),
+    })
+  }
+}
+
+/**
+ * Track authentication events
+ */
+export const trackAuthEvent = {
+  login: (method: string) =>
+    trackEvent('user_login', { method, category: 'authentication' }),
+  logout: () =>
+    trackEvent('user_logout', { category: 'authentication' }),
+  signupStarted: (method: string) =>
+    trackEvent('signup_started', { method, category: 'authentication' }),
+  signupCompleted: (method: string) =>
+    trackEvent('signup_completed', { method, category: 'authentication' }),
+}
+
+/**
+ * Track onboarding funnel events
+ */
+export const trackOnboardingEvent = {
+  sessionStarted: (sessionId: string, stage: number, planType?: string) =>
+    trackEvent('onboarding_session_started', {
+      session_id: sessionId,
+      stage,
+      plan_type: planType,
+      category: 'onboarding',
+    }),
+  stageAdvanced: (sessionId: string, fromStage: number, toStage: number) =>
+    trackEvent('onboarding_stage_advanced', {
+      session_id: sessionId,
+      from_stage: fromStage,
+      to_stage: toStage,
+      category: 'onboarding',
+    }),
+  messageSent: (sessionId: string, stage: number, messageLength: number) =>
+    trackEvent('onboarding_message_sent', {
+      session_id: sessionId,
+      stage,
+      message_length: messageLength,
+      category: 'onboarding',
+    }),
+  exitedEarly: (sessionId: string, stageReached: number, progressPercent: number) =>
+    trackEvent('onboarding_exited_early', {
+      session_id: sessionId,
+      stage_reached: stageReached,
+      progress_percent: progressPercent,
+      category: 'onboarding',
+    }),
+  completed: (sessionId: string, totalTimeMinutes: number, workflowTriggered: boolean) =>
+    trackEvent('onboarding_completed', {
+      session_id: sessionId,
+      total_time_minutes: totalTimeMinutes,
+      workflow_triggered: workflowTriggered,
+      category: 'onboarding',
+    }),
+}
+
+/**
+ * Track CrewAI analysis events
+ */
+export const trackCrewAIEvent = {
+  started: (projectId: string, analysisType: string) =>
+    trackEvent('crewai_analysis_started', {
+      project_id: projectId,
+      analysis_type: analysisType,
+      category: 'ai_workflow',
+    }),
+  completed: (projectId: string, duration: number, success: boolean) =>
+    trackEvent('crewai_analysis_completed', {
+      project_id: projectId,
+      duration_seconds: duration,
+      success,
+      category: 'ai_workflow',
+    }),
+  failed: (projectId: string, error: string, duration: number) =>
+    trackEvent('crewai_analysis_failed', {
+      project_id: projectId,
+      error,
+      duration_seconds: duration,
+      category: 'ai_workflow',
+    }),
 }

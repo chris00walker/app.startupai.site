@@ -10,18 +10,28 @@
 import { useCallback, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Download, Loader2 } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 
 interface PDFExporterProps {
   projectName: string
+  projectId?: string
   reportRef: React.RefObject<HTMLDivElement>
   className?: string
 }
 
-export function PDFExporter({ projectName, reportRef, className }: PDFExporterProps) {
+export function PDFExporter({ projectName, projectId, reportRef, className }: PDFExporterProps) {
   const [isPrinting, setIsPrinting] = useState(false)
 
   const handlePrint = useCallback(async () => {
     if (!reportRef.current) return
+
+    // Track export event
+    trackEvent('report_exported', {
+      project_id: projectId,
+      project_name: projectName,
+      export_format: 'pdf',
+      category: 'ui_interaction',
+    })
 
     setIsPrinting(true)
 
@@ -109,7 +119,7 @@ export function PDFExporter({ projectName, reportRef, className }: PDFExporterPr
     } finally {
       setIsPrinting(false)
     }
-  }, [projectName, reportRef])
+  }, [projectName, projectId, reportRef])
 
   return (
     <Button

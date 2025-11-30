@@ -562,4 +562,54 @@ export const trackUIEvent = {
   },
 };
 
+/**
+ * Track onboarding funnel events
+ */
+export const trackOnboardingEvent = {
+  sessionStarted: (sessionId: string, stage: number, planType?: string) => {
+    trackEvent('onboarding_session_started', {
+      session_id: sessionId,
+      stage,
+      plan_type: planType,
+      category: 'onboarding',
+    });
+  },
+
+  stageAdvanced: (sessionId: string, fromStage: number, toStage: number) => {
+    trackEvent('onboarding_stage_advanced', {
+      session_id: sessionId,
+      from_stage: fromStage,
+      to_stage: toStage,
+      category: 'onboarding',
+    });
+  },
+
+  messageSent: (sessionId: string, stage: number, messageLength: number) => {
+    trackEvent('onboarding_message_sent', {
+      session_id: sessionId,
+      stage,
+      message_length: messageLength,
+      category: 'onboarding',
+    });
+  },
+
+  exitedEarly: (sessionId: string, stageReached: number, progressPercent: number) => {
+    trackEvent('onboarding_exited_early', {
+      session_id: sessionId,
+      stage_reached: stageReached,
+      progress_percent: progressPercent,
+      category: 'onboarding',
+    });
+  },
+
+  completed: (sessionId: string, totalTimeMinutes: number, workflowTriggered: boolean) => {
+    trackEvent('onboarding_completed', {
+      session_id: sessionId,
+      total_time_minutes: totalTimeMinutes,
+      workflow_triggered: workflowTriggered,
+      category: 'onboarding',
+    });
+  },
+};
+
 export default analytics;

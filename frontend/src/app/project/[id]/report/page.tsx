@@ -10,16 +10,25 @@
 
 'use client'
 
+import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { CrewAIReportViewer } from '@/components/reports/CrewAIReportViewer'
+import { trackPageView } from '@/lib/analytics'
 
 export default function ProjectReportPage() {
   const params = useParams()
   const router = useRouter()
   const projectId = params?.id as string
+
+  // Track page view
+  useEffect(() => {
+    if (projectId) {
+      trackPageView('Project Report', { project_id: projectId })
+    }
+  }, [projectId])
 
   if (!projectId) {
     return (

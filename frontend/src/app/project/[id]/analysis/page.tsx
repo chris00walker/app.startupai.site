@@ -7,17 +7,26 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { VPCReportViewer } from '@/components/vpc';
 import { InnovationPhysicsPanel } from '@/components/signals';
 import { ArrowLeft, Download, Share2, FileText } from 'lucide-react';
 import Link from 'next/link';
+import { trackPageView } from '@/lib/analytics';
 
 export default function ProjectAnalysisPage() {
   const params = useParams();
   const router = useRouter();
   const projectId = params?.id as string;
+
+  // Track page view
+  useEffect(() => {
+    if (projectId) {
+      trackPageView('Project Analysis', { project_id: projectId });
+    }
+  }, [projectId]);
 
   if (!projectId) {
     return (

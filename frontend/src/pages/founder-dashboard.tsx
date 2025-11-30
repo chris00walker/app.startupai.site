@@ -28,6 +28,7 @@ import { AssumptionMap, ExperimentCardsGrid, CanvasesGallery } from "@/component
 // Hooks for real data
 import { useRecentActivity, type ActivityItem } from "@/hooks/useRecentActivity"
 import { useRecommendedActions, type RecommendedAction } from "@/hooks/useRecommendedActions"
+import { trackPageView, trackEvent } from "@/lib/analytics"
 import {
   Target,
   FileText,
@@ -351,7 +352,22 @@ export default function FounderDashboard() {
     if (tabFromUrl) {
       setActiveTab(tabFromUrl)
     }
-  }, [])
+    // Track page view
+    trackPageView('Founder Dashboard', {
+      project_count: projects.length,
+      has_projects: projects.length > 0,
+    })
+  }, [projects.length])
+
+  // Track tab switches
+  const handleTabChange = (newTab: string) => {
+    trackEvent('dashboard_tab_switched', {
+      from_tab: activeTab,
+      to_tab: newTab,
+      category: 'navigation',
+    })
+    setActiveTab(newTab)
+  }
 
   // Show loading state
   if (isLoading) {
@@ -417,7 +433,7 @@ export default function FounderDashboard() {
       ]}
       userType="founder"
     >
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6" data-testid="dashboard">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6" data-testid="dashboard">
         <div className="flex items-center justify-between">
           <TabsList className="grid w-full max-w-3xl grid-cols-5">
             <TabsTrigger value="overview">
@@ -443,13 +459,13 @@ export default function FounderDashboard() {
           </TabsList>
 
           <div className="flex gap-2">
-            <Link href="/ai-analysis">
+            <Link href="/ai-analysis" onClick={() => trackEvent('button_clicked', { button_name: 'ai_analysis', location: 'founder_dashboard', category: 'ui_interaction' })}>
               <Button data-testid="ai-analysis-button">
                 <Brain className="h-4 w-4 mr-2" />
                 AI Strategic Analysis
               </Button>
             </Link>
-            <Link href="/projects/new">
+            <Link href="/projects/new" onClick={() => trackEvent('button_clicked', { button_name: 'new_project', location: 'founder_dashboard', category: 'ui_interaction' })}>
               <Button variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 New Project

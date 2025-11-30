@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { use } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Plus, Download, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useUnifiedEvidence } from '@/hooks/useUnifiedEvidence'
+import { trackPageView } from '@/lib/analytics'
 import {
   EvidenceFilters,
   EvidenceSummaryPanel,
@@ -34,6 +35,16 @@ export default function EvidenceExplorerPage({ params }: PageProps) {
   } = useUnifiedEvidence(projectId)
 
   const [selectedEvidence, setSelectedEvidence] = useState<UnifiedEvidenceItem | null>(null)
+
+  // Track page view
+  useEffect(() => {
+    if (projectId) {
+      trackPageView('Evidence Explorer', {
+        project_id: projectId,
+        evidence_count: filteredEvidence.length,
+      })
+    }
+  }, [projectId, filteredEvidence.length])
 
   if (error) {
     return (

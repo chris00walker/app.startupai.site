@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { useRoleInfo } from "@/lib/auth/hooks"
+import { trackAuthEvent, resetAnalytics } from "@/lib/analytics"
 
 // Navigation item type
 interface NavigationItem {
@@ -232,6 +233,14 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
 
   const resolvedType: "consultant" | "founder" = roleInfo.role === "founder" ? "founder" : userType
 
+  // Handle logout with analytics tracking
+  const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    trackAuthEvent.logout()
+    resetAnalytics()
+    window.location.href = "/api/auth/logout"
+  }
+
   const navigationData = resolvedType === "founder" ? founderNavigation : consultantNavigation
   const platformLabel = resolvedType === "founder" ? "Validation Framework" : "Platform"
   const secondaryLabel = resolvedType === "founder" ? "Fit Types" : "Canvas Generation"
@@ -370,10 +379,17 @@ export function AppSidebar({ userType = "consultant", ...props }: AppSidebarProp
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
+                    {item.title === "Logout" ? (
+                      <a href={item.url} onClick={handleLogout}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    ) : (
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

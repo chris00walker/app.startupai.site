@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { trackOnboardingEvent, trackCrewAIEvent } from '@/lib/analytics';
 
 // ============================================================================
 // Types and Interfaces
@@ -149,6 +150,9 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               analysisIntervalRef.current = null;
             }
 
+            // Track CrewAI analysis completed
+            trackCrewAIEvent.completed(pid, data.duration || 0, true);
+
             toast.success('Analysis complete! Redirecting to your project...');
 
             // Redirect based on user type after short delay
@@ -165,6 +169,9 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               clearInterval(analysisIntervalRef.current);
               analysisIntervalRef.current = null;
             }
+
+            // Track CrewAI analysis failed
+            trackCrewAIEvent.failed(pid, data.error || 'Unknown error', data.duration || 0);
 
             toast.error('Analysis failed. Redirecting to dashboard...');
 
@@ -203,6 +210,11 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // Track stage advancement if stage changed
+          if (session.currentStage !== data.currentStage) {
+            trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, data.currentStage);
+          }
+
           // Update session state with new stage and progress
           setSession(prev => prev ? {
             ...prev,
@@ -257,6 +269,9 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, newUserMessage]);
+
+    // Track message sent
+    trackOnboardingEvent.messageSent(session.sessionId, session.currentStage, userMessage.length);
 
     // Demo mode - use mock responses
     if (isDemoMode) {
@@ -480,6 +495,9 @@ Ready to dive in? Let's start with the most important question:
         throw new Error(errorMsg);
       }
 
+      // Track session started
+      trackOnboardingEvent.sessionStarted(data.sessionId, data.stageInfo.currentStage, planType);
+
       const newSession: OnboardingSession = {
         sessionId: data.sessionId,
         currentStage: data.stageInfo.currentStage,
@@ -564,6 +582,15 @@ Ready to dive in? Let's start with the most important question:
         throw new Error(data.error?.message || 'Failed to complete onboarding');
       }
 
+      // Track onboarding completed
+      // Note: We don't have session start time stored, so using 0 for now
+      trackOnboardingEvent.completed(session.sessionId, 0, data.workflowTriggered || false);
+
+      // Track CrewAI analysis started if workflow was triggered
+      if (data.workflowTriggered && data.projectId) {
+        trackCrewAIEvent.started(data.projectId, 'founder_validation');
+      }
+
       if (data.deliverables) {
         try {
           sessionStorage.setItem('startupai:lastAnalysis', JSON.stringify(data.deliverables));
@@ -604,13 +631,19 @@ Ready to dive in? Let's start with the most important question:
   }, []);
 
   const confirmExit = useCallback(() => {
+    // Track exit early
+    if (session) {
+      const progressPercent = Math.round((session.currentStage / session.totalStages) * 100);
+      trackOnboardingEvent.exitedEarly(session.sessionId, session.currentStage, progressPercent);
+    }
+
     toast.info('Onboarding session saved. You can resume anytime.');
 
     // Redirect to the appropriate dashboard based on plan type
     // Consultants go to /clients to manage their client portfolio
     const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
     router.push(dashboardRoute);
-  }, [router, planType]);
+  }, [router, planType, session]);
 
   // Initialize on mount
   useEffect(() => {
