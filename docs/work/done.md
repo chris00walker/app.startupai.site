@@ -1,12 +1,25 @@
 ---
 purpose: "Private technical source of truth for recently delivered work"
 status: "active"
-last_reviewed: "2025-11-28"
+last_reviewed: "2025-11-29"
 ---
 
 # Recently Delivered
 
 ## November 2025
+
+### Late November Completions (Nov 28-29)
+| Item | Status | Notes |
+|------|--------|-------|
+| E2E test infrastructure fix | ✅ Done | Dashboard test timeouts fixed, parallel queries, API mocks |
+| Accessibility WCAG 2.1 AA foundation | ✅ Done | Skip links, ARIA labels, keyboard navigation |
+| CrewAI Report Viewer component | ✅ Done | Comprehensive report display for analysis results |
+| Evidence Explorer with D-F-V metrics | ✅ Done | Unified evidence exploration, surfaces unused CrewAI fields |
+| VPC Strategyzer-style SVG canvas | ✅ Done | Animated fit lines connecting pains↔relievers, gains↔creators |
+
+**Commits**: `e417bae`, `b25e25a`, `bd743c8`, `870e713`, `2fe1cca`, `0cf17ca`
+
+---
 
 ### Security Hardening (Nov 17)
 | Item | Status | Notes |

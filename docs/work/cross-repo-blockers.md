@@ -1,8 +1,8 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2025-11-26"
-last_synced: "2025-11-26 - Synced with startupai-crew Phase 2D completion"
+last_reviewed: "2025-11-29"
+last_synced: "2025-11-29 - Synced with Nov 28-29 completions"
 ---
 
 # Cross-Repository Blockers
@@ -57,8 +57,10 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 | Blocked Item | Status | Description | Impact |
 |--------------|--------|-------------|--------|
-| Results Display UI | ✅ Done | Dashboard showing analysis results | Ready to receive CrewAI results |
-| E2E Validation Flow | ⚠️ Ready to Test | Full flow: onboarding → analysis → results | Webhook implemented, needs E2E testing |
+| Results Display UI | ✅ Done | Dashboard + Report Viewer + Evidence Explorer | Full UI ready for CrewAI results |
+| E2E Validation Flow | ✅ Ready to Test | Full flow: onboarding → analysis → results | Webhook + E2E infra fixed |
+| Accessibility Foundation | ✅ Done | WCAG 2.1 AA foundation | Legal compliance path cleared |
+| VPC Canvas | ✅ Done | Strategyzer-style SVG with fit lines | Professional canvas visualization |
 
 ## Phase Alpha Dependencies
 
@@ -67,13 +69,17 @@ Phase Alpha (CrewAI Delivery & Onboarding Hardening) requires:
 2. **Results persistence** → ✅ Webhook implemented (`_persist_to_supabase()`)
 3. **Results display** → ✅ `ValidationResultsSummary` wired to dashboard
 
-### Dependency Chain - UPDATED 2025-11-26
+### Dependency Chain - UPDATED 2025-11-29
 ```
 ✅ CrewAI Phase 2D Complete (8 crews, 18 agents, 18 tools)
          ↓
 ✅ CrewAI Flow calls POST /api/crewai/webhook (implemented)
          ↓
-⚠️ Product App displays real results  ← CURRENT FOCUS
+✅ Product App displays real results (Report Viewer + Evidence Explorer)
+         ↓
+✅ E2E test infrastructure fixed
+         ↓
+⚠️ PostHog instrumentation ← CURRENT FOCUS (only P0 remaining)
          ↓
 Marketing Phase 4 Validation Cycles
 
@@ -87,9 +93,9 @@ AI Founders Get Smarter (operational)
 ## Coordination Notes
 
 - **CrewAI backend is UNBLOCKED** - All dependencies on CrewAI are resolved
-- **Product App focus**: E2E testing of webhook → display flow
+- **Product App focus**: PostHog instrumentation (only remaining P0 blocker)
 - **Marketing site waiting on**: Activity Feed API and Metrics API (not yet built)
-- Can proceed with onboarding hardening, PostHog, accessibility work
+- Major completions Nov 28-29: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas
 
 ## Cross-Repo Links
 
