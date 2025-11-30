@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { login, CONSULTANT_USER, FOUNDER_USER } from './helpers/auth';
+import { setupDashboardMocks } from './helpers/api-mocks';
+import { waitForDashboard } from './helpers/wait-helpers';
 
 test.describe('AI Founder Attribution', () => {
   test.beforeEach(async ({ page }) => {
+    // Setup API mocks BEFORE navigation for faster dashboard loads
+    await setupDashboardMocks(page);
+
     // Login and navigate to dashboard
     await page.goto('/login');
     await login(page, CONSULTANT_USER);
@@ -13,9 +18,8 @@ test.describe('AI Founder Attribution', () => {
       // Navigate to any dashboard page
       await page.goto('/founder-dashboard');
 
-      // Wait for dashboard to load by checking for key element (not networkidle)
-      const dashboard = page.locator('[data-testid="dashboard"]');
-      await expect(dashboard).toBeVisible({ timeout: 15000 });
+      // Wait for dashboard to load using progressive helper
+      await waitForDashboard(page);
 
       // Check for founder status panel in header
       const founderStatusPanel = page.locator('[data-testid="founder-status-panel"]');
@@ -33,9 +37,8 @@ test.describe('AI Founder Attribution', () => {
     test('should show all 6 AI Founders in status panel', async ({ page }) => {
       await page.goto('/founder-dashboard');
 
-      // Wait for dashboard to load
-      const dashboard = page.locator('[data-testid="dashboard"]');
-      await expect(dashboard).toBeVisible({ timeout: 15000 });
+      // Wait for dashboard to load using progressive helper
+      await waitForDashboard(page);
 
       // The founder avatars should be visible
       const founderAvatars = page.locator('[data-testid^="founder-avatar-"]');
@@ -140,9 +143,8 @@ test.describe('AI Founder Attribution', () => {
       // Navigate to a page with Innovation Physics Panel
       await page.goto('/founder-dashboard');
 
-      // Wait for dashboard to load
-      const dashboard = page.locator('[data-testid="dashboard"]');
-      await expect(dashboard).toBeVisible({ timeout: 15000 });
+      // Wait for dashboard to load using progressive helper
+      await waitForDashboard(page);
 
       // Look for Innovation Physics Panel
       const innovationPanel = page.locator('text=Innovation Physics');

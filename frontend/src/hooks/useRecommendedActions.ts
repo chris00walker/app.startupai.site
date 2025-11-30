@@ -51,21 +51,72 @@ export function useRecommendedActions(options: UseRecommendedActionsOptions = {}
 
       const recommendations: RecommendedAction[] = []
 
-      // 1. Check for high-criticality untested assumptions (Test First quadrant)
-      const { data: untestedAssumptions, error: assumptionsError } = await supabase
-        .from('hypotheses')
-        .select('id, statement, type, importance, evidence_strength')
-        .eq('project_id', projectId)
-        .eq('status', 'untested')
-        .in('importance', ['high', 'medium'])
-        .in('evidence_strength', ['none', 'weak'])
-        .order('importance', { ascending: false })
-        .limit(3)
+      // Execute all queries in parallel for performance
+      const [
+        untestedResult,
+        experimentsResult,
+        contradictionsResult,
+        evidenceCountsResult,
+        assumptionCountResult,
+      ] = await Promise.all([
+        // 1. High-criticality untested assumptions (Test First quadrant)
+        supabase
+          .from('hypotheses')
+          .select('id, statement, type, importance, evidence_strength')
+          .eq('project_id', projectId)
+          .eq('status', 'untested')
+          .in('importance', ['high', 'medium'])
+          .in('evidence_strength', ['none', 'weak'])
+          .order('importance', { ascending: false })
+          .limit(3),
 
-      if (assumptionsError) throw assumptionsError
+        // 2. Running experiments without results
+        supabase
+          .from('experiments')
+          .select('id, name, status, start_date')
+          .eq('project_id', projectId)
+          .eq('status', 'running')
+          .order('start_date', { ascending: true })
+          .limit(3),
 
+        // 3. Contradictions that need resolution
+        supabase
+          .from('evidence')
+          .select('id, title, fit_type')
+          .eq('project_id', projectId)
+          .eq('is_contradiction', true)
+          .limit(3),
+
+        // 4. Evidence coverage by fit type
+        supabase
+          .from('evidence')
+          .select('fit_type')
+          .eq('project_id', projectId),
+
+        // 5. Total assumption count
+        supabase
+          .from('hypotheses')
+          .select('*', { count: 'exact', head: true })
+          .eq('project_id', projectId),
+      ])
+
+      // Check for errors from parallel queries
+      if (untestedResult.error) throw untestedResult.error
+      if (experimentsResult.error) throw experimentsResult.error
+      if (contradictionsResult.error) throw contradictionsResult.error
+      if (evidenceCountsResult.error) throw evidenceCountsResult.error
+      if (assumptionCountResult.error) throw assumptionCountResult.error
+
+      // Extract data from results
+      const untestedAssumptions = untestedResult.data
+      const runningExperiments = experimentsResult.data
+      const contradictions = contradictionsResult.data
+      const evidenceCounts = evidenceCountsResult.data
+      const assumptionCount = assumptionCountResult.count
+
+      // Process untested assumptions
       if (untestedAssumptions && untestedAssumptions.length > 0) {
-        untestedAssumptions.forEach((assumption: any, index: number) => {
+        untestedAssumptions.forEach((assumption: any) => {
           recommendations.push({
             id: `test-assumption-${assumption.id}`,
             title: 'Design Experiment for Critical Assumption',
@@ -78,17 +129,7 @@ export function useRecommendedActions(options: UseRecommendedActionsOptions = {}
         })
       }
 
-      // 2. Check for running experiments without results
-      const { data: runningExperiments, error: experimentsError } = await supabase
-        .from('experiments')
-        .select('id, name, status, start_date')
-        .eq('project_id', projectId)
-        .eq('status', 'running')
-        .order('start_date', { ascending: true })
-        .limit(3)
-
-      if (experimentsError) throw experimentsError
-
+      // Process running experiments
       if (runningExperiments && runningExperiments.length > 0) {
         runningExperiments.forEach((experiment: any) => {
           recommendations.push({
@@ -103,16 +144,7 @@ export function useRecommendedActions(options: UseRecommendedActionsOptions = {}
         })
       }
 
-      // 3. Check for contradictions that need resolution
-      const { data: contradictions, error: contradictionsError } = await supabase
-        .from('evidence')
-        .select('id, title, fit_type')
-        .eq('project_id', projectId)
-        .eq('is_contradiction', true)
-        .limit(3)
-
-      if (contradictionsError) throw contradictionsError
-
+      // Process contradictions
       if (contradictions && contradictions.length > 0) {
         contradictions.forEach((contradiction: any) => {
           recommendations.push({
@@ -127,14 +159,7 @@ export function useRecommendedActions(options: UseRecommendedActionsOptions = {}
         })
       }
 
-      // 4. Check evidence coverage by fit type
-      const { data: evidenceCounts, error: evidenceCountError } = await supabase
-        .from('evidence')
-        .select('fit_type')
-        .eq('project_id', projectId)
-
-      if (evidenceCountError) throw evidenceCountError
-
+      // Process evidence coverage by fit type
       const fitTypeCounts = {
         Desirability: 0,
         Feasibility: 0,
@@ -164,14 +189,7 @@ export function useRecommendedActions(options: UseRecommendedActionsOptions = {}
         }
       })
 
-      // 5. If no assumptions exist, recommend canvas work
-      const { count: assumptionCount, error: countError } = await supabase
-        .from('hypotheses')
-        .select('*', { count: 'exact', head: true })
-        .eq('project_id', projectId)
-
-      if (countError) throw countError
-
+      // Process assumption count - recommend canvas work if few assumptions
       if ((assumptionCount || 0) < 3) {
         recommendations.push({
           id: 'create-assumptions',

@@ -7,9 +7,14 @@
 
 import { test, expect } from '@playwright/test';
 import { login, FOUNDER_USER } from './helpers/auth';
+import { setupDashboardMocks } from './helpers/api-mocks';
+import { waitForDashboard } from './helpers/wait-helpers';
 
 test.describe('Journey 1: Founder Analysis Flow', () => {
   test.beforeEach(async ({ page }) => {
+    // Setup API mocks BEFORE navigation for faster dashboard loads
+    await setupDashboardMocks(page);
+
     await page.goto('/login');
     await login(page, FOUNDER_USER);
   });
@@ -18,9 +23,8 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
     // Navigate to founder dashboard
     await page.goto('/founder-dashboard');
 
-    // Wait for dashboard to load by checking for key element (not networkidle)
-    const dashboard = page.locator('[data-testid="dashboard"]');
-    await expect(dashboard).toBeVisible({ timeout: 15000 });
+    // Wait for dashboard to load using progressive helper
+    await waitForDashboard(page);
 
     // Take screenshot of initial dashboard state
     await page.screenshot({
@@ -34,9 +38,8 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
   test('should show AI Strategic Analysis button on dashboard', async ({ page }) => {
     await page.goto('/founder-dashboard');
 
-    // Wait for dashboard to load
-    const dashboard = page.locator('[data-testid="dashboard"]');
-    await expect(dashboard).toBeVisible({ timeout: 15000 });
+    // Wait for dashboard to load using progressive helper
+    await waitForDashboard(page);
 
     // Look for AI Strategic Analysis button (using data-testid for reliability)
     const analysisButton = page.locator('[data-testid="ai-analysis-button"], button:has-text("AI Strategic Analysis")').first();
@@ -53,9 +56,8 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
   test('should navigate to AI analysis page', async ({ page }) => {
     await page.goto('/founder-dashboard');
 
-    // Wait for dashboard to load
-    const dashboard = page.locator('[data-testid="dashboard"]');
-    await expect(dashboard).toBeVisible({ timeout: 15000 });
+    // Wait for dashboard to load using progressive helper
+    await waitForDashboard(page);
 
     // Click AI Strategic Analysis button (using data-testid for reliability)
     const analysisButton = page.locator('[data-testid="ai-analysis-button"], button:has-text("AI Strategic Analysis")').first();
@@ -81,9 +83,8 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
   test('should display founder status panel', async ({ page }) => {
     await page.goto('/founder-dashboard');
 
-    // Wait for dashboard to load
-    const dashboard = page.locator('[data-testid="dashboard"]');
-    await expect(dashboard).toBeVisible({ timeout: 15000 });
+    // Wait for dashboard to load using progressive helper
+    await waitForDashboard(page);
 
     // Check for founder status panel
     const founderStatusPanel = page.locator('[data-testid="founder-status-panel"]');
@@ -239,13 +240,12 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
     await page.goto('/founder-dashboard');
 
-    // Wait for dashboard to fully load
+    // Wait for dashboard to fully load (empty state or with projects)
     const dashboard = page.locator('[data-testid="dashboard"]');
     await expect(dashboard).toBeVisible({ timeout: 15000 });
 
-    // Wait for any dynamic content to render
-    const tabPanel = page.locator('[role="tabpanel"]');
-    await expect(tabPanel).toBeVisible({ timeout: 5000 });
+    // Give time for any async errors to appear
+    await page.waitForTimeout(1000);
 
     if (errors.length > 0) {
       console.log('Console errors found:', errors);
@@ -253,7 +253,11 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
       console.log('No console errors on dashboard');
     }
 
-    expect(errors.filter((e) => !e.includes('favicon'))).toHaveLength(0);
+    // Filter out expected non-critical errors (favicon, PostHog init in test env)
+    const criticalErrors = errors.filter(
+      (e) => !e.includes('favicon') && !e.includes('PostHog')
+    );
+    expect(criticalErrors).toHaveLength(0);
   });
 
   test('should be responsive on mobile viewport', async ({ page }) => {

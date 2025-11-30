@@ -362,7 +362,7 @@ export default function FounderDashboard() {
         ]}
         userType="founder"
       >
-        <div className="text-center py-16">
+        <div data-testid="dashboard-loading" className="text-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading your projects...</p>
         </div>
@@ -402,7 +402,9 @@ export default function FounderDashboard() {
         ]}
         userType="founder"
       >
-        <EmptyState />
+        <div data-testid="dashboard">
+          <EmptyState />
+        </div>
       </DashboardLayout>
     )
   }

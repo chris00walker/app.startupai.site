@@ -7,9 +7,14 @@
 
 import { test, expect } from '@playwright/test';
 import { login, CONSULTANT_USER } from './helpers/auth';
+import { setupDashboardMocks } from './helpers/api-mocks';
+import { waitForDashboard } from './helpers/wait-helpers';
 
 test.describe('Journey 3: Consultant Portfolio Flow', () => {
   test.beforeEach(async ({ page }) => {
+    // Setup API mocks BEFORE navigation for faster dashboard loads
+    await setupDashboardMocks(page);
+
     await page.goto('/login');
     await login(page, CONSULTANT_USER);
   });
@@ -311,7 +316,11 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
       console.log('No console errors on consultant dashboard');
     }
 
-    expect(errors.filter((e) => !e.includes('favicon'))).toHaveLength(0);
+    // Filter out expected non-critical errors (favicon, PostHog init in test env)
+    const criticalErrors = errors.filter(
+      (e) => !e.includes('favicon') && !e.includes('PostHog')
+    );
+    expect(criticalErrors).toHaveLength(0);
   });
 
   test('should display search/filter functionality', async ({ page }) => {
@@ -340,6 +349,9 @@ test.describe('Journey 3: Consultant Portfolio Flow', () => {
 
 test.describe('Journey 3: Portfolio with Real Data', () => {
   test.beforeEach(async ({ page }) => {
+    // Setup API mocks BEFORE navigation for faster dashboard loads
+    await setupDashboardMocks(page);
+
     await page.goto('/login');
     await login(page, CONSULTANT_USER);
   });

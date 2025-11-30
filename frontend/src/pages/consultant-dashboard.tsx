@@ -247,7 +247,7 @@ function Dashboard() {
           { title: "Consultant Dashboard", href: "/consultant-dashboard" },
         ]}
       >
-        <div className="flex items-center justify-center h-[400px]">
+        <div data-testid="dashboard-loading" className="flex items-center justify-center h-[400px]">
           <div className="text-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
             <p className="text-muted-foreground">Loading your projects...</p>
