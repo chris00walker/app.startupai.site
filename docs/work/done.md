@@ -13,8 +13,10 @@ last_reviewed: "2025-11-30"
 |------|--------|-------|
 | Activity Feed API | ✅ Done | `GET /api/v1/public/activity` - anonymized agent activities |
 | Metrics API | ✅ Done | `GET /api/v1/public/metrics` - platform + founder statistics |
-| Database migration | ✅ Done | `public_activity_log` table with indexes |
+| Database migration | ✅ Done | `public_activity_log` table with indexes (applied 2025-11-30) |
 | Webhook activity logging | ✅ Done | CrewAI webhook now generates activity entries |
+
+**Migration**: `20251130000001_public_activity_log.sql` - Supabase migration applied via MCP tool
 
 **Files Created:**
 - `frontend/src/db/schema/public-activity-log.ts` - Drizzle schema
@@ -32,12 +34,13 @@ last_reviewed: "2025-11-30"
 ### PostHog Instrumentation (Nov 30)
 | Item | Status | Notes |
 |------|--------|-------|
-| PostHog event tracking | ✅ Done | 17 events wired across user journey |
+| PostHog event tracking | ✅ Partial | ~12 events actively wired (17 types defined) |
+| Signup tracking | ✅ Done | signup_started, signup_completed, signup_initiated_oauth, signup_failed |
 | Onboarding funnel tracking | ✅ Done | session_started, stage_advanced, message_sent, exited_early, completed |
-| Auth event tracking | ✅ Done | login, logout (signup was already tracked) |
 | CrewAI analysis tracking | ✅ Done | analysis_started, analysis_completed, analysis_failed |
-| Page view tracking | ✅ Done | dashboard, analysis, report, evidence explorer |
-| UI interaction tracking | ✅ Done | button_clicked, report_exported, dashboard_tab_switched |
+| UI interaction tracking | ✅ Done | button_clicked, report_exported, dashboard_tab_switched, gate_alert_* |
+
+**Coverage Gaps (see backlog.md):** login, logout, dashboard_viewed, project_*, evidence_*, canvas_* events defined but not implemented
 
 **Commit**: `73510ec feat(analytics): wire PostHog instrumentation across user journey`
 

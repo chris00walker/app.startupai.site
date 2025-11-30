@@ -2,6 +2,7 @@
 purpose: "Private technical source of truth for active work"
 status: "active"
 last_reviewed: "2025-11-30"
+last_synced: "2025-11-30 - Documentation audit complete, codebase verified"
 ---
 
 # In Progress
@@ -22,6 +23,7 @@ Work these items in order. Items marked "Ready" can start immediately.
 |----------|------|--------|-------|--------|-------|
 | 2 | Dashboard insights from CrewAI | **Ready** | @frontend | 3-4 days | Replace mock data with real AI insights. 81% of fields unused. |
 | 3 | Specification-driven test refresh | In Progress | @qa-lead | - | Update fixtures, Playwright journeys. GH Issue #189 |
+| 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented (see backlog.md) |
 
 ### P2: Ready for E2E Testing
 

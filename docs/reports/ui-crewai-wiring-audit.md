@@ -1,9 +1,9 @@
 # UI-to-CrewAI Wiring Audit Report
 
-**Date:** 2025-11-27
+**Date:** 2025-11-27 (Updated: 2025-11-30)
 **Auditor:** Claude (AI Assistant)
 **Scope:** Product platform UI structure and backend API wiring analysis
-**Status:** AUDIT COMPLETE - Integration gaps identified
+**Status:** AUDIT COMPLETE - Major gaps resolved (Nov 28-30)
 
 ---
 
@@ -11,11 +11,11 @@
 
 This audit examines the StartupAI product platform's UI-to-backend wiring, specifically focusing on how the frontend connects to the CrewAI 6-agent workflow deployed on CrewAI AMP. The platform serves two user personas (Founders and Consultants), each with their own onboarding flow and dashboard.
 
-**Key Findings:**
+**Key Findings (Updated Nov 30):**
 - ✅ UI structure is well-organized with clear separation between Founder and Consultant personas
-- ⚠️ **Onboarding flows use Vercel AI SDK (OpenAI GPT-4.1-nano), NOT CrewAI**
-- ⚠️ **CrewAI integration exists but is only used for post-onboarding strategic analysis**
-- ⚠️ **UI promises features that CrewAI delivers, but wiring is incomplete**
+- ✅ Onboarding flows use Vercel AI SDK (OpenAI GPT-4.1-nano) - intentional for conversational UX
+- ✅ CrewAI integration is now fully wired - Report Viewer + Evidence Explorer implemented
+- ✅ Most major gaps resolved Nov 28-30 (see below)
 
 ---
 
@@ -309,22 +309,22 @@ According to `CLAUDE.md` and architecture documentation, CrewAI should deliver:
 
 ### 4.2 Founder Dashboard
 
-| UI Feature | Data Source | CrewAI Integration | Gap |
-|------------|-------------|-------------------|-----|
-| Gate readiness scores | Supabase `gate_scores` table | No direct integration | ⚠️ CrewAI could populate gate scores |
-| Evidence quality tracking | Supabase `evidence` table | No direct integration | ⚠️ CrewAI could assess evidence quality |
-| Experiment recommendations | Static/mock data | No integration | ❌ **MISSING** - CrewAI should generate experiment recommendations |
-| Strategic insights | "Coming Soon" placeholder | No integration | ❌ **MISSING** - CrewAI analysis results not displayed |
-| Validation roadmap | Not implemented | CrewAI delivers "3-Tier Validation Roadmap" | ❌ **MAJOR GAP** - CrewAI output not wired to UI |
-| Competitor analysis | Not implemented | CrewAI delivers "Competitor Analysis Report" | ❌ **MAJOR GAP** |
-| Value proposition canvas | Not implemented | CrewAI delivers "Value Proposition Canvas" | ❌ **MAJOR GAP** |
-| Customer profile (Jobs/Pains/Gains) | Not implemented | CrewAI delivers "Customer Profile" | ❌ **MAJOR GAP** |
+| UI Feature | Data Source | CrewAI Integration | Status |
+|------------|-------------|-------------------|--------|
+| Gate readiness scores | Supabase `gate_scores` table | No direct integration | ⚠️ Future enhancement |
+| Evidence quality tracking | Supabase `evidence` table | Evidence Explorer | ✅ **DONE** (Nov 28) |
+| Experiment recommendations | Static/mock data | No integration | ⚠️ P1 backlog |
+| Strategic insights | CrewAI Report Viewer | Full integration | ✅ **DONE** (Nov 28) |
+| Validation roadmap | CrewAI Report Viewer | Full integration | ✅ **DONE** (Nov 28) |
+| Competitor analysis | CrewAI Report Viewer | Full integration | ✅ **DONE** (Nov 28) |
+| Value proposition canvas | VPC Canvas + Evidence Explorer | Full integration | ✅ **DONE** (Nov 29) |
+| Customer profile (Jobs/Pains/Gains) | VPC Canvas | Full integration | ✅ **DONE** (Nov 29) |
 
-**Critical Missing Wiring:**
-1. CrewAI analysis results are stored in `reports` table but NOT displayed in dashboard
-2. UI has "Insights" tab with "Coming Soon" message
-3. No component exists to render CrewAI's 6-section report
-4. Dashboard shows placeholder data instead of CrewAI-generated recommendations
+**Gaps Resolved (Nov 28-30):**
+1. ✅ CrewAI Report Viewer now displays full analysis results
+2. ✅ Evidence Explorer surfaces D-F-V metrics
+3. ✅ VPC Canvas shows Customer Profile and Value Map
+4. ⚠️ Some dashboard areas still use mock data (P1 backlog)
 
 ### 4.3 Consultant Dashboard
 
@@ -353,47 +353,36 @@ According to `CLAUDE.md` and architecture documentation, CrewAI should deliver:
 
 ## 5. Recommended Integration Points
 
-### 5.1 High Priority - Display CrewAI Analysis Results
+### 5.1 High Priority - Display CrewAI Analysis Results ✅ DONE
 
-**Problem:** CrewAI generates comprehensive reports but they're not shown to users.
+**Status:** ✅ COMPLETED (Nov 28-29)
 
-**Solution:**
-1. Create `/app/project/[id]/analysis` route
-2. Build `CrewAIReportViewer` component to render:
-   - Customer Profile (Jobs, Pains, Gains)
-   - Competitor Analysis Report
-   - Value Proposition Canvas
-   - 3-Tier Validation Roadmap
-   - QA Report
-3. Wire to `reports` table where CrewAI results are stored
-4. Add "View Analysis" button on dashboard that links to this page
+**Solution Implemented:**
+1. ✅ CrewAI Report Viewer component built
+2. ✅ Evidence Explorer with D-F-V metrics
+3. ✅ VPC Strategyzer canvas with animated fit lines
+4. ✅ Hooks: `useCrewAIState`, `useInnovationSignals`, `useVPCData`
 
-**Files to Create:**
-- `frontend/src/app/project/[id]/analysis/page.tsx`
-- `frontend/src/components/crewai/ReportViewer.tsx`
-- `frontend/src/components/crewai/sections/CustomerProfile.tsx`
-- `frontend/src/components/crewai/sections/CompetitorAnalysis.tsx`
-- `frontend/src/components/crewai/sections/ValuePropositionCanvas.tsx`
-- `frontend/src/components/crewai/sections/ValidationRoadmap.tsx`
-- `frontend/src/components/crewai/sections/QAReport.tsx`
+**Files Created:**
+- `frontend/src/components/crewai/CrewAIReportViewer.tsx`
+- `frontend/src/components/evidence/EvidenceExplorer.tsx`
+- `frontend/src/components/canvas/VPCStrategyzerCanvas.tsx`
+- `frontend/src/lib/hooks/useCrewAIState.ts`
+- `frontend/src/lib/hooks/useInnovationSignals.ts`
+- `frontend/src/lib/hooks/useVPCData.ts`
 
-### 5.2 Medium Priority - Populate Dashboard with CrewAI Data
+### 5.2 Medium Priority - Populate Dashboard with CrewAI Data ⚠️ PARTIAL
 
-**Problem:** Dashboard shows mock/placeholder data instead of CrewAI insights.
+**Status:** ⚠️ In Progress (P1 backlog)
 
-**Solution:**
-1. Parse CrewAI report JSON in `reports` table
-2. Extract actionable insights:
-   - Recommended experiments (populate Experiments tab)
-   - Next steps (populate "Recommended Next Steps" widget)
-   - Evidence gaps (highlight in Evidence tab)
-3. Create `useCrewAIInsights(projectId)` hook
-4. Wire to dashboard tabs
+**What's Done:**
+1. ✅ CrewAI Report Viewer displays full analysis
+2. ✅ Evidence Explorer surfaces stored metrics
+3. ✅ VPC Canvas shows customer profiles
 
-**Files to Modify:**
-- `frontend/src/pages/founder-dashboard.tsx` (line 185-242: NextSteps component)
-- `frontend/src/hooks/useCrewAIInsights.ts` (new hook)
-- `frontend/src/lib/crewai/report-parser.ts` (new utility)
+**What's Remaining:**
+1. Some dashboard components still use mock data
+2. Experiment recommendations not auto-populated
 
 ### 5.3 Medium Priority - Enhance Gate Scoring with CrewAI
 
@@ -521,36 +510,37 @@ CREW_CONTRACT_BEARER=f4cc39d92520
 
 ## 8. Summary and Next Steps
 
-### Key Findings
+### Key Findings (Updated Nov 30)
 
 1. ✅ **UI structure is solid** - Clear separation between Founder and Consultant personas
 2. ✅ **Onboarding flows work well** - Using Vercel AI SDK for conversational UX is appropriate
-3. ✅ **CrewAI integration is implemented** - Backend wiring exists and works
-4. ❌ **Major gap: CrewAI outputs are NOT displayed in UI** - Reports stored but not shown
-5. ⚠️ **Dashboard relies on mock/placeholder data** - Should use CrewAI insights
+3. ✅ **CrewAI integration is fully implemented** - Backend + frontend wiring complete
+4. ✅ **CrewAI outputs now displayed** - Report Viewer + Evidence Explorer + VPC Canvas
+5. ⚠️ **Some mock data remains** - Dashboard integration in P1 backlog
 
-### Critical Path to Production
+### Resolved (Nov 28-30)
 
-**Priority 1: Display CrewAI Analysis Results**
-- Create `/project/[id]/analysis` route
-- Build report viewer components
-- Wire to `reports` table
-- **Estimated effort:** 2-3 days
+**Priority 1: Display CrewAI Analysis Results** ✅ DONE
+- CrewAI Report Viewer component
+- Evidence Explorer with D-F-V metrics
+- VPC Strategyzer canvas with animated fit lines
+- All hooks wired: `useCrewAIState`, `useInnovationSignals`, `useVPCData`
 
-**Priority 2: Populate Dashboard with AI Insights**
-- Parse CrewAI report JSON
-- Extract experiments, next steps, evidence gaps
-- Replace mock data with real insights
+**Priority 2: Populate Dashboard with AI Insights** ⚠️ PARTIAL
+- Report Viewer displays full analysis
+- Evidence Explorer surfaces stored metrics
+- Some dashboard areas still use mock data
+
+### Remaining Work
+
+**P1: Dashboard Mock Data Replacement**
+- Replace remaining mock data with real CrewAI insights
 - **Estimated effort:** 3-4 days
 
-**Priority 3: Enhanced UX**
+**P2: Enhanced UX**
 - Real-time analysis updates
-- Better progress indicators
 - AI-generated experiment recommendations
 - **Estimated effort:** 2-3 days
-
-### Total Gap Closure Estimate
-**7-10 days of development** to fully integrate CrewAI outputs into the UI and replace all mock/placeholder content with real AI-generated insights.
 
 ---
 

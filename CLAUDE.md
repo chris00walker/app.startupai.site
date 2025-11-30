@@ -3,7 +3,7 @@
 ## Project Identity
 **Name**: StartupAI Product Platform  
 **Purpose**: Evidence-led strategy validation with AI-powered analysis  
-**Status**: ⚠️ 65-70% Complete  
+**Status**: ✅ ~85% Complete (Phase Alpha)  
 **Framework**: Next.js 15.5.3 (Hybrid: App Router + Pages Router)  
 **Deployment**: Netlify (considering Vercel migration)  
 
@@ -22,7 +22,7 @@
 ### Critical Components
 1. **Authentication**: JWT + GitHub OAuth via Supabase
 2. **Onboarding**: Vercel AI SDK with streaming chat (7 stages)
-3. **Database**: PostgreSQL + pgvector (12 migrations deployed)
+3. **Database**: PostgreSQL + pgvector (13 migrations deployed)
 4. **AI Analysis**: CrewAI AMP (Fortune 500-quality reports)
 5. **Frontend**: 20 pages, 50+ Shadcn components
 
@@ -282,12 +282,11 @@ For anything that spans services (auth flow, API contracts, data flow), refer to
 
 ## Cross-Repo Coordination
 
-**⚠️ This repo is blocked by CrewAI and blocks Marketing.**
+**✅ All P0 blockers resolved (Nov 30). Marketing site now unblocked.**
 
 ### Before Starting Work
 - Check `docs/work/cross-repo-blockers.md` for current dependencies
-- If working on blocked items, verify upstream status first:
-  - CrewAI Phase 1 criteria: `startupai-crew/docs/work/phases.md`
+- CrewAI Phase 2D complete (~85%), 18 tools implemented
 
 ### When Blockers Are Resolved
 1. Update `docs/work/cross-repo-blockers.md` status
@@ -338,6 +337,6 @@ Agents are automatically invoked based on context and trigger words in their des
 - Work Tracking: `docs/work/`
 
 ---
-**Last Updated**: 2025-11-21
+**Last Updated**: 2025-11-30
 **Maintainer**: Chris Walker
-**Status**: 65-70% Complete - Awaiting CrewAI Flows rebuild
+**Status**: ~85% Complete - Phase Alpha (P0 blockers cleared)

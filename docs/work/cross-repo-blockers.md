@@ -81,7 +81,7 @@ Phase Alpha (CrewAI Delivery & Onboarding Hardening) requires:
          ↓
 ✅ E2E test infrastructure fixed
          ↓
-✅ PostHog instrumentation (17 events wired - COMPLETED 2025-11-30)
+✅ PostHog instrumentation (~12 events wired - COMPLETED 2025-11-30)
          ↓
 Marketing Phase 4 Validation Cycles
 

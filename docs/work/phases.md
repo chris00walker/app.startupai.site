@@ -1,20 +1,29 @@
 ---
 purpose: "Private technical source of truth for current engineering phases"
 status: "active"
-last_reviewed: "2025-11-21"
+last_reviewed: "2025-11-30"
 ---
 
 # Engineering Phases
 
-## Phase Alpha - CrewAI Delivery & Onboarding Hardening (Active)
-- Enable Netlify CrewAI workflow and persist structured outputs (entrepreneur brief, validation plan, evidence summary).
-- Backfill dashboards with onboarding-derived data, including brief quality scores and recommended next steps.
-- Tighten analytics + accessibility budgets (voice controls, keyboard flows, screen reader polish).
-- Owners: Platform Engineering (lead), AI Platform (crew orchestration), Design Systems (accessibility).
+## Phase Alpha - CrewAI Delivery & Onboarding Hardening (Active - 85%)
 
-**Blocked by**: CrewAI Phase 1 completion (see `cross-repo-blockers.md`)
-- Results display UI requires CrewAI outputs persisted to Supabase
-- See `startupai-crew/docs/work/phases.md` for Phase 1 completion criteria
+**Completed:**
+- ✅ CrewAI webhook persists structured outputs to Supabase
+- ✅ CrewAI Report Viewer displays validation results
+- ✅ Evidence Explorer with D-F-V metrics
+- ✅ VPC Strategyzer canvas with animated fit lines
+- ✅ PostHog instrumentation (~12 events across user journey)
+- ✅ Public APIs for marketing (Activity Feed + Metrics)
+- ✅ Accessibility foundation (WCAG 2.1 AA - 70%)
+- ✅ E2E test infrastructure fixed
+
+**Remaining:**
+- Dashboard integration with remaining mock data
+- PostHog coverage gaps (13+ events not implemented)
+- Screen reader polish
+
+**Status**: CrewAI Phase 2D complete (~85%), 18 tools implemented
 
 ## Phase Beta - Evidence Ledger & Insight Dashboards (Queued)
 - Expose evidence search (pgvector) and validation experiment tracking inside the app.

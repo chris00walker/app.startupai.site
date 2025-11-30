@@ -1,7 +1,7 @@
 ---
 purpose: "Implementation status tracking for StartupAI product platform"
 status: "active"
-last_reviewed: "2025-11-29"
+last_reviewed: "2025-11-30"
 ---
 
 # Implementation Status
@@ -19,7 +19,12 @@ last_reviewed: "2025-11-29"
 | Accessibility | 70% | WCAG 2.1 AA foundation complete |
 | E2E Testing | 90% | Infrastructure fixed, dashboard timeouts resolved |
 
-## Recent Updates (2025-11-29)
+## Recent Updates (2025-11-30)
+
+**Fixed (Nov 30):**
+- [x] PostHog instrumentation - ~12 events across user journey
+- [x] Public APIs - Activity Feed + Metrics APIs with DB migration
+- [x] Documentation audit - reconciled docs with codebase state
 
 **Fixed (Nov 28-29):**
 - [x] E2E test infrastructure - dashboard timeouts, parallel queries, API mocks
@@ -36,7 +41,7 @@ last_reviewed: "2025-11-29"
 - [x] CrewAI state_schemas.py - fixed validation errors for Flow initialization
 
 **Still Needed:**
-- [ ] PostHog instrumentation (GH Issue #175)
+- [x] PostHog instrumentation - ~12 events wired (coverage gaps in backlog)
 - [ ] Dashboard integration with remaining mock data
 - [ ] Gate evaluation backend (Netlify → Next.js migration)
 
@@ -100,11 +105,12 @@ last_reviewed: "2025-11-29"
 ## Launch Blockers
 
 1. **Synthetic Data**: CrewAI outputs are LLM-generated, not real analysis
-2. **PostHog Instrumentation**: Event schemas needed for analytics (GH Issue #175)
 
-**Resolved (Nov 28-29):**
+**Resolved (Nov 28-30):**
 - ~~Results Persistence~~ → Webhook + UI implemented
 - ~~Accessibility~~ → WCAG 2.1 AA foundation complete (70%)
+- ~~PostHog Instrumentation~~ → ~12 events wired (coverage gaps in backlog)
+- ~~Public APIs~~ → Activity Feed + Metrics APIs deployed with DB migration
 
 ## Marketing Alignment Gap
 
@@ -130,12 +136,12 @@ last_reviewed: "2025-11-29"
 1. ~~Results → Supabase persistence~~ → ✅ Webhook implemented
 2. ~~Real analysis tools~~ → ✅ TavilySearchTool + 4 research tools
 3. Ad platform integration (Meta, Google Ads APIs) - deferred
-4. Activity Feed API for marketing (not started)
+4. ~~Activity Feed API for marketing~~ → ✅ Public APIs deployed (Nov 30)
 
 ## Next Steps
 
-1. Complete PostHog instrumentation (GH Issue #175)
-2. Replace remaining mock data in dashboard
+1. Dashboard integration with real CrewAI data (P1)
+2. PostHog coverage gaps - 13+ events undefined (P1)
 3. Run full E2E validation with CrewAI
 4. Polish accessibility (screen reader testing)
 
