@@ -4,26 +4,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Linear/Notion-inspired clean palette */
+    --background: 0 0% 99%;
+    --foreground: 240 10% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+
+    /* Onboarding-specific variables */
+    --onboarding-sidebar-width: 320px;
+    --onboarding-ai-bg: 240 4.8% 97%;
+    --onboarding-user-bg: 240 5.9% 10%;
+    --onboarding-accent: 217 91% 60%;
   }
 
   .dark {
@@ -159,5 +166,91 @@
     .vpc-mobile-fallback {
       @apply hidden;
     }
+  }
+}
+
+/* Onboarding Chat Interface - Clean Professional Design */
+@layer components {
+  /* Message animations */
+  @keyframes message-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes progress-fill {
+    from {
+      width: 0%;
+    }
+  }
+
+  .onboarding-message-animate {
+    animation: message-fade-in 0.2s ease-out forwards;
+  }
+
+  .onboarding-progress-animate {
+    animation: progress-fill 0.5s ease-out forwards;
+  }
+
+  /* Chat message styles */
+  .onboarding-message-ai {
+    @apply relative pl-4 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-border before:rounded-full;
+  }
+
+  .onboarding-message-user {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-3 shadow-sm;
+  }
+
+  /* Input area */
+  .onboarding-input {
+    @apply w-full resize-none border-0 bg-transparent text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0;
+  }
+
+  .onboarding-input-container {
+    @apply relative rounded-xl border border-border bg-card shadow-sm transition-shadow duration-200;
+  }
+
+  .onboarding-input-container:focus-within {
+    @apply shadow-md ring-1 ring-ring/10;
+  }
+
+  /* Sidebar styles */
+  .onboarding-sidebar {
+    @apply flex flex-col h-full bg-card/50 backdrop-blur-sm;
+  }
+
+  /* Progress steps */
+  .onboarding-step {
+    @apply flex items-center gap-3 py-2 text-sm transition-colors duration-200;
+  }
+
+  .onboarding-step-number {
+    @apply flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-all duration-200;
+  }
+
+  .onboarding-step-complete .onboarding-step-number {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .onboarding-step-current .onboarding-step-number {
+    @apply bg-primary text-primary-foreground ring-2 ring-primary/20;
+  }
+
+  .onboarding-step-pending .onboarding-step-number {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  /* Consultant card */
+  .onboarding-consultant-card {
+    @apply rounded-lg bg-muted/50 p-4 space-y-3;
+  }
+
+  .onboarding-consultant-avatar {
+    @apply h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-medium;
   }
 }

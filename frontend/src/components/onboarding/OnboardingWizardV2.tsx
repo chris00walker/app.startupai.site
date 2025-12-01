@@ -16,10 +16,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import {
-  SidebarProvider,
-  SidebarInset,
-} from '@/components/ui/sidebar';
+// Sidebar primitives no longer needed - using custom sidebar component
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
 import { Button } from '@/components/ui/button';
@@ -422,7 +419,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   }, []);
 
   // Initialize onboarding session
-  const initializeSession = useCallback(async () => {
+  const initializeSession = useCallback(async (forceNew = false) => {
     setIsInitializing(true);
     setError(null);
 
@@ -478,6 +475,7 @@ Ready to dive in? Let's start with the most important question:
         body: JSON.stringify({
           userId,
           planType,
+          forceNew,
           userContext: {
             referralSource: 'direct',
             previousExperience: 'first_time',
@@ -655,21 +653,21 @@ Ready to dive in? Let's start with the most important question:
 
   const confirmStartNew = useCallback(async () => {
     if (!session) {
-      // No session to abandon, just reinitialize
+      // No session to abandon, just reinitialize with forceNew
       setShowStartNewDialog(false);
-      await initializeSession();
+      await initializeSession(true);
       return;
     }
 
     try {
-      // Abandon current session
+      // Abandon current session (for cleanup/analytics)
       await fetch('/api/onboarding/abandon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: session.sessionId }),
       });
     } catch (e) {
-      // Silent fail - continue with reinitialize
+      // Silent fail - forceNew will ensure we get a fresh session anyway
       console.warn('[OnboardingWizard] Failed to abandon session:', e);
     }
 
@@ -680,9 +678,9 @@ Ready to dive in? Let's start with the most important question:
     setIsResuming(false);
     setShowStartNewDialog(false);
 
-    // Reinitialize with fresh session
+    // Reinitialize with fresh session (forceNew bypasses resumption)
     toast.success('Starting fresh conversation with Alex...');
-    await initializeSession();
+    await initializeSession(true);
   }, [session, initializeSession, initializeStages]);
 
   // Initialize on mount
@@ -699,12 +697,18 @@ Ready to dive in? Let's start with the most important question:
   // Loading state
   if (isLoading || isInitializing) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">
-            {isInitializing ? 'Starting your AI consultation...' : 'Loading onboarding...'}
-          </p>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center space-y-6">
+          <div className="relative w-12 h-12 mx-auto">
+            <div className="absolute inset-0 rounded-full border-2 border-border" />
+            <div className="absolute inset-0 rounded-full border-2 border-foreground border-t-transparent animate-spin" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">
+              {isInitializing ? 'Starting your AI consultation' : 'Loading'}
+            </p>
+            <p className="text-xs text-muted-foreground">This will just take a moment</p>
+          </div>
         </div>
       </div>
     );
@@ -713,18 +717,27 @@ Ready to dive in? Let's start with the most important question:
   // Error state
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center space-y-4 max-w-md">
-          <h2 className="text-2xl font-semibold text-destructive">Unable to Start Onboarding</h2>
-          <p className="text-muted-foreground">{error}</p>
-          <div className="space-x-4">
-            <Button onClick={() => window.location.reload()}>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center space-y-6 max-w-md px-6">
+          <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <span className="text-destructive text-xl">!</span>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-lg font-medium">Unable to Start Onboarding</h2>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+          <div className="flex gap-3 justify-center">
+            <Button size="sm" onClick={() => window.location.reload()}>
               Try Again
             </Button>
-            <Button variant="outline" onClick={() => {
-              const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
-              router.push(dashboardRoute);
-            }}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+                router.push(dashboardRoute);
+              }}
+            >
               Go to Dashboard
             </Button>
           </div>
@@ -735,21 +748,23 @@ Ready to dive in? Let's start with the most important question:
 
   // Main render
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex h-[100dvh] w-full overflow-hidden">
+    <>
+      <div className="flex h-[100dvh] w-full overflow-hidden bg-background">
         {/* Sidebar with progress tracking */}
-        <OnboardingSidebar
-          stages={stages}
-          currentStage={session?.currentStage || 1}
-          overallProgress={session?.overallProgress || 0}
-          agentPersonality={session?.agentPersonality}
-          onExit={handleExitOnboarding}
-          onStartNew={handleStartNew}
-          isResuming={isResuming}
-        />
+        <div className="hidden md:flex w-[320px] flex-shrink-0">
+          <OnboardingSidebar
+            stages={stages}
+            currentStage={session?.currentStage || 1}
+            overallProgress={session?.overallProgress || 0}
+            agentPersonality={session?.agentPersonality}
+            onExit={handleExitOnboarding}
+            onStartNew={handleStartNew}
+            isResuming={isResuming}
+          />
+        </div>
 
         {/* Main conversation area */}
-        <SidebarInset className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden">
           {session && (
             <ConversationInterface
               session={session}
@@ -761,7 +776,7 @@ Ready to dive in? Let's start with the most important question:
               onComplete={handleCompleteOnboarding}
             />
           )}
-        </SidebarInset>
+        </main>
       </div>
 
       {/* Exit confirmation dialog */}
@@ -833,6 +848,6 @@ Ready to dive in? Let's start with the most important question:
           </div>
         </DialogContent>
       </Dialog>
-    </SidebarProvider>
+    </>
   );
 }

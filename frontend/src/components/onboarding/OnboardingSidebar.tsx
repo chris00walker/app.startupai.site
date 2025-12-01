@@ -1,18 +1,8 @@
 'use client';
 
-import { CheckCircle, Circle, User, Clock, Target, X, RefreshCw } from 'lucide-react';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Check, X, RefreshCw, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // ============================================================================
 // Types and Interfaces
@@ -44,7 +34,7 @@ interface OnboardingSidebarProps {
 }
 
 // ============================================================================
-// OnboardingSidebar Component
+// OnboardingSidebar Component - Clean Professional Design
 // ============================================================================
 
 export function OnboardingSidebar({
@@ -56,241 +46,166 @@ export function OnboardingSidebar({
   onStartNew,
   isResuming,
 }: OnboardingSidebarProps) {
-  
-  const completedStages = stages.filter(stage => stage.isComplete).length;
-  const estimatedTimeRemaining = Math.max(0, (7 - currentStage) * 3); // ~3 minutes per stage
+  const completedStages = stages.filter((stage) => stage.isComplete).length;
+  const estimatedTimeRemaining = Math.max(0, (7 - currentStage) * 3);
 
   return (
-    <TooltipProvider>
-      <Sidebar collapsible="offcanvas" className="border-r bg-muted/10" role="complementary" aria-label="Onboarding progress">
-        {/* Header */}
-        <SidebarHeader className="p-4 md:p-6">
-          <div className="flex items-center justify-between gap-2">
+    <aside
+      className="flex h-full w-full flex-col border-r border-border/50 bg-muted/30"
+      role="complementary"
+      aria-label="Onboarding progress"
+    >
+      {/* Header */}
+      <header className="flex items-center justify-between p-6 pb-4">
+        <div>
+          <h2 className="text-sm font-medium text-foreground">AI Strategic Onboarding</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">with {agentPersonality?.name || 'Alex'}</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onExit}
+          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          aria-label="Exit onboarding"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </header>
+
+      {/* Progress Bar */}
+      <div className="px-6 pb-6">
+        <div className="flex items-baseline justify-between mb-2">
+          <span className="text-xs text-muted-foreground">Progress</span>
+          <span className="text-xs font-medium tabular-nums">{Math.round(overallProgress)}%</span>
+        </div>
+        <div className="h-1 w-full rounded-full bg-border overflow-hidden">
+          <div
+            className="h-full bg-foreground rounded-full transition-all duration-500 ease-out onboarding-progress-animate"
+            style={{ width: `${overallProgress}%` }}
+            role="progressbar"
+            aria-valuenow={overallProgress}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
+        </div>
+        <div className="flex items-center justify-between mt-2 text-[11px] text-muted-foreground">
+          <span>
+            {completedStages}/{stages.length} stages
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {estimatedTimeRemaining}m left
+          </span>
+        </div>
+      </div>
+
+      {/* Consultant Card */}
+      {agentPersonality && (
+        <div className="mx-6 mb-6 p-4 rounded-lg bg-card border border-border/50">
+          <div className="flex items-start gap-3">
+            <div className="onboarding-consultant-avatar flex-shrink-0">
+              {agentPersonality.name.charAt(0)}
+            </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-base md:text-lg font-semibold truncate">AI Strategic Onboarding</h2>
-              <p className="text-xs md:text-sm text-muted-foreground truncate">
-                Personalized business consultation
-              </p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-medium">{agentPersonality.name}</h3>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  AI Consultant
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{agentPersonality.role}</p>
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onExit}
-                  className="h-8 w-8 p-0"
-                  aria-label="Exit onboarding"
+          </div>
+        </div>
+      )}
+
+      {/* Stages */}
+      <div className="flex-1 overflow-auto px-6">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+          Stages
+        </h3>
+        <nav role="navigation" aria-label="Onboarding stages">
+          <ol className="space-y-1">
+            {stages.map((stage) => (
+              <li key={stage.stage}>
+                <div
+                  className={cn(
+                    'onboarding-step',
+                    stage.isComplete && 'onboarding-step-complete',
+                    stage.isActive && 'onboarding-step-current',
+                    !stage.isComplete && !stage.isActive && 'onboarding-step-pending'
+                  )}
+                  aria-current={stage.isActive ? 'step' : undefined}
                 >
-                  <X className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Save progress and exit</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          {/* Overall Progress */}
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Overall Progress</span>
-              <span className="text-muted-foreground">{Math.round(overallProgress)}%</span>
-            </div>
-            <Progress 
-              value={overallProgress} 
-              className="h-2"
-              aria-label={`Overall progress: ${Math.round(overallProgress)} percent complete`}
-            />
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{completedStages} of {stages.length} stages complete</span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                ~{estimatedTimeRemaining}m left
-              </span>
-            </div>
-          </div>
-        </SidebarHeader>
-
-        {/* Content */}
-        <SidebarContent className="px-4 md:px-6">
-          {/* AI Agent Info */}
-          {agentPersonality && (
-            <div className="mb-4 md:mb-6 p-3 md:p-4 rounded-lg bg-background border">
-              <div className="flex items-start gap-2 md:gap-3">
-                <Avatar className="h-8 w-8 md:h-10 md:w-10 flex-shrink-0">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs md:text-sm">
-                    {agentPersonality.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-medium text-xs md:text-sm truncate">{agentPersonality.name}</h3>
-                    <Badge variant="secondary" className="text-[10px] md:text-xs px-1.5 py-0.5">
-                      AI Consultant
-                    </Badge>
+                  {/* Step Number/Check */}
+                  <div className="onboarding-step-number">
+                    {stage.isComplete ? (
+                      <Check className="h-3 w-3" />
+                    ) : (
+                      <span>{stage.stage}</span>
+                    )}
                   </div>
-                  <p className="text-[10px] md:text-xs text-muted-foreground mt-1 truncate">
-                    {agentPersonality.role}
-                  </p>
-                  <p className="text-[10px] md:text-xs text-muted-foreground mt-1 line-clamp-2">
-                    Specializes in {agentPersonality.expertise}
-                  </p>
+
+                  {/* Step Label */}
+                  <span
+                    className={cn(
+                      'text-sm truncate',
+                      stage.isActive
+                        ? 'text-foreground font-medium'
+                        : stage.isComplete
+                          ? 'text-muted-foreground'
+                          : 'text-muted-foreground/70'
+                    )}
+                  >
+                    {stage.name}
+                  </span>
                 </div>
-              </div>
-            </div>
-          )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
 
-          <Separator className="mb-6" />
-
-          {/* Stages List */}
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Conversation Stages
-            </h3>
-            
-            <nav role="navigation" aria-label="Onboarding stages">
-              <ol className="space-y-2">
-                {stages.map((stage) => (
-                  <li key={stage.stage}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div
-                          className={`
-                            flex items-start gap-3 p-3 rounded-lg transition-colors cursor-default
-                            ${stage.isActive 
-                              ? 'bg-primary/10 border border-primary/20' 
-                              : stage.isComplete 
-                                ? 'bg-muted/50' 
-                                : 'hover:bg-muted/30'
-                            }
-                          `}
-                          aria-current={stage.isActive ? 'step' : undefined}
-                        >
-                          {/* Stage Icon */}
-                          <div className="flex-shrink-0 mt-0.5">
-                            {stage.isComplete ? (
-                              <CheckCircle 
-                                className="h-5 w-5 text-green-600" 
-                                aria-label="Completed"
-                              />
-                            ) : stage.isActive ? (
-                              <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                                <div className="h-2 w-2 rounded-full bg-primary-foreground animate-pulse" />
-                              </div>
-                            ) : (
-                              <Circle 
-                                className="h-5 w-5 text-muted-foreground" 
-                                aria-label="Not started"
-                              />
-                            )}
-                          </div>
-
-                          {/* Stage Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-muted-foreground">
-                                Stage {stage.stage}
-                              </span>
-                              {stage.isActive && (
-                                <Badge variant="default" className="text-xs px-1.5 py-0.5">
-                                  Active
-                                </Badge>
-                              )}
-                            </div>
-                            <h4 className={`
-                              text-sm font-medium leading-tight
-                              ${stage.isActive ? 'text-foreground' : 'text-muted-foreground'}
-                            `}>
-                              {stage.name}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {stage.description}
-                            </p>
-                          </div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        <div>
-                          <p className="font-medium">{stage.name}</p>
-                          <p className="text-xs mt-1">{stage.description}</p>
-                          <p className="text-xs mt-2 text-muted-foreground">
-                            Status: {stage.isComplete ? 'Completed' : stage.isActive ? 'In Progress' : 'Upcoming'}
-                          </p>
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </li>
-                ))}
-              </ol>
-            </nav>
+      {/* Footer */}
+      <footer className="p-6 pt-4 space-y-3 border-t border-border/50">
+        {/* Resume Indicator */}
+        {isResuming && (
+          <div className="text-xs text-center py-2 px-3 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
+            Resuming previous conversation
           </div>
-        </SidebarContent>
+        )}
 
-        {/* Footer */}
-        <SidebarFooter className="p-4 md:p-6">
-          <div className="space-y-2 md:space-y-3">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-2 md:gap-3 text-center">
-              <div className="p-2 rounded bg-muted/50">
-                <div className="text-base md:text-lg font-semibold text-primary">
-                  {currentStage}
-                </div>
-                <div className="text-[10px] md:text-xs text-muted-foreground">
-                  Current Stage
-                </div>
-              </div>
-              <div className="p-2 rounded bg-muted/50">
-                <div className="text-base md:text-lg font-semibold text-green-600">
-                  {completedStages}
-                </div>
-                <div className="text-[10px] md:text-xs text-muted-foreground">
-                  Completed
-                </div>
-              </div>
-            </div>
+        {/* Help Text */}
+        <p className="text-[11px] text-muted-foreground text-center">
+          Your progress is automatically saved.
+          <br />
+          You can resume anytime.
+        </p>
 
-            {/* Resume Indicator */}
-            {isResuming && (
-              <div className="text-[10px] md:text-xs text-center p-2 rounded bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-                <p className="text-blue-700 dark:text-blue-300 font-medium">Resuming previous conversation</p>
-              </div>
-            )}
-
-            {/* Help Text */}
-            <div className="text-[10px] md:text-xs text-muted-foreground text-center">
-              <p>Your progress is automatically saved.</p>
-              <p className="mt-1">You can resume anytime.</p>
-            </div>
-
-            {/* Start New Conversation Button */}
-            {onStartNew && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onStartNew}
-                className="w-full text-xs md:text-sm text-muted-foreground hover:text-foreground"
-                aria-label="Start a new conversation"
-              >
-                <RefreshCw className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-                Start New Conversation
-              </Button>
-            )}
-
-            {/* Exit Button */}
+        {/* Actions */}
+        <div className="flex flex-col gap-2">
+          {onStartNew && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={onExit}
-              className="w-full text-xs md:text-sm"
-              aria-label="Save progress and exit onboarding"
+              onClick={onStartNew}
+              className="w-full h-9 text-xs text-muted-foreground hover:text-foreground"
             >
-              <X className="h-3 w-3 md:h-4 md:w-4 mr-2" />
-              Save & Exit
+              <RefreshCw className="h-3.5 w-3.5 mr-2" />
+              Start New Conversation
             </Button>
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-    </TooltipProvider>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onExit}
+            className="w-full h-9 text-xs"
+          >
+            <X className="h-3.5 w-3.5 mr-2" />
+            Save & Exit
+          </Button>
+        </div>
+      </footer>
+    </aside>
   );
 }

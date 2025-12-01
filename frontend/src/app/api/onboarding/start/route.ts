@@ -15,6 +15,7 @@ interface StartOnboardingRequest {
   userId?: string;
   planType: 'trial' | 'sprint' | 'founder' | 'enterprise';
   resumeSessionId?: string;
+  forceNew?: boolean; // Skip session resumption and create fresh session
   userContext?: {
     referralSource?: string;
     previousExperience?: 'first_time' | 'experienced' | 'serial_entrepreneur';
@@ -289,7 +290,7 @@ async function saveOnboardingSession(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { planType, resumeSessionId, userContext }: StartOnboardingRequest = body;
+    const { planType, resumeSessionId, forceNew, userContext }: StartOnboardingRequest = body;
 
     const sessionClient = await createServerClient();
     const [
@@ -394,8 +395,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check for existing active sessions to enable session resumption
-    const { data: existingSessions } = await supabaseClient
+    // Check for existing active sessions to enable session resumption (skip if forceNew)
+    const { data: existingSessions } = forceNew ? { data: null } : await supabaseClient
       .from('onboarding_sessions')
       .select('*')
       .eq('user_id', effectiveUser.id)
@@ -403,8 +404,8 @@ export async function POST(request: NextRequest) {
       .order('last_activity', { ascending: false })
       .limit(1);
 
-    // If existing active session found, resume it
-    if (existingSessions && existingSessions.length > 0) {
+    // If existing active session found and not forcing new, resume it
+    if (!forceNew && existingSessions && existingSessions.length > 0) {
       const session = existingSessions[0];
 
       console.log('[onboarding/start] Resuming existing session:', session.session_id);
