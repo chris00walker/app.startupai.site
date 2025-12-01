@@ -1,7 +1,7 @@
 ---
 purpose: "Documentation index for the StartupAI product platform"
 status: "active"
-last_reviewed: "2025-11-26"
+last_reviewed: "2025-12-01"
 ---
 
 # StartupAI App Documentation
@@ -29,7 +29,7 @@ For new contributors, start with:
 | [`ops/`](ops/) | Environment configuration and runbooks |
 | [`public-interfaces/`](public-interfaces/) | API specs, changelog exports, marketing contracts |
 | [`user-experience/`](user-experience/) | Journey maps and UX documentation |
-| [`archive/`](archive/) | Deprecated docs and completion reports |
+| [`archive/`](archive/) | Deprecated docs (historical reference only) |
 
 ## Key Documents
 
@@ -55,4 +55,4 @@ For new contributors, start with:
 - **Marketing Site**: `startupai.site/docs/` (lead capture)
 
 ---
-**Last Updated**: 2025-11-26
+**Last Updated**: 2025-12-01

@@ -198,5 +198,7 @@ The `test:ci` script runs:
 
 ---
 
-**Last Updated**: 2025-11-26
+**Last Updated**: 2025-12-01
 **Status**: Jest + Playwright infrastructure implemented
+
+*Note: Verify available commands with `pnpm run` in the frontend directory. Some commands may vary based on package.json configuration.*

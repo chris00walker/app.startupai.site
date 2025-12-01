@@ -1,10 +1,12 @@
 ---
 purpose: "Private technical source of truth for product engineering work tracking"
 status: "active"
-last_reviewed: "2025-11-21"
+last_reviewed: "2025-12-01"
 ---
 
 # Work Tracking
+
+**Current Status:** ~85% complete (Phase Alpha). All P0 blockers resolved. See [phases.md](./phases.md) for details.
 
 - Planning cadence: bi-weekly sprint planning + monthly roadmap review.
 - Tracking tools: GitHub Projects (`app-startupai` board) and linear issue labels.

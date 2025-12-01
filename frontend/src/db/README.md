@@ -161,4 +161,8 @@ Happy developing! 🚀
 ### Row Level Security Status
 - ⚠️ RLS currently **DISABLED** on `user_profiles` table
 - Required for production deployment
-- See `MIGRATION_SUMMARY.md` for re-enabling instructions
+- See [`docs/status/MIGRATION_SUMMARY.md`](/docs/status/MIGRATION_SUMMARY.md) for re-enabling instructions
+
+---
+
+**Last Updated:** 2025-12-01
