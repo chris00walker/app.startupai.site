@@ -43,7 +43,8 @@ import {
   LayoutGrid,
   Users,
   BookOpen,
-  Map
+  Map,
+  MessageSquare
 } from "lucide-react"
 
 function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
@@ -322,15 +323,27 @@ function EmptyState() {
         </Card>
       </div>
       
-      <Link href="/projects/new">
-        <Button 
-          size="lg" 
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-5 w-5 mr-2" />
-          Create Your First Project
-        </Button>
-      </Link>
+      <div className="flex flex-col items-center gap-3">
+        <Link href="/onboarding/founder">
+          <Button
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <MessageSquare className="h-5 w-5 mr-2" />
+            Start with Alex (Recommended)
+          </Button>
+        </Link>
+        <Link href="/projects/new">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Quick Create (Skip AI Conversation)
+          </Button>
+        </Link>
+      </div>
     </div>
   )
 }
@@ -465,7 +478,7 @@ export default function FounderDashboard() {
                 AI Strategic Analysis
               </Button>
             </Link>
-            <Link href="/projects/new" onClick={() => trackEvent('button_clicked', { button_name: 'new_project', location: 'founder_dashboard', category: 'ui_interaction' })}>
+            <Link href="/onboarding/founder" onClick={() => trackEvent('button_clicked', { button_name: 'new_project', location: 'founder_dashboard', category: 'ui_interaction' })}>
               <Button variant="outline">
                 <Plus className="h-4 w-4 mr-2" />
                 New Project

@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, Circle, User, Clock, Target, X } from 'lucide-react';
+import { CheckCircle, Circle, User, Clock, Target, X, RefreshCw } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +39,8 @@ interface OnboardingSidebarProps {
   overallProgress: number;
   agentPersonality?: AgentPersonality;
   onExit: () => void;
+  onStartNew?: () => void;
+  isResuming?: boolean;
 }
 
 // ============================================================================
@@ -51,6 +53,8 @@ export function OnboardingSidebar({
   overallProgress,
   agentPersonality,
   onExit,
+  onStartNew,
+  isResuming,
 }: OnboardingSidebarProps) {
   
   const completedStages = stages.filter(stage => stage.isComplete).length;
@@ -246,11 +250,32 @@ export function OnboardingSidebar({
               </div>
             </div>
 
+            {/* Resume Indicator */}
+            {isResuming && (
+              <div className="text-[10px] md:text-xs text-center p-2 rounded bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
+                <p className="text-blue-700 dark:text-blue-300 font-medium">Resuming previous conversation</p>
+              </div>
+            )}
+
             {/* Help Text */}
             <div className="text-[10px] md:text-xs text-muted-foreground text-center">
               <p>Your progress is automatically saved.</p>
               <p className="mt-1">You can resume anytime.</p>
             </div>
+
+            {/* Start New Conversation Button */}
+            {onStartNew && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onStartNew}
+                className="w-full text-xs md:text-sm text-muted-foreground hover:text-foreground"
+                aria-label="Start a new conversation"
+              >
+                <RefreshCw className="h-3 w-3 md:h-4 md:w-4 mr-2" />
+                Start New Conversation
+              </Button>
+            )}
 
             {/* Exit Button */}
             <Button

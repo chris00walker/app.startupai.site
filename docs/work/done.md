@@ -8,6 +8,37 @@ last_reviewed: "2025-11-30"
 
 ## November 2025
 
+### Alex UX Improvements (Nov 30)
+| Item | Status | Notes |
+|------|--------|-------|
+| Project creation routing fix | ✅ Done | "Create Your First Project" now routes to Alex (`/onboarding/founder`) |
+| Session management | ✅ Done | "Start New Conversation" button + resume indicator |
+| Team awareness | ✅ Done | Alex knows about Sage and the 6 AI founders |
+| Abandon session API | ✅ Done | `POST /api/onboarding/abandon` endpoint |
+| Comprehensive test coverage | ✅ Done | 108 unit tests + 4 E2E tests |
+
+**Problem Solved**: Users were bypassing Alex entirely via `/projects/new` quick wizard. No way to start fresh conversations.
+
+**Files Created:**
+- `frontend/src/app/api/onboarding/abandon/route.ts` - Session abandon endpoint
+- `frontend/src/__tests__/api/onboarding/abandon/route.test.ts` - 10 API tests
+- `frontend/src/__tests__/pages/founder-dashboard.test.tsx` - 10 routing tests
+- `frontend/src/__tests__/lib/ai/onboarding-prompt.test.ts` - 37 prompt tests
+- `frontend/src/components/onboarding/__tests__/OnboardingSidebar.test.tsx` - 27 component tests
+- `frontend/src/components/onboarding/__tests__/OnboardingWizardV2.test.tsx` - 24 wizard tests
+
+**Files Modified:**
+- `frontend/src/pages/founder-dashboard.tsx` - Button routing to `/onboarding/founder`
+- `frontend/src/components/onboarding/OnboardingSidebar.tsx` - `onStartNew`, `isResuming` props
+- `frontend/src/components/onboarding/OnboardingWizardV2.tsx` - Session management logic
+- `frontend/src/lib/ai/onboarding-prompt.ts` - Team context + Sage handoff
+- `frontend/src/app/api/onboarding/start/route.ts` - Persona metadata (supervisor/team)
+- `frontend/tests/e2e/02-onboarding-flow.spec.ts` - 4 new E2E session tests
+
+**Impact**: Founders now have clear path to Alex for deep strategic conversations + ability to restart if needed.
+
+---
+
 ### Public APIs for Marketing Site (Nov 30)
 | Item | Status | Notes |
 |------|--------|-------|

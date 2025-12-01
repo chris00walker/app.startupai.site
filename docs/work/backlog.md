@@ -17,9 +17,23 @@ last_reviewed: "2025-11-30"
 
 | Item | Effort | Source | Notes |
 |------|--------|--------|-------|
+| **Consultant Alex UX Improvements** | 4-5h | Alex UX Plan | Mirror founder improvements for consultant onboarding flow |
 | VPC geometric shapes (circle/square) | 2-3h | [Strategyzer UX Audit](../reports/strategyzer-ux-audit.md) | Visual polish to match Strategyzer methodology |
 | ~~VPC visual fit lines~~ | ~~4-6h~~ | ~~[Strategyzer UX Audit]~~ | ✅ Done - commit `0cf17ca` (Nov 29) |
 | HITL comment display | 2-4h | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Show `human_comment` in UI |
+
+### Consultant Alex UX Improvements (Backlog)
+
+Repeat the Alex UX improvements for consultant onboarding (`/onboarding/consultant`):
+
+| Task | Notes |
+|------|-------|
+| Route consultant dashboard CTA to Alex | Similar to founder-dashboard changes |
+| Session management for consultants | Start new, resume indicator |
+| Team awareness context | Alex → Sage handoff messaging |
+| Test coverage | Unit + E2E tests |
+
+**Reference**: See completed [Alex UX Improvements Plan](~/.claude/plans/frolicking-coalescing-whisper.md) for implementation pattern.
 
 ### PostHog Coverage Gaps
 

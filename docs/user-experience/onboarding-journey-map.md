@@ -2,8 +2,8 @@
 
 **End-to-End User Experience Specification**
 
-**Status:** 🟡 **REFERENCE** - UX specification for onboarding flow
-**Last Updated:** 2025-11-21
+**Status:** 🟢 **IMPLEMENTED** - Core UX live, session management complete
+**Last Updated:** 2025-11-30
 **Cross-Reference:** [`features/stage-progression.md`](../features/stage-progression.md) - Implementation details  
 
 ---
@@ -585,6 +585,88 @@ user_experience: "flexible control over conversation flow"
 
 ---
 
+## 4.3 Session Management (Implemented Nov 30, 2025)
+
+### Start New Conversation
+Users can start fresh at any time via the sidebar button:
+
+```yaml
+feature: start_new_conversation
+location: OnboardingSidebar footer
+trigger: "Start New Conversation" button click
+flow:
+  1. User clicks button
+  2. Confirmation dialog appears: "Start New Conversation?"
+  3. Options: "Continue Current" (cancel) or "Start Fresh" (confirm)
+  4. If confirmed:
+     - Current session marked as "abandoned" via API
+     - Local state reset
+     - New session initialized
+     - Toast: "Starting fresh conversation with Alex..."
+api_endpoint: POST /api/onboarding/abandon
+preserves_data: true (abandoned sessions retained for analytics)
+```
+
+### Resume Indicator
+When resuming an existing session:
+
+```yaml
+feature: resume_indicator
+trigger: Page load with existing active session
+display:
+  - Sidebar shows "Resuming previous conversation" banner
+  - Toast notification on resume
+  - Conversation history restored
+  - Progress bar reflects saved state
+user_benefit: Clear indication that work is preserved
+```
+
+### Session States
+```yaml
+session_states:
+  active: "User currently engaged in conversation"
+  paused: "User exited but can resume"
+  abandoned: "User explicitly started fresh"
+  completed: "All 7 stages finished, CrewAI triggered"
+```
+
+---
+
+## 4.4 Team Awareness (Implemented Nov 30, 2025)
+
+Alex is aware of the AI leadership team and mentions the handoff naturally:
+
+### Alex's Team Context
+```yaml
+ai_personality:
+  name: "Alex"
+  role: "Strategic Business Consultant"
+  supervisor: "Sage (Chief Strategy Officer)"
+  team_members:
+    - "Sage (CSO) - Strategic analysis lead"
+    - "Forge (CTO) - Technical feasibility"
+    - "Pulse (CGO) - Growth and desirability"
+    - "Compass (CPO) - Synthesis and recommendations"
+    - "Guardian (CCO) - Governance and quality"
+    - "Ledger (CFO) - Financial viability"
+```
+
+### Natural Handoff Mentions
+Alex mentions the team when contextually appropriate (Stage 7, completion):
+- "I'll pass this to Sage and our AI leadership team for Fortune 500-quality analysis"
+- "Sage and the team will generate detailed validation experiments"
+- "You'll receive strategic analysis from our AI founders within minutes"
+
+### Initial Greeting (Updated)
+```
+"Once we finish our conversation, I'll hand everything off to Sage, our Chief
+Strategy Officer, and our AI leadership team. They'll generate Fortune 500-quality
+strategic analysis, including a detailed validation roadmap and experiments
+tailored to your business."
+```
+
+---
+
 ## 5. Accessibility Considerations
 
 ### 5.1 Screen Reader Compatibility
@@ -663,15 +745,18 @@ cognitive_support:
 - [`crewai-frontend-integration.md`](../engineering/crewai-frontend-integration.md) - API integration
 - [`onboarding-agent-personality.md`](../features/onboarding-agent-personality.md) - AI personality design
 
-**Implementation Dependencies:**
-- `/onboarding` page creation (currently 404)
-- CrewAI backend completion (currently 15% complete)
-- Real-time conversation interface
-- Multi-agent workflow integration
+**Implementation Status (Updated Nov 30, 2025):**
+- ✅ `/onboarding/founder` page live and functioning
+- ✅ CrewAI backend Phase 2D complete (~85%), 18 tools implemented
+- ✅ Real-time streaming conversation interface (Vercel AI SDK)
+- ✅ Multi-agent workflow integration (webhook + polling)
+- ✅ Session management (start new, resume indicator)
+- ✅ Team awareness (Alex → Sage handoff)
+- ✅ Project creation routes to Alex (not quick wizard)
 
 ---
 
-**Status:** 🔴 **CRITICAL IMPLEMENTATION REQUIRED**  
-**Business Impact:** Resolves vaporware gap between marketing promises and product delivery  
-**User Impact:** Enables the core value proposition that users expect after signup  
-**Next Action:** Begin implementation immediately after technical specifications complete  
+**Status:** 🟢 **IMPLEMENTED**
+**Business Impact:** Marketing promise of "AI-guided strategy session" now delivered
+**User Impact:** Full 7-stage onboarding with session management and team handoff
+**Test Coverage:** 108 unit tests + 4 E2E tests for Alex UX features  

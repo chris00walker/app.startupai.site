@@ -479,6 +479,8 @@ export async function POST(request: NextRequest) {
         role: 'Strategic Business Consultant',
         tone: 'friendly, encouraging, professionally direct',
         expertise: 'Lean Startup, Customer Development, Business Model Design',
+        supervisor: 'Sage (Chief Strategy Officer)',
+        team: ['Sage', 'Forge', 'Pulse', 'Compass', 'Guardian', 'Ledger'],
       },
       qualitySignals: {
         clarity: { label: 'medium' as const, score: 0.5 },

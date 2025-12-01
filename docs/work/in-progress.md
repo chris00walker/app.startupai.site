@@ -2,7 +2,7 @@
 purpose: "Private technical source of truth for active work"
 status: "active"
 last_reviewed: "2025-11-30"
-last_synced: "2025-11-30 - P1 dashboard/test work completed"
+last_synced: "2025-11-30 - Alex UX improvements completed"
 ---
 
 # In Progress
@@ -74,9 +74,18 @@ Work these items in order. Items marked "Ready" can start immediately.
 - Accessibility foundation (WCAG 2.1 AA + semantic landmarks)
 - Consultant dashboard using real portfolio activity data
 
+**Alex Onboarding UX Complete (Nov 30):**
+- Project creation routes to Alex (`/onboarding/founder`) not quick wizard
+- Session management: "Start New Conversation" button + resume indicator
+- Team awareness: Alex knows about Sage (CSO) and 6 AI founders
+- Abandon session API: `POST /api/onboarding/abandon`
+- 108 unit tests + 4 E2E tests for full coverage
+
 **Test Suite Health (Updated 2025-11-30):**
-- 355 tests passing, 17 skipped (intentional)
+- 463+ tests passing (355 existing + 108 Alex UX tests), 17 skipped (intentional)
 - Specification tests: 12/12 passing (accessibility, contracts, keyboard nav)
+- Alex UX tests: 108 passing (abandon API, sidebar, dashboard, prompt, wizard)
+- E2E onboarding: 4 new session management tests added
 - Deployment tests: Skip by default (require running server)
 - Timing tests: Using synthetic values per PERFORMANCE_TARGETS
 - Test pollution: Resolved with global afterEach cleanup

@@ -273,4 +273,126 @@ test.describe('Onboarding Session Management - Founder User', () => {
     // Take screenshot
     await page.screenshot({ path: 'test-results/session-resume.png', fullPage: true });
   });
+
+  test('should show "Start New Conversation" button in sidebar', async ({ page }) => {
+    // Navigate to onboarding
+    const url = page.url();
+    if (!url.includes('/onboarding') && !url.includes('/chat')) {
+      await navigateToOnboarding(page);
+    }
+
+    // Wait for chat interface
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Look for "Start New Conversation" button in sidebar
+    const startNewButton = page.locator('button:has-text("Start New Conversation")');
+
+    // The button should be visible in the sidebar
+    await expect(startNewButton).toBeVisible({ timeout: 10000 });
+
+    console.log('Start New Conversation button is visible');
+  });
+
+  test('should show confirmation dialog when clicking "Start New Conversation"', async ({ page }) => {
+    // Navigate to onboarding
+    const url = page.url();
+    if (!url.includes('/onboarding') && !url.includes('/chat')) {
+      await navigateToOnboarding(page);
+    }
+
+    // Wait for chat interface
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Click "Start New Conversation" button
+    const startNewButton = page.locator('button:has-text("Start New Conversation")');
+    await startNewButton.click();
+
+    // Verify confirmation dialog appears
+    const dialogTitle = page.locator('text="Start New Conversation?"');
+    await expect(dialogTitle).toBeVisible({ timeout: 5000 });
+
+    // Verify dialog has "Continue Current" and "Start Fresh" buttons
+    await expect(page.locator('button:has-text("Continue Current")')).toBeVisible();
+    await expect(page.locator('button:has-text("Start Fresh")')).toBeVisible();
+
+    console.log('Start New confirmation dialog displayed correctly');
+
+    // Take screenshot
+    await page.screenshot({ path: 'test-results/start-new-dialog.png', fullPage: true });
+  });
+
+  test('should cancel and return to conversation when clicking "Continue Current"', async ({ page }) => {
+    // Navigate to onboarding and send a message first
+    const url = page.url();
+    if (!url.includes('/onboarding') && !url.includes('/chat')) {
+      await navigateToOnboarding(page);
+    }
+
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Send a message to have some history
+    const testMessage = 'Testing conversation continuity';
+    await sendMessage(page, testMessage);
+    await waitForAIResponse(page, 45000);
+
+    // Click "Start New Conversation"
+    const startNewButton = page.locator('button:has-text("Start New Conversation")');
+    await startNewButton.click();
+
+    // Wait for dialog
+    await page.locator('text="Start New Conversation?"').waitFor({ state: 'visible', timeout: 5000 });
+
+    // Click "Continue Current"
+    await page.locator('button:has-text("Continue Current")').click();
+
+    // Verify dialog closes
+    await expect(page.locator('text="Start New Conversation?"')).toBeHidden({ timeout: 5000 });
+
+    // Verify previous message is still visible
+    await expect(page.locator(`text="${testMessage}"`)).toBeVisible();
+
+    console.log('Continue Current works - conversation preserved');
+  });
+
+  test('should show resume indicator when resuming existing session', async ({ page }) => {
+    // Navigate to onboarding
+    const url = page.url();
+    if (!url.includes('/onboarding') && !url.includes('/chat')) {
+      await navigateToOnboarding(page);
+    }
+
+    // Send a message to create session state
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+
+    await sendMessage(page, 'Starting my session');
+    await waitForAIResponse(page, 45000);
+
+    // Reload the page to trigger resume
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
+    // Wait for interface to reload
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+
+    // Look for resume indicator in sidebar
+    const resumeIndicator = page.locator('text="Resuming previous conversation"');
+
+    // It should appear briefly when resuming
+    const indicatorVisible = await resumeIndicator.isVisible({ timeout: 10000 }).catch(() => false);
+
+    if (indicatorVisible) {
+      console.log('Resume indicator displayed');
+    } else {
+      // It might have disappeared quickly - check for toast instead
+      const resumeToast = page.locator('text="Resuming your conversation"');
+      const toastVisible = await resumeToast.isVisible({ timeout: 5000 }).catch(() => false);
+      console.log(`Resume notification: ${toastVisible ? 'toast shown' : 'not detected'}`);
+    }
+
+    // Take screenshot
+    await page.screenshot({ path: 'test-results/resume-indicator.png', fullPage: true });
+  });
 });

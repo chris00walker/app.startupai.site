@@ -76,6 +76,8 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [isAILoading, setIsAILoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showStartNewDialog, setShowStartNewDialog] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
   const [input, setInput] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -515,6 +517,7 @@ Ready to dive in? Let's start with the most important question:
       if (data.resuming && data.conversationHistory && data.conversationHistory.length > 0) {
         // Restore conversation history
         setMessages(data.conversationHistory);
+        setIsResuming(true);
 
         // Announce to screen readers
         const announcement = `Resuming onboarding session at stage ${newSession.currentStage}: ${data.stageInfo.stageName}. Conversation history restored.`;
@@ -522,6 +525,7 @@ Ready to dive in? Let's start with the most important question:
 
         toast.success('Resuming your conversation with Alex...');
       } else {
+        setIsResuming(false);
         // Add initial AI greeting message for new or empty session
         // The API always returns agentIntroduction and firstQuestion
         const initialMessage = `${data.agentIntroduction}\n\n${data.firstQuestion}`;
@@ -644,6 +648,43 @@ Ready to dive in? Let's start with the most important question:
     router.push(dashboardRoute);
   }, [router, planType, session]);
 
+  // Handle start new conversation
+  const handleStartNew = useCallback(() => {
+    setShowStartNewDialog(true);
+  }, []);
+
+  const confirmStartNew = useCallback(async () => {
+    if (!session) {
+      // No session to abandon, just reinitialize
+      setShowStartNewDialog(false);
+      await initializeSession();
+      return;
+    }
+
+    try {
+      // Abandon current session
+      await fetch('/api/onboarding/abandon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: session.sessionId }),
+      });
+    } catch (e) {
+      // Silent fail - continue with reinitialize
+      console.warn('[OnboardingWizard] Failed to abandon session:', e);
+    }
+
+    // Reset local state
+    setSession(null);
+    setMessages([]);
+    setStages(initializeStages(1));
+    setIsResuming(false);
+    setShowStartNewDialog(false);
+
+    // Reinitialize with fresh session
+    toast.success('Starting fresh conversation with Alex...');
+    await initializeSession();
+  }, [session, initializeSession, initializeStages]);
+
   // Initialize on mount
   useEffect(() => {
     const init = async () => {
@@ -703,6 +744,8 @@ Ready to dive in? Let's start with the most important question:
           overallProgress={session?.overallProgress || 0}
           agentPersonality={session?.agentPersonality}
           onExit={handleExitOnboarding}
+          onStartNew={handleStartNew}
+          isResuming={isResuming}
         />
 
         {/* Main conversation area */}
@@ -735,6 +778,25 @@ Ready to dive in? Let's start with the most important question:
             <AlertDialogCancel>Continue Onboarding</AlertDialogCancel>
             <AlertDialogAction onClick={confirmExit}>
               Save & Exit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Start New Conversation confirmation dialog */}
+      <AlertDialog open={showStartNewDialog} onOpenChange={setShowStartNewDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start New Conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will end your current conversation and start fresh with Alex.
+              Your previous conversation will be saved but you&apos;ll begin from the beginning.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continue Current</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStartNew}>
+              Start Fresh
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
