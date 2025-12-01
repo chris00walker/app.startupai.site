@@ -122,11 +122,11 @@ export function ConversationInterface({
 
   return (
     <div className="flex flex-col h-full onboarding-atmosphere">
-      {/* Header - Bold brand presence */}
+      {/* Header - Bold brand presence with display font */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-card/50 backdrop-blur-sm reveal-1">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{getStageName(session.currentStage)}</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl font-display font-normal text-foreground tracking-tight">{getStageName(session.currentStage)}</h1>
+          <p className="text-sm font-body text-muted-foreground">
             Stage {session.currentStage} of {session.totalStages} &bull;{' '}
             <span className="text-primary font-medium">{session.agentPersonality?.name || 'Alex'}</span> is here to help
           </p>
@@ -159,14 +159,14 @@ export function ConversationInterface({
                 // AI Message - Clean with left accent
                 <div className="onboarding-message-ai space-y-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-body font-medium">
                       {session.agentPersonality?.name || 'Alex'}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs font-body text-muted-foreground">
                       {formatTime(new Date(message.timestamp))}
                     </span>
                   </div>
-                  <div className="text-[15px] leading-relaxed text-foreground/90 whitespace-pre-wrap">
+                  <div className="text-[15px] font-body leading-relaxed text-foreground/90 whitespace-pre-wrap">
                     {message.content}
                   </div>
                 </div>
@@ -174,13 +174,13 @@ export function ConversationInterface({
                 // User Message - Soft rounded bubble
                 <div className="max-w-[80%]">
                   <div className="flex items-center gap-2 mb-1 justify-end">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs font-body text-muted-foreground">
                       {formatTime(new Date(message.timestamp))}
                     </span>
-                    <span className="text-sm font-medium">You</span>
+                    <span className="text-sm font-body font-medium">You</span>
                   </div>
                   <div className="onboarding-message-user">
-                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap">
+                    <p className="text-[15px] font-body leading-relaxed whitespace-pre-wrap">
                       {message.content}
                     </p>
                   </div>

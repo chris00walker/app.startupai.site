@@ -60,8 +60,8 @@ export function OnboardingSidebar({
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between p-6 pb-4 reveal-1">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">AI Strategic Onboarding</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">with {agentPersonality?.name || 'Alex'}</p>
+          <h2 className="text-sm font-display font-normal text-foreground">AI Strategic Onboarding</h2>
+          <p className="text-xs font-body text-muted-foreground mt-0.5">with {agentPersonality?.name || 'Alex'}</p>
         </div>
         <Button
           variant="ghost"

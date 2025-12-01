@@ -73,11 +73,9 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		fontFamily: {
-  			sans: [
-  				'Inter',
-  				'system-ui',
-  				'sans-serif'
-  			]
+  			display: ['var(--font-display)', 'Georgia', 'serif'],
+  			body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+  			sans: ['var(--font-body)', 'system-ui', 'sans-serif'], // Default to body font
   		},
   		keyframes: {
   			'accordion-down': {

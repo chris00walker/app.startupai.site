@@ -69,8 +69,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    @apply bg-background text-foreground font-body;
+  }
+
+  /* Typography hierarchy with distinctive fonts */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
   }
 }
 
@@ -97,11 +101,11 @@
   }
   
   .business-title {
-    @apply text-3xl font-bold text-foreground mb-2;
+    @apply text-3xl font-display font-normal text-foreground mb-2 tracking-tight;
   }
-  
+
   .business-subtitle {
-    @apply text-lg text-muted-foreground;
+    @apply text-lg font-body text-muted-foreground;
   }
   
   .business-container {
