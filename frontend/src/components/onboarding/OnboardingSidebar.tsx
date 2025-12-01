@@ -51,14 +51,16 @@ export function OnboardingSidebar({
 
   return (
     <aside
-      className="flex h-full w-full flex-col border-r border-border/50 bg-muted/30"
+      className="flex h-full w-full flex-col border-r border-border/50 onboarding-sidebar-bg relative overflow-hidden"
       role="complementary"
       aria-label="Onboarding progress"
     >
+      {/* Subtle grid pattern overlay */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none" />
       {/* Header */}
-      <header className="flex items-center justify-between p-6 pb-4">
+      <header className="relative z-10 flex items-center justify-between p-6 pb-4 reveal-1">
         <div>
-          <h2 className="text-sm font-medium text-foreground">AI Strategic Onboarding</h2>
+          <h2 className="text-sm font-semibold text-foreground">AI Strategic Onboarding</h2>
           <p className="text-xs text-muted-foreground mt-0.5">with {agentPersonality?.name || 'Alex'}</p>
         </div>
         <Button
@@ -73,14 +75,14 @@ export function OnboardingSidebar({
       </header>
 
       {/* Progress Bar */}
-      <div className="px-6 pb-6">
+      <div className="relative z-10 px-6 pb-6 reveal-2">
         <div className="flex items-baseline justify-between mb-2">
-          <span className="text-xs text-muted-foreground">Progress</span>
-          <span className="text-xs font-medium tabular-nums">{Math.round(overallProgress)}%</span>
+          <span className="text-xs font-medium text-muted-foreground">Progress</span>
+          <span className="text-xs font-semibold text-primary tabular-nums">{Math.round(overallProgress)}%</span>
         </div>
-        <div className="h-1 w-full rounded-full bg-border overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-primary/10 overflow-hidden">
           <div
-            className="h-full bg-foreground rounded-full transition-all duration-500 ease-out onboarding-progress-animate"
+            className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500 ease-out onboarding-progress-animate"
             style={{ width: `${overallProgress}%` }}
             role="progressbar"
             aria-valuenow={overallProgress}
@@ -101,7 +103,7 @@ export function OnboardingSidebar({
 
       {/* Consultant Card */}
       {agentPersonality && (
-        <div className="mx-6 mb-6 p-4 rounded-lg bg-card border border-border/50">
+        <div className="relative z-10 mx-6 mb-6 p-4 rounded-xl bg-card/80 backdrop-blur-sm border border-primary/10 shadow-sm reveal-3">
           <div className="flex items-start gap-3">
             <div className="onboarding-consultant-avatar flex-shrink-0">
               {agentPersonality.name.charAt(0)}
@@ -120,8 +122,8 @@ export function OnboardingSidebar({
       )}
 
       {/* Stages */}
-      <div className="flex-1 overflow-auto px-6">
-        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+      <div className="relative z-10 flex-1 overflow-auto px-6 reveal-4">
+        <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
           Stages
         </h3>
         <nav role="navigation" aria-label="Onboarding stages">
@@ -167,7 +169,7 @@ export function OnboardingSidebar({
       </div>
 
       {/* Footer */}
-      <footer className="p-6 pt-4 space-y-3 border-t border-border/50">
+      <footer className="relative z-10 p-6 pt-4 space-y-3 border-t border-border/50">
         {/* Resume Indicator */}
         {isResuming && (
           <div className="text-xs text-center py-2 px-3 rounded-md bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">

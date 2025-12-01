@@ -121,18 +121,18 @@ export function ConversationInterface({
     session.currentStage >= session.totalStages && session.overallProgress >= 90;
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Header - Minimal */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+    <div className="flex flex-col h-full onboarding-atmosphere">
+      {/* Header - Bold brand presence */}
+      <header className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-card/50 backdrop-blur-sm reveal-1">
         <div>
-          <h1 className="text-lg font-medium">{getStageName(session.currentStage)}</h1>
+          <h1 className="text-xl font-semibold text-foreground">{getStageName(session.currentStage)}</h1>
           <p className="text-sm text-muted-foreground">
             Stage {session.currentStage} of {session.totalStages} &bull;{' '}
-            {session.agentPersonality?.name || 'Alex'} is here to help
+            <span className="text-primary font-medium">{session.agentPersonality?.name || 'Alex'}</span> is here to help
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground tabular-nums">
+          <span className="text-sm font-semibold text-primary tabular-nums">
             {Math.round(session.overallProgress)}% Complete
           </span>
           {isConversationComplete && (
