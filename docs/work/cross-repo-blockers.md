@@ -1,8 +1,8 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2025-11-30"
-last_synced: "2025-11-30 - Activity Feed API + Metrics API shipped, marketing fully unblocked"
+last_reviewed: "2025-12-02"
+last_synced: "2025-12-02 - E2E integration test added for webhook-to-dashboard flow"
 ---
 
 # Cross-Repository Blockers
@@ -58,7 +58,7 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 | Blocked Item | Status | Description | Impact |
 |--------------|--------|-------------|--------|
 | Results Display UI | ✅ Done | Dashboard + Report Viewer + Evidence Explorer | Full UI ready for CrewAI results |
-| E2E Validation Flow | ✅ Ready to Test | Full flow: onboarding → analysis → results | Webhook + E2E infra fixed |
+| E2E Validation Flow | ✅ Ready to Test | Full flow: onboarding → analysis → results | Integration test added 2025-12-02 |
 | Accessibility Foundation | ✅ Done | WCAG 2.1 AA foundation | Legal compliance path cleared |
 | VPC Canvas | ✅ Done | Strategyzer-style SVG with fit lines | Professional canvas visualization |
 | Activity Feed API | ✅ Done | `GET /api/v1/public/activity` | Marketing can show live agent activity |
@@ -99,6 +99,7 @@ AI Founders Get Smarter (operational)
 - **Marketing site UNBLOCKED** - Activity Feed API and Metrics API now available
 - **Test Suite Healthy** - 355 passing, specification tests 12/12, timing tests synthetic
 - Major completions Nov 28-30: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas, PostHog, Public APIs, Test Suite fixes
+- **Integration Test Added (2025-12-02)**: `webhook-to-dashboard.integration.test.ts` verifies full webhook → DB → dashboard flow
 
 ## Cross-Repo Links
 
