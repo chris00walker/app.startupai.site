@@ -305,6 +305,9 @@ function buildCrewAnalysisInputs(briefData: any) {
 /**
  * Build inputs for the CrewAI founder_validation flow.
  * Transforms entrepreneur brief data to the schema expected by the flow.
+ *
+ * NOTE: The CrewAI flow expects `entrepreneur_input` as a string description.
+ * We build a comprehensive text summary from the structured brief data.
  */
 function buildFounderValidationInputs(
   briefData: any,
@@ -312,14 +315,39 @@ function buildFounderValidationInputs(
   userId: string,
   sessionId: string
 ): Record<string, any> {
+  // Build entrepreneur_input as a comprehensive text string for the CrewAI flow
+  const businessIdea = briefData.solution_description || briefData.unique_value_proposition || '';
+  const problemDesc = briefData.problem_description || '';
+  const segments = (briefData.customer_segments || []).join(', ');
+  const competitors = (briefData.competitors || []).join(', ');
+  const differentiators = (briefData.differentiation_factors || []).join(', ');
+  const goals = (briefData.three_month_goals || []).join(', ');
+
+  // Construct a rich text description for the AI to analyze
+  const entrepreneurInput = [
+    `Business Idea: ${businessIdea}`,
+    problemDesc ? `Problem: ${problemDesc}` : '',
+    briefData.unique_value_proposition ? `Value Proposition: ${briefData.unique_value_proposition}` : '',
+    segments ? `Target Customers: ${segments}` : '',
+    briefData.primary_customer_segment ? `Primary Segment: ${briefData.primary_customer_segment}` : '',
+    competitors ? `Competitors: ${competitors}` : '',
+    differentiators ? `Differentiation: ${differentiators}` : '',
+    briefData.budget_range ? `Budget: ${briefData.budget_range}` : '',
+    briefData.business_stage ? `Stage: ${briefData.business_stage}` : '',
+    goals ? `Goals: ${goals}` : '',
+  ].filter(Boolean).join('\n');
+
   return {
     flow_type: 'founder_validation',
     project_id: projectId,
     user_id: userId,
     session_id: sessionId,
+    // Primary input expected by CrewAI flow
+    entrepreneur_input: entrepreneurInput,
+    // Also include structured data for richer context (flow can use if available)
     entrepreneur_brief: {
-      business_idea: briefData.solution_description || briefData.unique_value_proposition || '',
-      problem_description: briefData.problem_description || '',
+      business_idea: businessIdea,
+      problem_description: problemDesc,
       solution_description: briefData.solution_description || '',
       unique_value_proposition: briefData.unique_value_proposition || '',
       customer_segments: briefData.customer_segments || [],
