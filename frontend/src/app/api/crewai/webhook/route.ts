@@ -72,7 +72,10 @@ const desirabilityEvidenceSchema = z.object({
   problem_resonance: z.number().optional(),
   conversion_rate: z.number().optional(),
   commitment_depth: z.string().optional(),
+  zombie_ratio: z.number().optional(),  // Added: matches CrewAI contract
   traffic_quality: z.string().optional(),
+  key_learnings: z.array(z.string()).default([]),  // Added: matches CrewAI contract
+  tested_segments: z.array(z.string()).default([]),  // Added: matches CrewAI contract
   impressions: z.number().optional(),
   clicks: z.number().optional(),
   signups: z.number().optional(),
@@ -94,7 +97,11 @@ const viabilityEvidenceSchema = z.object({
   ltv: z.number().optional(),
   ltv_cac_ratio: z.number().optional(),
   gross_margin: z.number().optional(),
+  payback_months: z.number().optional(),  // Added: matches CrewAI contract
+  break_even_customers: z.number().optional(),  // Added: matches CrewAI contract
   tam_usd: z.number().optional(),
+  market_share_target: z.number().optional(),  // Added: matches CrewAI contract
+  viability_assessment: z.string().optional(),  // Added: matches CrewAI contract
 }).passthrough().nullable();
 
 const qaReportSchema = z.object({
