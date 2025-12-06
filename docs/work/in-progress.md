@@ -1,11 +1,23 @@
 ---
 purpose: "Private technical source of truth for active work"
 status: "active"
-last_reviewed: "2025-11-30"
-last_synced: "2025-11-30 - Alex UX improvements completed"
+last_reviewed: "2025-12-05"
+last_synced: "2025-12-05 - CrewAI migrated to 3-Crew architecture"
 ---
 
 # In Progress
+
+## Upstream Architecture Change (2025-12-05)
+
+**CrewAI has migrated from Flow to 3-Crew architecture.**
+
+- Code complete: 19 agents, 32 tasks, 7 HITL checkpoints
+- Deployment pending: `crewai login` needed
+- **E2E testing blocked until deployment completes**
+
+See `cross-repo-blockers.md` for details.
+
+---
 
 ## Priority Order
 
@@ -29,18 +41,19 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Notes |
 |----------|------|--------|-------|
-| 4 | E2E validation flow | **Ready to Test** | CrewAI webhook implemented, E2E infra fixed, ready for full validation |
-| 5 | Real analysis data quality | **Available** | TavilySearchTool + 4 research tools provide real web data |
+| 4 | E2E validation flow | **Blocked** | Waiting for CrewAI 3-Crew deployment |
+| 5 | Real analysis data quality | **Blocked** | Depends on deployed crews |
 
-**CrewAI Status (2025-11-29):** Phase 2D complete (~85%). 18 tools implemented.
+**CrewAI Status (2025-12-05):** Migrated to 3-Crew architecture. Code complete, deployment pending.
 
 ---
 
-## Cross-Repo Dependencies - UPDATED 2025-11-30
+## Cross-Repo Dependencies - UPDATED 2025-12-05
 
 ```
-✅ startupai-crew (CrewAI Phase 2D Complete - 85%)
-    ↓ Webhook implemented, real web research, 18 tools
+⚠️ startupai-crew (3-Crew Architecture - Deployment Pending)
+    ↓ Code complete, needs crewai login + deploy
+    ↓ 19 agents, 32 tasks, 7 HITL checkpoints
 ✅ app.startupai.site (This repo) ← P0 BLOCKERS CLEARED
     ↓ PostHog done, E2E tests fixed, accessibility done, reports + evidence explorer done
     ↓ Activity Feed API + Metrics API shipped
@@ -49,8 +62,8 @@ Work these items in order. Items marked "Ready" can start immediately.
 ```
 
 **Current Focus**:
-1. Dashboard integration with real CrewAI data (P1)
-2. Specification-driven test refresh (P1)
+1. Wait for CrewAI 3-Crew deployment (blocking E2E testing)
+2. PostHog coverage gaps (P1 - can proceed independently)
 
 ---
 
@@ -106,4 +119,9 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 ---
 
-**Last Updated**: 2025-11-30
+**Last Updated**: 2025-12-05
+
+**Changes (2025-12-05):**
+- Added Upstream Architecture Change notice
+- Updated CrewAI status: Flow → 3-Crew migration
+- E2E testing now blocked until deployment completes

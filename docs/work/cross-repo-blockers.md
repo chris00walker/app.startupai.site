@@ -1,37 +1,68 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2025-12-02"
-last_synced: "2025-12-02 - E2E integration test added for webhook-to-dashboard flow"
+last_reviewed: "2025-12-05"
+last_synced: "2025-12-05 - CrewAI architecture migrated from Flow to 3-Crew"
 ---
 
 # Cross-Repository Blockers
 
 This document tracks dependencies between StartupAI repositories to ensure coordinated delivery.
 
+## Architecture Change Notice (2025-12-05)
+
+**MAJOR UPSTREAM CHANGE**: CrewAI has migrated from Flow-based to 3-Crew architecture.
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Architecture change | ✅ Complete | Flow → 3-Crew (see ADR-001 in startupai-crew) |
+| Code complete | ✅ Complete | 19 agents, 32 tasks, 7 HITL checkpoints |
+| AMP deployment | ⚠️ Pending | Requires `crewai login` and deploy |
+| Crews 2 & 3 repos | ⚠️ Pending | Need separate GitHub repos |
+
+**Impact on Product App:**
+- API endpoint remains the same: `POST /kickoff` on Crew 1
+- Internal structure changed (3 crews instead of 1 flow)
+- **Wait for deployment before E2E testing**
+
+**Why the change:**
+- AMP platform has issues with `type = "flow"` projects
+- Flows returned `source: memory` without executing
+- 3-Crew architecture uses `type = "crew"` which works reliably
+
+**ADR**: See `startupai-crew/docs/adr/001-flow-to-crew-migration.md`
+
+---
+
 ## This Repo Blocked By
 
-### CrewAI Backend (`startupai-crew`) - **UPDATED 2025-11-26**
+### CrewAI Backend (`startupai-crew`) - **UPDATED 2025-12-05**
 
 | Blocker | Status | Description | Impact |
 |---------|--------|-------------|--------|
-| Phase 2D Completion | ✅ Complete | 8 crews, 18 agents, 18 tools, HITL, Flywheel | Can display results with real web research |
-| Flow → Webhook Call | ✅ Implemented | `_persist_to_supabase()` POSTs to our webhook | Results will persist when flow completes |
-| Real Analysis Tools | ✅ Implemented | TavilySearchTool + 4 research tools | Real web research available |
-| Flywheel Learning Tables | ✅ Done | Tables created in Supabase | CrewAI can persist/query learnings |
+| 3-Crew Architecture | ✅ Code Complete | 19 agents, 32 tasks, 7 HITL | New architecture ready |
+| Crew 1 Deployment | ⚠️ Pending | Requires `crewai login` then deploy | Can't test E2E until deployed |
+| Crews 2 & 3 Repos | ⚠️ Pending | Need separate GitHub repos | Full pipeline blocked |
+| Crew Chaining | ⚠️ Pending | `InvokeCrewAIAutomationTool` config | Inter-crew communication |
 
-**Status Update (2025-11-26):** CrewAI backend is ~85% complete. Core engine fully functional with:
-- 18 tools implemented (research, financial, build, HITL, flywheel, privacy)
-- `_persist_to_supabase()` webhook implemented in flow
-- Resume handler for HITL approvals (`webhooks/resume_handler.py`)
-- 192 integration tests passing
+**Status Update (2025-12-05):** CrewAI has migrated from Flow to 3-Crew architecture.
 
-**Remaining Gaps (not blocking this repo):**
-- Activity Feed API for marketing site (✅ Done - 2025-11-30)
-- Metrics API for marketing site (✅ Done - 2025-11-30)
-- Ad platform integration (Meta/Google) - explicitly deferred
+**New Architecture:**
+- Crew 1 (Intake): 4 agents, 6 tasks, 1 HITL - parses input, creates VPC
+- Crew 2 (Validation): 12 agents, 21 tasks, 5 HITL - runs D/F/V validation
+- Crew 3 (Decision): 3 agents, 5 tasks, 1 HITL - synthesizes and decides
 
-**Phase Status**: See `startupai-crew/docs/work/phases.md`
+**What's Ready:**
+- All crew code complete and tested
+- Crew 1 at repo root with `type = "crew"`
+- Old Flow code archived
+
+**What's Pending:**
+- CrewAI login (session expired)
+- AMP deployment for all 3 crews
+- Separate repos for Crews 2 & 3
+
+**Phase Status**: See `startupai-crew/docs/work/phases.md` (Phase 0 - Deployment)
 
 ## This Repo Provides
 
