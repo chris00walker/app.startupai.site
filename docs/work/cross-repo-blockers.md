@@ -1,68 +1,51 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2025-12-05"
-last_synced: "2025-12-05 - CrewAI architecture migrated from Flow to 3-Crew"
+last_reviewed: "2026-01-07"
+last_synced: "2026-01-07 - Full ecosystem status sync from startupai-crew"
 ---
 
 # Cross-Repository Blockers
 
 This document tracks dependencies between StartupAI repositories to ensure coordinated delivery.
 
-## Architecture Change Notice (2025-12-05)
+## Ecosystem Status (2026-01-07)
 
-**MAJOR UPSTREAM CHANGE**: CrewAI has migrated from Flow-based to 3-Crew architecture.
+**All services deployed and functional.** Primary work is E2E verification.
 
-| Item | Status | Notes |
-|------|--------|-------|
-| Architecture change | ✅ Complete | Flow → 3-Crew (see ADR-001 in startupai-crew) |
-| Code complete | ✅ Complete | 19 agents, 32 tasks, 7 HITL checkpoints |
-| AMP deployment | ⚠️ Pending | Requires `crewai login` and deploy |
-| Crews 2 & 3 repos | ⚠️ Pending | Need separate GitHub repos |
+| Service | Status | Completion |
+|---------|--------|------------|
+| CrewAI Backend | ✅ 3 Crews deployed to AMP | ~85% |
+| Product App | ✅ Phase Alpha complete | ~85% |
+| Marketing Site | ✅ Production, static export | ~90% |
 
-**Impact on Product App:**
-- API endpoint remains the same: `POST /kickoff` on Crew 1
-- Internal structure changed (3 crews instead of 1 flow)
-- **Wait for deployment before E2E testing**
-
-**Why the change:**
-- AMP platform has issues with `type = "flow"` projects
-- Flows returned `source: memory` without executing
-- 3-Crew architecture uses `type = "crew"` which works reliably
-
-**ADR**: See `startupai-crew/docs/adr/001-flow-to-crew-migration.md`
+**Source of Truth**: `startupai-crew/docs/master-architecture/09-status.md`
 
 ---
 
 ## This Repo Blocked By
 
-### CrewAI Backend (`startupai-crew`) - **UPDATED 2025-12-05**
+### CrewAI Backend (`startupai-crew`)
 
 | Blocker | Status | Description | Impact |
 |---------|--------|-------------|--------|
-| 3-Crew Architecture | ✅ Code Complete | 19 agents, 32 tasks, 7 HITL | New architecture ready |
-| Crew 1 Deployment | ⚠️ Pending | Requires `crewai login` then deploy | Can't test E2E until deployed |
-| Crews 2 & 3 Repos | ⚠️ Pending | Need separate GitHub repos | Full pipeline blocked |
-| Crew Chaining | ⚠️ Pending | `InvokeCrewAIAutomationTool` config | Inter-crew communication |
+| 3-Crew Architecture | ✅ DEPLOYED | 19 agents, 32 tasks, 7 HITL | Full pipeline operational |
+| Crew 1 Deployment | ✅ DEPLOYED | UUID: `6b1e5c4d-e708-4921-be55-08fcb0d1e94b` | Can trigger validation |
+| Crews 2 & 3 Repos | ✅ DEPLOYED | Separate GitHub repos created | Full pipeline works |
+| Crew Chaining | ✅ CONFIGURED | `InvokeCrewAIAutomationTool` wired | Inter-crew communication |
+| Crew 1 Best Practices | ✅ COMPLETE | 100% CrewAI alignment (2026-01-06) | Structured outputs |
 
-**Status Update (2025-12-05):** CrewAI has migrated from Flow to 3-Crew architecture.
+**All CrewAI blockers resolved.** E2E verification is the remaining work.
 
-**New Architecture:**
-- Crew 1 (Intake): 4 agents, 6 tasks, 1 HITL - parses input, creates VPC
-- Crew 2 (Validation): 12 agents, 21 tasks, 5 HITL - runs D/F/V validation
-- Crew 3 (Decision): 3 agents, 5 tasks, 1 HITL - synthesizes and decides
+### Remaining Work (Not Blockers)
 
-**What's Ready:**
-- All crew code complete and tested
-- Crew 1 at repo root with `type = "crew"`
-- Old Flow code archived
+| Item | Status | Owner | Notes |
+|------|--------|-------|-------|
+| E2E flow verification | ⚠️ Ready to test | All repos | All components exist |
+| PostHog coverage gaps | ⚠️ 13+ events defined | Product | Need implementation |
+| Dashboard mock replacement | ⚠️ Some remaining | Product | Wire to CrewAI data |
 
-**What's Pending:**
-- CrewAI login (session expired)
-- AMP deployment for all 3 crews
-- Separate repos for Crews 2 & 3
-
-**Phase Status**: See `startupai-crew/docs/work/phases.md` (Phase 0 - Deployment)
+---
 
 ## This Repo Provides
 
@@ -70,70 +53,89 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 | Item | Status | Description | Unblocks |
 |------|--------|-------------|----------|
-| Webhook endpoint | ✅ Done | `POST /api/crewai/webhook` accepts results | CrewAI Flow can persist outputs |
+| Webhook endpoint | ✅ Done | `POST /api/crewai/webhook` accepts results | CrewAI can persist outputs |
 | Learning tables migration | ✅ Done | pgvector tables for flywheel learning | CrewAI learning tools can persist/query |
 | HITL approval tables | ✅ Done | `approval_requests` table + API | CrewAI can request human approvals |
 | Consultant webhook | ✅ Done | Handles `consultant_onboarding` flow | Consultant analysis can persist |
 
-**Completed Infrastructure (2025-11-26):**
-- ✅ Unified webhook at `/api/crewai/webhook` (handles `founder_validation` and `consultant_onboarding`)
-- ✅ Flywheel tables: `learnings`, `patterns`, `outcomes`, `domain_expertise`
-- ✅ Vector similarity search functions: `search_learnings`, `search_patterns`, `get_domain_expertise`
-- ✅ Industry benchmark seed data pre-populated
-- ✅ Approval workflow: `/api/approvals` with CRUD operations
+### Marketing Site (`startupai.site`)
+
+| Item | Status | Description | Unblocks |
+|------|--------|-------------|----------|
+| Activity Feed API | ✅ Done | `GET /api/v1/public/activity` | Marketing can show live agent activity |
+| Metrics API | ✅ Done | `GET /api/v1/public/metrics` | Marketing can display trust metrics |
+| Results Display UI | ✅ Done | Dashboard + Report Viewer + Evidence Explorer | Full UI ready |
+| VPC Canvas | ✅ Done | Strategyzer-style SVG with fit lines | Professional visualization |
+
+**Marketing site is fully unblocked.** APIs are shipped and ready for connection.
+
+---
 
 ## This Repo Blocks
 
 ### Marketing Site (`startupai.site`)
 
-| Blocked Item | Status | Description | Impact |
-|--------------|--------|-------------|--------|
-| Results Display UI | ✅ Done | Dashboard + Report Viewer + Evidence Explorer | Full UI ready for CrewAI results |
-| E2E Validation Flow | ✅ Ready to Test | Full flow: onboarding → analysis → results | Integration test added 2025-12-02 |
-| Accessibility Foundation | ✅ Done | WCAG 2.1 AA foundation | Legal compliance path cleared |
-| VPC Canvas | ✅ Done | Strategyzer-style SVG with fit lines | Professional canvas visualization |
-| Activity Feed API | ✅ Done | `GET /api/v1/public/activity` | Marketing can show live agent activity |
-| Metrics API | ✅ Done | `GET /api/v1/public/metrics` | Marketing can display trust metrics |
+| Blocked Item | Status | Description |
+|--------------|--------|-------------|
+| Activity Feed connection | ⚠️ API Ready | Marketing needs to connect to `/api/v1/public/activity` |
+| Metrics connection | ⚠️ API Ready | Marketing needs to connect to `/api/v1/public/metrics` |
 
-## Phase Alpha Dependencies
+**Note:** APIs are shipped. Marketing site has components built with mock data. Just needs to wire to real APIs.
 
-Phase Alpha (CrewAI Delivery & Onboarding Hardening) requires:
-1. **CrewAI Phase 2D complete** → ✅ Complete (18 tools, real web research)
-2. **Results persistence** → ✅ Webhook implemented (`_persist_to_supabase()`)
-3. **Results display** → ✅ `ValidationResultsSummary` wired to dashboard
+---
 
-### Dependency Chain - UPDATED 2025-11-30
+## E2E Verification Checklist
+
+The following flow needs live verification:
+
 ```
-✅ CrewAI Phase 2D Complete (8 crews, 18 agents, 18 tools)
-         ↓
-✅ CrewAI Flow calls POST /api/crewai/webhook (implemented)
-         ↓
-✅ Product App displays real results (Report Viewer + Evidence Explorer)
-         ↓
-✅ E2E test infrastructure fixed
-         ↓
-✅ PostHog instrumentation (~12 events wired - COMPLETED 2025-11-30)
-         ↓
-Marketing Phase 4 Validation Cycles
-
-✅ Learning Tables Migration (done)
-         ↓
-✅ CrewAI Flywheel Tools (implemented)
-         ↓
-AI Founders Get Smarter (operational)
+User lands on startupai.site
+    ↓
+Signs up (Supabase Auth)
+    ↓
+Redirects to app.startupai.site with plan
+    ↓
+Completes onboarding chat (7 stages)
+    ↓
+Triggers CrewAI analysis (POST /kickoff)
+    ↓
+CrewAI processes through 3 crews
+    ↓
+Webhook persists results to Supabase
+    ↓
+Dashboard displays validation results
+    ↓
+Marketing activity feed shows real activity
 ```
+
+**Status**: All components exist. Needs live end-to-end test.
+
+---
 
 ## Coordination Notes
 
-- **CrewAI backend is UNBLOCKED** - All dependencies on CrewAI are resolved
-- **Product App P0 COMPLETE** - No remaining P0 blockers as of 2025-11-30
-- **Marketing site UNBLOCKED** - Activity Feed API and Metrics API now available
-- **Test Suite Healthy** - 355 passing, specification tests 12/12, timing tests synthetic
-- Major completions Nov 28-30: E2E infra, Accessibility, Report Viewer, Evidence Explorer, VPC Canvas, PostHog, Public APIs, Test Suite fixes
-- **Integration Test Added (2025-12-02)**: `webhook-to-dashboard.integration.test.ts` verifies full webhook → DB → dashboard flow
+- **CrewAI backend is UNBLOCKED** - All 3 crews deployed to AMP
+- **Product App P0 COMPLETE** - No remaining P0 blockers
+- **Marketing site UNBLOCKED** - Activity Feed + Metrics APIs shipped
+- **Test Suite Healthy** - 463+ tests passing
+- **Primary blocker**: E2E verification with live data
+
+---
 
 ## Cross-Repo Links
 
 - CrewAI blockers: `startupai-crew/docs/work/cross-repo-blockers.md`
 - Marketing blockers: `startupai.site/docs/work/cross-repo-blockers.md`
-- Master architecture: `startupai-crew/docs/master-architecture/01-ecosystem.md`
+- Master architecture: `startupai-crew/docs/master-architecture/09-status.md`
+
+---
+
+**Last Updated**: 2026-01-07
+
+**Changes (2026-01-07 - Full Ecosystem Sync)**:
+- Synced with `startupai-crew/docs/master-architecture/09-status.md` cross-repo rewrite
+- Updated all CrewAI blockers from "Pending" to "DEPLOYED"
+- All 3 crews now deployed and online on AMP
+- Updated status tables to reflect current reality
+- Added E2E Verification Checklist
+- Primary blocker is now E2E verification, not deployment
