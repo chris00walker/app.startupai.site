@@ -15,11 +15,11 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 | Service | Status | Completion |
 |---------|--------|------------|
-| CrewAI Backend | ✅ Canonical: 5 Flows/14 Crews/44 Agents; Deployed: 3 Crews/19 Agents | ~85% |
+| CrewAI Backend | ✅ Canonical: 5 Flows/14 Crews/45 Agents; Deployed: 3 Crews/19 Agents | ~85% |
 | Product App | ✅ Phase Alpha complete | ~85% |
 | Marketing Site | ✅ Production, static export | ~90% |
 
-**Architecture Note**: Canonical architecture (5 Flows, 14 Crews, 44 Agents, 10 HITL) is fully specified. AMP deployment (3 Crews, 19 Agents, 7 HITL) is a platform workaround.
+**Architecture Note**: Canonical architecture (5 Flows, 14 Crews, 45 Agents, 10 HITL) is fully specified. AMP deployment (3 Crews, 19 Agents, 7 HITL) is a platform workaround.
 
 **Source of Truth**: `startupai-crew/docs/master-architecture/09-status.md`
 
@@ -31,7 +31,7 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 
 | Blocker | Status | Description | Impact |
 |---------|--------|-------------|--------|
-| Architecture Docs | ✅ ALIGNED | Canonical: 5 Flows/14 Crews/44 Agents/10 HITL | Pattern clarity |
+| Architecture Docs | ✅ ALIGNED | Canonical: 5 Flows/14 Crews/45 Agents/10 HITL | Pattern clarity |
 | AMP Deployment | ✅ DEPLOYED | 3 Crews/19 Agents/7 HITL (platform workaround) | Full pipeline operational |
 | Crew 1 Deployment | ✅ DEPLOYED | UUID: `6b1e5c4d-e708-4921-be55-08fcb0d1e94b` | Can trigger validation |
 | Crews 2 & 3 Repos | ✅ DEPLOYED | Separate GitHub repos created | Full pipeline works |
@@ -137,7 +137,7 @@ Marketing activity feed shows real activity
 
 **Changes (2026-01-07 - Architecture Alignment Sync)**:
 - Synced with CrewAI architecture pattern alignment (canonical vs deployed)
-- Canonical architecture: 5 Flows, 14 Crews, 44 Agents, 10 HITL
+- Canonical architecture: 5 Flows, 14 Crews, 45 Agents, 10 HITL
 - AMP deployment: 3 Crews, 19 Agents, 7 HITL (platform workaround)
 - Added Architecture Docs blocker as ALIGNED
 
