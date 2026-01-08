@@ -1,16 +1,19 @@
 /**
- * Unified CrewAI Webhook Endpoint
+ * Unified CrewAI/Modal Webhook Endpoint
  *
  * POST /api/crewai/webhook
  *
- * Single entry point for all CrewAI flow results. Routes internally
+ * Single entry point for all validation flow results. Routes internally
  * based on the `flow_type` field in the payload.
  *
  * Supported flow types:
- * - founder_validation: Validation results from InternalValidationFlow
+ * - founder_validation: Validation results (AMP or Modal)
  * - consultant_onboarding: Results from ConsultantOnboardingFlow
+ * - progress_update: Real-time progress from Modal (NEW)
+ * - hitl_checkpoint: HITL checkpoint notifications from Modal (NEW)
  *
- * Authentication: Bearer token (CREW_CONTRACT_BEARER)
+ * Authentication:
+ * - Bearer token (CREW_CONTRACT_BEARER for AMP, MODAL_AUTH_TOKEN for Modal)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -21,10 +24,11 @@ import { createClient as createAdminClient } from '@/lib/supabase/admin';
 // SHARED TYPES AND UTILITIES
 // =============================================================================
 
-type FlowType = 'founder_validation' | 'consultant_onboarding';
+type FlowType = 'founder_validation' | 'consultant_onboarding' | 'progress_update' | 'hitl_checkpoint';
 
 /**
- * Validate bearer token from CrewAI
+ * Validate bearer token from CrewAI AMP or Modal
+ * Accepts either CREW_CONTRACT_BEARER (AMP) or MODAL_AUTH_TOKEN (Modal)
  */
 function validateBearerToken(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
@@ -33,14 +37,17 @@ function validateBearerToken(request: NextRequest): boolean {
   }
 
   const token = authHeader.slice(7);
-  const expectedToken = process.env.CREW_CONTRACT_BEARER;
 
-  if (!expectedToken) {
-    console.error('[api/crewai/webhook] CREW_CONTRACT_BEARER not configured');
+  // Accept either AMP token or Modal token
+  const ampToken = process.env.CREW_CONTRACT_BEARER;
+  const modalToken = process.env.MODAL_AUTH_TOKEN;
+
+  if (!ampToken && !modalToken) {
+    console.error('[api/crewai/webhook] Neither CREW_CONTRACT_BEARER nor MODAL_AUTH_TOKEN configured');
     return false;
   }
 
-  return token === expectedToken;
+  return token === ampToken || token === modalToken;
 }
 
 // =============================================================================
@@ -118,7 +125,8 @@ const founderValidationSchema = z.object({
   flow_type: z.literal('founder_validation'),
   project_id: z.string().uuid(),
   user_id: z.string().uuid(),
-  kickoff_id: z.string().optional(),
+  kickoff_id: z.string().optional(),  // AMP legacy
+  run_id: z.string().optional(),       // Modal (preferred)
   session_id: z.string().optional(),
   validation_report: validationReportSchema,
   value_proposition_canvas: z.record(z.string(), z.object({
@@ -213,9 +221,10 @@ function detectIndustry(businessIdea: string): string {
 function buildActivityLogEntries(payload: FounderValidationPayload): ActivityLogEntry[] {
   const entries: ActivityLogEntry[] = [];
   const industry = detectIndustry(payload.validation_report.business_idea);
+  const executionId = payload.run_id || payload.kickoff_id;
   const baseEntry = {
     project_id: payload.project_id,
-    kickoff_id: payload.kickoff_id || null,
+    kickoff_id: executionId || null,  // Store run_id or kickoff_id in kickoff_id column
   };
 
   // Sage: VPC/Analysis activities
@@ -328,6 +337,7 @@ type ConsultantOnboardingPayload = z.infer<typeof consultantOnboardingSchema>;
 function buildReportRow(payload: FounderValidationPayload) {
   const nowIso = new Date().toISOString();
   const report = payload.validation_report;
+  const executionId = payload.run_id || payload.kickoff_id;
 
   return {
     project_id: payload.project_id,
@@ -344,7 +354,7 @@ function buildReportRow(payload: FounderValidationPayload) {
       _metadata: {
         user_id: payload.user_id,
         validation_id: report.id,
-        kickoff_id: payload.kickoff_id,
+        execution_id: executionId,  // run_id (Modal) or kickoff_id (AMP)
         completed_at: payload.completed_at || nowIso,
         evidence_phases: {
           desirability: !!payload.evidence.desirability,
@@ -455,6 +465,7 @@ function buildValidationStateRow(payload: FounderValidationPayload) {
   const nowIso = new Date().toISOString();
   const canvas = payload.value_proposition_canvas;
   const segments = Object.keys(canvas);
+  const executionId = payload.run_id || payload.kickoff_id;
 
   // Transform VPC data into the expected format
   const customerProfiles: Record<string, any> = {};
@@ -499,7 +510,7 @@ function buildValidationStateRow(payload: FounderValidationPayload) {
     project_id: payload.project_id,
     user_id: payload.user_id,
     session_id: payload.session_id || null,
-    kickoff_id: payload.kickoff_id || null,
+    kickoff_id: executionId || null,  // Store run_id or kickoff_id
     iteration: payload.iteration || 1,
     phase: payload.phase || 'desirability',
     current_risk_axis: payload.current_risk_axis || 'desirability',
@@ -663,10 +674,13 @@ function buildEntrepreneurBriefRow(payload: FounderValidationPayload) {
 }
 
 async function handleFounderValidation(payload: FounderValidationPayload): Promise<NextResponse> {
+  // Use run_id (Modal) or kickoff_id (AMP) for identification
+  const executionId = payload.run_id || payload.kickoff_id;
+
   console.log('[api/crewai/webhook] Processing founder_validation:', {
     project_id: payload.project_id,
     user_id: payload.user_id,
-    kickoff_id: payload.kickoff_id,
+    execution_id: executionId,
     validation_id: payload.validation_report.id,
     has_desirability: !!payload.evidence.desirability,
     has_feasibility: !!payload.evidence.feasibility,
@@ -760,18 +774,18 @@ async function handleFounderValidation(payload: FounderValidationPayload): Promi
   let activitiesCreated = 0;
 
   if (activityEntries.length > 0) {
-    // Check for duplicate kickoff_id to ensure idempotency
-    if (payload.kickoff_id) {
+    // Check for duplicate execution_id (run_id or kickoff_id) to ensure idempotency
+    if (executionId) {
       const { data: existing } = await admin
         .from('public_activity_log')
         .select('id')
-        .eq('kickoff_id', payload.kickoff_id)
+        .eq('kickoff_id', executionId)
         .limit(1);
 
       if (existing && existing.length > 0) {
         console.log(
-          '[api/crewai/webhook] Skipping duplicate activity entries for kickoff_id:',
-          payload.kickoff_id
+          '[api/crewai/webhook] Skipping duplicate activity entries for execution_id:',
+          executionId
         );
       } else {
         const { error: activityError } = await admin.from('public_activity_log').insert(activityEntries);
@@ -783,7 +797,7 @@ async function handleFounderValidation(payload: FounderValidationPayload): Promi
         }
       }
     } else {
-      // No kickoff_id, insert without deduplication
+      // No execution_id, insert without deduplication
       const { error: activityError } = await admin.from('public_activity_log').insert(activityEntries);
       if (!activityError) {
         activitiesCreated = activityEntries.length;
@@ -869,6 +883,200 @@ async function handleConsultantOnboarding(payload: ConsultantOnboardingPayload):
 }
 
 // =============================================================================
+// MODAL PROGRESS UPDATE SCHEMAS AND HANDLER
+// =============================================================================
+
+const progressUpdateSchema = z.object({
+  flow_type: z.literal('progress_update'),
+  run_id: z.string(),
+  project_id: z.string().uuid().optional(),
+  user_id: z.string().uuid().optional(),
+  status: z.enum(['pending', 'running', 'paused', 'completed', 'failed']),
+  current_phase: z.number(),
+  phase_name: z.string(),
+  progress: z.object({
+    crew: z.string().optional(),
+    task: z.string().optional(),
+    agent: z.string().optional(),
+    progress_pct: z.number(),
+  }).optional(),
+  error: z.string().optional(),
+  timestamp: z.string().optional(),
+});
+
+type ProgressUpdatePayload = z.infer<typeof progressUpdateSchema>;
+
+async function handleProgressUpdate(payload: ProgressUpdatePayload): Promise<NextResponse> {
+  console.log('[api/crewai/webhook] Processing progress_update:', {
+    run_id: payload.run_id,
+    status: payload.status,
+    phase: payload.current_phase,
+    progress_pct: payload.progress?.progress_pct,
+  });
+
+  const admin = createAdminClient();
+
+  // Update validation_runs table with progress
+  const { error: updateError } = await admin
+    .from('validation_runs')
+    .update({
+      status: payload.status,
+      current_phase: payload.current_phase,
+      phase_name: payload.phase_name,
+      progress: payload.progress,
+      error: payload.error,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('run_id', payload.run_id);
+
+  if (updateError) {
+    console.error('[api/crewai/webhook] Failed to update validation_runs:', updateError);
+    // Don't fail - progress updates are best-effort
+  }
+
+  // Also insert into validation_progress for Realtime subscriptions
+  const { error: progressError } = await admin
+    .from('validation_progress')
+    .insert({
+      run_id: payload.run_id,
+      project_id: payload.project_id,
+      user_id: payload.user_id,
+      status: payload.status,
+      current_phase: payload.current_phase,
+      phase_name: payload.phase_name,
+      crew: payload.progress?.crew,
+      task: payload.progress?.task,
+      agent: payload.progress?.agent,
+      progress_pct: payload.progress?.progress_pct ?? 0,
+      error: payload.error,
+      created_at: payload.timestamp || new Date().toISOString(),
+    });
+
+  if (progressError) {
+    console.error('[api/crewai/webhook] Failed to insert progress:', progressError);
+  }
+
+  return NextResponse.json({
+    success: true,
+    flow_type: 'progress_update',
+    run_id: payload.run_id,
+    message: 'Progress update recorded',
+  });
+}
+
+// =============================================================================
+// MODAL HITL CHECKPOINT SCHEMAS AND HANDLER
+// =============================================================================
+
+const hitlCheckpointSchema = z.object({
+  flow_type: z.literal('hitl_checkpoint'),
+  run_id: z.string(),
+  project_id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  checkpoint: z.string(),
+  title: z.string(),
+  description: z.string(),
+  options: z.array(z.object({
+    id: z.string(),
+    label: z.string(),
+    description: z.string().optional(),
+  })),
+  recommended: z.string().optional(),
+  context: z.record(z.string(), z.any()).optional(),
+  expires_at: z.string().optional(),
+  timestamp: z.string().optional(),
+});
+
+type HITLCheckpointPayload = z.infer<typeof hitlCheckpointSchema>;
+
+async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<NextResponse> {
+  console.log('[api/crewai/webhook] Processing hitl_checkpoint:', {
+    run_id: payload.run_id,
+    checkpoint: payload.checkpoint,
+    title: payload.title,
+    options_count: payload.options.length,
+  });
+
+  const admin = createAdminClient();
+  const nowIso = new Date().toISOString();
+
+  // Update validation_runs to paused status
+  await admin
+    .from('validation_runs')
+    .update({
+      status: 'paused',
+      hitl_checkpoint: {
+        checkpoint: payload.checkpoint,
+        title: payload.title,
+        description: payload.description,
+        options: payload.options,
+        recommended: payload.recommended,
+        context: payload.context,
+      },
+      updated_at: nowIso,
+    })
+    .eq('run_id', payload.run_id);
+
+  // Create approval request in approval_requests table
+  const { data: approvalRequest, error: approvalError } = await admin
+    .from('approval_requests')
+    .insert({
+      project_id: payload.project_id,
+      user_id: payload.user_id,
+      execution_id: payload.run_id,  // Store run_id as execution_id
+      task_id: payload.checkpoint,    // Store checkpoint name as task_id
+      approval_type: 'hitl_checkpoint',
+      status: 'pending',
+      title: payload.title,
+      description: payload.description,
+      options: payload.options,
+      recommended_option: payload.recommended,
+      context: payload.context,
+      expires_at: payload.expires_at,
+      created_at: nowIso,
+      updated_at: nowIso,
+    })
+    .select('id')
+    .single();
+
+  if (approvalError) {
+    console.error('[api/crewai/webhook] Failed to create approval request:', approvalError);
+    return NextResponse.json(
+      { error: 'Failed to create approval request', details: approvalError.message },
+      { status: 500 }
+    );
+  }
+
+  console.log('[api/crewai/webhook] HITL checkpoint approval request created:', approvalRequest?.id);
+
+  // Insert HITL progress event for Realtime
+  await admin
+    .from('validation_progress')
+    .insert({
+      run_id: payload.run_id,
+      project_id: payload.project_id,
+      user_id: payload.user_id,
+      status: 'paused',
+      current_phase: 0,  // Will be updated from validation_runs
+      phase_name: 'Awaiting Approval',
+      crew: 'HITL',
+      task: payload.checkpoint,
+      agent: 'Human',
+      progress_pct: 0,
+      created_at: nowIso,
+    });
+
+  return NextResponse.json({
+    success: true,
+    flow_type: 'hitl_checkpoint',
+    run_id: payload.run_id,
+    checkpoint: payload.checkpoint,
+    approval_request_id: approvalRequest?.id,
+    message: 'HITL checkpoint recorded and approval request created',
+  });
+}
+
+// =============================================================================
 // MAIN HANDLER
 // =============================================================================
 
@@ -934,10 +1142,34 @@ export async function POST(request: NextRequest) {
         return await handleConsultantOnboarding(validation.data);
       }
 
+      case 'progress_update': {
+        const validation = progressUpdateSchema.safeParse(body);
+        if (!validation.success) {
+          console.error('[api/crewai/webhook] progress_update validation failed:', validation.error.flatten());
+          return NextResponse.json(
+            { error: 'Invalid payload for progress_update', details: validation.error.flatten() },
+            { status: 400 }
+          );
+        }
+        return await handleProgressUpdate(validation.data);
+      }
+
+      case 'hitl_checkpoint': {
+        const validation = hitlCheckpointSchema.safeParse(body);
+        if (!validation.success) {
+          console.error('[api/crewai/webhook] hitl_checkpoint validation failed:', validation.error.flatten());
+          return NextResponse.json(
+            { error: 'Invalid payload for hitl_checkpoint', details: validation.error.flatten() },
+            { status: 400 }
+          );
+        }
+        return await handleHITLCheckpoint(validation.data);
+      }
+
       default:
         console.error('[api/crewai/webhook] Unknown flow_type:', flowType);
         return NextResponse.json(
-          { error: `Unknown flow_type: ${flowType}. Expected: founder_validation | consultant_onboarding` },
+          { error: `Unknown flow_type: ${flowType}. Expected: founder_validation | consultant_onboarding | progress_update | hitl_checkpoint` },
           { status: 400 }
         );
     }

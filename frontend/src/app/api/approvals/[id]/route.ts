@@ -211,7 +211,8 @@ export async function PATCH(
       approval.execution_id,
       approval.task_id,
       body.decision || 'approved',
-      body.feedback || 'Approved by user'
+      body.feedback || 'Approved by user',
+      user.id
     );
   }
 
@@ -225,9 +226,88 @@ export async function PATCH(
 }
 
 /**
- * Resume CrewAI execution after approval.
+ * Resume validation execution after HITL approval.
+ * Uses Modal serverless (primary) or AMP (deprecated fallback).
  */
 async function resumeCrewAIExecution(
+  executionId: string,
+  taskId: string,
+  decision: string,
+  feedback: string,
+  decidedBy?: string
+): Promise<void> {
+  // Try Modal first (preferred)
+  if (isModalConfiguredForResume()) {
+    await resumeModalExecution(executionId, taskId, decision, feedback, decidedBy);
+    return;
+  }
+
+  // Fallback to AMP (deprecated)
+  await resumeAMPExecution(executionId, taskId, decision, feedback);
+}
+
+/**
+ * Check if Modal is configured for HITL resume
+ */
+function isModalConfiguredForResume(): boolean {
+  return !!(
+    process.env.MODAL_HITL_APPROVE_URL &&
+    process.env.MODAL_AUTH_TOKEN
+  );
+}
+
+/**
+ * Resume validation via Modal serverless HITL endpoint
+ */
+async function resumeModalExecution(
+  runId: string,
+  checkpoint: string,
+  decision: string,
+  feedback: string,
+  decidedBy?: string
+): Promise<void> {
+  const modalUrl = process.env.MODAL_HITL_APPROVE_URL;
+  const modalToken = process.env.MODAL_AUTH_TOKEN;
+
+  if (!modalUrl) {
+    console.warn('[api/approvals] Modal HITL URL not configured');
+    return;
+  }
+
+  try {
+    console.log('[api/approvals] Resuming via Modal HITL:', { runId, checkpoint, decision });
+
+    const response = await fetch(modalUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(modalToken && { 'Authorization': `Bearer ${modalToken}` }),
+      },
+      body: JSON.stringify({
+        run_id: runId,
+        checkpoint: checkpoint,
+        decision: decision,
+        feedback: feedback || undefined,
+        decided_by: decidedBy || undefined,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[api/approvals] Modal HITL resume failed:', response.status, errorText);
+    } else {
+      const result = await response.json();
+      console.log('[api/approvals] Modal execution resumed:', result);
+    }
+  } catch (error) {
+    console.error('[api/approvals] Modal HITL resume error:', error);
+  }
+}
+
+/**
+ * Resume validation via legacy AMP endpoint (deprecated)
+ */
+async function resumeAMPExecution(
   executionId: string,
   taskId: string,
   decision: string,
@@ -237,9 +317,11 @@ async function resumeCrewAIExecution(
   const crewaiToken = process.env.CREWAI_API_TOKEN;
 
   if (!crewaiUrl || !crewaiToken) {
-    console.warn('[api/approvals] CrewAI URL/Token not configured, skipping resume');
+    console.warn('[api/approvals] CrewAI AMP URL/Token not configured, skipping resume');
     return;
   }
+
+  console.log('[api/approvals] Using deprecated AMP resume');
 
   try {
     const resumeUrl = `${crewaiUrl}/resume`;
@@ -260,11 +342,11 @@ async function resumeCrewAIExecution(
     });
 
     if (!response.ok) {
-      console.error('[api/approvals] CrewAI resume failed:', response.status);
+      console.error('[api/approvals] AMP resume failed:', response.status);
     } else {
-      console.log('[api/approvals] CrewAI execution resumed');
+      console.log('[api/approvals] AMP execution resumed');
     }
   } catch (error) {
-    console.error('[api/approvals] CrewAI resume error:', error);
+    console.error('[api/approvals] AMP resume error:', error);
   }
 }

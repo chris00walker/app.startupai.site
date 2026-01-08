@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { assertTrialAllowance } from '@/lib/auth/trial-guard';
+import { createModalClient, isModalConfigured, type ModalKickoffRequest } from '@/lib/crewai/modal-client';
 
 const analyzeRequestSchema = z.object({
   strategic_question: z.string().min(10, 'Strategic question must be at least 10 characters'),
@@ -73,15 +74,76 @@ const PLAN_ANALYSIS_LIMITS: Record<string, number> = {
 };
 
 function resolveCrewAIUrl(): string {
-  // CrewAI AMP endpoint - deployed Value Proposition Design crew
+  // CrewAI AMP endpoint - deployed Value Proposition Design crew (DEPRECATED)
   const crewAIUrl = process.env.CREWAI_API_URL;
-  
+
   if (!crewAIUrl) {
     console.error('[api/analyze] CREWAI_API_URL environment variable not configured');
     throw new Error('CrewAI API endpoint not configured. Please set CREWAI_API_URL environment variable.');
   }
 
   return crewAIUrl;
+}
+
+/**
+ * Trigger validation using Modal serverless (primary) or AMP (fallback)
+ * Modal is preferred: $0 idle costs, checkpoint-and-resume pattern
+ */
+async function triggerValidation(params: {
+  entrepreneurInput: string;
+  projectId: string;
+  userId: string;
+  sessionId?: string;
+}): Promise<{ runId: string; provider: 'modal' | 'amp' }> {
+  const { entrepreneurInput, projectId, userId, sessionId } = params;
+
+  // Prefer Modal if configured
+  if (isModalConfigured()) {
+    console.log('[api/analyze] Using Modal serverless (recommended)');
+
+    const modalClient = createModalClient();
+    const modalRequest: ModalKickoffRequest = {
+      entrepreneur_input: entrepreneurInput,
+      project_id: projectId,
+      user_id: userId,
+      session_id: sessionId,
+    };
+
+    const response = await modalClient.kickoff(modalRequest);
+    return { runId: response.run_id, provider: 'modal' };
+  }
+
+  // Fallback to AMP (deprecated)
+  console.log('[api/analyze] Falling back to CrewAI AMP (deprecated)');
+
+  const crewAIUrl = resolveCrewAIUrl();
+  const crewAIPayload = {
+    inputs: {
+      entrepreneur_input: entrepreneurInput,
+    },
+    metadata: {
+      project_id: projectId,
+      session_id: sessionId,
+      user_id: userId,
+    }
+  };
+
+  const response = await fetch(`${crewAIUrl}/kickoff`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(process.env.CREWAI_API_TOKEN && { 'Authorization': `Bearer ${process.env.CREWAI_API_TOKEN}` }),
+    },
+    body: JSON.stringify(crewAIPayload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`AMP kickoff failed (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  return { runId: data.kickoff_id, provider: 'amp' };
 }
 
 function mapPlanTier(subscriptionTier?: string | null): keyof typeof PLAN_ANALYSIS_LIMITS {
@@ -402,126 +464,83 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const crewAIUrl = resolveCrewAIUrl();
-    
-    // Format payload for CrewAI AMP
-    // CrewAI expects a simple text input that our agents will process
-    const crewAIPayload = {
-      inputs: {
-        strategic_question: parsedPayload.strategic_question,
-        project_context: parsedPayload.project_context || '',
-        business_stage: 'validation',
-        priority: parsedPayload.priority_level || 'medium',
-      },
-      // Metadata for tracking
-      metadata: {
-        project_id: parsedPayload.project_id,
-        session_id: parsedPayload.session_id,
-        user_id: userId,
-      }
-    };
+    // Build entrepreneur input from strategic question and context
+    const entrepreneurInput = [
+      parsedPayload.strategic_question,
+      parsedPayload.project_context && `Context: ${parsedPayload.project_context}`,
+      parsedPayload.priority_level && `Priority: ${parsedPayload.priority_level}`,
+    ].filter(Boolean).join('\n\n');
 
-    let crewResponse: Response | null = null;
-    let fetchError: unknown = null;
-    const maxAttempts = 2;
+    // Trigger validation (Modal primary, AMP fallback)
+    // Returns immediately with run_id - results come via webhook
+    try {
+      const validationResult = await triggerValidation({
+        entrepreneurInput,
+        projectId: parsedPayload.project_id,
+        userId,
+        sessionId: parsedPayload.session_id,
+      });
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        console.log(`[api/analyze] Calling CrewAI AMP (attempt ${attempt}/${maxAttempts}):`, crewAIUrl);
-        
-        crewResponse = await fetch(crewAIUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            // Include CrewAI token if configured
-            ...(process.env.CREWAI_API_TOKEN && { 'Authorization': `Bearer ${process.env.CREWAI_API_TOKEN}` }),
+      console.log(
+        `[api/analyze] Validation started: run_id=${validationResult.runId}, provider=${validationResult.provider}`
+      );
+
+      // Create initial validation run record in Supabase for tracking
+      const { error: runInsertError } = await admin
+        .from('validation_runs')
+        .insert({
+          run_id: validationResult.runId,
+          project_id: parsedPayload.project_id,
+          user_id: userId,
+          session_id: parsedPayload.session_id,
+          status: 'pending',
+          provider: validationResult.provider,
+          current_phase: 0,
+          phase_name: 'Onboarding',
+          inputs: {
+            strategic_question: parsedPayload.strategic_question,
+            project_context: parsedPayload.project_context,
+            priority_level: parsedPayload.priority_level,
           },
-          body: JSON.stringify(crewAIPayload),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
 
-        if (crewResponse.ok) {
-          break;
-        }
-
-        if (crewResponse.status >= 500 && attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, attempt * 500));
-          continue;
-        }
-
-        break;
-      } catch (error) {
-        fetchError = error;
-        if (attempt < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, attempt * 500));
-          continue;
-        }
+      if (runInsertError) {
+        console.error('[api/analyze] Failed to create validation run record', runInsertError);
+        // Don't fail - the validation has started, we just can't track it locally
       }
-    }
 
-    if (!crewResponse) {
-      console.error('[api/analyze] Crew fetch failed', fetchError);
-      return NextResponse.json(
-        { error: 'CrewAI service unavailable', retryable: true },
-        { status: 503 },
-      );
-    }
-
-    if (crewResponse.status === 429) {
-      const rateInfo = await crewResponse.json().catch(() => ({}));
+      // Return 202 Accepted - validation is running asynchronously
+      // Client should poll /api/crewai/status/{run_id} or subscribe to Realtime
       return NextResponse.json(
         {
-          error: rateInfo?.error || 'CrewAI rate limit reached',
-          retryable: true,
-          metadata: rateInfo,
+          success: true,
+          run_id: validationResult.runId,
+          provider: validationResult.provider,
+          status: 'started',
+          message: 'Validation started. Subscribe to Realtime updates or poll status endpoint.',
+          status_url: `/api/crewai/status/${validationResult.runId}`,
+          project_id: parsedPayload.project_id,
         },
-        { status: 429 },
+        { status: 202 }
       );
-    }
+    } catch (validationError) {
+      console.error('[api/analyze] Validation trigger failed', validationError);
 
-    if (!crewResponse.ok) {
-      const errorBody = await crewResponse.text();
-      console.error('[api/analyze] Crew response error', crewResponse.status, errorBody);
+      const errorMessage = validationError instanceof Error
+        ? validationError.message
+        : 'Validation service unavailable';
+
       return NextResponse.json(
-        { error: 'CrewAI analysis failed', details: errorBody },
-        { status: 502 },
+        {
+          error: errorMessage,
+          retryable: true,
+          provider: isModalConfigured() ? 'modal' : 'amp',
+        },
+        { status: 503 }
       );
     }
-
-    const crewPayload = (await crewResponse.json()) as CrewFunctionResponse;
-
-    if (!crewPayload || !isCrewFunctionSuccess(crewPayload)) {
-      console.error('[api/analyze] Crew payload missing success', crewPayload);
-      return NextResponse.json(
-        { error: 'CrewAI response malformed' },
-        { status: 502 },
-      );
-    }
-
-    const existingEvidenceCount =
-      typeof project.evidence_count === 'number'
-        ? project.evidence_count
-        : Number(project.evidence_count ?? 0);
-
-    const persistenceResult = await persistAnalysisResult({
-      admin,
-      analysis: crewPayload,
-      userId,
-      projectId: parsedPayload.project_id,
-      sessionId: parsedPayload.session_id,
-      existingEvidenceCount: Number.isFinite(existingEvidenceCount) ? existingEvidenceCount : 0,
-    });
-
-    return NextResponse.json({
-      success: true,
-      analysisId: crewPayload.analysis_id,
-      summary: crewPayload.result.summary,
-      insights: crewPayload.result.insight_summaries,
-      evidenceCount: persistenceResult.evidenceCount,
-      evidenceCreated: persistenceResult.evidenceCreated,
-      reportCreated: persistenceResult.reportCreated,
-      metadata: crewPayload.metadata,
-      rawOutput: crewPayload.result.raw_output,
-    });
   } catch (error) {
     console.error('[api/analyze] Unexpected error', error);
     return NextResponse.json(
