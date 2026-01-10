@@ -2,6 +2,8 @@
 
 **Product Platform - Delivery layer for StartupAI's AI Founders validation engine**
 
+> **Modal Migration Complete**: Now integrated with Modal serverless backend. See `startupai-crew/docs/adr/002-modal-serverless-migration.md`.
+
 ## Architecture Overview
 
 This repository implements the **Product Platform** (`app.startupai.site`) - the delivery portal where users interact with the AI Founders team and receive validation results.
@@ -11,7 +13,7 @@ This repository implements the **Product Platform** (`app.startupai.site`) - the
 ```
 ┌─────────────────────┐
 │   AI Founders Core  │  ← Brain (startupai-crew)
-│  CrewAI Flows Engine│
+│   Modal Serverless  │
 └──────────┬──────────┘
            │
     ┌──────┼──────┐
@@ -27,7 +29,7 @@ Marketing  DB   Product
 
 - **startupai.site** - Marketing & lead capture
 - **app.startupai.site** - Product delivery ← THIS REPO
-- **startupai-crew** - AI Founders engine (8 crews / 18 agents)
+- **startupai-crew** - AI Founders engine (14 crews / 45 agents)
 
 ---
 
@@ -47,15 +49,15 @@ Marketing  DB   Product
 
 - **Frontend:** Next.js 15.5.3 with TypeScript 5.8.3
 - **AI Provider:** Vercel AI SDK v5 (OpenAI GPT-4.1-nano + Anthropic Claude)
-- **Database:** Supabase PostgreSQL with pgvector (12 migrations deployed)
+- **Database:** Supabase PostgreSQL with pgvector
 - **ORM:** Drizzle ORM for type-safe operations
 - **Storage:** Supabase Storage with RLS policies
 - **Vector Search:** pgvector with 1536-dim embeddings
-- **CrewAI Backend:** CrewAI AMP Platform (8-crew/18-agent Flows architecture)
+- **AI Founders Backend:** Modal Serverless (14-crew/45-agent architecture)
 - **Authentication:** JWT + GitHub OAuth with role-based routing
 - **Deployment:** Netlify
 
-**Status:** 65-70% Complete
+**Status:** ~95% Complete (Modal integration done, awaiting crew implementation)
 
 ---
 
@@ -89,7 +91,7 @@ cp frontend/.env.example frontend/.env.local
 **Development Ports (Canonical):**
 - **Marketing Site** (`startupai.site`): `localhost:3000`
 - **This repo (Product App)**: `localhost:3001`
-- **CrewAI Backend** (`startupai-crew`): Deployed on CrewAI AMP (no local port)
+- **AI Founders Backend** (`startupai-crew`): Modal Serverless (use `modal serve` for local dev)
 
 ### Production
 - **Live:** https://app-startupai-site.netlify.app
@@ -120,35 +122,36 @@ app.startupai.site/
 
 ## Current Status
 
-**Overall Progress:** 65-70% Complete
+**Overall Progress:** ~95% Complete
 
-> **Reality Check:** CrewAI integration works, but outputs are LLM-generated synthetic data until real analysis tools are built. See [cross-repo-blockers.md](docs/work/cross-repo-blockers.md) for the full gap analysis.
+> **Modal Integration Complete:** Product app now points to Modal serverless backend. Infrastructure verified (2026-01-08). Awaiting crew implementation for live validation runs. See [cross-repo-blockers.md](docs/work/cross-repo-blockers.md) for status.
 
 ### What's Working
 - 20 pages deployed (hybrid App + Pages Router)
 - 50+ UI components including 9 canvas tools
 - Complete validation UI with database integration
 - GitHub OAuth with role-based routing
-- 12 database migrations deployed
+- Database migrations deployed with Modal columns
 - Vector search function (match_evidence)
 - AI onboarding with Vercel AI SDK (7 stages, streaming)
-- CrewAI integration (kickoff, status polling, result storage)
+- Modal integration (kickoff, status polling, HITL approval)
+- Public APIs for Marketing site (Activity Feed, Metrics)
 - Trial usage guardrails
 
 ### In Progress
-- Post-onboarding workflow completion
-- Analysis results display improvements
+- First production validation run (after crews complete)
 - E2E test coverage expansion
 
-### Integration with CrewAI
+### Integration with Modal
 
 The platform connects to the AI Founders engine via:
-- `/api/analyze` - Triggers CrewAI workflow
-- `/api/crewai/status` - Polls for completion
-- `/api/crewai/webhook` - Receives results on flow completion
-- Results stored in `reports` and `evidence` tables
+- `/api/analyze` - Triggers Modal `/kickoff` endpoint
+- `/api/crewai/status` - Queries Supabase OR Modal `/status`
+- `/api/crewai/webhook` - Receives results (supports both AMP and Modal formats)
+- `/api/approvals` - Handles HITL approvals via Modal `/hitl/approve`
+- Results stored in `validation_runs`, `reports`, and `evidence` tables
 
-**Architecture:** 8-crew/18-agent Flows with Innovation Physics routers (Phase 2D complete in startupai-crew).
+**Architecture:** 5 Flows / 14 Crews / 45 Agents with Innovation Physics routers (Modal serverless).
 
 ---
 
@@ -157,9 +160,9 @@ The platform connects to the AI Founders engine via:
 ### Ecosystem Source of Truth
 **`startupai-crew/docs/master-architecture/`** contains:
 - `01-ecosystem.md` - Three-service overview
-- `02-organization.md` - 6 founders, 18 agents
-- `03-validation-spec.md` - Technical blueprint
-- `04-status.md` - Status assessment
+- `02-organization.md` - 6 founders, 45 agents
+- `03-methodology.md` - VPD framework reference
+- `09-status.md` - Current ecosystem status
 
 ### Platform-Specific Docs
 
@@ -186,6 +189,11 @@ The platform connects to the AI Founders engine via:
 - **Marketing Site:** [startupai.site](https://github.com/chris00walker/startupai.site)
 - **AI Founders Engine:** [startupai-crew](https://github.com/chris00walker/startupai-crew) - Brain of the ecosystem
 
+**Production URLs**:
+- Modal: `https://chris00walker--startupai-validation-fastapi-app.modal.run`
+- Product App: `https://app-startupai-site.netlify.app`
+- Marketing: `https://startupai.site`
+
 ---
 
 ## Testing Override
@@ -205,9 +213,11 @@ NEXT_PUBLIC_ONBOARDING_BYPASS=true
 - **Ecosystem Docs:** `startupai-crew/docs/master-architecture/`
 - **Supabase Dashboard:** https://supabase.com/dashboard
 - **Netlify Dashboard:** https://app.netlify.com
+- **Modal Dashboard:** https://modal.com/apps
 
 ---
 
-**Status:** 65-70% Complete
+**Status:** ~95% Complete (Modal integration done, awaiting crew implementation)
 **Deployment:** Netlify
+**Last Updated:** 2026-01-08
 **License:** Proprietary - StartupAI Platform
