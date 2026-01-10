@@ -1,8 +1,8 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2026-01-09"
-last_synced: "2026-01-09 - MCP architecture designed in CrewAI"
+last_reviewed: "2026-01-10"
+last_synced: "2026-01-10 - Modal tables deployed, security fixes applied"
 ---
 
 # Cross-Repository Blockers
@@ -41,7 +41,7 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 |---------|--------|-------------|--------|
 | Modal Infrastructure | ✅ DEPLOYED | Production endpoints live | Can trigger validation |
 | API Endpoints | ✅ WORKING | `/kickoff`, `/status`, `/hitl/approve`, `/health` | Full API operational |
-| Supabase Tables | ✅ READY | `validation_runs`, `validation_progress`, `hitl_requests` | State persistence works |
+| Supabase Tables | ✅ DEPLOYED | `validation_runs`, `validation_progress`, `hitl_requests` + security fixes | Live in production |
 | Supabase Realtime | ✅ ENABLED | Progress tables publishing | Real-time UI updates |
 | 14 Crews Implementation | ✅ COMPLETE | 45 agents across 14 crews | Structure complete |
 | **MCP Tool Implementation** | 🔄 **IN PROGRESS** | 60h roadmap, 4 weeks | Evidence-based outputs |
@@ -83,6 +83,37 @@ CrewAI adopting Model Context Protocol for all agent tools:
 | Crew implementation (14 crews) | ⏳ In progress | CrewAI | Building fresh from specs |
 | First production validation | ⏳ Pending | All repos | After crews complete |
 | PostHog coverage gaps | ⚠️ 13+ events defined | Product | Need implementation |
+
+---
+
+## Schema Alignment (COMPLETE)
+
+> **Deployed**: 2026-01-10 - Modal tables + security fixes applied
+> **Owner**: This repo (Supabase migrations live here)
+
+### Migrations Deployed
+
+| Migration | Purpose | Status |
+|-----------|---------|--------|
+| `modal_validation_runs` | Checkpoint state | ✅ Deployed |
+| `modal_validation_progress` | Realtime progress | ✅ Deployed |
+| `modal_hitl_requests` | HITL checkpoint/resume | ✅ Deployed |
+| `fix_security_definer_views` | 4 views fixed | ✅ Deployed |
+| `fix_function_search_paths_v2` | 9 functions secured | ✅ Deployed |
+| `fix_permissive_rls_policies` | Admin-only UPDATE | ✅ Deployed |
+| `fix_rls_auth_initplan_part1-5` | 60+ RLS policies optimized | ✅ Deployed |
+| `add_missing_fk_indexes` | 6 FK indexes added | ✅ Deployed |
+
+### Alignment Status
+
+| Pydantic Model | Supabase Table | Status |
+|----------------|----------------|--------|
+| `ValidationRunState` | `validation_runs` | ✅ Deployed |
+| `ValidationRunState` | `crewai_validation_states` | ✅ Deployed (fallback) |
+| `FoundersBrief` | `entrepreneur_briefs` | ⚠️ Structure mismatch |
+| Evidence models | JSONB columns | ✅ Works (flexible) |
+
+See `startupai-crew/docs/master-architecture/reference/data-flow.md` for complete analysis.
 
 ---
 
@@ -180,9 +211,18 @@ Marketing activity feed shows real activity
 
 ---
 
-**Last Updated**: 2026-01-09
+**Last Updated**: 2026-01-10
 
-**Changes (2026-01-09 - MCP Architecture Designed)**:
+**Changes (2026-01-10 - Modal Tables & Security Fixes Deployed)**:
+- ✅ **DEPLOYED**: Modal validation tables (`validation_runs`, `validation_progress`, `hitl_requests`)
+- ✅ **SECURITY**: Fixed 4 SECURITY DEFINER views → SECURITY INVOKER
+- ✅ **SECURITY**: Added `search_path = ''` to 9 functions
+- ✅ **SECURITY**: Restricted beta/contact UPDATE policies to admin-only
+- ✅ **PERFORMANCE**: Optimized 60+ RLS policies with `(select auth.uid())`
+- ✅ **PERFORMANCE**: Added 6 missing FK indexes
+- Schema alignment section updated to COMPLETE
+
+**Previous (2026-01-09 - MCP Architecture Designed)**:
 - 🚀 **MCP-FIRST**: CrewAI adopted Model Context Protocol as unified tool interface
 - Architecture: 13 EXISTS + 10 MCP Custom + 4 MCP External + 6 LLM-Based = 33 tools
 - Implementation roadmap: 60 hours over 4 weeks (~$5-10/month cost)
