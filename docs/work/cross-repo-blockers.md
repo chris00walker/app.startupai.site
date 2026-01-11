@@ -2,22 +2,22 @@
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
 last_reviewed: "2026-01-10"
-last_synced: "2026-01-10 - Modal tables deployed, security fixes applied"
+last_synced: "2026-01-10 - Tool integration complete, asset generation specs done"
 ---
 
 # Cross-Repository Blockers
 
 This document tracks dependencies between StartupAI repositories to ensure coordinated delivery.
 
-> **MCP ARCHITECTURE READY (2026-01-09)**: CrewAI adopting Model Context Protocol for unified tool interface. 33 tools mapped to 45 agents. 60-hour, 4-week implementation. See `startupai-crew/docs/work/phases.md` for roadmap.
+> **TOOLS COMPLETE (2026-01-10)**: 15 tools wired to 35+ agents, 681 tests passing. Phase 0-2 live testing verified. Asset generation specs complete (Blueprint Pattern + Ad Platform Library).
 
-## Ecosystem Status (2026-01-09)
+## Ecosystem Status (2026-01-10)
 
-**MCP architecture designed. CrewAI implementing tools over next 4 weeks.**
+**Phase 0-2 validated. Phase 3-4 live testing next. Asset generation specs ready for implementation.**
 
 | Service | Status | Completion | Notes |
 |---------|--------|------------|-------|
-| CrewAI Backend | **MCP IMPLEMENTATION** | ~80% | 60h roadmap, starting Phase A |
+| CrewAI Backend | **PHASE 0-2 VALIDATED** | ~92% | Phase 3-4 live testing next |
 | Product App | Modal integration complete | ~95% | Pointing to Modal endpoints |
 | Marketing Site | Live API integration | ~95% | Activity Feed + Metrics connected |
 
@@ -44,29 +44,35 @@ This document tracks dependencies between StartupAI repositories to ensure coord
 | Supabase Tables | ✅ DEPLOYED | `validation_runs`, `validation_progress`, `hitl_requests` + security fixes | Live in production |
 | Supabase Realtime | ✅ ENABLED | Progress tables publishing | Real-time UI updates |
 | 14 Crews Implementation | ✅ COMPLETE | 45 agents across 14 crews | Structure complete |
-| **MCP Tool Implementation** | 🔄 **IN PROGRESS** | 60h roadmap, 4 weeks | Evidence-based outputs |
+| Tool Integration | ✅ COMPLETE | 15 tools, 35+ agents, 681 tests | Evidence-based outputs |
+| Phase 0-2 Live Testing | ✅ COMPLETE | Pivot workflow verified | Desirability gate working |
+| Asset Generation Specs | ✅ COMPLETE | Blueprint Pattern + Ad Platform Library | Ready for implementation |
+| **Phase 3-4 Live Testing** | ⏳ **NEXT** | Feasibility + Viability gates | Final validation phases |
 
-**Modal infrastructure deployed. Crew structure complete. MCP implementation in progress.**
+**Tool integration complete. Phase 0-2 validated. Phase 3-4 live testing next.**
 
-#### MCP Architecture (Unified Tool Interface)
+#### Tool Architecture (Complete)
 
-CrewAI adopting Model Context Protocol for all agent tools:
+Tools implemented using BaseTool pattern (simpler than MCP server):
 
-| Category | Count | Implementation |
-|----------|-------|----------------|
-| EXISTS | 13 | Ready to wire (direct Python import) |
-| MCP Custom | 10 | FastMCP on Modal (forum_search, analyze_reviews, etc.) |
-| MCP External | 4 | Community servers (Meta Ads, Google Ads, Calendar, Fetch) |
-| LLM-Based | 6 | Pydantic structured output |
-| **TOTAL** | 33 | 45 agents mapped |
+| Category | Count | Status |
+|----------|-------|--------|
+| Customer Research | 4 | ✅ Complete |
+| Advanced Analysis | 4 | ✅ Complete |
+| Analytics & Privacy | 4 | ✅ Complete |
+| LLM-Based Tools | 3 | ✅ Complete |
+| **TOTAL** | 15 | **✅ 35+ agents wired** |
 
-**Implementation Phases** (in progress in `startupai-crew`):
-- Phase A (Week 1): Core MCP Server - 15h
-- Phase B (Week 2): Advanced Tools - 14h
-- Phase C (Week 3): External MCP + Analytics - 13h
-- Phase D (Week 4): CrewAI Integration - 18h
+#### Asset Generation Specs (New)
 
-**Cost**: ~$5-10/month (Modal compute only)
+| Spec | Status | Description |
+|------|--------|-------------|
+| `LandingPageGeneratorTool` | ✅ Spec Complete | Blueprint Pattern, 9 components, Progressive Images |
+| `AdCreativeGeneratorTool` | ✅ Spec Complete | Copy + Visuals, Progressive Resolution |
+| Ad Platform Library | ✅ Created | Meta, Google, LinkedIn, TikTok specs |
+| Observability Architecture | ✅ Created | Database schemas, callbacks, debugging |
+
+**Reference**: `startupai-crew/docs/master-architecture/reference/`
 
 ### Legacy AMP (ARCHIVED)
 
@@ -80,8 +86,9 @@ CrewAI adopting Model Context Protocol for all agent tools:
 
 | Item | Status | Owner | Notes |
 |------|--------|-------|-------|
-| Crew implementation (14 crews) | ⏳ In progress | CrewAI | Building fresh from specs |
-| First production validation | ⏳ Pending | All repos | After crews complete |
+| Phase 3-4 Live Testing | ⏳ Next | CrewAI | Feasibility + Viability gates |
+| Asset Generation Implementation | ⏳ Planned | CrewAI | Specs complete, waiting on F2/F3 fix |
+| First production validation | ⏳ Pending | All repos | After Phase 3-4 complete |
 | PostHog coverage gaps | ⚠️ 13+ events defined | Product | Need implementation |
 
 ---
@@ -211,7 +218,14 @@ Marketing activity feed shows real activity
 
 ---
 
-**Last Updated**: 2026-01-10
+**Last Updated**: 2026-01-10 22:00
+
+**Changes (2026-01-10 - Upstream Tool Integration & Asset Specs Complete)**:
+- ✅ **TOOLS COMPLETE**: 15 tools wired to 35+ agents, 681 tests passing
+- ✅ **PHASE 0-2 VALIDATED**: Live testing with pivot workflow verified
+- ✅ **ASSET GENERATION SPECS**: Blueprint Pattern, Progressive Images, Ad Platform Library
+- ✅ **NEW REFERENCE DOCS**: `ad-platform-specifications.md`, `observability-architecture.md`
+- ⏳ **NEXT**: Phase 3-4 live testing (Feasibility + Viability gates)
 
 **Changes (2026-01-10 - Modal Tables & Security Fixes Deployed)**:
 - ✅ **DEPLOYED**: Modal validation tables (`validation_runs`, `validation_progress`, `hitl_requests`)
