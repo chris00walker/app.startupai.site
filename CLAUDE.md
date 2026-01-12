@@ -376,34 +376,7 @@ CrewAI → Product App (this repo) → Marketing Site
 **Current blockers**: See `docs/work/cross-repo-blockers.md`
 
 ## LLM Coordination Protocol
-
-This repo uses a multi-agent workflow with Claude Code and Codex operating on separate repos.
-
-### Before Starting Work
-1. Check `startupai-crew/docs/master-architecture/ai-work-queue.md` for assigned tasks
-2. Review `startupai-crew/docs/master-architecture/llm-handoff.md` for context from previous session
-
-### While Working
-- Work on your own branch (never share branches between agents)
-- This repo (`app.startupai.site`) is Claude Code's primary domain
-- `startupai-crew` is Codex's primary domain
-
-### When Stopping
-Update `llm-handoff.md` with:
-- Branch name
-- Goal and changes made
-- Files touched and commits
-- Tests run
-- Blockers/questions
-- Context for next agent (key decisions, rationale, watch-outs)
-- Next steps
-
-### Repo Assignment
-| Repo | Primary Agent | Tech Stack |
-|------|---------------|------------|
-| `app.startupai.site` | Claude Code | Next.js, React, Supabase |
-| `startupai-crew` | Codex | Python, Modal, CrewAI |
-| `startupai.site` | Either | Next.js (marketing) |
+See `startupai-crew/docs/master-architecture/llm-coordination.md`.
 
 ## Claude Code Customizations
 
