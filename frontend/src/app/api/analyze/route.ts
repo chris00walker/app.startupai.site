@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { assertTrialAllowance } from '@/lib/auth/trial-guard';
-import { createModalClient, isModalConfigured, type ModalKickoffRequest } from '@/lib/crewai/modal-client';
+import { createModalClient, type ModalKickoffRequest } from '@/lib/crewai/modal-client';
 
 const analyzeRequestSchema = z.object({
   strategic_question: z.string().min(10, 'Strategic question must be at least 10 characters'),
@@ -73,77 +73,29 @@ const PLAN_ANALYSIS_LIMITS: Record<string, number> = {
   enterprise: 200,
 };
 
-function resolveCrewAIUrl(): string {
-  // CrewAI AMP endpoint - deployed Value Proposition Design crew (DEPRECATED)
-  const crewAIUrl = process.env.CREWAI_API_URL;
-
-  if (!crewAIUrl) {
-    console.error('[api/analyze] CREWAI_API_URL environment variable not configured');
-    throw new Error('CrewAI API endpoint not configured. Please set CREWAI_API_URL environment variable.');
-  }
-
-  return crewAIUrl;
-}
-
 /**
- * Trigger validation using Modal serverless (primary) or AMP (fallback)
- * Modal is preferred: $0 idle costs, checkpoint-and-resume pattern
+ * Trigger validation using Modal serverless.
  */
 async function triggerValidation(params: {
   entrepreneurInput: string;
   projectId: string;
   userId: string;
   sessionId?: string;
-}): Promise<{ runId: string; provider: 'modal' | 'amp' }> {
+}): Promise<{ runId: string; provider: 'modal' }> {
   const { entrepreneurInput, projectId, userId, sessionId } = params;
 
-  // Prefer Modal if configured
-  if (isModalConfigured()) {
-    console.log('[api/analyze] Using Modal serverless (recommended)');
+  console.log('[api/analyze] Using Modal serverless');
 
-    const modalClient = createModalClient();
-    const modalRequest: ModalKickoffRequest = {
-      entrepreneur_input: entrepreneurInput,
-      project_id: projectId,
-      user_id: userId,
-      session_id: sessionId,
-    };
-
-    const response = await modalClient.kickoff(modalRequest);
-    return { runId: response.run_id, provider: 'modal' };
-  }
-
-  // Fallback to AMP (deprecated)
-  console.log('[api/analyze] Falling back to CrewAI AMP (deprecated)');
-
-  const crewAIUrl = resolveCrewAIUrl();
-  const crewAIPayload = {
-    inputs: {
-      entrepreneur_input: entrepreneurInput,
-    },
-    metadata: {
-      project_id: projectId,
-      session_id: sessionId,
-      user_id: userId,
-    }
+  const modalClient = createModalClient();
+  const modalRequest: ModalKickoffRequest = {
+    entrepreneur_input: entrepreneurInput,
+    project_id: projectId,
+    user_id: userId,
+    session_id: sessionId,
   };
 
-  const response = await fetch(`${crewAIUrl}/kickoff`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(process.env.CREWAI_API_TOKEN && { 'Authorization': `Bearer ${process.env.CREWAI_API_TOKEN}` }),
-    },
-    body: JSON.stringify(crewAIPayload),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`AMP kickoff failed (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
-  return { runId: data.kickoff_id, provider: 'amp' };
+  const response = await modalClient.kickoff(modalRequest);
+  return { runId: response.run_id, provider: 'modal' };
 }
 
 function mapPlanTier(subscriptionTier?: string | null): keyof typeof PLAN_ANALYSIS_LIMITS {
@@ -471,8 +423,8 @@ export async function POST(request: NextRequest) {
       parsedPayload.priority_level && `Priority: ${parsedPayload.priority_level}`,
     ].filter(Boolean).join('\n\n');
 
-    // Trigger validation (Modal primary, AMP fallback)
-    // Returns immediately with run_id - results come via webhook
+    // Trigger validation (Modal only)
+    // Returns immediately with run_id; results arrive via webhook
     try {
       const validationResult = await triggerValidation({
         entrepreneurInput,
@@ -512,7 +464,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Return 202 Accepted - validation is running asynchronously
-      // Client should poll /api/crewai/status/{run_id} or subscribe to Realtime
+      // Client should poll /api/crewai/status?run_id=... or subscribe to Realtime
       return NextResponse.json(
         {
           success: true,
@@ -520,7 +472,7 @@ export async function POST(request: NextRequest) {
           provider: validationResult.provider,
           status: 'started',
           message: 'Validation started. Subscribe to Realtime updates or poll status endpoint.',
-          status_url: `/api/crewai/status/${validationResult.runId}`,
+          status_url: `/api/crewai/status?run_id=${validationResult.runId}`,
           project_id: parsedPayload.project_id,
         },
         { status: 202 }
@@ -536,7 +488,7 @@ export async function POST(request: NextRequest) {
         {
           error: errorMessage,
           retryable: true,
-          provider: isModalConfigured() ? 'modal' : 'amp',
+          provider: 'modal',
         },
         { status: 503 }
       );

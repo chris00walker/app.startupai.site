@@ -1,5 +1,5 @@
 /**
- * Unified CrewAI/Modal Webhook Endpoint
+ * CrewAI Webhook Endpoint
  *
  * POST /api/crewai/webhook
  *
@@ -7,13 +7,13 @@
  * based on the `flow_type` field in the payload.
  *
  * Supported flow types:
- * - founder_validation: Validation results (AMP or Modal)
+ * - founder_validation: Validation results
  * - consultant_onboarding: Results from ConsultantOnboardingFlow
  * - progress_update: Real-time progress from Modal (NEW)
  * - hitl_checkpoint: HITL checkpoint notifications from Modal (NEW)
  *
  * Authentication:
- * - Bearer token (CREW_CONTRACT_BEARER for AMP, MODAL_AUTH_TOKEN for Modal)
+ * - Bearer token (MODAL_AUTH_TOKEN)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -27,8 +27,7 @@ import { createClient as createAdminClient } from '@/lib/supabase/admin';
 type FlowType = 'founder_validation' | 'consultant_onboarding' | 'progress_update' | 'hitl_checkpoint';
 
 /**
- * Validate bearer token from CrewAI AMP or Modal
- * Accepts either CREW_CONTRACT_BEARER (AMP) or MODAL_AUTH_TOKEN (Modal)
+ * Validate bearer token from Modal webhook
  */
 function validateBearerToken(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
@@ -38,16 +37,14 @@ function validateBearerToken(request: NextRequest): boolean {
 
   const token = authHeader.slice(7);
 
-  // Accept either AMP token or Modal token
-  const ampToken = process.env.CREW_CONTRACT_BEARER;
   const modalToken = process.env.MODAL_AUTH_TOKEN;
 
-  if (!ampToken && !modalToken) {
-    console.error('[api/crewai/webhook] Neither CREW_CONTRACT_BEARER nor MODAL_AUTH_TOKEN configured');
+  if (!modalToken) {
+    console.error('[api/crewai/webhook] MODAL_AUTH_TOKEN not configured');
     return false;
   }
 
-  return token === ampToken || token === modalToken;
+  return token === modalToken;
 }
 
 // =============================================================================
@@ -125,8 +122,7 @@ const founderValidationSchema = z.object({
   flow_type: z.literal('founder_validation'),
   project_id: z.string().uuid(),
   user_id: z.string().uuid(),
-  kickoff_id: z.string().optional(),  // AMP legacy
-  run_id: z.string().optional(),       // Modal (preferred)
+  run_id: z.string(),
   session_id: z.string().optional(),
   validation_report: validationReportSchema,
   value_proposition_canvas: z.record(z.string(), z.object({
@@ -221,10 +217,10 @@ function detectIndustry(businessIdea: string): string {
 function buildActivityLogEntries(payload: FounderValidationPayload): ActivityLogEntry[] {
   const entries: ActivityLogEntry[] = [];
   const industry = detectIndustry(payload.validation_report.business_idea);
-  const executionId = payload.run_id || payload.kickoff_id;
+  const executionId = payload.run_id;
   const baseEntry = {
     project_id: payload.project_id,
-    kickoff_id: executionId || null,  // Store run_id or kickoff_id in kickoff_id column
+    kickoff_id: executionId || null,  // Store run_id in legacy kickoff_id column
   };
 
   // Sage: VPC/Analysis activities
@@ -337,7 +333,7 @@ type ConsultantOnboardingPayload = z.infer<typeof consultantOnboardingSchema>;
 function buildReportRow(payload: FounderValidationPayload) {
   const nowIso = new Date().toISOString();
   const report = payload.validation_report;
-  const executionId = payload.run_id || payload.kickoff_id;
+  const executionId = payload.run_id;
 
   return {
     project_id: payload.project_id,
@@ -354,7 +350,7 @@ function buildReportRow(payload: FounderValidationPayload) {
       _metadata: {
         user_id: payload.user_id,
         validation_id: report.id,
-        execution_id: executionId,  // run_id (Modal) or kickoff_id (AMP)
+        execution_id: executionId,
         completed_at: payload.completed_at || nowIso,
         evidence_phases: {
           desirability: !!payload.evidence.desirability,
@@ -465,7 +461,7 @@ function buildValidationStateRow(payload: FounderValidationPayload) {
   const nowIso = new Date().toISOString();
   const canvas = payload.value_proposition_canvas;
   const segments = Object.keys(canvas);
-  const executionId = payload.run_id || payload.kickoff_id;
+  const executionId = payload.run_id;
 
   // Transform VPC data into the expected format
   const customerProfiles: Record<string, any> = {};
@@ -510,7 +506,7 @@ function buildValidationStateRow(payload: FounderValidationPayload) {
     project_id: payload.project_id,
     user_id: payload.user_id,
     session_id: payload.session_id || null,
-    kickoff_id: executionId || null,  // Store run_id or kickoff_id
+    kickoff_id: executionId || null,  // Store run_id in legacy kickoff_id column
     iteration: payload.iteration || 1,
     phase: payload.phase || 'desirability',
     current_risk_axis: payload.current_risk_axis || 'desirability',
@@ -674,8 +670,8 @@ function buildEntrepreneurBriefRow(payload: FounderValidationPayload) {
 }
 
 async function handleFounderValidation(payload: FounderValidationPayload): Promise<NextResponse> {
-  // Use run_id (Modal) or kickoff_id (AMP) for identification
-  const executionId = payload.run_id || payload.kickoff_id;
+  // Use run_id for identification
+  const executionId = payload.run_id;
 
   console.log('[api/crewai/webhook] Processing founder_validation:', {
     project_id: payload.project_id,
@@ -774,7 +770,7 @@ async function handleFounderValidation(payload: FounderValidationPayload): Promi
   let activitiesCreated = 0;
 
   if (activityEntries.length > 0) {
-    // Check for duplicate execution_id (run_id or kickoff_id) to ensure idempotency
+    // Check for duplicate execution_id to ensure idempotency
     if (executionId) {
       const { data: existing } = await admin
         .from('public_activity_log')

@@ -267,7 +267,6 @@ export async function PATCH(
 
 /**
  * Resume validation execution after HITL approval.
- * Uses Modal serverless (primary) or AMP (deprecated fallback).
  */
 async function resumeCrewAIExecution(
   executionId: string,
@@ -276,24 +275,7 @@ async function resumeCrewAIExecution(
   feedback: string,
   decidedBy?: string
 ): Promise<void> {
-  // Try Modal first (preferred)
-  if (isModalConfiguredForResume()) {
-    await resumeModalExecution(executionId, taskId, decision, feedback, decidedBy);
-    return;
-  }
-
-  // Fallback to AMP (deprecated)
-  await resumeAMPExecution(executionId, taskId, decision, feedback);
-}
-
-/**
- * Check if Modal is configured for HITL resume
- */
-function isModalConfiguredForResume(): boolean {
-  return !!(
-    process.env.MODAL_HITL_APPROVE_URL &&
-    process.env.MODAL_AUTH_TOKEN
-  );
+  await resumeModalExecution(executionId, taskId, decision, feedback, decidedBy);
 }
 
 /**
@@ -341,52 +323,5 @@ async function resumeModalExecution(
     }
   } catch (error) {
     console.error('[api/approvals] Modal HITL resume error:', error);
-  }
-}
-
-/**
- * Resume validation via legacy AMP endpoint (deprecated)
- */
-async function resumeAMPExecution(
-  executionId: string,
-  taskId: string,
-  decision: string,
-  feedback: string
-): Promise<void> {
-  const crewaiUrl = process.env.CREWAI_API_URL;
-  const crewaiToken = process.env.CREWAI_API_TOKEN;
-
-  if (!crewaiUrl || !crewaiToken) {
-    console.warn('[api/approvals] CrewAI AMP URL/Token not configured, skipping resume');
-    return;
-  }
-
-  console.log('[api/approvals] Using deprecated AMP resume');
-
-  try {
-    const resumeUrl = `${crewaiUrl}/resume`;
-
-    const response = await fetch(resumeUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${crewaiToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        execution_id: executionId,
-        task_id: taskId,
-        human_feedback: feedback,
-        is_approve: true,
-        decision: decision,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('[api/approvals] AMP resume failed:', response.status);
-    } else {
-      console.log('[api/approvals] AMP execution resumed');
-    }
-  } catch (error) {
-    console.error('[api/approvals] AMP resume error:', error);
   }
 }

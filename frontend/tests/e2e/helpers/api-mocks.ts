@@ -54,7 +54,7 @@ export async function mockGateEvaluation(
 
 /**
  * Mock CrewAI analysis endpoints
- * These call external CrewAI AMP platform and can be slow
+ * These call external validation services and can be slow
  */
 export async function mockCrewAIAnalysis(
   page: Page,
@@ -69,14 +69,7 @@ export async function mockCrewAIAnalysis(
     });
   });
 
-  // Mock direct CrewAI AMP platform calls if any
-  await page.route('**crewai.com/**', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(response),
-    });
-  });
+  // Direct platform calls are not expected in the UI flow.
 }
 
 /**

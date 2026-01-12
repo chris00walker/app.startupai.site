@@ -45,11 +45,17 @@ jest.mock('@/lib/supabase/server', () => ({
   ),
 }));
 
-// Mock CrewAI client
-const mockGetCrewAIStatus = jest.fn();
-jest.mock('@/lib/crewai/amp-client', () => ({
-  getCrewAIStatus: (...args: unknown[]) => mockGetCrewAIStatus(...args),
-}));
+// Mock Modal client
+const mockGetModalStatus = jest.fn();
+jest.mock('@/lib/crewai/modal-client', () => {
+  const actual = jest.requireActual('@/lib/crewai/modal-client');
+  return {
+    ...actual,
+    createModalClient: () => ({
+      getStatus: (...args: unknown[]) => mockGetModalStatus(...args),
+    }),
+  };
+});
 
 // Import after mocks are set up
 import { GET } from '@/app/api/crewai/status/route';
@@ -64,14 +70,14 @@ describe('GET /api/crewai/status', () => {
     jest.clearAllMocks();
   });
 
-  it('should return 400 if kickoff_id is missing', async () => {
+  it('should return 400 if run_id is missing', async () => {
     const req = createMockRequest('http://localhost:3000/api/crewai/status');
 
     const response = await GET(req as any);
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe('kickoff_id required');
+    expect(data.error).toBe('run_id required');
   });
 
   it('should return 401 if user is not authenticated', async () => {
@@ -81,7 +87,7 @@ describe('GET /api/crewai/status', () => {
     });
 
     const req = createMockRequest(
-      'http://localhost:3000/api/crewai/status?kickoff_id=test-123'
+      'http://localhost:3000/api/crewai/status?run_id=test-123'
     );
 
     const response = await GET(req as any);
@@ -97,14 +103,19 @@ describe('GET /api/crewai/status', () => {
       error: null,
     });
 
-    mockGetCrewAIStatus.mockResolvedValue({
-      state: 'RUNNING',
-      status: 'Processing...',
-      progress: 0.5,
+    mockGetModalStatus.mockResolvedValue({
+      run_id: 'test-123',
+      status: 'running',
+      current_phase: 1,
+      phase_name: 'VPC Discovery',
+      progress: {
+        crew: 'Discovery',
+        progress_pct: 40,
+      },
     });
 
     const req = createMockRequest(
-      'http://localhost:3000/api/crewai/status?kickoff_id=test-123'
+      'http://localhost:3000/api/crewai/status?run_id=test-123'
     );
 
     const response = await GET(req as any);
@@ -121,13 +132,19 @@ describe('GET /api/crewai/status', () => {
       error: null,
     });
 
-    mockGetCrewAIStatus.mockResolvedValue({
-      state: 'COMPLETED',
-      status: 'Done',
+    mockGetModalStatus.mockResolvedValue({
+      run_id: 'test-123',
+      status: 'completed',
+      current_phase: 4,
+      phase_name: 'Viability',
+      progress: {
+        crew: 'Viability',
+        progress_pct: 100,
+      },
     });
 
     const req = createMockRequest(
-      'http://localhost:3000/api/crewai/status?kickoff_id=test-123'
+      'http://localhost:3000/api/crewai/status?run_id=test-123'
     );
 
     const response = await GET(req as any);

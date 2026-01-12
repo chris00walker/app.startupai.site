@@ -131,7 +131,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
     const pollStatus = async () => {
       try {
-        const response = await fetch(`/api/crewai/status?kickoff_id=${wid}`);
+        const response = await fetch(`/api/crewai/status?run_id=${wid}`);
         if (response.ok) {
           const data = await response.json();
 

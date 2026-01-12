@@ -6,7 +6,7 @@
  * DEPRECATED: Use /api/crewai/webhook with flow_type: "founder_validation" instead.
  * This route forwards requests to the unified webhook for backwards compatibility.
  *
- * Authentication: Bearer token (CREW_CONTRACT_BEARER)
+ * Authentication: Bearer token (MODAL_AUTH_TOKEN)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -87,6 +87,7 @@ const crewAIResultsSchema = z.object({
   // Required: project context
   project_id: z.string().uuid(),
   user_id: z.string().uuid(),
+  run_id: z.string().optional(),
   kickoff_id: z.string().optional(),
   session_id: z.string().optional(),
 
@@ -116,7 +117,7 @@ const crewAIResultsSchema = z.object({
 type CrewAIResultsPayload = z.infer<typeof crewAIResultsSchema>;
 
 /**
- * Validate bearer token from CrewAI
+ * Validate bearer token from webhook
  */
 function validateBearerToken(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
@@ -125,10 +126,10 @@ function validateBearerToken(request: NextRequest): boolean {
   }
 
   const token = authHeader.slice(7);
-  const expectedToken = process.env.CREW_CONTRACT_BEARER;
+  const expectedToken = process.env.MODAL_AUTH_TOKEN;
 
   if (!expectedToken) {
-    console.error('[api/crewai/results] CREW_CONTRACT_BEARER not configured');
+    console.error('[api/crewai/results] MODAL_AUTH_TOKEN not configured');
     return false;
   }
 
@@ -159,7 +160,7 @@ function buildReportRow(payload: CrewAIResultsPayload) {
     generation_metadata: {
       kind: 'crew_validation',
       validation_id: report.id,
-      kickoff_id: payload.kickoff_id,
+      kickoff_id: payload.run_id || payload.kickoff_id,
       completed_at: payload.completed_at || nowIso,
       evidence_phases: {
         desirability: !!payload.evidence.desirability,
@@ -362,7 +363,7 @@ export async function POST(request: NextRequest) {
   console.log('[api/crewai/results] Received results:', {
     project_id: payload.project_id,
     user_id: payload.user_id,
-    kickoff_id: payload.kickoff_id,
+    kickoff_id: payload.run_id || payload.kickoff_id,
     validation_id: payload.validation_report.id,
     has_desirability: !!payload.evidence.desirability,
     has_feasibility: !!payload.evidence.feasibility,

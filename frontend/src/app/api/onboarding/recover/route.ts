@@ -8,7 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
-import { kickoffCrewAIAnalysis } from '@/lib/crewai/amp-client';
+import { createModalClient } from '@/lib/crewai/modal-client';
+import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 
 export async function POST(req: NextRequest) {
   try {
@@ -130,18 +131,28 @@ export async function POST(req: NextRequest) {
 
     console.log('[api/onboarding/recover] Project created:', projectId);
 
-    // Kick off CrewAI workflow
+    // Kick off validation workflow (Modal)
     let workflowId: string;
     try {
-      workflowId = await kickoffCrewAIAnalysis(
+      const modalClient = createModalClient();
+      const validationInputs = buildFounderValidationInputs(
         briefData,
         projectId,
-        user.id
+        user.id,
+        sessionId
       );
 
-      console.log('[api/onboarding/recover] CrewAI workflow started:', workflowId);
+      const response = await modalClient.kickoff({
+        entrepreneur_input: validationInputs.entrepreneur_input,
+        project_id: validationInputs.project_id,
+        user_id: validationInputs.user_id,
+        session_id: validationInputs.session_id,
+      });
+
+      workflowId = response.run_id;
+      console.log('[api/onboarding/recover] Modal workflow started:', workflowId);
     } catch (crewError: any) {
-      console.error('[api/onboarding/recover] CrewAI kickoff failed:', crewError);
+      console.error('[api/onboarding/recover] Modal kickoff failed:', crewError);
       return NextResponse.json(
         {
           error: 'Failed to start analysis',

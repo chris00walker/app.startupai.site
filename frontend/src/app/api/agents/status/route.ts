@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getCrewAIStatus } from '@/lib/crewai/amp-client'
+import { createModalClient } from '@/lib/crewai/modal-client'
 
 /**
  * The 6 AI Founders in StartupAI
@@ -56,11 +56,12 @@ export async function GET(request: NextRequest) {
 
         if (activeProject?.initial_analysis_workflow_id) {
           try {
-            const status = await getCrewAIStatus(activeProject.initial_analysis_workflow_id)
+            const modalClient = createModalClient()
+            const status = await modalClient.getStatus(activeProject.initial_analysis_workflow_id)
 
-            if (status.state === 'RUNNING' || status.state === 'STARTED') {
-              // Determine which agent is currently running based on task name
-              const currentTask = status.last_executed_task?.name?.toLowerCase() || ''
+            if (status.status === 'running' || status.status === 'pending' || status.status === 'paused') {
+              // Determine which agent is currently running based on crew/phase hints
+              const currentTask = (status.progress?.crew || status.phase_name || '').toLowerCase()
 
               // Map task names to founders
               const taskToFounder: Record<string, string> = {
@@ -96,15 +97,15 @@ export async function GET(request: NextRequest) {
               agents.forEach(agent => {
                 if (agent.id === activeFounderId) {
                   agent.status = 'running'
-                  agent.currentTask = status.last_executed_task?.name || 'Processing...'
+                  agent.currentTask = status.progress?.crew || status.phase_name || 'Processing...'
                 }
               })
-            } else if (status.state === 'COMPLETED') {
+            } else if (status.status === 'completed') {
               // Mark all agents as completed
               agents.forEach(agent => {
                 agent.status = 'completed'
               })
-            } else if (status.state === 'FAILED') {
+            } else if (status.status === 'failed') {
               // Mark relevant agent as error
               agents.forEach(agent => {
                 agent.status = 'idle'

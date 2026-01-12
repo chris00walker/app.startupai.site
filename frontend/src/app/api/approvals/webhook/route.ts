@@ -3,10 +3,10 @@
  *
  * POST /api/approvals/webhook
  *
- * Receives HITL (Human-in-the-Loop) approval requests from CrewAI AMP
+ * Receives HITL (Human-in-the-Loop) approval requests from CrewAI
  * when a task requires human approval before proceeding.
  *
- * Authentication: Bearer token (CREW_CONTRACT_BEARER)
+ * Authentication: Bearer token (MODAL_AUTH_TOKEN)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,7 +18,6 @@ const approvalWebhookSchema = z.object({
   // CrewAI execution context
   execution_id: z.string(),
   task_id: z.string(),
-  kickoff_id: z.string().optional(),
 
   // User context
   user_id: z.string().uuid(),
@@ -56,7 +55,7 @@ const approvalWebhookSchema = z.object({
 type ApprovalWebhookPayload = z.infer<typeof approvalWebhookSchema>;
 
 /**
- * Validate bearer token from CrewAI
+ * Validate bearer token from Modal webhook
  */
 function validateBearerToken(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
@@ -65,10 +64,10 @@ function validateBearerToken(request: NextRequest): boolean {
   }
 
   const token = authHeader.slice(7);
-  const expectedToken = process.env.CREW_CONTRACT_BEARER;
+  const expectedToken = process.env.MODAL_AUTH_TOKEN;
 
   if (!expectedToken) {
-    console.error('[api/approvals/webhook] CREW_CONTRACT_BEARER not configured');
+    console.error('[api/approvals/webhook] MODAL_AUTH_TOKEN not configured');
     return false;
   }
 
@@ -179,7 +178,6 @@ export async function POST(request: NextRequest) {
     const approvalData = {
       execution_id: payload.execution_id,
       task_id: payload.task_id,
-      kickoff_id: payload.kickoff_id || null,
       user_id: payload.user_id,
       project_id: payload.project_id || null,
       approval_type: payload.approval_type,
@@ -257,7 +255,7 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Resume CrewAI execution after approval.
+ * Resume execution after approval via Modal HITL endpoint.
  */
 async function resumeCrewAIExecution(
   executionId: string,
@@ -265,38 +263,35 @@ async function resumeCrewAIExecution(
   decision: string,
   feedback: string
 ): Promise<void> {
-  const crewaiUrl = process.env.CREWAI_API_URL;
-  const crewaiToken = process.env.CREWAI_API_TOKEN;
+  const modalUrl = process.env.MODAL_HITL_APPROVE_URL;
+  const modalToken = process.env.MODAL_AUTH_TOKEN;
 
-  if (!crewaiUrl || !crewaiToken) {
-    console.warn('[api/approvals/webhook] CrewAI URL/Token not configured, skipping resume');
+  if (!modalUrl) {
+    console.warn('[api/approvals/webhook] MODAL_HITL_APPROVE_URL not configured, skipping resume');
     return;
   }
 
   try {
-    const resumeUrl = `${crewaiUrl}/resume`;
-
-    const response = await fetch(resumeUrl, {
+    const response = await fetch(modalUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${crewaiToken}`,
         'Content-Type': 'application/json',
+        ...(modalToken && { 'Authorization': `Bearer ${modalToken}` }),
       },
       body: JSON.stringify({
-        execution_id: executionId,
-        task_id: taskId,
-        human_feedback: feedback,
-        is_approve: true,
-        decision: decision,
+        run_id: executionId,
+        checkpoint: taskId,
+        decision,
+        feedback,
       }),
     });
 
     if (!response.ok) {
-      console.error('[api/approvals/webhook] CrewAI resume failed:', response.status);
+      console.error('[api/approvals/webhook] Modal resume failed:', response.status);
     } else {
-      console.log('[api/approvals/webhook] CrewAI execution resumed');
+      console.log('[api/approvals/webhook] Modal execution resumed');
     }
   } catch (error) {
-    console.error('[api/approvals/webhook] CrewAI resume error:', error);
+    console.error('[api/approvals/webhook] Modal resume error:', error);
   }
 }

@@ -9,7 +9,7 @@
  * Receives AI-generated recommendations from the ConsultantOnboardingFlow
  * and updates the consultant_profiles table with personalized guidance.
  *
- * Authentication: Bearer token (CREW_CONTRACT_BEARER)
+ * Authentication: Bearer token (MODAL_AUTH_TOKEN)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -48,7 +48,7 @@ const consultantResultsSchema = z.object({
 type ConsultantResultsPayload = z.infer<typeof consultantResultsSchema>;
 
 /**
- * Validate bearer token from CrewAI
+ * Validate bearer token from webhook
  */
 function validateBearerToken(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization');
@@ -57,10 +57,10 @@ function validateBearerToken(request: NextRequest): boolean {
   }
 
   const token = authHeader.slice(7);
-  const expectedToken = process.env.CREW_CONTRACT_BEARER;
+  const expectedToken = process.env.MODAL_AUTH_TOKEN;
 
   if (!expectedToken) {
-    console.error('[api/crewai/consultant] CREW_CONTRACT_BEARER not configured');
+    console.error('[api/crewai/consultant] MODAL_AUTH_TOKEN not configured');
     return false;
   }
 

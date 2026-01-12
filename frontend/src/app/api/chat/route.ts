@@ -4,6 +4,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { createModalClient } from '@/lib/crewai/modal-client';
+import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 import {
   ONBOARDING_SYSTEM_PROMPT,
   ONBOARDING_STAGES,
@@ -365,15 +367,24 @@ export async function POST(req: NextRequest) {
 
                   console.log('[api/chat] Project created:', projectId);
 
-                  // Step 4: Kick off CrewAI workflow
-                  const { kickoffCrewAIAnalysis } = await import('@/lib/crewai/amp-client');
-                  const workflowId = await kickoffCrewAIAnalysis(
+                  // Step 4: Kick off validation workflow (Modal)
+                  const modalClient = createModalClient();
+                  const validationInputs = buildFounderValidationInputs(
                     briefData,
                     projectId,
-                    effectiveUser.id
+                    effectiveUser.id,
+                    sessionId
                   );
 
-                  console.log('[api/chat] CrewAI workflow started:', workflowId);
+                  const response = await modalClient.kickoff({
+                    entrepreneur_input: validationInputs.entrepreneur_input,
+                    project_id: validationInputs.project_id,
+                    user_id: validationInputs.user_id,
+                    session_id: validationInputs.session_id,
+                  });
+
+                  const workflowId = response.run_id;
+                  console.log('[api/chat] Modal workflow started:', workflowId);
 
                   // Step 5: Store workflow ID in project
                   await supabaseClient

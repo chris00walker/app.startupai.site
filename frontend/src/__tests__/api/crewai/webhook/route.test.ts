@@ -105,7 +105,7 @@ function createFounderValidationPayload(overrides: Partial<any> = {}) {
     flow_type: 'founder_validation',
     project_id: TEST_PROJECT_ID,
     user_id: TEST_USER_ID,
-    kickoff_id: 'kick-test-001',
+    run_id: 'run-test-001',
     validation_report: {
       id: 'rpt-test-001',
       business_idea: 'AI-powered logistics platform',
@@ -155,7 +155,7 @@ function createFounderValidationPayload(overrides: Partial<any> = {}) {
 describe('POST /api/crewai/webhook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.CREW_CONTRACT_BEARER = VALID_TOKEN;
+    process.env.MODAL_AUTH_TOKEN = VALID_TOKEN;
 
     // Default: project exists and user matches
     mockSelectEqSingle.mockResolvedValue({
@@ -169,7 +169,7 @@ describe('POST /api/crewai/webhook', () => {
   });
 
   afterEach(() => {
-    delete process.env.CREW_CONTRACT_BEARER;
+    delete process.env.MODAL_AUTH_TOKEN;
   });
 
   // ===========================================================================
@@ -411,7 +411,7 @@ describe('POST /api/crewai/webhook', () => {
 describe('POST /api/crewai/webhook - Consultant Onboarding', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.CREW_CONTRACT_BEARER = VALID_TOKEN;
+    process.env.MODAL_AUTH_TOKEN = VALID_TOKEN;
 
     // Mock consultant profile lookup
     mockSelectEqSingle.mockResolvedValue({
@@ -424,7 +424,7 @@ describe('POST /api/crewai/webhook - Consultant Onboarding', () => {
   });
 
   afterEach(() => {
-    delete process.env.CREW_CONTRACT_BEARER;
+    delete process.env.MODAL_AUTH_TOKEN;
   });
 
   function createConsultantPayload(overrides: Partial<any> = {}) {

@@ -2,7 +2,7 @@
  * Modal Serverless Client for StartupAI Validation Engine
  *
  * Provides utilities for interacting with the Modal-deployed validation pipeline.
- * Replaces CrewAI AMP client with checkpoint-and-resume pattern for $0 idle costs.
+ * Uses checkpoint-and-resume to avoid idle costs between HITL approvals.
  *
  * @see ADR-002: Modal Serverless Migration in startupai-crew/docs/adr/
  */
@@ -300,17 +300,6 @@ export function createModalClient(config?: Partial<ModalClientConfig>): ModalCli
     maxPollAttempts: config?.maxPollAttempts,
     pollIntervalMs: config?.pollIntervalMs,
   });
-}
-
-/**
- * Check if Modal is configured (vs AMP fallback)
- */
-export function isModalConfigured(): boolean {
-  return !!(
-    process.env.MODAL_KICKOFF_URL &&
-    process.env.MODAL_STATUS_URL &&
-    process.env.MODAL_HITL_APPROVE_URL
-  );
 }
 
 // =============================================================================

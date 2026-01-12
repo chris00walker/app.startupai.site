@@ -58,7 +58,7 @@ function buildWebhookPayload(projectId: string, userId: string, kickoffId: strin
     flow_type: 'founder_validation',
     project_id: projectId,
     user_id: userId,
-    kickoff_id: kickoffId,
+    run_id: kickoffId,
     session_id: `session-${kickoffId}`,
     validation_report: {
       id: `rpt-${kickoffId}`,
@@ -285,7 +285,7 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
             _metadata: {
               user_id: ctx.testUserId,
               validation_id: payload.validation_report.id,
-              kickoff_id: kickoffId,
+              run_id: kickoffId,
               completed_at: payload.completed_at,
             },
           },
@@ -367,7 +367,7 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
           {
             project_id: ctx.testProjectId,
             user_id: ctx.testUserId,
-            kickoff_id: kickoffId,
+            run_id: kickoffId,
             iteration: payload.iteration,
             phase: payload.phase,
             current_risk_axis: payload.current_risk_axis,
