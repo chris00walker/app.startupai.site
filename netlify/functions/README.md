@@ -4,14 +4,14 @@
 
 This directory contains Netlify serverless functions for the StartupAI platform.
 
-> **Note**: The primary backend is implemented via **Next.js API routes** in `frontend/src/app/api/`. These Netlify functions provide supplementary endpoints for specific use cases (Python-based CrewAI integration, background processing). For most API work, see `frontend/src/app/api/`.
+> **Note**: The primary backend is implemented via **Next.js API routes** in `frontend/src/app/api/`, and the canonical AI backend runs on **Modal** (`startupai-crew`). These Netlify functions are legacy/supplementary; avoid adding new AI workflows here.
 
 ## Structure
 
 ```
 netlify/functions/
-├── crewai-analyze.py    # Main CrewAI analysis endpoint
-├── gate-evaluate.py     # Gate evaluation endpoint
+├── crewai-analyze.py    # Legacy CrewAI analysis endpoint (deprecated)
+├── gate-evaluate.py     # Gate evaluation endpoint (legacy)
 └── README.md            # This file
 ```
 
@@ -21,7 +21,7 @@ netlify/functions/
 
 **Endpoint:** `POST /.netlify/functions/crewai-analyze`
 
-**Purpose:** Runs CrewAI strategic analysis workflows
+**Purpose:** Legacy CrewAI strategic analysis workflows (deprecated in favor of Modal)
 
 **Features:**
 - JWT authentication with Supabase
@@ -30,7 +30,7 @@ netlify/functions/
 
 ### 2. gate-evaluate.py
 
-**Endpoint:** `POST /.netlify/functions/gate-evaluate`
+**Endpoint:** `POST /.netlify/functions/gate-evaluate` (legacy)
 
 **Purpose:** Evaluates validation gates (desirability, feasibility, viability)
 
@@ -78,10 +78,7 @@ Optional:
 
 ## Backend Configuration
 
-Additional backend configuration and tests are in `backend/`:
-- `backend/config/` - Configuration files
-- `backend/tests/` - Pytest test suite
-- `backend/netlify/` - Additional Netlify-specific backend code
+Additional AI backend configuration lives in `startupai-crew` (Modal).
 
 ## Deployment
 
@@ -120,7 +117,7 @@ Check function logs in Netlify dashboard:
 - [ ] Add integration tests
 - [ ] Set up error alerting
 
-## API Architecture
+## API Architecture (Canonical)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -142,14 +139,14 @@ Check function logs in Netlify dashboard:
          └───────────┬───────────────┘
                      ▼
          ┌───────────────────────┐
-         │  CrewAI AMP Platform  │
-         │  (8-crew/18-agent)    │
+         │   Modal Serverless    │
+         │  (14-crew/45-agent)   │
          └───────────────────────┘
 ```
 
 **When to use which:**
 - **Next.js API routes** - TypeScript handlers, Supabase integration, streaming responses
-- **Netlify Functions** - Python-specific operations, long-running background tasks
+- **Netlify Functions** - Legacy endpoints only (avoid for new AI workflows)
 
 ## Resources
 

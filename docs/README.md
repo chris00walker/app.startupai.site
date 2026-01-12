@@ -51,7 +51,7 @@ For new contributors, start with:
 ## Cross-References
 
 - **Master Architecture**: `startupai-crew/docs/master-architecture/` (ecosystem source of truth)
-- **CrewAI Backend**: 8-crew/18-agent Flows with Innovation Physics routers (Phase 2D complete)
+- **CrewAI Backend**: 5-flow/14-crew/45-agent engine on Modal (see `startupai-crew`)
 - **Marketing Site**: `startupai.site/docs/` (lead capture)
 
 ---

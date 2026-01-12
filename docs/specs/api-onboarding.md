@@ -11,13 +11,13 @@ Implementation lives in `frontend/src/app/api/onboarding/{start,message,complete
 
 ## Backend Integration
 
-**CrewAI AMP Platform:** The API routes integrate with CrewAI flows deployed on the CrewAI AMP platform. The onboarding completion triggers the strategic analysis workflow.
+**Modal Serverless:** The API routes integrate with CrewAI Flows deployed on Modal. The onboarding completion triggers the strategic analysis workflow.
 
 - **Onboarding:** Vercel AI SDK handles the conversational UI (frontend/src/app/api/chat/route.ts)
-- **Analysis Workflow:** CrewAI Flows on AMP (kickoff triggered from /api/onboarding/complete)
-- **Configuration:** See `docs/master-architecture/reference/amp-configuration.md`
+- **Analysis Workflow:** CrewAI Flows on Modal (kickoff triggered from /api/crewai/analyze)
+- **Configuration:** See `startupai-crew/docs/adr/002-modal-serverless-migration.md`
 
-The CrewAI backend handles the strategic validation workflow with 8 crews and 18 specialist agents.
+The CrewAI backend handles the strategic validation workflow with 5 flows, 14 crews, and 45 specialist agents.
 
 ## Endpoint Summary
 

@@ -18,7 +18,7 @@ This overview details how the product platform operates within the three-service
 | Auth & Identity | Platform Engineering | Supabase Auth (GitHub OAuth, email) with profile trigger (`handle_new_user`) keeping `user_profiles` in sync. |
 | Application site (`app.startupai.site`) | Platform Engineering | Next.js App Router. Onboarding wizard, dashboards, and automation live here. |
 | Database & Storage | Platform Engineering | Supabase Postgres + pgvector. Migrations in `supabase/migrations`. Storage buckets currently paused. |
-| AI Workflows | AI Platform | CrewAI agents deployed via AMP. Backend under `backend/src/startupai`. Integration in progress. |
+| AI Workflows | AI Platform | CrewAI Flows on Modal (`startupai-crew`). Integration in progress. |
 | Analytics | Shared (Growth + Platform) | PostHog instrumentation via `frontend/src/lib/analytics`. Product and marketing share dashboards with segmented properties. |
 | Ops & Incident Response | Platform (primary), Ops (secondary) | Pager coverage when Netlify/Supabase incidents occur. Runbooks tracked in private ops docs. |
 
@@ -29,7 +29,7 @@ This overview details how the product platform operates within the three-service
 3. **Session hydration** - `frontend/src/app/(authenticated)/layout.tsx` fetches the Supabase session; lacking auth triggers a redirect to `/login` with the original return URL.
 4. **Onboarding wizard** - `/onboarding` loads `OnboardingWizard`. The page fetches `user_profiles.subscription_tier` to determine plan limits and then calls `POST /api/onboarding/start` to seed a session.
 5. **Conversation loop** - Messages flow through `POST /api/onboarding/message`, storing state in `onboarding_sessions`. Progress and follow-ups render via `ConversationInterface`.
-6. **Completion & project creation** - `POST /api/onboarding/complete` persists `entrepreneur_briefs`, creates a `projects` row, and redirects to `/projects/{id}`. CrewAI deliverables are still mock data pending backend integration.
+6. **Completion & project creation** - `POST /api/onboarding/complete` persists `entrepreneur_briefs`, creates a `projects` row, and triggers Modal `/kickoff`. Results are persisted in Supabase and should be displayed from real data (no mock outputs in production).
 7. **Dashboards & follow-up** - Projects feed future dashboards (currently under construction). Analytics hooks capture completion, drop-off, and feedback to PostHog for funnel tracking.
 
 ## Contracts with Marketing

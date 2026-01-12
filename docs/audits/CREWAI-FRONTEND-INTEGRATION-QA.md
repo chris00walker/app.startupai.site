@@ -1,5 +1,7 @@
 # CrewAI-Frontend Integration QA Report
 
+> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
+
 **Date**: November 30, 2025 (Updated)
 **Status**: Phase Alpha ~85% Complete
 **Author**: Claude Code (Automated QA)

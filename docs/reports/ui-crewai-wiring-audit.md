@@ -1,5 +1,7 @@
 # UI-to-CrewAI Wiring Audit Report
 
+> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
+
 **Date:** 2025-11-27 (Updated: 2025-11-30)
 **Auditor:** Claude (AI Assistant)
 **Scope:** Product platform UI structure and backend API wiring analysis
@@ -9,7 +11,7 @@
 
 ## Executive Summary
 
-This audit examines the StartupAI product platform's UI-to-backend wiring, specifically focusing on how the frontend connects to the CrewAI 6-agent workflow deployed on CrewAI AMP. The platform serves two user personas (Founders and Consultants), each with their own onboarding flow and dashboard.
+This audit examines the StartupAI product platform's UI-to-backend wiring, specifically focusing on how the frontend connects to the legacy CrewAI 6-agent workflow deployed on AMP (deprecated). The platform serves two user personas (Founders and Consultants), each with their own onboarding flow and dashboard.
 
 **Key Findings (Updated Nov 30):**
 - ✅ UI structure is well-organized with clear separation between Founder and Consultant personas

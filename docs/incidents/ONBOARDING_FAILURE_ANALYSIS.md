@@ -1,5 +1,7 @@
 # Onboarding Workflow Failure - Systems Engineering Analysis
 
+> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
+
 **Date:** 2025-11-12
 **Issue:** Completed onboarding conversation shows 0% progress, no stage advancement, no CrewAI trigger
 **Evidence:** Screenshot showing conversation with Alex completed but sidebar stuck at Stage 1, 0% progress

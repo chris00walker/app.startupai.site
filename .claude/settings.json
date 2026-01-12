@@ -97,7 +97,7 @@
 
   "project_context": {
     "framework": "Next.js 15.5.3 (Hybrid: App Router + Pages Router)",
-    "architecture": "Microservices (Frontend → Supabase → Vercel AI SDK → CrewAI AMP)",
+    "architecture": "Microservices (Frontend → Supabase → Vercel AI SDK → Modal)",
     "deployment": "Netlify (considering Vercel migration)",
     "node_version": "22.18.0",
     "package_manager": "pnpm 9.12.1+",
@@ -106,7 +106,7 @@
     "critical_integrations": [
       "Supabase Auth (JWT + GitHub OAuth)",
       "Vercel AI SDK (onboarding chat)",
-      "CrewAI AMP (strategic analysis)",
+      "Modal serverless (CrewAI Flows)",
       "Drizzle ORM (type-safe queries)",
       "pgvector (embeddings)"
     ]

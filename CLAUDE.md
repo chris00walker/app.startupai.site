@@ -37,7 +37,9 @@ See [startupai-crew/docs/master-architecture/10-dogfooding.md](../startupai-crew
                           ↓
                    [Drizzle ORM + pgvector]
                           ↓
-[CrewAI Flows Engine] ← AI Founders (8 crews / 18 agents)
+                [Modal FastAPI + CrewAI Flows]
+                          ↓
+        AI Founders Engine (5 flows / 14 crews / 45 agents)
 ```
 
 ### Ecosystem Source of Truth
@@ -47,7 +49,7 @@ See [startupai-crew/docs/master-architecture/10-dogfooding.md](../startupai-crew
 1. **Authentication**: JWT + GitHub OAuth via Supabase
 2. **Onboarding**: Vercel AI SDK with streaming chat (7 stages)
 3. **Database**: PostgreSQL + pgvector (13 migrations deployed)
-4. **AI Analysis**: CrewAI AMP (Fortune 500-quality reports)
+4. **AI Analysis**: Modal serverless (CrewAI Flows, 5 phases)
 5. **Frontend**: 20 pages, 50+ Shadcn components
 
 ## Directory Structure
@@ -84,7 +86,7 @@ pnpm db:studio              # Open Drizzle Studio
 supabase status             # Check connection
 
 # CrewAI Integration
-pnpm crew:contract-check    # Validate CrewAI AMP connectivity
+pnpm crew:contract-check    # Validate CrewAI/Modal contract connectivity
 
 # Build & Deploy
 pnpm build                  # Production build
@@ -120,8 +122,8 @@ OPENAI_API_KEY=...                  # ⚠️ COST - Vercel AI SDK
 ANTHROPIC_API_KEY=...               # ⚠️ COST - Fallback LLM
 
 # CrewAI Integration
-CREW_ANALYZE_URL=...                # CrewAI AMP endpoint (optional override)
-CREW_CONTRACT_BEARER=...            # Local contract check token
+CREW_ANALYZE_URL=...                # Modal /kickoff endpoint (optional override)
+CREW_CONTRACT_BEARER=...            # Legacy AMP token (unused for Modal)
 
 # Feature Flags
 NEXT_PUBLIC_ONBOARDING_BYPASS=false # ⚠️ MUST BE FALSE in production
@@ -163,30 +165,28 @@ users (1) → (1) onboarding_sessions
 **State Management**: `onboarding_sessions` table stores conversation history
 
 ### Strategic Analysis (CrewAI Flows)
-**Tech Stack**: 8-crew/18-agent Flows architecture on CrewAI AMP platform
+**Tech Stack**: 5-flow/14-crew/45-agent architecture on Modal serverless
 
-**6 AI Founders**: Sage (CSO), Forge (CTO), Pulse (CGO), Compass (CPO), Guardian (CGO), Ledger (CFO)
+**6 AI Founders**: Sage (CSO), Forge (CTO), Pulse (CMO), Compass (CPO), Guardian (CGO), Ledger (CFO)
 
-**8 Crews**: Service, Analysis, Governance, Build, Growth, Synthesis, Finance, Enhanced Governance
+**Canonical Flows**: Phase 0-4 (Onboarding → Viability) with HITL checkpoints
 
-**Note**: Platform currently integrated with 6-agent crew. Will be updated as startupai-crew rebuilds to Flows architecture.
+See `startupai-crew/docs/master-architecture/` for the full technical blueprint.
 
-See `startupai-crew/docs/master-architecture/internal-validation-system-spec.md` for full technical blueprint.
-
-**API Endpoint**:
+**API Endpoints**:
 ```bash
-POST https://startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com/kickoff
-Authorization: Bearer f4cc39d92520
+POST https://chris00walker--startupai-validation-fastapi-app.modal.run/kickoff
 Content-Type: application/json
 
 {
+  "project_id": "...",
   "entrepreneur_input": "Business idea description..."
 }
 ```
 
-**Integration Point**: Backend API route `/api/crewai/analyze` proxies to CrewAI AMP
+**Integration Point**: Backend API route `/api/crewai/analyze` proxies to Modal `/kickoff`
 
-**Output**: Structured reports stored in Supabase, displayed in UI
+**Output**: Structured reports persisted in Supabase and displayed in the UI
 
 ## Design System
 - **UI Framework**: Shadcn UI (New York theme, same as marketing)

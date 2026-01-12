@@ -49,7 +49,7 @@ netlify dev
 # Access at: http://localhost:8889
 ```
 
-**Use for:** Testing production builds, Netlify Functions, CrewAI integration, environment variable validation
+**Use for:** Testing production builds, Modal integration, environment variable validation
 
 ---
 
@@ -141,7 +141,7 @@ FREEMIUM_MONTHLY_LIMIT=10
 **Runs:** `netlify dev` (port 8889, proxies to 3000)
 
 **Features:**
-- Tests Netlify Functions (Python CrewAI workflows)
+- Tests Modal integration via `/api/crewai/*` routes
 - Validates cross-site authentication with marketing site
 - Tests database migrations and seeding
 - Enables all experimental features
@@ -258,15 +258,17 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
-### Test Netlify Functions (Python CrewAI)
+### Test Modal Integration
 ```bash
 cd app.startupai.site
 
 # Start Netlify Dev
 netlify dev
 
-# In another terminal, invoke function
-netlify functions:invoke crew-analyze-background --payload '{"startup":"TestCo"}'
+# In another terminal, trigger Modal kickoff via API route
+curl -X POST http://localhost:8889/api/crewai/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"project_id":"test","entrepreneur_input":"TestCo"}'
 ```
 
 ---
@@ -278,13 +280,13 @@ When running `pnpm dev:staging` or `netlify dev`, you get:
 ### ✅ Production Simulation
 - Exact same environment as production
 - Tests Netlify-specific features (Functions, Redirects, Headers)
-- Validates Python runtime for CrewAI workflows
-- Simulates serverless function cold starts
+- Validates API routes and Modal connectivity
+- Simulates serverless cold starts for Netlify runtime
 
-### ✅ Function Testing
-- **Python Functions:** `netlify/functions/crew-*.py`
-- **API Routes:** `/api/analyze-background` → `/.netlify/functions/crew-analyze-background`
-- **Live Reload:** Auto-restarts on function changes
+### ✅ API Route Testing
+- **CrewAI Routes:** `/api/crewai/analyze`, `/api/crewai/webhook`
+- **Onboarding Routes:** `/api/onboarding/*`
+- **Live Reload:** Auto-restarts on route changes
 
 ### ✅ Environment Injection
 Netlify automatically provides:
@@ -347,7 +349,7 @@ pnpm dev
 - ✅ Database schema changes
 
 ### Use **Staging** when:
-- ✅ Testing CrewAI workflows (Python Functions)
+- ✅ Testing CrewAI workflows (Modal via API routes)
 - ✅ Validating cross-site authentication
 - ✅ Testing environment variable loading
 - ✅ Checking Netlify redirects and headers
@@ -470,7 +472,7 @@ app.startupai.site/
 │   ├── package.json      # Frontend dependencies
 │   └── .env.local        # ⭐ Environment variables HERE
 ├── netlify/
-│   └── functions/        # Python serverless functions (CrewAI)
+│   └── functions/        # Legacy Python functions (deprecated)
 ├── docs/                 # Documentation
 ├── netlify.toml          # Deployment configuration
 └── package.json          # Root workspace config
@@ -492,9 +494,9 @@ app.startupai.site/
 - **Redirects to:** App platform after authentication
 
 ### CrewAI Backend (startupai-crew)
-- **Deployment:** CrewAI AMP Platform (cloud-hosted)
-- **API Endpoint:** Configured in `AGENTUITY_AGENT_URL`
-- **Local Testing:** `crewai run` (requires `.env` with OPENAI_API_KEY)
+- **Deployment:** Modal Serverless (cloud-hosted)
+- **API Endpoint:** Modal `/kickoff` (override via `CREW_ANALYZE_URL`)
+- **Local Testing:** `modal serve src/modal_app/app.py`
 
 ### Environment Variables Must Match
 JWT secrets and Supabase keys must be **identical** across:
@@ -516,7 +518,7 @@ JWT secrets and Supabase keys must be **identical** across:
 - [ ] Database migrations applied: `pnpm db:migrate`
 - [ ] Test data seeded: `pnpm db:seed`
 - [ ] Cross-site auth tested with marketing site
-- [ ] Netlify Functions tested: `netlify functions:invoke`
+- [ ] Modal integration tested: `curl http://localhost:8889/api/crewai/analyze`
 
 ---
 

@@ -1,5 +1,7 @@
 # End-to-End Data Flow Verification Report
 
+> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
+
 ## Executive Summary
 
 **Overall Status: ✅ Well-Architected with Minor Gaps**

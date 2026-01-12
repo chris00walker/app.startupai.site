@@ -207,7 +207,7 @@ git push origin main
 
 **CrewAI Logs:**
 ```bash
-# Check CrewAI AMP dashboard or logs
+# Check Modal dashboard or logs
 # Verify workflows are starting and completing
 ```
 

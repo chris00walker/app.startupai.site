@@ -31,14 +31,14 @@ StartupAI operates as a three-service ecosystem with clear separation of concern
 
 **Role**: Brain of StartupAI - market analysis, idea validation, strategy generation
 
-- CrewAI Python agents (6 founders, 18 agents)
-- LangChain integration for multi-provider LLM support
-- Deployed via CrewAI AMP (Agent Messaging Protocol)
+- CrewAI Python agents (5 flows / 14 crews / 45 agents)
+- Modal serverless execution with HITL checkpoints
+- Supabase persistence + Realtime for progress
 
 **Key Components**:
-- Agent configs: `config/agents.yaml`
-- Task configs: `config/tasks.yaml`
-- Crew orchestration: `src/startupai/crew.py`
+- Modal API: `src/modal_app/app.py`
+- Phase functions: `src/modal_app/phases/`
+- State persistence: `src/state/persistence.py`
 
 ### 2. Marketing Interface (startupai.site)
 
@@ -84,9 +84,9 @@ startupai.site/signup
 ```
 User Input (Onboarding/Project)
     → app.startupai.site API
-    → CrewAI AMP
-        → 6-agent pipeline
-        → Strategic analysis
+    → Modal serverless
+        → 5-flow pipeline
+        → Strategic analysis + HITL
     → Results stored in Supabase
     → Dashboard displays insights
 ```
@@ -97,13 +97,13 @@ User Input (Onboarding/Project)
 - **Database**: Supabase PostgreSQL with RLS
 - **Auth**: Supabase Auth (OAuth, PKCE)
 - **Analytics**: PostHog (shared workspace)
-- **Deployment**: Netlify (web apps), CrewAI AMP (agents)
+- **Deployment**: Netlify (web apps), Modal (agents)
 
 ### Product-Specific
 - **ORM**: Drizzle for type-safe queries
 - **State**: TanStack Query
 - **Testing**: Jest + Playwright
-- **AI**: CrewAI via AMP
+- **AI**: CrewAI via Modal
 
 ## System Flow
 
@@ -111,7 +111,7 @@ User Input (Onboarding/Project)
 
 2. **Onboarding**: The wizard lives in App Router (`/onboarding`). API handlers mutate `onboarding_sessions` and `entrepreneur_briefs` in Supabase.
 
-3. **AI Analysis**: `POST /api/onboarding/complete` calls CrewAI AMP which writes structured evidence and recommendations back to Supabase.
+3. **AI Analysis**: `POST /api/crewai/analyze` triggers Modal `/kickoff`, which writes structured evidence and recommendations back to Supabase.
 
 4. **Dashboards**: Server components consume Supabase data. Analytics events push to PostHog for funnel monitoring.
 
@@ -122,13 +122,13 @@ User Input (Onboarding/Project)
 | Infrastructure | 95% complete |
 | Database | 100% complete |
 | Auth | Working (GitHub OAuth + PKCE) |
-| AI Backend | In progress (CrewAI AMP deployment) |
+| AI Backend | Modal deployed (UI integration in progress) |
 
 See `work/implementation-status.md` for detailed tracking.
 
 ## Known Risks
 
-- CrewAI AMP integration in progress - needed for end-to-end AI
+- Modal integration in progress - needed for end-to-end UI
 - Service-role credentials for Supabase must be rotated carefully
 - pgvector search only via stored procedure - dashboard experiences must use RPC
 - Accessibility compliance not yet implemented (launch blocker)
