@@ -375,9 +375,6 @@ CrewAI → Product App (this repo) → Marketing Site
 
 **Current blockers**: See `docs/work/cross-repo-blockers.md`
 
-## LLM Coordination Protocol
-See `startupai-crew/docs/master-architecture/llm-coordination.md`.
-
 ## Claude Code Customizations
 
 ### Available Agents (Project-Level)
@@ -411,6 +408,6 @@ Agents are automatically invoked based on context and trigger words in their des
 - Work Tracking: `docs/work/`
 
 ---
-**Last Updated**: 2026-01-12
+**Last Updated**: 2025-11-30
 **Maintainer**: Chris Walker
 **Status**: ~85% Complete - Phase Alpha (P0 blockers cleared)
