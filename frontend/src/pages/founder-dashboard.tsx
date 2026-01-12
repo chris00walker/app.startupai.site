@@ -370,6 +370,12 @@ export default function FounderDashboard() {
       project_count: projects.length,
       has_projects: projects.length > 0,
     })
+    // Track dashboard viewed event
+    trackEvent('dashboard_viewed', {
+      role: 'founder',
+      project_count: projects.length,
+      category: 'navigation',
+    })
   }, [projects.length])
 
   // Track tab switches
