@@ -32,6 +32,7 @@ import {
   Loader2,
   Brain
 } from "lucide-react"
+import { trackEvent, trackPageView } from "@/lib/analytics"
 import { PortfolioProject, PortfolioMetrics } from "@/types/portfolio"
 
 function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
@@ -149,6 +150,19 @@ function Dashboard() {
     }
     fetchUserRole()
   }, [user])
+
+  // Track dashboard viewed on initial load
+  React.useEffect(() => {
+    trackPageView('Consultant Dashboard', {
+      client_count: projects.length,
+      has_clients: projects.length > 0,
+    })
+    trackEvent('dashboard_viewed', {
+      role: 'consultant',
+      client_count: projects.length,
+      category: 'navigation',
+    })
+  }, [projects.length])
 
   // Use appropriate hook based on user role
   const isConsultant = userRole === 'consultant'
