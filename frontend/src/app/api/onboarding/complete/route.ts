@@ -682,20 +682,16 @@ export async function POST(request: NextRequest) {
       let rateLimitInfo: RateLimitInfo | undefined;
 
       try {
-        // Use CrewAI AMP for founder validation (async, fire-and-forget)
+        // Use Modal Serverless for founder validation (primary)
+        // Falls back to CrewAI AMP if Modal not configured
         // Results will be persisted via webhook at /api/crewai/webhook
-        const { createCrewAIClient } = await import('@/lib/crewai/amp-client');
+        const { createModalClient, isModalConfigured } = await import('@/lib/crewai/modal-client');
 
-        const crewaiUrl = process.env.CREWAI_API_URL;
-        if (!crewaiUrl) {
-          console.warn('[onboarding/complete] CREWAI_API_URL not configured, skipping AI analysis');
-        } else {
-          const crewClient = createCrewAIClient({
-            apiUrl: crewaiUrl,
-            apiToken: process.env.CREWAI_API_TOKEN,
-          });
+        if (isModalConfigured()) {
+          // Modal Serverless (recommended - $0 idle costs)
+          console.log('[onboarding/complete] Starting Modal founder_validation flow...');
 
-          console.log('[onboarding/complete] Starting CrewAI founder_validation flow...');
+          const modalClient = createModalClient();
 
           // Build inputs for founder validation flow
           const validationInputs = buildFounderValidationInputs(
@@ -707,12 +703,15 @@ export async function POST(request: NextRequest) {
 
           // Kick off the flow (fire and forget - don't wait for completion)
           // Results will be persisted via webhook at /api/crewai/webhook
-          const response = await crewClient.kickoff({
-            inputs: validationInputs,
+          const response = await modalClient.kickoff({
+            entrepreneur_input: validationInputs.entrepreneur_input,
+            project_id: validationInputs.project_id,
+            user_id: validationInputs.user_id,
+            session_id: validationInputs.session_id,
           });
 
-          workflowId = response.kickoff_id;
-          console.log('[onboarding/complete] CrewAI kickoff started:', workflowId);
+          workflowId = response.run_id;
+          console.log('[onboarding/complete] Modal kickoff started:', workflowId);
 
           // Mark that we successfully triggered the workflow
           analysisResult = {
@@ -726,22 +725,75 @@ export async function POST(request: NextRequest) {
             },
           };
 
-          // Store kickoff_id in project metadata for webhook correlation
+          // Store run_id in project metadata for webhook correlation
           await supabaseClient
             .from('projects')
             .update({
               metadata: {
                 ...(project.metadata || {}),
                 pending_kickoff_id: workflowId,
+                modal_run_id: workflowId,
                 crewai_flow_type: 'founder_validation',
                 kickoff_started_at: new Date().toISOString(),
               },
             })
             .eq('id', project.id);
+        } else {
+          // Fallback to CrewAI AMP (deprecated)
+          const { createCrewAIClient } = await import('@/lib/crewai/amp-client');
+
+          const crewaiUrl = process.env.CREWAI_API_URL;
+          if (!crewaiUrl) {
+            console.warn('[onboarding/complete] Neither MODAL nor CREWAI_API_URL configured, skipping AI analysis');
+          } else {
+            console.log('[onboarding/complete] Using fallback CrewAI AMP (Modal not configured)...');
+
+            const crewClient = createCrewAIClient({
+              apiUrl: crewaiUrl,
+              apiToken: process.env.CREWAI_API_TOKEN,
+            });
+
+            const validationInputs = buildFounderValidationInputs(
+              finalBriefData,
+              project.id,
+              session.user_id,
+              sessionId
+            );
+
+            const response = await crewClient.kickoff({
+              inputs: validationInputs,
+            });
+
+            workflowId = response.kickoff_id;
+            console.log('[onboarding/complete] CrewAI AMP kickoff started:', workflowId);
+
+            analysisResult = {
+              success: true,
+              analysisId: workflowId,
+              summary: 'Your founder validation analysis is in progress. Results will appear on your dashboard within 3-5 minutes.',
+              insights: [],
+              metadata: {
+                project_id: project.id,
+                user_id: user.id,
+              },
+            };
+
+            await supabaseClient
+              .from('projects')
+              .update({
+                metadata: {
+                  ...(project.metadata || {}),
+                  pending_kickoff_id: workflowId,
+                  crewai_flow_type: 'founder_validation',
+                  kickoff_started_at: new Date().toISOString(),
+                },
+              })
+              .eq('id', project.id);
+          }
         }
       } catch (analysisErr) {
-        crewError = analysisErr instanceof Error ? analysisErr.message : 'CrewAI AMP request failed';
-        console.error('[onboarding/complete] CrewAI AMP error:', crewError);
+        crewError = analysisErr instanceof Error ? analysisErr.message : 'Validation kickoff failed';
+        console.error('[onboarding/complete] Kickoff error:', crewError);
       }
 
       // No mock fallback - users will see "processing" state until webhook delivers real results

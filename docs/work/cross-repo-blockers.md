@@ -1,24 +1,24 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2026-01-10"
-last_synced: "2026-01-10 - Tool integration complete, asset generation specs done"
+last_reviewed: "2026-01-12"
+last_synced: "2026-01-12 - API routes hardened, evidence display verified, build passing"
 ---
 
 # Cross-Repository Blockers
 
 This document tracks dependencies between StartupAI repositories to ensure coordinated delivery.
 
-> **TOOLS COMPLETE (2026-01-10)**: 15 tools wired to 35+ agents, 681 tests passing. Phase 0-2 live testing verified. Asset generation specs complete (Blueprint Pattern + Ad Platform Library).
+> **DOGFOODING VERIFIED (2026-01-12)**: Founder and Consultant browser journeys tested. Phase 0-1 HITL approvals working. RLS policies for consultant access deployed. API routes hardened with improved error handling.
 
-## Ecosystem Status (2026-01-10)
+## Ecosystem Status (2026-01-12)
 
-**Phase 0-2 validated. Phase 3-4 live testing next. Asset generation specs ready for implementation.**
+**Dogfooding setup complete. Founder + Consultant journeys verified. API routes hardened. Phase 2 testing next.**
 
 | Service | Status | Completion | Notes |
 |---------|--------|------------|-------|
 | CrewAI Backend | **PHASE 0-2 VALIDATED** | ~92% | Phase 3-4 live testing next |
-| Product App | Modal integration complete | ~95% | Pointing to Modal endpoints |
+| Product App | **API ROUTES HARDENED** | ~95% | Build passing, evidence display working |
 | Marketing Site | Live API integration | ~95% | Activity Feed + Metrics connected |
 
 **Production URLs**:
@@ -218,7 +218,23 @@ Marketing activity feed shows real activity
 
 ---
 
-**Last Updated**: 2026-01-10 22:00
+**Last Updated**: 2026-01-12 18:00
+
+**Changes (2026-01-12 - API Route Hardening)**:
+- ✅ **APPROVAL ROUTES ENHANCED**: List + detail endpoints with better error handling
+- ✅ **WEBHOOK ROUTE HARDENED**: Improved logging, validation, error responses
+- ✅ **ONBOARDING COMPLETE**: Enhanced route with better session handling
+- ✅ **EVIDENCE DISPLAY**: Working in approval detail modals
+- ✅ **BUILD PASSING**: Production build verification successful
+- ⏳ **NEXT**: Phase 2 Desirability testing (landing pages, experiments)
+
+**Changes (2026-01-12 - Dogfooding Methodology & Browser Testing)**:
+- ✅ **DOGFOODING ENSHRINED**: Test accounts documented in CLAUDE.md (both repos)
+- ✅ **FOUNDER JOURNEY VERIFIED**: Login, dashboard, projects, approvals all working
+- ✅ **CONSULTANT JOURNEY VERIFIED**: Login, clients, client projects all working
+- ✅ **RLS POLICY DEPLOYED**: Consultants can now view client projects
+- ✅ **TEST DATA CREATED**: StartupAI project (Founder), Elias Food Imports (Suzanne)
+- ✅ **PHASE 0-1 HITL WORKING**: Founder's Brief + VPC approval both completed
 
 **Changes (2026-01-10 - Upstream Tool Integration & Asset Specs Complete)**:
 - ✅ **TOOLS COMPLETE**: 15 tools wired to 35+ agents, 681 tests passing

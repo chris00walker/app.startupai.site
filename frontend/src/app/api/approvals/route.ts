@@ -6,19 +6,58 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createBrowserClient } from '@supabase/supabase-js';
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+  // Debug: Log auth state
+  console.log('[api/approvals] Checking auth...');
 
-  // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  let user;
+  let supabase;
 
-  if (authError || !user) {
+  // Check for Authorization header (for API/testing access)
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    console.log('[api/approvals] Using Authorization header');
+
+    // Create a client with the provided token
+    supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+
+    const { data: { user: tokenUser }, error: tokenError } = await supabase.auth.getUser(token);
+    if (tokenError) {
+      console.log('[api/approvals] Token auth error:', tokenError.message);
+    }
+    user = tokenUser;
+  } else {
+    // Use cookie-based auth (normal browser flow)
+    supabase = await createClient();
+    const { data: { user: cookieUser }, error: authError } = await supabase.auth.getUser();
+
+    console.log('[api/approvals] Cookie auth - User:', cookieUser?.id || 'null');
+    console.log('[api/approvals] Cookie auth error:', authError?.message || 'none');
+    user = cookieUser;
+  }
+
+  if (!user) {
+    console.log('[api/approvals] Returning 401 - no user');
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
     );
   }
+
+  console.log('[api/approvals] Authenticated user:', user.id);
 
   // Parse query params
   const { searchParams } = new URL(request.url);
@@ -47,6 +86,8 @@ export async function GET(request: NextRequest) {
   }
 
   const { data: approvals, error: fetchError, count } = await query;
+
+  console.log('[api/approvals] Query result - count:', count, 'approvals:', approvals?.length || 0);
 
   if (fetchError) {
     console.error('[api/approvals] Fetch failed:', fetchError);

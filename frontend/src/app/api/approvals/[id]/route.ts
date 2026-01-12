@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { createClient as createBrowserClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Schema for approval decision
 const approvalDecisionSchema = z.object({
@@ -18,6 +19,41 @@ const approvalDecisionSchema = z.object({
 });
 
 /**
+ * Helper to get authenticated user from request (supports both cookies and Authorization header)
+ */
+async function getAuthenticatedUser(request: NextRequest): Promise<{
+  user: { id: string; email?: string } | null;
+  supabase: SupabaseClient;
+}> {
+  // Check for Authorization header (for API/testing access)
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    console.log('[api/approvals] Using Authorization header');
+
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser(token);
+    return { user, supabase };
+  }
+
+  // Use cookie-based auth (normal browser flow)
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return { user, supabase };
+}
+
+/**
  * GET - Fetch approval request details
  */
 export async function GET(
@@ -25,12 +61,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = await createClient();
 
-  // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  // Get current user (supports both cookies and Authorization header)
+  const { user, supabase } = await getAuthenticatedUser(request);
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -95,12 +130,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = await createClient();
 
-  // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  // Get current user (supports both cookies and Authorization header)
+  const { user } = await getAuthenticatedUser(request);
 
-  if (authError || !user) {
+  if (!user) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -207,10 +241,16 @@ export async function PATCH(
 
   // If approved, resume CrewAI execution
   if (isApproved) {
+    // Map frontend decision values to Modal expected values
+    // Modal expects: approved, rejected, override_proceed, iterate, segment_[1-9], custom_segment
+    const modalDecision = body.decision === 'approve' ? 'approved' :
+                          body.decision === 'reject' ? 'rejected' :
+                          body.decision || 'approved';
+
     await resumeCrewAIExecution(
       approval.execution_id,
       approval.task_id,
-      body.decision || 'approved',
+      modalDecision,
       body.feedback || 'Approved by user',
       user.id
     );

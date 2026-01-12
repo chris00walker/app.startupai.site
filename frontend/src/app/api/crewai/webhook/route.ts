@@ -989,6 +989,126 @@ const hitlCheckpointSchema = z.object({
 
 type HITLCheckpointPayload = z.infer<typeof hitlCheckpointSchema>;
 
+/**
+ * Transform checkpoint-specific context into evidence_summary format for UI display.
+ *
+ * The EvidenceSummary component expects specific fields:
+ * - desirability_signal, feasibility_signal, viability_signal (D-F-V signals)
+ * - ltv, cac, ltv_cac_ratio, conversion_rate (metrics)
+ * - impressions, signups (experiment metrics)
+ * - key_learnings (string[]), summary (string)
+ *
+ * This function transforms checkpoint-specific data into that format.
+ */
+function buildEvidenceSummaryFromContext(
+  checkpoint: string,
+  context: Record<string, unknown> | undefined
+): Record<string, unknown> {
+  if (!context) return {};
+
+  const evidenceSummary: Record<string, unknown> = {};
+
+  switch (checkpoint) {
+    case 'approve_founders_brief': {
+      // Phase 0: Founder's Brief approval
+      const foundersBreif = context.founders_brief as Record<string, unknown> | undefined;
+      const businessIdea = (foundersBreif?.business_idea || context.business_idea || '') as string;
+      const assumptions = (foundersBreif?.assumptions || context.assumptions || []) as string[];
+
+      evidenceSummary.summary = businessIdea
+        ? `Founder's Brief prepared: ${businessIdea.slice(0, 100)}${businessIdea.length > 100 ? '...' : ''}`
+        : 'Founder\'s Brief ready for review';
+      evidenceSummary.key_learnings = assumptions.slice(0, 5);
+      break;
+    }
+
+    case 'approve_vpc_completion': {
+      // Phase 1: VPC Discovery complete
+      const fitAssessment = context.fit_assessment as Record<string, unknown> | undefined;
+      const customerProfile = context.customer_profile_summary as Record<string, unknown> | undefined;
+      const valueMap = context.value_map_summary as Record<string, unknown> | undefined;
+
+      // Build summary from VPC data
+      const fitScore = fitAssessment?.fit_score ?? 0;
+      const segment = customerProfile?.segment ?? 'Unknown segment';
+      const jobsCount = customerProfile?.jobs_count ?? 0;
+      const painsCount = customerProfile?.pains_count ?? 0;
+      const gainsCount = customerProfile?.gains_count ?? 0;
+      const productsCount = valueMap?.products_count ?? 0;
+      const painRelieversCount = valueMap?.pain_relievers_count ?? 0;
+      const gainCreatorsCount = valueMap?.gain_creators_count ?? 0;
+
+      evidenceSummary.summary = `VPC fit score: ${fitScore}/100. ` +
+        `Customer: ${segment} (${jobsCount} jobs, ${painsCount} pains, ${gainsCount} gains). ` +
+        `Value Map: ${productsCount} product(s), ${painRelieversCount} pain relievers, ${gainCreatorsCount} gain creators.`;
+
+      // Key learnings from blockers
+      const blockers = (fitAssessment?.blockers || []) as string[];
+      evidenceSummary.key_learnings = blockers;
+
+      // No D-F-V signals yet in Phase 1 (VPC is pre-experimentation)
+      break;
+    }
+
+    case 'approve_desirability_gate': {
+      // Phase 2: Desirability validation complete
+      const desirabilitySignal = context.desirability_signal as string | undefined;
+      const conversionRate = context.conversion_rate as number | undefined;
+      const impressions = context.impressions as number | undefined;
+      const signups = context.signups as number | undefined;
+      const keyLearnings = (context.key_learnings || []) as string[];
+
+      evidenceSummary.desirability_signal = desirabilitySignal || 'no_signal';
+      if (conversionRate !== undefined) evidenceSummary.conversion_rate = conversionRate;
+      if (impressions !== undefined) evidenceSummary.impressions = impressions;
+      if (signups !== undefined) evidenceSummary.signups = signups;
+      evidenceSummary.key_learnings = keyLearnings;
+      evidenceSummary.summary = context.summary as string || 'Desirability validation complete';
+      break;
+    }
+
+    case 'approve_feasibility_gate': {
+      // Phase 3: Feasibility validation complete
+      const feasibilitySignal = context.feasibility_signal as string | undefined;
+      const keyLearnings = (context.key_learnings || []) as string[];
+
+      evidenceSummary.feasibility_signal = feasibilitySignal || 'unknown';
+      evidenceSummary.key_learnings = keyLearnings;
+      evidenceSummary.summary = context.summary as string || 'Feasibility assessment complete';
+      break;
+    }
+
+    case 'approve_viability_gate': {
+      // Phase 4: Viability validation complete
+      const viabilitySignal = context.viability_signal as string | undefined;
+      const ltv = context.ltv as number | undefined;
+      const cac = context.cac as number | undefined;
+      const ltvCacRatio = context.ltv_cac_ratio as number | undefined;
+      const keyLearnings = (context.key_learnings || []) as string[];
+
+      evidenceSummary.viability_signal = viabilitySignal || 'unknown';
+      if (ltv !== undefined) evidenceSummary.ltv = ltv;
+      if (cac !== undefined) evidenceSummary.cac = cac;
+      if (ltvCacRatio !== undefined) evidenceSummary.ltv_cac_ratio = ltvCacRatio;
+      evidenceSummary.key_learnings = keyLearnings;
+      evidenceSummary.summary = context.summary as string || 'Viability assessment complete';
+      break;
+    }
+
+    default: {
+      // Generic handling for other checkpoints
+      if (context.summary) evidenceSummary.summary = context.summary;
+      if (context.key_learnings) evidenceSummary.key_learnings = context.key_learnings;
+      if (context.desirability_signal) evidenceSummary.desirability_signal = context.desirability_signal;
+      if (context.feasibility_signal) evidenceSummary.feasibility_signal = context.feasibility_signal;
+      if (context.viability_signal) evidenceSummary.viability_signal = context.viability_signal;
+      break;
+    }
+  }
+
+  return evidenceSummary;
+}
+
 async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<NextResponse> {
   console.log('[api/crewai/webhook] Processing hitl_checkpoint:', {
     run_id: payload.run_id,
@@ -1017,6 +1137,45 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
     })
     .eq('run_id', payload.run_id);
 
+  // Determine approval_type based on checkpoint name
+  // Map HITL checkpoints to valid approval_type values from schema
+  const approvalTypeMap: Record<string, string> = {
+    'approve_founders_brief': 'gate_progression',
+    'approve_vpc_completion': 'gate_progression',
+    'approve_experiment_plan': 'gate_progression',
+    'approve_pricing_test': 'gate_progression',
+    'approve_campaign_launch': 'campaign_launch',
+    'approve_spend_increase': 'spend_increase',
+    'approve_desirability_gate': 'gate_progression',
+    'approve_feasibility_gate': 'gate_progression',
+    'approve_viability_gate': 'gate_progression',
+    'approve_pivot': 'segment_pivot',
+    'approve_proceed': 'gate_progression',
+    'request_human_decision': 'gate_progression',
+  };
+
+  // Determine owner_role based on checkpoint phase/type
+  const ownerRoleMap: Record<string, string> = {
+    'approve_founders_brief': 'compass',     // Phase 0 - Compass leads synthesis
+    'approve_vpc_completion': 'compass',     // Phase 1 - VPC
+    'approve_experiment_plan': 'pulse',      // Phase 1 - Pulse runs experiments
+    'approve_pricing_test': 'ledger',        // Phase 1 - Ledger handles pricing
+    'approve_campaign_launch': 'pulse',      // Phase 2 - Marketing
+    'approve_spend_increase': 'ledger',      // Phase 2 - Budget
+    'approve_desirability_gate': 'compass',  // Phase 2 - Gate
+    'approve_feasibility_gate': 'forge',     // Phase 3 - Technical
+    'approve_viability_gate': 'ledger',      // Phase 4 - Financial
+    'approve_pivot': 'compass',              // Phase 4 - Strategy
+    'approve_proceed': 'compass',            // Phase 4 - Final
+    'request_human_decision': 'compass',     // Phase 4 - Final decision
+  };
+
+  const approvalType = approvalTypeMap[payload.checkpoint] || 'gate_progression';
+  const ownerRole = ownerRoleMap[payload.checkpoint] || 'compass';
+
+  // Transform context into evidence_summary for UI display
+  const evidenceSummary = buildEvidenceSummaryFromContext(payload.checkpoint, payload.context);
+
   // Create approval request in approval_requests table
   const { data: approvalRequest, error: approvalError } = await admin
     .from('approval_requests')
@@ -1025,13 +1184,14 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
       user_id: payload.user_id,
       execution_id: payload.run_id,  // Store run_id as execution_id
       task_id: payload.checkpoint,    // Store checkpoint name as task_id
-      approval_type: 'hitl_checkpoint',
+      approval_type: approvalType,
+      owner_role: ownerRole,
       status: 'pending',
       title: payload.title,
       description: payload.description,
+      task_output: payload.context || {},  // Raw context for reference
+      evidence_summary: evidenceSummary,   // Transformed for UI display
       options: payload.options,
-      recommended_option: payload.recommended,
-      context: payload.context,
       expires_at: payload.expires_at,
       created_at: nowIso,
       updated_at: nowIso,

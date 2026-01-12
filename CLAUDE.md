@@ -7,6 +7,30 @@
 **Framework**: Next.js 15.5.3 (Hybrid: App Router + Pages Router)  
 **Deployment**: Netlify (considering Vercel migration)  
 
+## Dogfooding Methodology
+
+> **"If StartupAI can't validate itself, it won't work for anyone else."**
+
+Test as a real user before testing as a developer.
+
+### Test Accounts
+
+| Role | Email | Password | Purpose |
+|------|-------|----------|---------|
+| **Founder** | chris00walker@proton.me | W7txYdr7bV0Tc30U0bv& | Tests full validation journey |
+| **Consultant** | chris00walker@gmail.com | Test123! | Tests advisor/client features |
+
+**Project**: StartupAI (the platform validating itself)
+
+### Quality Gates (Dogfooding)
+- [ ] Founder account can complete onboarding
+- [ ] Founder account can approve all HITL checkpoints
+- [ ] Consultant account can view client data
+- [ ] No mock data in any user-facing component
+- [ ] UI displays real StartupAI validation results
+
+See [startupai-crew/docs/master-architecture/10-dogfooding.md](../startupai-crew/docs/master-architecture/10-dogfooding.md) for full methodology.
+
 ## Architecture
 ```
 [Next.js Frontend] → [Supabase Backend] → [Vercel AI SDK] → [OpenAI/Anthropic]
@@ -250,6 +274,53 @@ const projects = await db.execute(sql`SELECT * FROM projects WHERE user_id = ${u
 1. Check connectivity: `pnpm crew:contract-check`
 2. Expected output: Deployment UUID and inputs schema
 3. If fails: Check `CREW_ANALYZE_URL` and `CREW_CONTRACT_BEARER`
+
+## Integration Audit Rules
+
+**CRITICAL**: Before creating new UI components for displaying CrewAI/Modal data, ALWAYS follow this checklist:
+
+### Pre-Implementation Audit
+1. **Audit existing components FIRST** - The frontend was engineered with sophisticated UI components:
+   - `components/approvals/EvidenceSummary.tsx` - D-F-V signal badges, metrics display
+   - `components/approvals/ApprovalDetailModal.tsx` - Full approval workflow
+   - `components/approvals/ApprovalCard.tsx` - Approval list items
+   - `components/vpc/` - VPC visualization components
+   - `components/validation/` - Validation progress components
+
+2. **Check data transformation, not UI first** - When data doesn't display:
+   - Is the webhook handler (`/api/crewai/webhook/route.ts`) populating the correct fields?
+   - Does Modal send data in a different structure than the UI expects?
+   - Check what fields existing components expect (read the component's interface/props)
+
+3. **Map data contracts before coding**:
+   - Modal sends: Check `startupai-crew/docs/master-architecture/reference/api-contracts.md`
+   - Frontend expects: Read the component's TypeScript interface
+   - Transform in: Webhook handler or API route
+
+### Data Flow Verification
+```
+Modal Backend → Webhook Handler → Supabase Tables → UI Components
+     ↓              ↓                  ↓               ↓
+  payload      transform          persist         read & display
+```
+
+If data isn't displaying:
+1. Check Supabase table has the data (SQL query)
+2. Check component is reading from correct table/field
+3. Check webhook populated the field correctly
+4. ONLY THEN consider if component needs modification
+
+### Never Do This
+- ❌ Create new `TaskOutputDisplay.tsx` when `EvidenceSummary.tsx` exists
+- ❌ Assume "UI Gap" when it's actually a data transformation gap
+- ❌ Add components without checking `git status` for existing untracked files
+- ❌ Modify components without understanding their existing data contracts
+
+### Always Do This
+- ✅ Run `glob` on `components/` to see existing components before creating new ones
+- ✅ Read existing component props/interfaces to understand expected data structure
+- ✅ Trace data from Modal → Webhook → Supabase → Component before assuming gaps
+- ✅ Fix data transformation in webhook handlers, not by creating parallel components
 
 ## Known Issues & Workarounds
 ### Hybrid Routing (App + Pages Router)

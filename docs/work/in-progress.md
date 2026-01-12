@@ -1,21 +1,35 @@
 ---
 purpose: "Private technical source of truth for active work"
 status: "active"
-last_reviewed: "2025-12-05"
-last_synced: "2025-12-05 - CrewAI migrated to 3-Crew architecture"
+last_reviewed: "2026-01-12"
+last_synced: "2026-01-12 - API routes hardened, evidence display fixed, dogfooding verified"
 ---
 
 # In Progress
 
-## Upstream Architecture Change (2025-12-05)
+## Current Focus (2026-01-12)
 
-**CrewAI has migrated from Flow to 3-Crew architecture.**
+**Dogfooding: Testing StartupAI using StartupAI**
 
-- Code complete: 19 agents, 32 tasks, 7 HITL checkpoints
-- Deployment pending: `crewai login` needed
-- **E2E testing blocked until deployment completes**
+Test Accounts:
+- **Founder**: chris00walker@proton.me (validates StartupAI as business idea)
+- **Consultant**: chris00walker@gmail.com (advises StartupAI as client)
 
-See `cross-repo-blockers.md` for details.
+Status:
+- ✅ Phase 0 (Onboarding) - Founder's Brief approved
+- ✅ Phase 1 (VPC Discovery) - VPC fit score 73/100, approved
+- ⏳ Phase 2 (Desirability) - Landing pages, experiments (NEXT)
+- ⏳ Phase 3-4 - Feasibility + Viability (pending)
+
+Recent Session Work (2026-01-12):
+- ✅ Approval API routes enhanced (list + detail endpoints)
+- ✅ Webhook route hardened (better error handling, logging)
+- ✅ Onboarding complete route improved
+- ✅ Evidence summary display working in approval modals
+- ✅ RLS policy for consultant client project access deployed
+- ✅ Build verification passed (pnpm build succeeds)
+
+See `cross-repo-blockers.md` for ecosystem status.
 
 ---
 
@@ -27,24 +41,27 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| - | *No P0 blockers remaining* | ✅ | - | - | PostHog instrumentation completed 2025-11-30 |
+| - | *No P0 blockers remaining* | ✅ | - | - | Dogfooding setup complete 2026-01-12 |
 
 ### P1: High Priority (Should Fix Before Launch)
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 2 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard mock data replaced with usePortfolioActivity hook |
-| 3 | Specification-driven test refresh | ✅ Done | @qa-lead | ~4 hours | TypeScript errors fixed, accessibility roles added, test pollution resolved |
-| 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented (see backlog.md) |
+| 1 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
+| 2 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
+| 3 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
 
 ### P2: Ready for E2E Testing
 
 | Priority | Item | Status | Notes |
 |----------|------|--------|-------|
-| 4 | E2E validation flow | **Blocked** | Waiting for CrewAI 3-Crew deployment |
-| 5 | Real analysis data quality | **Blocked** | Depends on deployed crews |
+| 1 | Phase 0-1 HITL flow | ✅ **VERIFIED** | Founder's Brief + VPC approval working |
+| 2 | Founder dashboard | ✅ **VERIFIED** | Projects, approvals, evidence display |
+| 3 | Consultant dashboard | ✅ **VERIFIED** | Clients, client projects (RLS policy deployed) |
+| 4 | Phase 2 Desirability | **NEXT** | Landing page generation, experiments |
+| 5 | Phase 3-4 Feasibility/Viability | **Pending** | After Phase 2 complete |
 
-**CrewAI Status (2025-12-05):** Migrated to 3-Crew architecture. Code complete, deployment pending.
+**Modal Status (2026-01-12):** Production deployed, Phase 0-2 validated, HITL working.
 
 ---
 
@@ -119,9 +136,16 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 ---
 
-**Last Updated**: 2025-12-05
+**Last Updated**: 2026-01-12
 
-**Changes (2025-12-05):**
+**Changes (2026-01-12):**
+- Dogfooding methodology enshrined in CLAUDE.md files
+- Founder journey verified (login, dashboard, projects, approvals)
+- Consultant journey verified (login, clients, client projects)
+- RLS policy deployed for consultant client project access
+- Phase 0-1 HITL approvals tested and working
+- Test data created (StartupAI + Elias Food Imports projects)
+
+**Previous (2025-12-05):**
 - Added Upstream Architecture Change notice
 - Updated CrewAI status: Flow → 3-Crew migration
-- E2E testing now blocked until deployment completes
