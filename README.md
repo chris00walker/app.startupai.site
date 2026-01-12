@@ -147,7 +147,7 @@ app.startupai.site/
 The platform connects to the AI Founders engine via:
 - `/api/analyze` - Triggers Modal `/kickoff` endpoint
 - `/api/crewai/status` - Queries Supabase OR Modal `/status`
-- `/api/crewai/webhook` - Receives results (Modal format; AMP legacy deprecated)
+- `/api/crewai/webhook` - Receives results (Modal format)
 - `/api/approvals` - Handles HITL approvals via Modal `/hitl/approve`
 - Results stored in `validation_runs`, `reports`, and `evidence` tables
 

@@ -123,7 +123,7 @@ ANTHROPIC_API_KEY=...               # ⚠️ COST - Fallback LLM
 
 # CrewAI Integration
 CREW_ANALYZE_URL=...                # Modal /kickoff endpoint (optional override)
-CREW_CONTRACT_BEARER=...            # Legacy AMP token (unused for Modal)
+CREW_CONTRACT_BEARER=...            # Webhook bearer token (CrewAI results)
 
 # Feature Flags
 NEXT_PUBLIC_ONBOARDING_BYPASS=false # ⚠️ MUST BE FALSE in production

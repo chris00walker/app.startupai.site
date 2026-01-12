@@ -149,7 +149,7 @@ last_reviewed: "2025-11-30"
 | VPC visualization components | ✅ Done | Read-only + editable variants |
 | Full CRUD operations on VPC | ✅ Done | Create, edit, delete customer profiles & value maps |
 | Validation state persistence | ✅ Done | All fields stored in Supabase |
-| CrewAI AMP client migration | ✅ Done | Updated to new API structure |
+| CrewAI Modal client migration | ✅ Done | Updated to new API structure |
 
 ---
 
