@@ -1,7 +1,5 @@
 # CrewAI-Frontend Integration QA Report
 
-> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
-
 **Date**: November 30, 2025 (Updated)
 **Status**: Phase Alpha ~85% Complete
 **Author**: Claude Code (Automated QA)
@@ -48,7 +46,7 @@
 
 ### Phase 4: Canvas Tools & VPC (Nov 24-25)
 - VPC visualization (read-only + editable variants)
-- CrewAI AMP client migration
+- Modal client integration alignment
 - Database-architect and testing-specialist Claude agents
 
 ### Phase 5: Validation & Schema Alignment (Nov 25-26)
@@ -91,7 +89,7 @@
 ## 3. Data Flow Status
 
 ```
-CrewAI AMP (8 Crews / 18 Agents)
+Modal Serverless (14 Crews / 45 Agents)
          │
          ▼
 POST /api/crewai/webhook

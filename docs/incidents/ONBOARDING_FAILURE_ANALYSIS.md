@@ -1,7 +1,5 @@
 # Onboarding Workflow Failure - Systems Engineering Analysis
 
-> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
-
 **Date:** 2025-11-12
 **Issue:** Completed onboarding conversation shows 0% progress, no stage advancement, no CrewAI trigger
 **Evidence:** Screenshot showing conversation with Alex completed but sidebar stuck at Stage 1, 0% progress
@@ -222,7 +220,7 @@ if (toolCall.toolName === 'completeOnboarding') {
     insightsCount: keyInsights.length,
   });
 
-  // ❌ MISSING: Call to CrewAI AMP to kick off analysis
+  // ❌ MISSING: Call to Modal /kickoff to start analysis
   // ❌ MISSING: Create project in database
   // ❌ MISSING: Redirect user to dashboard
 }
@@ -235,8 +233,8 @@ This route DOES have CrewAI integration:
 if (toolCall.toolName === 'triggerAnalysis') {
   const { strategicQuestion, projectId, additionalContext, priority } = toolCall.input as any;
 
-  // Makes actual call to /api/analyze endpoint
-  const analyzeResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/analyze`, {
+  // Makes actual call to /api/crewai/analyze endpoint
+  const analyzeResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/crewai/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -252,10 +250,9 @@ if (toolCall.toolName === 'triggerAnalysis') {
 ```
 
 **What's missing from `/api/chat/route.ts`:**
-1. No fetch to `/api/analyze` or CrewAI AMP
-2. No kickoff call to CrewAI Enterprise MCP server
-3. No project creation in database
-4. No handoff to CrewAI's 6-agent analysis crew
+1. No fetch to `/api/crewai/analyze` or Modal `/kickoff`
+2. No project creation in database
+3. No handoff to CrewAI's 5-flow analysis pipeline
 
 ---
 
@@ -319,7 +316,7 @@ The conversation exists in `conversation_history` as raw text, but was never:
 
 ---
 
-## Why Was This Information Not Handed Off to CrewAI AMP?
+## Why Was This Information Not Handed Off to Modal?
 
 ### Answer: Two-Part Failure
 

@@ -1,7 +1,5 @@
 # End-to-End Data Flow Verification Report
 
-> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
-
 ## Executive Summary
 
 **Overall Status: ✅ Well-Architected with Minor Gaps**
@@ -14,26 +12,27 @@ The CrewAI → Supabase → API → UI data flow is comprehensively implemented.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              CrewAI AMP                                      │
-│  (InternalValidationFlow / ConsultantOnboardingFlow)                        │
+│                              Modal Serverless                                │
+│  (Founders Validation / Consultant Onboarding Flows)                         │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                     ┌───────────────┴───────────────┐
                     ▼                               ▼
         POST /api/crewai/webhook          POST /api/approvals/webhook
-        (Bearer: CREW_CONTRACT_BEARER)    (Bearer: CREW_CONTRACT_BEARER)
+        (Bearer: STARTUPAI_WEBHOOK_BEARER_TOKEN)
                     │                               │
                     ▼                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           Supabase PostgreSQL                                │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  crewai_validation_states (188 cols)  │  approval_requests                  │
-│  - kickoff_id (links to AMP)          │  - execution_id, task_id            │
-│  - D-F-V signals                      │  - kickoff_id (links to state)      │
-│  - Evidence containers (JSONB)        │  - status, options, decision        │
-│  - customer_profiles, value_maps      │                                      │
-│  - Crew outputs (all 8 crews)         │  approval_preferences               │
-│                                        │  approval_history                   │
+│  validation_runs                     │  approval_requests                  │
+│  - run_id (Modal)                     │  - execution_id, task_id            │
+│  - phase, status, started_at          │  - run_id (links to validation_runs)│
+│  - D-F-V signals                      │  - status, options, decision        │
+│  validation_progress                  │                                      │
+│  - crew, agent, message               │  approval_preferences               │
+│  hitl_requests                        │  approval_history                   │
+│  - checkpoint_name, status            │                                      │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  reports  │  evidence  │  entrepreneur_briefs  │  value_proposition_canvas  │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -375,7 +374,7 @@ supabase.channel('validation-state-changes')
 
 ### Transformers
 - `frontend/src/lib/crewai/vpc-transformer.ts` - CrewAI → VPC UI format
-- `frontend/src/lib/crewai/amp-client.ts` - CrewAI AMP client
+- `frontend/src/lib/crewai/modal-client.ts` - Modal client
 
 ---
 

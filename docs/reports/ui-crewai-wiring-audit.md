@@ -1,7 +1,5 @@
 # UI-to-CrewAI Wiring Audit Report
 
-> **Status Note (2026-01-12):** Modal serverless is the canonical backend. AMP references below are historical.
-
 **Date:** 2025-11-27 (Updated: 2025-11-30)
 **Auditor:** Claude (AI Assistant)
 **Scope:** Product platform UI structure and backend API wiring analysis
@@ -11,7 +9,7 @@
 
 ## Executive Summary
 
-This audit examines the StartupAI product platform's UI-to-backend wiring, specifically focusing on how the frontend connects to the legacy CrewAI 6-agent workflow deployed on AMP (deprecated). The platform serves two user personas (Founders and Consultants), each with their own onboarding flow and dashboard.
+This audit examines the StartupAI product platform's UI-to-backend wiring, specifically focusing on how the frontend connects to the Modal-hosted CrewAI Flows engine. The platform serves two user personas (Founders and Consultants), each with their own onboarding flow and dashboard.
 
 **Key Findings (Updated Nov 30):**
 - ✅ UI structure is well-organized with clear separation between Founder and Consultant personas
@@ -203,25 +201,25 @@ Differences:
 **Key Integration Points:**
 
 **`/api/crewai/status/route.ts`:**
-- GET endpoint that polls CrewAI AMP for workflow status
+- GET endpoint that reads status from Supabase and/or Modal
 - Used by frontend to track analysis progress
 - Stores completed results in `reports` table
 - Updates project status to 'active' when complete
 
-**`/lib/crewai/amp-client.ts` (300 lines):**
-- `CrewAIAMPClient` class with methods:
+**`/lib/crewai/modal-client.ts` (300 lines):**
+- `ModalClient` class with methods:
   - `kickoff(request)` - Start crew execution
-  - `getStatus(kickoffId)` - Check status
+  - `getStatus(runId)` - Check status
   - `kickoffAndWait(request)` - Async pattern with polling
   - `getInputs()` - Get expected inputs schema
-- Uses `process.env.CREWAI_API_URL` and `process.env.CREWAI_API_TOKEN`
-- Supports 6-agent crew workflow (6 tasks @ ~16.67% each)
+- Uses `process.env.CREW_ANALYZE_URL`
+- Supports 5-flow/14-crew/45-agent workflow (phase-based progress)
 
-**`/api/analyze/route.ts`:**
+**`/api/crewai/analyze/route.ts`:**
 - POST endpoint to trigger strategic analysis
 - Validates user, project, and plan limits
-- Kicks off CrewAI workflow using `CrewAIAMPClient`
-- Stores `kickoff_id` for status tracking
+- Kicks off Modal workflow using `ModalClient`
+- Stores `run_id` for status tracking
 - **This is the primary CrewAI trigger endpoint**
 
 ---
@@ -231,26 +229,16 @@ Differences:
 ### 3.1 Current CrewAI Deployment
 
 **Deployment Details:**
-- Platform: CrewAI AMP
-- URL: `https://startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com`
-- Workflow: 6-agent strategic analysis crew
-- Authentication: Bearer token (`process.env.CREWAI_API_TOKEN`)
+- Platform: Modal Serverless
+- URL: `https://chris00walker--startupai-validation-fastapi-app.modal.run`
+- Workflow: 5 flows / 14 crews / 45 agents
+- Authentication: None at Modal edge (app routes enforce auth)
 
 **Input Format:**
 ```json
 {
-  "inputs": {
-    "entrepreneur_input": {
-      "target_customer": "string",
-      "problem_description": "string",
-      "solution_description": "string",
-      "key_differentiators": ["array"],
-      "competitors": ["array"],
-      "budget_range": "string",
-      "business_stage": "string",
-      "goals": "string"
-    }
-  }
+  "project_id": "uuid",
+  "entrepreneur_input": "Business idea + context"
 }
 ```
 
@@ -290,7 +278,7 @@ According to `CLAUDE.md` and architecture documentation, CrewAI should deliver:
 6. Strategic recommendations
 
 **Current Implementation Status:**
-- Platform integrated with **6-agent crew** (not yet rebuilt to Flows architecture)
+- Platform integrated with **Modal 5-flow/14-crew/45-agent** architecture
 - See `startupai-crew/docs/master-architecture/internal-validation-system-spec.md` for full blueprint
 
 ---
@@ -599,7 +587,7 @@ CREW_CONTRACT_BEARER=f4cc39d92520
 ### Libraries and Utilities
 
 **CrewAI Integration:**
-- `frontend/src/lib/crewai/amp-client.ts`
+- `frontend/src/lib/crewai/modal-client.ts`
 - `frontend/src/lib/crewai/client.ts`
 - `frontend/src/lib/crewai/types.ts`
 

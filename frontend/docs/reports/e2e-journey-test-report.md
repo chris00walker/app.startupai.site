@@ -21,16 +21,16 @@
 
 ## Pre-Test Validation
 
-### CrewAI Connectivity
+### Modal Connectivity
 - **Status**: FAILED
 - **Error**: Connection timeout (10s)
-- **URL**: `https://startupai-b4d5c1dd-27e2-4163-b9fb-a18ca06ca-4f4192a6.crewai.com`
-- **Impact**: Real CrewAI integration cannot be tested
+- **URL**: `https://chris00walker--startupai-validation-fastapi-app.modal.run`
+- **Impact**: Real AI integration cannot be tested
 
 ### Environment Variables
 - **Status**: CONFIGURED
-- `CREWAI_API_URL`: Set correctly
-- `CREWAI_API_TOKEN`: Set correctly
+- `CREW_ANALYZE_URL`: Set correctly
+- `STARTUPAI_WEBHOOK_BEARER_TOKEN`: Set correctly
 
 ### Dev Server
 - **Status**: RUNNING (port 3001)
@@ -145,7 +145,7 @@
 
 ### P0 - Blocking Issues
 
-1. **CrewAI AMP Unreachable**
+1. **Modal Unreachable**
    - Production deployment not responding
    - Cannot test real AI integration
    - Blocks: All analysis features
@@ -188,7 +188,7 @@
 
 ### Journey 2 Gaps
 - E2E tests only test navigation, not actual approve/reject
-- No tests for CrewAI `/resume` endpoint calls
+- No tests for Modal `/hitl/approve` endpoint calls
 - Auto-approval logic untested
 
 ### Journey 3 Gaps
@@ -279,7 +279,7 @@ test-results/playwright/artifacts/
 
 1. **Test-code mismatch**: Tests were written for a UI that either doesn't exist or was significantly changed
 2. **Infrastructure issues**: Server instability causes cascading failures
-3. **External dependency failure**: CrewAI AMP is unreachable
+3. **External dependency failure**: Modal endpoint is unreachable
 
 **Before any production deployment, the following must be resolved:**
 - [ ] CrewAI connectivity restored
