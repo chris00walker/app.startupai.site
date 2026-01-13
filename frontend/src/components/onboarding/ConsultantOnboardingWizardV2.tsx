@@ -349,7 +349,13 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
         throw new Error(data.error?.message || 'Failed to complete onboarding');
       }
 
-      toast.success('Onboarding complete! Welcome to your consultant dashboard.');
+      // Log validation workflow if triggered
+      if (data.workflowId) {
+        console.log('[ConsultantOnboarding] Validation workflow started:', data.workflowId);
+        toast.success('Onboarding complete! Validation analysis has been started.');
+      } else {
+        toast.success('Onboarding complete! Welcome to your consultant dashboard.');
+      }
 
       // Redirect to consultant dashboard
       router.push('/consultant-dashboard');

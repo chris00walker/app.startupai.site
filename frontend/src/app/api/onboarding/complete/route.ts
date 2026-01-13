@@ -628,12 +628,20 @@ export async function POST(request: NextRequest) {
 
         const modalClient = createModalClient();
 
+        // Get conversation transcript from session for two-layer architecture
+        // Layer 1: "Alex" chat collects conversation_history
+        // Layer 2: OnboardingCrew validates and compiles Founder's Brief
+        const conversationHistory = session.conversation_history || [];
+        const conversationTranscript = JSON.stringify(conversationHistory);
+
         // Build inputs for founder validation flow
         const validationInputs = buildFounderValidationInputs(
           finalBriefData,
           project.id,
           session.user_id,
-          sessionId
+          sessionId,
+          conversationTranscript,
+          'founder'  // User type for this route
         );
 
         // Kick off the flow (fire and forget - don't wait for completion)
@@ -643,6 +651,8 @@ export async function POST(request: NextRequest) {
           project_id: validationInputs.project_id,
           user_id: validationInputs.user_id,
           session_id: validationInputs.session_id,
+          conversation_transcript: validationInputs.conversation_transcript,
+          user_type: validationInputs.user_type,
         });
 
         workflowId = response.run_id;

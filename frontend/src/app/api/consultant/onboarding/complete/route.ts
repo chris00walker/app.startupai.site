@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { NextRequest, NextResponse } from 'next/server';
+import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 
 /**
  * Extract practice size from session data
@@ -167,12 +168,91 @@ export async function POST(request: NextRequest) {
 
     console.log('[ConsultantComplete] Onboarding completed for user:', userId);
 
-    console.log('[ConsultantComplete] Skipping AI onboarding trigger (Modal flow not available).');
+    // Trigger Modal founder_validation flow for consultant onboarding
+    // Two-layer architecture:
+    // - Layer 1: "Alex" chat collected conversation_history
+    // - Layer 2: OnboardingCrew validates and compiles Founder's Brief
+    let workflowId: string | null = null;
+    let modalError: string | null = null;
+
+    try {
+      const { createModalClient } = await import('@/lib/crewai/modal-client');
+
+      console.log('[ConsultantComplete] Starting Modal founder_validation flow for consultant...');
+
+      const modalClient = createModalClient();
+
+      // Get conversation transcript from session
+      const conversationHistory = session.conversation_history || messages || [];
+      const conversationTranscript = JSON.stringify(conversationHistory);
+
+      // Build brief data from consultant session fields
+      const briefData = {
+        solution_description: profileData.company_name,
+        problem_description: profileData.pain_points,
+        customer_segments: profileData.industries,
+        business_stage: 'consulting_practice',
+        budget_range: 'not specified',
+        competitors: [],
+        differentiation_factors: profileData.services,
+        available_channels: [],
+        team_capabilities: profileData.tools_used,
+        three_month_goals: goalsData.short_term_goals || [],
+        success_criteria: [],
+        key_metrics: [],
+      };
+
+      // Build inputs for founder validation flow
+      const validationInputs = buildFounderValidationInputs(
+        briefData,
+        sessionId,  // Use sessionId as project_id for consultant
+        userId,
+        sessionId,
+        conversationTranscript,
+        'consultant'  // User type
+      );
+
+      // Kick off the flow
+      const response = await modalClient.kickoff({
+        entrepreneur_input: validationInputs.entrepreneur_input,
+        project_id: validationInputs.project_id,
+        user_id: validationInputs.user_id,
+        session_id: validationInputs.session_id,
+        conversation_transcript: validationInputs.conversation_transcript,
+        user_type: validationInputs.user_type,
+      });
+
+      workflowId = response.run_id;
+      console.log('[ConsultantComplete] Modal kickoff started:', workflowId);
+
+      // Store run_id in session for webhook correlation
+      await supabaseClient
+        .from('consultant_onboarding_sessions')
+        .update({
+          ai_context: {
+            ...(session.ai_context || {}),
+            modal_run_id: workflowId,
+            crewai_flow_type: 'founder_validation',
+            kickoff_started_at: new Date().toISOString(),
+          },
+        })
+        .eq('session_id', sessionId);
+
+    } catch (err) {
+      modalError = err instanceof Error ? err.message : 'Modal kickoff failed';
+      console.error('[ConsultantComplete] Modal kickoff error:', modalError);
+      // Continue anyway - consultant profile is saved
+    }
 
     return NextResponse.json({
       success: true,
       profile,
-      message: 'Onboarding completed successfully',
+      workflowId,
+      workflowTriggered: Boolean(workflowId),
+      message: workflowId
+        ? 'Onboarding completed. Validation analysis started.'
+        : 'Onboarding completed successfully',
+      ...(modalError ? { modalError } : {}),
     });
 
   } catch (error: any) {

@@ -16,6 +16,8 @@ export interface ModalKickoffRequest {
   project_id: string;
   user_id: string;
   session_id?: string;
+  conversation_transcript?: string;  // Full conversation from Alex chat
+  user_type?: 'founder' | 'consultant';
 }
 
 export interface ModalKickoffResponse {

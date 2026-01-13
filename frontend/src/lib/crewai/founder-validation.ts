@@ -5,17 +5,25 @@ export interface FounderValidationInputs {
   session_id?: string;
   entrepreneur_input: string;
   entrepreneur_brief: Record<string, unknown>;
+  conversation_transcript?: string;  // Full conversation from Alex chat
+  user_type?: 'founder' | 'consultant';
 }
 
 /**
  * Build inputs for the founder_validation flow.
  * Transforms entrepreneur brief data to the schema expected by the flow.
+ *
+ * Two-layer architecture:
+ * - Layer 1: "Alex" chat collects conversation_transcript
+ * - Layer 2: OnboardingCrew validates and compiles Founder's Brief
  */
 export function buildFounderValidationInputs(
   briefData: Record<string, any>,
   projectId: string,
   userId: string,
-  sessionId?: string
+  sessionId?: string,
+  conversationTranscript?: string,
+  userType?: 'founder' | 'consultant'
 ): FounderValidationInputs {
   const businessIdea = briefData.solution_description || briefData.unique_value_proposition || '';
   const problemDesc = briefData.problem_description || '';
@@ -60,5 +68,7 @@ export function buildFounderValidationInputs(
       success_criteria: briefData.success_criteria || [],
       key_metrics: briefData.key_metrics || [],
     },
+    conversation_transcript: conversationTranscript,
+    user_type: userType || 'founder',
   };
 }
