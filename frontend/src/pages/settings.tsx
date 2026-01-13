@@ -31,7 +31,6 @@ import {
   Loader2,
   Bot
 } from "lucide-react"
-import { useDemoMode } from "@/hooks/useDemoMode"
 import { useAuth } from "@/lib/auth/hooks"
 import { createClient } from "@/lib/supabase/client"
 import type { ApprovalType } from "@/types/crewai"
@@ -86,7 +85,6 @@ const ALL_APPROVAL_TYPES: ApprovalType[] = [
 ]
 
 export default function SettingsPage() {
-  const demoMode = useDemoMode()
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("profile")
   const [showApiKey, setShowApiKey] = useState(false)
@@ -306,9 +304,6 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {demoMode.isDemo && (
-              <Badge variant="secondary">Demo Mode</Badge>
-            )}
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
               Export Settings

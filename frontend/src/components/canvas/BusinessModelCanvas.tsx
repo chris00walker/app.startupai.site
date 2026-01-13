@@ -9,7 +9,7 @@ import { Plus, Save, X, Sparkles, Building2, Users, DollarSign, Zap, Heart, Truc
 
 interface BusinessModelCanvasProps {
   canvasId?: string;
-  clientId: string;
+  clientId?: string;
   initialData?: any;
   onSave?: (data: any) => void;
   readOnly?: boolean;
@@ -41,7 +41,6 @@ const defaultBMC: BMCData = {
 
 export default function BusinessModelCanvas({ 
   canvasId, 
-  clientId, 
   initialData, 
   onSave, 
   readOnly = false 

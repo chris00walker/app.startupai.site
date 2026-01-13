@@ -324,14 +324,25 @@ If data isn't displaying:
 
 ## Known Issues & Workarounds
 ### Hybrid Routing (App + Pages Router)
-**Status**: Intentional (Vercel-recommended migration strategy)  
-**Workaround**: Keep both routers coexisting during migration  
+**Status**: Intentional (Vercel-recommended migration strategy)
+**Workaround**: Keep both routers coexisting during migration
 **Plan**: Eventually migrate all Pages Router routes to App Router
 
 ### Onboarding Bypass Enabled
-**Status**: ⚠️ Temporary for QA  
-**Risk**: Users can create unlimited projects without plan limits  
+**Status**: ⚠️ Temporary for QA
+**Risk**: Users can create unlimited projects without plan limits
 **Action**: MUST set `NEXT_PUBLIC_ONBOARDING_BYPASS=false` before launch
+
+### Demo Mode Removed (Jan 2026)
+**Status**: ✅ Complete
+**What was removed**:
+- `useDemoMode` hook and all demo feature flags
+- `demoData.ts` and `portfolioMockData.ts` files
+- Test user bypass in API routes
+- Mock responses in onboarding wizard
+- `?demo=true` URL parameter handling
+
+**Result**: All pages now fetch real data from Supabase. Empty states display for new users.
 
 ## Related Repositories
 - Marketing Site: `startupai.site` (lead capture)
@@ -408,6 +419,6 @@ Agents are automatically invoked based on context and trigger words in their des
 - Work Tracking: `docs/work/`
 
 ---
-**Last Updated**: 2025-11-30
+**Last Updated**: 2026-01-13
 **Maintainer**: Chris Walker
-**Status**: ~85% Complete - Phase Alpha (P0 blockers cleared)
+**Status**: ~85% Complete - Phase Alpha (Demo mode removed, real data only)

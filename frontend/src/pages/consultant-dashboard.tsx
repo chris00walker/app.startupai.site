@@ -10,8 +10,6 @@ import { StageProgressIndicator } from "@/components/portfolio/StageProgressIndi
 import { RiskBudgetWidget } from "@/components/portfolio/RiskBudgetWidget"
 import { GateStageFilter, type GateStage, type GateStatus } from "@/components/portfolio/GateStageFilter"
 import { GateAlerts } from "@/components/portfolio/GateAlerts"
-import { GuidedTour, DemoBanner } from "@/components/demo/GuidedTour"
-import { useDemoMode } from "@/hooks/useDemoMode"
 import { useProjects } from "@/hooks/useProjects"
 import { useClients } from "@/hooks/useClients"
 import { useAuth } from "@/lib/auth/hooks"
@@ -127,7 +125,6 @@ function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
 }
 
 function Dashboard() {
-  const demoMode = useDemoMode()
   const { user } = useAuth()
   const [userRole, setUserRole] = React.useState<string | null>(null)
 
@@ -177,7 +174,7 @@ function Dashboard() {
   const [selectedStages, setSelectedStages] = React.useState<GateStage[]>([])
   const [selectedStatuses, setSelectedStatuses] = React.useState<GateStatus[]>([])
 
-  // Use real projects only (no mock fallback)
+  // Use real projects only (no fallback)
   const allProjects = projects
 
   // Calculate real metrics from projects
@@ -262,20 +259,12 @@ function Dashboard() {
   }
 
   return (
-    <>
-      {demoMode.isDemo && (
-        <DemoBanner
-          onExitDemo={demoMode.exitDemo}
-          onRestartTour={demoMode.restartTour}
-        />
-      )}
-
-      <DashboardLayout
-        breadcrumbs={[
-          { title: "Consultant Dashboard", href: "/consultant-dashboard" },
-        ]}
-      >
-        <div data-testid="dashboard" className="space-y-6">
+    <DashboardLayout
+      breadcrumbs={[
+        { title: "Consultant Dashboard", href: "/consultant-dashboard" },
+      ]}
+    >
+      <div data-testid="dashboard" className="space-y-6">
           {/* Welcome Section */}
           <div className="flex items-center justify-between">
             <div>
@@ -371,18 +360,8 @@ function Dashboard() {
               </CardContent>
             </Card>
           </div>
-        </div>
-      </DashboardLayout>
-      
-      <GuidedTour
-        currentStep={demoMode.currentStep}
-        onNext={demoMode.nextStep}
-        onPrev={demoMode.prevStep}
-        onSkip={demoMode.skipTour}
-        onComplete={demoMode.skipTour}
-        isVisible={demoMode.showGuidedTour}
-      />
-    </>
+      </div>
+    </DashboardLayout>
   )
 }
 

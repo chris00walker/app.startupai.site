@@ -261,9 +261,9 @@ export function useClients() {
             clientName: client.company || client.full_name || client.email,
             stage: 'DESIRABILITY',
             gateStatus: 'Pending',
-            riskBudget: { planned: 100, actual: 0, delta: 0 },
+            riskBudget: { planned: 0, actual: 0, delta: 0 },
             lastActivity: formatRelativeTime(new Date(client.updated_at)),
-            assignedConsultant: 'You',
+            assignedConsultant: user?.email || 'Consultant',
             evidenceQuality: 0,
             hypothesesCount: 0,
             experimentsCount: 0,
@@ -301,14 +301,14 @@ export function useClients() {
               stage,
               gateStatus,
               riskBudget: {
-                planned: 100, // Default budget - could be stored per-project
+                planned: actualSpend,
                 actual: actualSpend,
-                delta: actualSpend - 100,
+                delta: 0,
               },
               lastActivity: formatRelativeTime(
                 new Date(state?.updated_at || project.updated_at)
               ),
-              assignedConsultant: 'You',
+              assignedConsultant: user?.email || 'Consultant',
               evidenceQuality: calculateEvidenceQuality(state?.synthesis_confidence || null),
               hypothesesCount: 0, // TODO: Add hypotheses count when table is available
               experimentsCount: 0, // TODO: Add experiments count when table is available

@@ -138,26 +138,20 @@ describe.skip('Client Dashboard Integration Tests', () => {
     it('should load and display client data from API', async () => {
       renderWithProviders(<ClientPage />);
 
-      // Wait for all queries to resolve and demo data to load
+      // Wait for all queries to resolve and data to load
       await waitFor(() => {
         expect(screen.getByText('TechStart Ventures')).toBeInTheDocument();
       });
       
-      // Wait for tasks to load (should show demo data since we return empty array)
       await waitFor(() => {
-        expect(screen.getByText('Demo Mode: Showing sample tasks (backend not connected)')).toBeInTheDocument();
+        expect(screen.getByText('No tasks yet.')).toBeInTheDocument();
       });
 
       // Verify all data sections are rendered
       expect(screen.getByText('Series A SaaS Startup - Strategic Growth & Market Expansion')).toBeInTheDocument();
       expect(screen.getByText('TechStart Ventures')).toBeInTheDocument(); // Client name
       expect(screen.getByText('Active')).toBeInTheDocument(); // Status badge
-      // Check for specific task elements in the kanban board
-      const scalePlanningElements = screen.getAllByText('Scale Planning');
-      expect(scalePlanningElements.length).toBeGreaterThan(0);
-      
-      const riskAssessmentElements = screen.getAllByText('Risk Assessment');
-      expect(riskAssessmentElements.length).toBeGreaterThan(0);
+      expect(screen.getByText('Project Tasks & Milestones')).toBeInTheDocument();
     });
 
     it('should handle API errors gracefully and show fallback content', async () => {
@@ -165,13 +159,10 @@ describe.skip('Client Dashboard Integration Tests', () => {
 
       renderWithProviders(<ClientPage />);
 
-      // Should show demo content when API fails
+      // Should show error content when API fails
       await waitFor(() => {
-        expect(screen.getByText(/demo mode/i)).toBeInTheDocument();
+        expect(screen.getByText(/could not load this client/i)).toBeInTheDocument();
       });
-
-      // Should still render the page structure
-      expect(screen.getByText('Project Tasks & Milestones')).toBeInTheDocument();
     });
   });
 
@@ -238,8 +229,7 @@ describe.skip('Client Dashboard Integration Tests', () => {
       });
 
       expect(screen.getByText('DiscoveryAgent')).toBeInTheDocument();
-      // Check for specific task count in context
-      expect(screen.getByText('Demo Mode: Showing sample tasks (backend not connected)')).toBeInTheDocument();
+      expect(screen.getByText('No tasks yet.')).toBeInTheDocument();
     });
   });
 
@@ -281,7 +271,7 @@ describe.skip('Client Dashboard Integration Tests', () => {
 
       // Should show fallback UI instead of crashing
       await waitFor(() => {
-        expect(screen.getByText(/demo mode/i)).toBeInTheDocument();
+        expect(screen.getByText(/could not load this client/i)).toBeInTheDocument();
       });
 
       consoleSpy.mockRestore();

@@ -28,6 +28,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:all": "pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e",
     "test:ci": "pnpm run test:coverage && pnpm run test:e2e",
+    "type-check": "tsc --noEmit",
     "lint": "node -e \"console.log('Linting deferred: see docs/status/linting.md for details.');\"",
     "lint:a11y": "eslint --config eslint.config.a11y.mjs src/",
     "test:generate-token": "tsx scripts/generate-test-token.ts",

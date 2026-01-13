@@ -13,14 +13,6 @@ import {
 } from '@/lib/ai/onboarding-prompt';
 
 // ============================================================================
-// Test Session State Management (for development mode)
-// ============================================================================
-
-// In-memory session state for test users (development mode only)
-// Exported so the status endpoint can access the same state
-export const testSessionState = new Map<string, any>();
-
-// ============================================================================
 // AI Model Configuration
 // ============================================================================
 
@@ -118,22 +110,12 @@ export async function POST(req: NextRequest) {
       error: userError,
     } = await sessionClient.auth.getUser();
 
-    // Allow test user in development mode
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const isTestUser = sessionId?.startsWith('test-') || sessionId?.includes('demo');
-
-    if ((userError || !user) && !(isDevelopment && isTestUser)) {
-      console.error('[api/chat] Authentication failed:', { userError, hasUser: !!user, isDevelopment, isTestUser });
+    if (userError || !user) {
+      console.error('[api/chat] Authentication failed:', { userError, hasUser: !!user });
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const effectiveUser = user || (isDevelopment && isTestUser ? { id: 'test-user-id', email: 'test@example.com' } : null);
-    if (!effectiveUser) {
-      console.error('[api/chat] No effective user');
-      return new Response('Unauthorized', { status: 401 });
-    }
-
-    console.log('[api/chat] User authenticated:', { userId: effectiveUser.id, email: effectiveUser.email, isTestUser });
+    console.log('[api/chat] User authenticated:', { userId: user.id, email: user.email });
 
     if (!sessionId) {
       return new Response('Session ID required', { status: 400 });
@@ -148,43 +130,21 @@ export async function POST(req: NextRequest) {
       supabaseClient = sessionClient;
     }
 
-    // Fetch session from database (mock for test users in development)
-    let session: any;
-    if (isDevelopment && isTestUser) {
-      // Check if we have an existing test session in memory
-      if (testSessionState.has(sessionId)) {
-        session = testSessionState.get(sessionId);
-        console.log('[api/chat] Retrieved test session from memory:', { stage: session.current_stage, progress: session.overall_progress });
-      } else {
-        // Create initial mock session for test users
-        session = {
-          session_id: sessionId,
-          user_id: 'test-user-id',
-          current_stage: 1,
-          stage_data: { brief: {} },
-          conversation_history: [],
-          overall_progress: 0,
-        };
-        testSessionState.set(sessionId, session);
-        console.log('[api/chat] Created new test session in memory');
-      }
-    } else {
-      const { data: sessionData, error: sessionError } = await supabaseClient
-        .from('onboarding_sessions')
-        .select('*')
-        .eq('session_id', sessionId)
-        .single();
+    const { data: sessionData, error: sessionError } = await supabaseClient
+      .from('onboarding_sessions')
+      .select('*')
+      .eq('session_id', sessionId)
+      .single();
 
-      if (sessionError || !sessionData) {
-        return new Response('Session not found', { status: 404 });
-      }
+    if (sessionError || !sessionData) {
+      return new Response('Session not found', { status: 404 });
+    }
 
-      session = sessionData;
+    const session = sessionData;
 
-      // Verify session ownership
-      if (session.user_id !== effectiveUser.id) {
-        return new Response('Session ownership mismatch', { status: 403 });
-      }
+    // Verify session ownership
+    if (session.user_id !== user.id) {
+      return new Response('Session ownership mismatch', { status: 403 });
     }
 
     // Prepare AI context
@@ -344,7 +304,7 @@ export async function POST(req: NextRequest) {
                   const { data: brief, error: briefError } = await supabaseClient
                     .rpc('upsert_entrepreneur_brief', {
                       p_session_id: sessionId,
-                      p_user_id: effectiveUser.id,
+                      p_user_id: user.id,
                       p_brief_data: briefData,
                     });
 
@@ -372,7 +332,7 @@ export async function POST(req: NextRequest) {
                   const validationInputs = buildFounderValidationInputs(
                     briefData,
                     projectId,
-                    effectiveUser.id,
+                    user.id,
                     sessionId
                   );
 
@@ -460,28 +420,14 @@ export async function POST(req: NextRequest) {
             );
           }
 
-          // Update session (database for real users, memory for test users)
-          if (isDevelopment && isTestUser) {
-            // Update in-memory test session
-            const updatedSession = {
-              ...session,
-              ...updateData,
-            };
-            testSessionState.set(sessionId, updatedSession);
-            console.log(
-              `[api/chat] Test session ${sessionId} updated in memory: ${updateData.overall_progress}% progress`
-            );
-          } else {
-            // Update in database
-            await supabaseClient
-              .from('onboarding_sessions')
-              .update(updateData)
-              .eq('session_id', sessionId);
+          await supabaseClient
+            .from('onboarding_sessions')
+            .update(updateData)
+            .eq('session_id', sessionId);
 
-            console.log(
-              `[api/chat] Session ${sessionId} updated in database: ${updateData.overall_progress}% progress`
-            );
-          }
+          console.log(
+            `[api/chat] Session ${sessionId} updated in database: ${updateData.overall_progress}% progress`
+          );
         } catch (error) {
           console.error('[api/chat] Error in onFinish callback:', error);
           // Don't throw - we still want to return the stream to the user

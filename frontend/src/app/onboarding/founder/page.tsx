@@ -18,31 +18,19 @@ async function FounderOnboardingPage() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
-  // For development/testing: allow access without auth
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const allowTestAccess = isDevelopment && !user;
-
-  if ((error || !user) && !allowTestAccess) {
+  if (error || !user) {
     // Redirect to login with return URL
     redirect('/login?returnUrl=/onboarding/founder');
   }
 
-  // Use mock user for testing if not authenticated
-  const effectiveUser = user || {
-    id: 'test-user-id',
-    email: 'test@example.com',
-  };
-
   // Get user profile to determine plan type (skip in test mode)
   let profile: { subscription_tier: any; role: any; } | null = null;
-  if (user) {
-    const { data: profileData } = await supabase
-      .from('user_profiles')
-      .select('subscription_tier, role')
-      .eq('id', user.id)
-      .single();
-    profile = profileData;
-  }
+  const { data: profileData } = await supabase
+    .from('user_profiles')
+    .select('subscription_tier, role')
+    .eq('id', user.id)
+    .single();
+  profile = profileData;
 
   // Map subscription tier to plan type for onboarding API
   const planTypeMapping = {
@@ -58,13 +46,6 @@ async function FounderOnboardingPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Development notice */}
-      {allowTestAccess && (
-        <div className="bg-yellow-100 border-b border-yellow-400 px-4 py-2 text-sm text-yellow-900">
-          ⚠️ <strong>Test Mode:</strong> Running without authentication for development testing
-        </div>
-      )}
-
       {/* Skip navigation for accessibility */}
       <a
         href="#main-content"
@@ -77,9 +58,9 @@ async function FounderOnboardingPage() {
       <div id="main-content" data-testid="onboarding" role="main" aria-label="Founder onboarding conversation">
         <Suspense fallback={<OnboardingLoadingSkeleton />}>
           <OnboardingWizard
-            userId={effectiveUser.id as string}
+            userId={user.id as string}
             planType={planType}
-            userEmail={effectiveUser.email || 'test@example.com'}
+            userEmail={user.email || ''}
           />
         </Suspense>
       </div>

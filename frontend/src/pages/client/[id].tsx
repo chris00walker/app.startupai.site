@@ -47,92 +47,6 @@ interface WorkflowProgress {
   startTime: number;
 }
 
-// Demo data for when backend is offline
-const getDemoClient = (id: string): Client => {
-  const demoClients = {
-    'demo-1': {
-      _id: 'demo-1',
-      name: 'TechStart Ventures',
-      company: 'TechStart Ventures',
-      status: 'active',
-      description: 'Series A SaaS Startup - Strategic Growth & Market Expansion',
-      workflowStatus: {
-        discovery: { status: 'completed', completedAt: '2025-08-01T10:00:00Z' },
-        validation: { status: 'in_progress' },
-        scale: { status: 'not_started' }
-      }
-    },
-    'demo-2': {
-      _id: 'demo-2',
-      name: 'Global Manufacturing Co',
-      company: 'Global Manufacturing Co',
-      status: 'in-progress',
-      description: 'Enterprise Digital Transformation - Operations Optimization',
-      workflowStatus: {
-        discovery: { status: 'completed', completedAt: '2025-07-30T14:30:00Z' },
-        validation: { status: 'completed', completedAt: '2025-08-01T16:45:00Z' },
-        scale: { status: 'in_progress' }
-      }
-    }
-  };
-  return demoClients[id as keyof typeof demoClients] || demoClients['demo-1'];
-};
-
-const getDemoArtefacts = (id: string): Artefact[] => {
-  const baseArtefacts = [
-    {
-      id: '1',
-      name: 'Market Analysis Report',
-      type: 'Research',
-      status: 'completed',
-      createdAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Competitive Intelligence',
-      type: 'Analysis',
-      status: 'in-progress',
-      createdAt: '2024-01-20T14:30:00Z'
-    },
-    {
-      id: '3',
-      name: 'Strategic Roadmap',
-      type: 'Planning',
-      status: 'completed',
-      createdAt: '2024-01-10T09:15:00Z'
-    },
-    {
-      id: '4',
-      name: 'Risk Assessment',
-      type: 'Analysis',
-      status: 'pending',
-      createdAt: '2024-01-25T16:45:00Z'
-    }
-  ];
-  
-  if (id === 'demo-2') {
-    return [
-      ...baseArtefacts,
-      {
-        id: '5',
-        name: 'Process Optimization Study',
-        type: 'Operations',
-        status: 'completed',
-        createdAt: '2024-01-12T11:20:00Z'
-      },
-      {
-        id: '6',
-        name: 'Digital Transformation Plan',
-        type: 'Strategy',
-        status: 'in-progress',
-        createdAt: '2024-01-22T13:10:00Z'
-      }
-    ];
-  }
-  
-  return baseArtefacts;
-};
-
 const ClientPage: React.FC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -178,14 +92,7 @@ const ClientPage: React.FC = () => {
   const [showResults, setShowResults] = useState<Record<string, boolean>>({});
   const [workflowErrors, setWorkflowErrors] = useState<Record<string, string>>({});
 
-  // Use demo data if there's an error (backend offline) or if it's a demo ID
-  const displayClient = clientError || (typeof id === 'string' && id.startsWith('demo-')) 
-    ? getDemoClient(id as string) 
-    : client;
-  
-  const displayArtefacts = artefactsError || (typeof id === 'string' && id.startsWith('demo-')) 
-    ? getDemoArtefacts(id as string) 
-    : artefacts;
+  const displayClient = client || null;
 
   // Progress tracking for running workflows
   useEffect(() => {
@@ -252,9 +159,25 @@ const ClientPage: React.FC = () => {
     );
   }
 
-  const clientName = displayClient?.company || 'Loading Client...';
-  const clientContact = displayClient?.name || '';
-  const clientType = displayClient?.description || clientContact || 'Loading client information...';
+  if (clientError || !displayClient) {
+    return (
+      <div className="min-h-screen business-gradient">
+        <div className="business-container py-12">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              We could not load this client right now. Please return to the portfolio and try again.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  const clientName = displayClient.company || displayClient.name || 'Client';
+  const clientContact = displayClient.name || '';
+  const clientType = displayClient.description || clientContact || 'Client profile';
+  const clientStatus = displayClient.status || 'Status unavailable';
 
   return (
     <div className="min-h-screen business-gradient">
@@ -279,7 +202,7 @@ const ClientPage: React.FC = () => {
                 </Button>
               </Link>
               <Badge variant="default">
-                Active
+                {clientStatus}
               </Badge>
               <div className="flex items-center space-x-2">
                 <div className="status-indicator bg-green-400"></div>
@@ -346,16 +269,16 @@ const ClientPage: React.FC = () => {
                     </div>
                   )}
                   {artefactsError && (
-                    <div className="mb-4 p-4 border border-amber-200 bg-amber-50 rounded-lg">
-                      <h3 className="font-semibold text-amber-800 mb-2">Demo Artefacts Available</h3>
-                      <p className="text-amber-700 text-sm">
-                        Backend services are offline. Displaying demo strategic artefacts and insights.
+                    <div className="mb-4 p-4 border border-red-200 bg-red-50 rounded-lg">
+                      <h3 className="font-semibold text-red-800 mb-2">Unable to load artefacts</h3>
+                      <p className="text-red-700 text-sm">
+                        Strategic artefacts are unavailable right now. Please try again later.
                       </p>
                     </div>
                   )}
                   <div className="space-y-4">
-                    {displayArtefacts.length > 0 ? (
-                      displayArtefacts.map((artefact) => (
+                    {artefacts.length > 0 ? (
+                      artefacts.map((artefact) => (
                         <div
                           key={artefact.id}
                           className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"

@@ -3,7 +3,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../services/api';
 
-// Simple card components for demo (replace with actual ShadCN UI when available)
+// Simple card components (replace with actual ShadCN UI when available)
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
   <div className={`border rounded-lg shadow-sm ${className || ''}`}>{children}</div>
 );
@@ -48,49 +48,12 @@ export const KanbanBoard: React.FC<{ clientId: string }> = ({ clientId }) => {
 
   if (isLoading) return <div>Loading tasks...</div>;
   
-  // Show demo data when API is not available OR when no tasks are returned
-  if (error || !tasks || tasks.length === 0) {
-    // Demo data when API is not available
-    const demoTasks: Task[] = [
-      { _id: '1', title: 'Discovery Analysis', status: 'complete', assignedAgent: 'DiscoveryAgent' },
-      { _id: '2', title: 'Market Validation', status: 'in_progress', assignedAgent: 'ValidationAgent' },
-      { _id: '3', title: 'Scale Planning', status: 'pending', assignedAgent: 'ScaleAgent' },
-      { _id: '4', title: 'Risk Assessment', status: 'exception', assignedAgent: 'RiskAgent' },
-    ];
-    
-    const columns = ['pending', 'in_progress', 'complete', 'exception'] as const;
-    const tasksByStatus = columns.reduce((acc, status) => {
-      acc[status] = demoTasks.filter(t => t.status === status);
-      return acc;
-    }, {} as Record<typeof columns[number], Task[]>);
+  if (error) {
+    return <div className="text-sm text-muted-foreground">Unable to load tasks right now.</div>;
+  }
 
-    return (
-      <div>
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded mb-4 text-sm">
-          Demo Mode: Showing sample tasks (backend not connected)
-        </div>
-        <div className="grid grid-cols-4 gap-4">
-          {columns.map(status => (
-            <div key={status}>
-              <h3 className="font-semibold mb-2 capitalize">
-                {status.replace('_', ' ')}
-              </h3>
-              {tasksByStatus[status].map(task => (
-                <Card key={task._id} className="mb-2">
-                  <CardHeader className="flex justify-between items-center">
-                    <CardTitle>{task.title}</CardTitle>
-                    <Badge variant="outline">{task.status}</Badge>
-                  </CardHeader>
-                  <CardContent>
-                    Assigned: {task.assignedAgent || 'Unassigned'}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  if (!tasks || tasks.length === 0) {
+    return <div className="text-sm text-muted-foreground">No tasks yet.</div>;
   }
 
   const columns = ['pending', 'in_progress', 'complete', 'exception'] as const;

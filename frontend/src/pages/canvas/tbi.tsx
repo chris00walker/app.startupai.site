@@ -1,34 +1,26 @@
-import React from 'react'
+import React from "react"
+import { useRouter } from "next/router"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import GuidedTestingBusinessIdeasCanvas from "@/components/canvas/GuidedTestingBusinessIdeasCanvas"
-import { useDemoMode } from "@/hooks/useDemoMode"
-import { getDemoTestingBusinessIdeas } from "@/data/demoData"
-import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { Button } from "@/components/ui/button"
-import { FileText, Save, Download, Share } from "lucide-react"
+import { FileText, Save, Download, Share, Loader2 } from "lucide-react"
+import { useProjects } from "@/hooks/useProjects"
 
 export default function TBIPage() {
-  const demoMode = useDemoMode()
-  
-  // Get demo data using lazy loading function
-  const demoTestingBusinessIdeas = getDemoTestingBusinessIdeas()
-  
-  // Check if we're in founder platform mode (client-side only)
-  const [isFounderPlatform, setIsFounderPlatform] = React.useState(false)
-  
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const platform = urlParams.get('platform')
-      setIsFounderPlatform(platform === 'founder')
-    }
-  }, [])
+  const router = useRouter()
+  const { projects, isLoading } = useProjects()
+  const platform = typeof router.query.platform === "string" ? router.query.platform : undefined
+  const queryProjectId = typeof router.query.projectId === "string" ? router.query.projectId : undefined
+
+  const currentProjectId = queryProjectId || projects[0]?.id
+  const isFounderPlatform = platform === "founder"
 
   return (
     <DashboardLayout
       userType={isFounderPlatform ? "founder" : "consultant"}
       breadcrumbs={
-        isFounderPlatform 
+        isFounderPlatform
           ? [
               { title: "Founder Dashboard", href: "/founder-dashboard" },
               { title: "Testing Business Ideas", href: "/canvas/tbi?platform=founder" },
@@ -40,7 +32,6 @@ export default function TBIPage() {
       }
     >
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        {/* Header */}
         <div className="flex items-center justify-between space-y-2">
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-lg">
@@ -54,9 +45,6 @@ export default function TBIPage() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {demoMode.isDemo && (
-              <Badge variant="secondary">Demo Mode</Badge>
-            )}
             <Button variant="outline">
               <Share className="mr-2 h-4 w-4" />
               Share
@@ -72,31 +60,34 @@ export default function TBIPage() {
           </div>
         </div>
 
-        {/* Canvas Description */}
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <div className="flex items-start space-x-3">
             <FileText className="h-5 w-5 text-purple-600 mt-0.5" />
             <div>
               <h3 className="font-semibold text-purple-900">Guided Experimentation Framework</h3>
               <p className="text-purple-800 text-sm mt-1">
-                A proven approach to validate business assumptions through structured experiments. Map risks, design tests, capture insights, and track validation progress in one place.
+                A proven approach to validate business assumptions through structured experiments. Map risks,
+                design tests, capture insights, and track validation progress in one place.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Guided Testing Business Ideas Canvas Component */}
-        <GuidedTestingBusinessIdeasCanvas 
-          canvasId={demoMode.isDemo ? "demo-tbi-1" : undefined}
-          clientId={demoMode.isDemo ? "demo-techstart" : "demo-client"}
-          onSave={(canvasData) => {
-            console.log('Saving TBI:', canvasData)
-            // TODO: Implement save functionality
-          }}
-          readOnly={false}
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12 text-muted-foreground">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            Loading project data...
+          </div>
+        ) : !currentProjectId ? (
+          <EmptyState
+            title="No canvases yet"
+            description="Complete onboarding to generate your first Testing Business Ideas canvas."
+            icon={<FileText className="h-8 w-8" />}
+          />
+        ) : (
+          <GuidedTestingBusinessIdeasCanvas canvasId={currentProjectId} readOnly={false} />
+        )}
 
-        {/* Testing Framework Guide */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <h4 className="font-semibold text-red-900 mb-2">Assumption Map</h4>
@@ -136,7 +127,6 @@ export default function TBIPage() {
           </div>
         </div>
 
-        {/* Testing Best Practices */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <h4 className="font-semibold text-yellow-900 mb-2">Testing Best Practices</h4>
           <div className="grid gap-4 md:grid-cols-2">
@@ -154,7 +144,6 @@ export default function TBIPage() {
             </ul>
           </div>
         </div>
-
       </div>
     </DashboardLayout>
   )

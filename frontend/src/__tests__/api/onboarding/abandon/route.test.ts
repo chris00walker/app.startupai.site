@@ -247,40 +247,4 @@ describe('POST /api/onboarding/abandon', () => {
     });
   });
 
-  describe('development mode test sessions', () => {
-    const originalEnv = process.env.NODE_ENV;
-
-    beforeEach(() => {
-      (process.env as { NODE_ENV: string }).NODE_ENV = 'development';
-      mockGetUser.mockResolvedValue({
-        data: { user: null },
-        error: new Error('Not authenticated'),
-      });
-    });
-
-    afterEach(() => {
-      (process.env as { NODE_ENV: string | undefined }).NODE_ENV = originalEnv;
-    });
-
-    it('should allow test sessions in development mode', async () => {
-      const req = createMockRequest({ sessionId: 'test-session-123' });
-
-      const response = await POST(req as any);
-      const data = await response.json();
-
-      // Test sessions in dev mode should succeed without auth
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-    });
-
-    it('should allow demo sessions in development mode', async () => {
-      const req = createMockRequest({ sessionId: 'demo-onboarding-abc' });
-
-      const response = await POST(req as any);
-      const data = await response.json();
-
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-    });
-  });
 });

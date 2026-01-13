@@ -29,21 +29,11 @@ export async function POST(request: NextRequest) {
       error: userError,
     } = await sessionClient.auth.getUser();
 
-    // Allow test sessions in development
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const isTestSession = sessionId.startsWith('test-') || sessionId.includes('demo');
-
-    if ((userError || !user) && !(isDevelopment && isTestSession)) {
+    if (userError || !user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
-    }
-
-    // For test sessions in development, just return success
-    if (isDevelopment && isTestSession) {
-      console.log('[api/onboarding/abandon] Test session abandoned (no-op):', sessionId);
-      return NextResponse.json({ success: true });
     }
 
     // Get admin client for database operations

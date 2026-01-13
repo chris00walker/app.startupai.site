@@ -394,7 +394,7 @@ async function updateSessionComplete(
 }
 
 /**
- * @deprecated This mock fallback is no longer used.
+ * @deprecated This legacy fallback is no longer used.
  * Real analysis comes from CrewAI founder_validation flow via webhook.
  * Keeping for reference - can be removed in future cleanup.
  */
@@ -688,7 +688,7 @@ export async function POST(request: NextRequest) {
         console.error('[onboarding/complete] Kickoff error:', crewError);
       }
 
-      // No mock fallback - users will see "processing" state until webhook delivers real results
+      // No fallback - users will see "processing" state until webhook delivers real results
       const deliverableInsights: CrewInsight[] = analysisResult?.insights ?? [];
       const deliverableSummary = analysisResult?.summary ?? (
         crewError

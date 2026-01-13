@@ -60,10 +60,6 @@ interface StageInfo {
 export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWizardProps) {
   const router = useRouter();
 
-  // Demo mode check - controlled by environment variable
-  // Set NEXT_PUBLIC_DEMO_MODE=true to enable demo responses without API calls
-  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
-
   // State management
   const [session, setSession] = useState<OnboardingSession | null>(null);
   const [stages, setStages] = useState<StageInfo[]>([]);
@@ -277,38 +273,6 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     // Track message sent
     trackOnboardingEvent.messageSent(session.sessionId, session.currentStage, userMessage.length);
 
-    // Demo mode - use mock responses
-    if (isDemoMode) {
-      // Simulate typing delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const mockResponses = [
-        "That's a really interesting problem! I can see how that would be valuable. Let me ask you this: Have you talked to any potential customers about this problem yet? What did they say?",
-        "Great insight! It sounds like you're on to something. Now, can you tell me more about who specifically experiences this problem the most? Try to be as specific as possible about this customer segment.",
-        "Excellent! I'm starting to get a clear picture. What have you learned about how these customers currently try to solve this problem? What workarounds or alternatives are they using today?",
-        "That makes sense. Based on what you've shared, what do you think is the biggest pain point for them? What makes this problem urgent or important enough that they'd pay to solve it?",
-        "Perfect! You're making great progress. Let's shift gears a bit - how does your solution actually solve this problem? Walk me through the core mechanism or approach.",
-      ];
-
-      const mockResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: mockResponse,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-
-      // Update progress
-      const progress = Math.min(95, Math.floor((messages.length + 2) / 30 * 100));
-      setSession(prev => prev ? { ...prev, overallProgress: progress } : null);
-
-      setIsAILoading(false);
-      return;
-    }
-
     // Real mode - call API
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
@@ -408,7 +372,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       setIsAILoading(false);
       abortControllerRef.current = null;
     }
-  }, [input, isAILoading, session, messages, isDemoMode, refetchSessionStatus]);
+  }, [input, isAILoading, session, messages, refetchSessionStatus]);
 
   const announceToScreenReader = useCallback((message: string) => {
     const announcement = document.createElement('div');
@@ -429,47 +393,6 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setError(null);
 
     try {
-      // Demo mode - use mock data
-      if (isDemoMode) {
-        const mockSession: OnboardingSession = {
-          sessionId: 'demo-session-' + Date.now(),
-          currentStage: 1,
-          totalStages: 7,
-          overallProgress: 0,
-          stageProgress: 0,
-          agentPersonality: {
-            name: 'Alex',
-            role: 'Strategic Business Consultant',
-            tone: 'friendly, encouraging, professionally direct',
-            expertise: 'Lean Startup, Customer Development, Business Model Design',
-          },
-          isActive: true,
-        };
-
-        setSession(mockSession);
-        setStages(initializeStages(1));
-
-        // Add initial demo messages
-        setMessages([
-          {
-            role: 'assistant',
-            content: `Hi there! I'm Alex, and I'm excited to help you think through your business idea using proven validation methods.
-
-Over the next 15-20 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your goals. This isn't a pitch session - it's a strategic conversation to help you identify what assumptions you need to test and what experiments you should run first.
-
-There are no wrong answers here. In fact, "I don't know yet" is often the most honest and valuable response because it helps us identify what you need to learn.
-
-Ready to dive in? Let's start with the most important question:
-
-**What business idea are you most excited about right now?**`,
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-
-        toast.success('Demo mode: UI preview loaded successfully!');
-        return;
-      }
-
       // Real mode - call API
       console.log('📡 Calling /api/onboarding/start with:', { userId, planType });
       const response = await fetch('/api/onboarding/start/', {
@@ -558,7 +481,7 @@ Ready to dive in? Let's start with the most important question:
     } finally {
       setIsInitializing(false);
     }
-  }, [userId, planType, initializeStages, announceToScreenReader, isDemoMode]);
+  }, [userId, planType, initializeStages, announceToScreenReader]);
 
   // Handle onboarding completion
   const handleCompleteOnboarding = useCallback(async () => {

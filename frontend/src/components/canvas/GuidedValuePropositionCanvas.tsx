@@ -137,6 +137,12 @@ export default function GuidedValuePropositionCanvas({
   // Use VPC hook when projectId is provided
   const vpc = useVPC({ projectId: projectId || undefined });
 
+  useEffect(() => {
+    if (projectId && initialSegmentKey && vpc.segmentKeys.includes(initialSegmentKey)) {
+      vpc.setActiveSegmentKey(initialSegmentKey);
+    }
+  }, [projectId, initialSegmentKey, vpc.segmentKeys, vpc.setActiveSegmentKey]);
+
   // Sync data from VPC hook if editing an existing segment
   useEffect(() => {
     if (projectId && vpc.activeSegment && initialSegmentKey) {

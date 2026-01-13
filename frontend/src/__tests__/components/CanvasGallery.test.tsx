@@ -4,6 +4,10 @@ import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import { CanvasGallery } from '@/components/canvas/CanvasGallery'
 
+jest.mock('@/lib/auth/hooks', () => ({
+  useAuth: () => ({ user: null, loading: false, isAuthenticated: false }),
+}));
+
 // Mock the canvas components
 jest.mock('@/components/canvas/ValuePropositionCanvas', () => {
   return function MockValuePropositionCanvas({ readOnly }: any) {
@@ -38,51 +42,58 @@ jest.mock('@/components/canvas/TestingBusinessIdeasCanvas', () => {
   }
 })
 
-// Mock demo data
-jest.mock('@/data/demoData', () => ({
-  getDemoValuePropositionCanvas: () => ({
-    id: 'demo-vpc-1',
-    title: 'Demo VPC',
-    type: 'Value Proposition Canvas',
-    customerProfile: { jobs: [], pains: [], gains: [] },
-    valueMap: { productsServices: [], painRelievers: [], gainCreators: [] }
-  }),
-  getDemoBusinessModelCanvas: () => ({
-    id: 'demo-bmc-1',
-    title: 'Demo BMC',
-    type: 'Business Model Canvas'
-  }),
-  getDemoTestingBusinessIdeasCanvas: () => ({
-    id: 'demo-tbi-1',
-    title: 'Demo TBI',
-    type: 'Testing Business Ideas Canvas'
-  })
-}))
-
 describe('CanvasGallery', () => {
-  const mockDemoCanvases = [
+  const mockCanvases = [
     {
       id: '1',
+      projectId: 'project-1',
       title: 'E-commerce Platform VPC',
       type: 'vpc' as const,
       client: 'TechStart Inc.',
       status: 'completed' as const,
       lastModified: '2024-01-15',
       aiGenerated: true,
-      completionRate: 95
+      completionRate: 95,
+      vpcData: {
+        valuePropositionTitle: 'TechStart VPC',
+        customerSegmentTitle: 'Founders',
+        valueMap: {
+          productsAndServices: ['Prototype'],
+          painRelievers: ['Faster validation'],
+          gainCreators: ['Clear insights'],
+        },
+        customerProfile: {
+          gains: ['Confidence'],
+          pains: ['Uncertainty'],
+          jobs: ['Validate ideas'],
+        },
+      }
     },
     {
       id: '2',
+      projectId: 'project-2',
       title: 'SaaS Business Model',
       type: 'bmc' as const,
       client: 'StartupCo',
       status: 'in-progress' as const,
       lastModified: '2024-01-14',
       aiGenerated: false,
-      completionRate: 70
+      completionRate: 70,
+      bmcData: {
+        keyPartners: [],
+        keyActivities: ['Research'],
+        keyResources: [],
+        valuePropositions: ['Value'],
+        customerRelationships: [],
+        channels: [],
+        customerSegments: ['Startups'],
+        costStructure: ['Ops'],
+        revenueStreams: ['Subscription'],
+      }
     },
     {
       id: '3',
+      projectId: 'project-3',
       title: 'User Testing Framework',
       type: 'tbi' as const,
       client: 'InnovateLab',
@@ -99,11 +110,11 @@ describe('CanvasGallery', () => {
 
   describe('Component Rendering', () => {
     test('renders gallery header and controls', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Should have main heading
       expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
-      expect(screen.getByText('AI-generated strategic canvases for your clients')).toBeInTheDocument()
+      expect(screen.getByText('Strategic canvases generated from real project data')).toBeInTheDocument()
       
       // Should have search input
       expect(screen.getByPlaceholderText('Search canvases...')).toBeInTheDocument()
@@ -113,7 +124,7 @@ describe('CanvasGallery', () => {
     })
 
     test('renders filter controls', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Should have filter tabs
       expect(screen.getByRole('tablist')).toBeInTheDocument()
@@ -124,7 +135,7 @@ describe('CanvasGallery', () => {
     })
 
     test('renders view toggle buttons', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Should have grid/list view toggles
       const buttons = screen.getAllByRole('button')
@@ -134,7 +145,7 @@ describe('CanvasGallery', () => {
 
   describe('Canvas Cards Display', () => {
     test('displays canvas cards when demo data provided', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       expect(screen.getByText('E-commerce Platform VPC')).toBeInTheDocument()
       expect(screen.getByText('SaaS Business Model')).toBeInTheDocument()
@@ -142,7 +153,7 @@ describe('CanvasGallery', () => {
     })
 
     test('shows canvas metadata correctly', async () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Wait for canvas cards to render - use more flexible text matching
       await waitFor(() => {
@@ -164,7 +175,7 @@ describe('CanvasGallery', () => {
     })
 
     test('displays completion rates', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Check for completion rates
       expect(screen.getByText('95%')).toBeInTheDocument()
@@ -173,7 +184,7 @@ describe('CanvasGallery', () => {
     })
 
     test('shows AI generation badges', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Should show AI badges for AI-generated canvases
       const aiBadges = screen.getAllByText(/ai/i)
@@ -184,7 +195,7 @@ describe('CanvasGallery', () => {
   describe('Canvas Type Filtering', () => {
     test('filters by canvas type', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
 
       const vpcTab = screen.getByRole('tab', { name: /value proposition/i })
       await user.click(vpcTab)
@@ -196,7 +207,7 @@ describe('CanvasGallery', () => {
     })
 
     test('shows all canvas types by default', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // All three canvas types should be visible
       expect(screen.getByText('E-commerce Platform VPC')).toBeInTheDocument()
@@ -208,7 +219,7 @@ describe('CanvasGallery', () => {
   describe('Search Functionality', () => {
     test('filters canvases by search term', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       const searchInput = screen.getByPlaceholderText(/search canvases/i)
       await user.type(searchInput, 'E-commerce')
@@ -221,7 +232,7 @@ describe('CanvasGallery', () => {
 
     test('shows no results message when search has no matches', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       const searchInput = screen.getByPlaceholderText(/search canvases/i)
       await user.type(searchInput, 'NonexistentCanvas')
@@ -234,7 +245,7 @@ describe('CanvasGallery', () => {
 
     test('clears search results when search is cleared', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       const searchInput = screen.getByPlaceholderText(/search canvases/i)
       await user.type(searchInput, 'E-commerce')
@@ -252,7 +263,7 @@ describe('CanvasGallery', () => {
   describe('Canvas Viewing', () => {
     test('opens canvas for viewing when clicked', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Find and click a VPC canvas
       const vpcCanvas = screen.getByText('E-commerce Platform VPC')
@@ -268,7 +279,7 @@ describe('CanvasGallery', () => {
 
     test('opens BMC canvas for viewing', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       const bmcCanvas = screen.getByText('SaaS Business Model')
       await user.click(bmcCanvas)
@@ -282,7 +293,7 @@ describe('CanvasGallery', () => {
 
     test('opens TBI canvas for viewing', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       const tbiCanvas = screen.getByText('User Testing Framework')
       await user.click(tbiCanvas)
@@ -296,7 +307,7 @@ describe('CanvasGallery', () => {
 
     test('closes canvas view when back button clicked', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Open a canvas
       const vpcCanvas = screen.getByText('E-commerce Platform VPC')
@@ -319,7 +330,7 @@ describe('CanvasGallery', () => {
   describe('View Modes', () => {
     test('switches between grid and list view', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Find view toggle buttons
       const viewButtons = screen.getAllByRole('button')
@@ -343,14 +354,14 @@ describe('CanvasGallery', () => {
 
   describe('Empty States', () => {
     test('shows empty state when no canvases provided', () => {
-      render(<CanvasGallery demoCanvases={[]} />)
+      render(<CanvasGallery canvases={[]} />)
       
       expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
       // Should show empty state or no canvases message
     })
 
-    test('handles undefined demo canvases', () => {
-      render(<CanvasGallery />)
+    test('handles undefined canvases prop', () => {
+      render(<CanvasGallery canvases={[]} />)
       
       expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
       // Should not crash and should show appropriate state
@@ -359,7 +370,7 @@ describe('CanvasGallery', () => {
 
   describe('Canvas Actions', () => {
     test('shows action buttons for each canvas', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Should have action buttons (view, edit, etc.)
       const actionButtons = screen.getAllByRole('button')
@@ -368,7 +379,7 @@ describe('CanvasGallery', () => {
 
     test('handles canvas dropdown menu actions', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Find dropdown menu triggers (three dots button)
       const menuButtons = screen.getAllByRole('button')
@@ -396,7 +407,7 @@ describe('CanvasGallery', () => {
         value: 375,
       })
       
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
       
@@ -418,6 +429,7 @@ describe('CanvasGallery', () => {
         const types = ['vpc', 'bmc', 'tbi'] as const
         return {
           id: `canvas-${i}`,
+          projectId: `project-${i}`,
           title: `Canvas ${i}`,
           type: types[i % 3],
           client: `Client ${i}`,
@@ -429,7 +441,7 @@ describe('CanvasGallery', () => {
       })
       
       const startTime = performance.now()
-      render(<CanvasGallery demoCanvases={largeCanvasSet} />)
+      render(<CanvasGallery canvases={largeCanvasSet} />)
       const endTime = performance.now()
       
       // Allow generous threshold to avoid CI flakiness
@@ -440,7 +452,7 @@ describe('CanvasGallery', () => {
 
   describe('Accessibility', () => {
     test('has proper ARIA labels and roles', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Search input should have proper label
       const searchInput = screen.getByPlaceholderText(/search canvases/i)
@@ -458,7 +470,7 @@ describe('CanvasGallery', () => {
 
     it('supports keyboard navigation', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Should be able to tab through interactive elements
       await user.tab()
@@ -476,7 +488,7 @@ describe('CanvasGallery', () => {
     })
 
     test('has proper heading structure', () => {
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       const mainHeading = screen.getByRole('heading', { name: /canvas gallery/i })
       expect(mainHeading).toBeInTheDocument()
@@ -486,7 +498,7 @@ describe('CanvasGallery', () => {
   describe('Integration', () => {
     test('integrates with all canvas types correctly', async () => {
       const user = userEvent.setup()
-      render(<CanvasGallery demoCanvases={mockDemoCanvases} />)
+      render(<CanvasGallery canvases={mockCanvases} />)
       
       // Test VPC integration - click on canvas card
       await user.click(screen.getByText('E-commerce Platform VPC'))

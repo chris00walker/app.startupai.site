@@ -11,7 +11,7 @@ import { ChevronRight, ChevronLeft, CheckCircle, Target, TestTube, BookOpen, Lib
 
 interface GuidedTestingBusinessIdeasCanvasProps {
   canvasId?: string;
-  clientId: string;
+  clientId?: string;
   initialData?: any;
   onSave?: (data: any) => void;
   readOnly?: boolean;
@@ -100,7 +100,6 @@ const tbiSteps = [
 
 export default function GuidedTestingBusinessIdeasCanvas({ 
   canvasId, 
-  clientId, 
   initialData, 
   onSave, 
   readOnly = false 

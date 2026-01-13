@@ -9,6 +9,10 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
+jest.mock('@/lib/auth/hooks', () => ({
+  useAuth: () => ({ user: null, loading: false, isAuthenticated: false }),
+}))
+
 // Mock API service with proper data structures
 jest.mock('@/services/api', () => ({
   canvas: {
@@ -103,8 +107,8 @@ import BusinessModelCanvas from '../components/canvas/BusinessModelCanvas'
 import CanvasEditor from '../components/canvas/CanvasEditor'
 import { CanvasGallery } from '../components/canvas/CanvasGallery'
 
-// Mock data for testing
-const mockCanvasData = {
+// Sample data for testing
+const sampleCanvasData = {
   vpc: {
     valuePropositionTitle: "Test Value Proposition",
     customerSegmentTitle: "Test Customer Segment",
@@ -120,6 +124,43 @@ const mockCanvasData = {
     }
   }
 }
+
+const sampleGalleryCanvases = [
+  {
+    id: 'gallery-vpc',
+    projectId: 'project-1',
+    title: 'E-commerce Platform VPC',
+    type: 'vpc' as const,
+    client: 'TechStart Inc.',
+    status: 'completed' as const,
+    lastModified: '2 days ago',
+    aiGenerated: true,
+    completionRate: 92,
+    vpcData: sampleCanvasData.vpc,
+  },
+  {
+    id: 'gallery-bmc',
+    projectId: 'project-2',
+    title: 'SaaS Business Model',
+    type: 'bmc' as const,
+    client: 'StartupCo',
+    status: 'in-progress' as const,
+    lastModified: '1 day ago',
+    aiGenerated: false,
+    completionRate: 64,
+    bmcData: {
+      keyPartners: [],
+      keyActivities: [],
+      keyResources: [],
+      valuePropositions: [],
+      customerRelationships: [],
+      channels: [],
+      customerSegments: [],
+      costStructure: [],
+      revenueStreams: [],
+    },
+  },
+]
 
 describe('Canvas Components TDD Validation', () => {
   
@@ -162,7 +203,7 @@ describe('Canvas Components TDD Validation', () => {
         <ValuePropositionCanvas
           canvasId="test-vpc"
           clientId="test-client"
-          initialData={mockCanvasData.vpc}
+          initialData={sampleCanvasData.vpc}
           readOnly={false}
         />
       )
@@ -178,7 +219,7 @@ describe('Canvas Components TDD Validation', () => {
         <ValuePropositionCanvas
           canvasId="test-vpc"
           clientId="test-client"
-          initialData={mockCanvasData.vpc}
+          initialData={sampleCanvasData.vpc}
           readOnly={true}
         />
       )
@@ -281,11 +322,11 @@ describe('Canvas Components TDD Validation', () => {
 
   describe('Canvas Gallery Integration', () => {
     it('renders successfully with ShadCN components', () => {
-      render(<CanvasGallery />)
+      render(<CanvasGallery canvases={sampleGalleryCanvases} />)
       
       // Verify core gallery elements
       expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
-      expect(screen.getByText('AI-generated strategic canvases for your clients')).toBeInTheDocument()
+      expect(screen.getByText('Strategic canvases generated from real project data')).toBeInTheDocument()
       expect(screen.getByText('Generate Canvas')).toBeInTheDocument()
       
       // Verify filter tabs
@@ -294,10 +335,10 @@ describe('Canvas Components TDD Validation', () => {
       expect(screen.getByText('Business Model')).toBeInTheDocument()
     })
 
-    it('displays mock canvas data', () => {
-      render(<CanvasGallery />)
+    it('displays provided canvas data', () => {
+      render(<CanvasGallery canvases={sampleGalleryCanvases} />)
       
-      // Should show some mock canvases
+      // Should show provided canvases
       expect(screen.getByText('E-commerce Platform VPC')).toBeInTheDocument()
       expect(screen.getByText('SaaS Business Model')).toBeInTheDocument()
     })
@@ -305,7 +346,7 @@ describe('Canvas Components TDD Validation', () => {
 
   describe('ShadCN Component Integration', () => {
     it('uses proper ShadCN Card components', () => {
-      render(<CanvasGallery />)
+      render(<CanvasGallery canvases={sampleGalleryCanvases} />)
       
       // Verify ShadCN Card structure is present
       const cards = document.querySelectorAll('[class*="card"]')
@@ -327,7 +368,7 @@ describe('Canvas Components TDD Validation', () => {
     })
 
     it('uses proper ShadCN Button components', () => {
-      render(<CanvasGallery />)
+      render(<CanvasGallery canvases={sampleGalleryCanvases} />)
       
       // Verify buttons are rendered
       const generateButton = screen.getByText('Generate Canvas')
@@ -373,14 +414,14 @@ describe('TDD Implementation Validation', () => {
     })
     editorRender.unmount()
 
-    const galleryRender = render(<CanvasGallery />)
+    const galleryRender = render(<CanvasGallery canvases={sampleGalleryCanvases} />)
     expect(screen.getByText('Canvas Gallery')).toBeInTheDocument()
     galleryRender.unmount()
   })
 
   it('validates ShadCN UI integration', () => {
     // Render a component and verify ShadCN classes are present
-    render(<CanvasGallery />)
+    render(<CanvasGallery canvases={sampleGalleryCanvases} />)
     
     // Look for common ShadCN class patterns
     const elementsWithShadcnClasses = document.querySelectorAll('[class*="bg-"], [class*="text-"], [class*="border-"]')

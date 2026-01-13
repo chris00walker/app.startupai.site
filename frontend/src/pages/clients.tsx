@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
-import Link from 'next/link'
+import React, { useMemo, useState } from "react"
+import Link from "next/link"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { EmptyState } from "@/components/ui/EmptyState"
 import {
   Users,
   Plus,
@@ -14,9 +15,8 @@ import {
   MoreVertical,
   TrendingUp,
   Calendar,
-  Building,
   Target,
-  Loader2
+  Loader2,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -24,149 +24,45 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useDemoMode } from "@/hooks/useDemoMode"
-import { getDemoClient } from "@/data/demoData"
 import { useClients } from "@/hooks/useClients"
 import type { PortfolioProject } from "@/types/portfolio"
 
-interface Client {
-  id: string
-  name: string
-  industry: string
-  description: string
-  stage: "discovery" | "validation" | "scaling" | "optimization"
-  createdAt: string
-  lastActivity: string
-  canvasCount: number
-  completionRate: number
-  revenue?: string
+const stageLabels: Record<PortfolioProject["stage"], string> = {
+  DESIRABILITY: "Discovery",
+  FEASIBILITY: "Validation",
+  VIABILITY: "Scaling",
+  SCALE: "Optimization",
 }
 
-// Transform PortfolioProject to Client format
-function portfolioToClient(project: PortfolioProject): Client {
-  const stageMap: Record<string, "discovery" | "validation" | "scaling" | "optimization"> = {
-    'DESIRABILITY': 'discovery',
-    'FEASIBILITY': 'validation',
-    'VIABILITY': 'scaling',
-    'SCALE': 'optimization'
-  }
-
-  return {
-    id: project.id,
-    name: project.clientName,
-    industry: 'Technology', // Default since not in PortfolioProject
-    description: `Client with ${project.hypothesesCount || 0} hypotheses and ${project.experimentsCount || 0} experiments`,
-    stage: stageMap[project.stage] || 'discovery',
-    createdAt: new Date().toISOString().split('T')[0],
-    lastActivity: project.lastActivity,
-    canvasCount: project.evidenceCount || 0,
-    completionRate: project.evidenceQuality || 0,
-    revenue: 'TBD'
-  }
+const stageColors: Record<PortfolioProject["stage"], string> = {
+  DESIRABILITY: "bg-blue-100 text-blue-800",
+  FEASIBILITY: "bg-yellow-100 text-yellow-800",
+  VIABILITY: "bg-green-100 text-green-800",
+  SCALE: "bg-purple-100 text-purple-800",
 }
 
 export default function ClientsPage() {
-  const demoMode = useDemoMode()
-  const { projects: realClients, isLoading, error } = useClients()
+  const { projects, isLoading, error } = useClients()
   const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState("all")
+  const [activeTab, setActiveTab] = useState<"all" | "DESIRABILITY" | "FEASIBILITY" | "VIABILITY" | "SCALE">("all")
 
-  // Get demo data using lazy loading function
-  const demoClient = getDemoClient()
+  const filteredClients = useMemo(() => {
+    return projects.filter((client) => {
+      const matchesSearch = client.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+      if (activeTab === "all") return matchesSearch
+      return matchesSearch && client.stage === activeTab
+    })
+  }, [projects, searchTerm, activeTab])
 
-  // Demo clients data
-  const demoClients: Client[] = [
-    {
-      id: demoClient.id,
-      name: demoClient.name,
-      industry: demoClient.industry,
-      description: demoClient.description,
-      stage: demoClient.stage as "validation",
-      createdAt: demoClient.createdAt,
-      lastActivity: "2 hours ago",
-      canvasCount: 3,
-      completionRate: 85,
-      revenue: "$50K ARR"
-    },
-    {
-      id: "client-2",
-      name: "EcoSmart Solutions",
-      industry: "Sustainable Technology",
-      description: "IoT-based smart home energy management system",
-      stage: "scaling",
-      createdAt: "2024-01-10",
-      lastActivity: "1 day ago",
-      canvasCount: 5,
-      completionRate: 92,
-      revenue: "$120K ARR"
-    },
-    {
-      id: "client-3",
-      name: "FinanceFlow Pro",
-      industry: "Financial Technology",
-      description: "AI-powered personal finance management platform",
-      stage: "discovery",
-      createdAt: "2024-02-01",
-      lastActivity: "3 days ago",
-      canvasCount: 2,
-      completionRate: 45,
-      revenue: "Pre-revenue"
-    },
-    {
-      id: "client-4",
-      name: "HealthTrack Analytics",
-      industry: "Healthcare Technology",
-      description: "Predictive analytics for patient care optimization",
-      stage: "optimization",
-      createdAt: "2023-11-15",
-      lastActivity: "1 week ago",
-      canvasCount: 8,
-      completionRate: 98,
-      revenue: "$300K ARR"
-    }
-  ]
-
-  // Use real clients if available, otherwise fall back to demo data
-  const transformedRealClients = realClients.map(portfolioToClient)
-  const clients = transformedRealClients.length > 0 ? transformedRealClients : demoClients
-  const usingRealData = transformedRealClients.length > 0
-
-  // Filter clients based on search and tab
-  const filteredClients = clients.filter(client => {
-    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.industry.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    if (activeTab === "all") return matchesSearch
-    return matchesSearch && client.stage === activeTab
-  })
-
-  const getStageColor = (stage: string) => {
-    switch (stage) {
-      case "discovery": return "bg-blue-100 text-blue-800"
-      case "validation": return "bg-yellow-100 text-yellow-800"
-      case "scaling": return "bg-green-100 text-green-800"
-      case "optimization": return "bg-purple-100 text-purple-800"
-      default: return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getStageIcon = (stage: string) => {
-    switch (stage) {
-      case "discovery": return <Search className="h-4 w-4" />
-      case "validation": return <Target className="h-4 w-4" />
-      case "scaling": return <TrendingUp className="h-4 w-4" />
-      case "optimization": return <Building className="h-4 w-4" />
-      default: return <Users className="h-4 w-4" />
-    }
-  }
+  const averageEvidenceQuality = useMemo(() => {
+    if (projects.length === 0) return 0
+    const total = projects.reduce((sum, project) => sum + (project.evidenceQuality || 0), 0)
+    return Math.round(total / projects.length)
+  }, [projects])
 
   if (isLoading) {
     return (
-      <DashboardLayout
-        breadcrumbs={[
-          { title: "Client Portfolio", href: "/clients" },
-        ]}
-      >
+      <DashboardLayout breadcrumbs={[{ title: "Client Portfolio", href: "/clients" }]}>
         <div className="flex items-center justify-center h-[400px]">
           <div className="text-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
@@ -178,43 +74,8 @@ export default function ClientsPage() {
   }
 
   return (
-    <DashboardLayout
-      breadcrumbs={[
-        { title: "Client Portfolio", href: "/clients" },
-      ]}
-    >
+    <DashboardLayout breadcrumbs={[{ title: "Client Portfolio", href: "/clients" }]}>
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        {/* Info Banner */}
-        {!usingRealData && (
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <Users className="h-5 w-5 text-blue-400 mt-0.5" />
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm text-blue-700 leading-relaxed">
-                  <strong>Demo Mode:</strong> Showing sample data. Add your first client to see real data.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        {usingRealData && (
-          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-md">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <Users className="h-5 w-5 text-green-400 mt-0.5" />
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm text-green-700 leading-relaxed">
-                  <strong>Live Data:</strong> Showing your real client portfolio.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Header */}
         <div className="flex items-center justify-between space-y-2">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Client Portfolio</h2>
@@ -232,7 +93,6 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        {/* Search and Filters */}
         <div className="flex items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -245,171 +105,136 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        {/* Tabs for filtering by stage */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="all">All Clients</TabsTrigger>
-            <TabsTrigger value="discovery">Discovery</TabsTrigger>
-            <TabsTrigger value="validation">Validation</TabsTrigger>
-            <TabsTrigger value="scaling">Scaling</TabsTrigger>
-            <TabsTrigger value="optimization">Optimization</TabsTrigger>
-          </TabsList>
+        {error && (
+          <EmptyState
+            title="Clients unavailable"
+            description="We couldn't load your client portfolio."
+            icon={<Users className="h-8 w-8" />}
+          />
+        )}
 
-          <TabsContent value={activeTab} className="space-y-4">
-            {/* Client Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{clients.length}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {usingRealData ? "Active clients" : "Demo data"}
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {clients.reduce((sum, client) => sum + client.canvasCount, 0)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Total canvases
-                  </p>
-                </CardContent>
-              </Card>
+        {!error && (
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="all">All Clients</TabsTrigger>
+              <TabsTrigger value="DESIRABILITY">Discovery</TabsTrigger>
+              <TabsTrigger value="FEASIBILITY">Validation</TabsTrigger>
+              <TabsTrigger value="VIABILITY">Scaling</TabsTrigger>
+              <TabsTrigger value="SCALE">Optimization</TabsTrigger>
+            </TabsList>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Avg Completion</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {clients.length > 0 
-                      ? Math.round(clients.reduce((sum, client) => sum + client.completionRate, 0) / clients.length)
-                      : 0}%
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Project progress
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Revenue Impact</CardTitle>
-                  <Building className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$470K</div>
-                  <p className="text-xs text-muted-foreground">
-                    Total ARR tracked
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Client Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredClients.map((client) => (
-                <Card key={client.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        {getStageIcon(client.stage)}
-                        <CardTitle className="text-lg">{client.name}</CardTitle>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/client/${client.id}`}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <CardDescription className="text-sm">
-                      {client.industry}
-                    </CardDescription>
+            <TabsContent value={activeTab} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {client.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <Badge className={getStageColor(client.stage)} variant="secondary">
-                        {client.stage.charAt(0).toUpperCase() + client.stage.slice(1)}
-                      </Badge>
-                      <span className="text-sm font-medium text-green-600">
-                        {client.revenue}
-                      </span>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span>{client.completionRate}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full" 
-                          style={{ width: `${client.completionRate}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {client.lastActivity}
-                      </div>
-                      <span>{client.canvasCount} canvases</span>
-                    </div>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{projects.length}</div>
+                    <p className="text-xs text-muted-foreground">Active clients</p>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
 
-            {/* Empty State */}
-            {filteredClients.length === 0 && (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No clients found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    {searchTerm 
-                      ? "Try adjusting your search terms" 
-                      : "Get started by adding your first client"}
-                  </p>
-                  {!searchTerm && (
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Evidence Quality</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{averageEvidenceQuality}%</div>
+                    <p className="text-xs text-muted-foreground">Across projects</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Evidence</CardTitle>
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {projects.reduce((sum, client) => sum + (client.evidenceCount || 0), 0)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Evidence items captured</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Stages</CardTitle>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {new Set(projects.map((client) => client.stage)).size}
+                    </div>
+                    <p className="text-xs text-muted-foreground">Stages in motion</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {filteredClients.length === 0 ? (
+                <EmptyState
+                  title="No clients yet"
+                  description="Add your first client to get started."
+                  icon={<Users className="h-8 w-8" />}
+                  action={
                     <Link href="/clients/new">
                       <Button>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Client
                       </Button>
                     </Link>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+                  }
+                />
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredClients.map((client) => (
+                    <Card key={client.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Badge className={stageColors[client.stage]}>
+                              {stageLabels[client.stage]}
+                            </Badge>
+                            <CardTitle className="text-lg">{client.clientName}</CardTitle>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="text-sm text-muted-foreground">
+                          Last activity: {client.lastActivity}
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Evidence Quality</span>
+                          <span className="font-medium">{Math.round(client.evidenceQuality || 0)}%</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Gate Status</span>
+                          <Badge variant="outline">{client.gateStatus}</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </DashboardLayout>
   )

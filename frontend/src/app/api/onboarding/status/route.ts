@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
-import { testSessionState } from '@/app/api/chat/route';
 
 /**
  * GET /api/onboarding/status
@@ -33,61 +32,33 @@ export async function GET(request: NextRequest) {
       error: userError,
     } = await sessionClient.auth.getUser();
 
-    // Allow test user in development mode
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const isTestUser = sessionId.startsWith('test-') || sessionId.includes('demo');
-
-    if ((userError || !user) && !(isDevelopment && isTestUser)) {
+    if (userError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    // Get session data
-    let sessionData: any;
+    // Get admin client for database operations
+    let supabaseClient;
+    try {
+      supabaseClient = createAdminClient();
+    } catch (error) {
+      console.warn('[api/onboarding/status] SUPABASE_SERVICE_ROLE_KEY unavailable, using user-scoped client.');
+      supabaseClient = sessionClient;
+    }
 
-    if (isDevelopment && isTestUser) {
-      // For test users, retrieve from in-memory state
-      if (testSessionState.has(sessionId)) {
-        sessionData = testSessionState.get(sessionId);
-        console.log('[api/onboarding/status] Retrieved test session from memory');
-      } else {
-        // Session not found in memory - might be initial state
-        sessionData = {
-          session_id: sessionId,
-          current_stage: 1,
-          overall_progress: 0,
-          stage_progress: 0,
-          conversation_history: [],
-          status: 'active',
-        };
-        console.log('[api/onboarding/status] Using default test session data');
-      }
-    } else {
-      // Get admin client for database operations
-      let supabaseClient;
-      try {
-        supabaseClient = createAdminClient();
-      } catch (error) {
-        console.warn('[api/onboarding/status] SUPABASE_SERVICE_ROLE_KEY unavailable, using user-scoped client.');
-        supabaseClient = sessionClient;
-      }
+    const { data: sessionData, error: sessionError } = await supabaseClient
+      .from('onboarding_sessions')
+      .select('session_id, current_stage, overall_progress, stage_progress, status, conversation_history')
+      .eq('session_id', sessionId)
+      .single();
 
-      const { data, error } = await supabaseClient
-        .from('onboarding_sessions')
-        .select('session_id, current_stage, overall_progress, stage_progress, status, conversation_history')
-        .eq('session_id', sessionId)
-        .single();
-
-      if (error || !data) {
-        return NextResponse.json(
-          { error: 'Session not found' },
-          { status: 404 }
-        );
-      }
-
-      sessionData = data;
+    if (sessionError || !sessionData) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
     }
 
     // Return session status

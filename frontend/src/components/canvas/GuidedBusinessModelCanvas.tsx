@@ -9,7 +9,7 @@ import { ChevronRight, ChevronLeft, CheckCircle, Users, Target, Truck, Heart, Co
 
 interface GuidedBusinessModelCanvasProps {
   canvasId?: string;
-  clientId: string;
+  clientId?: string;
   initialData?: any;
   onSave?: (data: any) => void;
   readOnly?: boolean;
@@ -152,7 +152,6 @@ const bmcSteps = [
 
 export default function GuidedBusinessModelCanvas({ 
   canvasId, 
-  clientId, 
   initialData, 
   onSave, 
   readOnly = false 

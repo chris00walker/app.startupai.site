@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -49,115 +50,75 @@ import { RevenueStreamsOverlay, CostStructureOverlay, ViabilitySummaryBar } from
 
 // Hooks
 import { useCrewAIState } from '@/hooks/useCrewAIState'
+import { useBMC } from '@/hooks/useBMC'
 // import { useProject } from '@/hooks/useProject' // TODO: Create this hook when needed
 
 // Types
 import type {
   Phase,
-  DesirabilitySignal,
-  FeasibilitySignal,
-  ViabilitySignal,
   PivotType
 } from '@/types/crewai'
 
-// Demo data for development
-const DEMO_DATA = {
-  segment: {
-    segmentKey: 'early-adopters',
-    segmentName: 'Early Adopter Founders',
-    customerProfile: {
-      segment_name: 'Early Adopter Founders',
-      jobs: [
-        { functional: 'Validate business ideas quickly', emotional: 'Feel confident', social: 'Be seen as innovative', importance: 9 },
-        { functional: 'Reduce startup risk', emotional: 'Reduce anxiety', social: 'Appear credible to investors', importance: 8 }
-      ],
-      pains: ['Wasting time on bad ideas', 'Lack of validation methodology', 'Investor skepticism'],
-      gains: ['Fast validation cycles', 'Data-driven decisions', 'Investor confidence'],
-      pain_intensity: { 'Wasting time on bad ideas': 9, 'Lack of validation methodology': 8 },
-      gain_importance: { 'Fast validation cycles': 9, 'Data-driven decisions': 8 }
-    }
-  },
-  signals: {
-    desirability: 'strong_commitment' as DesirabilitySignal,
-    feasibility: 'green' as FeasibilitySignal,
-    viability: 'marginal' as ViabilitySignal
-  },
-  evidence: {
-    desirability: {
-      problem_resonance: 0.72,
-      conversion_rate: 0.08,
-      commitment_depth: 'skin_in_game' as const,
-      zombie_ratio: 0.15,
-      experiments: [],
-      key_learnings: ['Problem resonates strongly', 'Price sensitivity moderate'],
-      tested_segments: ['Early Adopter Founders'],
-      impressions: 50000,
-      clicks: 2500,
-      signups: 200,
-      spend_usd: 3500
-    },
-    feasibility: {
-      core_features_feasible: { 'AI Analysis': 'POSSIBLE', 'VPC Generator': 'POSSIBLE', 'Real-time Dashboard': 'CONSTRAINED' } as Record<string, 'POSSIBLE' | 'CONSTRAINED' | 'IMPOSSIBLE'>,
-      technical_risks: ['LLM cost scaling', 'Real-time sync complexity'],
-      skill_requirements: ['AI/ML Engineer', 'Full-stack Developer'],
-      estimated_effort: '3-4 months',
-      downgrade_required: false,
-      removed_features: [],
-      alternative_approaches: ['Async processing instead of real-time'],
-      monthly_cost_estimate_usd: 2500
-    },
-    viability: {
-      cac: 175,
-      ltv: 420,
-      ltv_cac_ratio: 2.4,
-      gross_margin: 0.68,
-      payback_months: 8,
-      break_even_customers: 150,
-      tam_usd: 45000000,
-      market_share_target: 0.02,
-      viability_assessment: 'Marginal economics - needs CAC optimization or price increase'
-    }
-  },
-  metrics: {
-    cac_usd: 175,
-    ltv_usd: 420,
-    ltv_cac_ratio: 2.4,
-    gross_margin_pct: 0.68,
-    tam_annual_revenue_potential_usd: 45000000,
-    monthly_churn_pct: 0.04,
-    payback_months: 8,
-    cac_breakdown: { marketing: 100, sales: 50, onboarding: 25 },
-    ltv_breakdown: { subscription: 350, expansion: 50, services: 20 },
-    model_assumptions: { avg_contract_months: 24, expansion_rate: 0.12 }
-  },
-  bmcData: {
-    revenueStreams: ['SaaS Subscription ($99/mo)', 'Enterprise tier ($499/mo)', 'Professional Services'],
-    costStructure: ['Cloud Infrastructure', 'AI/ML Processing', 'Customer Support', 'Marketing']
-  },
-  phase: 'viability' as Phase,
-  pivotRecommendation: 'cost_pivot' as PivotType
-}
-
 export default function ValidationDashboard() {
   const router = useRouter()
-  const { projectId } = router.query
+  const projectId = typeof router.query.projectId === 'string' ? router.query.projectId : undefined
 
-  // In production, use real hooks
-  // const { state, isLoading, error, refetch } = useCrewAIState(projectId as string)
-  // const { project } = useProject(projectId as string)
-
-  // For demo, use static data
-  const isDemo = !projectId || projectId === 'demo'
-  const isLoading = false
-  const error = null
+  const { validationState, signals, isLoading: stateLoading, error } = useCrewAIState({
+    projectId,
+  })
+  const { bmc, isLoading: bmcLoading } = useBMC({ projectId })
+  const isLoading = stateLoading || bmcLoading
 
   const data = useMemo(() => {
-    // In production, transform state to our display format
-    // For now, use demo data
-    return DEMO_DATA
-  }, [])
+    if (!validationState || !signals) return null
 
-  const phaseConfig = getPhaseConfig(data.phase)
+    const customerProfiles = validationState.customer_profiles || {}
+    const valueMaps = validationState.value_maps || {}
+    const segmentKeys = Object.keys(customerProfiles)
+    const primarySegmentKey = segmentKeys[0]
+    const primaryProfile = primarySegmentKey ? customerProfiles[primarySegmentKey] : undefined
+    const primaryValueMap = primarySegmentKey ? valueMaps[primarySegmentKey] : undefined
+
+    const bmcRecord = typeof bmc === 'object' && bmc !== null ? (bmc as Record<string, unknown>) : null
+    const getBmcItems = (camelKey: string, snakeKey: string) => {
+      if (!bmcRecord) return []
+      const value = bmcRecord[camelKey] ?? bmcRecord[snakeKey]
+      return Array.isArray(value) ? value : []
+    }
+    const toTextList = (items: unknown[]) =>
+      items
+        .map((item) => (typeof item === 'object' && item !== null ? (item as Record<string, unknown>).text : null))
+        .filter((value): value is string => typeof value === 'string')
+
+    return {
+      segment: {
+        segmentKey: primarySegmentKey || 'primary',
+        segmentName: primaryProfile?.segment_name || 'Primary Segment',
+        customerProfile: primaryProfile,
+        valueMap: primaryValueMap,
+        resonanceScore: primaryProfile?.resonance_score,
+      },
+      signals: {
+        desirability: signals.desirability,
+        feasibility: signals.feasibility,
+        viability: signals.viability,
+      },
+      evidence: {
+        desirability: validationState.desirability_evidence,
+        feasibility: validationState.feasibility_evidence,
+        viability: validationState.viability_evidence,
+      },
+      metrics: validationState.last_viability_metrics ?? null,
+      bmcData: {
+        revenueStreams: toTextList(getBmcItems('revenueStreams', 'revenue_streams')),
+        costStructure: toTextList(getBmcItems('costStructure', 'cost_structure')),
+      },
+      phase: signals.phase,
+      pivotRecommendation: signals.pivotRecommendation,
+    }
+  }, [validationState, signals, bmc])
+
+  const phaseConfig = getPhaseConfig(data?.phase || 'ideation')
 
   if (isLoading) {
     return <ValidationDashboardSkeleton />
@@ -183,6 +144,44 @@ export default function ValidationDashboard() {
     )
   }
 
+  if (!projectId) {
+    return (
+      <>
+        <Head>
+          <title>Validation Dashboard | StartupAI</title>
+        </Head>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto p-6 space-y-6">
+            <EmptyState
+              title="Select a project to view validation"
+              description="Open a project to view its validation dashboard."
+              icon={<FlaskConical className="h-8 w-8" />}
+            />
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  if (!data) {
+    return (
+      <>
+        <Head>
+          <title>Validation Dashboard | StartupAI</title>
+        </Head>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto p-6 space-y-6">
+            <EmptyState
+              title="No validation data yet"
+              description="Complete onboarding and trigger a validation run to populate this dashboard."
+              icon={<FlaskConical className="h-8 w-8" />}
+            />
+          </div>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <Head>
@@ -191,7 +190,6 @@ export default function ValidationDashboard() {
 
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto p-6 space-y-6">
-          {/* Breadcrumb */}
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -204,7 +202,6 @@ export default function ValidationDashboard() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          {/* Header */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -216,11 +213,6 @@ export default function ValidationDashboard() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              {isDemo && (
-                <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
-                  Demo Mode
-                </Badge>
-              )}
               <Badge className={phaseConfig.badgeColor}>
                 {phaseConfig.icon}
                 <span className="ml-1">Phase: {phaseConfig.label}</span>
@@ -275,7 +267,13 @@ export default function ValidationDashboard() {
               signals={data.signals}
               evidence={data.evidence}
               pivotRecommendation={data.pivotRecommendation}
-              onViewFullVPC={() => router.push('/canvas/vpc')}
+              onViewFullVPC={() => {
+                const params = new URLSearchParams({ projectId })
+                if (data.segment.segmentKey) {
+                  params.set('segmentKey', data.segment.segmentKey)
+                }
+                router.push(`/canvas/vpc?${params.toString()}`)
+              }}
               variant="full"
             />
 
@@ -351,7 +349,7 @@ export default function ValidationDashboard() {
             <QuickNavCard
               title="Value Proposition Canvas"
               description="Full customer-value analysis"
-              href="/canvas/vpc"
+              href={`/canvas/vpc?projectId=${projectId}`}
               icon={<LayoutGrid className="h-5 w-5" />}
             />
             <QuickNavCard

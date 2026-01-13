@@ -12,6 +12,7 @@ import { useParams } from 'next/navigation';
 import { GateDashboard } from '@/components/gates/GateDashboard';
 import { useGateEvaluation } from '@/hooks/useGateEvaluation';
 import { useGateAlerts } from '@/hooks/useGateAlerts';
+import { useProjects } from '@/hooks/useProjects';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Bell, RefreshCw, Sparkles, Loader2 } from 'lucide-react';
@@ -20,6 +21,8 @@ import { createClient } from '@/lib/supabase/client';
 export default function ProjectGatePage() {
   const params = useParams();
   const projectId = params?.id as string;
+  const { projects, isLoading: projectsLoading } = useProjects();
+  const currentProject = projects.find((project) => project.id === projectId);
 
   const [analysisSummary, setAnalysisSummary] = useState<string | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
@@ -31,9 +34,7 @@ export default function ProjectGatePage() {
     return <div>Project not found</div>;
   }
 
-  // For demo, using DESIRABILITY stage
-  // In production, fetch from project data
-  const stage = 'DESIRABILITY';
+  const stage = currentProject?.stage || 'DESIRABILITY';
 
   const { result, isLoading, error, refetch } = useGateEvaluation({
     projectId,
@@ -124,13 +125,24 @@ export default function ProjectGatePage() {
     loadCrewAnalysis();
   }, [projectId]);
 
-  if (isLoading && !result) {
+  if ((projectsLoading || isLoading) && !result) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
           <span className="ml-3 text-gray-600">Evaluating gate...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (!projectsLoading && !currentProject) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card className="border-red-200 bg-red-50 p-6">
+          <h2 className="text-lg font-semibold text-red-900">Project Not Found</h2>
+          <p className="mt-2 text-sm text-red-700">We could not locate this project.</p>
+        </Card>
       </div>
     );
   }

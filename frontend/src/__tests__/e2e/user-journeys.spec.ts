@@ -62,11 +62,8 @@ test.describe('Multi-Agent Platform - User Journeys', () => {
       
       await page.goto('/client/techstart-ventures');
       
-      // Should show demo mode or fallback content
-      await expect(page.locator('text=Demo Mode')).toBeVisible();
-      
-      // Dashboard should still be functional with demo data
-      await expect(page.locator('h1')).toContainText('TechStart Ventures');
+      // Should show error content when backend is unavailable
+      await expect(page.locator('text=We could not load this client')).toBeVisible();
     });
 
     test('should display metrics with proper formatting', async ({ page }) => {
@@ -207,8 +204,8 @@ test.describe('Multi-Agent Platform - User Journeys', () => {
       // Trigger a new request (e.g., refresh data)
       await page.reload();
       
-      // Should show error state or fallback content
-      await expect(page.locator('text=Demo Mode')).toBeVisible();
+      // Should show error state
+      await expect(page.locator('text=We could not load this client')).toBeVisible();
     });
 
     test('should handle 404 errors properly', async ({ page }) => {
