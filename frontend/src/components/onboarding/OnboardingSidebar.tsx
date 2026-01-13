@@ -47,7 +47,8 @@ export function OnboardingSidebar({
   isResuming,
 }: OnboardingSidebarProps) {
   const completedStages = stages.filter((stage) => stage.isComplete).length;
-  const estimatedTimeRemaining = Math.max(0, (7 - currentStage) * 3);
+  const totalStages = stages.length || 7; // Default to 7 if stages empty
+  const estimatedTimeRemaining = Math.max(0, (totalStages - currentStage) * 3);
 
   return (
     <aside
@@ -78,13 +79,20 @@ export function OnboardingSidebar({
       <div className="relative z-10 px-6 pb-6 reveal-2">
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-xs font-medium text-muted-foreground">Progress</span>
-          <span className="text-xs font-semibold text-primary tabular-nums">{Math.round(overallProgress)}%</span>
+          <span
+            className="text-xs font-semibold text-primary tabular-nums"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {Math.round(overallProgress)}%
+          </span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-primary/10 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500 ease-out onboarding-progress-animate"
             style={{ width: `${overallProgress}%` }}
             role="progressbar"
+            aria-label={`Onboarding progress: ${Math.round(overallProgress)} percent complete`}
             aria-valuenow={overallProgress}
             aria-valuemin={0}
             aria-valuemax={100}

@@ -20,6 +20,7 @@ import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { trackOnboardingEvent } from '@/lib/analytics';
 
 // ============================================================================
 // Types and Interfaces
@@ -64,6 +65,7 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
   const [isAILoading, setIsAILoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showStartNewDialog, setShowStartNewDialog] = useState(false);
   const [input, setInput] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -112,6 +114,15 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
+          // Track stage advancement
+          if (session.currentStage !== data.currentStage) {
+            trackOnboardingEvent.stageAdvanced(
+              session.sessionId,
+              session.currentStage,
+              data.currentStage
+            );
+          }
+
           setSession(prev => prev ? {
             ...prev,
             currentStage: data.currentStage,
@@ -149,6 +160,13 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
     };
     setMessages(prev => [...prev, newUserMessage]);
 
+    // Track message sent
+    trackOnboardingEvent.messageSent(
+      session.sessionId,
+      session.currentStage,
+      userMessage.length
+    );
+
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
 
@@ -170,9 +188,10 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
         throw new Error(`API error: ${response.status}`);
       }
 
-      // Handle streaming response
+      // Handle streaming response (SSE format)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
       let accumulatedText = '';
 
       if (reader) {
@@ -180,28 +199,43 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedText += chunk;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
 
-          // Update AI message in real-time
-          setMessages(prev => {
-            const lastMessage = prev[prev.length - 1];
-            if (lastMessage?.role === 'assistant') {
-              return [
-                ...prev.slice(0, -1),
-                { ...lastMessage, content: accumulatedText },
-              ];
-            } else {
-              return [
-                ...prev,
-                {
-                  role: 'assistant',
-                  content: accumulatedText,
-                  timestamp: new Date().toISOString(),
-                },
-              ];
+          for (const line of lines) {
+            // SSE format: lines starting with '0:' contain text deltas
+            if (line.trim().startsWith('0:')) {
+              const jsonStr = line.trim().slice(2);
+              try {
+                const parsed = JSON.parse(jsonStr);
+                if (typeof parsed === 'string') {
+                  accumulatedText += parsed;
+                  // Update AI message in real-time
+                  setMessages(prev => {
+                    const lastMessage = prev[prev.length - 1];
+                    if (lastMessage?.role === 'assistant') {
+                      return [
+                        ...prev.slice(0, -1),
+                        { ...lastMessage, content: accumulatedText },
+                      ];
+                    } else {
+                      return [
+                        ...prev,
+                        {
+                          role: 'assistant',
+                          content: accumulatedText,
+                          timestamp: new Date().toISOString(),
+                        },
+                      ];
+                    }
+                  });
+                }
+              } catch (e) {
+                // Skip malformed JSON
+              }
             }
-          });
+          }
         }
       }
 
@@ -283,6 +317,13 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
       setSession(newSession);
       setStages(initializeStages(newSession.currentStage));
 
+      // Track session started
+      trackOnboardingEvent.sessionStarted(
+        newSession.sessionId,
+        newSession.currentStage,
+        'consultant'
+      );
+
       // Check if resuming existing session
       if (data.resuming && data.conversationHistory && data.conversationHistory.length > 0) {
         // Restore conversation history
@@ -349,6 +390,13 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
         throw new Error(data.error?.message || 'Failed to complete onboarding');
       }
 
+      // Track completion
+      trackOnboardingEvent.completed(
+        session.sessionId,
+        0, // Duration not tracked in this component
+        Boolean(data.workflowId)
+      );
+
       // Log validation workflow if triggered
       if (data.workflowId) {
         console.log('[ConsultantOnboarding] Validation workflow started:', data.workflowId);
@@ -372,9 +420,31 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
   }, []);
 
   const confirmExit = useCallback(() => {
+    // Track early exit
+    if (session) {
+      trackOnboardingEvent.exitedEarly(
+        session.sessionId,
+        session.currentStage,
+        session.overallProgress
+      );
+    }
     toast.info('Progress saved. You can resume anytime.');
     router.push('/consultant-dashboard');
-  }, [router]);
+  }, [router, session]);
+
+  // Handle start new conversation
+  const handleStartNew = useCallback(() => {
+    setShowStartNewDialog(true);
+  }, []);
+
+  const confirmStartNew = useCallback(async () => {
+    setShowStartNewDialog(false);
+    setSession(null);
+    setMessages([]);
+    setStages([]);
+    setIsLoading(true);
+    await initializeSession();
+  }, [initializeSession]);
 
   // Initialize session on mount
   useEffect(() => {
@@ -425,6 +495,7 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
           overallProgress={session?.overallProgress || 0}
           agentPersonality={session?.agentPersonality}
           onExit={handleExitOnboarding}
+          onStartNew={handleStartNew}
         />
 
         {/* Main conversation area */}
@@ -457,6 +528,24 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
             <AlertDialogCancel>Continue Onboarding</AlertDialogCancel>
             <AlertDialogAction onClick={confirmExit}>
               Save & Exit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Start new conversation dialog */}
+      <AlertDialog open={showStartNewDialog} onOpenChange={setShowStartNewDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start New Conversation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will clear your current progress and start fresh. Your previous responses will not be saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStartNew}>
+              Start Fresh
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -251,7 +251,7 @@ describe('POST /api/onboarding/abandon', () => {
     const originalEnv = process.env.NODE_ENV;
 
     beforeEach(() => {
-      process.env.NODE_ENV = 'development';
+      (process.env as { NODE_ENV: string }).NODE_ENV = 'development';
       mockGetUser.mockResolvedValue({
         data: { user: null },
         error: new Error('Not authenticated'),
@@ -259,7 +259,7 @@ describe('POST /api/onboarding/abandon', () => {
     });
 
     afterEach(() => {
-      process.env.NODE_ENV = originalEnv;
+      (process.env as { NODE_ENV: string | undefined }).NODE_ENV = originalEnv;
     });
 
     it('should allow test sessions in development mode', async () => {

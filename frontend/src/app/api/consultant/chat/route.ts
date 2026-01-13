@@ -291,7 +291,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return result.toTextStreamResponse();
+    // Return SSE format (consistent with Founder path)
+    return result.toUIMessageStreamResponse({
+      onError: (error) => {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error('[ConsultantChat] Stream error:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        });
+        return `Error: ${err.message}`;
+      },
+    });
 
   } catch (error: any) {
     console.error('[ConsultantChat] Error:', error);

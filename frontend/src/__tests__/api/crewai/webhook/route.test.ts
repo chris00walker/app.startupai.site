@@ -81,8 +81,9 @@ import { POST } from '@/app/api/crewai/webhook/route';
 // TEST HELPERS
 // =============================================================================
 
-const TEST_PROJECT_ID = '12345678-1234-1234-1234-123456789012';
-const TEST_USER_ID = '12345678-1234-1234-1234-123456789012';
+// Valid UUID v4 format (version 4 indicated by the 4 in third group)
+const TEST_PROJECT_ID = '12345678-1234-4234-8234-123456789012';
+const TEST_USER_ID = '12345678-1234-4234-8234-123456789012';
 const VALID_TOKEN = 'test-webhook-token';
 
 function createMockRequest(payload: any, token?: string): NextRequest {
@@ -217,8 +218,8 @@ describe('POST /api/crewai/webhook', () => {
   describe('Payload Validation', () => {
     it('should return 400 if flow_type is missing', async () => {
       const payload = createFounderValidationPayload();
-      delete payload.flow_type;
-      const req = createMockRequest(payload, VALID_TOKEN);
+      const { flow_type, ...payloadWithoutFlowType } = payload;
+      const req = createMockRequest(payloadWithoutFlowType, VALID_TOKEN);
 
       const response = await POST(req);
       const data = await response.json();
@@ -260,8 +261,8 @@ describe('POST /api/crewai/webhook', () => {
 
     it('should return 400 if validation_report is missing', async () => {
       const payload = createFounderValidationPayload();
-      delete payload.validation_report;
-      const req = createMockRequest(payload, VALID_TOKEN);
+      const { validation_report, ...payloadWithoutReport } = payload;
+      const req = createMockRequest(payloadWithoutReport, VALID_TOKEN);
 
       const response = await POST(req);
       const data = await response.json();

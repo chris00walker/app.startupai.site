@@ -60,9 +60,9 @@ interface StageInfo {
 export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWizardProps) {
   const router = useRouter();
 
-  // Demo mode check - if userId is 'test-user-id' AND no real API interaction requested, use demo mode
-  // When OPENAI_API_KEY is configured, we want to test real AI even in dev mode
-  const isDemoMode = false; // Disabled to test real AI with OpenAI API key
+  // Demo mode check - controlled by environment variable
+  // Set NEXT_PUBLIC_DEMO_MODE=true to enable demo responses without API calls
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
   // State management
   const [session, setSession] = useState<OnboardingSession | null>(null);
@@ -183,6 +183,11 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         }
       } catch (error) {
         console.error('[OnboardingWizard] Failed to poll analysis status:', error);
+        // Defensive cleanup on error to prevent orphaned intervals
+        if (analysisIntervalRef.current) {
+          clearInterval(analysisIntervalRef.current);
+          analysisIntervalRef.current = null;
+        }
       }
     };
 

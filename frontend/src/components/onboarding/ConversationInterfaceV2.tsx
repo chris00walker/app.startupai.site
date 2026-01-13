@@ -10,7 +10,7 @@
 'use client';
 
 import { useRef, useEffect, useCallback } from 'react';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -216,6 +216,31 @@ export function ConversationInterface({
         </div>
       </ScrollArea>
 
+      {/* Completion Banner - More prominent than header button */}
+      {isConversationComplete && (
+        <div className="border-t border-accent/20 bg-gradient-to-r from-accent/5 to-accent/10 p-6">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h3 className="font-display text-lg font-semibold text-accent flex items-center gap-2 justify-center sm:justify-start">
+                <CheckCircle className="w-5 h-5" />
+                You're all set!
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                All stages complete. Ready to start your validation journey.
+              </p>
+            </div>
+            <Button
+              onClick={onComplete}
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-white min-w-[180px]"
+            >
+              Complete Onboarding
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Input Area - Clean with floating send */}
       <div className="border-t border-border/50 bg-muted/30 px-6 py-4">
         <div className="max-w-3xl mx-auto">
@@ -231,9 +256,10 @@ export function ConversationInterface({
                 disabled={isLoading}
                 rows={2}
                 aria-label="Type your message"
+                aria-describedby="input-instructions"
               />
               <div className="flex items-center justify-between mt-3">
-                <p className="text-xs text-muted-foreground">
+                <p id="input-instructions" className="text-xs text-muted-foreground">
                   Be specific and detailed in your responses to get the best strategic guidance.
                 </p>
                 <Button
