@@ -11,11 +11,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { 
-  Lightbulb, 
-  Target, 
-  Users, 
-  DollarSign, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Lightbulb,
+  Target,
+  Users,
+  DollarSign,
   Rocket,
   Brain,
   CheckCircle,
@@ -25,6 +32,7 @@ import {
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/auth/hooks"
+import { ValidationProgressTimeline } from "@/components/validation/ValidationProgressTimeline"
 
 interface ProjectCreationWizardProps {
   clientId?: string // Optional - for consultants creating projects for clients
@@ -79,6 +87,8 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
   const [aiProgress, setAiProgress] = useState<string>('')
   const [aiError, setAiError] = useState<string>('')
   const [analysisLoaded, setAnalysisLoaded] = useState(false)
+  const [validationRunId, setValidationRunId] = useState<string | null>(null)
+  const [showProgressModal, setShowProgressModal] = useState(false)
   const [pending, startTransition] = useTransition()
   const { user } = useAuth()
   const router = useRouter()
@@ -171,14 +181,47 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
       })
       
       setAiProgress('AI agents analyzing your startup...')
-      
+
       if (!response.ok) {
         const errorText = await response.text().catch(() => '')
         throw new Error(`AI analysis failed: ${response.statusText}${errorText ? ` – ${errorText}` : ''}`)
       }
-      
+
       setAiProgress('Processing AI analysis results...')
-      const aiResult = await response.json() as { success: boolean; summary?: string; insights?: any[]; analysisId?: string; rawOutput?: string }
+      const aiResult = await response.json() as {
+        success: boolean;
+        summary?: string;
+        insights?: any[];
+        analysisId?: string;
+        rawOutput?: string;
+        run_id?: string;
+        status?: string;
+        status_url?: string;
+      }
+
+      // Handle async validation pattern (Modal returns 202 with run_id)
+      if (aiResult.run_id && aiResult.status === 'started') {
+        setAiProgress('Validation started - tracking progress...')
+        setValidationRunId(aiResult.run_id)
+        setShowProgressModal(true)
+
+        // Create placeholder insights while validation runs
+        const placeholderInsights: AIInsight[] = [
+          {
+            type: 'hypothesis',
+            title: 'AI Analysis In Progress',
+            description: 'Our AI agents are analyzing your startup. This process validates your idea across desirability, feasibility, and viability dimensions.',
+            priority: 'high'
+          }
+        ]
+        setAiInsights(placeholderInsights)
+        setAnalysisResult({
+          analysisId: aiResult.run_id,
+          summary: 'AI validation in progress. You can track real-time progress and will be notified when approval is needed.',
+        })
+        setAnalysisLoaded(true)
+        return
+      }
 
       if (!aiResult?.success) {
         throw new Error('Analysis completed without success flag')
@@ -189,7 +232,7 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
         insights: aiResult.insights,
         rawOutput: aiResult.rawOutput,
       })
-      
+
       setAiProgress('AI analysis complete')
       setAiInsights(crewaiInsights)
       setAnalysisResult({
@@ -642,17 +685,17 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
 
       {/* Navigation */}
       <div className="flex justify-between">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={prevStep}
           disabled={currentStep === 1}
         >
           Previous
         </Button>
-        
+
         <div className="flex gap-2">
           {currentStep < totalSteps ? (
-            <Button 
+            <Button
               onClick={nextStep}
               disabled={!canProceed() || isGeneratingInsights}
             >
@@ -660,7 +703,7 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button 
+            <Button
               onClick={createProject}
               disabled={!canProceed() || isCreatingProject || pending}
               className="bg-green-600 hover:bg-green-700"
@@ -680,6 +723,40 @@ export function ProjectCreationWizard({ clientId }: ProjectCreationWizardProps =
           )}
         </div>
       </div>
+
+      {/* Validation Progress Modal */}
+      <Dialog open={showProgressModal} onOpenChange={setShowProgressModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>AI Validation in Progress</DialogTitle>
+            <DialogDescription>
+              Your startup is being analyzed by our AI founders team.
+            </DialogDescription>
+          </DialogHeader>
+          {validationRunId && (
+            <ValidationProgressTimeline
+              runId={validationRunId}
+              variant="modal"
+              onHITLRequired={(checkpoint) => {
+                setShowProgressModal(false)
+                router.push('/approvals')
+              }}
+              onComplete={() => {
+                setShowProgressModal(false)
+                if (projectId) {
+                  router.push(`/project/${projectId}/analysis`)
+                } else if (projectClientId) {
+                  router.push(`/client/${projectClientId}`)
+                }
+              }}
+              onError={(err) => {
+                console.error('[ProjectCreationWizard] Validation error:', err)
+                setAiError(err.message || 'Validation failed')
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
