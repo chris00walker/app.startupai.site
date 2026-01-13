@@ -151,6 +151,15 @@ function Dashboard() {
     fetchUserRole()
   }, [user])
 
+  // Use appropriate hook based on user role
+  const isConsultant = userRole === 'consultant'
+  const projectsData = useProjects()
+  const clientsData = useClients()
+
+  const { projects, isLoading, error } = isConsultant ? clientsData : projectsData
+
+  console.log('[Dashboard] isConsultant:', isConsultant, '| projects count:', projects.length, '| isLoading:', isLoading);
+
   // Track dashboard viewed on initial load
   React.useEffect(() => {
     trackPageView('Consultant Dashboard', {
@@ -163,15 +172,6 @@ function Dashboard() {
       category: 'navigation',
     })
   }, [projects.length])
-
-  // Use appropriate hook based on user role
-  const isConsultant = userRole === 'consultant'
-  const projectsData = useProjects()
-  const clientsData = useClients()
-
-  const { projects, isLoading, error } = isConsultant ? clientsData : projectsData
-
-  console.log('[Dashboard] isConsultant:', isConsultant, '| projects count:', projects.length, '| isLoading:', isLoading);
 
   // Gate filtering state
   const [selectedStages, setSelectedStages] = React.useState<GateStage[]>([])
