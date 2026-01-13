@@ -52,7 +52,15 @@ Legend: wired, demo, stub, broken, legacy.
 
 ## Spec alignment notes (startupai-crew master architecture)
 
-- Modal API is expected to expose `POST /kickoff`, `GET /status/{run_id}`, `POST /hitl/approve` (see `../startupai-crew/docs/master-architecture/reference/api-contracts.md`). The product app calls Modal via env-driven URLs inside `/api/analyze`, `/api/crewai/status`, and `PATCH /api/approvals/[id]`; ensure those env URLs map to the Modal endpoints.
-- Phase 0 spec defines interview + Founder's Brief endpoints (`/interview/start`, `/brief/{id}`, `/brief/{id}/approve`) that are not present in the product app; onboarding instead uses `/api/onboarding/*` and `/api/chat`.
-- HITL checkpoints like `approve_founders_brief` are handled via `/api/crewai/webhook` into `approval_requests` and surfaced in `/approvals`, but there is no dedicated Founder's Brief review screen.
-- Architecture docs describe Modal writing progress directly to Supabase with Realtime and no compute-to-app webhook; the product app currently supports `POST /api/crewai/webhook` for progress + HITL updates, so the intended path needs to be confirmed.
+> **Resolved 2026-01-13**: All questions below answered in `../startupai-crew/docs/features/integration-contracts.md`
+
+- ✅ **Modal API endpoints**: Confirmed matching - `POST /kickoff`, `GET /status/{run_id}`, `POST /hitl/approve` all implemented at `https://chris00walker--startupai-validation-fastapi-app.modal.run`. Product app calls via env-driven URLs are correct.
+- ✅ **Phase 0 endpoint mapping**: By design - Product app handles interview UI (`/api/onboarding/*`, `/api/chat`), Modal Phase 0 receives final `entrepreneur_input` via `/kickoff`. The spec's `/interview/start` is not needed.
+- ✅ **HITL checkpoint flow**: Confirmed correct - `approve_founders_brief` → webhook to `/api/crewai/webhook` → `approval_requests` → `/approvals` UI → `PATCH /api/approvals/[id]` → `POST /hitl/approve` to Modal.
+- ✅ **Webhook vs Realtime**: BOTH patterns used - Supabase Realtime for progress streaming (`validation_progress` table), webhooks for HITL notifications and completion events (`POST /api/crewai/webhook`).
+
+**Reference**: See `../startupai-crew/docs/features/` for complete feature audit:
+- `integration-contracts.md` - Full API contracts and TypeScript types
+- `hitl-checkpoint-map.md` - 10 HITL checkpoints with decision options
+- `api-entrypoints.md` - Modal endpoint documentation
+- `state-persistence.md` - Supabase table schemas
