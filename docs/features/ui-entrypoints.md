@@ -150,6 +150,19 @@ Legend:
 - Save approvals settings -> `GET|PUT /api/settings/approvals` (wired)
 - Save notification/security settings -> console log only (stub)
 
+### `/settings` → Projects tab (planned, Founders only)
+- Select project -> dropdown via `useProjects()` (planned)
+- Toggle "Show archived" -> local filter state (planned)
+- Archive Project -> `PATCH /api/projects/[id]` with `{ status: 'archived' }` (planned)
+- Restore Project -> `PATCH /api/projects/[id]` with `{ status: 'active' }` (planned)
+- Delete Forever -> AlertDialog with type-to-confirm -> `DELETE /api/projects/[id]` (planned)
+
+### `/settings` → Clients tab (planned, Consultants only)
+- Select client -> dropdown via `useClients()` (planned)
+- Toggle "Show archived" -> local filter state (planned)
+- Archive Client -> `PATCH /api/clients/[id]/archive` with `{ archived: true }` (planned)
+- Restore Client -> `PATCH /api/clients/[id]/archive` with `{ archived: false }` (planned)
+
 ### `/export` (`frontend/src/pages/export.tsx`)
 - Export evidence pack -> console log only (stub)
 - Export canvases -> console log only (stub)
