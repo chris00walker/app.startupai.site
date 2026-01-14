@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        toolChoice: 'required', // Force AI to call at least one tool per response for progress tracking
+        toolChoice: 'auto', // Let AI decide when to call tools - 'required' was blocking text generation
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] Stream finished:', {
             textLength: text.length,
@@ -480,9 +480,19 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[api/chat] Returning stream response to client');
-    // Use toDataStreamResponse for SSE format that frontend can parse
-    // The data stream protocol uses format: TYPE:CONTENT where type 0 = text delta
-    return result.toDataStreamResponse();
+    // Use toDataStreamResponse for data stream protocol format
+    // Format: TYPE:CONTENT\n where type 0 = text delta, type 2 = error
+    return result.toDataStreamResponse({
+      getErrorMessage: (error) => {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error('[api/chat] Stream error:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        });
+        return `Error: ${err.message}`;
+      },
+    });
   } catch (error: any) {
     console.error('[api/chat] Top-level error:', {
       name: error?.name,

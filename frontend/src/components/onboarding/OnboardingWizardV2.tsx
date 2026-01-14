@@ -413,10 +413,10 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             if (!content || content === '[DONE]') continue;
 
             // Parse data stream protocol: TYPE:CONTENT
-            // Type 0 = text delta
+            // Type 0 = text delta, Type 2 = error, Type 9 = tool_call, Type e = finish
             if (content.startsWith('0:')) {
+              // Type 0: text-delta - parse JSON-encoded string
               try {
-                // Content after "0:" is a JSON-encoded string
                 const textContent = JSON.parse(content.slice(2));
                 if (typeof textContent === 'string') {
                   accumulatedText += textContent;
@@ -424,6 +424,21 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               } catch (e) {
                 // Ignore parse errors
               }
+            } else if (content.startsWith('2:')) {
+              // Type 2: error - parse and show to user
+              try {
+                const errorContent = JSON.parse(content.slice(2));
+                console.error('[OnboardingWizard] Stream error:', errorContent);
+                toast.error(`AI error: ${typeof errorContent === 'string' ? errorContent : errorContent.message || 'Unknown error'}`);
+              } catch (e) {
+                console.error('[OnboardingWizard] Failed to parse error:', content);
+              }
+            } else if (content.startsWith('9:')) {
+              // Type 9: tool_call - log for debugging (AI is processing tools)
+              console.log('[OnboardingWizard] Tool call event:', content.slice(2));
+            } else if (content.startsWith('e:')) {
+              // Type e: finish event
+              console.log('[OnboardingWizard] Stream finished');
             }
           }
 
@@ -450,6 +465,18 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               }
             });
           }
+        }
+
+        // Debug: Log final state after stream completes
+        console.log('[OnboardingWizard] Stream complete:', {
+          accumulatedTextLength: accumulatedText.length,
+          accumulatedTextPreview: accumulatedText.substring(0, 100),
+          bufferRemaining: buffer,
+        });
+
+        // If no text was accumulated but stream completed, something went wrong
+        if (!accumulatedText) {
+          console.warn('[OnboardingWizard] No text accumulated from stream - AI may have only called tools');
         }
       }
 

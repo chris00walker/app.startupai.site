@@ -4,6 +4,29 @@ Last Updated: 2026-01-14
 
 ## Recently Completed
 
+### Critical Bug Fix: AI Consultant Not Responding
+**Status:** ✅ Complete (pending production testing)
+**Date:** 2026-01-14
+
+Fixed critical bug where AI consultant "Alex" would not respond after user input in onboarding flow.
+
+**Root Causes Identified:**
+1. `toolChoice: 'required'` was forcing AI to call tools, potentially blocking text generation
+2. Frontend only parsed type 0 (text-delta) events, ignoring errors (type 2)
+3. System prompt overly emphasized tool calls without clarifying text response requirement
+
+**Files Modified:**
+- `src/app/api/chat/route.ts` - Changed `toolChoice` from 'required' to 'auto', added error handling to stream response
+- `src/components/onboarding/OnboardingWizardV2.tsx` - Added handling for error events (type 2), tool calls (type 9), finish events (type e), and debug logging
+- `src/lib/ai/onboarding-prompt.ts` - Clarified that AI must generate text FIRST, then call tools
+
+**Testing Required:**
+- [ ] Verify AI responds with text after user input
+- [ ] Verify progress tracking still works via tool calls
+- [ ] Verify stage advancement functions correctly
+
+---
+
 ### HITL Founder's Brief Approval Flow
 **Status:** ✅ Complete (pending testing)
 **Date:** 2026-01-14
