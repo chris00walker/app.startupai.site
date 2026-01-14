@@ -304,21 +304,21 @@ describe('Chat API Route', () => {
 
   describe('Empty Response Handling', () => {
     it('should skip saving empty AI responses', () => {
-      const text = '';
+      const text: string = '';
       const shouldSave = !!(text && text.trim().length > 0);
 
       expect(shouldSave).toBe(false);
     });
 
     it('should skip saving whitespace-only responses', () => {
-      const text = '   \n\t  ';
+      const text: string = '   \n\t  ';
       const shouldSave = !!(text && text.trim().length > 0);
 
       expect(shouldSave).toBe(false);
     });
 
     it('should save valid responses', () => {
-      const text = 'Hello! Tell me about your business idea.';
+      const text: string = 'Hello! Tell me about your business idea.';
       const shouldSave = !!(text && text.trim().length > 0);
 
       expect(shouldSave).toBe(true);

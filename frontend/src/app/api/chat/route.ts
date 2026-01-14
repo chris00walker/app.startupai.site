@@ -185,6 +185,8 @@ export async function POST(req: NextRequest) {
         temperature: 0.7,
       });
 
+      console.log('[api/chat] Starting streamText with multi-step tool enforcement');
+
       result = streamText({
         model,
         system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
@@ -192,20 +194,27 @@ export async function POST(req: NextRequest) {
         temperature: 0.7,
         tools: onboardingTools,
         // Step 1: FORCE tool usage (required), Step 2: FORCE text (none)
-        prepareStep: ({ steps }) => {
-          if (steps.length === 0) {
+        prepareStep: ({ stepNumber, steps }) => {
+          console.log('[api/chat] prepareStep called:', {
+            stepNumber,
+            previousStepsCount: steps.length,
+          });
+
+          if (stepNumber === 1) {
             // Step 1: Force AI to call at least one tool
-            console.log('[api/chat] Step 1: Forcing toolChoice=required');
+            console.log('[api/chat] Step 1: Returning toolChoice=required');
             return { toolChoice: 'required' as const };
           }
           // Step 2+: No tools allowed, must generate text
-          console.log('[api/chat] Step 2+: Forcing toolChoice=none for text generation');
+          console.log('[api/chat] Step 2: Returning toolChoice=none for text generation');
           return { toolChoice: 'none' as const };
         },
-        stopWhen: stepCountIs(2), // Allow exactly 2 steps: tools then text
+        stopWhen: stepCountIs(2), // Stop after 2 steps: tools then text
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
-          console.log('[api/chat] Stream finished:', {
+          console.log('[api/chat] ========== STREAM FINISHED ==========');
+          console.log('[api/chat] Stream result:', {
             textLength: text.length,
+            textPreview: text.substring(0, 100),
             finishReason,
             toolCallsCount: toolCalls?.length || 0,
             toolResultsCount: toolResults?.length || 0,
@@ -214,8 +223,11 @@ export async function POST(req: NextRequest) {
 
           // CRITICAL: Log if tools were NOT called - this is the root cause of progress issues
           if (!toolCalls || toolCalls.length === 0) {
-            console.error('[api/chat] WARNING: No tools were called! Progress will not update.');
+            console.error('[api/chat] ⚠️ WARNING: No tools were called! Progress will not update.');
             console.error('[api/chat] This should not happen with toolChoice=required in step 1');
+            console.error('[api/chat] Check if prepareStep is being called and returning correct value');
+          } else {
+            console.log('[api/chat] ✓ Tools were called:', toolCalls.map(tc => tc.toolName));
           }
 
           try {
