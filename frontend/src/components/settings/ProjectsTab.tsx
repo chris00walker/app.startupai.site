@@ -181,9 +181,9 @@ export function ProjectsTab() {
               </SelectTrigger>
               <SelectContent>
                 {projects.length === 0 ? (
-                  <SelectItem value="" disabled>
+                  <div className="py-6 text-center text-sm text-muted-foreground">
                     No projects found
-                  </SelectItem>
+                  </div>
                 ) : (
                   projects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>

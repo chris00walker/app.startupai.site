@@ -100,9 +100,9 @@ export function ClientsTab() {
               </SelectTrigger>
               <SelectContent>
                 {clients.length === 0 ? (
-                  <SelectItem value="" disabled>
+                  <div className="py-6 text-center text-sm text-muted-foreground">
                     No clients found
-                  </SelectItem>
+                  </div>
                 ) : (
                   clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
