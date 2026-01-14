@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 // Sidebar primitives no longer needed - using custom sidebar component
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
+import { FoundersBriefReview, EntrepreneurBrief } from '@/components/onboarding/FoundersBriefReview';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -84,6 +85,18 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [projectId, setProjectId] = useState<string | null>(null);
   const analysisIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // HITL approval state
+  const [analysisState, setAnalysisState] = useState<
+    'idle' | 'analyzing' | 'awaiting_approval' | 'completed' | 'failed'
+  >('idle');
+  const [hitlCheckpoint, setHitlCheckpoint] = useState<{
+    name: string;
+    approval_id: string | null;
+    run_id: string;
+  } | null>(null);
+  const [entrepreneurBrief, setEntrepreneurBrief] = useState<Partial<EntrepreneurBrief> | null>(null);
+  const [isApprovingBrief, setIsApprovingBrief] = useState(false);
+
   // Handle input change
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -136,12 +149,79 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           console.log('[OnboardingWizard] Analysis status:', {
             state: data.state,
             progress: data.progress,
+            hitl_checkpoint: data.hitl_checkpoint,
+            approval_id: data.approval_id,
           });
 
           setAnalysisProgress(data.progress || 0);
 
+          // Handle PAUSED state with HITL checkpoint
+          // Note: hitl_checkpoint is an object { checkpoint, title, description, options, ... }
+          const hitlData = data.hitl_checkpoint;
+          const checkpointName = typeof hitlData === 'string' ? hitlData : hitlData?.checkpoint;
+
+          if (data.state === 'PAUSED' && checkpointName) {
+            // Stop polling - we're waiting for human input
+            if (analysisIntervalRef.current) {
+              clearInterval(analysisIntervalRef.current);
+              analysisIntervalRef.current = null;
+            }
+
+            console.log('[OnboardingWizard] HITL checkpoint detected:', checkpointName);
+
+            // Store checkpoint info for the approval UI
+            setHitlCheckpoint({
+              name: checkpointName,
+              approval_id: data.approval_id || null,
+              run_id: wid,
+            });
+
+            // Fetch the Founder's Brief for display
+            // Priority: 1) Approval request task_output (AI-compiled), 2) entrepreneur_briefs table (user input)
+            try {
+              let briefFound = false;
+
+              // Try to get Brief from approval request's task_output (contains AI-compiled Founder's Brief)
+              if (data.approval_id) {
+                const approvalResponse = await fetch(`/api/approvals/${data.approval_id}`);
+                if (approvalResponse.ok) {
+                  // API returns approval object directly, not wrapped in { approval: ... }
+                  const approvalData = await approvalResponse.json();
+                  const taskOutput = approvalData.task_output;
+                  if (taskOutput?.founders_brief) {
+                    // AI-compiled Brief from Modal
+                    setEntrepreneurBrief(taskOutput.founders_brief);
+                    briefFound = true;
+                    console.log('[OnboardingWizard] Using AI-compiled Brief from approval request');
+                  }
+                }
+              }
+
+              // Fallback: fetch from entrepreneur_briefs table (user's original input)
+              if (!briefFound) {
+                const briefResponse = await fetch(`/api/onboarding/brief?projectId=${pid}`);
+                if (briefResponse.ok) {
+                  const briefData = await briefResponse.json();
+                  if (briefData.brief) {
+                    setEntrepreneurBrief(briefData.brief);
+                    console.log('[OnboardingWizard] Using Brief from entrepreneur_briefs table');
+                  }
+                }
+              }
+            } catch (briefError) {
+              console.warn('[OnboardingWizard] Could not fetch brief:', briefError);
+              // Continue without brief data - will show what we have
+            }
+
+            // Switch to approval UI
+            setAnalysisState('awaiting_approval');
+            setShowAnalysisModal(false);
+            return;
+          }
+
           if (data.state === 'COMPLETED') {
             setAnalysisStatus('completed');
+            setAnalysisState('completed');
             if (analysisIntervalRef.current) {
               clearInterval(analysisIntervalRef.current);
               analysisIntervalRef.current = null;
@@ -150,18 +230,18 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             // Track CrewAI analysis completed
             trackCrewAIEvent.completed(pid, data.duration || 0, true);
 
-            toast.success('Analysis complete! Redirecting to your project...');
+            toast.success('Analysis complete! Redirecting to your results...');
 
-            // Redirect based on user type after short delay
+            // Redirect to the gate page to see full results
             setTimeout(() => {
-              // Consultants go to their client dashboard, founders to project view
               const dashboardRoute = planType === 'sprint'
                 ? '/clients'
-                : `/dashboard/project/${pid}`;
+                : `/project/${pid}/gate`;
               router.push(dashboardRoute);
             }, 2000);
           } else if (data.state === 'FAILED') {
             setAnalysisStatus('failed');
+            setAnalysisState('failed');
             if (analysisIntervalRef.current) {
               clearInterval(analysisIntervalRef.current);
               analysisIntervalRef.current = null;
@@ -173,7 +253,6 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             toast.error('Analysis failed. Redirecting to dashboard...');
 
             setTimeout(() => {
-              // Consultants go to clients page, founders to founder dashboard
               const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
               router.push(dashboardRoute);
             }, 2000);
@@ -192,7 +271,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     // Poll immediately, then every 5 seconds
     pollStatus();
     analysisIntervalRef.current = setInterval(pollStatus, 5000);
-  }, [router]);
+  }, [router, planType]);
 
   // Cleanup polling interval on unmount
   useEffect(() => {
@@ -524,14 +603,14 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       }
 
       // Track onboarding completed
-      // Note: We don't have session start time stored, so using 0 for now
       trackOnboardingEvent.completed(session.sessionId, 0, data.workflowTriggered || false);
 
       // Track CrewAI analysis started if workflow was triggered
-      if (data.workflowTriggered && data.projectId) {
-        trackCrewAIEvent.started(data.projectId, 'founder_validation');
+      if (data.workflowTriggered && data.projectCreated?.projectId) {
+        trackCrewAIEvent.started(data.projectCreated.projectId, 'founder_validation');
       }
 
+      // Store deliverables for later use
       if (data.deliverables) {
         try {
           sessionStorage.setItem('startupai:lastAnalysis', JSON.stringify(data.deliverables));
@@ -540,31 +619,41 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         }
       }
 
-      const summarySnippet = data.deliverables?.summary
-        ? `${data.deliverables.summary}`.slice(0, 160)
-        : null;
+      announceToScreenReader('Onboarding completed. Compiling your Founder\'s Brief...');
 
-      if (data.workflowTriggered && summarySnippet) {
-        toast.success(`Onboarding complete. CrewAI summary: ${summarySnippet}${summarySnippet.length === 160 ? '…' : ''}`);
+      // If workflow was triggered, show analysis modal and start polling
+      // Do NOT redirect immediately - wait for HITL checkpoint or completion
+      if (data.workflowTriggered && data.workflowId && data.projectCreated?.projectId) {
+        const wid = data.workflowId;
+        const pid = data.projectCreated.projectId;
+
+        console.log('[OnboardingWizard] Starting analysis workflow:', { wid, pid });
+
+        // Set up analysis state
+        setWorkflowId(wid);
+        setProjectId(pid);
+        setAnalysisState('analyzing');
+        setAnalysisStatus('running');
+        setShowAnalysisModal(true);
+
+        toast.success('Compiling your Founder\'s Brief...');
+
+        // Start polling - will handle HITL checkpoint or completion
+        startAnalysisPolling(wid, pid);
       } else {
-        toast.success('Onboarding completed! Redirecting to your project...');
+        // No workflow triggered - redirect to dashboard
+        toast.info('Onboarding completed. Redirecting to dashboard...');
+        setTimeout(() => {
+          const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+          router.push(dashboardRoute);
+        }, 2000);
       }
-
-      if (!data.workflowTriggered) {
-        toast.warning('AI analysis is still running. Your project will update as soon as the deliverables are ready.');
-      }
-
-      announceToScreenReader('Onboarding completed successfully. Redirecting to your new project dashboard.');
-
-      setTimeout(() => {
-        router.push(data.dashboardRedirect);
-      }, 2000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to complete onboarding';
       toast.error(errorMessage);
       announceToScreenReader(`Error completing onboarding: ${errorMessage}`);
     }
-  }, [session, router, announceToScreenReader]);
+  }, [session, router, announceToScreenReader, startAnalysisPolling, planType]);
 
   // Handle exit onboarding
   const handleExitOnboarding = useCallback(() => {
@@ -634,6 +723,107 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     toast.success('Starting fresh conversation with Alex...');
     await initializeSession(true);
   }, [session, initializeSession, initializeStages]);
+
+  // Handle HITL Brief approval
+  const handleApproveFoundersBrief = useCallback(async () => {
+    if (!hitlCheckpoint || !workflowId || !projectId) {
+      console.error('[OnboardingWizard] Missing required data for approval');
+      return;
+    }
+
+    setIsApprovingBrief(true);
+
+    try {
+      if (hitlCheckpoint.approval_id) {
+        // Use existing approval API
+        const response = await fetch(`/api/approvals/${hitlCheckpoint.approval_id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'approve',
+            decision: 'approved',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to approve brief');
+        }
+      } else {
+        // No approval_id - call resume directly via API
+        const response = await fetch('/api/crewai/resume', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            run_id: hitlCheckpoint.run_id,
+            checkpoint: hitlCheckpoint.name,
+            decision: 'approved',
+            feedback: null,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to resume workflow');
+        }
+      }
+
+      console.log('[OnboardingWizard] Brief approved, redirecting to analysis page');
+      toast.success('Brief approved! Redirecting to validation progress...');
+
+      // Reset HITL state
+      setHitlCheckpoint(null);
+      setAnalysisState('analyzing');
+
+      // Redirect to analysis page where user can see Phase 1-4 progress
+      // The analysis page has ValidationProgressTimeline for real-time updates
+      setTimeout(() => {
+        const analysisRoute = planType === 'sprint'
+          ? '/clients'
+          : `/project/${projectId}/analysis`;
+        router.push(analysisRoute);
+      }, 1500);
+    } catch (error) {
+      console.error('[OnboardingWizard] Failed to approve brief:', error);
+      toast.error('Failed to approve brief. Please try again.');
+    } finally {
+      setIsApprovingBrief(false);
+    }
+  }, [hitlCheckpoint, workflowId, projectId, planType, router]);
+
+  // Handle HITL Brief change request
+  const handleRequestBriefChanges = useCallback(async (feedback: string) => {
+    if (!hitlCheckpoint?.approval_id) {
+      // For MVP, show a message about contacting support
+      toast.info('Change requests require support assistance. Please contact support@startupai.com with your feedback.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/approvals/${hitlCheckpoint.approval_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reject',
+          decision: 'changes_requested',
+          feedback,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback');
+      }
+
+      toast.info('Feedback submitted. Our team will review and help make adjustments.');
+
+      // For MVP, redirect to dashboard - complex to re-enter chat
+      setTimeout(() => {
+        const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+        router.push(dashboardRoute);
+      }, 2000);
+    } catch (error) {
+      console.error('[OnboardingWizard] Failed to submit change request:', error);
+      toast.error('Failed to submit feedback. Please try again.');
+    }
+  }, [hitlCheckpoint, planType, router]);
 
   // Initialize on mount (pass forceNew from URL if present)
   // Ensure minimum 500ms loading display to prevent flash
@@ -794,10 +984,10 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       <Dialog open={showAnalysisModal} onOpenChange={setShowAnalysisModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Analyzing Your Business Idea</DialogTitle>
+            <DialogTitle>Compiling Your Founder's Brief</DialogTitle>
             <DialogDescription>
-              Our AI team is analyzing your responses and creating a comprehensive
-              value proposition and validation roadmap. This typically takes 3-5 minutes.
+              Our AI team is analyzing your responses and compiling your strategic brief.
+              This typically takes 30-60 seconds.
             </DialogDescription>
           </DialogHeader>
 
@@ -811,14 +1001,40 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
             {analysisStatus === 'running' && (
               <div className="text-xs text-muted-foreground text-center space-y-1">
-                <p>✓ Business concept validated</p>
-                <p>⟳ Customer profile analysis in progress...</p>
-                <p className="opacity-50">○ Competitive positioning</p>
-                <p className="opacity-50">○ Value proposition design</p>
-                <p className="opacity-50">○ Validation roadmap</p>
+                <p>✓ Interview responses captured</p>
+                <p>⟳ Compiling strategic brief...</p>
+                <p className="opacity-50">○ Identifying key assumptions</p>
+                <p className="opacity-50">○ Preparing for your review</p>
               </div>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Founder's Brief Review Modal - HITL Checkpoint */}
+      <Dialog
+        open={analysisState === 'awaiting_approval' && hitlCheckpoint !== null}
+        onOpenChange={() => {}}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Review Your Founder's Brief</DialogTitle>
+            <DialogDescription>
+              Our AI team has compiled your responses into a strategic brief.
+              Please review and approve to continue with the validation analysis.
+            </DialogDescription>
+          </DialogHeader>
+
+          {hitlCheckpoint && (
+            <FoundersBriefReview
+              briefData={entrepreneurBrief || {}}
+              approvalId={hitlCheckpoint.approval_id || undefined}
+              runId={hitlCheckpoint.run_id}
+              onApprove={handleApproveFoundersBrief}
+              onRequestChanges={handleRequestBriefChanges}
+              isApproving={isApprovingBrief}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>

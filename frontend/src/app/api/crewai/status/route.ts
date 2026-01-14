@@ -110,7 +110,8 @@ async function handleModalStatus(
         .eq('run_id', runId);
     }
 
-    return NextResponse.json({
+    // Build base response
+    const response = {
       run_id: runId,
       provider: 'modal',
       status: modalStatus.status,
@@ -122,7 +123,33 @@ async function handleModalStatus(
       hitl_checkpoint: modalStatus.hitl_checkpoint,
       outputs: modalStatus.outputs,
       error: modalStatus.error,
-    });
+      approval_id: null as string | null,
+    };
+
+    // If there's a HITL checkpoint, look up the associated approval_id
+    // Note: hitl_checkpoint is an object with { checkpoint, title, description, options, ... }
+    const checkpointName = modalStatus.hitl_checkpoint?.checkpoint;
+    if (checkpointName) {
+      const admin = createAdminClient();
+      const { data: approval } = await admin
+        .from('approval_requests')
+        .select('id')
+        .eq('execution_id', runId)
+        .eq('task_id', checkpointName)
+        .eq('status', 'pending')
+        .single();
+
+      if (approval) {
+        response.approval_id = approval.id;
+        console.log('[api/crewai/status] Found approval_id for HITL checkpoint:', {
+          runId,
+          checkpoint: checkpointName,
+          approvalId: approval.id,
+        });
+      }
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('[api/crewai/status] Modal status fetch failed:', error);
 
@@ -158,6 +185,8 @@ function formatLocalRunStatus(run: Record<string, unknown>) {
     hitl_checkpoint: run.hitl_checkpoint,
     outputs: run.outputs,
     error: run.error,
+    // Note: approval_id not available from cached local run - frontend should fetch if needed
+    approval_id: null,
   };
 }
 
