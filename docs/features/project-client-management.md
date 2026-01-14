@@ -1,6 +1,6 @@
 ---
 purpose: "Project and Client management feature specification"
-status: "planned"
+status: "active"
 last_reviewed: "2026-01-14"
 ---
 
@@ -291,33 +291,33 @@ CREATE TABLE archived_clients (
 
 ### Project Management (Founders)
 
-- [ ] Create `DELETE /api/projects/[id]` endpoint with ownership verification
-- [ ] Create `PATCH /api/projects/[id]` endpoint for status updates
-- [ ] Add `deleteProject` mutation to `useProjects` hook
-- [ ] Add `archiveProject` / `unarchiveProject` mutations to `useProjects` hook
-- [ ] Create `ProjectsTab` component for Settings page
-- [ ] Add project selector dropdown
-- [ ] Add archive/restore buttons with confirmation
-- [ ] Create delete AlertDialog with type-to-confirm
-- [ ] Show deletion impact summary (count of related records)
-- [ ] Add "Show archived" filter to Founder dashboard
+- [x] Create `DELETE /api/projects/[id]` endpoint with ownership verification
+- [x] Create `PATCH /api/projects/[id]` endpoint for status updates
+- [x] Add `deleteProject` mutation to `useProjects` hook
+- [x] Add `archiveProject` / `unarchiveProject` mutations to `useProjects` hook
+- [x] Create `ProjectsTab` component for Settings page
+- [x] Add project selector dropdown
+- [x] Add archive/restore buttons with confirmation
+- [x] Create delete AlertDialog with type-to-confirm
+- [x] Show deletion impact summary (count of related records)
+- [ ] Add "Show archived" filter to Founder dashboard (optional, can use Settings)
 
 ### Client Management (Consultants)
 
-- [ ] Decide on data approach (junction table vs existing table)
-- [ ] Create database migration for chosen approach
-- [ ] Create `PATCH /api/clients/[id]/archive` endpoint
-- [ ] Add `archiveClient` / `unarchiveClient` mutations to `useClients` hook
-- [ ] Create `ClientsTab` component for Settings page
-- [ ] Add client selector dropdown
-- [ ] Add archive/restore buttons with confirmation
-- [ ] Add "Show archived" filter to Consultant dashboard
+- [x] Decide on data approach (junction table vs existing table) → Junction table chosen
+- [x] Create database migration for chosen approach (`archived_clients` table)
+- [x] Create `PATCH /api/clients/[id]/archive` endpoint
+- [x] Add `archiveClient` / `unarchiveClient` mutations to `useClients` hook
+- [x] Create `ClientsTab` component for Settings page
+- [x] Add client selector dropdown
+- [x] Add archive/restore buttons with confirmation
+- [ ] Add "Show archived" filter to Consultant dashboard (optional, can use Settings)
 
 ### Settings Page Updates
 
-- [ ] Add 7th tab (Projects for Founders, Clients for Consultants)
-- [ ] Implement role-based tab visibility
-- [ ] Style Danger Zone section with red border/background
+- [x] Add 7th tab (Projects for Founders, Clients for Consultants)
+- [x] Implement role-based tab visibility
+- [x] Style Danger Zone section with red border/background (Projects only - Clients uses info styling)
 
 ---
 
@@ -331,11 +331,14 @@ CREATE TABLE archived_clients (
 - `frontend/src/pages/settings.tsx` - Settings page (6 tabs currently)
 - `frontend/src/components/ui/alert-dialog.tsx` - AlertDialog component
 
-### To Be Created
-- `frontend/src/app/api/projects/[id]/route.ts` - DELETE + PATCH endpoints
-- `frontend/src/app/api/clients/[id]/archive/route.ts` - Archive endpoint
-- `frontend/src/components/settings/ProjectsTab.tsx` - Projects tab component
-- `frontend/src/components/settings/ClientsTab.tsx` - Clients tab component
+### Created (Jan 14, 2026)
+- `frontend/src/app/api/projects/[id]/route.ts` - GET + PATCH + DELETE endpoints ✅
+- `frontend/src/app/api/clients/[id]/archive/route.ts` - Archive endpoint ✅
+- `frontend/src/components/settings/ProjectsTab.tsx` - Projects tab component ✅
+- `frontend/src/components/settings/ClientsTab.tsx` - Clients tab component ✅
+
+### Database Tables Created
+- `archived_clients` - Junction table for consultant-client archive relationships
 
 ---
 

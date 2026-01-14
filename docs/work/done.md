@@ -38,6 +38,35 @@ last_reviewed: "2026-01-14"
 
 ---
 
+### Client Archive Feature (Jan 14)
+| Item | Status | Notes |
+|------|--------|-------|
+| Database migration | ✅ Done | `archived_clients` junction table with RLS |
+| API route | ✅ Done | PATCH `/api/clients/[id]/archive` |
+| Hook mutations | ✅ Done | `archiveClient`, `unarchiveClient` in useClients |
+| Settings Clients tab | ✅ Done | Consultant-only tab with archive/restore UI |
+| Info card (not danger zone) | ✅ Done | Blue info card explaining non-destructive nature |
+
+**Problem Solved**: Consultants had no way to manage their client portfolio visibility.
+
+**Critical Constraint**: Archiving a client does NOT affect Founder data - it only hides the client from the Consultant's portfolio view.
+
+**Files Created:**
+- `frontend/src/app/api/clients/[id]/archive/route.ts` - PATCH endpoint with ownership verification
+- `frontend/src/components/settings/ClientsTab.tsx` - Clients management UI
+
+**Files Modified:**
+- `frontend/src/hooks/useClients.ts` - Added archive mutations + includeArchived option + ClientInfo interface
+- `frontend/src/pages/settings.tsx` - Added Clients tab for Consultants via useRoleInfo()
+
+**Database Changes:**
+- Created `archived_clients` table (junction table for consultant-client archive relationships)
+- RLS policy: Consultants can only manage their own archived relationships
+
+**Impact**: Consultants can now hide completed or inactive client relationships from their portfolio view without affecting the client's actual data.
+
+---
+
 ## November 2025
 
 ### Alex UX Improvements (Nov 30)

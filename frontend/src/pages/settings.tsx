@@ -30,9 +30,11 @@ import {
   Upload,
   Loader2,
   Bot,
-  FolderArchive
+  FolderArchive,
+  Users
 } from "lucide-react"
 import { ProjectsTab } from "@/components/settings/ProjectsTab"
+import { ClientsTab } from "@/components/settings/ClientsTab"
 import { useAuth, useRoleInfo } from "@/lib/auth/hooks"
 import { createClient } from "@/lib/supabase/client"
 import type { ApprovalType } from "@/types/crewai"
@@ -316,7 +318,7 @@ export default function SettingsPage() {
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className={`grid w-full ${role === 'founder' ? 'grid-cols-7' : 'grid-cols-6'}`}>
+          <TabsList className={`grid w-full ${role === 'founder' || role === 'consultant' ? 'grid-cols-7' : 'grid-cols-6'}`}>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
@@ -324,6 +326,9 @@ export default function SettingsPage() {
             <TabsTrigger value="approvals">AI Approvals</TabsTrigger>
             {role === 'founder' && (
               <TabsTrigger value="projects">Projects</TabsTrigger>
+            )}
+            {role === 'consultant' && (
+              <TabsTrigger value="clients">Clients</TabsTrigger>
             )}
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
           </TabsList>
@@ -851,6 +856,13 @@ export default function SettingsPage() {
           {role === 'founder' && (
             <TabsContent value="projects" className="space-y-4">
               <ProjectsTab />
+            </TabsContent>
+          )}
+
+          {/* Clients Tab (Consultants Only) */}
+          {role === 'consultant' && (
+            <TabsContent value="clients" className="space-y-4">
+              <ClientsTab />
             </TabsContent>
           )}
 

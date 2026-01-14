@@ -12,11 +12,14 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant
 export const userProfiles = pgTable('user_profiles', {
   // Primary key references auth.users(id) from Supabase Auth
   id: uuid('id').primaryKey().notNull(),
-  
+
   email: text('email').notNull(),
   fullName: text('full_name'),
   company: text('company'),
-  
+
+  // Consultant relationship - links founder to their assigned consultant
+  consultantId: uuid('consultant_id'),
+
   // Subscription and tier information
   subscriptionTier: text('subscription_tier').default('free').notNull(),
   subscriptionStatus: text('subscription_status').default('trial'),

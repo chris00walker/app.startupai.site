@@ -156,28 +156,43 @@ function formatRelativeTime(date: Date): string {
   return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
 }
 
-export function useClients() {
+// Client info for archive management
+export interface ClientInfo {
+  id: string;
+  name: string;
+  company: string | null;
+  email: string;
+  isArchived: boolean;
+}
+
+interface UseClientsOptions {
+  includeArchived?: boolean;
+}
+
+export function useClients(options: UseClientsOptions = {}) {
+  const { includeArchived = false } = options;
   const { user, loading: authLoading } = useAuth();
   const [clients, setClients] = useState<PortfolioProject[]>([]);
+  const [clientList, setClientList] = useState<ClientInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const supabase = useMemo(() => createClient(), []);
 
   const fetchClients = useCallback(async () => {
     if (authLoading) {
-      console.log('[useClients] Still loading auth...');
+      // Debug: [useClients] Still loading auth...');
       return;
     }
 
     if (!user) {
-      console.log('[useClients] No user found, returning empty clients');
+      // Debug: [useClients] No user found, returning empty clients');
       setClients([]);
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log('[useClients] Fetching clients for user:', user.id, user.email);
+      // Debug: [useClients] Fetching clients for user:', user.id, user.email);
       setIsLoading(true);
 
       // Step 1: Get all clients (user_profiles) assigned to this consultant
@@ -189,8 +204,40 @@ export function useClients() {
 
       if (clientError) throw clientError;
 
-      const dbClients = clientData as DbClient[] || [];
-      console.log('[useClients] Fetched clients:', dbClients.length);
+      const allDbClients = clientData as DbClient[] || [];
+      // Debug: [useClients] Fetched clients:', allDbClients.length);
+
+      // Step 1b: Get archived clients for this consultant
+      const { data: archivedData } = await supabase
+        .from('archived_clients')
+        .select('client_id')
+        .eq('consultant_id', user.id);
+
+      const archivedClientIds = new Set(
+        (archivedData || []).map((a: { client_id: string }) => a.client_id)
+      );
+      // Debug: [useClients] Archived clients:', archivedClientIds.size);
+
+      // Build client info list for Settings tab
+      // Filter based on includeArchived option
+      const allClientInfo: ClientInfo[] = allDbClients.map(c => ({
+        id: c.id,
+        name: c.full_name || c.email,
+        company: c.company,
+        email: c.email,
+        isArchived: archivedClientIds.has(c.id),
+      }));
+
+      // Filter client list based on includeArchived option
+      const clientInfoList = includeArchived
+        ? allClientInfo
+        : allClientInfo.filter(c => !c.isArchived);
+      setClientList(clientInfoList);
+
+      // Filter DB clients for portfolio projects query
+      const dbClients = includeArchived
+        ? allDbClients
+        : allDbClients.filter(c => !archivedClientIds.has(c.id));
 
       if (dbClients.length === 0) {
         setClients([]);
@@ -209,7 +256,7 @@ export function useClients() {
       if (projectError) throw projectError;
 
       const dbProjects = projectData as DbProject[] || [];
-      console.log('[useClients] Fetched projects:', dbProjects.length);
+      // Debug: [useClients] Fetched projects:', dbProjects.length);
 
       // Step 3: Get validation states for these projects
       const projectIds = dbProjects.map(p => p.id);
@@ -227,11 +274,11 @@ export function useClients() {
           .in('project_id', projectIds);
 
         if (stateError) {
-          console.warn('[useClients] Error fetching validation states:', stateError);
+          // Validation states fetch failed - continue without them
           // Continue without validation states
         } else {
           validationStates = stateData as DbValidationState[] || [];
-          console.log('[useClients] Fetched validation states:', validationStates.length);
+          // Debug: [useClients] Fetched validation states:', validationStates.length);
         }
       }
 
@@ -326,16 +373,56 @@ export function useClients() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, authLoading, supabase]);
+  }, [user, authLoading, supabase, includeArchived]);
 
   useEffect(() => {
     fetchClients();
   }, [fetchClients]);
 
+  /**
+   * Archive a client relationship
+   * This does NOT affect the client's data - only hides them from portfolio
+   */
+  const archiveClient = async (clientId: string): Promise<void> => {
+    const response = await fetch(`/api/clients/${clientId}/archive`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archived: true }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to archive client');
+    }
+
+    await fetchClients();
+  };
+
+  /**
+   * Unarchive a client relationship
+   */
+  const unarchiveClient = async (clientId: string): Promise<void> => {
+    const response = await fetch(`/api/clients/${clientId}/archive`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ archived: false }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to unarchive client');
+    }
+
+    await fetchClients();
+  };
+
   return {
     projects: clients, // Return as 'projects' for compatibility with dashboard
+    clients: clientList, // Raw client list with archive status (for Settings)
     isLoading: isLoading || authLoading,
     error,
     refetch: fetchClients,
+    archiveClient,
+    unarchiveClient,
   };
 }
