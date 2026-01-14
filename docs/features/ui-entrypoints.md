@@ -150,12 +150,12 @@ Legend:
 - Save approvals settings -> `GET|PUT /api/settings/approvals` (wired)
 - Save notification/security settings -> console log only (stub)
 
-### `/settings` → Projects tab (planned, Founders only)
-- Select project -> dropdown via `useProjects()` (planned)
-- Toggle "Show archived" -> local filter state (planned)
-- Archive Project -> `PATCH /api/projects/[id]` with `{ status: 'archived' }` (planned)
-- Restore Project -> `PATCH /api/projects/[id]` with `{ status: 'active' }` (planned)
-- Delete Forever -> AlertDialog with type-to-confirm -> `DELETE /api/projects/[id]` (planned)
+### `/settings` → Projects tab (wired, Founders only)
+- Select project -> dropdown via `useProjects()` (wired)
+- Toggle "Show archived" -> local filter state (wired)
+- Archive Project -> `PATCH /api/projects/[id]` with `{ status: 'archived' }` (wired)
+- Restore Project -> `PATCH /api/projects/[id]` with `{ status: 'active' }` (wired)
+- Delete Forever -> AlertDialog with type-to-confirm -> `DELETE /api/projects/[id]` (wired)
 
 ### `/settings` → Clients tab (planned, Consultants only)
 - Select client -> dropdown via `useClients()` (planned)

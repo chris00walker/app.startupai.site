@@ -1,10 +1,42 @@
 ---
 purpose: "Private technical source of truth for recently delivered work"
 status: "active"
-last_reviewed: "2025-11-30"
+last_reviewed: "2026-01-14"
 ---
 
 # Recently Delivered
+
+## January 2026
+
+### Project Archive/Delete Feature (Jan 14)
+| Item | Status | Notes |
+|------|--------|-------|
+| API route for project management | ✅ Done | GET + PATCH + DELETE `/api/projects/[id]` |
+| Hook mutations | ✅ Done | `archiveProject`, `unarchiveProject`, `deleteProject` in useProjects |
+| Settings Projects tab | ✅ Done | Founder-only tab with archive/restore/delete UI |
+| Impact counts display | ✅ Done | Real counts from hypotheses, evidence, experiments, reports |
+| Type-to-confirm deletion | ✅ Done | AlertDialog with project name confirmation |
+| Toast notifications | ✅ Done | Sonner toasts for success/error feedback |
+
+**Problem Solved**: Founders had no way to archive or delete projects from the platform.
+
+**Files Created:**
+- `frontend/src/app/api/projects/[id]/route.ts` - GET + PATCH + DELETE endpoints
+- `frontend/src/components/settings/ProjectsTab.tsx` - Projects management UI
+
+**Files Modified:**
+- `frontend/src/hooks/useProjects.ts` - Added mutation functions + includeArchived option
+- `frontend/src/pages/settings.tsx` - Added 7th tab (Projects) for Founders via useRoleInfo()
+
+**Documentation Updated:**
+- `docs/features/project-client-management.md` - Feature specification
+- `docs/features/wiring-matrix.md` - Status changed to "wired"
+- `docs/features/feature-inventory.md` - Status changed to "active"
+- `docs/features/ui-entrypoints.md` - Status changed to "wired"
+
+**Impact**: Founders can now manage their projects from Settings - archive to hide from dashboard, restore archived projects, or permanently delete with cascade.
+
+---
 
 ## November 2025
 

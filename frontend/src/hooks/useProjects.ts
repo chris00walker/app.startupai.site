@@ -79,7 +79,12 @@ function formatGateDate(date: Date): string {
   return `${months[date.getMonth()]} ${date.getDate()}`;
 }
 
-export function useProjects() {
+interface UseProjectsOptions {
+  includeArchived?: boolean;
+}
+
+export function useProjects(options: UseProjectsOptions = {}) {
+  const { includeArchived = false } = options;
   const { user, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +94,7 @@ export function useProjects() {
   useEffect(() => {
     async function fetchProjects() {
       if (authLoading) return;
-      
+
       if (!user) {
         setProjects([]);
         setIsLoading(false);
@@ -98,10 +103,17 @@ export function useProjects() {
 
       try {
         setIsLoading(true);
-        const { data, error: fetchError } = await supabase
+        let query = supabase
           .from('projects')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', user.id);
+
+        // Filter out archived unless explicitly requested
+        if (!includeArchived) {
+          query = query.neq('status', 'archived');
+        }
+
+        const { data, error: fetchError } = await query
           .order('last_activity', { ascending: false });
 
         if (fetchError) throw fetchError;
@@ -119,20 +131,26 @@ export function useProjects() {
     }
 
     fetchProjects();
-  }, [user, authLoading, supabase]);
+  }, [user, authLoading, supabase, includeArchived]);
 
   const refetch = async () => {
     if (!user) return;
-    
+
     try {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('projects')
         .select('*')
-        .eq('user_id', user.id)
-        .order('last_activity', { ascending: false});
+        .eq('user_id', user.id);
+
+      if (!includeArchived) {
+        query = query.neq('status', 'archived');
+      }
+
+      const { data, error: fetchError } = await query
+        .order('last_activity', { ascending: false });
 
       if (fetchError) throw fetchError;
-      
+
       const transformedProjects = (data as DbProject[] || []).map(transformProject);
       setProjects(transformedProjects);
     } catch (err) {
@@ -141,11 +159,67 @@ export function useProjects() {
     }
   };
 
+  /**
+   * Archive a project (soft delete)
+   */
+  const archiveProject = async (projectId: string): Promise<void> => {
+    const response = await fetch(`/api/projects/${projectId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'archived' }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to archive project');
+    }
+
+    await refetch();
+  };
+
+  /**
+   * Unarchive a project (restore to active)
+   */
+  const unarchiveProject = async (projectId: string): Promise<void> => {
+    const response = await fetch(`/api/projects/${projectId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'active' }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to unarchive project');
+    }
+
+    await refetch();
+  };
+
+  /**
+   * Permanently delete a project
+   * WARNING: This cascades to all related data (hypotheses, evidence, etc.)
+   */
+  const deleteProject = async (projectId: string): Promise<void> => {
+    const response = await fetch(`/api/projects/${projectId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Failed to delete project');
+    }
+
+    await refetch();
+  };
+
   return {
     projects,
     isLoading: isLoading || authLoading,
     error,
-    refetch
+    refetch,
+    archiveProject,
+    unarchiveProject,
+    deleteProject,
   };
 }
 

@@ -49,9 +49,9 @@ Legend: wired, demo, stub, broken, legacy.
 | Public activity | marketing/public | none | `GET /api/v1/public/activity` | `public_activity_log` | wired |
 | Canvas APIs (Strategyzer) | `/canvas/*` | `services/api.ts` | `/api/canvas/*` | none (missing) | broken |
 | Export evidence pack | `/export` | page-local handlers | none | none | stub |
-| Project archive | `/settings` | `useProjects()` | `PATCH /api/projects/[id]` | `projects.status` | planned |
-| Project unarchive | `/settings` | `useProjects()` | `PATCH /api/projects/[id]` | `projects.status` | planned |
-| Project delete | `/settings` | `useProjects()` | `DELETE /api/projects/[id]` | `projects` (cascade delete) | planned |
+| Project archive | `/settings` | `useProjects()` | `PATCH /api/projects/[id]` | `projects.status` | wired |
+| Project unarchive | `/settings` | `useProjects()` | `PATCH /api/projects/[id]` | `projects.status` | wired |
+| Project delete | `/settings` | `useProjects()` | `DELETE /api/projects/[id]` | `projects` (cascade delete) | wired |
 | Client archive | `/settings` | `useClients()` | `PATCH /api/clients/[id]/archive` | TBD (junction table or clients) | planned |
 | Client unarchive | `/settings` | `useClients()` | `PATCH /api/clients/[id]/archive` | TBD (junction table or clients) | planned |
 

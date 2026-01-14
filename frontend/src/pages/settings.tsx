@@ -29,9 +29,11 @@ import {
   Download,
   Upload,
   Loader2,
-  Bot
+  Bot,
+  FolderArchive
 } from "lucide-react"
-import { useAuth } from "@/lib/auth/hooks"
+import { ProjectsTab } from "@/components/settings/ProjectsTab"
+import { useAuth, useRoleInfo } from "@/lib/auth/hooks"
 import { createClient } from "@/lib/supabase/client"
 import type { ApprovalType } from "@/types/crewai"
 import { getApprovalTypeInfo } from "@/types/crewai"
@@ -86,6 +88,7 @@ const ALL_APPROVAL_TYPES: ApprovalType[] = [
 
 export default function SettingsPage() {
   const { user } = useAuth()
+  const { role } = useRoleInfo()
   const [activeTab, setActiveTab] = useState("profile")
   const [showApiKey, setShowApiKey] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -313,12 +316,15 @@ export default function SettingsPage() {
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className={`grid w-full ${role === 'founder' ? 'grid-cols-7' : 'grid-cols-6'}`}>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="preferences">Preferences</TabsTrigger>
             <TabsTrigger value="approvals">AI Approvals</TabsTrigger>
+            {role === 'founder' && (
+              <TabsTrigger value="projects">Projects</TabsTrigger>
+            )}
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
           </TabsList>
 
@@ -840,6 +846,13 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Projects Tab (Founders Only) */}
+          {role === 'founder' && (
+            <TabsContent value="projects" className="space-y-4">
+              <ProjectsTab />
+            </TabsContent>
+          )}
 
           {/* Integrations Tab */}
           <TabsContent value="integrations" className="space-y-4">
