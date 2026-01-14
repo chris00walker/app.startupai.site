@@ -480,20 +480,9 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[api/chat] Returning stream response to client');
-    return result.toUIMessageStreamResponse({
-      onError: (error) => {
-        const err = error instanceof Error ? error : new Error(String(error));
-        console.error('[api/chat] Stream error in toUIMessageStreamResponse:', {
-          name: err.name,
-          message: err.message,
-          cause: err.cause,
-          stack: err.stack,
-          errorType: typeof error,
-          errorConstructor: error?.constructor?.name,
-        });
-        return `Error: ${err.message}`;
-      },
-    });
+    // Use toDataStreamResponse for SSE format that frontend can parse
+    // The data stream protocol uses format: TYPE:CONTENT where type 0 = text delta
+    return result.toDataStreamResponse();
   } catch (error: any) {
     console.error('[api/chat] Top-level error:', {
       name: error?.name,

@@ -400,23 +400,29 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           buffer += decoder.decode(value, { stream: true });
 
           // Process complete SSE messages
+          // Vercel AI SDK data stream protocol format: TYPE:CONTENT
+          // Type 0 = text delta (content is JSON-encoded string)
           const lines = buffer.split('\n');
           buffer = lines.pop() || ''; // Keep incomplete line in buffer
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6); // Remove 'data: ' prefix
+            // Handle SSE data: prefix
+            const content = line.startsWith('data: ') ? line.slice(6) : line;
 
-              // Skip metadata events, only process text deltas
-              if (data === '[DONE]') continue;
+            // Skip empty lines and [DONE]
+            if (!content || content === '[DONE]') continue;
 
+            // Parse data stream protocol: TYPE:CONTENT
+            // Type 0 = text delta
+            if (content.startsWith('0:')) {
               try {
-                const parsed = JSON.parse(data);
-                if (parsed.type === 'text-delta' && parsed.delta) {
-                  accumulatedText += parsed.delta;
+                // Content after "0:" is a JSON-encoded string
+                const textContent = JSON.parse(content.slice(2));
+                if (typeof textContent === 'string') {
+                  accumulatedText += textContent;
                 }
               } catch (e) {
-                // Ignore parse errors for non-JSON lines
+                // Ignore parse errors
               }
             }
           }

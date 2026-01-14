@@ -141,8 +141,8 @@ export function OnboardingSidebar({
       )}
 
       {/* Stages */}
-      <div className="relative z-10 flex-1 overflow-auto px-6 reveal-4">
-        <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
+      <div className="relative z-10 flex-1 min-h-0 overflow-y-auto px-6 pb-4 reveal-4">
+        <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 sticky top-0 bg-inherit pt-1">
           Stages
         </h3>
         <TooltipProvider>

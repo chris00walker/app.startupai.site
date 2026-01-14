@@ -9,11 +9,65 @@
 
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { Send, Loader2, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+// ============================================================================
+// Simple Markdown Renderer
+// ============================================================================
+
+/**
+ * Renders basic markdown (bold, italic) to React elements
+ * Handles: **bold**, *italic*, `code`
+ */
+function renderMarkdown(text: string): React.ReactNode {
+  if (!text) return null;
+
+  // Split by markdown patterns and render appropriately
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  // Process bold (**text**), italic (*text*), and code (`text`)
+  const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    // Add formatted text
+    if (match[2]) {
+      // Bold: **text**
+      parts.push(<strong key={key++} className="font-semibold">{match[2]}</strong>);
+    } else if (match[3]) {
+      // Italic: *text*
+      parts.push(<em key={key++}>{match[3]}</em>);
+    } else if (match[4]) {
+      // Code: `text`
+      parts.push(
+        <code key={key++} className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono">
+          {match[4]}
+        </code>
+      );
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+}
 
 // ============================================================================
 // Types and Interfaces
@@ -167,7 +221,7 @@ export function ConversationInterface({
                     </span>
                   </div>
                   <div className="text-[15px] font-body leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                    {message.content}
+                    {renderMarkdown(message.content)}
                   </div>
                 </div>
               ) : (
@@ -180,9 +234,9 @@ export function ConversationInterface({
                     <span className="text-sm font-body font-medium">You</span>
                   </div>
                   <div className="onboarding-message-user">
-                    <p className="text-[15px] font-body leading-relaxed whitespace-pre-wrap">
-                      {message.content}
-                    </p>
+                    <div className="text-[15px] font-body leading-relaxed whitespace-pre-wrap">
+                      {renderMarkdown(message.content)}
+                    </div>
                   </div>
                 </div>
               )}
