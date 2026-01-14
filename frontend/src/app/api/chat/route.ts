@@ -1,4 +1,4 @@
-import { streamText, tool } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -191,7 +191,14 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        toolChoice: 'auto', // Let AI decide when to call tools - 'required' was blocking text generation
+        toolChoice: 'auto',
+        // If step 1 was tool-only, force step 2 to emit text (no tools allowed)
+        prepareStep: ({ steps }) => {
+          if (steps.length > 0) {
+            return { toolChoice: 'none' }; // Force user-visible text after tool calls
+          }
+        },
+        stopWhen: stepCountIs(2), // Allow up to 2 steps so tool-then-text works
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] Stream finished:', {
             textLength: text.length,

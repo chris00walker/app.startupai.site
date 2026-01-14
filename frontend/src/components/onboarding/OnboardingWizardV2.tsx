@@ -457,6 +457,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         // If no text was accumulated but stream completed, something went wrong
         if (!accumulatedText) {
           console.warn('[OnboardingWizard] No text accumulated from stream - AI may have only called tools');
+          toast.error('Alex is having trouble responding. Please try again.');
         }
       }
 

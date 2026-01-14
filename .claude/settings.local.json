@@ -52,7 +52,8 @@
       "Skill(modal-docs)",
       "Skill(supabase-docs)",
       "Skill(netlify-docs)",
-      "Skill(docs-cache-sync)"
+      "Skill(docs-cache-sync)",
+      "WebFetch(domain:opennext.js.org)"
     ],
     "deny": [
       "Bash(rm:*)",
