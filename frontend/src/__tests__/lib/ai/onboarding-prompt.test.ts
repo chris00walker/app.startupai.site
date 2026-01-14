@@ -45,6 +45,53 @@ describe('INITIAL_GREETING', () => {
 });
 
 describe('ONBOARDING_SYSTEM_PROMPT', () => {
+  /**
+   * CRITICAL: Tool Invocation Order Tests
+   *
+   * These tests verify that the prompt instructs tools-first behavior,
+   * which is essential for the multi-step flow in chat/route.ts to work.
+   *
+   * Background: The code uses prepareStep() to disable tools after step 1.
+   * If the prompt says "text first, then tools", the AI writes text in step 1,
+   * tools get disabled in step 2, and stage progression never happens.
+   *
+   * The fix: Prompt must say "tools first, then text" to align with code behavior.
+   */
+  describe('tool invocation order (CRITICAL)', () => {
+    it('should instruct AI to call tools FIRST before writing text', () => {
+      // This is the critical fix - tools must be called first
+      // The code's prepareStep() disables tools after step 1
+      expect(ONBOARDING_SYSTEM_PROMPT).toContain('FIRST**: Call appropriate tools');
+    });
+
+    it('should instruct AI to write text AFTER calling tools', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).toContain('THEN**: Write a conversational response');
+    });
+
+    it('should have correct instruction order (tools before text)', () => {
+      const toolsFirstIndex = ONBOARDING_SYSTEM_PROMPT.indexOf('FIRST**: Call appropriate tools');
+      const textSecondIndex = ONBOARDING_SYSTEM_PROMPT.indexOf('THEN**: Write a conversational response');
+
+      expect(toolsFirstIndex).toBeGreaterThan(-1);
+      expect(textSecondIndex).toBeGreaterThan(-1);
+      expect(toolsFirstIndex).toBeLessThan(textSecondIndex);
+    });
+
+    it('should instruct to call assessQuality FIRST on every response', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).toContain('FIRST call `assessQuality`');
+    });
+
+    it('should NOT instruct to write text first (old broken behavior)', () => {
+      // These patterns were in the broken prompt and caused tools to never be called
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('Write your conversational response to the user FIRST');
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('respond with TEXT first, then call tools');
+    });
+
+    it('should mention that system guarantees text after tool calls', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).toContain('system guarantees text will be generated after tool calls');
+    });
+  });
+
   describe('team context section', () => {
     it('should contain team context section', () => {
       expect(ONBOARDING_SYSTEM_PROMPT).toContain('## Your Team Context');
