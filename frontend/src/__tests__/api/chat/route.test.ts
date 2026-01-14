@@ -142,28 +142,28 @@ describe('Chat API Route', () => {
      * easily mock the streamText internals.
      */
 
-    it('should allow tools in step 1 (steps.length === 0)', () => {
+    it('should FORCE tools in step 1 (steps.length === 0)', () => {
       const prepareStep = ({ steps }: { steps: unknown[] }) => {
-        if (steps.length > 0) {
-          return { toolChoice: 'none' as const };
+        if (steps.length === 0) {
+          return { toolChoice: 'required' as const };
         }
-        return undefined;
+        return { toolChoice: 'none' as const };
       };
 
-      // Step 1: no previous steps, should allow tools
+      // Step 1: no previous steps, should FORCE tools
       const step1Result = prepareStep({ steps: [] });
-      expect(step1Result).toBeUndefined(); // No override = toolChoice: 'auto'
+      expect(step1Result).toEqual({ toolChoice: 'required' }); // FORCE tool usage
     });
 
     it('should force text-only in step 2 (steps.length > 0)', () => {
       const prepareStep = ({ steps }: { steps: unknown[] }) => {
-        if (steps.length > 0) {
-          return { toolChoice: 'none' as const };
+        if (steps.length === 0) {
+          return { toolChoice: 'required' as const };
         }
-        return undefined;
+        return { toolChoice: 'none' as const };
       };
 
-      // Step 2: one previous step, should force text
+      // Step 2: one previous step, should force text (no tools)
       const step2Result = prepareStep({ steps: ['step1'] });
       expect(step2Result).toEqual({ toolChoice: 'none' });
     });

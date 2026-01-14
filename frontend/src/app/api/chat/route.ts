@@ -191,21 +191,32 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        toolChoice: 'auto',
-        // If step 1 was tool-only, force step 2 to emit text (no tools allowed)
+        // Step 1: FORCE tool usage (required), Step 2: FORCE text (none)
         prepareStep: ({ steps }) => {
-          if (steps.length > 0) {
-            return { toolChoice: 'none' }; // Force user-visible text after tool calls
+          if (steps.length === 0) {
+            // Step 1: Force AI to call at least one tool
+            console.log('[api/chat] Step 1: Forcing toolChoice=required');
+            return { toolChoice: 'required' as const };
           }
+          // Step 2+: No tools allowed, must generate text
+          console.log('[api/chat] Step 2+: Forcing toolChoice=none for text generation');
+          return { toolChoice: 'none' as const };
         },
-        stopWhen: stepCountIs(2), // Allow up to 2 steps so tool-then-text works
+        stopWhen: stepCountIs(2), // Allow exactly 2 steps: tools then text
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] Stream finished:', {
             textLength: text.length,
             finishReason,
             toolCallsCount: toolCalls?.length || 0,
             toolResultsCount: toolResults?.length || 0,
+            toolNames: toolCalls?.map(tc => tc.toolName) || [],
           });
+
+          // CRITICAL: Log if tools were NOT called - this is the root cause of progress issues
+          if (!toolCalls || toolCalls.length === 0) {
+            console.error('[api/chat] WARNING: No tools were called! Progress will not update.');
+            console.error('[api/chat] This should not happen with toolChoice=required in step 1');
+          }
 
           try {
 
