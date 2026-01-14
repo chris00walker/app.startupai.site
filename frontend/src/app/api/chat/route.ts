@@ -480,9 +480,20 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[api/chat] Returning stream response to client');
-    // Use toTextStreamResponse for plain text streaming that frontend can parse
-    // This returns the AI's text response directly without complex protocol wrapping
-    return result.toTextStreamResponse();
+    // Use toUIMessageStreamResponse - this is the format that was working
+    // It outputs SSE with data: prefix and JSON objects like {"type": "text-delta", "delta": "..."}
+    return result.toUIMessageStreamResponse({
+      onError: (error) => {
+        const err = error instanceof Error ? error : new Error(String(error));
+        console.error('[api/chat] Stream error in toUIMessageStreamResponse:', {
+          name: err.name,
+          message: err.message,
+          cause: err.cause,
+          stack: err.stack,
+        });
+        return `Error: ${err.message}`;
+      },
+    });
   } catch (error: any) {
     console.error('[api/chat] Top-level error:', {
       name: error?.name,

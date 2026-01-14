@@ -399,10 +399,28 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           // Decode chunk and add to buffer
           buffer += decoder.decode(value, { stream: true });
 
-          // toTextStreamResponse() returns plain text chunks directly
-          // No JSON encoding or protocol wrapping - just raw AI text
-          accumulatedText += buffer;
-          buffer = ''; // All content is text, no line-by-line protocol
+          // Process complete SSE messages from toUIMessageStreamResponse
+          // Format: data: {"type": "text-delta", "delta": "..."}
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6); // Remove 'data: ' prefix
+
+              // Skip metadata events, only process text deltas
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.type === 'text-delta' && parsed.delta) {
+                  accumulatedText += parsed.delta;
+                }
+              } catch (e) {
+                // Ignore parse errors for non-JSON lines
+              }
+            }
+          }
 
           // Update AI message in real-time
           if (accumulatedText) {
