@@ -10,7 +10,7 @@
 'use client';
 
 import { useRef, useEffect, useCallback, useMemo } from 'react';
-import { Send, Loader2, CheckCircle, ArrowRight } from 'lucide-react';
+import { Send, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -120,14 +120,20 @@ export function ConversationInterface({
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector(
-        '[data-radix-scroll-area-viewport]'
-      );
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    // Use requestAnimationFrame to ensure DOM has updated before scrolling
+    requestAnimationFrame(() => {
+      if (scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector(
+          '[data-radix-scroll-area-viewport]'
+        );
+        if (scrollContainer) {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
       }
-    }
+    });
   }, [messages]);
 
   // Focus textarea on mount
@@ -136,6 +142,17 @@ export function ConversationInterface({
       textareaRef.current.focus();
     }
   }, []);
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
+      textareaRef.current.style.height = 'auto';
+      // Set height to scrollHeight, capped at max-height (200px)
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+    }
+  }, [input]);
 
   // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -322,14 +339,8 @@ export function ConversationInterface({
                   size="sm"
                   className="h-8 px-4"
                 >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <span className="mr-2">Send</span>
-                      <Send className="h-3.5 w-3.5" />
-                    </>
-                  )}
+                  <span className="mr-2">Send</span>
+                  <Send className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>

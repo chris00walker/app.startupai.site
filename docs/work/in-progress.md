@@ -2,7 +2,7 @@
 purpose: "Private technical source of truth for active work"
 status: "active"
 last_reviewed: "2026-01-14"
-last_synced: "2026-01-14 - Onboarding UX bugs fixed from dogfooding feedback"
+last_synced: "2026-01-14 - Critical onboarding prompt/code mismatch fixed"
 ---
 
 # In Progress
@@ -51,6 +51,19 @@ Work these items in order. Items marked "Ready" can start immediately.
 | 2 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
 | 3 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
 | 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+
+#### Onboarding Critical Root Cause Fix (2026-01-14 Evening)
+
+**Problem**: Despite earlier fixes, progress still stuck at ~13% and stages never advanced.
+
+**Root Cause Analysis**:
+- `frontend/src/app/api/chat/route.ts` lines 196-201: `prepareStep` forces `toolChoice: 'none'` after step 1
+- `frontend/src/lib/ai/onboarding-prompt.ts`: Prompt said "Write text FIRST, then call tools"
+- Result: AI wrote text in step 1 → tools disabled in step 2 → no `advanceStage`/`completeOnboarding` calls
+
+**Fix**: Changed prompt instruction order to "Call tools FIRST, then write text"
+
+**Impact**: This fix is critical for Phase 0 → Phase 1 transition (unblocks entire validation pipeline)
 
 #### Onboarding UX Bug Fixes (Completed 2026-01-14)
 
@@ -161,7 +174,16 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 **Last Updated**: 2026-01-14
 
-**Changes (2026-01-14):**
+**Changes (2026-01-14 - Evening Session):**
+- **CRITICAL FIX**: Root cause of progress/stage issues discovered and fixed
+- **Root Cause**: Prompt told AI "Write text FIRST, then call tools", but code's `prepareStep` disabled tools after step 1 text
+- **Solution**: Updated `onboarding-prompt.ts` to instruct "Call tools FIRST, then write text"
+- **Impact**: Unlocks entire Phase 0 → Phase 1 pipeline (tools now track progress, trigger completion)
+- Fixed scroll position (added requestAnimationFrame for reliable scrolling)
+- Fixed typing indicator redundancy (removed Send button spinner, kept "Thinking..." dots)
+- Added auto-expanding textarea (resizes to content, caps at 200px)
+
+**Changes (2026-01-14 - Morning Session):**
 - Fixed Founder onboarding UX bugs found during dogfooding
 - Progress tracking race condition resolved (800ms delay before status refetch)
 - Empty AI response validation added
