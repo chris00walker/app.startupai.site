@@ -142,30 +142,30 @@ describe('Chat API Route', () => {
      * easily mock the streamText internals.
      */
 
-    it('should FORCE tools in step 1 (steps.length === 0)', () => {
-      const prepareStep = ({ steps }: { steps: unknown[] }) => {
-        if (steps.length === 0) {
+    it('should FORCE tools in step 0 (stepNumber === 0)', () => {
+      const prepareStep = ({ stepNumber }: { stepNumber: number }) => {
+        if (stepNumber === 0) {
           return { toolChoice: 'required' as const };
         }
         return { toolChoice: 'none' as const };
       };
 
-      // Step 1: no previous steps, should FORCE tools
-      const step1Result = prepareStep({ steps: [] });
-      expect(step1Result).toEqual({ toolChoice: 'required' }); // FORCE tool usage
+      // Step 0 (first step): should FORCE tools
+      const step0Result = prepareStep({ stepNumber: 0 });
+      expect(step0Result).toEqual({ toolChoice: 'required' }); // FORCE tool usage
     });
 
-    it('should force text-only in step 2 (steps.length > 0)', () => {
-      const prepareStep = ({ steps }: { steps: unknown[] }) => {
-        if (steps.length === 0) {
+    it('should force text-only in step 1+ (stepNumber > 0)', () => {
+      const prepareStep = ({ stepNumber }: { stepNumber: number }) => {
+        if (stepNumber === 0) {
           return { toolChoice: 'required' as const };
         }
         return { toolChoice: 'none' as const };
       };
 
-      // Step 2: one previous step, should force text (no tools)
-      const step2Result = prepareStep({ steps: ['step1'] });
-      expect(step2Result).toEqual({ toolChoice: 'none' });
+      // Step 1 (second step): should force text (no tools)
+      const step1Result = prepareStep({ stepNumber: 1 });
+      expect(step1Result).toEqual({ toolChoice: 'none' });
     });
 
     it('should stop after 2 steps', () => {

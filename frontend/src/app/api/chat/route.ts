@@ -193,20 +193,20 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        // Step 1: FORCE tool usage (required), Step 2: FORCE text (none)
+        // Step 0: FORCE tool usage (required), Step 1: FORCE text (none)
         prepareStep: ({ stepNumber, steps }) => {
           console.log('[api/chat] prepareStep called:', {
             stepNumber,
             previousStepsCount: steps.length,
           });
 
-          if (stepNumber === 1) {
-            // Step 1: Force AI to call at least one tool
-            console.log('[api/chat] Step 1: Returning toolChoice=required');
+          if (stepNumber === 0) {
+            // Step 0 (first step): Force AI to call at least one tool
+            console.log('[api/chat] Step 0: Returning toolChoice=required (forcing tools)');
             return { toolChoice: 'required' as const };
           }
-          // Step 2+: No tools allowed, must generate text
-          console.log('[api/chat] Step 2: Returning toolChoice=none for text generation');
+          // Step 1+ (second step onwards): No tools allowed, must generate text
+          console.log('[api/chat] Step 1+: Returning toolChoice=none (forcing text)');
           return { toolChoice: 'none' as const };
         },
         stopWhen: stepCountIs(2), // Stop after 2 steps: tools then text
