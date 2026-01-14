@@ -1,8 +1,8 @@
 ---
 purpose: "Private technical source of truth for active work"
 status: "active"
-last_reviewed: "2026-01-12"
-last_synced: "2026-01-12 - API routes hardened, evidence display fixed, dogfooding verified"
+last_reviewed: "2026-01-14"
+last_synced: "2026-01-14 - Onboarding UX bugs fixed from dogfooding feedback"
 ---
 
 # In Progress
@@ -47,9 +47,32 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 1 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
-| 2 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
-| 3 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+| 1 | Onboarding UX Bug Fixes (Dogfooding) | ✅ **DONE** | @frontend | ~8 hours | See details below |
+| 2 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
+| 3 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
+| 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+
+#### Onboarding UX Bug Fixes (Completed 2026-01-14)
+
+Issues found during dogfooding testing of Founder onboarding flow:
+
+| Fix | Status | Notes |
+|-----|--------|-------|
+| Progress tracking race condition | ✅ | Added 800ms delay before refetchSessionStatus |
+| Empty AI response validation | ✅ | Skip saving empty messages in onFinish callback |
+| Optimistic progress removed | ✅ | Now uses backend-calculated progress only |
+| Dashboard shows active sessions | ✅ | ContinueSessionCard instead of empty state |
+| Save & Exit pauses session | ✅ | New /api/onboarding/pause endpoint |
+| AI tool execution forced | ✅ | toolChoice: 'required' + strengthened prompt |
+| Progress display fixed | ✅ | Shows "Stage X of 7" instead of "0/7 stages" |
+| Stage completion toast | ✅ | Toast notification on stage advancement |
+| Redundant X button removed | ✅ | Single "Save & Exit" button in footer |
+| Start New wired up | ✅ | Already implemented - calls abandon API |
+| forceNew URL param honored | ✅ | useSearchParams reads ?forceNew=true, passed to initializeSession |
+| Start New dialog progress context | ✅ | Shows % complete and message count before confirming |
+| Elapsed-time estimate | ✅ | Dynamic calculation based on actual time spent per stage |
+| Locked-stage visuals | ✅ | Lock icon, cursor-not-allowed, tooltip for pending stages |
+| 500ms minimum loading | ✅ | Prevents jarring flash on fast initialization |
 
 ### P2: Ready for E2E Testing
 
@@ -136,9 +159,20 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 ---
 
-**Last Updated**: 2026-01-12
+**Last Updated**: 2026-01-14
 
-**Changes (2026-01-12):**
+**Changes (2026-01-14):**
+- Fixed Founder onboarding UX bugs found during dogfooding
+- Progress tracking race condition resolved (800ms delay before status refetch)
+- Empty AI response validation added
+- Dashboard now shows "Continue Session" card for active onboarding sessions
+- Save & Exit now properly pauses session (new /api/onboarding/pause endpoint)
+- AI tool execution forced with toolChoice: 'required'
+- Progress display fixed ("Stage X of 7" instead of "0/7 stages")
+- Stage completion toast notifications added
+- Redundant X exit button removed from sidebar
+
+**Previous (2026-01-12):**
 - Dogfooding methodology enshrined in CLAUDE.md files
 - Founder journey verified (login, dashboard, projects, approvals)
 - Consultant journey verified (login, clients, client projects)

@@ -1,8 +1,10 @@
 'use client';
 
-import { Check, X, RefreshCw, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, X, RefreshCw, Clock, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // ============================================================================
 // Types and Interfaces
@@ -46,9 +48,29 @@ export function OnboardingSidebar({
   onStartNew,
   isResuming,
 }: OnboardingSidebarProps) {
-  const completedStages = stages.filter((stage) => stage.isComplete).length;
   const totalStages = stages.length || 7; // Default to 7 if stages empty
-  const estimatedTimeRemaining = Math.max(0, (totalStages - currentStage) * 3);
+
+  // Track session start time for dynamic time estimate
+  const [sessionStartTime] = useState(() => Date.now());
+  const [elapsedMinutes, setElapsedMinutes] = useState(0);
+
+  // Update elapsed time every 30 seconds
+  useEffect(() => {
+    const updateElapsed = () => {
+      setElapsedMinutes(Math.floor((Date.now() - sessionStartTime) / 60000));
+    };
+    updateElapsed();
+    const interval = setInterval(updateElapsed, 30000);
+    return () => clearInterval(interval);
+  }, [sessionStartTime]);
+
+  // Calculate time estimate based on actual elapsed time
+  const completedStagesCount = currentStage - 1;
+  const avgMinutesPerStage = completedStagesCount > 0
+    ? Math.max(2, elapsedMinutes / completedStagesCount) // At least 2 min per stage
+    : 3; // Default 3 min if no stages completed yet
+  const remainingStages = totalStages - currentStage;
+  const estimatedTimeRemaining = Math.max(0, Math.ceil(remainingStages * avgMinutesPerStage));
 
   return (
     <aside
@@ -59,20 +81,9 @@ export function OnboardingSidebar({
       {/* Subtle grid pattern overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-50 pointer-events-none" />
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between p-6 pb-4 reveal-1">
-        <div>
-          <h2 className="text-sm font-display font-normal text-foreground">AI Strategic Onboarding</h2>
-          <p className="text-xs font-body text-muted-foreground mt-0.5">with {agentPersonality?.name || 'Alex'}</p>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onExit}
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          aria-label="Exit onboarding"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+      <header className="relative z-10 p-6 pb-4 reveal-1">
+        <h2 className="text-sm font-display font-normal text-foreground">AI Strategic Onboarding</h2>
+        <p className="text-xs font-body text-muted-foreground mt-0.5">with {agentPersonality?.name || 'Alex'}</p>
       </header>
 
       {/* Progress Bar */}
@@ -100,11 +111,11 @@ export function OnboardingSidebar({
         </div>
         <div className="flex items-center justify-between mt-2 text-[11px] text-muted-foreground">
           <span>
-            {completedStages}/{stages.length} stages
+            Stage {currentStage} of {totalStages}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {estimatedTimeRemaining}m left
+            ~{estimatedTimeRemaining}m left
           </span>
         </div>
       </div>
@@ -134,46 +145,69 @@ export function OnboardingSidebar({
         <h3 className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
           Stages
         </h3>
-        <nav role="navigation" aria-label="Onboarding stages">
-          <ol className="space-y-1">
-            {stages.map((stage) => (
-              <li key={stage.stage}>
-                <div
-                  className={cn(
-                    'onboarding-step',
-                    stage.isComplete && 'onboarding-step-complete',
-                    stage.isActive && 'onboarding-step-current',
-                    !stage.isComplete && !stage.isActive && 'onboarding-step-pending'
-                  )}
-                  aria-current={stage.isActive ? 'step' : undefined}
-                >
-                  {/* Step Number/Check */}
-                  <div className="onboarding-step-number">
-                    {stage.isComplete ? (
-                      <Check className="h-3 w-3" />
-                    ) : (
-                      <span>{stage.stage}</span>
-                    )}
-                  </div>
-
-                  {/* Step Label */}
-                  <span
+        <TooltipProvider>
+          <nav role="navigation" aria-label="Onboarding stages">
+            <ol className="space-y-1">
+              {stages.map((stage) => {
+                const isPending = !stage.isComplete && !stage.isActive;
+                const stageContent = (
+                  <div
                     className={cn(
-                      'text-sm truncate',
-                      stage.isActive
-                        ? 'text-foreground font-medium'
-                        : stage.isComplete
-                          ? 'text-muted-foreground'
-                          : 'text-muted-foreground/70'
+                      'onboarding-step',
+                      stage.isComplete && 'onboarding-step-complete',
+                      stage.isActive && 'onboarding-step-current',
+                      isPending && 'onboarding-step-pending cursor-not-allowed opacity-60'
                     )}
+                    aria-current={stage.isActive ? 'step' : undefined}
+                    aria-disabled={isPending}
                   >
-                    {stage.name}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </nav>
+                    {/* Step Number/Check/Lock */}
+                    <div className="onboarding-step-number">
+                      {stage.isComplete ? (
+                        <Check className="h-3 w-3" />
+                      ) : isPending ? (
+                        <Lock className="h-3 w-3" />
+                      ) : (
+                        <span>{stage.stage}</span>
+                      )}
+                    </div>
+
+                    {/* Step Label */}
+                    <span
+                      className={cn(
+                        'text-sm truncate',
+                        stage.isActive
+                          ? 'text-foreground font-medium'
+                          : stage.isComplete
+                            ? 'text-muted-foreground'
+                            : 'text-muted-foreground/70'
+                      )}
+                    >
+                      {stage.name}
+                    </span>
+                  </div>
+                );
+
+                return (
+                  <li key={stage.stage}>
+                    {isPending ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          {stageContent}
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs">
+                          Complete previous stages first
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      stageContent
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
+        </TooltipProvider>
       </div>
 
       {/* Footer */}

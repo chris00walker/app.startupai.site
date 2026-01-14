@@ -14,7 +14,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 // Sidebar primitives no longer needed - using custom sidebar component
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
@@ -59,6 +59,8 @@ interface StageInfo {
 
 export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWizardProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const forceNewFromUrl = searchParams?.get('forceNew') === 'true';
 
   // State management
   const [session, setSession] = useState<OnboardingSession | null>(null);
@@ -210,9 +212,19 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Track stage advancement if stage changed
-          if (session.currentStage !== data.currentStage) {
+          // Track and announce stage advancement if stage changed
+          if (session.currentStage !== data.currentStage && data.currentStage > session.currentStage) {
             trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, data.currentStage);
+
+            // Show toast notification for stage completion
+            const stageNames = [
+              'Welcome & Introduction', 'Customer Discovery', 'Problem Definition',
+              'Solution Validation', 'Competitive Analysis', 'Resources & Constraints', 'Goals & Next Steps'
+            ];
+            toast.success(
+              `Stage complete! Moving to: ${stageNames[data.currentStage - 1]}`,
+              { duration: 4000 }
+            );
           }
 
           // Update session state with new stage and progress
@@ -356,11 +368,11 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         }
       }
 
-      // Update progress
-      const progress = Math.min(95, Math.floor((messages.length + 2) / 30 * 100));
-      setSession(prev => prev ? { ...prev, overallProgress: progress } : null);
+      // Wait for onFinish callback to complete DB write before refetching
+      // This fixes the race condition where refetchSessionStatus() reads stale data
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Refetch session status to get updated stage (if AI advanced stages)
+      // Refetch session status to get updated stage and progress from database
       await refetchSessionStatus();
 
     } catch (error: any) {
@@ -559,14 +571,26 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setShowExitDialog(true);
   }, []);
 
-  const confirmExit = useCallback(() => {
+  const confirmExit = useCallback(async () => {
     // Track exit early
     if (session) {
       const progressPercent = Math.round((session.currentStage / session.totalStages) * 100);
       trackOnboardingEvent.exitedEarly(session.sessionId, session.currentStage, progressPercent);
+
+      // Actually pause the session in the database
+      try {
+        await fetch('/api/onboarding/pause', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: session.sessionId }),
+        });
+      } catch (e) {
+        console.warn('[OnboardingWizard] Failed to pause session:', e);
+        // Continue with exit even if pause fails
+      }
     }
 
-    toast.info('Onboarding session saved. You can resume anytime.');
+    toast.info('Session saved. You can resume anytime from the dashboard.');
 
     // Redirect to the appropriate dashboard based on plan type
     // Consultants go to /clients to manage their client portfolio
@@ -611,15 +635,27 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     await initializeSession(true);
   }, [session, initializeSession, initializeStages]);
 
-  // Initialize on mount
+  // Initialize on mount (pass forceNew from URL if present)
+  // Ensure minimum 500ms loading display to prevent flash
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
-      await initializeSession();
+      const startTime = Date.now();
+
+      await initializeSession(forceNewFromUrl);
+
+      // Ensure minimum 500ms loading to prevent jarring flash
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 500 - elapsed);
+      if (remaining > 0) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
+
       setIsLoading(false);
     };
 
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- forceNewFromUrl should only apply on initial mount
   }, [initializeSession]);
 
   // Loading state
@@ -732,8 +768,17 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           <AlertDialogHeader>
             <AlertDialogTitle>Start New Conversation?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will end your current conversation and start fresh with Alex.
-              Your previous conversation will be saved but you&apos;ll begin from the beginning.
+              {session ? (
+                <>
+                  You&apos;ve completed {Math.round(session.overallProgress)}% of onboarding with {messages.length} messages exchanged.
+                  Starting fresh will archive this progress. Your previous conversation will be saved but you&apos;ll begin from the beginning.
+                </>
+              ) : (
+                <>
+                  This will end your current conversation and start fresh with Alex.
+                  Your previous conversation will be saved but you&apos;ll begin from the beginning.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

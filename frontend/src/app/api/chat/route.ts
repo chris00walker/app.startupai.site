@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        toolChoice: 'auto', // Let AI decide when to call tools (strengthened prompt will guide it)
+        toolChoice: 'required', // Force AI to call at least one tool per response for progress tracking
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] Stream finished:', {
             textLength: text.length,
@@ -372,6 +372,17 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
+          }
+
+          // Validate AI response is not empty before saving to conversation history
+          if (!text || text.trim().length === 0) {
+            console.warn('[api/chat] Skipping empty AI response - stream may have failed');
+            // Still update session activity but don't add empty message
+            await supabaseClient
+              .from('onboarding_sessions')
+              .update({ last_activity: new Date().toISOString() })
+              .eq('session_id', sessionId);
+            return;
           }
 
           // Update conversation history
