@@ -399,48 +399,10 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           // Decode chunk and add to buffer
           buffer += decoder.decode(value, { stream: true });
 
-          // Process complete SSE messages
-          // Vercel AI SDK data stream protocol format: TYPE:CONTENT
-          // Type 0 = text delta (content is JSON-encoded string)
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-          for (const line of lines) {
-            // Handle SSE data: prefix
-            const content = line.startsWith('data: ') ? line.slice(6) : line;
-
-            // Skip empty lines and [DONE]
-            if (!content || content === '[DONE]') continue;
-
-            // Parse data stream protocol: TYPE:CONTENT
-            // Type 0 = text delta, Type 2 = error, Type 9 = tool_call, Type e = finish
-            if (content.startsWith('0:')) {
-              // Type 0: text-delta - parse JSON-encoded string
-              try {
-                const textContent = JSON.parse(content.slice(2));
-                if (typeof textContent === 'string') {
-                  accumulatedText += textContent;
-                }
-              } catch (e) {
-                // Ignore parse errors
-              }
-            } else if (content.startsWith('2:')) {
-              // Type 2: error - parse and show to user
-              try {
-                const errorContent = JSON.parse(content.slice(2));
-                console.error('[OnboardingWizard] Stream error:', errorContent);
-                toast.error(`AI error: ${typeof errorContent === 'string' ? errorContent : errorContent.message || 'Unknown error'}`);
-              } catch (e) {
-                console.error('[OnboardingWizard] Failed to parse error:', content);
-              }
-            } else if (content.startsWith('9:')) {
-              // Type 9: tool_call - log for debugging (AI is processing tools)
-              console.log('[OnboardingWizard] Tool call event:', content.slice(2));
-            } else if (content.startsWith('e:')) {
-              // Type e: finish event
-              console.log('[OnboardingWizard] Stream finished');
-            }
-          }
+          // toTextStreamResponse() returns plain text chunks directly
+          // No JSON encoding or protocol wrapping - just raw AI text
+          accumulatedText += buffer;
+          buffer = ''; // All content is text, no line-by-line protocol
 
           // Update AI message in real-time
           if (accumulatedText) {

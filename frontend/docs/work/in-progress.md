@@ -4,26 +4,34 @@ Last Updated: 2026-01-14
 
 ## Recently Completed
 
-### Critical Bug Fix: AI Consultant Not Responding
+### Critical Bug Fix: 500 Error on Chat API
 **Status:** ✅ Complete (pending production testing)
 **Date:** 2026-01-14
 
-Fixed critical bug where AI consultant "Alex" would not respond after user input in onboarding flow.
+Fixed critical 500 error caused by calling non-existent `toDataStreamResponse()` method.
 
-**Root Causes Identified:**
-1. `toolChoice: 'required'` was forcing AI to call tools, potentially blocking text generation
-2. Frontend only parsed type 0 (text-delta) events, ignoring errors (type 2)
-3. System prompt overly emphasized tool calls without clarifying text response requirement
+**Root Cause:**
+The AI SDK v5.0.82 does NOT have a `toDataStreamResponse()` method on `StreamTextResult`. The previous fix incorrectly used this method, causing a runtime 500 error.
+
+**Available Methods in AI SDK v5.0.82:**
+- `toUIMessageStreamResponse()` - for useChat hook (complex protocol)
+- `toTextStreamResponse()` - for plain text streaming (simple)
+
+**Fix Applied:**
+Changed from `toDataStreamResponse()` (doesn't exist) to `toTextStreamResponse()` which returns plain text that the frontend can easily consume.
 
 **Files Modified:**
-- `src/app/api/chat/route.ts` - Changed `toolChoice` from 'required' to 'auto', added error handling to stream response
-- `src/components/onboarding/OnboardingWizardV2.tsx` - Added handling for error events (type 2), tool calls (type 9), finish events (type e), and debug logging
-- `src/lib/ai/onboarding-prompt.ts` - Clarified that AI must generate text FIRST, then call tools
+- `src/app/api/chat/route.ts` - Use `toTextStreamResponse()` instead of non-existent method
+- `src/components/onboarding/OnboardingWizardV2.tsx` - Simplified stream parsing for plain text format
+
+**Previous Fixes Also Included:**
+- `toolChoice: 'auto'` instead of 'required' (allows AI to generate text alongside tool calls)
+- Updated system prompt to clarify text-first response requirement
 
 **Testing Required:**
+- [ ] Verify API no longer returns 500 error
 - [ ] Verify AI responds with text after user input
 - [ ] Verify progress tracking still works via tool calls
-- [ ] Verify stage advancement functions correctly
 
 ---
 

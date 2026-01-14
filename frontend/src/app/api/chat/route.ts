@@ -480,19 +480,9 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('[api/chat] Returning stream response to client');
-    // Use toDataStreamResponse for data stream protocol format
-    // Format: TYPE:CONTENT\n where type 0 = text delta, type 2 = error
-    return result.toDataStreamResponse({
-      getErrorMessage: (error) => {
-        const err = error instanceof Error ? error : new Error(String(error));
-        console.error('[api/chat] Stream error:', {
-          name: err.name,
-          message: err.message,
-          stack: err.stack,
-        });
-        return `Error: ${err.message}`;
-      },
-    });
+    // Use toTextStreamResponse for plain text streaming that frontend can parse
+    // This returns the AI's text response directly without complex protocol wrapping
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error('[api/chat] Top-level error:', {
       name: error?.name,
