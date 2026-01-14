@@ -237,10 +237,20 @@ export async function POST(req: NextRequest) {
           let newStageData = { ...stageData };
           let isCompleted = false;
 
+          console.log('[api/chat] Processing tool results:', {
+            toolResultsCount: toolResults?.length || 0,
+            toolCallsCount: toolCalls?.length || 0,
+            currentStage,
+            currentStageData: Object.keys(stageData),
+          });
+
           if (toolResults && toolResults.length > 0) {
             for (const result of toolResults) {
               const toolCall = toolCalls?.find(tc => tc.toolCallId === result.toolCallId);
-              if (!toolCall) continue;
+              if (!toolCall) {
+                console.warn('[api/chat] Tool result without matching call:', result.toolCallId);
+                continue;
+              }
 
               console.log('[api/chat] Processing tool result:', {
                 toolName: toolCall.toolName,
@@ -404,15 +414,11 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          // Validate AI response is not empty before saving to conversation history
-          if (!text || text.trim().length === 0) {
-            console.warn('[api/chat] Skipping empty AI response - stream may have failed');
-            // Still update session activity but don't add empty message
-            await supabaseClient
-              .from('onboarding_sessions')
-              .update({ last_activity: new Date().toISOString() })
-              .eq('session_id', sessionId);
-            return;
+          // Note: Empty text is OK if tools were called (step 0 only calls tools)
+          // We still need to process tool results and update stage/progress
+          const hasText = text && text.trim().length > 0;
+          if (!hasText) {
+            console.warn('[api/chat] Empty AI text response - likely tool-only step');
           }
 
           // Update conversation history
@@ -424,14 +430,21 @@ export async function POST(req: NextRequest) {
               timestamp: new Date().toISOString(),
               stage: currentStage,
             },
-            {
+          ];
+
+          // Only add assistant message if we have text content
+          // (Tool-only responses don't need to be in conversation history)
+          if (hasText) {
+            updatedHistory.push({
               role: 'assistant',
               content: text,
               timestamp: new Date().toISOString(),
               stage: newStage, // Use new stage if advanced
               toolCalls: toolCalls || [],
-            },
-          ];
+            });
+          } else {
+            console.log('[api/chat] Skipping assistant message in history (no text content)');
+          }
 
           // Initialize update object
           const updateData: any = {
@@ -472,10 +485,30 @@ export async function POST(req: NextRequest) {
             );
           }
 
-          await supabaseClient
+          console.log('[api/chat] Updating database with:', {
+            sessionId,
+            currentStage: updateData.current_stage,
+            overallProgress: updateData.overall_progress,
+            stageDataKeys: Object.keys(updateData.stage_data),
+            hasStageQuality: !!updateData.stage_data[`stage_${newStage}_quality`],
+            hasStageSummary: !!updateData.stage_data[`stage_${currentStage}_summary`],
+          });
+
+          const { data: updateResult, error: updateError } = await supabaseClient
             .from('onboarding_sessions')
             .update(updateData)
-            .eq('session_id', sessionId);
+            .eq('session_id', sessionId)
+            .select();
+
+          if (updateError) {
+            console.error('[api/chat] Database update failed:', updateError);
+          } else {
+            console.log('[api/chat] Database updated successfully:', {
+              sessionId,
+              updatedStage: updateResult?.[0]?.current_stage,
+              updatedProgress: updateResult?.[0]?.overall_progress,
+            });
+          }
 
           console.log(
             `[api/chat] Session ${sessionId} updated in database: ${updateData.overall_progress}% progress`
