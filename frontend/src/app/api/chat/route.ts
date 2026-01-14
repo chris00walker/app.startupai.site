@@ -425,9 +425,20 @@ export async function POST(req: NextRequest) {
 
             // Calculate overall progress: base progress + (stage progress * stage weight)
             const stageWeight = Math.floor(100 / 7); // ~14% per stage
+            const qualityBasedProgress = baseProgress + Math.floor(stageProgress * stageWeight);
+
+            // Ensure minimum progress based on conversation activity
+            // Each message exchange (user + assistant) = ~1% progress, capped at stage max
+            const messageCount = updatedHistory.length;
+            const messageBasedProgress = Math.min(
+              baseProgress + stageWeight - 1, // Cap at current stage max minus 1%
+              Math.floor(messageCount * 0.5) // 0.5% per message
+            );
+
+            // Use the higher of quality-based or message-based progress
             updateData.overall_progress = Math.min(
               95,
-              baseProgress + Math.floor(stageProgress * stageWeight)
+              Math.max(qualityBasedProgress, messageBasedProgress)
             );
           }
 

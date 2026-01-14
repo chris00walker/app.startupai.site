@@ -30,29 +30,35 @@ export function FounderStatusPanel({
     projectId,
   })
 
-  // Header variant: compact row of avatars
+  // Header variant: compact row of avatars with label
+  // Only show when analysis is actively running - hide when all founders are idle
   if (variant === 'header') {
+    if (!isAnalyzing) {
+      return null
+    }
+
     return (
       <div
         className={cn('flex items-center gap-2', className)}
         data-testid="founder-status-header"
       >
-        {getAllFounders().map((founder) => {
-          const founderStatus = founders.find((f) => f.id === founder.id)
-          return (
-            <FounderAvatar
-              key={founder.id}
-              founderId={founder.id}
-              size="sm"
-              status={founderStatus?.status}
-            />
-          )
-        })}
-        {isAnalyzing && (
-          <Badge variant="default" className="animate-pulse ml-1 text-xs">
-            Processing
-          </Badge>
-        )}
+        <span className="text-xs text-muted-foreground hidden sm:inline">AI Team:</span>
+        <div className="flex items-center gap-1">
+          {getAllFounders().map((founder) => {
+            const founderStatus = founders.find((f) => f.id === founder.id)
+            return (
+              <FounderAvatar
+                key={founder.id}
+                founderId={founder.id}
+                size="sm"
+                status={founderStatus?.status}
+              />
+            )
+          })}
+        </div>
+        <Badge variant="default" className="animate-pulse ml-1 text-xs">
+          Processing
+        </Badge>
       </div>
     )
   }

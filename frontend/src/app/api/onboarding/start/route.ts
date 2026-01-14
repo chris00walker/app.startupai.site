@@ -411,6 +411,7 @@ export async function POST(request: NextRequest) {
       console.log('[onboarding/start] Resuming existing session:', session.session_id);
 
       // Return existing session data for resumption
+      // Include agentIntroduction/firstQuestion as fallback if conversation_history is empty
       return NextResponse.json({
         success: true,
         sessionId: session.session_id,
@@ -434,6 +435,15 @@ export async function POST(request: NextRequest) {
         overallProgress: session.overall_progress,
         stageProgress: session.stage_progress,
         stageData: session.stage_data,
+        // Include greeting for fallback if conversation_history is empty
+        agentIntroduction: `Hi there! I'm Alex, and I'm excited to help you think through your business idea using proven validation methods.
+
+Over the next 15-20 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your goals. This isn't a pitch session - it's a strategic conversation to help you identify what assumptions you need to test and what experiments you should run first.
+
+There are no wrong answers here. In fact, "I don't know yet" is often the most honest and valuable response because it helps us identify what you need to learn.`,
+        firstQuestion: `Ready to dive in? Let's start with the most important question:
+
+**What business idea are you most excited about right now?**`,
       } as any);
     }
 
