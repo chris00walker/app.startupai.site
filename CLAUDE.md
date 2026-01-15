@@ -93,6 +93,44 @@ pnpm build                  # Production build
 # Deployment automatic via Netlify on push to main
 ```
 
+## CLI Tools Available
+The following CLIs are installed and configured with API keys from `~/.secrets/startupai`:
+
+| Tool | Command | Purpose |
+|------|---------|---------|
+| **Netlify** | `npx netlify` | Deploy, env vars, logs, functions |
+| **Supabase** | `supabase` | Database, migrations, auth |
+| **Modal** | `modal` | Serverless Python deployment |
+| **OpenRouter** | `llm -m openrouter/...` | AI model access (Claude, GPT, etc.) |
+| **OpenRouter** | `openrouter-cli` | Interactive AI chat sessions |
+
+```bash
+# Netlify
+npx netlify status                    # Check site status
+npx netlify env:list                  # List env vars
+npx netlify logs:function <name>      # View function logs
+npx netlify deploy --build --prod     # Manual deploy
+
+# Supabase
+supabase status                       # Check connection
+supabase db diff                      # Show schema changes
+supabase migration list               # List migrations
+
+# Modal
+modal deploy                          # Deploy functions
+modal run                             # Run locally
+modal shell                           # Interactive shell
+
+# OpenRouter (via llm)
+llm -m openrouter/anthropic/claude-3.5-sonnet "prompt"  # One-off prompt
+llm models | grep openrouter          # List available models
+cat file.txt | llm -m openrouter/... "summarize"        # Pipe input
+
+# OpenRouter (interactive)
+openrouter-cli run anthropic/claude-3.5-sonnet          # Interactive chat
+openrouter-cli models                 # List models
+```
+
 ## Authentication System
 ### Flow
 1. User signs up on marketing site → Supabase creates account
