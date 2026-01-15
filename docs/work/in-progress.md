@@ -65,7 +65,7 @@ Work these items in order. Items marked "Ready" can start immediately.
 | No loading feedback | Added "(usually 3-5 seconds)" to typing indicator | ⏳ Unverified |
 | Dead-end states | Added mandatory "always end with question" rule to AI prompt | ⏳ Unverified |
 | Stages view-only | Completed stages now clickable to review past Q&A | ⏳ Unverified |
-| Save inconsistency | Increased delay to 1200ms + added "Saving..." indicator | ⏳ Unverified |
+| **Save inconsistency** | **Now uses Realtime subscription (<100ms)** instead of polling | ✅ Implemented |
 | Context visibility | Deferred to follow-up (P2) | N/A |
 
 **Files Modified**:
@@ -222,6 +222,20 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 ---
 
 **Last Updated**: 2026-01-15
+
+**Changes (2026-01-15 - Late Session):**
+- **Architectural Improvements**: Supabase Realtime + unified stage config (from plan `snappy-hugging-lollipop.md`)
+- Added Supabase Realtime subscription for instant onboarding progress updates (eliminates 1200ms polling delay)
+- Created `lib/onboarding/stages-config.ts` as single source of truth for all 7 stages
+- New `useOnboardingSession` hook with Realtime subscription + connection status tracking
+- Added feature flag `NEXT_PUBLIC_ONBOARDING_REALTIME` (enabled by default, can disable)
+- Fixed Stage 6 missing `available_channels` data topic
+- Removed duplicate `CONVERSATION_STAGES` from `/api/onboarding/message/route.ts`
+- Removed duplicate stage names from `OnboardingWizardV2.tsx` (now uses `getStageName()`)
+- Local migration file: `db/migrations/0010_enable_onboarding_realtime.sql`
+- Realtime publication includes only scalar columns (excludes large JSONB for performance)
+- Connection status UI: yellow banner + reconnect button when WebSocket disconnects
+- Build verified: `pnpm build` succeeds with all changes
 
 **Changes (2026-01-15 - Evening Session):**
 - **Onboarding UX Overhaul**: Implemented fixes for 9 UX issues from dogfooding (PENDING VERIFICATION)

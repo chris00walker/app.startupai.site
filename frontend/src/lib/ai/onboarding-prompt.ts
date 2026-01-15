@@ -4,106 +4,22 @@
  * This file contains the system prompt and configuration for the AI-powered
  * onboarding conversation. The AI guides users through 7 stages of business
  * validation, collecting information to generate strategic insights via CrewAI.
+ *
+ * Stage configuration is now centralized in lib/onboarding/stages-config.ts
  */
 
-export const ONBOARDING_STAGES = [
-  {
-    stage: 1,
-    name: 'Welcome & Introduction',
-    description: 'Getting to know you and your business idea',
-    objective: 'Understand the founder\'s background, inspiration, and current business stage',
-    keyQuestions: [
-      'What business idea are you most excited about?',
-      'What inspired this idea?',
-      'What stage is your business currently in?',
-    ],
-    dataToCollect: ['business_concept', 'inspiration', 'current_stage', 'founder_background'],
-    progressThreshold: 0.8,
-  },
-  {
-    stage: 2,
-    name: 'Customer Discovery',
-    description: 'Understanding your target customers',
-    objective: 'Identify and validate target customer segments',
-    keyQuestions: [
-      'Who do you think would be most interested in this solution?',
-      'What specific group of people have this problem most acutely?',
-      'How do these customers currently solve this problem?',
-    ],
-    dataToCollect: ['target_customers', 'customer_segments', 'current_solutions', 'customer_behaviors'],
-    progressThreshold: 0.75,
-  },
-  {
-    stage: 3,
-    name: 'Problem Definition',
-    description: 'Defining the core problem you\'re solving',
-    objective: 'Articulate the problem statement with clarity and evidence',
-    keyQuestions: [
-      'What specific problem does your solution address?',
-      'How painful is this problem for your customers?',
-      'How often do they encounter this problem?',
-      'What evidence do you have that this problem exists?',
-    ],
-    dataToCollect: ['problem_description', 'pain_level', 'frequency', 'problem_evidence'],
-    progressThreshold: 0.8,
-  },
-  {
-    stage: 4,
-    name: 'Solution Validation',
-    description: 'Exploring your proposed solution',
-    objective: 'Define the solution approach and unique value proposition',
-    keyQuestions: [
-      'How does your solution solve this problem?',
-      'What makes your approach unique?',
-      'What\'s your key differentiator?',
-      'Why would customers choose you over alternatives?',
-    ],
-    dataToCollect: ['solution_description', 'solution_mechanism', 'unique_value_prop', 'differentiation'],
-    progressThreshold: 0.75,
-  },
-  {
-    stage: 5,
-    name: 'Competitive Analysis',
-    description: 'Understanding the competitive landscape',
-    objective: 'Map competitors and identify positioning opportunities',
-    keyQuestions: [
-      'Who else is solving this problem?',
-      'What alternatives do customers have?',
-      'What would make customers switch to your solution?',
-      'What are the strengths and weaknesses of existing solutions?',
-    ],
-    dataToCollect: ['competitors', 'alternatives', 'switching_barriers', 'competitive_advantages'],
-    progressThreshold: 0.7,
-  },
-  {
-    stage: 6,
-    name: 'Resources & Constraints',
-    description: 'Assessing your available resources',
-    objective: 'Understand budget, team, and constraints',
-    keyQuestions: [
-      'What\'s your budget for getting started?',
-      'What skills and resources do you have available?',
-      'What are your main constraints (time, money, team)?',
-      'What channels do you have access to for reaching customers?',
-    ],
-    dataToCollect: ['budget_range', 'available_resources', 'constraints', 'team_capabilities', 'available_channels'],
-    progressThreshold: 0.75,
-  },
-  {
-    stage: 7,
-    name: 'Goals & Next Steps',
-    description: 'Setting strategic goals and priorities',
-    objective: 'Define success metrics and immediate action items',
-    keyQuestions: [
-      'What do you want to achieve in the next 3 months?',
-      'How will you measure success?',
-      'What\'s your biggest priority right now?',
-      'What\'s the first experiment you want to run?',
-    ],
-    dataToCollect: ['short_term_goals', 'success_metrics', 'priorities', 'first_experiment'],
-    progressThreshold: 0.85,
-  },
-] as const;
+// Re-export stage configuration from single source of truth
+export {
+  ONBOARDING_STAGES_CONFIG as ONBOARDING_STAGES,
+  TOTAL_STAGES,
+  getStageConfigSafe as getStageInfo,  // Backward-compatible (falls back to stage 1)
+  getStageConfig,
+  getStageConfigSafe,
+  getStageSystemContext,
+  getStageName,
+  type OnboardingStageConfig,
+  type StageDataTopic,
+} from '@/lib/onboarding/stages-config';
 
 export const ONBOARDING_SYSTEM_PROMPT = `You are an expert startup consultant conducting an AI-powered onboarding session. Your role is to guide entrepreneurs through a structured 7-stage conversation to help them validate their business ideas using evidence-based methods.
 
@@ -282,25 +198,3 @@ Ready to dive in? Let's start with the most important question:
 
 **What business idea are you most excited about right now?**`;
 
-export function getStageInfo(stageNumber: number) {
-  return ONBOARDING_STAGES.find(s => s.stage === stageNumber) || ONBOARDING_STAGES[0];
-}
-
-export function getStageSystemContext(stageNumber: number, collectedData: Record<string, any>) {
-  const stage = getStageInfo(stageNumber);
-
-  return `
-## Current Stage: ${stage.name} (Stage ${stageNumber}/7)
-
-**Objective**: ${stage.objective}
-
-**Data to Collect**: ${stage.dataToCollect.join(', ')}
-
-**Already Collected**:
-${Object.entries(collectedData).map(([key, value]) => `- ${key}: ${typeof value === 'string' ? value.substring(0, 100) : JSON.stringify(value).substring(0, 100)}`).join('\n')}
-
-**Missing Data Points**: ${stage.dataToCollect.filter(field => !collectedData[field]).join(', ') || 'None - good progress!'}
-
-Focus on filling gaps and getting specificity. Use follow-up questions to dig deeper.
-`;
-}

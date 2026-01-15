@@ -6,55 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
-// ============================================================================
-// Stage Topics Configuration
-// ============================================================================
-
-const STAGE_TOPICS: Record<number, { label: string; key: string }[]> = {
-  1: [
-    { label: 'Business concept', key: 'business_concept' },
-    { label: 'Inspiration', key: 'inspiration' },
-    { label: 'Current stage', key: 'current_stage' },
-    { label: 'Background', key: 'founder_background' },
-  ],
-  2: [
-    { label: 'Target customers', key: 'target_customers' },
-    { label: 'Customer segments', key: 'customer_segments' },
-    { label: 'Current solutions', key: 'current_solutions' },
-    { label: 'Customer behaviors', key: 'customer_behaviors' },
-  ],
-  3: [
-    { label: 'Problem description', key: 'problem_description' },
-    { label: 'Pain level', key: 'pain_level' },
-    { label: 'Frequency', key: 'frequency' },
-    { label: 'Problem evidence', key: 'problem_evidence' },
-  ],
-  4: [
-    { label: 'Solution approach', key: 'solution_description' },
-    { label: 'How it works', key: 'solution_mechanism' },
-    { label: 'Unique value', key: 'unique_value_prop' },
-    { label: 'Differentiation', key: 'differentiation' },
-  ],
-  5: [
-    { label: 'Competitors', key: 'competitors' },
-    { label: 'Alternatives', key: 'alternatives' },
-    { label: 'Switching barriers', key: 'switching_barriers' },
-    { label: 'Competitive advantages', key: 'competitive_advantages' },
-  ],
-  6: [
-    { label: 'Budget range', key: 'budget_range' },
-    { label: 'Resources', key: 'available_resources' },
-    { label: 'Constraints', key: 'constraints' },
-    { label: 'Team capabilities', key: 'team_capabilities' },
-  ],
-  7: [
-    { label: 'Short-term goals', key: 'short_term_goals' },
-    { label: 'Success metrics', key: 'success_metrics' },
-    { label: 'Priorities', key: 'priorities' },
-    { label: 'First experiment', key: 'first_experiment' },
-  ],
-};
+import { getStageTopics } from '@/lib/onboarding/stages-config';
 
 // ============================================================================
 // Types and Interfaces
@@ -198,7 +150,7 @@ export function OnboardingSidebar({
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                 Collecting in Stage {currentStage}
               </p>
-              {STAGE_TOPICS[currentStage]?.map((topic) => {
+              {getStageTopics(currentStage).map((topic) => {
                 const isCollected = stageProgressData?.collectedTopics?.includes(topic.key);
                 return (
                   <div

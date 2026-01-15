@@ -8,7 +8,6 @@ import { createModalClient } from '@/lib/crewai/modal-client';
 import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 import {
   ONBOARDING_SYSTEM_PROMPT,
-  ONBOARDING_STAGES,
   getStageSystemContext,
 } from '@/lib/ai/onboarding-prompt';
 

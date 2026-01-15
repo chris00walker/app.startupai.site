@@ -26,6 +26,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { trackOnboardingEvent, trackCrewAIEvent } from '@/lib/analytics';
+import { useOnboardingSession } from '@/hooks/useOnboardingSession';
+import { ONBOARDING_STAGES_CONFIG, getStageName } from '@/lib/onboarding/stages-config';
 
 // ============================================================================
 // Types and Interfaces
@@ -79,6 +81,13 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [isSaving, setIsSaving] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Realtime subscription for instant progress updates (replaces polling delay)
+  const {
+    session: realtimeSession,
+    realtimeStatus,
+    refetch: refetchRealtimeSession,
+  } = useOnboardingSession(session?.sessionId || null);
+
   // Stage review modal state
   const [showStageReview, setShowStageReview] = useState(false);
   const [reviewStage, setReviewStage] = useState<number | null>(null);
@@ -108,36 +117,55 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     setInput(e.target.value);
   }, []);
 
-  // Initialize stages
+  // Initialize stages from shared config
   const initializeStages = useCallback((currentStage: number = 1) => {
-    const stageNames = [
-      'Welcome & Introduction',
-      'Customer Discovery',
-      'Problem Definition',
-      'Solution Validation',
-      'Competitive Analysis',
-      'Resources & Constraints',
-      'Goals & Next Steps',
-    ];
-
-    const stageDescriptions = [
-      'Getting to know you and your business idea',
-      'Understanding your target customers',
-      'Defining the core problem you\'re solving',
-      'Exploring your proposed solution',
-      'Understanding the competitive landscape',
-      'Assessing your available resources',
-      'Setting strategic goals and priorities',
-    ];
-
-    return stageNames.map((name, index) => ({
-      stage: index + 1,
-      name,
-      description: stageDescriptions[index],
-      isComplete: index + 1 < currentStage,
-      isActive: index + 1 === currentStage,
+    return ONBOARDING_STAGES_CONFIG.map((stageConfig) => ({
+      stage: stageConfig.stage,
+      name: stageConfig.name,
+      description: stageConfig.description,
+      isComplete: stageConfig.stage < currentStage,
+      isActive: stageConfig.stage === currentStage,
     }));
   }, []);
+
+  // Sync Realtime session updates to local state (instant progress updates)
+  useEffect(() => {
+    if (!realtimeSession || !session) return;
+
+    // Check if stage or progress changed
+    const stageChanged = realtimeSession.currentStage !== session.currentStage;
+    const progressChanged = realtimeSession.overallProgress !== session.overallProgress;
+
+    if (stageChanged || progressChanged) {
+      console.log('[OnboardingWizard] Realtime update:', {
+        oldStage: session.currentStage,
+        newStage: realtimeSession.currentStage,
+        oldProgress: session.overallProgress,
+        newProgress: realtimeSession.overallProgress,
+      });
+
+      // Track and announce stage advancement
+      if (stageChanged && realtimeSession.currentStage > session.currentStage) {
+        trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, realtimeSession.currentStage);
+
+        toast.success(
+          `Stage complete! Moving to: ${getStageName(realtimeSession.currentStage)}`,
+          { duration: 4000 }
+        );
+      }
+
+      // Update local state with Realtime data
+      setSession(prev => prev ? {
+        ...prev,
+        currentStage: realtimeSession.currentStage,
+        overallProgress: realtimeSession.overallProgress,
+        stageProgress: realtimeSession.stageProgress,
+      } : null);
+
+      // Update stages UI
+      setStages(initializeStages(realtimeSession.currentStage));
+    }
+  }, [realtimeSession, session, initializeStages]);
 
   // Poll CrewAI analysis status
   const startAnalysisPolling = useCallback((wid: string, pid: string) => {
@@ -302,12 +330,8 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, data.currentStage);
 
             // Show toast notification for stage completion
-            const stageNames = [
-              'Welcome & Introduction', 'Customer Discovery', 'Problem Definition',
-              'Solution Validation', 'Competitive Analysis', 'Resources & Constraints', 'Goals & Next Steps'
-            ];
             toast.success(
-              `Stage complete! Moving to: ${stageNames[data.currentStage - 1]}`,
+              `Stage complete! Moving to: ${getStageName(data.currentStage)}`,
               { duration: 4000 }
             );
           }
@@ -467,15 +491,14 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         }
       }
 
-      // Wait for onFinish callback to complete DB write before refetching
-      // This fixes the race condition where refetchSessionStatus() reads stale data
-      // Increased to 1200ms for slower connections
+      // Brief grace period for perceived responsiveness
+      // Realtime subscription handles actual state updates instantly
+      // This delay is just for UX smoothness, not data accuracy
       setIsSaving(true);
-      await new Promise(resolve => setTimeout(resolve, 1200));
-
-      // Refetch session status to get updated stage and progress from database
-      await refetchSessionStatus();
+      await new Promise(resolve => setTimeout(resolve, 300));
       setIsSaving(false);
+      // Note: Realtime subscription handles progress updates automatically
+      // refetchSessionStatus() available as manual fallback if needed
 
     } catch (error: any) {
       if (error.name !== 'AbortError') {
@@ -487,7 +510,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       setIsSaving(false);
       abortControllerRef.current = null;
     }
-  }, [input, isAILoading, session, messages, refetchSessionStatus]);
+  }, [input, isAILoading, session, messages]);
 
   const announceToScreenReader = useCallback((message: string) => {
     const announcement = document.createElement('div');
@@ -774,16 +797,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
   // Get stage name for review modal
   const getStageNameForReview = useCallback((stageNumber: number) => {
-    const stageNames = [
-      'Welcome & Introduction',
-      'Customer Discovery',
-      'Problem Definition',
-      'Solution Validation',
-      'Competitive Analysis',
-      'Resources & Constraints',
-      'Goals & Next Steps',
-    ];
-    return stageNames[stageNumber - 1] || `Stage ${stageNumber}`;
+    return getStageName(stageNumber);
   }, []);
 
   // Handle HITL Brief approval
@@ -965,7 +979,25 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   // Main render
   return (
     <>
-      <div className="flex h-[100dvh] w-full overflow-hidden bg-background">
+      <div className="flex h-[100dvh] w-full overflow-hidden bg-background flex-col">
+        {/* Connection Status Banner (Realtime disconnected) */}
+        {realtimeStatus === 'disconnected' && session && (
+          <div className="bg-yellow-50 dark:bg-yellow-950/50 border-b border-yellow-200 dark:border-yellow-800 px-4 py-2 flex items-center justify-between gap-4 flex-shrink-0">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              Live updates disconnected. Progress may not update instantly.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refetchRealtimeSession}
+              className="text-yellow-800 dark:text-yellow-200 border-yellow-300 dark:border-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900"
+            >
+              Reconnect
+            </Button>
+          </div>
+        )}
+
+        <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Sidebar with progress tracking */}
         <div className="hidden md:flex w-[320px] flex-shrink-0">
           <OnboardingSidebar
@@ -999,6 +1031,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             />
           )}
         </main>
+        </div>
       </div>
 
       {/* Exit confirmation dialog */}

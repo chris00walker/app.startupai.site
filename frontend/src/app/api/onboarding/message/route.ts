@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
+import { getStageConfig } from '@/lib/onboarding/stages-config';
 
 type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
@@ -130,90 +131,6 @@ interface MessageError {
     retryable: boolean;
   };
 }
-
-// ============================================================================
-// Conversation Stage Configuration
-// ============================================================================
-
-const CONVERSATION_STAGES = {
-  1: {
-    name: 'Welcome & Introduction',
-    description: 'Getting to know you and your business idea',
-    keyQuestions: [
-      'What business idea are you most excited about?',
-      'What inspired this idea?',
-      'What stage is your business currently in?',
-    ],
-    dataToCollect: ['business_concept', 'inspiration', 'current_stage'],
-    progressThreshold: 80,
-  },
-  2: {
-    name: 'Customer Discovery',
-    description: 'Understanding your target customers',
-    keyQuestions: [
-      'Who do you think would be most interested in this solution?',
-      'What specific group of people have this problem most acutely?',
-      'How do these customers currently solve this problem?',
-    ],
-    dataToCollect: ['target_customers', 'customer_segments', 'current_solutions'],
-    progressThreshold: 75,
-  },
-  3: {
-    name: 'Problem Definition',
-    description: 'Defining the core problem you\'re solving',
-    keyQuestions: [
-      'What specific problem does your solution address?',
-      'How painful is this problem for your customers?',
-      'How often do they encounter this problem?',
-    ],
-    dataToCollect: ['problem_description', 'pain_level', 'frequency'],
-    progressThreshold: 80,
-  },
-  4: {
-    name: 'Solution Validation',
-    description: 'Exploring your proposed solution',
-    keyQuestions: [
-      'How does your solution solve this problem?',
-      'What makes your approach unique?',
-      'What\'s your key differentiator?',
-    ],
-    dataToCollect: ['solution_description', 'unique_value_prop', 'differentiation'],
-    progressThreshold: 75,
-  },
-  5: {
-    name: 'Competitive Analysis',
-    description: 'Understanding the competitive landscape',
-    keyQuestions: [
-      'Who else is solving this problem?',
-      'What alternatives do customers have?',
-      'What would make customers switch to your solution?',
-    ],
-    dataToCollect: ['competitors', 'alternatives', 'switching_barriers'],
-    progressThreshold: 70,
-  },
-  6: {
-    name: 'Resources & Constraints',
-    description: 'Assessing your available resources',
-    keyQuestions: [
-      'What\'s your budget for getting started?',
-      'What skills and resources do you have available?',
-      'What are your main constraints?',
-    ],
-    dataToCollect: ['budget_range', 'available_resources', 'constraints'],
-    progressThreshold: 75,
-  },
-  7: {
-    name: 'Goals & Next Steps',
-    description: 'Setting strategic goals and priorities',
-    keyQuestions: [
-      'What do you want to achieve in the next 3 months?',
-      'How will you measure success?',
-      'What\'s your biggest priority right now?',
-    ],
-    dataToCollect: ['short_term_goals', 'success_metrics', 'priorities'],
-    progressThreshold: 85,
-  },
-};
 
 // ============================================================================
 // Helper Functions
@@ -586,8 +503,7 @@ export async function POST(request: NextRequest) {
         "You're making great progress! Your insights are helping build a comprehensive picture of your business opportunity.",
     };
 
-    const nextStageInfo =
-      CONVERSATION_STAGES[crewMessage.stage_state.current_stage as keyof typeof CONVERSATION_STAGES];
+    const nextStageInfo = getStageConfig(crewMessage.stage_state.current_stage);
 
     const response: SendMessageResponse = {
       success: true,
