@@ -1,15 +1,16 @@
 # In Progress Work
 
-Last Updated: 2026-01-14
+Last Updated: 2026-01-15
 
 ---
 
-## CRITICAL: Onboarding Stage Progression Broken
+## CRITICAL: Onboarding Stage Progression - OpenRouter Fix Deployed
 
-**Status:** 🔴 UNRESOLVED - Multiple fix attempts failed
+**Status:** 🟡 FIX DEPLOYED - Testing Required
 **Priority:** P0 - Blocks entire validation pipeline
 **Date Started:** 2026-01-14
-**Time Spent:** ~8 hours across 14 commits
+**Latest Fix:** 2026-01-15 (OpenRouter integration)
+**Commit:** `901bb7b`
 
 ### Problem Statement
 
@@ -20,100 +21,62 @@ The AI consultant "Alex" responds with text but **never calls the stage progress
 - CrewAI/Modal workflow never starts
 - Entire Phase 0 → Phase 1 pipeline blocked
 
-### Evidence (Supabase MCP Query)
-```sql
--- All sessions show same pattern:
-current_stage: 1      -- Stuck at stage 1
-overall_progress: 13  -- Stuck at 13%
-msg_count: 56         -- Many messages exchanged
-stage_data: {
-  brief: {},
-  coverage: { stage_1: { coverage: 0 } }
-  -- NO stage_1_quality, stage_1_summary, completion fields
-}
-```
+### Latest Fix: OpenRouter Integration
 
-### Fix Attempts (All Failed)
+**Deployed:** 2026-01-15
+**Commit:** `901bb7b`
 
-| Commit | Theory | Fix Applied | Result |
-|--------|--------|-------------|--------|
-| `a068a10` | Prompt said "text first" but code disabled tools after text | Updated prompt to say "tools first" | ❌ Still stuck |
-| `45d7ee5` | Need to guarantee text after tools | Added `prepareStep` + `stopWhen` | ❌ Still stuck |
-| `3312b05` | `toolChoice: 'auto'` doesn't enforce | Changed to `toolChoice: 'required'` | ❌ Still stuck |
-| `4bd8b8e` | Need diagnostic logging | Added debug endpoint + logging | ✅ Logs work, ❌ Issue persists |
-| `e83a01f` | Off-by-one error: `stepNumber === 1` should be `0` | Fixed to `stepNumber === 0` | ❌ Still stuck |
-| `f25f33d` | Early return blocked DB updates on empty text | Removed early return | ❌ Still stuck |
-| (env var) | Model too small to respect toolChoice | Changed to `gpt-4o` | ❌ Still stuck |
+Switched from direct OpenAI API to OpenRouter multi-provider gateway:
+- Replaced `@ai-sdk/openai` with `@openrouter/ai-sdk-provider`
+- Default model: `anthropic/claude-3.5-sonnet` (better tool reliability)
+- OpenRouter provides automatic failover and better tool enforcement
+- Environment variables added to Netlify: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
 
-### Root Cause Analysis: INCONCLUSIVE
-
-We do NOT definitively know the root cause. Theories explored:
-
-1. **Prompt/Code Mismatch** - Fixed, but issue persists
-2. **Off-by-One Error** - Fixed, but issue persists
-3. **Early Return Bug** - Fixed, but issue persists
-4. **Model Quality** - Upgraded to gpt-4o, but issue persists
-5. **AI SDK Bug** - Known issues with `toolChoice: 'required'` not being enforced:
-   - [GitHub #8992](https://github.com/vercel/ai/issues/8992) - toolChoice not enforced
-   - [GitHub #10269](https://github.com/vercel/ai/issues/10269) - Tool execution unreliable after ~5 messages
-
-### What We Know For Certain
-
-| Fact | Evidence |
-|------|----------|
-| Alex generates text responses | Messages appear in UI and DB |
-| Tools are NOT being called | No `stage_X_quality`, `stage_X_summary` in `stage_data` |
-| `prepareStep` may not be executing | No server logs confirming `toolChoice: 'required'` is sent |
-| Multiple sessions affected | All 5+ test sessions show identical pattern |
-| Problem persists across models | gpt-4o-mini and gpt-4o both fail |
-
-### What We Don't Know
-
-- Is `prepareStep` callback actually being called?
-- Is `toolChoice: 'required'` being sent to OpenAI API?
-- Is OpenAI ignoring the toolChoice parameter?
-- Is there an AI SDK bug we haven't identified?
-- Is the streaming response format affecting tool execution?
-
-### Current Architecture (Problematic)
-
+**New Architecture:**
 ```
 Frontend (OnboardingWizardV2)
     ↓ POST /api/chat
 Backend (chat/route.ts)
-    ↓ streamText() with tools
-OpenAI API (gpt-4o)
-    ↓ Should call tools, doesn't
-Response (text only, no tool calls)
+    ↓ streamText() with tools via OpenRouter
+OpenRouter Gateway
+    ↓ Routes to Claude 3.5 Sonnet (or fallback)
+Anthropic Claude API
+    ↓ Better tool calling reliability
+Response (tools + text)
     ↓
-Database (stage never updates)
+Database (stage updates)
 ```
 
-**Single Point of Failure:** Direct OpenAI dependency with no fallback
+### Previous Fix Attempts (All Failed with OpenAI)
 
-### Recommendations
+| Commit | Theory | Fix Applied | Result |
+|--------|--------|-------------|--------|
+| `a068a10` | Prompt said "text first" | Changed to "tools first" | ❌ Still stuck |
+| `45d7ee5` | Need guaranteed text step | Added `prepareStep` + `stopWhen` | ❌ Still stuck |
+| `3312b05` | `toolChoice: 'auto'` too weak | Changed to `toolChoice: 'required'` | ❌ Still stuck |
+| `e83a01f` | Off-by-one error | Fixed `stepNumber === 0` | ❌ Still stuck |
+| `f25f33d` | Early return blocked DB | Removed early return | ❌ Still stuck |
+| (env var) | Model too small | Changed to `gpt-4o` | ❌ Still stuck |
+| **`901bb7b`** | **Provider issue** | **Switched to OpenRouter + Claude** | **🟡 Testing** |
 
-#### Immediate (P0)
-1. **Add instrumentation** - Log exact request/response to OpenAI to confirm toolChoice is sent
-2. **Test with different provider** - Try Anthropic Claude which has better tool reliability
-3. **Consider OpenRouter** - Multi-provider gateway with automatic fallback
+### Verification Checklist
 
-#### Short-term (P1)
-4. **Implement provider abstraction** - Use OpenRouter or custom gateway
-5. **Add retry logic** - If no tools called, retry with stronger prompt
-6. **Fallback to manual progression** - Let user click "Next Stage" if AI fails
+After deploy completes, test:
 
-#### Architectural (P2)
-7. **Decouple tool execution** - Separate tool calls from text generation
-8. **Use generateObject** - More reliable than streaming for structured output
-9. **Consider CrewAI for onboarding** - Already proven reliable in Modal backend
+1. [ ] Start new onboarding session
+2. [ ] Check server logs for `[api/chat] Using OpenRouter model: anthropic/claude-3.5-sonnet`
+3. [ ] Answer 2-3 questions in Stage 1
+4. [ ] Verify:
+   - [ ] Progress bar > 14%
+   - [ ] Stage header changes from "Stage 1" to "Stage 2"
+   - [ ] Toast notification shows "Moving to Stage 2"
+5. [ ] Query Supabase: `stage_data` should have `stage_1_quality` and `stage_1_summary`
 
-### Files Involved
+### Files Modified
 
-- `src/app/api/chat/route.ts` - Main chat endpoint with tool definitions
-- `src/lib/ai/onboarding-prompt.ts` - System prompt with tool instructions
-- `src/components/onboarding/OnboardingWizardV2.tsx` - Frontend state management
-- Environment: `OPENAI_MODEL_DEFAULT`, `OPENAI_API_KEY`
+- `src/app/api/chat/route.ts` - Now uses OpenRouter + Claude
+- `package.json` - Added `@openrouter/ai-sdk-provider`
+- Netlify env: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
 
 ---
 
@@ -152,9 +115,9 @@ Implemented `approve_founders_brief` checkpoint. Will work once onboarding compl
 - Auto-expanding textarea
 
 ### Infrastructure
-- OpenRouter integration (multi-provider)
+- ~~**OpenRouter integration for onboarding chat**~~ ✅ Implemented (`901bb7b`)
 - Provider health monitoring
-- Automatic failover
+- Automatic failover logic enhancement
 
 ### Testing
 - E2E test for full onboarding flow
@@ -165,7 +128,7 @@ Implemented `approve_founders_brief` checkpoint. Will work once onboarding compl
 
 ## Technical Debt
 
-1. **Single provider dependency** - OpenAI-only is a reliability risk
+1. ~~**Single provider dependency**~~ ✅ Resolved - Now using OpenRouter with Claude fallback
 2. **No tool call verification** - Can't confirm tools are being called
 3. **Limited observability** - Need APM/logging for AI calls
 4. **No fallback UX** - User stuck if AI fails to progress stages
