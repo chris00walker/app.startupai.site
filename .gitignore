@@ -228,6 +228,7 @@ audit-logs/
 # Deployment artifacts
 app-deployment.zip
 frontend/app-startupai-site.tar.gz
+frontend/deploy-*.zip
 netlify.toml.backup
 *.tar.gz
 

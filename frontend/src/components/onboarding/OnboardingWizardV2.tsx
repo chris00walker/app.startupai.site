@@ -715,16 +715,26 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       const progressPercent = Math.round((session.currentStage / session.totalStages) * 100);
       trackOnboardingEvent.exitedEarly(session.sessionId, session.currentStage, progressPercent);
 
-      // Actually pause the session in the database
+      // Actually pause the session in the database - WITH RESPONSE CHECKING
+      // Fix: Don't redirect if pause fails (data loss prevention)
       try {
-        await fetch('/api/onboarding/pause', {
+        const response = await fetch('/api/onboarding/pause', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: session.sessionId }),
         });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          console.error('[OnboardingWizard] Pause failed:', data);
+          toast.error('Failed to save session. Please try again.');
+          return; // Block redirect on failure
+        }
       } catch (e) {
-        console.warn('[OnboardingWizard] Failed to pause session:', e);
-        // Continue with exit even if pause fails
+        console.error('[OnboardingWizard] Pause error:', e);
+        toast.error('Failed to save session. Please try again.');
+        return; // Block redirect on failure
       }
     }
 

@@ -10,6 +10,7 @@ import {
   ONBOARDING_SYSTEM_PROMPT,
   getStageSystemContext,
 } from '@/lib/ai/onboarding-prompt';
+import { getStageConfig } from '@/lib/onboarding/stages-config';
 
 // ============================================================================
 // AI Model Configuration - OpenRouter (Multi-Provider Gateway)
@@ -59,21 +60,10 @@ const assessQualityTool = tool({
   },
 });
 
-const advanceStageTool = tool({
-  description: 'Silently advance from the current stage to the next stage. This is a background operation - never announce it to the user. Only use when coverage is above threshold and clarity is good.',
-  inputSchema: z.object({
-    fromStage: z.number().min(1).max(7).describe('The current stage number'),
-    toStage: z.number().min(1).max(7).describe('The next stage number (usually fromStage + 1)'),
-    summary: z.string().describe('Brief summary of what was learned in this stage'),
-    collectedData: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).describe('Key data points collected in this stage as key-value pairs'),
-  }),
-  execute: async ({ fromStage, toStage, summary, collectedData }) => {
-    return {
-      transition: { fromStage, toStage, summary, collectedData },
-      message: `Advancing from Stage ${fromStage} to Stage ${toStage}`,
-    };
-  },
-});
+// advanceStageTool REMOVED - backend now handles stage advancement automatically
+// after assessQuality returns coverage >= threshold (see onFinish callback)
+// This fixes the root cause of 10+ failed stage progression fixes:
+// LLMs cannot reliably chain conditional tool calls (assessQuality → advanceStage)
 
 const completeOnboardingTool = tool({
   description: 'Silently signal that all 7 stages are complete. This is a background operation that triggers strategic analysis - never mention it to the user. Only use after Stage 7 is thoroughly completed with high-quality responses.',
@@ -92,7 +82,7 @@ const completeOnboardingTool = tool({
 
 const onboardingTools = {
   assessQuality: assessQualityTool,
-  advanceStage: advanceStageTool,
+  // advanceStage: REMOVED - backend handles stage advancement automatically
   completeOnboarding: completeOnboardingTool,
 };
 
@@ -251,26 +241,8 @@ export async function POST(req: NextRequest) {
                 input: toolCall.input,
               });
 
-              // Handle advanceStage tool
-              if (toolCall.toolName === 'advanceStage') {
-                const { fromStage, toStage, summary, collectedData } = toolCall.input as any;
-                newStage = toStage;
-
-                // Store stage summary and collected data
-                newStageData[`stage_${fromStage}_summary`] = summary;
-                newStageData[`stage_${fromStage}_data`] = collectedData;
-
-                // Merge collected data into brief
-                newStageData.brief = {
-                  ...(newStageData.brief || {}),
-                  ...collectedData,
-                };
-
-                console.log('[api/chat] Stage advanced:', {
-                  from: fromStage,
-                  to: toStage,
-                });
-              }
+              // advanceStage tool handling REMOVED - backend auto-advances in assessQuality handler above
+              // This code block is kept for reference but the tool no longer exists
 
               // Handle assessQuality tool
               if (toolCall.toolName === 'assessQuality') {
@@ -291,6 +263,43 @@ export async function POST(req: NextRequest) {
                   clarity,
                   completeness,
                 });
+
+                // === BACKEND AUTO-ADVANCE LOGIC ===
+                // This replaces the unreliable LLM-driven advanceStage tool
+                // Root cause fix: LLMs cannot conditionally chain tools
+                const stageConfig = getStageConfig(currentStage);
+                const threshold = stageConfig?.progressThreshold ?? 0.75;
+
+                if (
+                  coverage >= threshold &&
+                  completeness === 'complete' &&
+                  currentStage < 7
+                ) {
+                  const fromStage = currentStage;
+                  newStage = currentStage + 1;
+
+                  // Store stage summary for audit trail
+                  newStageData[`stage_${fromStage}_summary`] =
+                    `Auto-advanced after ${Math.round(coverage * 100)}% coverage`;
+
+                  console.log('[api/chat] AUTO-ADVANCING:', {
+                    from: fromStage,
+                    to: newStage,
+                    coverage,
+                    threshold,
+                    clarity,
+                    completeness,
+                  });
+                } else {
+                  console.log('[api/chat] Not advancing:', {
+                    stage: currentStage,
+                    coverage,
+                    threshold,
+                    completeness,
+                    reason: coverage < threshold ? 'below threshold' :
+                            completeness !== 'complete' ? 'incomplete' : 'at stage 7',
+                  });
+                }
               }
 
               // Handle completeOnboarding tool
@@ -363,11 +372,20 @@ export async function POST(req: NextRequest) {
 
                   // Step 4: Kick off validation workflow (Modal)
                   const modalClient = createModalClient();
+
+                  // Get conversation transcript for two-layer architecture
+                  // Layer 1 (entrepreneur_briefs) = raw extraction
+                  // Layer 2 (founders_briefs) = S1 compiled from transcript + extraction
+                  const conversationHistory = session.conversation_history || [];
+                  const conversationTranscript = JSON.stringify(conversationHistory);
+
                   const validationInputs = buildFounderValidationInputs(
                     briefData,
                     projectId,
                     user.id,
-                    sessionId
+                    sessionId,
+                    conversationTranscript,  // 5th param: transcript for CrewAI
+                    'founder'                // 6th param: user type
                   );
 
                   const response = await modalClient.kickoff({
@@ -478,6 +496,13 @@ export async function POST(req: NextRequest) {
               Math.max(qualityBasedProgress, messageBasedProgress)
             );
           }
+
+          // === ADD stage_progress FIELD ===
+          // This was never being set before, causing DB column to always be null
+          const currentStageQuality = newStageData[`stage_${newStage}_quality`];
+          updateData.stage_progress = currentStageQuality?.coverage
+            ? Math.round(currentStageQuality.coverage * 100)
+            : 0;
 
           console.log('[api/chat] Updating database with:', {
             sessionId,

@@ -741,11 +741,14 @@ async function handleFounderValidation(payload: FounderValidationPayload): Promi
     })
     .eq('id', payload.project_id);
 
-  // If session_id provided, upsert entrepreneur brief
-  if (payload.session_id) {
-    const briefRow = buildEntrepreneurBriefRow(payload);
-    await admin.from('entrepreneur_briefs').upsert(briefRow, { onConflict: 'session_id' });
-  }
+  // REMOVED: entrepreneur_briefs upsert
+  // The TWO-ARTIFACT FIX: entrepreneur_briefs (Layer 1) is created by /api/chat completeOnboarding
+  // founders_briefs (Layer 2) is created by handleHITLCheckpoint on approve_founders_brief
+  // This code was incorrectly overwriting Layer 1 with Layer 2 data
+  // if (payload.session_id) {
+  //   const briefRow = buildEntrepreneurBriefRow(payload);
+  //   await admin.from('entrepreneur_briefs').upsert(briefRow, { onConflict: 'session_id' });
+  // }
 
   // Persist full validation state to crewai_validation_states table
   const validationStateRow = buildValidationStateRow(payload);
@@ -1115,6 +1118,67 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
 
   const admin = createAdminClient();
   const nowIso = new Date().toISOString();
+
+  // === PHASE 0 SPECIFIC: Create founders_briefs (Layer 2) on approve_founders_brief ===
+  // This is the TWO-ARTIFACT FIX: entrepreneur_briefs (Layer 1) stays untouched
+  // founders_briefs (Layer 2) is created from S1 agent's compiled output
+  if (payload.checkpoint === 'approve_founders_brief' && payload.context?.founders_brief) {
+    const foundersBrief = payload.context.founders_brief as Record<string, any>;
+
+    console.log('[api/crewai/webhook] Creating founders_brief (Layer 2) from S1 output');
+
+    const { error: briefError } = await admin.from('founders_briefs').insert({
+      session_id: payload.context.session_id as string || null,
+      user_id: payload.user_id,
+      // The Idea
+      idea_one_liner: foundersBrief.the_idea?.one_liner || foundersBrief.business_idea || 'No idea provided',
+      idea_description: foundersBrief.the_idea?.description || foundersBrief.business_idea || '',
+      idea_inspiration: foundersBrief.the_idea?.inspiration || null,
+      idea_unique_insight: foundersBrief.the_idea?.unique_insight || null,
+      // Problem Hypothesis
+      problem_statement: foundersBrief.problem_hypothesis?.problem_statement || '',
+      problem_who_has_this: foundersBrief.problem_hypothesis?.who_has_this_problem || '',
+      problem_frequency: foundersBrief.problem_hypothesis?.frequency || null,
+      problem_current_alternatives: foundersBrief.problem_hypothesis?.current_alternatives || null,
+      problem_why_alternatives_fail: foundersBrief.problem_hypothesis?.why_alternatives_fail || null,
+      problem_evidence: foundersBrief.problem_hypothesis?.evidence || null,
+      // Customer Hypothesis
+      customer_primary_segment: foundersBrief.customer_hypothesis?.primary_segment || '',
+      customer_segment_description: foundersBrief.customer_hypothesis?.segment_description || null,
+      customer_characteristics: foundersBrief.customer_hypothesis?.characteristics || [],
+      customer_where_to_find: foundersBrief.customer_hypothesis?.where_to_find || null,
+      customer_estimated_size: foundersBrief.customer_hypothesis?.estimated_size || null,
+      // Solution Hypothesis
+      solution_proposed: foundersBrief.solution_hypothesis?.proposed_solution || '',
+      solution_key_features: foundersBrief.solution_hypothesis?.key_features || [],
+      solution_differentiation: foundersBrief.solution_hypothesis?.differentiation || null,
+      solution_unfair_advantage: foundersBrief.solution_hypothesis?.unfair_advantage || null,
+      // Key Assumptions (array of objects with risk_level, how_to_test)
+      key_assumptions: foundersBrief.key_assumptions || [],
+      // QA Status from GV1/GV2 agents
+      qa_legitimacy_check: foundersBrief.qa_status?.legitimacy_check || 'pending',
+      qa_legitimacy_notes: foundersBrief.qa_status?.legitimacy_notes || null,
+      qa_intent_verification: foundersBrief.qa_status?.intent_verification || 'pending',
+      qa_intent_notes: foundersBrief.qa_status?.intent_notes || null,
+      qa_overall_status: foundersBrief.qa_status?.overall_status || 'pending',
+      // Interview metadata from O1 agent
+      interview_duration_minutes: foundersBrief.metadata?.interview_duration_minutes || 0,
+      interview_turns: foundersBrief.metadata?.interview_turns || 0,
+      interview_followup_questions: foundersBrief.metadata?.followup_questions || 0,
+      interview_confidence_score: foundersBrief.metadata?.confidence_score || 0,
+      // Approval workflow
+      approval_status: 'pending',
+      created_at: nowIso,
+      updated_at: nowIso,
+    });
+
+    if (briefError) {
+      console.error('[api/crewai/webhook] Failed to create founders_brief (Layer 2):', briefError);
+      // Don't fail the whole request - continue with approval request creation
+    } else {
+      console.log('[api/crewai/webhook] founders_brief (Layer 2) created successfully');
+    }
+  }
 
   // Update validation_runs to paused status
   await admin

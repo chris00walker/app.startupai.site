@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for backlog references"
 status: "active"
-last_reviewed: "2025-11-30"
+last_reviewed: "2026-01-15"
 ---
 
 # Backlog
@@ -17,10 +17,37 @@ last_reviewed: "2025-11-30"
 
 | Item | Effort | Source | Notes |
 |------|--------|--------|-------|
+| **HITL Approval UI Data Source** | 2-4h | [Phase 0 Audit](../audits/phase0-spec-alignment-report.md) | **DEFERRED from P1** - see details below |
 | **Consultant Alex UX Improvements** | 4-5h | Alex UX Plan | Mirror founder improvements for consultant onboarding flow |
 | VPC geometric shapes (circle/square) | 2-3h | [Strategyzer UX Audit](../reports/strategyzer-ux-audit.md) | Visual polish to match Strategyzer methodology |
 | ~~VPC visual fit lines~~ | ~~4-6h~~ | ~~[Strategyzer UX Audit]~~ | ✅ Done - commit `0cf17ca` (Nov 29) |
 | HITL comment display | 2-4h | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Show `human_comment` in UI |
+
+### HITL Approval UI Data Source (Deferred from P1) ⚠️ DO NOT FORGET
+
+**Context**: Team audit (2026-01-15) identified two-artifact data model issue.
+
+**Problem**: `FoundersBriefReview.tsx` reads from `entrepreneur_briefs` (Layer 1 raw extraction), but should show `founders_briefs` (Layer 2 S1-compiled output) after Modal processing.
+
+**Current Behavior**: HITL approval shows raw Alex chat extraction instead of S1-validated brief.
+
+**Two Options**:
+
+| Option | Approach | Effort | Risk |
+|--------|----------|--------|------|
+| A (Spec-compliant) | Create `/api/founders-brief` endpoint that queries `founders_briefs` table | 2-4h | Lower long-term |
+| B (Pragmatic) | Pass `approval_requests.task_output.founders_brief` directly to component | 1-2h | Tech debt |
+
+**Recommendation**: Start with Option B (quick fix), migrate to Option A once Phase 0 stabilizes.
+
+**Files to Modify**:
+- `frontend/src/components/onboarding/FoundersBriefReview.tsx` - Update data source
+- `frontend/src/app/api/onboarding/brief/route.ts` - Query `founders_briefs` instead of `entrepreneur_briefs`
+- OR: `frontend/src/app/approvals/[id]/page.tsx` - Pass task_output directly
+
+**Reference Plan**: `~/.claude/plans/gentle-booping-mitten.md` (Section C4)
+
+**Why Deferred**: Less frequently hit path than stage progression bugs. Can ship P1 fixes first and validate the two-artifact architecture works end-to-end before updating UI.
 
 ### Consultant Alex UX Improvements (Backlog)
 
@@ -90,5 +117,20 @@ The following items from the original backlog have been addressed:
 
 Backlog triage happens weekly with platform + AI platform leads. Update this table after sprint planning so docs and GitHub stay aligned.
 
-**Next Review**: December 2025
-**Last Updated**: 2025-11-30
+**Next Review**: January 2026
+**Last Updated**: 2026-01-15
+
+---
+
+## Phase 0 Audit Reports (2026-01-15)
+
+Team audit created comprehensive documentation of Phase 0 issues:
+
+| Report | Purpose |
+|--------|---------|
+| [phase0-retrospective-48h.md](../audits/phase0-retrospective-48h.md) | Git forensics of 10+ failed fixes |
+| [phase0-spec-alignment-report.md](../audits/phase0-spec-alignment-report.md) | Spec vs implementation gaps |
+| [phase0-alignment-task-list.md](../audits/phase0-alignment-task-list.md) | Prioritized task list |
+| [phase0-spec-delta.md](../audits/phase0-spec-delta.md) | Proposed spec updates |
+
+**Implementation Plan**: `~/.claude/plans/gentle-booping-mitten.md`

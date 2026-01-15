@@ -41,16 +41,59 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| - | *No P0 blockers remaining* | ✅ | - | - | Dogfooding setup complete 2026-01-12 |
+| 1 | **Delete deploy zip with secrets** | 🔴 **CRITICAL** | @devops | 1 min | 423MB zip contains SERVICE_ROLE_KEY, DATABASE_URL |
+| 2 | **Apply Realtime migration** | **Ready** | @supabase | 1 min | `20260115000001_enable_onboarding_realtime.sql` not pushed |
+| 3 | **Apply founders_briefs migration** | **Ready** | @supabase | 1 min | `20260115000002_founders_briefs.sql` creates Layer 2 table |
+
+#### P0 Security Details (2026-01-15)
+
+**Deploy Zip with Secrets** 🔴
+```
+frontend/deploy-1768437579795-4ada87d3-745a-4904-beaa-3b0fdf0c1e04.zip
+Contains: .env.local, .env.staging with SUPABASE_SERVICE_ROLE_KEY, DATABASE_URL
+```
+**Fix**: `rm frontend/deploy-*.zip && echo "frontend/deploy-*.zip" >> .gitignore`
+
+**Realtime Migration**
+Local file exists but not applied to remote Supabase.
+**Fix**: `supabase db push`
 
 ### P1: High Priority (Should Fix Before Launch)
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 1 | Onboarding UX Overhaul (9 issues) | ⏳ **PENDING VERIFICATION** | @frontend | ~10 hours | See details below - needs live testing |
-| 2 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
-| 3 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
-| 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+| 1 | **Phase 0 Stage Progression Fix** | **Ready** | @backend | ~2 hours | Backend auto-advance, remove advanceStage tool, add stage_progress |
+| 2 | **Phase 0 Webhook Data Model Fix** | **Ready** | @backend | ~1 hour | Fix webhook to create `founders_briefs` (not overwrite `entrepreneur_briefs`) |
+| 3 | **Transcript Handoff to Modal** | **Ready** | @backend | ~30 min | Pass conversation transcript to buildFounderValidationInputs |
+| 4 | **Save & Exit Response Checking** | **Ready** | @frontend | ~30 min | Check pause API response before redirect |
+| 5 | Onboarding UX Overhaul (9 issues) | ⏳ **PENDING VERIFICATION** | @frontend | ~10 hours | See details below - needs live testing |
+| 6 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
+| 7 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
+| 8 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+
+#### Phase 0 Architecture Fix (2026-01-15) - Team Audit Findings
+
+**Problem**: 10+ failed attempts to fix stage progression. Root cause: LLM cannot conditionally chain tools.
+
+**Solution**: Backend-driven deterministic logic (Plan: `gentle-booping-mitten.md`)
+
+| Fix | File | Change |
+|-----|------|--------|
+| Backend auto-advance | `/api/chat/route.ts` | Move stage advancement from LLM tool to backend after `assessQuality` |
+| Remove advanceStage tool | `/api/chat/route.ts` | Tool is redundant with backend logic |
+| Add stage_progress | `/api/chat/route.ts` | `updateData.stage_progress = Math.round(coverage * 100)` |
+| Fix transcript handoff | `/api/chat/route.ts` | Pass `conversationTranscript` as 5th param to `buildFounderValidationInputs` |
+| Fix webhook data model | `/api/crewai/webhook/route.ts` | INSERT to `founders_briefs` (Layer 2), don't overwrite `entrepreneur_briefs` (Layer 1) |
+| Save & Exit checking | `OnboardingWizardV2.tsx` | Check `response.ok && data.success` before redirect |
+
+**Two-Artifact Data Model** (Key Insight from Team Audit):
+```
+entrepreneur_briefs (Layer 1) → Created by Alex chat → Raw conversational extraction
+founders_briefs (Layer 2)     → Created by S1 agent → Validated brief for Phase 1
+```
+The webhook was incorrectly overwriting Layer 1 with Layer 2 data. Now creates separate table.
+
+**Deferred to P2**: HITL approval UI data source update (see backlog.md)
 
 #### Onboarding UX Overhaul (2026-01-15) ⏳ PENDING VERIFICATION
 
@@ -145,6 +188,9 @@ Issues found during dogfooding testing of Founder onboarding flow:
 | 3 | Consultant dashboard | ✅ **VERIFIED** | Clients, client projects (RLS policy deployed) |
 | 4 | Phase 2 Desirability | **NEXT** | Landing page generation, experiments |
 | 5 | Phase 3-4 Feasibility/Viability | **Pending** | After Phase 2 complete |
+| 6 | **Deprecate /api/onboarding/complete** | **After P1** | Keep for recovery, but /api/chat tool is canonical |
+| 7 | **HITL Approval UI Data Source** | **Deferred** | See backlog.md - update FoundersBriefReview to read from founders_briefs |
+| 8 | **Webhook Contract Tests** | **After P1** | Add tests for Phase 0 HITL checkpoint handling |
 
 **Modal Status (2026-01-12):** Production deployed, Phase 0-2 validated, HITL working.
 
@@ -222,6 +268,14 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 ---
 
 **Last Updated**: 2026-01-15
+
+**Changes (2026-01-15 - Phase 0 Team Audit):**
+- **P0 SECURITY**: Added deploy zip with secrets deletion (423MB file with SERVICE_ROLE_KEY)
+- **P0 MIGRATIONS**: Added Realtime + founders_briefs migrations to apply
+- **P1 PHASE 0 FIX**: Added 6 core fixes from team audit (backend auto-advance, webhook data model, etc.)
+- **P2 DEFERRED**: Added HITL UI data source update, deprecate /api/onboarding/complete, webhook tests
+- **NEW AUDIT DOCS**: 4 audit reports in `docs/audits/` + implementation plan `gentle-booping-mitten.md`
+- **KEY INSIGHT**: Two-artifact data model - `entrepreneur_briefs` (Layer 1) vs `founders_briefs` (Layer 2)
 
 **Changes (2026-01-15 - Late Session):**
 - **Architectural Improvements**: Supabase Realtime + unified stage config (from plan `snappy-hugging-lollipop.md`)
