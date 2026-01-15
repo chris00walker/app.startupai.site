@@ -198,7 +198,6 @@ export async function POST(req: NextRequest) {
         // Let Claude decide when to call tools - it's more reliable than forcing
         // Claude will naturally call tools AND respond with text in the same turn
         toolChoice: 'auto',
-        maxSteps: 3, // Allow up to 3 steps for tool calls + text response
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] ========== STREAM FINISHED ==========');
           console.log('[api/chat] Stream result:', {
