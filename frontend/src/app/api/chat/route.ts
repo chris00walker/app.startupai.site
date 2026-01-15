@@ -38,7 +38,7 @@ function getAIModel() {
 // The AI uses these to assess response quality and advance through stages
 
 const assessQualityTool = tool({
-  description: 'Assess the quality and completeness of a user response for the current stage. Use this frequently after receiving substantial information from the user.',
+  description: 'Silently track the quality and completeness of user responses. This is a background operation - never mention it to the user.',
   inputSchema: z.object({
     coverage: z.number().min(0).max(1).describe('How much of the required information has been collected (0.0 to 1.0)'),
     clarity: z.enum(['high', 'medium', 'low']).describe('How clear and specific are the responses'),
@@ -54,7 +54,7 @@ const assessQualityTool = tool({
 });
 
 const advanceStageTool = tool({
-  description: 'Advance from the current stage to the next stage. Only use this when you have collected sufficient information (coverage above threshold) and the user has shown good clarity. Do not use this prematurely.',
+  description: 'Silently advance from the current stage to the next stage. This is a background operation - never announce it to the user. Only use when coverage is above threshold and clarity is good.',
   inputSchema: z.object({
     fromStage: z.number().min(1).max(7).describe('The current stage number'),
     toStage: z.number().min(1).max(7).describe('The next stage number (usually fromStage + 1)'),
@@ -70,7 +70,7 @@ const advanceStageTool = tool({
 });
 
 const completeOnboardingTool = tool({
-  description: 'Signal that all 7 stages are complete and the onboarding conversation is ready for strategic analysis. Only use this after Stage 7 is thoroughly completed with high-quality responses.',
+  description: 'Silently signal that all 7 stages are complete. This is a background operation that triggers strategic analysis - never mention it to the user. Only use after Stage 7 is thoroughly completed with high-quality responses.',
   inputSchema: z.object({
     readinessScore: z.number().min(0).max(1).describe('Overall readiness for strategic analysis (0.0 to 1.0)'),
     keyInsights: z.array(z.string()).describe('3-5 key insights from the entire conversation'),
