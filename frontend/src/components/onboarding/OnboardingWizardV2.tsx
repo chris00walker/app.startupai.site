@@ -491,14 +491,16 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         }
       }
 
-      // Brief grace period for perceived responsiveness
-      // Realtime subscription handles actual state updates instantly
-      // This delay is just for UX smoothness, not data accuracy
+      // Brief delay then fetch latest state from DB
+      // Realtime should provide instant updates, but we add this fallback
+      // to ensure UI stays in sync even if Realtime events are missed
       setIsSaving(true);
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // CRITICAL: Always fetch latest state as fallback for Realtime
+      // This ensures progress updates even if Realtime subscription fails
+      await refetchSessionStatus();
       setIsSaving(false);
-      // Note: Realtime subscription handles progress updates automatically
-      // refetchSessionStatus() available as manual fallback if needed
 
     } catch (error: any) {
       if (error.name !== 'AbortError') {
@@ -510,7 +512,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       setIsSaving(false);
       abortControllerRef.current = null;
     }
-  }, [input, isAILoading, session, messages]);
+  }, [input, isAILoading, session, messages, refetchSessionStatus]);
 
   const announceToScreenReader = useCallback((message: string) => {
     const announcement = document.createElement('div');
