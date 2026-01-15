@@ -16,20 +16,18 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 // ============================================================================
-// Simple Markdown Renderer
+// Simple Markdown Renderer with Question Highlighting
 // ============================================================================
 
 /**
  * Renders basic markdown (bold, italic) to React elements
  * Handles: **bold**, *italic*, `code`
  */
-function renderMarkdown(text: string): React.ReactNode {
-  if (!text) return null;
+function renderMarkdownBasic(text: string, keyOffset: number = 0): { nodes: React.ReactNode[]; keyCount: number } {
+  if (!text) return { nodes: [], keyCount: 0 };
 
-  // Split by markdown patterns and render appropriately
   const parts: React.ReactNode[] = [];
-  let remaining = text;
-  let key = 0;
+  let key = keyOffset;
 
   // Process bold (**text**), italic (*text*), and code (`text`)
   const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
@@ -66,7 +64,74 @@ function renderMarkdown(text: string): React.ReactNode {
     parts.push(text.slice(lastIndex));
   }
 
-  return parts.length > 0 ? parts : text;
+  return { nodes: parts.length > 0 ? parts : [text], keyCount: key - keyOffset };
+}
+
+/**
+ * Renders markdown with question highlighting
+ * Questions (sentences ending with ?) are visually emphasized
+ */
+function renderMarkdown(text: string): React.ReactNode {
+  if (!text) return null;
+
+  // Split text into paragraphs (preserve double newlines)
+  const paragraphs = text.split(/\n\n+/);
+  const result: React.ReactNode[] = [];
+  let globalKey = 0;
+
+  paragraphs.forEach((paragraph, pIndex) => {
+    if (pIndex > 0) {
+      result.push(<br key={`br-${globalKey++}`} />);
+      result.push(<br key={`br-${globalKey++}`} />);
+    }
+
+    // Split paragraph into sentences, keeping the punctuation
+    // Match sentences ending with ? ! or .
+    const sentenceRegex = /([^.!?]*[.!?]+\s*)/g;
+    const sentences: string[] = [];
+    let lastEnd = 0;
+    let sentenceMatch;
+
+    while ((sentenceMatch = sentenceRegex.exec(paragraph)) !== null) {
+      sentences.push(sentenceMatch[1]);
+      lastEnd = sentenceRegex.lastIndex;
+    }
+
+    // Add any remaining text that doesn't end with punctuation
+    if (lastEnd < paragraph.length) {
+      sentences.push(paragraph.slice(lastEnd));
+    }
+
+    // If no sentences found, treat whole paragraph as one
+    if (sentences.length === 0) {
+      sentences.push(paragraph);
+    }
+
+    sentences.forEach((sentence, sIndex) => {
+      const trimmed = sentence.trim();
+      const isQuestion = trimmed.endsWith('?');
+
+      // Process markdown within the sentence
+      const { nodes, keyCount } = renderMarkdownBasic(sentence, globalKey);
+      globalKey += keyCount || 1;
+
+      if (isQuestion && trimmed.length > 0) {
+        // Highlight questions with accent color and slightly bolder
+        result.push(
+          <span
+            key={`q-${globalKey++}`}
+            className="text-primary font-medium"
+          >
+            {nodes}
+          </span>
+        );
+      } else {
+        result.push(...nodes);
+      }
+    });
+  });
+
+  return result;
 }
 
 // ============================================================================
@@ -98,6 +163,7 @@ interface ConversationInterfaceProps {
   ) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
+  isSaving?: boolean;
   onComplete: () => Promise<void>;
 }
 
@@ -112,6 +178,7 @@ export function ConversationInterface({
   handleInputChange,
   handleSubmit,
   isLoading,
+  isSaving = false,
   onComplete,
 }: ConversationInterfaceProps) {
   // Refs
@@ -165,6 +232,16 @@ export function ConversationInterface({
     }
   }, []);
 
+  // Handle button click explicitly to avoid race condition with disabled state
+  const handleButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    // Use requestSubmit for consistent behavior with Enter key
+    const form = e.currentTarget.closest('form');
+    if (form && input.trim() && !isLoading) {
+      // Let form's onSubmit handle the actual submission
+      form.requestSubmit();
+    }
+  }, [input, isLoading]);
+
   // Format timestamp for display
   const formatTime = useCallback((timestamp: Date) => {
     return timestamp.toLocaleTimeString([], {
@@ -215,7 +292,7 @@ export function ConversationInterface({
       </header>
 
       {/* Conversation Area */}
-      <ScrollArea className="flex-1" ref={scrollAreaRef}>
+      <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
         <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
           {messages.map((message, index) => (
             <div
@@ -260,7 +337,7 @@ export function ConversationInterface({
             </div>
           ))}
 
-          {/* Typing Indicator */}
+          {/* Typing Indicator with time estimate */}
           {isLoading && (
             <div className="onboarding-message-ai onboarding-message-animate">
               <div className="flex items-center gap-2 mb-1">
@@ -280,8 +357,18 @@ export function ConversationInterface({
                     style={{ animationDelay: '0.2s' }}
                   />
                 </div>
-                <span className="text-sm text-muted-foreground">Thinking...</span>
+                <span className="text-sm text-muted-foreground">
+                  Thinking... <span className="text-xs opacity-70">(usually 3-5 seconds)</span>
+                </span>
               </div>
+            </div>
+          )}
+
+          {/* Saving Indicator */}
+          {isSaving && !isLoading && (
+            <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground">
+              <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <span className="text-xs">Saving progress...</span>
             </div>
           )}
         </div>
@@ -336,6 +423,7 @@ export function ConversationInterface({
                 <Button
                   type="submit"
                   disabled={!input.trim() || isLoading}
+                  onClick={handleButtonClick}
                   size="sm"
                   className="h-8 px-4"
                 >

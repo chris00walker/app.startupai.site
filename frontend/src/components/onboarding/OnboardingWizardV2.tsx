@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
 import { FoundersBriefReview, EntrepreneurBrief } from '@/components/onboarding/FoundersBriefReview';
+import { StageReviewModal } from '@/components/onboarding/StageReviewModal';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -75,7 +76,12 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [showStartNewDialog, setShowStartNewDialog] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
   const [input, setInput] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Stage review modal state
+  const [showStageReview, setShowStageReview] = useState(false);
+  const [reviewStage, setReviewStage] = useState<number | null>(null);
 
   // Analysis state
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
@@ -463,10 +469,13 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
       // Wait for onFinish callback to complete DB write before refetching
       // This fixes the race condition where refetchSessionStatus() reads stale data
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Increased to 1200ms for slower connections
+      setIsSaving(true);
+      await new Promise(resolve => setTimeout(resolve, 1200));
 
       // Refetch session status to get updated stage and progress from database
       await refetchSessionStatus();
+      setIsSaving(false);
 
     } catch (error: any) {
       if (error.name !== 'AbortError') {
@@ -475,6 +484,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       }
     } finally {
       setIsAILoading(false);
+      setIsSaving(false);
       abortControllerRef.current = null;
     }
   }, [input, isAILoading, session, messages, refetchSessionStatus]);
@@ -738,6 +748,44 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     await initializeSession(true);
   }, [session, initializeSession, initializeStages]);
 
+  // Handle stage click for review
+  const handleStageClick = useCallback((stageNumber: number) => {
+    setReviewStage(stageNumber);
+    setShowStageReview(true);
+  }, []);
+
+  // Get messages for a specific stage (approximation based on message index)
+  // In a real implementation, this would be filtered by stage markers in the messages
+  const getMessagesForStage = useCallback((stageNumber: number) => {
+    // Simple approximation: divide messages by stages
+    // Each stage gets roughly (totalMessages / currentStage) messages
+    if (!messages.length || !session) return [];
+
+    const completedStages = session.currentStage - 1;
+    if (stageNumber > completedStages) return [];
+
+    // Estimate messages per stage
+    const avgMessagesPerStage = Math.ceil(messages.length / Math.max(completedStages, 1));
+    const startIndex = (stageNumber - 1) * avgMessagesPerStage;
+    const endIndex = stageNumber * avgMessagesPerStage;
+
+    return messages.slice(startIndex, endIndex);
+  }, [messages, session]);
+
+  // Get stage name for review modal
+  const getStageNameForReview = useCallback((stageNumber: number) => {
+    const stageNames = [
+      'Welcome & Introduction',
+      'Customer Discovery',
+      'Problem Definition',
+      'Solution Validation',
+      'Competitive Analysis',
+      'Resources & Constraints',
+      'Goals & Next Steps',
+    ];
+    return stageNames[stageNumber - 1] || `Stage ${stageNumber}`;
+  }, []);
+
   // Handle HITL Brief approval
   const handleApproveFoundersBrief = useCallback(async () => {
     if (!hitlCheckpoint || !workflowId || !projectId) {
@@ -925,14 +973,19 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             currentStage={session?.currentStage || 1}
             overallProgress={session?.overallProgress || 0}
             agentPersonality={session?.agentPersonality}
+            stageProgressData={{
+              collectedTopics: [], // TODO: Populate from session.stageData when available
+              stageProgress: session?.stageProgress || 0,
+            }}
             onExit={handleExitOnboarding}
             onStartNew={handleStartNew}
+            onStageClick={handleStageClick}
             isResuming={isResuming}
           />
         </div>
 
         {/* Main conversation area */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 flex flex-col min-h-0">
           {session && (
             <ConversationInterface
               session={session}
@@ -941,6 +994,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               handleInputChange={handleInputChange}
               handleSubmit={handleSubmit}
               isLoading={isAILoading}
+              isSaving={isSaving}
               onComplete={handleCompleteOnboarding}
             />
           )}
@@ -1051,6 +1105,20 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Stage Review Modal */}
+      {reviewStage !== null && (
+        <StageReviewModal
+          isOpen={showStageReview}
+          onClose={() => {
+            setShowStageReview(false);
+            setReviewStage(null);
+          }}
+          stageNumber={reviewStage}
+          stageName={getStageNameForReview(reviewStage)}
+          messages={getMessagesForStage(reviewStage)}
+        />
+      )}
     </>
   );
 }

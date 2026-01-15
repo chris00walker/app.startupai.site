@@ -1,10 +1,60 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, X, RefreshCw, Clock, Lock } from 'lucide-react';
+import { Check, X, RefreshCw, Clock, Lock, ChevronDown, ChevronUp, Circle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+// ============================================================================
+// Stage Topics Configuration
+// ============================================================================
+
+const STAGE_TOPICS: Record<number, { label: string; key: string }[]> = {
+  1: [
+    { label: 'Business concept', key: 'business_concept' },
+    { label: 'Inspiration', key: 'inspiration' },
+    { label: 'Current stage', key: 'current_stage' },
+    { label: 'Background', key: 'founder_background' },
+  ],
+  2: [
+    { label: 'Target customers', key: 'target_customers' },
+    { label: 'Customer segments', key: 'customer_segments' },
+    { label: 'Current solutions', key: 'current_solutions' },
+    { label: 'Customer behaviors', key: 'customer_behaviors' },
+  ],
+  3: [
+    { label: 'Problem description', key: 'problem_description' },
+    { label: 'Pain level', key: 'pain_level' },
+    { label: 'Frequency', key: 'frequency' },
+    { label: 'Problem evidence', key: 'problem_evidence' },
+  ],
+  4: [
+    { label: 'Solution approach', key: 'solution_description' },
+    { label: 'How it works', key: 'solution_mechanism' },
+    { label: 'Unique value', key: 'unique_value_prop' },
+    { label: 'Differentiation', key: 'differentiation' },
+  ],
+  5: [
+    { label: 'Competitors', key: 'competitors' },
+    { label: 'Alternatives', key: 'alternatives' },
+    { label: 'Switching barriers', key: 'switching_barriers' },
+    { label: 'Competitive advantages', key: 'competitive_advantages' },
+  ],
+  6: [
+    { label: 'Budget range', key: 'budget_range' },
+    { label: 'Resources', key: 'available_resources' },
+    { label: 'Constraints', key: 'constraints' },
+    { label: 'Team capabilities', key: 'team_capabilities' },
+  ],
+  7: [
+    { label: 'Short-term goals', key: 'short_term_goals' },
+    { label: 'Success metrics', key: 'success_metrics' },
+    { label: 'Priorities', key: 'priorities' },
+    { label: 'First experiment', key: 'first_experiment' },
+  ],
+};
 
 // ============================================================================
 // Types and Interfaces
@@ -25,13 +75,20 @@ interface AgentPersonality {
   expertise: string;
 }
 
+interface StageProgressData {
+  collectedTopics?: string[];
+  stageProgress?: number;
+}
+
 interface OnboardingSidebarProps {
   stages: StageInfo[];
   currentStage: number;
   overallProgress: number;
   agentPersonality?: AgentPersonality;
+  stageProgressData?: StageProgressData;
   onExit: () => void;
   onStartNew?: () => void;
+  onStageClick?: (stage: number) => void;
   isResuming?: boolean;
 }
 
@@ -44,10 +101,13 @@ export function OnboardingSidebar({
   currentStage,
   overallProgress,
   agentPersonality,
+  stageProgressData,
   onExit,
   onStartNew,
+  onStageClick,
   isResuming,
 }: OnboardingSidebarProps) {
+  const [isProgressExpanded, setIsProgressExpanded] = useState(false);
   const totalStages = stages.length || 7; // Default to 7 if stages empty
 
   // Track session start time for dynamic time estimate
@@ -118,6 +178,48 @@ export function OnboardingSidebar({
             ~{estimatedTimeRemaining}m left
           </span>
         </div>
+
+        {/* Collapsible Progress Details */}
+        <Collapsible open={isProgressExpanded} onOpenChange={setIsProgressExpanded}>
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center justify-between w-full mt-3 pt-3 border-t border-border/30 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+              <span>
+                {isProgressExpanded ? 'Hide details' : `~${Math.max(1, 4 - (stageProgressData?.collectedTopics?.length || 0))} more questions in this stage`}
+              </span>
+              {isProgressExpanded ? (
+                <ChevronUp className="h-3 w-3" />
+              ) : (
+                <ChevronDown className="h-3 w-3" />
+              )}
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-3">
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                Collecting in Stage {currentStage}
+              </p>
+              {STAGE_TOPICS[currentStage]?.map((topic) => {
+                const isCollected = stageProgressData?.collectedTopics?.includes(topic.key);
+                return (
+                  <div
+                    key={topic.key}
+                    className={cn(
+                      'flex items-center gap-2 text-[11px]',
+                      isCollected ? 'text-accent' : 'text-muted-foreground/70'
+                    )}
+                  >
+                    {isCollected ? (
+                      <CheckCircle2 className="h-3 w-3 flex-shrink-0" />
+                    ) : (
+                      <Circle className="h-3 w-3 flex-shrink-0" />
+                    )}
+                    <span>{topic.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       {/* Consultant Card */}
@@ -150,16 +252,28 @@ export function OnboardingSidebar({
             <ol className="space-y-1">
               {stages.map((stage) => {
                 const isPending = !stage.isComplete && !stage.isActive;
+                const isClickable = stage.isComplete && onStageClick;
+
                 const stageContent = (
                   <div
                     className={cn(
                       'onboarding-step',
                       stage.isComplete && 'onboarding-step-complete',
                       stage.isActive && 'onboarding-step-current',
-                      isPending && 'onboarding-step-pending cursor-not-allowed opacity-60'
+                      isPending && 'onboarding-step-pending cursor-not-allowed opacity-60',
+                      isClickable && 'cursor-pointer hover:bg-accent/10 rounded-lg -mx-2 px-2'
                     )}
                     aria-current={stage.isActive ? 'step' : undefined}
                     aria-disabled={isPending}
+                    onClick={isClickable ? () => onStageClick(stage.stage) : undefined}
+                    role={isClickable ? 'button' : undefined}
+                    tabIndex={isClickable ? 0 : undefined}
+                    onKeyDown={isClickable ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onStageClick(stage.stage);
+                      }
+                    } : undefined}
                   >
                     {/* Step Number/Check/Lock */}
                     <div className="onboarding-step-number">
@@ -197,6 +311,15 @@ export function OnboardingSidebar({
                         </TooltipTrigger>
                         <TooltipContent side="right" className="text-xs">
                           Complete previous stages first
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : isClickable ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          {stageContent}
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs">
+                          Click to review Stage {stage.stage}
                         </TooltipContent>
                       </Tooltip>
                     ) : (

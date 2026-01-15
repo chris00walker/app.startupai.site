@@ -2,7 +2,7 @@
 purpose: "Private technical source of truth for active work"
 status: "active"
 last_reviewed: "2026-01-15"
-last_synced: "2026-01-15 - Groq integration via OpenRouter complete, onboarding tested"
+last_synced: "2026-01-15 - Onboarding UX overhaul implemented, pending live verification"
 ---
 
 # In Progress
@@ -47,10 +47,35 @@ Work these items in order. Items marked "Ready" can start immediately.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 1 | Onboarding UX Bug Fixes (Dogfooding) | ✅ **DONE** | @frontend | ~8 hours | See details below |
+| 1 | Onboarding UX Overhaul (9 issues) | ⏳ **PENDING VERIFICATION** | @frontend | ~10 hours | See details below - needs live testing |
 | 2 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
 | 3 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
 | 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+
+#### Onboarding UX Overhaul (2026-01-15) ⏳ PENDING VERIFICATION
+
+**Goal**: Fix 9 UX issues causing user uncertainty during onboarding chat.
+
+| Issue | Fix | Status |
+|-------|-----|--------|
+| Truncated messages | Fixed flex container overflow (`min-h-0`, removed `overflow-hidden`) | ⏳ Unverified |
+| No question highlighting | Questions now highlighted in accent color via `renderMarkdown()` | ⏳ Unverified |
+| Unreliable Send button | Added explicit `form.requestSubmit()` handler (matches Enter key) | ⏳ Unverified |
+| Ambiguous progress | Added collapsible progress details with topic checklist | ⏳ Unverified |
+| No loading feedback | Added "(usually 3-5 seconds)" to typing indicator | ⏳ Unverified |
+| Dead-end states | Added mandatory "always end with question" rule to AI prompt | ⏳ Unverified |
+| Stages view-only | Completed stages now clickable to review past Q&A | ⏳ Unverified |
+| Save inconsistency | Increased delay to 1200ms + added "Saving..." indicator | ⏳ Unverified |
+| Context visibility | Deferred to follow-up (P2) | N/A |
+
+**Files Modified**:
+- `ConversationInterfaceV2.tsx` - Truncation, button, question highlighting, loading, save indicator
+- `OnboardingWizardV2.tsx` - Overflow fix, save delay, stage review modal
+- `OnboardingSidebar.tsx` - Progress details, stage navigation
+- `onboarding-prompt.ts` - Always-end-with-question rule
+- **New**: `StageReviewModal.tsx` - Read-only stage review modal
+
+**Next Step**: Live dogfooding test to verify all fixes work in production.
 
 #### Groq Integration via OpenRouter (2026-01-15) ✅ COMPLETE
 
@@ -198,7 +223,19 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 **Last Updated**: 2026-01-15
 
-**Changes (2026-01-15):**
+**Changes (2026-01-15 - Evening Session):**
+- **Onboarding UX Overhaul**: Implemented fixes for 9 UX issues from dogfooding (PENDING VERIFICATION)
+- Fixed message truncation: Changed flex overflow handling (`min-h-0`, removed `overflow-hidden`)
+- Fixed Send button reliability: Added explicit `form.requestSubmit()` handler
+- Added question highlighting: Questions in AI responses now highlighted in accent color
+- Enhanced progress display: Collapsible section showing topics being collected
+- Added loading time estimate: "(usually 3-5 seconds)" on typing indicator
+- Fixed dead-end states: Added mandatory "always end with question" rule to AI prompt
+- Added stage navigation: Completed stages now clickable to review past Q&A (new `StageReviewModal.tsx`)
+- Fixed save consistency: Increased delay to 1200ms + added "Saving..." indicator
+- Build verified: `pnpm build` succeeds with all changes
+
+**Changes (2026-01-15 - Morning Session):**
 - **Groq Integration Complete**: Switched onboarding to Groq via OpenRouter for 3x speed, 91% cost savings
 - Model: `meta-llama/llama-3.3-70b-instruct` with forced Groq provider routing
 - Fixed Claude meta-commentary bug ("Let me assess...") with prompt engineering
