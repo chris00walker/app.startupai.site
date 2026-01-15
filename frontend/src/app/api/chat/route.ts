@@ -17,16 +17,23 @@ import {
 // ============================================================================
 
 function getAIModel() {
-  // Use OpenRouter for better tool calling reliability and multi-provider fallback
-  // OpenRouter automatically handles provider failover and has better tool enforcement
+  // Use OpenRouter with Groq as the preferred provider for speed
+  // Groq offers ~300 tokens/sec vs ~50-100 for other providers
+  const provider = process.env.OPENROUTER_PROVIDER || 'Groq';
+
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY,
+    extraBody: {
+      provider: {
+        order: [provider],
+        allow_fallbacks: true, // Fall back to other providers if Groq is unavailable
+      },
+    },
   });
 
-  // Default to Claude 3.5 Sonnet which has excellent tool calling reliability
-  // Fallback order: anthropic/claude-3.5-sonnet > openai/gpt-4o > openai/gpt-4o-mini
-  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-3.5-sonnet';
-  console.log('[api/chat] Using OpenRouter model:', model);
+  // Default to Llama 3.3 70B which has excellent tool calling (90.76% BFCL benchmark)
+  const model = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
+  console.log('[api/chat] Using OpenRouter model:', model, 'via provider:', provider);
   return openrouter(model);
 }
 
