@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       // Fetch specific session by ID
       const result = await supabaseClient
         .from('onboarding_sessions')
-        .select('session_id, current_stage, overall_progress, stage_progress, status, conversation_history, last_activity')
+        .select('session_id, current_stage, overall_progress, stage_progress, status, conversation_history, last_activity, stage_data')
         .eq('session_id', sessionId)
         .single();
       sessionData = result.data;
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       // Find most recent active or paused session for user
       const result = await supabaseClient
         .from('onboarding_sessions')
-        .select('session_id, current_stage, overall_progress, stage_progress, status, conversation_history, last_activity')
+        .select('session_id, current_stage, overall_progress, stage_progress, status, conversation_history, last_activity, stage_data')
         .eq('user_id', user.id)
         .in('status', ['active', 'paused'])
         .order('last_activity', { ascending: false })
@@ -97,6 +97,10 @@ export async function GET(request: NextRequest) {
       messageCount: sessionData.conversation_history?.length || 0,
       status: sessionData.status || 'active',
       lastActivity: sessionData.last_activity,
+      // Include completion data when session is completed (for fallback fetch)
+      ...(sessionData.status === 'completed' && sessionData.stage_data?.completion
+        ? { completion: sessionData.stage_data.completion }
+        : {}),
     });
 
   } catch (error) {

@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 // ============================================================================
@@ -42,6 +42,8 @@ export interface UseOnboardingSessionResult {
   error: Error | null;
   realtimeStatus: RealtimeStatus;
   refetch: () => Promise<void>;
+  isPollingFallback: boolean;
+  retryCount: number;
 }
 
 // ============================================================================
@@ -56,6 +58,26 @@ export function useOnboardingSession(
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
+
+  // Retry state for resilient Realtime connections
+  const [retryCount, setRetryCount] = useState(0);
+  const [isPollingFallback, setIsPollingFallback] = useState(false);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Retry configuration
+  const MAX_RETRIES = 3;
+  const BASE_RETRY_DELAY_MS = 1000; // 1s, 2s, 4s exponential backoff
+  const POLLING_INTERVAL_MS = 5000;
+  const RECONNECT_ATTEMPT_INTERVAL_MS = 30000; // Try to reconnect every 30s while polling
+
+  // Helper to clear pending retry timer (prevents race conditions)
+  const clearRetryTimer = useCallback(() => {
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+  }, []);
 
   // Feature flag check - can be disabled via env var or options
   const featureFlagEnabled = process.env.NEXT_PUBLIC_ONBOARDING_REALTIME !== 'false';
@@ -156,21 +178,73 @@ export function useOnboardingSession(
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           console.log('[useOnboardingSession] Realtime subscription active');
+          // Clear any pending retry timer to prevent race condition
+          clearRetryTimer();
           setRealtimeStatus('connected');
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setRetryCount(0);
+          setIsPollingFallback(false);
+          setError(null);
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+          // Handle all disconnection scenarios with retry logic
           console.error('[useOnboardingSession] Subscription failed:', status);
-          setRealtimeStatus('disconnected');
-          setError(new Error(`Realtime connection failed: ${status}`));
-        } else if (status === 'CLOSED') {
-          setRealtimeStatus('disconnected');
+
+          // Clear any existing timer before scheduling new one
+          clearRetryTimer();
+
+          if (retryCount < MAX_RETRIES) {
+            const delay = BASE_RETRY_DELAY_MS * Math.pow(2, retryCount);
+            console.log(`[useOnboardingSession] Retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+            setRealtimeStatus('connecting');
+
+            retryTimeoutRef.current = setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+            }, delay);
+          } else {
+            console.warn('[useOnboardingSession] Max retries exhausted, falling back to polling');
+            setRealtimeStatus('disconnected');
+            setIsPollingFallback(true);
+            setError(new Error(`Realtime connection failed after ${MAX_RETRIES} retries. Using polling fallback.`));
+          }
         }
       });
 
     return () => {
       console.log('[useOnboardingSession] Cleaning up subscription');
       supabase.removeChannel(channel);
+      clearRetryTimer();
+      if (reconnectIntervalRef.current) {
+        clearInterval(reconnectIntervalRef.current);
+        reconnectIntervalRef.current = null;
+      }
     };
-  }, [sessionId, enableRealtime]);
+  }, [sessionId, enableRealtime, retryCount, clearRetryTimer]);
+
+  // Fallback polling when Realtime fails
+  useEffect(() => {
+    if (!isPollingFallback || !sessionId) return;
+
+    console.log('[useOnboardingSession] Starting polling fallback');
+
+    // Poll immediately, then at interval
+    fetchSession();
+    const pollIntervalId = setInterval(fetchSession, POLLING_INTERVAL_MS);
+
+    // Periodically attempt to reconnect to Realtime
+    reconnectIntervalRef.current = setInterval(() => {
+      console.log('[useOnboardingSession] Attempting to reconnect to Realtime...');
+      setRetryCount(0); // Reset retry count to trigger reconnection attempt
+      setIsPollingFallback(false);
+    }, RECONNECT_ATTEMPT_INTERVAL_MS);
+
+    return () => {
+      console.log('[useOnboardingSession] Stopping polling fallback');
+      clearInterval(pollIntervalId);
+      if (reconnectIntervalRef.current) {
+        clearInterval(reconnectIntervalRef.current);
+        reconnectIntervalRef.current = null;
+      }
+    };
+  }, [sessionId, isPollingFallback, fetchSession]);
 
   return {
     session,
@@ -178,5 +252,7 @@ export function useOnboardingSession(
     error,
     realtimeStatus,
     refetch: fetchSession,
+    isPollingFallback,
+    retryCount,
   };
 }
