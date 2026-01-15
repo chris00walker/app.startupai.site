@@ -2,7 +2,7 @@
 purpose: "Private technical source of truth for active work"
 status: "active"
 last_reviewed: "2026-01-15"
-last_synced: "2026-01-15 - OpenRouter migration complete, Netlify deploy fixed"
+last_synced: "2026-01-15 - Groq integration via OpenRouter complete, onboarding tested"
 ---
 
 # In Progress
@@ -52,19 +52,29 @@ Work these items in order. Items marked "Ready" can start immediately.
 | 3 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
 | 4 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
 
-#### OpenRouter Migration (2026-01-15)
+#### Groq Integration via OpenRouter (2026-01-15) ✅ COMPLETE
 
-**Goal**: Improve tool calling reliability for onboarding chat flow.
+**Goal**: Improve speed and reduce cost for onboarding chat flow.
 
 | Task | Status | Notes |
 |------|--------|-------|
 | Switch `/api/chat` to OpenRouter | ✅ | Multi-provider gateway with automatic fallback |
 | Fix TypeScript build error | ✅ | Removed unsupported `maxSteps` property |
-| Configure .env files | ✅ | Added to .env.local, .env.example, .env.staging, .env.test.local |
-| Set Netlify production env vars | ✅ | OPENROUTER_API_KEY + OPENROUTER_MODEL configured |
-| Verify API key works | ✅ | Tested locally with curl → successful response |
+| Configure .env files | ✅ | Added OPENROUTER_API_KEY, OPENROUTER_MODEL, OPENROUTER_PROVIDER |
+| Set Netlify production env vars | ✅ | All three env vars configured |
+| Force Groq as provider | ✅ | Using `extraBody.provider.order: ["Groq"]` |
+| Fix Claude meta-commentary bug | ✅ | Updated prompts to prevent "Let me assess..." narration |
+| Production testing | ✅ | Onboarding with Alex working correctly |
 
-**Model**: `anthropic/claude-3.5-sonnet` (better tool calling than GPT-4o for structured outputs)
+**Configuration**:
+- **Model**: `meta-llama/llama-3.3-70b-instruct` (90.76% BFCL tool benchmark)
+- **Provider**: `Groq` (forced via provider routing, fallback enabled)
+- **Speed**: ~300 tok/s (vs ~50-100 for Claude)
+- **Cost**: ~91% cheaper per session
+
+**CLI Tools Installed**:
+- `llm -m openrouter/...` - One-off prompts and scripting
+- `openrouter-cli` - Interactive chat sessions
 
 #### Onboarding Critical Root Cause Fix (2026-01-14 Evening)
 
@@ -189,10 +199,14 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 **Last Updated**: 2026-01-15
 
 **Changes (2026-01-15):**
-- Switched onboarding chat from OpenAI to OpenRouter for better tool calling reliability
+- **Groq Integration Complete**: Switched onboarding to Groq via OpenRouter for 3x speed, 91% cost savings
+- Model: `meta-llama/llama-3.3-70b-instruct` with forced Groq provider routing
+- Fixed Claude meta-commentary bug ("Let me assess...") with prompt engineering
 - Fixed Netlify build failure (removed `maxSteps` property not in AI SDK types)
-- Configured OPENROUTER_API_KEY in all .env files and Netlify production
-- Model: anthropic/claude-3.5-sonnet via OpenRouter multi-provider gateway
+- Installed OpenRouter CLI tools (`llm`, `openrouter-cli`) for command-line access
+- Updated CLAUDE.md with CLI tools reference (Netlify, Supabase, Modal, OpenRouter)
+- Created user-level `~/.claude/CLAUDE.md` for cross-repo CLI documentation
+- Production tested: Onboarding with Alex working correctly on Groq
 
 **Changes (2026-01-14 - Evening Session):**
 - **CRITICAL FIX**: Root cause of progress/stage issues discovered and fixed
