@@ -1,4 +1,4 @@
-import { streamText, tool, stepCountIs } from 'ai';
+import { streamText, tool } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -195,23 +195,10 @@ export async function POST(req: NextRequest) {
         messages,
         temperature: 0.7,
         tools: onboardingTools,
-        // Step 0: FORCE tool usage (required), Step 1: FORCE text (none)
-        prepareStep: ({ stepNumber, steps }) => {
-          console.log('[api/chat] prepareStep called:', {
-            stepNumber,
-            previousStepsCount: steps.length,
-          });
-
-          if (stepNumber === 0) {
-            // Step 0 (first step): Force AI to call at least one tool
-            console.log('[api/chat] Step 0: Returning toolChoice=required (forcing tools)');
-            return { toolChoice: 'required' as const };
-          }
-          // Step 1+ (second step onwards): No tools allowed, must generate text
-          console.log('[api/chat] Step 1+: Returning toolChoice=none (forcing text)');
-          return { toolChoice: 'none' as const };
-        },
-        stopWhen: stepCountIs(2), // Stop after 2 steps: tools then text
+        // Let Claude decide when to call tools - it's more reliable than forcing
+        // Claude will naturally call tools AND respond with text in the same turn
+        toolChoice: 'auto',
+        maxSteps: 3, // Allow up to 3 steps for tool calls + text response
         onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
           console.log('[api/chat] ========== STREAM FINISHED ==========');
           console.log('[api/chat] Stream result:', {
