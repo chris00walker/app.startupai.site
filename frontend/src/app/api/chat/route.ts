@@ -1,5 +1,5 @@
 import { streamText, tool, stepCountIs } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient as createServerClient } from '@/lib/supabase/server';
@@ -13,19 +13,21 @@ import {
 } from '@/lib/ai/onboarding-prompt';
 
 // ============================================================================
-// AI Model Configuration
+// AI Model Configuration - OpenRouter (Multi-Provider Gateway)
 // ============================================================================
 
 function getAIModel() {
-  // Use OpenAI with explicit baseURL to bypass Netlify AI Gateway
-  const openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
+  // Use OpenRouter for better tool calling reliability and multi-provider fallback
+  // OpenRouter automatically handles provider failover and has better tool enforcement
+  const openrouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_API_KEY,
   });
 
-  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o';
-  console.log('[api/chat] Using OpenAI model:', model);
-  return openai(model);
+  // Default to Claude 3.5 Sonnet which has excellent tool calling reliability
+  // Fallback order: anthropic/claude-3.5-sonnet > openai/gpt-4o > openai/gpt-4o-mini
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-3.5-sonnet';
+  console.log('[api/chat] Using OpenRouter model:', model);
+  return openrouter(model);
 }
 
 // ============================================================================
