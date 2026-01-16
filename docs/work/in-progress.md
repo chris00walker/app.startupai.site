@@ -63,6 +63,7 @@ Local file exists but not applied to remote Supabase.
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
 | 1 | **Phase 0 Stage Progression Fix** | ✅ **IMPLEMENTED** | @backend | ~2 hours | Two-Pass Architecture (ADR-004) - Backend assessment replaces tools |
+| 1.5 | **Phase 0 Durability (ADR-005)** | ✅ **APPROVED** | @backend | ~8 hours | State-First Synchronized Loop - PR 1 next |
 | 2 | **Phase 0 Webhook Data Model Fix** | **Ready** | @backend | ~1 hour | Fix webhook to create `founders_briefs` (not overwrite `entrepreneur_briefs`) |
 | 3 | **Transcript Handoff to Modal** | **Ready** | @backend | ~30 min | Pass conversation transcript to buildFounderValidationInputs |
 | 4 | **Save & Exit Response Checking** | **Ready** | @frontend | ~30 min | Check pause API response before redirect |
@@ -97,7 +98,22 @@ Pass 2: Backend assessment (deterministic, ALWAYS runs)
 State machine: Merge data, check thresholds, advance stage, trigger CrewAI
 ```
 
-**Status**: Implemented, pending live verification with dogfooding account.
+**Status**: Implemented, errata fixed, live dogfooding issues resolved.
+
+**Evolution (ADR-005 - Approved 2026-01-16)**:
+
+Two-Pass Architecture addresses reliability but has latent durability risks:
+- Partial saves: Serverless `onFinish` can be killed after response
+- Race conditions: Last-write-wins merge in app layer
+- Hydration gaps: Frontend treats state as ephemeral
+
+ADR-005 proposes moving the state machine to PostgreSQL with RPC-based atomic commits:
+- `apply_onboarding_turn` RPC with idempotency and row locking
+- Split `chat_history` from `phase_state` for clean separation
+- Binary gate on field coverage for deterministic progress
+- Implementation: PR 1 (Schema), PR 2 (RPC), PR 3 (Modal), PR 4 (Frontend), PR 5 (Cleanup)
+
+**Reference**: [ADR-005](../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)
 
 **Two-Artifact Data Model** (Key Insight from Team Audit):
 ```

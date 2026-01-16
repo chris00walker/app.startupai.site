@@ -6,13 +6,13 @@ Last Updated: 2026-01-16
 
 ## Two-Pass Onboarding Architecture
 
-**Status:** ✅ IMPLEMENTED - Errata Fixed, Live Verified
+**Status:** ✅ IMPLEMENTED - Errata Fixed, Live Verified, ADR-005 Approved
 **Priority:** P0 - Was blocking entire validation pipeline
 **Date Started:** 2026-01-14
 **Solution Deployed:** 2026-01-16 (Two-Pass Architecture)
 **ADR:** [004-two-pass-onboarding-architecture.md](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
 **Plan:** [async-mixing-ritchie.md](/home/chris/.claude/plans/async-mixing-ritchie.md)
-**Evolution:** [ADR-005: State-First Synchronized Loop](../../../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md) - Proposed
+**Evolution:** [ADR-005: State-First Synchronized Loop](../../../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md) - **APPROVED** (PR 1 next)
 
 ### Problem Statement (RESOLVED)
 
@@ -125,7 +125,7 @@ Live dogfooding revealed deeper architectural issues that incremental fixes cann
 - **Pillar D**: Binary gate on field coverage (deterministic progress)
 - **Pillar E**: Frontend hydration + realtime subscriptions
 
-**Status**: Proposed (ADR-005). Decision pending.
+**Status**: **APPROVED** (2026-01-16). Implementation sequence: PR 1 (Schema), PR 2 (RPC), PR 3 (Modal), PR 4 (Frontend), PR 5 (Cleanup).
 
 **ADR**: [005-state-first-synchronized-loop.md](../../../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)
 

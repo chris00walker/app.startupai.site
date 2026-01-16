@@ -9,6 +9,8 @@ last_synced: "2026-01-16 - Two-Pass Architecture implemented for onboarding, ADR
 
 This document tracks dependencies between StartupAI repositories to ensure coordinated delivery.
 
+> **STATE-FIRST ARCHITECTURE (2026-01-16)**: ADR-005 approved - PostgreSQL RPC atomic commits for durability. See [ADR-005](../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md).
+>
 > **TWO-PASS ARCHITECTURE (2026-01-16)**: Onboarding stage progression fix implemented. Backend-driven assessment replaces unreliable LLM tool-calling. See [ADR-004](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md).
 
 > **DOGFOODING VERIFIED (2026-01-12)**: Founder and Consultant browser journeys tested. Phase 0-1 HITL approvals working. RLS policies for consultant access deployed. API routes hardened with improved error handling.
@@ -214,13 +216,21 @@ Marketing activity feed shows real activity
 
 **Last Updated**: 2026-01-16
 
+**Changes (2026-01-16 - ADR-005 Approved)**:
+- ✅ **ADR-005 APPROVED**: State-First Synchronized Loop architecture
+- PostgreSQL RPC as atomic commit point with row-level locking
+- Addresses durability risks: partial saves, race conditions, hydration gaps
+- Implementation sequence: PR 1 (Schema), PR 2 (RPC), PR 3 (Modal), PR 4 (Frontend), PR 5 (Cleanup)
+- ⏳ **NEXT**: PR 1 implementation
+
 **Changes (2026-01-16 - Two-Pass Architecture)**:
 - ✅ **ONBOARDING FIX**: Implemented Two-Pass Architecture (ADR-004) for reliable stage progression
 - ✅ **ADR CREATED**: `startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md`
+- ✅ **ERRATA FIXED**: E1-E4 (timestamp, schema min(3), legacy messages, test imports)
+- ✅ **DOGFOODING FIXED**: P2 (progress regression), P3 (Invalid Date)
 - Root cause: LLM tool calling was 18% reliable, causing stuck sessions
 - Solution: Backend runs deterministic assessment after every response
 - Impact: Phase 0 → Phase 1 pipeline should now reliably trigger CrewAI
-- ⏳ **PENDING**: Live verification with dogfooding account
 
 **Changes (2026-01-12 - API Route Hardening)**:
 - ✅ **APPROVAL ROUTES ENHANCED**: List + detail endpoints with better error handling

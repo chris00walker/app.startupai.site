@@ -3,6 +3,8 @@
 **Product Platform - Delivery layer for StartupAI's AI Founders validation engine**
 
 > **Modal Migration Complete**: Now integrated with Modal serverless backend. See `startupai-crew/docs/adr/002-modal-serverless-migration.md`.
+>
+> **Current Focus**: Phase 0 durability. Two-Pass Architecture ([ADR-004](../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)) implemented. State-First Synchronized Loop ([ADR-005](../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)) approved.
 
 ## Architecture Overview
 
@@ -37,7 +39,7 @@ Marketing  DB   Product
 
 **Evidence-Led Strategy Platform** that helps entrepreneurs validate business ideas:
 
-- **AI-Powered Onboarding** - Vercel AI SDK with 7-stage conversation flow
+- **AI-Powered Onboarding** - Vercel AI SDK with 7-stage conversation flow (Two-Pass Architecture)
 - **CrewAI Integration** - Triggers and displays results from AI Founders analysis
 - **Project Management** - Track validation projects and hypotheses
 - **Gate-Based Validation** - Desirability → Feasibility → Viability → Scale
@@ -133,12 +135,17 @@ app.startupai.site/
 - GitHub OAuth with role-based routing
 - Database migrations deployed with Modal columns
 - Vector search function (match_evidence)
-- AI onboarding with Vercel AI SDK (7 stages, streaming)
+- AI onboarding with Vercel AI SDK (7 stages, streaming, Two-Pass Architecture)
 - Modal integration (kickoff, status polling, HITL approval)
 - Public APIs for Marketing site (Activity Feed, Metrics)
 - Trial usage guardrails
 
+### Recent Architecture Changes (2026-01-16)
+- **Two-Pass Onboarding** ([ADR-004](../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)): Replaced unreliable LLM tool-calling (18% call rate) with deterministic backend assessment
+- **State-First Architecture** ([ADR-005](../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)): Approved - PostgreSQL RPC atomic commits to address durability risks
+
 ### In Progress
+- ADR-005 State-First implementation (PR 1: Schema + Migration)
 - First production validation run (after crews complete)
 - E2E test coverage expansion
 
@@ -217,7 +224,7 @@ NEXT_PUBLIC_ONBOARDING_BYPASS=true
 
 ---
 
-**Status:** ~95% Complete (Modal integration done, awaiting crew implementation)
+**Status:** ~95% Complete (Two-Pass onboarding deployed, ADR-005 implementation in progress)
 **Deployment:** Netlify
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-01-16
 **License:** Proprietary - StartupAI Platform
