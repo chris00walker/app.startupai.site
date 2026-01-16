@@ -242,9 +242,16 @@ export function ConversationInterface({
     }
   }, [input, isLoading]);
 
-  // Format timestamp for display
-  const formatTime = useCallback((timestamp: Date) => {
-    return timestamp.toLocaleTimeString([], {
+  // Format timestamp for display - handles missing/invalid timestamps gracefully
+  const formatTime = useCallback((timestamp: Date | string | undefined) => {
+    if (!timestamp) {
+      return '--:--'; // Fallback for legacy messages without timestamps
+    }
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      return '--:--'; // Fallback for invalid dates
+    }
+    return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -296,7 +303,7 @@ export function ConversationInterface({
         <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
           {messages.map((message, index) => (
             <div
-              key={`${message.timestamp}-${index}`}
+              key={`msg-${index}-${message.timestamp || 'legacy'}`}
               className={cn(
                 'onboarding-message-animate',
                 message.role === 'user' ? 'flex justify-end' : ''
@@ -311,7 +318,7 @@ export function ConversationInterface({
                       {session.agentPersonality?.name || 'Alex'}
                     </span>
                     <span className="text-xs font-body text-muted-foreground">
-                      {formatTime(new Date(message.timestamp))}
+                      {formatTime(message.timestamp)}
                     </span>
                   </div>
                   <div className="text-[15px] font-body leading-relaxed text-foreground/90 whitespace-pre-wrap">
@@ -323,7 +330,7 @@ export function ConversationInterface({
                 <div className="max-w-[80%]">
                   <div className="flex items-center gap-2 mb-1 justify-end">
                     <span className="text-xs font-body text-muted-foreground">
-                      {formatTime(new Date(message.timestamp))}
+                      {formatTime(message.timestamp)}
                     </span>
                     <span className="text-sm font-body font-medium">You</span>
                   </div>
