@@ -465,14 +465,20 @@ export async function POST(req: NextRequest) {
             // ================================================================
             // Regular Update (Not Completed)
             // ================================================================
+            // P2 Fix: After auto-advance, reset coverage to 0 for the NEW stage
+            // Otherwise we'd record Stage 2 as 85% complete using Stage 1's coverage
+            const didAutoAdvance = newStage !== requestContext.stage;
+            const coverageForProgress = didAutoAdvance ? 0 : assessment.coverage;
+
             const overallProgress = calculateOverallProgress(
               newStage,
-              assessment.coverage,
+              coverageForProgress,
               false,
               updatedHistory.length
             );
 
-            const stageProgress = Math.round(assessment.coverage * 100);
+            // Stage progress should be 0% after auto-advance (new stage has no data yet)
+            const stageProgress = didAutoAdvance ? 0 : Math.round(assessment.coverage * 100);
 
             console.log('[api/chat] Updating database:', {
               sessionId,
