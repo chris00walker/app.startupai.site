@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       .from('onboarding_sessions')
       .update({
         status: 'paused',
-        updated_at: new Date().toISOString(),
+        last_activity: new Date().toISOString(),
       })
       .eq('session_id', sessionId);
 

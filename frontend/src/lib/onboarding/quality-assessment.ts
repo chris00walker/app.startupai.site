@@ -123,7 +123,20 @@ function getAssessmentModel() {
   });
 
   // Use Claude 3.5 Haiku for fast, cheap, reliable structured output
+  // Note: OpenRouter passes schema to Claude for JSON mode
   return openrouter('anthropic/claude-3.5-haiku');
+}
+
+/**
+ * Get Anthropic model directly for more reliable structured output
+ * Fallback if OpenRouter has issues with JSON mode
+ */
+async function getAnthropicAssessmentModel() {
+  const { createAnthropic } = await import('@ai-sdk/anthropic');
+  const anthropic = createAnthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  });
+  return anthropic('claude-3-5-haiku-latest');
 }
 
 // ============================================================================
@@ -209,6 +222,9 @@ This is the final stage. If completeness is "complete", also provide:
 /**
  * Assess conversation quality with retry logic
  *
+ * Uses Anthropic SDK directly for more reliable structured output.
+ * Falls back to OpenRouter if Anthropic API key is not available.
+ *
  * @param prompt - The assessment prompt
  * @param maxRetries - Maximum retry attempts (default: 3)
  * @returns QualityAssessment or null if all retries fail
@@ -217,7 +233,22 @@ export async function assessWithRetry(
   prompt: string,
   maxRetries: number = 3
 ): Promise<QualityAssessment | null> {
-  const model = getAssessmentModel();
+  // Try to use Anthropic directly for more reliable JSON output
+  let model;
+  const useAnthropicDirect = !!process.env.ANTHROPIC_API_KEY;
+
+  if (useAnthropicDirect) {
+    try {
+      model = await getAnthropicAssessmentModel();
+      console.log('[quality-assessment] Using Anthropic SDK directly for structured output');
+    } catch (err) {
+      console.warn('[quality-assessment] Failed to initialize Anthropic, falling back to OpenRouter:', err);
+      model = getAssessmentModel();
+    }
+  } else {
+    model = getAssessmentModel();
+    console.log('[quality-assessment] Using OpenRouter for assessment');
+  }
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -225,6 +256,8 @@ export async function assessWithRetry(
         model,
         schema: qualityAssessmentSchema,
         prompt,
+        // Explicit mode for Anthropic models
+        mode: 'json',
       });
       return object;
     } catch (error) {
