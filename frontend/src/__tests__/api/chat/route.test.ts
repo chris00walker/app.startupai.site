@@ -2,11 +2,20 @@
  * Chat API Route Tests
  *
  * Tests for the onboarding chat endpoint (/api/chat)
- * Focuses on tool handling and progress calculation logic.
+ * Focuses on two-pass architecture: progress calculation and backend assessment.
  *
  * Note: The actual streamText call is complex to mock, so we test
- * the key logic: progress calculation and tool result handling.
+ * the key logic: progress calculation and backend assessment functions.
+ *
+ * @see Plan: /home/chris/.claude/plans/async-mixing-ritchie.md
  */
+
+import {
+  mergeExtractedData,
+  shouldAdvanceStage,
+  hashMessageForIdempotency,
+  type QualityAssessment,
+} from '@/lib/onboarding/quality-assessment';
 
 // Mock dependencies before imports
 jest.mock('@/lib/supabase/server', () => ({
@@ -25,8 +34,6 @@ jest.mock('@/lib/crewai/modal-client', () => ({
 
 jest.mock('ai', () => ({
   streamText: jest.fn(),
-  tool: jest.fn((config) => config),
-  stepCountIs: jest.fn((n) => n),
 }));
 
 describe('Chat API Route', () => {
@@ -107,197 +114,153 @@ describe('Chat API Route', () => {
     });
   });
 
-  describe('Tool Definitions', () => {
-    it('should define assessQuality tool with correct schema', () => {
-      // Verify the tool exists in the route
-      // This is a structural test - the actual tool is defined in route.ts
-      const expectedFields = ['coverage', 'clarity', 'completeness', 'notes'];
-      expectedFields.forEach((field) => {
-        expect(field).toBeDefined();
-      });
-    });
+  /**
+   * Backend Assessment Tests
+   *
+   * Two-pass architecture: LLM generates conversation (Pass 1),
+   * backend ALWAYS runs quality assessment (Pass 2).
+   *
+   * These tests verify the assessment utility functions imported from
+   * quality-assessment.ts that are used in the route's onFinish callback.
+   */
+  describe('Backend Assessment', () => {
+    describe('mergeExtractedData', () => {
+      it('should merge new data into existing brief', () => {
+        const existing = { business_concept: 'old idea' };
+        const extracted = { target_customers: ['B2B SaaS'] };
+        const merged = mergeExtractedData(existing, extracted);
 
-    it('should define advanceStage tool with correct schema', () => {
-      const expectedFields = ['fromStage', 'toStage', 'summary', 'collectedData'];
-      expectedFields.forEach((field) => {
-        expect(field).toBeDefined();
-      });
-    });
-
-    it('should define completeOnboarding tool with correct schema', () => {
-      const expectedFields = ['readinessScore', 'keyInsights', 'recommendedNextSteps'];
-      expectedFields.forEach((field) => {
-        expect(field).toBeDefined();
-      });
-    });
-  });
-
-  describe('Multi-step Flow Configuration', () => {
-    /**
-     * The prepareStep + stopWhen configuration is critical for tools-first behavior:
-     * - prepareStep: Returns { toolChoice: 'none' } after step 1 (forces text in step 2)
-     * - stopWhen: stepCountIs(2) allows exactly 2 steps (tools → text)
-     *
-     * This test documents the expected behavior, even though we can't
-     * easily mock the streamText internals.
-     */
-
-    it('should FORCE tools in step 0 (stepNumber === 0)', () => {
-      const prepareStep = ({ stepNumber }: { stepNumber: number }) => {
-        if (stepNumber === 0) {
-          return { toolChoice: 'required' as const };
-        }
-        return { toolChoice: 'none' as const };
-      };
-
-      // Step 0 (first step): should FORCE tools
-      const step0Result = prepareStep({ stepNumber: 0 });
-      expect(step0Result).toEqual({ toolChoice: 'required' }); // FORCE tool usage
-    });
-
-    it('should force text-only in step 1+ (stepNumber > 0)', () => {
-      const prepareStep = ({ stepNumber }: { stepNumber: number }) => {
-        if (stepNumber === 0) {
-          return { toolChoice: 'required' as const };
-        }
-        return { toolChoice: 'none' as const };
-      };
-
-      // Step 1 (second step): should force text (no tools)
-      const step1Result = prepareStep({ stepNumber: 1 });
-      expect(step1Result).toEqual({ toolChoice: 'none' });
-    });
-
-    it('should stop after 2 steps', () => {
-      const maxSteps = 2;
-      expect(maxSteps).toBe(2);
-    });
-  });
-
-  describe('Tool Result Handling', () => {
-    describe('advanceStage tool', () => {
-      it('should update stage when advanceStage is called', () => {
-        const currentStage = 1;
-        const toolInput = {
-          fromStage: 1,
-          toStage: 2,
-          summary: 'User described their business concept clearly',
-          collectedData: { business_concept: 'AI validation platform' },
-        };
-
-        // Simulate tool handling
-        let newStage = currentStage;
-        if (toolInput.fromStage === currentStage) {
-          newStage = toolInput.toStage;
-        }
-
-        expect(newStage).toBe(2);
-      });
-
-      it('should store stage summary in stageData', () => {
-        const stageData: Record<string, unknown> = {};
-        const toolInput = {
-          fromStage: 1,
-          toStage: 2,
-          summary: 'Test summary',
-          collectedData: { key: 'value' },
-        };
-
-        // Simulate storing summary
-        stageData[`stage_${toolInput.fromStage}_summary`] = toolInput.summary;
-        stageData[`stage_${toolInput.fromStage}_data`] = toolInput.collectedData;
-
-        expect(stageData['stage_1_summary']).toBe('Test summary');
-        expect(stageData['stage_1_data']).toEqual({ key: 'value' });
-      });
-
-      it('should merge collected data into brief', () => {
-        const stageData: Record<string, unknown> = {
-          brief: { existing_field: 'value' },
-        };
-        const collectedData = { new_field: 'new_value' };
-
-        // Simulate merging
-        stageData.brief = {
-          ...(stageData.brief as object),
-          ...collectedData,
-        };
-
-        expect(stageData.brief).toEqual({
-          existing_field: 'value',
-          new_field: 'new_value',
+        expect(merged).toEqual({
+          business_concept: 'old idea',
+          target_customers: ['B2B SaaS'],
         });
       });
-    });
 
-    describe('assessQuality tool', () => {
-      it('should store quality assessment for current stage', () => {
-        const currentStage = 2;
-        const stageData: Record<string, unknown> = {};
-        const toolInput = {
-          coverage: 0.75,
-          clarity: 'high' as const,
-          completeness: 'partial' as const,
-          notes: 'Good detail on customer segments',
-        };
+      it('should append arrays instead of replacing', () => {
+        const existing = { competitors: ['Competitor A'] };
+        const extracted = { competitors: ['Competitor B'] };
+        const merged = mergeExtractedData(existing, extracted);
 
-        // Simulate storing quality
-        stageData[`stage_${currentStage}_quality`] = {
-          ...toolInput,
-          timestamp: new Date().toISOString(),
-        };
+        expect(merged.competitors).toEqual(['Competitor A', 'Competitor B']);
+      });
 
-        const quality = stageData['stage_2_quality'] as {
-          coverage: number;
-          clarity: string;
-        };
-        expect(quality.coverage).toBe(0.75);
-        expect(quality.clarity).toBe('high');
+      it('should dedupe arrays when merging', () => {
+        const existing = { competitors: ['A', 'B'] };
+        const extracted = { competitors: ['B', 'C'] };
+        const merged = mergeExtractedData(existing, extracted);
+
+        expect(merged.competitors).toEqual(['A', 'B', 'C']);
+      });
+
+      it('should overwrite non-array values', () => {
+        const existing = { business_concept: 'old' };
+        const extracted = { business_concept: 'updated' };
+        const merged = mergeExtractedData(existing, extracted);
+
+        expect(merged.business_concept).toBe('updated');
+      });
+
+      it('should handle undefined extractedData', () => {
+        const existing = { business_concept: 'test' };
+        const merged = mergeExtractedData(existing, undefined);
+
+        expect(merged).toEqual({ business_concept: 'test' });
+      });
+
+      it('should skip empty string values', () => {
+        const existing = { business_concept: 'test' };
+        const extracted = { inspiration: '' };
+        const merged = mergeExtractedData(existing, extracted);
+
+        expect(merged).toEqual({ business_concept: 'test' });
+        expect(merged).not.toHaveProperty('inspiration');
       });
     });
 
-    describe('completeOnboarding tool', () => {
-      it('should set progress to 100% when completed', () => {
-        let overallProgress = 85;
-        const isCompleted = true;
-
-        if (isCompleted) {
-          overallProgress = 100;
-        }
-
-        expect(overallProgress).toBe(100);
+    describe('shouldAdvanceStage', () => {
+      it('should return true when coverage >= threshold and complete', () => {
+        const assessment: QualityAssessment = {
+          coverage: 0.85,
+          clarity: 'high',
+          completeness: 'complete',
+          notes: 'Good progress',
+        };
+        // Stage 1 threshold = 0.8
+        expect(shouldAdvanceStage(assessment, 1)).toBe(true);
       });
 
-      it('should set status to completed', () => {
-        let status = 'active';
-        const isCompleted = true;
-
-        if (isCompleted) {
-          status = 'completed';
-        }
-
-        expect(status).toBe('completed');
+      it('should return false when coverage < threshold', () => {
+        const assessment: QualityAssessment = {
+          coverage: 0.5,
+          clarity: 'medium',
+          completeness: 'partial',
+          notes: 'Needs more detail',
+        };
+        // Stage 1 threshold = 0.8
+        expect(shouldAdvanceStage(assessment, 1)).toBe(false);
       });
 
-      it('should store completion data', () => {
-        const stageData: Record<string, unknown> = {};
-        const toolInput = {
-          readinessScore: 0.85,
-          keyInsights: ['Strong problem-solution fit', 'Clear target market'],
-          recommendedNextSteps: ['Customer interviews', 'Landing page test'],
+      it('should return false when completeness is not complete', () => {
+        const assessment: QualityAssessment = {
+          coverage: 0.9,
+          clarity: 'high',
+          completeness: 'partial', // Not complete
+          notes: 'Almost there',
         };
+        expect(shouldAdvanceStage(assessment, 1)).toBe(false);
+      });
 
-        stageData.completion = {
-          ...toolInput,
-          completedAt: new Date().toISOString(),
+      it('should return false at stage 7 (cannot advance past final)', () => {
+        const assessment: QualityAssessment = {
+          coverage: 1.0,
+          clarity: 'high',
+          completeness: 'complete',
+          notes: 'All done',
         };
+        expect(shouldAdvanceStage(assessment, 7)).toBe(false);
+      });
+    });
 
-        const completion = stageData.completion as {
-          readinessScore: number;
-          keyInsights: string[];
-        };
-        expect(completion.readinessScore).toBe(0.85);
-        expect(completion.keyInsights).toHaveLength(2);
+    describe('hashMessageForIdempotency', () => {
+      it('should produce consistent hash for same inputs', () => {
+        const hash1 = hashMessageForIdempotency('session1', 5, 2, 'hello');
+        const hash2 = hashMessageForIdempotency('session1', 5, 2, 'hello');
+
+        expect(hash1).toBe(hash2);
+      });
+
+      it('should produce different hash for different messages', () => {
+        const hash1 = hashMessageForIdempotency('session1', 5, 2, 'hello');
+        const hash2 = hashMessageForIdempotency('session1', 5, 2, 'world');
+
+        expect(hash1).not.toBe(hash2);
+      });
+
+      it('should produce different hash for same message at different index', () => {
+        const hash1 = hashMessageForIdempotency('session1', 5, 2, 'yes');
+        const hash2 = hashMessageForIdempotency('session1', 7, 2, 'yes');
+
+        expect(hash1).not.toBe(hash2);
+      });
+
+      it('should produce different hash for same message at different stage', () => {
+        const hash1 = hashMessageForIdempotency('session1', 5, 2, 'yes');
+        const hash2 = hashMessageForIdempotency('session1', 5, 3, 'yes');
+
+        expect(hash1).not.toBe(hash2);
+      });
+
+      it('should produce different hash for different sessions', () => {
+        const hash1 = hashMessageForIdempotency('session1', 5, 2, 'hello');
+        const hash2 = hashMessageForIdempotency('session2', 5, 2, 'hello');
+
+        expect(hash1).not.toBe(hash2);
+      });
+
+      it('should return string starting with assessment_', () => {
+        const hash = hashMessageForIdempotency('session1', 5, 2, 'hello');
+
+        expect(hash).toMatch(/^assessment_[a-f0-9]+$/);
       });
     });
   });

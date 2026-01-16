@@ -1,13 +1,15 @@
 ---
 purpose: "Cross-repository dependency tracking for coordinated delivery"
 status: "active"
-last_reviewed: "2026-01-12"
-last_synced: "2026-01-12 - API routes hardened, evidence display verified, build passing"
+last_reviewed: "2026-01-16"
+last_synced: "2026-01-16 - Two-Pass Architecture implemented for onboarding, ADR-004 created"
 ---
 
 # Cross-Repository Blockers
 
 This document tracks dependencies between StartupAI repositories to ensure coordinated delivery.
+
+> **TWO-PASS ARCHITECTURE (2026-01-16)**: Onboarding stage progression fix implemented. Backend-driven assessment replaces unreliable LLM tool-calling. See [ADR-004](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md).
 
 > **DOGFOODING VERIFIED (2026-01-12)**: Founder and Consultant browser journeys tested. Phase 0-1 HITL approvals working. RLS policies for consultant access deployed. API routes hardened with improved error handling.
 
@@ -210,7 +212,15 @@ Marketing activity feed shows real activity
 
 ---
 
-**Last Updated**: 2026-01-12 18:00
+**Last Updated**: 2026-01-16
+
+**Changes (2026-01-16 - Two-Pass Architecture)**:
+- ✅ **ONBOARDING FIX**: Implemented Two-Pass Architecture (ADR-004) for reliable stage progression
+- ✅ **ADR CREATED**: `startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md`
+- Root cause: LLM tool calling was 18% reliable, causing stuck sessions
+- Solution: Backend runs deterministic assessment after every response
+- Impact: Phase 0 → Phase 1 pipeline should now reliably trigger CrewAI
+- ⏳ **PENDING**: Live verification with dogfooding account
 
 **Changes (2026-01-12 - API Route Hardening)**:
 - ✅ **APPROVAL ROUTES ENHANCED**: List + detail endpoints with better error handling

@@ -62,7 +62,7 @@ Local file exists but not applied to remote Supabase.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
-| 1 | **Phase 0 Stage Progression Fix** | **Ready** | @backend | ~2 hours | Backend auto-advance, remove advanceStage tool, add stage_progress |
+| 1 | **Phase 0 Stage Progression Fix** | ✅ **IMPLEMENTED** | @backend | ~2 hours | Two-Pass Architecture (ADR-004) - Backend assessment replaces tools |
 | 2 | **Phase 0 Webhook Data Model Fix** | **Ready** | @backend | ~1 hour | Fix webhook to create `founders_briefs` (not overwrite `entrepreneur_briefs`) |
 | 3 | **Transcript Handoff to Modal** | **Ready** | @backend | ~30 min | Pass conversation transcript to buildFounderValidationInputs |
 | 4 | **Save & Exit Response Checking** | **Ready** | @frontend | ~30 min | Check pause API response before redirect |
@@ -71,20 +71,33 @@ Local file exists but not applied to remote Supabase.
 | 7 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
 | 8 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
 
-#### Phase 0 Architecture Fix (2026-01-15) - Team Audit Findings
+#### Phase 0 Architecture Fix (2026-01-16) - Two-Pass Architecture ✅ IMPLEMENTED
 
-**Problem**: 10+ failed attempts to fix stage progression. Root cause: LLM cannot conditionally chain tools.
+**Problem**: 10+ failed attempts to fix stage progression. Root cause: LLM tool calling is fundamentally unreliable (18% call rate observed).
 
-**Solution**: Backend-driven deterministic logic (Plan: `gentle-booping-mitten.md`)
+**Solution**: Two-Pass Architecture - deterministic backend assessment
+- **ADR**: [004-two-pass-onboarding-architecture.md](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
+- **Plan**: [async-mixing-ritchie.md](/home/chris/.claude/plans/async-mixing-ritchie.md)
 
 | Fix | File | Change |
 |-----|------|--------|
-| Backend auto-advance | `/api/chat/route.ts` | Move stage advancement from LLM tool to backend after `assessQuality` |
-| Remove advanceStage tool | `/api/chat/route.ts` | Tool is redundant with backend logic |
-| Add stage_progress | `/api/chat/route.ts` | `updateData.stage_progress = Math.round(coverage * 100)` |
-| Fix transcript handoff | `/api/chat/route.ts` | Pass `conversationTranscript` as 5th param to `buildFounderValidationInputs` |
-| Fix webhook data model | `/api/crewai/webhook/route.ts` | INSERT to `founders_briefs` (Layer 2), don't overwrite `entrepreneur_briefs` (Layer 1) |
-| Save & Exit checking | `OnboardingWizardV2.tsx` | Check `response.ok && data.success` before redirect |
+| **Remove all tools** | `/api/chat/route.ts` | Removed `assessQuality`, `advanceStage`, `completeOnboarding` |
+| **Add Pass 2 assessment** | `/api/chat/route.ts` | Backend calls `generateObject` after every response |
+| **New assessment module** | `/lib/onboarding/quality-assessment.ts` | Schema, assessment, merge, idempotency functions |
+| **Simplified prompt** | `/lib/ai/onboarding-prompt.ts` | Removed tool instructions, LLM handles conversation only |
+| **Idempotency guard** | `/api/chat/route.ts` | Hash-based key prevents duplicate assessments |
+| **Atomic completion** | `/api/chat/route.ts` | Supabase conditional update for CrewAI trigger |
+
+**Architecture**:
+```
+Pass 1: LLM conversation (streaming, NO tools)
+    ↓
+Pass 2: Backend assessment (deterministic, ALWAYS runs)
+    ↓
+State machine: Merge data, check thresholds, advance stage, trigger CrewAI
+```
+
+**Status**: Implemented, pending live verification with dogfooding account.
 
 **Two-Artifact Data Model** (Key Insight from Team Audit):
 ```
@@ -267,7 +280,21 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 ---
 
-**Last Updated**: 2026-01-15
+**Last Updated**: 2026-01-16
+
+**Changes (2026-01-16 - Two-Pass Architecture):**
+- **MAJOR**: Implemented Two-Pass Onboarding Architecture (ADR-004)
+- Replaced unreliable LLM tool-calling (18% call rate) with deterministic backend assessment
+- New module: `/lib/onboarding/quality-assessment.ts` with all assessment logic
+- Removed tools: `assessQuality`, `advanceStage`, `completeOnboarding` from chat route
+- Pass 1: LLM generates conversation only (no tools)
+- Pass 2: Backend ALWAYS runs `generateObject` for quality assessment
+- Idempotency: Hash-based key (sessionId + messageIndex + stage + content)
+- Atomic completion: Supabase conditional update for CrewAI trigger
+- All tests pass (41 prompt tests, 28 route tests)
+- Build verified successful
+- **Plan**: `/home/chris/.claude/plans/async-mixing-ritchie.md`
+- **ADR**: `startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md`
 
 **Changes (2026-01-15 - Phase 0 Team Audit):**
 - **P0 SECURITY**: Added deploy zip with secrets deletion (423MB file with SERVICE_ROLE_KEY)

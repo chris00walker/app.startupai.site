@@ -1,7 +1,6 @@
-import { streamText, tool } from 'ai';
+import { streamText } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { NextRequest } from 'next/server';
-import { z } from 'zod';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createModalClient } from '@/lib/crewai/modal-client';
@@ -10,7 +9,15 @@ import {
   ONBOARDING_SYSTEM_PROMPT,
   getStageSystemContext,
 } from '@/lib/ai/onboarding-prompt';
-import { getStageConfig } from '@/lib/onboarding/stages-config';
+import {
+  assessConversationQuality,
+  shouldAdvanceStage,
+  isOnboardingComplete,
+  mergeExtractedData,
+  hashMessageForIdempotency,
+  calculateOverallProgress,
+  type ConversationMessage,
+} from '@/lib/onboarding/quality-assessment';
 
 // ============================================================================
 // AI Model Configuration - OpenRouter (Multi-Provider Gateway)
@@ -31,64 +38,21 @@ function getAIModel() {
     },
   });
 
-  // Default to Llama 3.3 70B which has excellent tool calling (90.76% BFCL benchmark)
+  // Default to Llama 3.3 70B for conversational quality
   const model = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
   console.log('[api/chat] Using OpenRouter model:', model, 'via provider:', provider);
   return openrouter(model);
 }
 
 // ============================================================================
-// AI Tools for Stage Progression
-// ============================================================================
-
-// These tools allow the AI to manage the 7-stage onboarding flow
-// The AI uses these to assess response quality and advance through stages
-
-const assessQualityTool = tool({
-  description: 'Silently track the quality and completeness of user responses. This is a background operation - never mention it to the user.',
-  inputSchema: z.object({
-    coverage: z.number().min(0).max(1).describe('How much of the required information has been collected (0.0 to 1.0)'),
-    clarity: z.enum(['high', 'medium', 'low']).describe('How clear and specific are the responses'),
-    completeness: z.enum(['complete', 'partial', 'insufficient']).describe('Is there enough information to move forward'),
-    notes: z.string().describe('Brief observations about response quality and any gaps'),
-  }),
-  execute: async ({ coverage, clarity, completeness, notes }) => {
-    return {
-      assessment: { coverage, clarity, completeness, notes },
-      message: 'Quality assessment recorded',
-    };
-  },
-});
-
-// advanceStageTool REMOVED - backend now handles stage advancement automatically
-// after assessQuality returns coverage >= threshold (see onFinish callback)
-// This fixes the root cause of 10+ failed stage progression fixes:
-// LLMs cannot reliably chain conditional tool calls (assessQuality → advanceStage)
-
-const completeOnboardingTool = tool({
-  description: 'Silently signal that all 7 stages are complete. This is a background operation that triggers strategic analysis - never mention it to the user. Only use after Stage 7 is thoroughly completed with high-quality responses.',
-  inputSchema: z.object({
-    readinessScore: z.number().min(0).max(1).describe('Overall readiness for strategic analysis (0.0 to 1.0)'),
-    keyInsights: z.array(z.string()).describe('3-5 key insights from the entire conversation'),
-    recommendedNextSteps: z.array(z.string()).describe('3-5 recommended experiments or actions'),
-  }),
-  execute: async ({ readinessScore, keyInsights, recommendedNextSteps }) => {
-    return {
-      completion: { readinessScore, keyInsights, recommendedNextSteps },
-      message: 'Onboarding complete - ready for strategic analysis',
-    };
-  },
-});
-
-const onboardingTools = {
-  assessQuality: assessQualityTool,
-  // advanceStage: REMOVED - backend handles stage advancement automatically
-  completeOnboarding: completeOnboardingTool,
-};
-
-// ============================================================================
 // Main Chat API Handler
 // ============================================================================
+
+// Two-Pass Architecture:
+// Pass 1: LLM generates conversational response (NO tools, streaming)
+// Pass 2: Backend deterministically assesses quality after response (generateObject)
+//
+// This fixes the 18% tool call rate issue that caused sessions to get stuck.
 
 export async function POST(req: NextRequest) {
   try {
@@ -152,6 +116,16 @@ export async function POST(req: NextRequest) {
 
     const stageContext = getStageSystemContext(currentStage, briefData);
 
+    // Capture request context at START for idempotency (before any async work)
+    // This ensures retries produce the same hash even if state changes
+    const userMessage = messages[messages.length - 1]?.content || '';
+    const requestContext = {
+      sessionId,
+      messageIndex: messages.length,
+      stage: currentStage,
+      userMessage,
+    };
+
     // Log request details for debugging
     console.log('[api/chat] Creating stream:', {
       sessionId,
@@ -173,7 +147,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Stream AI response
+    // ========================================================================
+    // PASS 1: Stream AI Response (Conversation Only - NO Tools)
+    // ========================================================================
     let result;
     try {
       console.log('[api/chat] Calling streamText with:', {
@@ -183,361 +159,347 @@ export async function POST(req: NextRequest) {
         temperature: 0.7,
       });
 
-      console.log('[api/chat] Starting streamText with multi-step tool enforcement');
+      console.log('[api/chat] Starting Pass 1: Conversation streaming (no tools)');
 
       result = streamText({
         model,
         system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
         messages,
         temperature: 0.7,
-        tools: onboardingTools,
-        // Let Claude decide when to call tools - it's more reliable than forcing
-        // Claude will naturally call tools AND respond with text in the same turn
-        toolChoice: 'auto',
-        onFinish: async ({ text, finishReason, toolCalls, toolResults }) => {
-          console.log('[api/chat] ========== STREAM FINISHED ==========');
+        // NO tools - Pass 2 handles assessment deterministically
+        onFinish: async ({ text, finishReason }) => {
+          console.log('[api/chat] ========== PASS 1 COMPLETE ==========');
           console.log('[api/chat] Stream result:', {
             textLength: text.length,
             textPreview: text.substring(0, 100),
             finishReason,
-            toolCallsCount: toolCalls?.length || 0,
-            toolResultsCount: toolResults?.length || 0,
-            toolNames: toolCalls?.map(tc => tc.toolName) || [],
           });
-
-          // CRITICAL: Log if tools were NOT called - this is the root cause of progress issues
-          if (!toolCalls || toolCalls.length === 0) {
-            console.error('[api/chat] ⚠️ WARNING: No tools were called! Progress will not update.');
-            console.error('[api/chat] This should not happen with toolChoice=required in step 1');
-            console.error('[api/chat] Check if prepareStep is being called and returning correct value');
-          } else {
-            console.log('[api/chat] ✓ Tools were called:', toolCalls.map(tc => tc.toolName));
-          }
 
           try {
+            // Skip if no text (edge case)
+            const hasText = text && text.trim().length > 0;
+            if (!hasText) {
+              console.warn('[api/chat] Empty AI text response, skipping Pass 2');
+              return;
+            }
 
-          // Process tool results
-          let newStage = currentStage;
-          let newStageData = { ...stageData };
-          let isCompleted = false;
+            // ================================================================
+            // Build Updated Conversation History
+            // ================================================================
+            const updatedHistory: ConversationMessage[] = [
+              ...((session.conversation_history || []) as ConversationMessage[]),
+              {
+                role: 'user',
+                content: requestContext.userMessage,
+                stage: requestContext.stage, // Use captured stage
+              },
+              {
+                role: 'assistant',
+                content: text,
+                stage: requestContext.stage, // Tagged with current stage BEFORE assessment
+              },
+            ];
 
-          console.log('[api/chat] Processing tool results:', {
-            toolResultsCount: toolResults?.length || 0,
-            toolCallsCount: toolCalls?.length || 0,
-            currentStage,
-            currentStageData: Object.keys(stageData),
-          });
+            // ================================================================
+            // Check if Already Completed - Persist History Only
+            // ================================================================
+            const isSessionCompleted = !!stageData.completion;
+            if (isSessionCompleted) {
+              console.log('[api/chat] Session already completed, persisting history only');
+              await supabaseClient
+                .from('onboarding_sessions')
+                .update({
+                  conversation_history: updatedHistory,
+                  last_activity: new Date().toISOString(),
+                })
+                .eq('session_id', sessionId);
+              return;
+            }
 
-          if (toolResults && toolResults.length > 0) {
-            for (const result of toolResults) {
-              const toolCall = toolCalls?.find(tc => tc.toolCallId === result.toolCallId);
-              if (!toolCall) {
-                console.warn('[api/chat] Tool result without matching call:', result.toolCallId);
-                continue;
+            // ================================================================
+            // Idempotency Guard - Skip if Already Processed
+            // ================================================================
+            const assessmentKey = hashMessageForIdempotency(
+              requestContext.sessionId,
+              requestContext.messageIndex,
+              requestContext.stage,
+              requestContext.userMessage
+            );
+
+            if (stageData[assessmentKey]) {
+              console.log('[api/chat] Assessment already exists for this message, skipping');
+              return;
+            }
+
+            // ================================================================
+            // PASS 2: Deterministic Quality Assessment
+            // ================================================================
+            console.log('[api/chat] Starting Pass 2: Backend quality assessment');
+
+            const assessment = await assessConversationQuality(
+              requestContext.stage,
+              updatedHistory,
+              briefData
+            );
+
+            // Handle assessment failure
+            if (!assessment) {
+              console.error('[api/chat] Assessment failed, storing failure marker');
+              const failureStageData = {
+                ...stageData,
+                [`assessment_failure_${Date.now()}`]: {
+                  timestamp: new Date().toISOString(),
+                  stage: requestContext.stage,
+                  error: 'Assessment failed after 3 retries',
+                },
+              };
+
+              await supabaseClient
+                .from('onboarding_sessions')
+                .update({
+                  conversation_history: updatedHistory,
+                  stage_data: failureStageData,
+                  last_activity: new Date().toISOString(),
+                })
+                .eq('session_id', sessionId);
+              return;
+            }
+
+            console.log('[api/chat] Pass 2 Assessment result:', {
+              stage: requestContext.stage,
+              coverage: assessment.coverage,
+              completeness: assessment.completeness,
+              shouldAdvance: shouldAdvanceStage(assessment, requestContext.stage),
+              extractedFields: Object.keys(assessment.extractedData || {}),
+            });
+
+            // ================================================================
+            // State Machine: Process Assessment Results
+            // ================================================================
+            let newStage = requestContext.stage;
+            let newStageData = { ...stageData };
+            let completedNow = false;
+
+            // Store idempotency key
+            newStageData[assessmentKey] = {
+              timestamp: new Date().toISOString(),
+              coverage: assessment.coverage,
+              stage: requestContext.stage,
+            };
+
+            // Store quality assessment
+            newStageData[`stage_${requestContext.stage}_quality`] = {
+              coverage: assessment.coverage,
+              clarity: assessment.clarity,
+              completeness: assessment.completeness,
+              notes: assessment.notes,
+              timestamp: new Date().toISOString(),
+            };
+
+            // Merge extracted data into brief
+            newStageData.brief = mergeExtractedData(
+              newStageData.brief || {},
+              assessment.extractedData
+            );
+
+            // Check for stage advancement
+            if (shouldAdvanceStage(assessment, requestContext.stage)) {
+              const fromStage = requestContext.stage;
+              newStage = requestContext.stage + 1;
+
+              newStageData[`stage_${fromStage}_summary`] =
+                `Auto-advanced after ${Math.round(assessment.coverage * 100)}% coverage`;
+
+              console.log('[api/chat] AUTO-ADVANCING:', {
+                from: fromStage,
+                to: newStage,
+                coverage: assessment.coverage,
+              });
+            }
+
+            // Check for completion (Stage 7 finished)
+            if (isOnboardingComplete(assessment, requestContext.stage)) {
+              completedNow = true;
+              console.log('[api/chat] Onboarding complete, preparing CrewAI trigger');
+
+              // ============================================================
+              // Atomic Completion Guard + CrewAI Trigger
+              // ============================================================
+              const completionData = {
+                readinessScore: assessment.coverage,
+                keyInsights: assessment.keyInsights || [],
+                recommendedNextSteps: assessment.recommendedNextSteps || [],
+                completedAt: new Date().toISOString(),
+              };
+
+              // Atomic update - only succeeds if completion doesn't exist yet
+              const { data: completionResult, error: completionError } = await supabaseClient
+                .from('onboarding_sessions')
+                .update({
+                  conversation_history: updatedHistory,
+                  stage_data: { ...newStageData, completion: completionData },
+                  current_stage: newStage,
+                  overall_progress: 100,
+                  status: 'completed',
+                  last_activity: new Date().toISOString(),
+                })
+                .eq('session_id', sessionId)
+                .is('stage_data->completion', null) // Only update if not already completed
+                .select();
+
+              if (completionError || !completionResult || completionResult.length === 0) {
+                console.log('[api/chat] Completion already recorded by another request, skipping CrewAI');
+                return;
               }
 
-              console.log('[api/chat] Processing tool result:', {
-                toolName: toolCall.toolName,
-                input: toolCall.input,
-              });
-
-              // advanceStage tool handling REMOVED - backend auto-advances in assessQuality handler above
-              // This code block is kept for reference but the tool no longer exists
-
-              // Handle assessQuality tool
-              if (toolCall.toolName === 'assessQuality') {
-                const { coverage, clarity, completeness, notes } = toolCall.input as any;
-
-                // Store quality assessment for current stage
-                newStageData[`stage_${currentStage}_quality`] = {
-                  coverage,
-                  clarity,
-                  completeness,
-                  notes,
-                  timestamp: new Date().toISOString(),
+              // ============================================================
+              // CrewAI Integration - Kickoff Analysis
+              // ============================================================
+              try {
+                const crewBriefData = {
+                  customer_segments: newStageData.brief?.target_customers || [],
+                  primary_customer_segment: newStageData.brief?.primary_segment || newStageData.brief?.target_customers,
+                  problem_description: newStageData.brief?.problem_description || newStageData.brief?.problem,
+                  problem_pain_level: newStageData.brief?.pain_level || 5,
+                  solution_description: newStageData.brief?.solution_description || newStageData.brief?.solution,
+                  unique_value_proposition: newStageData.brief?.unique_value_prop || newStageData.brief?.differentiation,
+                  differentiation_factors: newStageData.brief?.differentiation || newStageData.brief?.differentiators || [],
+                  competitors: newStageData.brief?.competitors || [],
+                  budget_range: newStageData.brief?.budget_range || newStageData.brief?.budget || 'not specified',
+                  available_channels: newStageData.brief?.available_channels || newStageData.brief?.channels || [],
+                  business_stage: newStageData.brief?.current_stage || newStageData.brief?.business_stage || 'idea',
+                  three_month_goals: newStageData.brief?.short_term_goals || newStageData.brief?.goals || [],
                 };
 
-                console.log('[api/chat] Quality assessed:', {
-                  stage: currentStage,
-                  coverage,
-                  clarity,
-                  completeness,
+                // Save to entrepreneur_briefs table
+                await supabaseClient.rpc('upsert_entrepreneur_brief', {
+                  p_session_id: sessionId,
+                  p_user_id: user.id,
+                  p_brief_data: crewBriefData,
                 });
 
-                // === BACKEND AUTO-ADVANCE LOGIC ===
-                // This replaces the unreliable LLM-driven advanceStage tool
-                // Root cause fix: LLMs cannot conditionally chain tools
-                const stageConfig = getStageConfig(currentStage);
-                const threshold = stageConfig?.progressThreshold ?? 0.75;
-
-                if (
-                  coverage >= threshold &&
-                  completeness === 'complete' &&
-                  currentStage < 7
-                ) {
-                  const fromStage = currentStage;
-                  newStage = currentStage + 1;
-
-                  // Store stage summary for audit trail
-                  newStageData[`stage_${fromStage}_summary`] =
-                    `Auto-advanced after ${Math.round(coverage * 100)}% coverage`;
-
-                  console.log('[api/chat] AUTO-ADVANCING:', {
-                    from: fromStage,
-                    to: newStage,
-                    coverage,
-                    threshold,
-                    clarity,
-                    completeness,
+                // Create project from onboarding session
+                const { data: projectId, error: projectError } = await supabaseClient
+                  .rpc('create_project_from_onboarding', {
+                    p_session_id: sessionId,
                   });
-                } else {
-                  console.log('[api/chat] Not advancing:', {
-                    stage: currentStage,
-                    coverage,
-                    threshold,
-                    completeness,
-                    reason: coverage < threshold ? 'below threshold' :
-                            completeness !== 'complete' ? 'incomplete' : 'at stage 7',
-                  });
+
+                if (projectError) {
+                  throw projectError;
                 }
+
+                console.log('[api/chat] Project created:', projectId);
+
+                // Kick off validation workflow (Modal)
+                const modalClient = createModalClient();
+                const conversationTranscript = JSON.stringify(updatedHistory);
+
+                const validationInputs = buildFounderValidationInputs(
+                  crewBriefData,
+                  projectId,
+                  user.id,
+                  sessionId,
+                  conversationTranscript,
+                  'founder'
+                );
+
+                const response = await modalClient.kickoff({
+                  entrepreneur_input: validationInputs.entrepreneur_input,
+                  project_id: validationInputs.project_id,
+                  user_id: validationInputs.user_id,
+                  session_id: validationInputs.session_id,
+                });
+
+                const workflowId = response.run_id;
+                console.log('[api/chat] Modal workflow started:', workflowId);
+
+                // Store workflow ID in project
+                await supabaseClient
+                  .from('projects')
+                  .update({
+                    initial_analysis_workflow_id: workflowId,
+                    status: 'analyzing',
+                  })
+                  .eq('id', projectId);
+
+                // Update completion data with projectId and workflowId
+                await supabaseClient
+                  .from('onboarding_sessions')
+                  .update({
+                    stage_data: {
+                      ...newStageData,
+                      completion: {
+                        ...completionData,
+                        projectId,
+                        workflowId,
+                      },
+                    },
+                  })
+                  .eq('session_id', sessionId);
+
+                console.log('[api/chat] CrewAI integration complete:', { projectId, workflowId });
+              } catch (crewError) {
+                console.error('[api/chat] Error in CrewAI integration:', crewError);
+                // Store error but don't fail - user still gets completion
+                await supabaseClient
+                  .from('onboarding_sessions')
+                  .update({
+                    stage_data: {
+                      ...newStageData,
+                      completion: {
+                        ...completionData,
+                        error: crewError instanceof Error ? crewError.message : 'Unknown error',
+                      },
+                    },
+                  })
+                  .eq('session_id', sessionId);
               }
 
-              // Handle completeOnboarding tool
-              if (toolCall.toolName === 'completeOnboarding') {
-                const { readinessScore, keyInsights, recommendedNextSteps } = toolCall.input as any;
-
-                isCompleted = true;
-                newStageData.completion = {
-                  readinessScore,
-                  keyInsights,
-                  recommendedNextSteps,
-                  completedAt: new Date().toISOString(),
-                };
-
-                console.log('[api/chat] Onboarding completed, triggering CrewAI workflow');
-
-                // ========================================
-                // CrewAI Integration - Kickoff Analysis
-                // ========================================
-
-                try {
-                  // Step 1: Extract structured brief from stage_data
-                  const briefData = {
-                    customer_segments: newStageData.brief?.target_customers || [],
-                    primary_customer_segment: newStageData.brief?.primary_segment || newStageData.brief?.target_customers,
-                    problem_description: newStageData.brief?.problem_description || newStageData.brief?.problem,
-                    problem_pain_level: newStageData.brief?.pain_level || 5,
-                    solution_description: newStageData.brief?.solution_description || newStageData.brief?.solution,
-                    unique_value_proposition: newStageData.brief?.unique_value_prop || newStageData.brief?.differentiation,
-                    differentiation_factors: newStageData.brief?.differentiation || newStageData.brief?.differentiators || [],
-                    competitors: newStageData.brief?.competitors || [],
-                    budget_range: newStageData.brief?.budget_range || newStageData.brief?.budget || 'not specified',
-                    available_channels: newStageData.brief?.available_channels || newStageData.brief?.channels || [],
-                    business_stage: newStageData.brief?.current_stage || newStageData.brief?.business_stage || 'idea',
-                    three_month_goals: newStageData.brief?.short_term_goals || newStageData.brief?.goals || [],
-                  };
-
-                  console.log('[api/chat] Extracted brief data:', {
-                    hasDescription: !!briefData.problem_description,
-                    hasSolution: !!briefData.solution_description,
-                    hasCustomers: !!briefData.primary_customer_segment,
-                  });
-
-                  // Step 2: Save to entrepreneur_briefs table
-                  const { data: brief, error: briefError } = await supabaseClient
-                    .rpc('upsert_entrepreneur_brief', {
-                      p_session_id: sessionId,
-                      p_user_id: user.id,
-                      p_brief_data: briefData,
-                    });
-
-                  if (briefError) {
-                    console.error('[api/chat] Failed to save entrepreneur brief:', briefError);
-                  } else {
-                    console.log('[api/chat] Entrepreneur brief saved');
-                  }
-
-                  // Step 3: Create project from onboarding session
-                  const { data: projectId, error: projectError } = await supabaseClient
-                    .rpc('create_project_from_onboarding', {
-                      p_session_id: sessionId,
-                    });
-
-                  if (projectError) {
-                    console.error('[api/chat] Failed to create project:', projectError);
-                    throw projectError;
-                  }
-
-                  console.log('[api/chat] Project created:', projectId);
-
-                  // Step 4: Kick off validation workflow (Modal)
-                  const modalClient = createModalClient();
-
-                  // Get conversation transcript for two-layer architecture
-                  // Layer 1 (entrepreneur_briefs) = raw extraction
-                  // Layer 2 (founders_briefs) = S1 compiled from transcript + extraction
-                  const conversationHistory = session.conversation_history || [];
-                  const conversationTranscript = JSON.stringify(conversationHistory);
-
-                  const validationInputs = buildFounderValidationInputs(
-                    briefData,
-                    projectId,
-                    user.id,
-                    sessionId,
-                    conversationTranscript,  // 5th param: transcript for CrewAI
-                    'founder'                // 6th param: user type
-                  );
-
-                  const response = await modalClient.kickoff({
-                    entrepreneur_input: validationInputs.entrepreneur_input,
-                    project_id: validationInputs.project_id,
-                    user_id: validationInputs.user_id,
-                    session_id: validationInputs.session_id,
-                  });
-
-                  const workflowId = response.run_id;
-                  console.log('[api/chat] Modal workflow started:', workflowId);
-
-                  // Step 5: Store workflow ID in project
-                  await supabaseClient
-                    .from('projects')
-                    .update({
-                      initial_analysis_workflow_id: workflowId,
-                      status: 'analyzing',
-                    })
-                    .eq('id', projectId);
-
-                  // Step 6: Store projectId and workflowId in completion data for frontend
-                  newStageData.completion.projectId = projectId;
-                  newStageData.completion.workflowId = workflowId;
-
-                  console.log('[api/chat] CrewAI integration complete:', {
-                    projectId,
-                    workflowId,
-                  });
-
-                } catch (error) {
-                  console.error('[api/chat] Error in CrewAI integration:', error);
-                  // Don't fail the whole response - user still gets completion message
-                  // Store error info for debugging
-                  newStageData.completion.error = error instanceof Error ? error.message : 'Unknown error';
-                }
-              }
+              return; // Completion handled, exit early
             }
-          }
 
-          // Note: Empty text is OK if tools were called (step 0 only calls tools)
-          // We still need to process tool results and update stage/progress
-          const hasText = text && text.trim().length > 0;
-          if (!hasText) {
-            console.warn('[api/chat] Empty AI text response - likely tool-only step');
-          }
-
-          // Update conversation history
-          const updatedHistory = [
-            ...(session.conversation_history || []),
-            {
-              role: 'user',
-              content: messages[messages.length - 1].content,
-              timestamp: new Date().toISOString(),
-              stage: currentStage,
-            },
-          ];
-
-          // Only add assistant message if we have text content
-          // (Tool-only responses don't need to be in conversation history)
-          if (hasText) {
-            updatedHistory.push({
-              role: 'assistant',
-              content: text,
-              timestamp: new Date().toISOString(),
-              stage: newStage, // Use new stage if advanced
-              toolCalls: toolCalls || [],
-            });
-          } else {
-            console.log('[api/chat] Skipping assistant message in history (no text content)');
-          }
-
-          // Initialize update object
-          const updateData: any = {
-            conversation_history: updatedHistory,
-            last_activity: new Date().toISOString(),
-            current_stage: newStage,
-            stage_data: newStageData,
-          };
-
-          // Calculate progress based on stage completion
-          if (isCompleted) {
-            updateData.overall_progress = 100;
-            updateData.status = 'completed';
-          } else {
-            // Progress based on stage: Stage 1 = 0-14%, Stage 2 = 14-28%, ..., Stage 7 = 85-100%
-            const baseProgress = Math.floor(((newStage - 1) / 7) * 100);
-
-            // Check if we have quality assessment for current stage
-            const stageQuality = newStageData[`stage_${newStage}_quality`];
-            const stageProgress = stageQuality?.coverage || 0;
-
-            // Calculate overall progress: base progress + (stage progress * stage weight)
-            const stageWeight = Math.floor(100 / 7); // ~14% per stage
-            const qualityBasedProgress = baseProgress + Math.floor(stageProgress * stageWeight);
-
-            // Ensure minimum progress based on conversation activity
-            // Each message exchange (user + assistant) = ~1% progress, capped at stage max
-            const messageCount = updatedHistory.length;
-            const messageBasedProgress = Math.min(
-              baseProgress + stageWeight - 1, // Cap at current stage max minus 1%
-              Math.floor(messageCount * 0.5) // 0.5% per message
+            // ================================================================
+            // Regular Update (Not Completed)
+            // ================================================================
+            const overallProgress = calculateOverallProgress(
+              newStage,
+              assessment.coverage,
+              false,
+              updatedHistory.length
             );
 
-            // Use the higher of quality-based or message-based progress
-            updateData.overall_progress = Math.min(
-              95,
-              Math.max(qualityBasedProgress, messageBasedProgress)
-            );
-          }
+            const stageProgress = Math.round(assessment.coverage * 100);
 
-          // === ADD stage_progress FIELD ===
-          // This was never being set before, causing DB column to always be null
-          const currentStageQuality = newStageData[`stage_${newStage}_quality`];
-          updateData.stage_progress = currentStageQuality?.coverage
-            ? Math.round(currentStageQuality.coverage * 100)
-            : 0;
-
-          console.log('[api/chat] Updating database with:', {
-            sessionId,
-            currentStage: updateData.current_stage,
-            overallProgress: updateData.overall_progress,
-            stageDataKeys: Object.keys(updateData.stage_data),
-            hasStageQuality: !!updateData.stage_data[`stage_${newStage}_quality`],
-            hasStageSummary: !!updateData.stage_data[`stage_${currentStage}_summary`],
-          });
-
-          const { data: updateResult, error: updateError } = await supabaseClient
-            .from('onboarding_sessions')
-            .update(updateData)
-            .eq('session_id', sessionId)
-            .select();
-
-          if (updateError) {
-            console.error('[api/chat] Database update failed:', updateError);
-          } else {
-            console.log('[api/chat] Database updated successfully:', {
+            console.log('[api/chat] Updating database:', {
               sessionId,
-              updatedStage: updateResult?.[0]?.current_stage,
-              updatedProgress: updateResult?.[0]?.overall_progress,
+              currentStage: newStage,
+              overallProgress,
+              stageProgress,
+              briefFields: Object.keys(newStageData.brief || {}),
             });
-          }
 
-          console.log(
-            `[api/chat] Session ${sessionId} updated in database: ${updateData.overall_progress}% progress`
-          );
-        } catch (error) {
-          console.error('[api/chat] Error in onFinish callback:', error);
-          // Don't throw - we still want to return the stream to the user
-        }
-      },
-    });
+            const { error: updateError } = await supabaseClient
+              .from('onboarding_sessions')
+              .update({
+                conversation_history: updatedHistory,
+                current_stage: newStage,
+                stage_data: newStageData,
+                overall_progress: overallProgress,
+                stage_progress: stageProgress,
+                last_activity: new Date().toISOString(),
+              })
+              .eq('session_id', sessionId);
+
+            if (updateError) {
+              console.error('[api/chat] Database update failed:', updateError);
+            } else {
+              console.log('[api/chat] Database updated successfully');
+            }
+          } catch (error) {
+            console.error('[api/chat] Error in onFinish callback:', error);
+          }
+        },
+      });
 
       console.log('[api/chat] streamText() completed successfully, preparing response');
     } catch (streamError: any) {

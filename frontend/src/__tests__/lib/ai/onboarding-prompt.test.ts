@@ -46,49 +46,30 @@ describe('INITIAL_GREETING', () => {
 
 describe('ONBOARDING_SYSTEM_PROMPT', () => {
   /**
-   * CRITICAL: Tool Invocation Order Tests
+   * Two-Pass Architecture Tests
    *
-   * These tests verify that the prompt instructs tools-first behavior,
-   * which is essential for the multi-step flow in chat/route.ts to work.
+   * The prompt should NOT mention tools. Stage progression is now handled
+   * by deterministic backend assessment (Pass 2) after each LLM response.
    *
-   * Background: The code uses prepareStep() to disable tools after step 1.
-   * If the prompt says "text first, then tools", the AI writes text in step 1,
-   * tools get disabled in step 2, and stage progression never happens.
-   *
-   * The fix: Prompt must say "tools first, then text" to align with code behavior.
+   * @see Plan: /home/chris/.claude/plans/async-mixing-ritchie.md
    */
-  describe('tool invocation order (CRITICAL)', () => {
-    it('should instruct AI to call tools FIRST before writing text', () => {
-      // This is the critical fix - tools must be called first
-      // The code's prepareStep() disables tools after step 1
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('FIRST**: Call appropriate tools');
+  describe('no tools (backend handles assessment)', () => {
+    it('should NOT mention assessQuality tool', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('assessQuality');
     });
 
-    it('should instruct AI to write text AFTER calling tools', () => {
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('THEN**: Write a conversational response');
+    it('should NOT mention advanceStage tool', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('advanceStage');
     });
 
-    it('should have correct instruction order (tools before text)', () => {
-      const toolsFirstIndex = ONBOARDING_SYSTEM_PROMPT.indexOf('FIRST**: Call appropriate tools');
-      const textSecondIndex = ONBOARDING_SYSTEM_PROMPT.indexOf('THEN**: Write a conversational response');
-
-      expect(toolsFirstIndex).toBeGreaterThan(-1);
-      expect(textSecondIndex).toBeGreaterThan(-1);
-      expect(toolsFirstIndex).toBeLessThan(textSecondIndex);
+    it('should NOT mention completeOnboarding tool', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('completeOnboarding');
     });
 
-    it('should instruct to call assessQuality FIRST on every response', () => {
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('FIRST call `assessQuality`');
-    });
-
-    it('should NOT instruct to write text first (old broken behavior)', () => {
-      // These patterns were in the broken prompt and caused tools to never be called
-      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('Write your conversational response to the user FIRST');
-      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('respond with TEXT first, then call tools');
-    });
-
-    it('should mention that system guarantees text after tool calls', () => {
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('system guarantees text will be generated after tool calls');
+    it('should NOT contain tool execution instructions', () => {
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('Tool Execution');
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('FIRST**: Call appropriate tools');
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('THEN**: Write a conversational response');
     });
   });
 
@@ -182,10 +163,11 @@ describe('ONBOARDING_SYSTEM_PROMPT', () => {
       });
     });
 
-    it('should mention tool requirements', () => {
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('assessQuality');
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('advanceStage');
-      expect(ONBOARDING_SYSTEM_PROMPT).toContain('completeOnboarding');
+    it('should NOT mention any tools (backend handles progression)', () => {
+      // Two-pass architecture: LLM handles conversation, backend handles assessment
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('assessQuality');
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('advanceStage');
+      expect(ONBOARDING_SYSTEM_PROMPT).not.toContain('completeOnboarding');
     });
   });
 });

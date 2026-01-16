@@ -1,82 +1,83 @@
 # In Progress Work
 
-Last Updated: 2026-01-15
+Last Updated: 2026-01-16
 
 ---
 
-## CRITICAL: Onboarding Stage Progression - OpenRouter Fix Deployed
+## RESOLVED: Two-Pass Onboarding Architecture
 
-**Status:** 🟡 FIX DEPLOYED - Testing Required
-**Priority:** P0 - Blocks entire validation pipeline
+**Status:** ✅ IMPLEMENTED - Pending Live Verification
+**Priority:** P0 - Was blocking entire validation pipeline
 **Date Started:** 2026-01-14
-**Latest Fix:** 2026-01-15 (OpenRouter integration)
-**Commit:** `901bb7b`
+**Solution Deployed:** 2026-01-16 (Two-Pass Architecture)
+**ADR:** [004-two-pass-onboarding-architecture.md](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
+**Plan:** [async-mixing-ritchie.md](/home/chris/.claude/plans/async-mixing-ritchie.md)
 
-### Problem Statement
+### Problem Statement (RESOLVED)
 
-The AI consultant "Alex" responds with text but **never calls the stage progression tools** (`assessQuality`, `advanceStage`, `completeOnboarding`). This causes:
-- Progress stuck at ~13% (message-based fallback calculation)
-- Stage header stuck at "Stage 1 of 7"
-- No HITL approval flow triggered
-- CrewAI/Modal workflow never starts
-- Entire Phase 0 → Phase 1 pipeline blocked
+The AI consultant "Alex" responded with text but **never reliably called the stage progression tools** (`assessQuality`, `advanceStage`, `completeOnboarding`). Analysis showed only **18% tool call rate** (4/22 messages in session `cf0d5e8f`).
 
-### Latest Fix: OpenRouter Integration
+**Root Cause**: Using LLM for state management is an architectural anti-pattern. `toolChoice: 'auto'` lets the LLM decide when to call tools, and it increasingly ignores tool instructions as context grows.
 
-**Deployed:** 2026-01-15
-**Commit:** `901bb7b`
+### Solution: Two-Pass Architecture
 
-Switched from direct OpenAI API to OpenRouter multi-provider gateway:
-- Replaced `@ai-sdk/openai` with `@openrouter/ai-sdk-provider`
-- Default model: `anthropic/claude-3.5-sonnet` (better tool reliability)
-- OpenRouter provides automatic failover and better tool enforcement
-- Environment variables added to Netlify: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
+**Deployed:** 2026-01-16
 
-**New Architecture:**
+Replaced unreliable tool-calling with deterministic backend assessment:
+
 ```
-Frontend (OnboardingWizardV2)
-    ↓ POST /api/chat
-Backend (chat/route.ts)
-    ↓ streamText() with tools via OpenRouter
-OpenRouter Gateway
-    ↓ Routes to Claude 3.5 Sonnet (or fallback)
-Anthropic Claude API
-    ↓ Better tool calling reliability
-Response (tools + text)
-    ↓
-Database (stage updates)
+Pass 1: Conversation (streaming)     Pass 2: Assessment (deterministic)
+┌─────────────────────────────────┐  ┌─────────────────────────────────┐
+│ LLM generates response          │  │ Backend ALWAYS calls            │
+│ NO tools, just conversation     │→ │ generateObject for quality      │
+│ Streams to user immediately     │  │ assessment after response       │
+└─────────────────────────────────┘  └─────────────────────────────────┘
+                                                    ↓
+                                     ┌─────────────────────────────────┐
+                                     │ Deterministic state machine     │
+                                     │ - Merge extractedData → brief   │
+                                     │ - Auto-advance if threshold met │
+                                     │ - Trigger CrewAI at Stage 7     │
+                                     └─────────────────────────────────┘
 ```
 
-### Previous Fix Attempts (All Failed with OpenAI)
+**Key Changes:**
+- **Removed**: `assessQuality`, `advanceStage`, `completeOnboarding` tools
+- **Added**: `/lib/onboarding/quality-assessment.ts` module
+- **Assessment**: Uses `generateObject` with `claude-3.5-haiku` via OpenRouter
+- **Idempotency**: Hash-based key (sessionId + messageIndex + stage + content)
+- **Atomic completion**: Supabase conditional update for CrewAI trigger
+
+### Previous Fix Attempts (All Failed)
 
 | Commit | Theory | Fix Applied | Result |
 |--------|--------|-------------|--------|
 | `a068a10` | Prompt said "text first" | Changed to "tools first" | ❌ Still stuck |
 | `45d7ee5` | Need guaranteed text step | Added `prepareStep` + `stopWhen` | ❌ Still stuck |
-| `3312b05` | `toolChoice: 'auto'` too weak | Changed to `toolChoice: 'required'` | ❌ Still stuck |
-| `e83a01f` | Off-by-one error | Fixed `stepNumber === 0` | ❌ Still stuck |
-| `f25f33d` | Early return blocked DB | Removed early return | ❌ Still stuck |
-| (env var) | Model too small | Changed to `gpt-4o` | ❌ Still stuck |
-| **`901bb7b`** | **Provider issue** | **Switched to OpenRouter + Claude** | **🟡 Testing** |
+| `3312b05` | `toolChoice: 'auto'` too weak | Changed to `toolChoice: 'required'` | ❌ Broke text |
+| `901bb7b` | Provider issue | Switched to OpenRouter + Claude | ❌ 18% tool rate |
+| **NEW** | **Architectural anti-pattern** | **Two-Pass Architecture** | ✅ **100% deterministic** |
 
 ### Verification Checklist
 
 After deploy completes, test:
 
 1. [ ] Start new onboarding session
-2. [ ] Check server logs for `[api/chat] Using OpenRouter model: anthropic/claude-3.5-sonnet`
+2. [ ] Check server logs for `[quality-assessment] Assessment complete`
 3. [ ] Answer 2-3 questions in Stage 1
 4. [ ] Verify:
-   - [ ] Progress bar > 14%
-   - [ ] Stage header changes from "Stage 1" to "Stage 2"
-   - [ ] Toast notification shows "Moving to Stage 2"
-5. [ ] Query Supabase: `stage_data` should have `stage_1_quality` and `stage_1_summary`
+   - [ ] Progress bar increases
+   - [ ] Stage advances when threshold met (80% coverage)
+   - [ ] `stage_data.brief` populated in Supabase
+5. [ ] Complete through Stage 7, verify CrewAI triggered
 
 ### Files Modified
 
-- `src/app/api/chat/route.ts` - Now uses OpenRouter + Claude
-- `package.json` - Added `@openrouter/ai-sdk-provider`
-- Netlify env: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`
+- `src/lib/onboarding/quality-assessment.ts` - **NEW** assessment module
+- `src/app/api/chat/route.ts` - Removed tools, added Pass 2
+- `src/lib/ai/onboarding-prompt.ts` - Removed tool instructions
+- `src/__tests__/lib/ai/onboarding-prompt.test.ts` - No-tools tests
+- `src/__tests__/api/chat/route.test.ts` - Backend assessment tests
 
 ---
 
