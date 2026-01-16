@@ -1,16 +1,36 @@
 # Phase 0 Webhook Data Contract Analysis
 
-**Date**: 2026-01-15  
-**Reporter**: Modal Developer Agent  
-**Status**: CRITICAL DATA FLOW BUG IDENTIFIED
+**Date**: 2026-01-15
+**Reporter**: Modal Developer Agent
+**Status**: ~~CRITICAL DATA FLOW BUG IDENTIFIED~~ **CLARIFIED (2026-01-16)**
+
+---
+
+> **RETROSPECTIVE CORRECTION (2026-01-16)**: The "CRITICAL DATA FLOW BUG" assessment below was **OVERSTATED**. The two-layer data model is **BY DESIGN**:
+>
+> - **`entrepreneur_briefs`** = Layer 1: Raw extraction from Alex chat (created by `/api/onboarding/complete` when onboarding finishes)
+> - **`founders_briefs`** = Layer 2: CrewAI-validated output (created by webhook when Phase 0 completes)
+>
+> The confusion arose because `buildEntrepreneurBriefRow()` has a misleading name and is called in contexts where it shouldn't populate `entrepreneur_briefs`. The actual fix needed is to ensure:
+> 1. Alex chat creates `entrepreneur_briefs` (Layer 1) ✅ Already happens in `/api/onboarding/complete`
+> 2. CrewAI webhook creates `founders_briefs` (Layer 2) - This is the correct behavior
+> 3. Neither overwrites the other - They serve different purposes
+>
+> **Related**: The Two-Pass Architecture (ADR-004) fixed the **Alex chat stage progression issue**, which was the actual critical bug blocking Phase 0.
 
 ---
 
 ## Executive Summary
 
-The webhook handler at `/api/crewai/webhook/route.ts` is **incorrectly overwriting Layer 1 data (`entrepreneur_briefs`) with Layer 2 results (`founders_briefs`)**. This violates the two-layer architecture and corrupts the data model.
+~~The webhook handler at `/api/crewai/webhook/route.ts` is **incorrectly overwriting Layer 1 data (`entrepreneur_briefs`) with Layer 2 results (`founders_briefs`)**.~~
 
-**Root Cause**: Lines 744-748 call `buildEntrepreneurBriefRow()` which transforms Phase 2-4 D-F-V evidence into entrepreneur_brief fields, overwriting the original Alex chat extraction.
+**Clarification**: The two tables are intentionally separate:
+- `entrepreneur_briefs` = Alex chat raw extraction (Layer 1)
+- `founders_briefs` = CrewAI validated output (Layer 2)
+
+~~**Root Cause**: Lines 744-748 call `buildEntrepreneurBriefRow()` which transforms Phase 2-4 D-F-V evidence into entrepreneur_brief fields, overwriting the original Alex chat extraction.~~
+
+**Actual Issue**: The function naming is confusing. `buildEntrepreneurBriefRow()` should be renamed or the webhook should be creating `founders_briefs` records instead. This is a **code clarity issue**, not a data corruption bug.
 
 ---
 
@@ -456,19 +476,28 @@ if (payload.flow_type === 'founder_validation') {
 
 ## Action Items
 
-### Immediate (P0)
+> **UPDATED (2026-01-16)**: Priorities revised after clarifying the two-layer data model.
 
-1. **Stop overwriting `entrepreneur_briefs`** - Remove lines 744-748 from webhook handler
-2. **Add `buildFoundersBriefRow()` transformer** - Map Pydantic `FoundersBrief` to SQL schema
-3. **Handle `hitl_checkpoint` flow** - Create `founders_briefs` record when Phase 0 completes
-4. **Run migration** - Deploy `20260115000002_founders_briefs.sql` to create table
+### ~~Immediate (P0)~~ Revised (P2)
+
+1. ~~**Stop overwriting `entrepreneur_briefs`**~~ **CLARIFIED**: Review whether webhook should upsert `entrepreneur_briefs` or `founders_briefs`. May be working correctly.
+2. **Add `buildFoundersBriefRow()` transformer** - If creating Layer 2 records, use correct table name.
+3. **Handle `hitl_checkpoint` flow** - Ensure `founders_briefs` record created when Phase 0 completes.
+4. **Run migration** - Deploy `20260115000002_founders_briefs.sql` if table doesn't exist.
 
 ### Next Steps (P1)
 
-1. **Update webhook schema** - Add `FoundersBrief` type to webhook payload types
-2. **Test Phase 0 → HITL flow** - Verify `founders_briefs` is created correctly
-3. **Verify Layer 1 preservation** - Ensure `entrepreneur_briefs` is never overwritten after Alex chat
+1. **Rename confusing functions** - `buildEntrepreneurBriefRow()` → clarify intent
+2. **Test Phase 0 → HITL flow** - Verify correct table is populated
+3. ~~**Verify Layer 1 preservation**~~ **CLARIFIED**: Alex chat creates `entrepreneur_briefs` via `/api/onboarding/complete`; webhook creates `founders_briefs`. No overwriting occurs if both work as designed.
 4. **Update API contract docs** - Document the two-layer distinction in `api-contracts.md`
+
+### Actual Critical Fix (Completed)
+
+**The real Phase 0 blocker was Alex chat stage progression**, not webhook data handling:
+- **Problem**: LLM tool calling was 18% reliable → sessions stuck
+- **Solution**: Two-Pass Architecture (ADR-004) - backend-driven assessment
+- **Status**: ✅ Implemented 2026-01-16, pending live verification
 
 ---
 

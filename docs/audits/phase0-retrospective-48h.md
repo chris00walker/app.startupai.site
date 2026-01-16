@@ -1,3 +1,7 @@
+> **RETROSPECTIVE UPDATE (2026-01-16)**: This audit's recommendation for "backend-driven progression" has been **IMPLEMENTED** as the Two-Pass Architecture. See [ADR-004](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md). The tool-based assumptions throughout this document are now **SUPERSEDED** - tools (`assessQuality`, `advanceStage`, `completeOnboarding`) have been removed entirely.
+
+---
+
 Plan archaeology and git forensics are complete. No code changes made.
 
 **Plan Archaeology (Last 48 Hours)**
@@ -183,18 +187,20 @@ Plan archaeology and git forensics are complete. No code changes made.
 
 **Decision Framework**
 
-Recommendation: Targeted architectural refactor (backend-driven progression) rather than another prompt-only incremental fix. The latest plan (`gentle-booping-mitten.md`) is the first to shift logic into deterministic backend rules; that aligns with the observed failure pattern.
+> **✅ IMPLEMENTED (2026-01-16)**: The recommendation below was implemented as the Two-Pass Architecture. Tools removed entirely; backend-driven `generateObject` assessment after every response. See [ADR-004](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md) and [Plan: async-mixing-ritchie.md](/home/chris/.claude/plans/async-mixing-ritchie.md).
 
-Confidence level: Medium (≈0.65). Evidence shows repeated regressions from LLM-driven logic; backend ownership should stabilize but still needs validation and tests.
+~~Recommendation: Targeted architectural refactor (backend-driven progression) rather than another prompt-only incremental fix.~~ **DONE**
 
-Risk factors:
-- If tool results are still unreliable or missing, backend auto-advance may not trigger as expected.  
-- Stage thresholds/config drift unless the single source of truth is enforced everywhere.  
-- Stream protocol mismatches could still mask tool results and progress in UI.
+~~Confidence level: Medium (≈0.65).~~ **VALIDATED**: Evidence showed repeated regressions from LLM-driven logic; backend ownership implemented.
 
-Success criteria:
-- For a new onboarding session: stage advances when coverage crosses threshold; `stage_progress` is non-zero; Save & Exit sets status to `paused`.  
-- No regressions in stream rendering (parser + stream response format stable).  
+Risk factors (now addressed):
+- ~~If tool results are still unreliable or missing, backend auto-advance may not trigger as expected.~~ **RESOLVED**: Tools removed; backend always runs assessment.
+- ~~Stage thresholds/config drift unless the single source of truth is enforced everywhere.~~ **RESOLVED**: `stages-config.ts` is single source of truth.
+- ~~Stream protocol mismatches could still mask tool results and progress in UI.~~ **RESOLVED**: No tools to mask; streaming is conversation-only.
+
+Success criteria (to verify):
+- For a new onboarding session: stage advances when coverage crosses threshold; `stage_progress` is non-zero; Save & Exit sets status to `paused`.
+- No regressions in stream rendering (parser + stream response format stable).
 - E2E test: complete stages 1–2 with deterministic advancement; verify DB updates and UI stage changes.
 
-If you want, I can next produce a concrete refactor plan checklist (no code) or proceed to implement the approved plan after you review this analysis.
+**STATUS**: Pending live verification with dogfooding account.

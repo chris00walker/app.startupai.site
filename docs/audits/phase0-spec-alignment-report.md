@@ -1,3 +1,11 @@
+> **RETROSPECTIVE UPDATE (2026-01-16)**: This audit's gap analysis has been partially addressed by the Two-Pass Architecture. See [ADR-004](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md). Key changes:
+> - **Tools REMOVED**: `assessQuality`, `advanceStage`, `completeOnboarding` no longer exist
+> - **Dual completion paths RESOLVED**: Backend-driven assessment is now the single path
+> - **Stage progression criteria DEFINED**: `quality-assessment.ts` + `stages-config.ts`
+> - **Remaining gaps**: `entrepreneur_briefs` vs `founders_briefs` schema alignment still needed (Layer 1 vs Layer 2 data model is by design, not a bug)
+
+---
+
 Phase 0 Spec Alignment Report
 
 Spec Source
@@ -33,21 +41,25 @@ Implementation Inventory (What Phase 0 Does Today)
   - frontend/src/components/onboarding/FoundersBriefReview.tsx: HITL approval UI, uses EntrepreneurBrief schema and derives assumptions.
   - frontend/src/components/onboarding/OnboardingSidebar.tsx and frontend/src/components/onboarding/ConversationInterfaceV2.tsx: chat + progress display.
 - AI integration
-  - System prompt in frontend/src/lib/ai/onboarding-prompt.ts with tool usage requirements and "always end with a question".
-  - Chat route uses Vercel AI SDK + OpenRouter/Groq; tools are assessQuality, advanceStage, completeOnboarding in frontend/src/app/api/chat/route.ts.
+  - System prompt in frontend/src/lib/ai/onboarding-prompt.ts ~~with tool usage requirements and~~ "always end with a question". **Tools removed in Two-Pass Architecture.**
+  - Chat route uses Vercel AI SDK + OpenRouter; ~~tools are assessQuality, advanceStage, completeOnboarding~~ **tools REMOVED**. Backend runs `assessConversationQuality()` after each response instead.
+  - **NEW**: `frontend/src/lib/onboarding/quality-assessment.ts` - deterministic assessment module with `generateObject`.
 - Stage config
   - Unified config and thresholds in frontend/src/lib/onboarding/stages-config.ts.
 
 Gap Analysis
+
+> **UPDATE (2026-01-16)**: Gaps marked with ✅ have been addressed by Two-Pass Architecture.
+
 | Spec Requirement | Implementation Status | Gap/Drift Description |
 |---|---|---|
-| Two-layer architecture (Alex chat + CrewAI) | Partial | Present, but there are two completion paths (/api/chat tool vs /api/onboarding/complete) with different data shapes. |
-| Layer 1 tech: Vercel AI SDK + OpenAI | Diverged | Uses Vercel AI SDK + OpenRouter/Groq in frontend/src/app/api/chat/route.ts. |
+| Two-layer architecture (Alex chat + CrewAI) | ✅ **RESOLVED** | ~~Present, but there are two completion paths.~~ Now single backend-driven path via `quality-assessment.ts`. |
+| Layer 1 tech: Vercel AI SDK + OpenAI | Diverged | Uses Vercel AI SDK + OpenRouter/Groq. This is an accepted deviation (documented in spec). |
 | 7 stages (names) | Aligned | Stage names and counts match in frontend/src/lib/onboarding/stages-config.ts. |
-| Stage progression criteria defined | Missing | Spec does not define thresholds; implementation uses progressThreshold plus tool calls; source of truth unclear. |
-| Output: transcript + extracted context | Partial | Transcript stored in conversation_history, but buildFounderValidationInputs is called without transcript in frontend/src/app/api/chat/route.ts. |
+| Stage progression criteria defined | ✅ **RESOLVED** | ~~Spec does not define thresholds.~~ Now defined in `stages-config.ts` (70-85%) and enforced by `quality-assessment.ts`. |
+| Output: transcript + extracted context | ✅ **RESOLVED** | `extractedData` merged into `stage_data.brief` after every assessment. |
 | CrewAI flow with intent_gate loops | Partial | HITL approval supported, but no UI for NEEDS_FOLLOWUP/FAIL loop-back to interview. |
-| Founder's Brief schema as specified | Missing | DB uses entrepreneur_briefs schema (different fields); no QAStatus, Assumption risk level, or InterviewMetadata in supabase/migrations/00009_onboarding_schema.sql. |
+| Founder's Brief schema as specified | Partial | `entrepreneur_briefs` = Layer 1 (Alex raw extraction), `founders_briefs` = Layer 2 (CrewAI validated). This is **by design**, not a bug. |
 | Hypotheses marked as NOT VALIDATED | Partial | UI shows HYPOTHESIS badges but data model lacks explicit validation_status fields per spec. |
 | HITL approval UI (6 sections + checkboxes + approve/request) | Partial | UI exists in frontend/src/components/onboarding/FoundersBriefReview.tsx, but fields map to EntrepreneurBrief, not spec's Founder's Brief schema. |
 | Exit criteria: approval + legitimacy verified | Partial | Approval exists, but legitimacy verification is only in CrewAI output; no explicit gate in product UI. |
