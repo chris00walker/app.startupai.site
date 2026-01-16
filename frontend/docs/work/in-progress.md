@@ -6,7 +6,7 @@ Last Updated: 2026-01-16
 
 ## Two-Pass Onboarding Architecture
 
-**Status:** ⚠️ IMPLEMENTED - Errata Identified, Fixes Required
+**Status:** ✅ IMPLEMENTED - Errata Fixed, Pending Live Verification
 **Priority:** P0 - Was blocking entire validation pipeline
 **Date Started:** 2026-01-14
 **Solution Deployed:** 2026-01-16 (Two-Pass Architecture)
@@ -85,12 +85,13 @@ Identified by Codex audit + manual review. **Must fix before live verification.*
 
 | ID | Severity | Issue | Impact | Status |
 |----|----------|-------|--------|--------|
-| E1 | **HIGH** | `ConversationMessage` missing `timestamp` | Resumed sessions show "Invalid Date", unstable React keys | ⏳ Pending |
-| E2 | MEDIUM | Schema allows < 3 items for Stage 7 arrays but completion requires >= 3 | Users can complete Stage 7 but stall forever | ⏳ Pending |
-| E3 | MEDIUM | Legacy sessions without `stage` tags have messages filtered out | Resumed pre-deployment sessions undercount coverage | ⏳ Pending |
-| E4 | LOW | Progress tests use local helper instead of exported `calculateOverallProgress` | Test coverage gap | ⏳ Pending |
+| E1 | **HIGH** | `ConversationMessage` missing `timestamp` | Resumed sessions show "Invalid Date", unstable React keys | ✅ Fixed |
+| E2 | MEDIUM | Schema allows < 3 items for Stage 7 arrays but completion requires >= 3 | Users can complete Stage 7 but stall forever | ✅ Fixed |
+| E3 | MEDIUM | Legacy sessions without `stage` tags have messages filtered out | Resumed pre-deployment sessions undercount coverage | ✅ Fixed |
+| E4 | LOW | Progress tests use local helper instead of exported `calculateOverallProgress` | Test coverage gap | ✅ Fixed |
 
 **Fixes documented in:** [Plan Errata](/home/chris/.claude/plans/async-mixing-ritchie.md#errata-2026-01-16-post-implementation-audit)
+**Commit:** `902ef0c` - fix: Two-Pass Architecture errata - all 4 issues resolved
 
 ---
 
@@ -146,4 +147,4 @@ Implemented `approve_founders_brief` checkpoint. Will work once onboarding compl
 2. ~~**No tool call verification**~~ ✅ Superseded - Tools removed; backend assessment is deterministic
 3. **Limited observability** - Need APM/logging for AI calls
 4. ~~**No fallback UX**~~ ✅ Addressed - Backend assessment with retry + failure markers
-5. **Two-Pass Errata** - 4 issues identified, fixes pending (see Errata section above)
+5. ~~**Two-Pass Errata**~~ ✅ Resolved - 4 issues fixed (`902ef0c`)
