@@ -164,6 +164,7 @@ interface ConversationInterfaceProps {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   isSaving?: boolean;
+  savedVersion?: number | null;
   onComplete: () => Promise<void>;
 }
 
@@ -179,6 +180,7 @@ export function ConversationInterface({
   handleSubmit,
   isLoading,
   isSaving = false,
+  savedVersion = null,
   onComplete,
 }: ConversationInterfaceProps) {
   // Refs
@@ -371,11 +373,20 @@ export function ConversationInterface({
             </div>
           )}
 
-          {/* Saving Indicator */}
-          {isSaving && !isLoading && (
+          {/* Save Status Indicator (ADR-005: "Saved v{X}" UX) */}
+          {(isSaving || savedVersion) && !isLoading && (
             <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground">
-              <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-              <span className="text-xs">Saving progress...</span>
+              {isSaving ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <span className="text-xs">Saving progress...</span>
+                </>
+              ) : savedVersion ? (
+                <>
+                  <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                  <span className="text-xs text-green-600 dark:text-green-400">Saved v{savedVersion}</span>
+                </>
+              ) : null}
             </div>
           )}
         </div>

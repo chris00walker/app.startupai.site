@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Progress } from '@/components/ui/progress';
 import { trackOnboardingEvent, trackCrewAIEvent } from '@/lib/analytics';
 import { useOnboardingSession } from '@/hooks/useOnboardingSession';
+import { useOnboardingRecovery } from '@/hooks/useOnboardingRecovery';
 import { ONBOARDING_STAGES_CONFIG, getStageName } from '@/lib/onboarding/stages-config';
 
 // ============================================================================
@@ -79,6 +80,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [isResuming, setIsResuming] = useState(false);
   const [input, setInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [savedVersion, setSavedVersion] = useState<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Realtime subscription for instant progress updates (replaces polling delay)
@@ -87,6 +89,18 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     realtimeStatus,
     refetch: refetchRealtimeSession,
   } = useOnboardingSession(session?.sessionId || null);
+
+  // Recovery hook for localStorage fallback (ADR-005)
+  const { savePending, clearPending } = useOnboardingRecovery({
+    sessionId: session?.sessionId || null,
+    onRecovered: (version) => {
+      setSavedVersion(version);
+      toast.success(`Recovered unsaved message (v${version})`);
+    },
+    onRecoveryFailed: () => {
+      toast.error('Some messages could not be recovered');
+    },
+  });
 
   // Stage review modal state
   const [showStageReview, setShowStageReview] = useState(false);
@@ -374,7 +388,29 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     }
   }, [session, initializeStages, startAnalysisPolling]);
 
-  // Handle form submit - stream AI response
+  // Helper: Retry with exponential backoff for save operations
+  const retryWithBackoff = useCallback(async <T,>(
+    fn: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> => {
+    let lastError: Error | null = null;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        if (attempt < maxRetries - 1) {
+          const delay = baseDelay * Math.pow(2, attempt);
+          console.log(`[OnboardingWizard] Save retry ${attempt + 1}/${maxRetries} in ${delay}ms`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    throw lastError;
+  }, []);
+
+  // Handle form submit - stream AI response (Split API: stream then save)
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim() || isAILoading || !session) return;
@@ -382,24 +418,34 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     const userMessage = input.trim();
     setInput('');
     setIsAILoading(true);
+    setSavedVersion(null); // Clear previous version while new message is being processed
 
-    // Add user message
+    // Generate unique message ID for idempotency (ADR-005)
+    const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    // Capture timestamp for user message
+    const userTimestamp = new Date().toISOString();
     const newUserMessage = {
       role: 'user',
       content: userMessage,
-      timestamp: new Date().toISOString(),
+      timestamp: userTimestamp,
     };
     setMessages(prev => [...prev, newUserMessage]);
 
     // Track message sent
     trackOnboardingEvent.messageSent(session.sessionId, session.currentStage, userMessage.length);
 
-    // Real mode - call API
     // Create abort controller for this request
     abortControllerRef.current = new AbortController();
 
+    let assistantContent = '';
+    let assistantTimestamp = '';
+
     try {
-      const response = await fetch('/api/chat', {
+      // ====================================================================
+      // STEP 1: Stream AI response from /api/chat/stream (stateless)
+      // ====================================================================
+      const streamResponse = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -411,14 +457,13 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         signal: abortControllerRef.current.signal,
       });
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+      if (!streamResponse.ok) {
+        throw new Error(`Stream API error: ${streamResponse.status}`);
       }
 
       // Handle streaming response - parse SSE format
-      const reader = response.body?.getReader();
+      const reader = streamResponse.body?.getReader();
       const decoder = new TextDecoder();
-      let accumulatedText = '';
       let buffer = '';
 
       if (reader) {
@@ -444,32 +489,33 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               try {
                 const parsed = JSON.parse(data);
                 if (parsed.type === 'text-delta' && parsed.delta) {
-                  accumulatedText += parsed.delta;
+                  assistantContent += parsed.delta;
                 }
-              } catch (e) {
+              } catch {
                 // Ignore parse errors for non-JSON lines
               }
             }
           }
 
           // Update AI message in real-time
-          if (accumulatedText) {
+          if (assistantContent) {
             setMessages(prev => {
               const lastMessage = prev[prev.length - 1];
               if (lastMessage?.role === 'assistant') {
                 // Update existing assistant message
                 return [
                   ...prev.slice(0, -1),
-                  { ...lastMessage, content: accumulatedText },
+                  { ...lastMessage, content: assistantContent },
                 ];
               } else {
                 // Add new assistant message
+                assistantTimestamp = new Date().toISOString();
                 return [
                   ...prev,
                   {
                     role: 'assistant',
-                    content: accumulatedText,
-                    timestamp: new Date().toISOString(),
+                    content: assistantContent,
+                    timestamp: assistantTimestamp,
                   },
                 ];
               }
@@ -477,42 +523,146 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           }
         }
 
-        // Debug: Log final state after stream completes
         console.log('[OnboardingWizard] Stream complete:', {
-          accumulatedTextLength: accumulatedText.length,
-          accumulatedTextPreview: accumulatedText.substring(0, 100),
-          bufferRemaining: buffer,
+          messageId,
+          accumulatedTextLength: assistantContent.length,
+          accumulatedTextPreview: assistantContent.substring(0, 100),
         });
 
-        // If no text was accumulated but stream completed, something went wrong
-        if (!accumulatedText) {
-          console.warn('[OnboardingWizard] No text accumulated from stream - AI may have only called tools');
+        // If no text was accumulated, something went wrong
+        if (!assistantContent) {
+          console.warn('[OnboardingWizard] No text accumulated from stream');
           toast.error('Alex is having trouble responding. Please try again.');
+          return;
         }
       }
 
-      // Brief delay then fetch latest state from DB
-      // Realtime should provide instant updates, but we add this fallback
-      // to ensure UI stays in sync even if Realtime events are missed
+      // ====================================================================
+      // STEP 2: Save to database via /api/chat/save (atomic persistence)
+      // ====================================================================
       setIsSaving(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setIsAILoading(false); // Stream complete, now saving
 
-      // CRITICAL: Always fetch latest state as fallback for Realtime
-      // This ensures progress updates even if Realtime subscription fails
-      await refetchSessionStatus();
-      setIsSaving(false);
+      // Ensure we have the assistant timestamp
+      if (!assistantTimestamp) {
+        assistantTimestamp = new Date().toISOString();
+      }
 
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('[OnboardingWizard] Chat error:', error);
-        toast.error(`Failed to send message: ${error.message}`);
+      // Store in localStorage before attempting save (ADR-005 recovery fallback)
+      savePending({
+        sessionId: session.sessionId,
+        messageId,
+        userMessage: {
+          role: 'user',
+          content: userMessage,
+          timestamp: userTimestamp,
+        },
+        assistantMessage: {
+          role: 'assistant',
+          content: assistantContent,
+          timestamp: assistantTimestamp,
+        },
+      });
+
+      const saveResult = await retryWithBackoff(async () => {
+        const saveResponse = await fetch('/api/chat/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sessionId: session.sessionId,
+            messageId,
+            userMessage: {
+              role: 'user',
+              content: userMessage,
+              timestamp: userTimestamp,
+            },
+            assistantMessage: {
+              role: 'assistant',
+              content: assistantContent,
+              timestamp: assistantTimestamp,
+            },
+          }),
+        });
+
+        if (!saveResponse.ok) {
+          const errorData = await saveResponse.json().catch(() => ({}));
+          throw new Error(errorData.error || `Save API error: ${saveResponse.status}`);
+        }
+
+        return saveResponse.json();
+      });
+
+      console.log('[OnboardingWizard] Save result:', saveResult);
+
+      // Clear from localStorage after successful save (ADR-005 recovery)
+      if (saveResult.success) {
+        clearPending(messageId);
+      }
+
+      // Update version for "Saved v{X}" display
+      if (saveResult.success && saveResult.version) {
+        setSavedVersion(saveResult.version);
+      }
+
+      // Handle stage advancement from save response
+      if (saveResult.stageAdvanced && saveResult.currentStage) {
+        trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, saveResult.currentStage);
+
+        toast.success(
+          `Stage complete! Moving to: ${getStageName(saveResult.currentStage)}`,
+          { duration: 4000 }
+        );
+
+        setSession(prev => prev ? {
+          ...prev,
+          currentStage: saveResult.currentStage,
+          overallProgress: saveResult.overallProgress ?? prev.overallProgress,
+          stageProgress: saveResult.stageProgress ?? 0,
+        } : null);
+
+        setStages(initializeStages(saveResult.currentStage));
+      } else if (saveResult.overallProgress !== undefined) {
+        // Update progress without stage change
+        setSession(prev => prev ? {
+          ...prev,
+          overallProgress: saveResult.overallProgress,
+          stageProgress: saveResult.stageProgress ?? prev.stageProgress,
+        } : null);
+      }
+
+      // Handle onboarding completion with CrewAI kickoff
+      if (saveResult.completed && saveResult.projectId && saveResult.workflowId) {
+        console.log('[OnboardingWizard] Onboarding completed, starting analysis:', {
+          projectId: saveResult.projectId,
+          workflowId: saveResult.workflowId,
+        });
+
+        setProjectId(saveResult.projectId);
+        setWorkflowId(saveResult.workflowId);
+        setAnalysisState('analyzing');
+        setAnalysisStatus('running');
+        setShowAnalysisModal(true);
+
+        toast.success('Compiling your Founder\'s Brief...');
+
+        // Start polling for analysis status
+        startAnalysisPolling(saveResult.workflowId, saveResult.projectId);
+      }
+
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      if (err.name !== 'AbortError') {
+        console.error('[OnboardingWizard] Chat error:', err);
+        toast.error(`Failed to send message: ${err.message}`);
       }
     } finally {
       setIsAILoading(false);
       setIsSaving(false);
       abortControllerRef.current = null;
     }
-  }, [input, isAILoading, session, messages, refetchSessionStatus]);
+  }, [input, isAILoading, session, messages, retryWithBackoff, initializeStages, startAnalysisPolling, savePending, clearPending]);
 
   const announceToScreenReader = useCallback((message: string) => {
     const announcement = document.createElement('div');
@@ -1039,6 +1189,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               handleSubmit={handleSubmit}
               isLoading={isAILoading}
               isSaving={isSaving}
+              savedVersion={savedVersion}
               onComplete={handleCompleteOnboarding}
             />
           )}
