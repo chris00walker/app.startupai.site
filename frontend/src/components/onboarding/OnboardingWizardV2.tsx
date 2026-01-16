@@ -455,6 +455,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           sessionId: session.sessionId,
         }),
         signal: abortControllerRef.current.signal,
+        credentials: 'include', // Required for cookies on Netlify
       });
 
       if (!streamResponse.ok) {
@@ -584,6 +585,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               timestamp: assistantTimestamp,
             },
           }),
+          credentials: 'include', // Required for cookies on Netlify
         });
 
         if (!saveResponse.ok) {
@@ -793,6 +795,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             helpfulnessRating: 5,
           },
         }),
+        credentials: 'include', // Required for cookies on Netlify
       });
 
       const data = await response.json();
@@ -872,6 +875,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId: session.sessionId }),
+          credentials: 'include', // Required for cookies on Netlify
         });
 
         const data = await response.json();
@@ -915,6 +919,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: session.sessionId }),
+        credentials: 'include', // Required for cookies on Netlify
       });
     } catch (e) {
       // Silent fail - forceNew will ensure we get a fresh session anyway
@@ -997,6 +1002,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             decision: 'approved',
             feedback: null,
           }),
+          credentials: 'include', // Required for cookies on Netlify
         });
 
         if (!response.ok) {
