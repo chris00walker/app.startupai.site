@@ -91,12 +91,15 @@ export const qualityAssessmentSchema = z.object({
     .describe('Extracted data values from the conversation'),
 
   // Stage 7 completion fields (only populated at final stage)
+  // MUST have .min(3) to prevent completion stall (see Erratum 2)
   keyInsights: z
     .array(z.string())
+    .min(3)
     .optional()
     .describe('3-5 key insights from the entire conversation (Stage 7 only)'),
   recommendedNextSteps: z
     .array(z.string())
+    .min(3)
     .optional()
     .describe('3-5 recommended validation experiments (Stage 7 only)'),
 });
@@ -107,6 +110,7 @@ export interface ConversationMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   stage?: number;
+  timestamp?: string; // ISO timestamp for UI display and React keys (see Erratum 1)
 }
 
 // ============================================================================
@@ -144,9 +148,16 @@ export function buildAssessmentPrompt(
   // Filter to messages from current stage only
   const stageMessages = history.filter(m => m.stage === stage);
 
-  const conversationText =
+  // FALLBACK: If no stage-tagged messages, include all non-system messages
+  // This handles legacy sessions created before Two-Pass deployment (see Erratum 3)
+  const messagesForAssessment =
     stageMessages.length > 0
-      ? stageMessages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n')
+      ? stageMessages
+      : history.filter(m => m.role !== 'system');
+
+  const conversationText =
+    messagesForAssessment.length > 0
+      ? messagesForAssessment.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n')
       : 'No messages yet for this stage.';
 
   const existingDataText =

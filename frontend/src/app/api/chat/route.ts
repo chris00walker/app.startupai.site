@@ -186,17 +186,21 @@ export async function POST(req: NextRequest) {
             // ================================================================
             // Build Updated Conversation History
             // ================================================================
+            // Build updated history with timestamps for UI rendering (see Erratum 1)
+            const now = new Date().toISOString();
             const updatedHistory: ConversationMessage[] = [
               ...((session.conversation_history || []) as ConversationMessage[]),
               {
                 role: 'user',
                 content: requestContext.userMessage,
                 stage: requestContext.stage, // Use captured stage
+                timestamp: now,
               },
               {
                 role: 'assistant',
                 content: text,
                 stage: requestContext.stage, // Tagged with current stage BEFORE assessment
+                timestamp: now,
               },
             ];
 

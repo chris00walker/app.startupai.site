@@ -14,6 +14,7 @@ import {
   mergeExtractedData,
   shouldAdvanceStage,
   hashMessageForIdempotency,
+  calculateOverallProgress, // Added for Erratum 4 fix
   type QualityAssessment,
 } from '@/lib/onboarding/quality-assessment';
 
@@ -37,79 +38,64 @@ jest.mock('ai', () => ({
 }));
 
 describe('Chat API Route', () => {
+  /**
+   * Progress Calculation Tests
+   *
+   * Uses the exported calculateOverallProgress function (Erratum 4 fix).
+   * Function signature: calculateOverallProgress(stage, coverage, isCompleted, messageCount)
+   *
+   * Progress formula:
+   * - baseProgress = Math.floor(((newStage - 1) / 7) * 100)
+   * - Stage 1 = 0%, Stage 2 = 14%, Stage 3 = 28%, ..., Stage 7 = 85%
+   * - Additional progress from quality assessment coverage
+   * - Capped at 95% until completion
+   */
   describe('Progress Calculation', () => {
-    /**
-     * Progress formula (from route.ts lines 421-449):
-     * - baseProgress = Math.floor(((newStage - 1) / 7) * 100)
-     * - Stage 1 = 0%, Stage 2 = 14%, Stage 3 = 28%, ..., Stage 7 = 85%
-     * - Additional progress from quality assessment coverage
-     * - Capped at 95% until completeOnboarding is called
-     */
-
-    function calculateProgress(
-      stage: number,
-      coverage: number = 0,
-      messageCount: number = 0,
-      isCompleted: boolean = false
-    ): number {
-      if (isCompleted) return 100;
-
-      const baseProgress = Math.floor(((stage - 1) / 7) * 100);
-      const stageWeight = Math.floor(100 / 7); // ~14% per stage
-      const qualityBasedProgress = baseProgress + Math.floor(coverage * stageWeight);
-      const messageBasedProgress = Math.min(
-        baseProgress + stageWeight - 1,
-        Math.floor(messageCount * 0.5)
-      );
-
-      return Math.min(95, Math.max(qualityBasedProgress, messageBasedProgress));
-    }
-
     it('should calculate 0% progress for stage 1 with no coverage', () => {
-      expect(calculateProgress(1, 0, 0)).toBe(0);
+      expect(calculateOverallProgress(1, 0, false, 0)).toBe(0);
     });
 
     it('should calculate ~14% progress for stage 2 base', () => {
-      const progress = calculateProgress(2, 0, 0);
+      const progress = calculateOverallProgress(2, 0, false, 0);
       expect(progress).toBe(14);
     });
 
     it('should calculate ~28% progress for stage 3 base', () => {
-      const progress = calculateProgress(3, 0, 0);
+      const progress = calculateOverallProgress(3, 0, false, 0);
       expect(progress).toBe(28);
     });
 
     it('should calculate ~85% progress for stage 7 base', () => {
-      const progress = calculateProgress(7, 0, 0);
+      const progress = calculateOverallProgress(7, 0, false, 0);
       expect(progress).toBe(85);
     });
 
     it('should add coverage-based progress within stage', () => {
       // Stage 1 with 50% coverage = 0 + (0.5 * 14) = 7%
-      const progress = calculateProgress(1, 0.5, 0);
+      const progress = calculateOverallProgress(1, 0.5, false, 0);
       expect(progress).toBe(7);
     });
 
     it('should add message-based progress as fallback', () => {
       // 26 messages * 0.5 = 13%
-      const progress = calculateProgress(1, 0, 26);
+      const progress = calculateOverallProgress(1, 0, false, 26);
       expect(progress).toBe(13);
     });
 
     it('should cap progress at 95% before completion', () => {
-      const progress = calculateProgress(7, 1.0, 200);
+      const progress = calculateOverallProgress(7, 1.0, false, 200);
       expect(progress).toBe(95);
     });
 
     it('should return 100% when completed', () => {
-      expect(calculateProgress(7, 1.0, 100, true)).toBe(100);
+      expect(calculateOverallProgress(7, 1.0, true, 100)).toBe(100);
     });
 
     it('should use higher of quality-based or message-based progress', () => {
       // Quality-based: 0 + (0.3 * 14) = 4%
       // Message-based: 20 * 0.5 = 10%
       // Should use message-based (10%)
-      const progress = calculateProgress(1, 0.3, 20);
+      const progress = calculateOverallProgress(1, 0.3, false, 20);
       expect(progress).toBe(10);
     });
   });
