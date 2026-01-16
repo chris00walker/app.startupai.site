@@ -93,6 +93,19 @@ Identified by Codex audit + manual review. **Must fix before live verification.*
 **Fixes documented in:** [Plan Errata](/home/chris/.claude/plans/async-mixing-ritchie.md#errata-2026-01-16-post-implementation-audit)
 **Commit:** `902ef0c` - fix: Two-Pass Architecture errata - all 4 issues resolved
 
+### Live Dogfooding Fixes (2026-01-16)
+
+Discovered during live testing with chris00walker@proton.me:
+
+| ID | Severity | Issue | Root Cause | Fix | Status |
+|----|----------|-------|------------|-----|--------|
+| P2 | **HIGH** | Progress regressed to 13% after auto-advance | Used new stage's coverage (0%) for progress calc after auto-advance | Reset `coverageForProgress = 0` when `didAutoAdvance` | ✅ Fixed (`6c6a4db`) |
+| P3 | MEDIUM | "Invalid Date" shown for old messages | UI called `new Date(undefined)` for legacy messages without timestamps | `formatTime` returns '--:--' fallback for missing/invalid timestamps | ✅ Fixed (`b1c02b9`) |
+
+**Commits:**
+- `6c6a4db` - fix: Phase 0 stage progression + two-artifact data model
+- `b1c02b9` - fix: handle missing/invalid timestamps in conversation UI
+
 ---
 
 ## Previously Completed (Verified Working)
