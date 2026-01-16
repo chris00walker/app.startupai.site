@@ -6,12 +6,13 @@ Last Updated: 2026-01-16
 
 ## Two-Pass Onboarding Architecture
 
-**Status:** ✅ IMPLEMENTED - Errata Fixed, Pending Live Verification
+**Status:** ✅ IMPLEMENTED - Errata Fixed, Live Verified
 **Priority:** P0 - Was blocking entire validation pipeline
 **Date Started:** 2026-01-14
 **Solution Deployed:** 2026-01-16 (Two-Pass Architecture)
 **ADR:** [004-two-pass-onboarding-architecture.md](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
 **Plan:** [async-mixing-ritchie.md](/home/chris/.claude/plans/async-mixing-ritchie.md)
+**Evolution:** [ADR-005: State-First Synchronized Loop](../../../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md) - Proposed
 
 ### Problem Statement (RESOLVED)
 
@@ -106,6 +107,28 @@ Discovered during live testing with chris00walker@proton.me:
 - `6c6a4db` - fix: Phase 0 stage progression + two-artifact data model
 - `b1c02b9` - fix: handle missing/invalid timestamps in conversation UI
 
+### Proposed Evolution: State-First Synchronized Loop (ADR-005)
+
+Live dogfooding revealed deeper architectural issues that incremental fixes cannot fully address:
+
+| Latent Risk | Root Cause | Two-Pass Status |
+|-------------|------------|-----------------|
+| Partial saves | Serverless `onFinish` can be killed after response | **Unaddressed** |
+| Race conditions | Last-write-wins merge in app layer | **Latent risk** |
+| Hydration gaps | Frontend treats state as ephemeral | Partially addressed |
+
+**Proposed Solution**: Move state machine to PostgreSQL with RPC-based atomic commits.
+
+- **Pillar A**: Modal blocks until RPC commit (no partial saves)
+- **Pillar B**: PostgreSQL RPC with `FOR UPDATE` (no race conditions)
+- **Pillar C**: Split `chat_history` from `phase_state` (clean separation)
+- **Pillar D**: Binary gate on field coverage (deterministic progress)
+- **Pillar E**: Frontend hydration + realtime subscriptions
+
+**Status**: Proposed (ADR-005). Decision pending.
+
+**ADR**: [005-state-first-synchronized-loop.md](../../../../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)
+
 ---
 
 ## Previously Completed (Verified Working)
@@ -129,9 +152,9 @@ Implemented `approve_founders_brief` checkpoint. Will work once onboarding compl
 | Time estimate static | ✅ Fixed |
 | STAGES label rendering | ✅ Fixed |
 | Stage completion indicators | ✅ Fixed |
-| Progress stuck at 13% | 🔴 UNRESOLVED |
-| Stage header stuck | 🔴 UNRESOLVED |
-| No HITL approval | 🔴 BLOCKED |
+| Progress stuck at 13% | ✅ Fixed (P2) |
+| Stage header stuck | ✅ Fixed (P2) |
+| No HITL approval | 🔴 BLOCKED (pending Stage 7 completion) |
 
 ---
 
