@@ -1,3 +1,26 @@
+/**
+ * @deprecated DEPRECATED - Use OnboardingWizardV2 instead (ADR-005)
+ *
+ * This V1 component uses the old monolithic /api/onboarding/message endpoint.
+ * It is replaced by OnboardingWizardV2 which uses the split API architecture:
+ * - /api/chat/stream - Stateless streaming (no persistence)
+ * - /api/chat/save   - Atomic persistence via Supabase RPC
+ *
+ * The V2 component provides:
+ * - Guaranteed durability (no async ghost problem)
+ * - Atomic commits with row-level locking
+ * - Idempotent saves with message-level deduplication
+ * - "Saved v{X}" UX confirmation
+ * - localStorage recovery for failed saves
+ *
+ * This file is kept temporarily for backwards compatibility.
+ * It will be removed in a future release.
+ *
+ * @see OnboardingWizardV2.tsx
+ * @see /home/chris/.claude/plans/shiny-growing-sprout.md
+ * @see startupai-crew/docs/adr/005-state-first-synchronized-loop.md
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

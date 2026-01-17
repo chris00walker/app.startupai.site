@@ -16,8 +16,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
-import { createModalClient } from '@/lib/crewai/modal-client';
-import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 import {
   assessConversationQuality,
   shouldAdvanceStage,
@@ -43,17 +41,21 @@ interface SaveRequest {
     content: string;
     timestamp: string;
   };
+  expectedVersion?: number;  // ADR-005: Optional version for conflict detection
 }
 
 interface SaveResponse {
   success: boolean;
-  status: 'committed' | 'duplicate' | 'error';
+  status: 'committed' | 'duplicate' | 'version_conflict' | 'error';
   version?: number;
+  currentVersion?: number;     // ADR-005: Current version (for conflict resolution)
+  expectedVersion?: number;    // ADR-005: What version client expected
   currentStage?: number;
   overallProgress?: number;
   stageProgress?: number;
   stageAdvanced?: boolean;
   completed?: boolean;
+  queued?: boolean;  // ADR-005: Stage 7 completion queued for background processing
   workflowId?: string;
   projectId?: string;
   error?: string;
@@ -69,7 +71,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
 
     // Parse request
     const body: SaveRequest = await req.json();
-    const { sessionId, messageId, userMessage, assistantMessage } = body;
+    const { sessionId, messageId, userMessage, assistantMessage, expectedVersion } = body;
 
     // Validate required fields
     if (!sessionId || !messageId || !userMessage || !assistantMessage) {
@@ -206,7 +208,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     // ========================================================================
     // 5. Call apply_onboarding_turn RPC
     // ========================================================================
-    console.log('[api/chat/save] Calling apply_onboarding_turn RPC');
+    console.log('[api/chat/save] Calling apply_onboarding_turn RPC', {
+      expectedVersion,
+    });
 
     const { data: rpcResult, error: rpcError } = await supabaseClient.rpc('apply_onboarding_turn', {
       p_session_id: sessionId,
@@ -222,6 +226,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
         timestamp: assistantMessage.timestamp,
       },
       p_assessment: assessmentData,
+      p_expected_version: expectedVersion ?? null,  // ADR-005: Pass version for conflict detection
     });
 
     if (rpcError) {
@@ -235,14 +240,32 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     const result = rpcResult as {
       status: string;
       version: number;
+      current_version?: number;
+      expected_version?: number;
       current_stage: number;
       overall_progress: number;
       stage_progress: number;
       stage_advanced: boolean;
       completed: boolean;
+      message?: string;
     };
 
     console.log('[api/chat/save] RPC result:', result);
+
+    // Handle version conflict (ADR-005)
+    if (result.status === 'version_conflict') {
+      console.warn('[api/chat/save] Version conflict detected:', {
+        currentVersion: result.current_version,
+        expectedVersion: result.expected_version,
+      });
+      return NextResponse.json({
+        success: false,
+        status: 'version_conflict',
+        currentVersion: result.current_version,
+        expectedVersion: result.expected_version,
+        error: result.message || 'Session has been modified. Please refresh and retry.',
+      });
+    }
 
     // Handle duplicate (idempotency)
     if (result.status === 'duplicate') {
@@ -259,127 +282,42 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     }
 
     // ========================================================================
-    // 6. If completed, trigger CrewAI/Modal kickoff
+    // 6. If completed, queue for background processing (ADR-005)
     // ========================================================================
-    let workflowId: string | undefined;
-    let projectId: string | undefined;
+    // IMPORTANT: We no longer call Modal directly here.
+    // Instead, we atomically mark completion AND insert a queue row.
+    // A background worker will handle the CrewAI kickoff with retries.
+
+    let queued = false;
 
     if (result.completed) {
-      console.log('[api/chat/save] Onboarding completed, triggering CrewAI kickoff');
+      console.log('[api/chat/save] Onboarding completed, queuing for CrewAI kickoff');
 
       try {
-        // Refresh session to get latest stage_data with completion info
-        const { data: completedSession } = await supabaseClient
-          .from('onboarding_sessions')
-          .select('stage_data, conversation_history')
-          .eq('session_id', sessionId)
-          .single();
-
-        const finalStageData = (completedSession?.stage_data as Record<string, unknown>) || {};
-        const finalBrief = (finalStageData.brief as Record<string, unknown>) || {};
-        const finalHistory = completedSession?.conversation_history || [];
-
-        // Build CrewAI brief data
-        const crewBriefData = {
-          customer_segments: finalBrief.target_customers || [],
-          primary_customer_segment: finalBrief.primary_segment || finalBrief.target_customers,
-          problem_description: finalBrief.problem_description || finalBrief.problem,
-          problem_pain_level: finalBrief.pain_level || 5,
-          solution_description: finalBrief.solution_description || finalBrief.solution,
-          unique_value_proposition: finalBrief.unique_value_prop || finalBrief.differentiation,
-          differentiation_factors: finalBrief.differentiation || finalBrief.differentiators || [],
-          competitors: finalBrief.competitors || [],
-          budget_range: finalBrief.budget_range || finalBrief.budget || 'not specified',
-          available_channels: finalBrief.available_channels || finalBrief.channels || [],
-          business_stage: finalBrief.current_stage || finalBrief.business_stage || 'idea',
-          three_month_goals: finalBrief.short_term_goals || finalBrief.goals || [],
-        };
-
-        // Save to entrepreneur_briefs table
-        await supabaseClient.rpc('upsert_entrepreneur_brief', {
-          p_session_id: sessionId,
-          p_user_id: user.id,
-          p_brief_data: crewBriefData,
-        });
-
-        // Create project from onboarding session
-        const { data: newProjectId, error: projectError } = await supabaseClient.rpc(
-          'create_project_from_onboarding',
-          { p_session_id: sessionId }
+        // Call atomic RPC: marks session complete AND inserts queue row
+        const { data: queueResult, error: queueError } = await supabaseClient.rpc(
+          'complete_onboarding_with_kickoff',
+          {
+            p_session_id: sessionId,
+            p_user_id: user.id,
+          }
         );
 
-        if (projectError) {
-          throw projectError;
+        if (queueError) {
+          console.error('[api/chat/save] Queue RPC error:', queueError);
+          // Don't fail the save - session is already marked complete by apply_onboarding_turn
+          // The recovery mechanism in complete_onboarding_with_kickoff will handle re-queuing
+        } else {
+          const queueStatus = (queueResult as { status: string })?.status;
+          console.log('[api/chat/save] Queue result:', queueStatus);
+
+          if (queueStatus === 'queued' || queueStatus === 'requeued' || queueStatus === 'already_completed') {
+            queued = true;
+          }
         }
-
-        projectId = newProjectId as string;
-        console.log('[api/chat/save] Project created:', projectId);
-
-        // Kick off validation workflow (Modal)
-        const modalClient = createModalClient();
-        const conversationTranscript = JSON.stringify(finalHistory);
-
-        const validationInputs = buildFounderValidationInputs(
-          crewBriefData,
-          projectId,
-          user.id,
-          sessionId,
-          conversationTranscript,
-          'founder'
-        );
-
-        const modalResponse = await modalClient.kickoff({
-          entrepreneur_input: validationInputs.entrepreneur_input,
-          project_id: validationInputs.project_id,
-          user_id: validationInputs.user_id,
-          session_id: validationInputs.session_id,
-        });
-
-        workflowId = modalResponse.run_id;
-        console.log('[api/chat/save] Modal workflow started:', workflowId);
-
-        // Store workflow ID in project
-        await supabaseClient
-          .from('projects')
-          .update({
-            initial_analysis_workflow_id: workflowId,
-            status: 'analyzing',
-          })
-          .eq('id', projectId);
-
-        // Update session with workflow info
-        await supabaseClient
-          .from('onboarding_sessions')
-          .update({
-            stage_data: {
-              ...finalStageData,
-              completion: {
-                ...(finalStageData.completion as Record<string, unknown> || {}),
-                projectId,
-                workflowId,
-              },
-            },
-          })
-          .eq('session_id', sessionId);
-
-        console.log('[api/chat/save] CrewAI integration complete:', { projectId, workflowId });
-      } catch (crewError) {
-        console.error('[api/chat/save] Error in CrewAI integration:', crewError);
-        // Store error but don't fail the save - user still gets completion
-        const errorMessage = crewError instanceof Error ? crewError.message : 'Unknown error';
-
-        await supabaseClient
-          .from('onboarding_sessions')
-          .update({
-            stage_data: {
-              ...stageData,
-              completion: {
-                ...(stageData.completion as Record<string, unknown> || {}),
-                crewError: errorMessage,
-              },
-            },
-          })
-          .eq('session_id', sessionId);
+      } catch (queueError) {
+        console.error('[api/chat/save] Error queuing completion:', queueError);
+        // Non-fatal: worker can recover from completed sessions missing queue rows
       }
     }
 
@@ -395,8 +333,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
       stageProgress: result.stage_progress,
       stageAdvanced: result.stage_advanced,
       completed: result.completed,
-      workflowId,
-      projectId,
+      queued,
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

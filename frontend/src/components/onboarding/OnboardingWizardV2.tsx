@@ -584,16 +584,27 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
               content: assistantContent,
               timestamp: assistantTimestamp,
             },
+            // ADR-005: Send expected version for conflict detection
+            expectedVersion: savedVersion ?? undefined,
           }),
           credentials: 'include', // Required for cookies on Netlify
         });
 
-        if (!saveResponse.ok) {
-          const errorData = await saveResponse.json().catch(() => ({}));
-          throw new Error(errorData.error || `Save API error: ${saveResponse.status}`);
+        const result = await saveResponse.json();
+
+        // Handle version conflict (ADR-005)
+        if (result.status === 'version_conflict') {
+          console.warn('[OnboardingWizard] Version conflict:', result);
+          // Refresh session to get current version
+          await refetchRealtimeSession();
+          throw new Error('Session was modified in another tab. Please try again.');
         }
 
-        return saveResponse.json();
+        if (!saveResponse.ok && result.status !== 'version_conflict') {
+          throw new Error(result.error || `Save API error: ${saveResponse.status}`);
+        }
+
+        return result;
       });
 
       console.log('[OnboardingWizard] Save result:', saveResult);
@@ -603,7 +614,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         clearPending(messageId);
       }
 
-      // Update version for "Saved v{X}" display
+      // Update version for "Saved v{X}" display and for next expectedVersion
       if (saveResult.success && saveResult.version) {
         setSavedVersion(saveResult.version);
       }
@@ -634,23 +645,75 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         } : null);
       }
 
-      // Handle onboarding completion with CrewAI kickoff
-      if (saveResult.completed && saveResult.projectId && saveResult.workflowId) {
-        console.log('[OnboardingWizard] Onboarding completed, starting analysis:', {
+      // Handle onboarding completion (ADR-005: Queue-based)
+      if (saveResult.completed) {
+        console.log('[OnboardingWizard] Onboarding completed:', {
+          queued: saveResult.queued,
           projectId: saveResult.projectId,
           workflowId: saveResult.workflowId,
         });
 
-        setProjectId(saveResult.projectId);
-        setWorkflowId(saveResult.workflowId);
+        // Show completion modal - processing will happen in background
         setAnalysisState('analyzing');
         setAnalysisStatus('running');
         setShowAnalysisModal(true);
 
-        toast.success('Compiling your Founder\'s Brief...');
+        if (saveResult.queued) {
+          // Queue-based completion (ADR-005)
+          toast.success('Onboarding complete! Processing your Founder\'s Brief...');
 
-        // Start polling for analysis status
-        startAnalysisPolling(saveResult.workflowId, saveResult.projectId);
+          // Poll the session status to get projectId/workflowId once worker processes
+          const pollForWorkflow = async () => {
+            let attempts = 0;
+            const maxAttempts = 60; // 5 minutes (5s intervals)
+
+            const poll = async () => {
+              attempts++;
+              try {
+                const statusResponse = await fetch(
+                  `/api/onboarding/status?sessionId=${session.sessionId}`,
+                  { credentials: 'include' }
+                );
+
+                if (statusResponse.ok) {
+                  const statusData = await statusResponse.json();
+                  if (statusData.success && statusData.completion) {
+                    const { projectId: pid, workflowId: wid } = statusData.completion;
+                    if (pid && wid) {
+                      console.log('[OnboardingWizard] Worker completed, starting polling:', { pid, wid });
+                      setProjectId(pid);
+                      setWorkflowId(wid);
+                      startAnalysisPolling(wid, pid);
+                      return;
+                    }
+                  }
+                }
+              } catch (e) {
+                console.warn('[OnboardingWizard] Status poll error:', e);
+              }
+
+              if (attempts < maxAttempts) {
+                setTimeout(poll, 5000); // Poll every 5 seconds
+              } else {
+                console.error('[OnboardingWizard] Timeout waiting for worker');
+                toast.error('Processing is taking longer than expected. Check your dashboard.');
+                const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+                router.push(dashboardRoute);
+              }
+            };
+
+            // Start polling after short delay (give worker time to start)
+            setTimeout(poll, 3000);
+          };
+
+          pollForWorkflow();
+        } else if (saveResult.projectId && saveResult.workflowId) {
+          // Legacy direct completion (fallback)
+          setProjectId(saveResult.projectId);
+          setWorkflowId(saveResult.workflowId);
+          toast.success('Compiling your Founder\'s Brief...');
+          startAnalysisPolling(saveResult.workflowId, saveResult.projectId);
+        }
       }
 
     } catch (error: unknown) {
@@ -664,7 +727,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
       setIsSaving(false);
       abortControllerRef.current = null;
     }
-  }, [input, isAILoading, session, messages, retryWithBackoff, initializeStages, startAnalysisPolling, savePending, clearPending]);
+  }, [input, isAILoading, session, messages, retryWithBackoff, initializeStages, startAnalysisPolling, savePending, clearPending, planType, router]);
 
   const announceToScreenReader = useCallback((message: string) => {
     const announcement = document.createElement('div');

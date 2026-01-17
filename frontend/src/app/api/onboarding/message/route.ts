@@ -1,3 +1,23 @@
+/**
+ * @deprecated DEPRECATED - Use split API endpoints instead (ADR-005)
+ *
+ * This endpoint is replaced by:
+ * - /api/chat/stream - Stateless streaming (no persistence)
+ * - /api/chat/save   - Atomic persistence via Supabase RPC
+ *
+ * The split API architecture provides:
+ * - Guaranteed durability (no async ghost problem)
+ * - Atomic commits with row-level locking
+ * - Idempotent saves with message-level deduplication
+ * - "Saved v{X}" UX confirmation
+ *
+ * This file is kept temporarily for backwards compatibility.
+ * It will be removed in a future release.
+ *
+ * @see /home/chris/.claude/plans/shiny-growing-sprout.md
+ * @see startupai-crew/docs/adr/005-state-first-synchronized-loop.md
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
