@@ -52,7 +52,7 @@ export const ONBOARDING_STAGES_CONFIG = [
       { label: 'Current stage', key: 'current_stage' },
       { label: 'Background', key: 'founder_background' },
     ],
-    progressThreshold: 0.8,
+    progressThreshold: 0.7, // Bug B7 fix: Lowered from 0.8 to prevent getting stuck
   },
   {
     stage: 2,

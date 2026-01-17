@@ -191,15 +191,17 @@ USING (true)
 WITH CHECK (true);
 
 -- Consultants can view approval requests for their clients
-DROP POLICY IF EXISTS "Consultants can view client approval requests" ON approval_requests;
-CREATE POLICY "Consultants can view client approval requests"
-ON approval_requests FOR SELECT
-TO authenticated
-USING (
-  user_id IN (
-    SELECT id FROM user_profiles WHERE consultant_id = auth.uid()
-  )
-);
+-- NOTE: Commented out because consultant_id column doesn't exist on user_profiles table yet
+-- This will be enabled when consultant features are fully implemented
+-- DROP POLICY IF EXISTS "Consultants can view client approval requests" ON approval_requests;
+-- CREATE POLICY "Consultants can view client approval requests"
+-- ON approval_requests FOR SELECT
+-- TO authenticated
+-- USING (
+--   user_id IN (
+--     SELECT id FROM user_profiles WHERE consultant_id = auth.uid()
+--   )
+-- );
 
 -- ============================================================================
 -- HELPER FUNCTIONS

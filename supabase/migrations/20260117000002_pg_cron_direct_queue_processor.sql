@@ -138,15 +138,24 @@ END;
 $$;
 
 -- ========================================================================
--- Schedule the direct processor
+-- Schedule the direct processor (only on Supabase Cloud where pg_cron is available)
 -- ========================================================================
-SELECT cron.schedule(
-    'process-completions-direct',
-    '* * * * *',  -- every minute
-    $$SELECT process_one_pending_completion();$$
-);
+DO $$
+BEGIN
+    -- Only schedule if cron schema exists (Supabase Cloud)
+    IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+        PERFORM cron.schedule(
+            'process-completions-direct',
+            '* * * * *',  -- every minute
+            $CRON$SELECT process_one_pending_completion();$CRON$
+        );
+        RAISE NOTICE 'Scheduled process-completions-direct cron job';
+    ELSE
+        RAISE NOTICE 'pg_cron not available - skipping cron job (use manual processing for local dev)';
+    END IF;
+END $$;
 
 -- Grant execute permission
 GRANT EXECUTE ON FUNCTION process_one_pending_completion TO service_role;
 
-COMMENT ON FUNCTION process_one_pending_completion IS 'Processes one pending Stage 7 completion directly from pg_cron - no Edge Function needed';
+COMMENT ON FUNCTION process_one_pending_completion IS 'Processes one pending Stage 7 completion directly from pg_cron - no Edge Function needed (Cloud only, use manual processing locally)';

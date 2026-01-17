@@ -316,7 +316,7 @@ export function ConversationInterface({
             >
               {message.role === 'assistant' ? (
                 // AI Message - Clean with left accent
-                <div className="onboarding-message-ai space-y-1">
+                <div data-role="assistant" className="onboarding-message-ai space-y-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-body font-medium">
                       {session.agentPersonality?.name || 'Alex'}
@@ -331,7 +331,7 @@ export function ConversationInterface({
                 </div>
               ) : (
                 // User Message - Soft rounded bubble
-                <div className="max-w-[80%]">
+                <div data-role="user" className="max-w-[80%]">
                   <div className="flex items-center gap-2 mb-1 justify-end">
                     <span className="text-xs font-body text-muted-foreground">
                       {formatTime(message.timestamp)}
@@ -377,7 +377,10 @@ export function ConversationInterface({
 
           {/* Save Status Indicator (ADR-005: "Saved v{X}" UX) */}
           {(isSaving || savedVersion) && !isLoading && (
-            <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground">
+            <div
+              data-testid="save-indicator"
+              className="flex items-center justify-center gap-2 py-2 text-muted-foreground"
+            >
               {isSaving ? (
                 <>
                   <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -386,7 +389,9 @@ export function ConversationInterface({
               ) : savedVersion ? (
                 <>
                   <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                  <span className="text-xs text-green-600 dark:text-green-400">Saved v{savedVersion}</span>
+                  <span data-testid="version-indicator" className="text-xs text-green-600 dark:text-green-400">
+                    Saved v{savedVersion}
+                  </span>
                 </>
               ) : null}
             </div>

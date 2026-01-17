@@ -12,8 +12,10 @@ CREATE POLICY "Users can insert own profile" ON public.user_profiles
 
 -- Step 2: Add performance indexes for RLS policy columns
 -- These indexes improve query performance when RLS policies are evaluated
-CREATE INDEX IF NOT EXISTS idx_user_profiles_consultant_id
-  ON public.user_profiles(consultant_id);
+-- NOTE: consultant_id column doesn't exist on user_profiles table
+-- This index is created in migration 20260112161533 which handles consultant features
+-- CREATE INDEX IF NOT EXISTS idx_user_profiles_consultant_id
+--   ON public.user_profiles(consultant_id);
 
 CREATE INDEX IF NOT EXISTS idx_user_profiles_role
   ON public.user_profiles(role);

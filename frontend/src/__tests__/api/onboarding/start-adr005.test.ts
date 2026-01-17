@@ -212,9 +212,10 @@ describe('/api/onboarding/start ADR-005 Response Structure', () => {
 
     it('should use status for completion check, not progress', () => {
       // Bug B5: Frontend was using overallProgress >= 90 instead of status
-      const session1 = { status: 'active' as const, overallProgress: 95 };
-      const session2 = { status: 'completed' as const, overallProgress: 100 };
-      const session3 = { status: 'active' as const, overallProgress: 100 };
+      type SessionStatus = 'active' | 'completed' | 'abandoned';
+      const session1: { status: SessionStatus; overallProgress: number } = { status: 'active', overallProgress: 95 };
+      const session2: { status: SessionStatus; overallProgress: number } = { status: 'completed', overallProgress: 100 };
+      const session3: { status: SessionStatus; overallProgress: number } = { status: 'active', overallProgress: 100 };
 
       // Correct check: use status
       const isComplete1 = session1.status === 'completed';

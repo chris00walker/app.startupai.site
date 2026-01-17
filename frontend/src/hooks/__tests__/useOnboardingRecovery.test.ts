@@ -5,7 +5,7 @@
  * Tests localStorage fallback and recovery logic
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+// Jest globals are available automatically
 import { renderHook, act } from '@testing-library/react';
 import { useOnboardingRecovery } from '../useOnboardingRecovery';
 
@@ -13,14 +13,14 @@ import { useOnboardingRecovery } from '../useOnboardingRecovery';
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
-    getItem: vi.fn((key: string) => store[key] ?? null),
-    setItem: vi.fn((key: string, value: string) => {
+    getItem: jest.fn((key: string) => store[key] ?? null),
+    setItem: jest.fn((key: string, value: string) => {
       store[key] = value;
     }),
-    removeItem: vi.fn((key: string) => {
+    removeItem: jest.fn((key: string) => {
       delete store[key];
     }),
-    clear: vi.fn(() => {
+    clear: jest.fn(() => {
       store = {};
     }),
   };
@@ -29,24 +29,24 @@ const localStorageMock = (() => {
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = jest.fn();
 
 // Mock toast
-vi.mock('sonner', () => ({
+jest.mock('sonner', () => ({
   toast: {
-    success: vi.fn(),
-    error: vi.fn(),
+    success: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
 describe('useOnboardingRecovery', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     localStorageMock.clear();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('savePending', () => {
@@ -209,7 +209,7 @@ describe('useOnboardingRecovery', () => {
       );
 
       // Mock successful save response
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           success: true,
@@ -218,7 +218,7 @@ describe('useOnboardingRecovery', () => {
         }),
       });
 
-      const onRecovered = vi.fn();
+      const onRecovered = jest.fn();
 
       const { result } = renderHook(() =>
         useOnboardingRecovery({
@@ -254,7 +254,7 @@ describe('useOnboardingRecovery', () => {
         ])
       );
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           success: true,
@@ -263,7 +263,7 @@ describe('useOnboardingRecovery', () => {
         }),
       });
 
-      const onRecovered = vi.fn();
+      const onRecovered = jest.fn();
 
       const { result } = renderHook(() =>
         useOnboardingRecovery({
@@ -294,7 +294,7 @@ describe('useOnboardingRecovery', () => {
         ])
       );
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           success: true,
@@ -330,7 +330,7 @@ describe('useOnboardingRecovery', () => {
       );
 
       // Mock failed save response
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 500,
         json: () => Promise.resolve({
@@ -339,7 +339,7 @@ describe('useOnboardingRecovery', () => {
         }),
       });
 
-      const onRecovered = vi.fn();
+      const onRecovered = jest.fn();
       const { result } = renderHook(() =>
         useOnboardingRecovery({
           sessionId: 'test-session',
@@ -370,7 +370,7 @@ describe('useOnboardingRecovery', () => {
       );
 
       // Mock version conflict response
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           success: false,
@@ -415,7 +415,7 @@ describe('useOnboardingRecovery', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(pendingMessages));
 
       let callCount = 0;
-      (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      (global.fetch as jest.Mock).mockImplementation(() => {
         callCount++;
         return Promise.resolve({
           ok: true,
@@ -427,7 +427,7 @@ describe('useOnboardingRecovery', () => {
         });
       });
 
-      const onRecovered = vi.fn();
+      const onRecovered = jest.fn();
       const { result } = renderHook(() =>
         useOnboardingRecovery({
           sessionId: 'test-session',
@@ -463,7 +463,7 @@ describe('useOnboardingRecovery', () => {
         ])
       );
 
-      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           success: true,
@@ -472,7 +472,7 @@ describe('useOnboardingRecovery', () => {
         }),
       });
 
-      const onRecovered = vi.fn();
+      const onRecovered = jest.fn();
       const { result } = renderHook(() =>
         useOnboardingRecovery({
           sessionId: 'test-session',
@@ -559,7 +559,7 @@ describe('useOnboardingRecovery', () => {
         ])
       );
 
-      const onRecoveryFailed = vi.fn();
+      const onRecoveryFailed = jest.fn();
 
       const { result } = renderHook(() =>
         useOnboardingRecovery({

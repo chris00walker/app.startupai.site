@@ -58,6 +58,7 @@ interface SaveResponse {
   queued?: boolean;  // ADR-005: Stage 7 completion queued for background processing
   workflowId?: string;
   projectId?: string;
+  collectedTopics?: string[];  // Bug B6 fix: Keys of extracted data for question counter
   error?: string;
 }
 
@@ -169,7 +170,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     let assessmentData: Record<string, unknown> | null = null;
 
     if (assessment) {
-      const shouldAdvance = shouldAdvanceStage(assessment, currentStage);
+      // Bug B7 fix: Calculate stage message count for fallback advancement
+      const stageMessageCount = updatedHistory.filter(m => m.stage === currentStage).length;
+      const shouldAdvance = shouldAdvanceStage(assessment, currentStage, stageMessageCount);
       const isComplete = isOnboardingComplete(assessment, currentStage);
 
       // Calculate progress
@@ -202,7 +205,29 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
         isComplete,
       });
     } else {
-      console.warn('[api/chat/save] Assessment failed, proceeding with null assessment');
+      console.warn('[api/chat/save] Assessment failed, using fallback progress calculation');
+
+      // ADR-005 Bug B1/B4 Fix: Even when assessment fails, provide minimum progress
+      // based on message count to prevent "stuck at 0%" issue
+      const messageBasedProgress = Math.min(10, Math.floor(updatedHistory.length * 0.5));
+      const fallbackStageProgress = Math.min(25, updatedHistory.length * 5);
+
+      assessmentData = {
+        coverage: 0.1, // Minimum coverage to show some progress
+        clarity: 'medium',
+        completeness: 'partial',
+        extractedData: {},
+        shouldAdvance: false,
+        isComplete: false,
+        overallProgress: messageBasedProgress,
+        stageProgress: fallbackStageProgress,
+      };
+
+      console.log('[api/chat/save] Fallback progress:', {
+        messageCount: updatedHistory.length,
+        overallProgress: messageBasedProgress,
+        stageProgress: fallbackStageProgress,
+      });
     }
 
     // ========================================================================
@@ -324,6 +349,13 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     // ========================================================================
     // 7. Return success response
     // ========================================================================
+
+    // Bug B6 fix: Extract collected topic keys for question counter
+    const extractedData = (assessmentData?.extractedData as Record<string, unknown>) || {};
+    const collectedTopics = Object.keys(extractedData).filter(
+      key => extractedData[key] !== undefined && extractedData[key] !== null && extractedData[key] !== ''
+    );
+
     return NextResponse.json({
       success: true,
       status: 'committed',
@@ -334,6 +366,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
       stageAdvanced: result.stage_advanced,
       completed: result.completed,
       queued,
+      collectedTopics, // Bug B6: For question counter updates
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

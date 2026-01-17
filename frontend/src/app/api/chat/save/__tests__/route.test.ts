@@ -5,21 +5,21 @@
  * Tests atomic persistence, idempotency, and response structure
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest globals are available automatically
 
 // Mock Supabase clients
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(() => ({
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(() => ({
     auth: {
-      getUser: vi.fn(() => ({
+      getUser: jest.fn(() => ({
         data: { user: { id: 'test-user-id', email: 'test@example.com' } },
         error: null,
       })),
     },
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => ({
             data: {
               session_id: 'test-session-id',
               user_id: 'test-user-id',
@@ -32,7 +32,7 @@ vi.mock('@/lib/supabase/server', () => ({
         })),
       })),
     })),
-    rpc: vi.fn(() => ({
+    rpc: jest.fn(() => ({
       data: {
         status: 'committed',
         version: 1,
@@ -47,12 +47,12 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }));
 
-vi.mock('@/lib/supabase/admin', () => ({
-  createClient: vi.fn(() => ({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          single: vi.fn(() => ({
+jest.mock('@/lib/supabase/admin', () => ({
+  createClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => ({
             data: {
               session_id: 'test-session-id',
               user_id: 'test-user-id',
@@ -65,7 +65,7 @@ vi.mock('@/lib/supabase/admin', () => ({
         })),
       })),
     })),
-    rpc: vi.fn(() => ({
+    rpc: jest.fn(() => ({
       data: {
         status: 'committed',
         version: 1,
@@ -80,8 +80,8 @@ vi.mock('@/lib/supabase/admin', () => ({
   })),
 }));
 
-vi.mock('@/lib/onboarding/quality-assessment', () => ({
-  assessConversationQuality: vi.fn(() => ({
+jest.mock('@/lib/onboarding/quality-assessment', () => ({
+  assessConversationQuality: jest.fn(() => ({
     coverage: 0.5,
     clarity: 'good',
     completeness: 'partial',
@@ -89,19 +89,19 @@ vi.mock('@/lib/onboarding/quality-assessment', () => ({
     keyInsights: [],
     recommendedNextSteps: [],
   })),
-  shouldAdvanceStage: vi.fn(() => false),
-  isOnboardingComplete: vi.fn(() => false),
-  calculateOverallProgress: vi.fn(() => 10),
+  shouldAdvanceStage: jest.fn(() => false),
+  isOnboardingComplete: jest.fn(() => false),
+  calculateOverallProgress: jest.fn(() => 10),
 }));
 
-vi.mock('@/lib/crewai/modal-client', () => ({
-  createModalClient: vi.fn(() => ({
-    kickoff: vi.fn(),
+jest.mock('@/lib/crewai/modal-client', () => ({
+  createModalClient: jest.fn(() => ({
+    kickoff: jest.fn(),
   })),
 }));
 
-vi.mock('@/lib/crewai/founder-validation', () => ({
-  buildFounderValidationInputs: vi.fn(() => ({})),
+jest.mock('@/lib/crewai/founder-validation', () => ({
+  buildFounderValidationInputs: jest.fn(() => ({})),
 }));
 
 // Helper to create mock request
@@ -127,8 +127,8 @@ function createSaveRequest(overrides: Partial<{
 
 describe('/api/chat/save', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.resetModules();
+    jest.clearAllMocks();
+    jest.resetModules();
   });
 
   describe('request validation', () => {
@@ -276,12 +276,12 @@ describe('/api/chat/save', () => {
 
     it('should return version_conflict when expectedVersion does not match', async () => {
       // Re-mock with conflict response
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: {
                     session_id: 'test-session-id',
                     user_id: 'test-user-id',
@@ -294,7 +294,7 @@ describe('/api/chat/save', () => {
               })),
             })),
           })),
-          rpc: vi.fn(() => ({
+          rpc: jest.fn(() => ({
             data: {
               status: 'version_conflict',
               current_version: 5,
@@ -337,12 +337,12 @@ describe('/api/chat/save', () => {
   describe('idempotency (duplicate detection)', () => {
     it('should return duplicate status for repeated messageId', async () => {
       // Mock duplicate response
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: {
                     session_id: 'test-session-id',
                     user_id: 'test-user-id',
@@ -355,7 +355,7 @@ describe('/api/chat/save', () => {
               })),
             })),
           })),
-          rpc: vi.fn(() => ({
+          rpc: jest.fn(() => ({
             data: {
               status: 'duplicate',
               version: 3,
@@ -386,12 +386,12 @@ describe('/api/chat/save', () => {
   describe('completion flow (ADR-005 Stage 7 queue)', () => {
     it('should set completed=true when onboarding is complete', async () => {
       // Mock completion response
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: {
                     session_id: 'test-session-id',
                     user_id: 'test-user-id',
@@ -404,7 +404,7 @@ describe('/api/chat/save', () => {
               })),
             })),
           })),
-          rpc: vi.fn((name: string) => {
+          rpc: jest.fn((name: string) => {
             if (name === 'apply_onboarding_turn') {
               return {
                 data: {
@@ -443,12 +443,12 @@ describe('/api/chat/save', () => {
 
     it('should include queued flag when completion is queued for processing', async () => {
       // Same as above, verify queued flag is present
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: {
                     session_id: 'test-session-id',
                     user_id: 'test-user-id',
@@ -461,7 +461,7 @@ describe('/api/chat/save', () => {
               })),
             })),
           })),
-          rpc: vi.fn((name: string) => {
+          rpc: jest.fn((name: string) => {
             if (name === 'apply_onboarding_turn') {
               return {
                 data: {
@@ -499,12 +499,12 @@ describe('/api/chat/save', () => {
 
   describe('stage progression', () => {
     it('should return stageAdvanced=true when stage progresses', async () => {
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: {
                     session_id: 'test-session-id',
                     user_id: 'test-user-id',
@@ -517,7 +517,7 @@ describe('/api/chat/save', () => {
               })),
             })),
           })),
-          rpc: vi.fn(() => ({
+          rpc: jest.fn(() => ({
             data: {
               status: 'committed',
               version: 5,
@@ -563,10 +563,10 @@ describe('/api/chat/save', () => {
 
   describe('error handling', () => {
     it('should return 401 for unauthenticated requests', async () => {
-      vi.doMock('@/lib/supabase/server', () => ({
-        createClient: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/server', () => ({
+        createClient: jest.fn(() => ({
           auth: {
-            getUser: vi.fn(() => ({
+            getUser: jest.fn(() => ({
               data: { user: null },
               error: { message: 'Not authenticated' },
             })),
@@ -586,12 +586,12 @@ describe('/api/chat/save', () => {
     });
 
     it('should return 404 for non-existent session', async () => {
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: null,
                   error: { message: 'Session not found' },
                 })),
@@ -613,12 +613,12 @@ describe('/api/chat/save', () => {
     });
 
     it('should return 403 for session ownership mismatch', async () => {
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn(() => ({
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                single: vi.fn(() => ({
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn(() => ({
+            select: jest.fn(() => ({
+              eq: jest.fn(() => ({
+                single: jest.fn(() => ({
                   data: {
                     session_id: 'test-session-id',
                     user_id: 'different-user-id', // Different from authenticated user

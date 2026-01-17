@@ -5,17 +5,17 @@
  * Tests session creation, resumption, and version/status inclusion in resume response
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest globals are available automatically
 
 // Mock Supabase server client
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(async () => ({
     auth: {
-      getUser: vi.fn(() => ({
+      getUser: jest.fn(() => ({
         data: { user: { id: 'test-user-id', email: 'test@example.com' } },
         error: null,
       })),
-      getSession: vi.fn(() => ({
+      getSession: jest.fn(() => ({
         data: { session: { access_token: 'test-token' } },
         error: null,
       })),
@@ -24,32 +24,32 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 // Mock Supabase admin client - this will be overridden in individual tests
-vi.mock('@/lib/supabase/admin', () => ({
-  createClient: vi.fn(() => ({
-    from: vi.fn((table: string) => {
+jest.mock('@/lib/supabase/admin', () => ({
+  createClient: jest.fn(() => ({
+    from: jest.fn((table: string) => {
       if (table === 'onboarding_sessions') {
         return {
-          select: vi.fn(() => ({
-            eq: vi.fn(() => ({
-              in: vi.fn(() => ({
-                order: vi.fn(() => ({
-                  limit: vi.fn(() => ({
+          select: jest.fn(() => ({
+            eq: jest.fn(() => ({
+              in: jest.fn(() => ({
+                order: jest.fn(() => ({
+                  limit: jest.fn(() => ({
                     // Default: no existing sessions
                     data: [],
                     error: null,
                   })),
                 })),
               })),
-              gte: vi.fn(() => ({
+              gte: jest.fn(() => ({
                 // Plan limits check - return empty sessions
                 data: [],
                 error: null,
               })),
             })),
           })),
-          insert: vi.fn(() => ({
-            select: vi.fn(() => ({
-              single: vi.fn(() => ({
+          insert: jest.fn(() => ({
+            select: jest.fn(() => ({
+              single: jest.fn(() => ({
                 data: {
                   session_id: 'onb_test_session',
                   user_id: 'test-user-id',
@@ -61,20 +61,20 @@ vi.mock('@/lib/supabase/admin', () => ({
           })),
         };
       }
-      return { select: vi.fn() };
+      return { select: jest.fn() };
     }),
   })),
 }));
 
 // Mock env
-vi.mock('@/lib/env', () => ({
+jest.mock('@/lib/env', () => ({
   BYPASS_LIMITS: true,
 }));
 
 describe('/api/onboarding/start', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.resetModules();
+    jest.clearAllMocks();
+    jest.resetModules();
   });
 
   describe('new session creation', () => {
@@ -163,16 +163,16 @@ describe('/api/onboarding/start', () => {
   describe('session resumption (ADR-005)', () => {
     it('should resume existing active session for user', async () => {
       // Override mock to return existing session
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn((table: string) => {
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn((table: string) => {
             if (table === 'onboarding_sessions') {
               return {
-                select: vi.fn(() => ({
-                  eq: vi.fn(() => ({
-                    in: vi.fn(() => ({
-                      order: vi.fn(() => ({
-                        limit: vi.fn(() => ({
+                select: jest.fn(() => ({
+                  eq: jest.fn(() => ({
+                    in: jest.fn(() => ({
+                      order: jest.fn(() => ({
+                        limit: jest.fn(() => ({
                           data: [
                             {
                               session_id: 'existing-session-123',
@@ -197,12 +197,12 @@ describe('/api/onboarding/start', () => {
                         })),
                       })),
                     })),
-                    gte: vi.fn(() => ({ data: [], error: null })),
+                    gte: jest.fn(() => ({ data: [], error: null })),
                   })),
                 })),
               };
             }
-            return { select: vi.fn() };
+            return { select: jest.fn() };
           }),
         })),
       }));
@@ -229,16 +229,16 @@ describe('/api/onboarding/start', () => {
 
     it('should include version in resume response (ADR-005 PR7)', async () => {
       // Override mock to return session with version
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn((table: string) => {
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn((table: string) => {
             if (table === 'onboarding_sessions') {
               return {
-                select: vi.fn(() => ({
-                  eq: vi.fn(() => ({
-                    in: vi.fn(() => ({
-                      order: vi.fn(() => ({
-                        limit: vi.fn(() => ({
+                select: jest.fn(() => ({
+                  eq: jest.fn(() => ({
+                    in: jest.fn(() => ({
+                      order: jest.fn(() => ({
+                        limit: jest.fn(() => ({
                           data: [
                             {
                               session_id: 'session-with-version',
@@ -258,12 +258,12 @@ describe('/api/onboarding/start', () => {
                         })),
                       })),
                     })),
-                    gte: vi.fn(() => ({ data: [], error: null })),
+                    gte: jest.fn(() => ({ data: [], error: null })),
                   })),
                 })),
               };
             }
-            return { select: vi.fn() };
+            return { select: jest.fn() };
           }),
         })),
       }));
@@ -289,16 +289,16 @@ describe('/api/onboarding/start', () => {
 
     it('should include status in resume response (ADR-005 PR4)', async () => {
       // Override mock to return session with status
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn((table: string) => {
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn((table: string) => {
             if (table === 'onboarding_sessions') {
               return {
-                select: vi.fn(() => ({
-                  eq: vi.fn(() => ({
-                    in: vi.fn(() => ({
-                      order: vi.fn(() => ({
-                        limit: vi.fn(() => ({
+                select: jest.fn(() => ({
+                  eq: jest.fn(() => ({
+                    in: jest.fn(() => ({
+                      order: jest.fn(() => ({
+                        limit: jest.fn(() => ({
                           data: [
                             {
                               session_id: 'session-with-status',
@@ -318,12 +318,12 @@ describe('/api/onboarding/start', () => {
                         })),
                       })),
                     })),
-                    gte: vi.fn(() => ({ data: [], error: null })),
+                    gte: jest.fn(() => ({ data: [], error: null })),
                   })),
                 })),
               };
             }
-            return { select: vi.fn() };
+            return { select: jest.fn() };
           }),
         })),
       }));
@@ -349,16 +349,16 @@ describe('/api/onboarding/start', () => {
 
     it('should default version to 0 when not present in database', async () => {
       // Override mock to return session without version
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn((table: string) => {
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn((table: string) => {
             if (table === 'onboarding_sessions') {
               return {
-                select: vi.fn(() => ({
-                  eq: vi.fn(() => ({
-                    in: vi.fn(() => ({
-                      order: vi.fn(() => ({
-                        limit: vi.fn(() => ({
+                select: jest.fn(() => ({
+                  eq: jest.fn(() => ({
+                    in: jest.fn(() => ({
+                      order: jest.fn(() => ({
+                        limit: jest.fn(() => ({
                           data: [
                             {
                               session_id: 'legacy-session',
@@ -378,12 +378,12 @@ describe('/api/onboarding/start', () => {
                         })),
                       })),
                     })),
-                    gte: vi.fn(() => ({ data: [], error: null })),
+                    gte: jest.fn(() => ({ data: [], error: null })),
                   })),
                 })),
               };
             }
-            return { select: vi.fn() };
+            return { select: jest.fn() };
           }),
         })),
       }));
@@ -408,16 +408,16 @@ describe('/api/onboarding/start', () => {
     });
 
     it('should return overallProgress and stageProgress on resume', async () => {
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn((table: string) => {
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn((table: string) => {
             if (table === 'onboarding_sessions') {
               return {
-                select: vi.fn(() => ({
-                  eq: vi.fn(() => ({
-                    in: vi.fn(() => ({
-                      order: vi.fn(() => ({
-                        limit: vi.fn(() => ({
+                select: jest.fn(() => ({
+                  eq: jest.fn(() => ({
+                    in: jest.fn(() => ({
+                      order: jest.fn(() => ({
+                        limit: jest.fn(() => ({
                           data: [
                             {
                               session_id: 'progress-session',
@@ -437,12 +437,12 @@ describe('/api/onboarding/start', () => {
                         })),
                       })),
                     })),
-                    gte: vi.fn(() => ({ data: [], error: null })),
+                    gte: jest.fn(() => ({ data: [], error: null })),
                   })),
                 })),
               };
             }
-            return { select: vi.fn() };
+            return { select: jest.fn() };
           }),
         })),
       }));
@@ -470,28 +470,28 @@ describe('/api/onboarding/start', () => {
   describe('forceNew flag', () => {
     it('should create new session when forceNew=true even if active session exists', async () => {
       // Mock would normally return existing session, but forceNew should skip it
-      vi.doMock('@/lib/supabase/admin', () => ({
-        createClient: vi.fn(() => ({
-          from: vi.fn((table: string) => {
+      jest.doMock('@/lib/supabase/admin', () => ({
+        createClient: jest.fn(() => ({
+          from: jest.fn((table: string) => {
             if (table === 'onboarding_sessions') {
               return {
-                select: vi.fn(() => ({
-                  eq: vi.fn(() => ({
-                    in: vi.fn(() => ({
-                      order: vi.fn(() => ({
-                        limit: vi.fn(() => ({
+                select: jest.fn(() => ({
+                  eq: jest.fn(() => ({
+                    in: jest.fn(() => ({
+                      order: jest.fn(() => ({
+                        limit: jest.fn(() => ({
                           // This should NOT be called when forceNew=true
                           data: [{ session_id: 'should-not-resume' }],
                           error: null,
                         })),
                       })),
                     })),
-                    gte: vi.fn(() => ({ data: [], error: null })),
+                    gte: jest.fn(() => ({ data: [], error: null })),
                   })),
                 })),
-                insert: vi.fn(() => ({
-                  select: vi.fn(() => ({
-                    single: vi.fn(() => ({
+                insert: jest.fn(() => ({
+                  select: jest.fn(() => ({
+                    single: jest.fn(() => ({
                       data: {
                         session_id: 'new-forced-session',
                         user_id: 'test-user-id',
@@ -503,7 +503,7 @@ describe('/api/onboarding/start', () => {
                 })),
               };
             }
-            return { select: vi.fn() };
+            return { select: jest.fn() };
           }),
         })),
       }));
@@ -535,14 +535,14 @@ describe('/api/onboarding/start', () => {
   describe('authentication', () => {
     it('should return 401 for unauthenticated users', async () => {
       // Override auth mock to return no user
-      vi.doMock('@/lib/supabase/server', () => ({
-        createClient: vi.fn(async () => ({
+      jest.doMock('@/lib/supabase/server', () => ({
+        createClient: jest.fn(async () => ({
           auth: {
-            getUser: vi.fn(() => ({
+            getUser: jest.fn(() => ({
               data: { user: null },
               error: { message: 'Not authenticated' },
             })),
-            getSession: vi.fn(() => ({
+            getSession: jest.fn(() => ({
               data: { session: null },
               error: null,
             })),

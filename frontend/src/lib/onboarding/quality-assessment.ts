@@ -180,6 +180,8 @@ export function buildAssessmentPrompt(
 
   return `You are assessing an onboarding conversation for quality and completeness.
 
+IMPORTANT: You MUST respond with a valid JSON object only. Do not include any explanatory text, markdown formatting, or code blocks - just the raw JSON object.
+
 ## Stage ${stage}: ${config.name}
 **Objective**: ${config.objective}
 **Required Data**: ${config.dataToCollect.join(', ')}
@@ -216,14 +218,28 @@ This is the final stage. If completeness is "complete", also provide:
 - **recommendedNextSteps**: 3-5 suggested validation experiments based on everything discussed
 `
     : ''
+}
+## Required Response Format
+Respond ONLY with a JSON object in this exact format (no markdown, no explanation):
+{
+  "coverage": <number between 0 and 1>,
+  "clarity": "<high|medium|low>",
+  "completeness": "<complete|partial|insufficient>",
+  "notes": "<string>",
+  "extractedData": { <field>: <value>, ... }${stage === TOTAL_STAGES ? ',\n  "keyInsights": ["<insight1>", "<insight2>", "<insight3>"],\n  "recommendedNextSteps": ["<step1>", "<step2>", "<step3>"]' : ''}
 }`;
 }
 
 /**
  * Assess conversation quality with retry logic
  *
- * Uses Anthropic SDK directly for more reliable structured output.
+ * Uses Anthropic SDK directly for reliable structured output.
  * Falls back to OpenRouter if Anthropic API key is not available.
+ *
+ * Note: AI SDK v5 removed the `mode: 'json'` parameter. Structured output
+ * is now handled automatically by the provider when a schema is passed.
+ * For Anthropic, the SDK uses tool-based JSON generation by default,
+ * or native structured output (outputFormat) on newer models.
  *
  * @param prompt - The assessment prompt
  * @param maxRetries - Maximum retry attempts (default: 3)
@@ -233,7 +249,8 @@ export async function assessWithRetry(
   prompt: string,
   maxRetries: number = 3
 ): Promise<QualityAssessment | null> {
-  // Try to use Anthropic directly for more reliable JSON output
+  // ALWAYS prefer Anthropic SDK directly for reliable structured output
+  // OpenRouter may not properly relay JSON mode settings to Claude
   let model;
   const useAnthropicDirect = !!process.env.ANTHROPIC_API_KEY;
 
@@ -247,17 +264,21 @@ export async function assessWithRetry(
     }
   } else {
     model = getAssessmentModel();
-    console.log('[quality-assessment] Using OpenRouter for assessment');
+    console.log('[quality-assessment] Using OpenRouter for assessment (ANTHROPIC_API_KEY not set)');
+    console.warn('[quality-assessment] WARNING: OpenRouter may have unreliable JSON output. Set ANTHROPIC_API_KEY for better results.');
   }
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      // AI SDK v5: `mode` parameter is deprecated/ignored
+      // Structured output is determined by the provider automatically when schema is passed
+      // For Anthropic, this uses tool-based JSON or native structured output
       const { object } = await generateObject({
         model,
         schema: qualityAssessmentSchema,
         prompt,
-        // Explicit mode for Anthropic models
-        mode: 'json',
+        // Note: Do NOT pass `mode: 'json'` - it's deprecated in AI SDK v5
+        // The schema alone tells the SDK to use structured output
       });
       return object;
     } catch (error) {
@@ -320,11 +341,19 @@ export async function assessConversationQuality(
 /**
  * Determine if stage should advance based on assessment
  *
+ * Bug B7 fix: Added message-based fallback to prevent getting stuck
+ * when LLM assessment is overly strict.
+ *
  * @param assessment - Quality assessment result
  * @param currentStage - Current stage number (1-7)
+ * @param stageMessageCount - Optional: Number of messages in current stage
  * @returns true if stage should advance
  */
-export function shouldAdvanceStage(assessment: QualityAssessment, currentStage: number): boolean {
+export function shouldAdvanceStage(
+  assessment: QualityAssessment,
+  currentStage: number,
+  stageMessageCount?: number
+): boolean {
   const config = getStageConfigSafe(currentStage);
 
   // Check coverage meets threshold
@@ -333,8 +362,28 @@ export function shouldAdvanceStage(assessment: QualityAssessment, currentStage: 
   // Check completeness indicates ready
   const isComplete = assessment.completeness === 'complete';
 
-  // Both conditions must be met, and can't advance past stage 7
-  return meetsThreshold && isComplete && currentStage < TOTAL_STAGES;
+  // Quality-based advancement (original logic)
+  const qualityBasedAdvance = meetsThreshold && isComplete && currentStage < TOTAL_STAGES;
+
+  // Bug B7 fix: Message-based fallback
+  // After 6+ turns (12+ messages) in a stage, advance if coverage is at least 60%
+  // This prevents getting stuck when assessment is overly strict
+  const messageBasedAdvance =
+    stageMessageCount !== undefined &&
+    stageMessageCount >= 6 && // 6 turns = 12 messages (user + assistant pairs)
+    assessment.coverage >= 0.6 && // Must have some reasonable coverage
+    currentStage < TOTAL_STAGES;
+
+  if (messageBasedAdvance && !qualityBasedAdvance) {
+    console.log('[quality-assessment] Message-based stage advancement triggered:', {
+      stage: currentStage,
+      messageCount: stageMessageCount,
+      coverage: assessment.coverage,
+      completeness: assessment.completeness,
+    });
+  }
+
+  return qualityBasedAdvance || messageBasedAdvance;
 }
 
 /**

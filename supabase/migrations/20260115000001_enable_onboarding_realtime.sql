@@ -19,6 +19,14 @@ BEGIN
     EXCEPTION
         WHEN undefined_table THEN NULL;
         WHEN object_not_in_prerequisite_state THEN NULL;
+        WHEN undefined_object THEN NULL; -- Catch "not part of publication" error
+        WHEN OTHERS THEN
+            -- If error is "not part of publication", continue
+            IF SQLERRM LIKE '%not part of the publication%' THEN
+                NULL;
+            ELSE
+                RAISE;
+            END IF;
     END;
 
     -- Add table with filtered columns (excludes large JSONB for performance)

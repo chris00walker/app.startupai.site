@@ -83,6 +83,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   const [input, setInput] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [savedVersion, setSavedVersion] = useState<number | null>(null);
+  const [collectedTopics, setCollectedTopics] = useState<string[]>([]); // Bug B6: Track collected topics
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Realtime subscription for instant progress updates (replaces polling delay)
@@ -145,6 +146,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   }, []);
 
   // Sync Realtime session updates to local state (instant progress updates)
+  // Bug B7 fix: Only accept FORWARD progression to prevent stale data from reverting UI
   useEffect(() => {
     if (!realtimeSession || !session) return;
 
@@ -152,12 +154,23 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     const stageChanged = realtimeSession.currentStage !== session.currentStage;
     const progressChanged = realtimeSession.overallProgress !== session.overallProgress;
 
-    if (stageChanged || progressChanged) {
+    // Bug B7 fix: Ignore stale Realtime data that would revert progress
+    // Only accept updates that move forward (higher stage or higher progress)
+    const isForwardProgression =
+      realtimeSession.currentStage > session.currentStage ||
+      (realtimeSession.currentStage === session.currentStage &&
+        realtimeSession.overallProgress > session.overallProgress);
+
+    // Also accept if we're catching up from a stale local state (e.g., after refresh)
+    const isCatchingUp = realtimeSession.currentStage >= session.currentStage;
+
+    if ((stageChanged || progressChanged) && (isForwardProgression || isCatchingUp)) {
       console.log('[OnboardingWizard] Realtime update:', {
         oldStage: session.currentStage,
         newStage: realtimeSession.currentStage,
         oldProgress: session.overallProgress,
         newProgress: realtimeSession.overallProgress,
+        isForwardProgression,
       });
 
       // Track and announce stage advancement
@@ -180,6 +193,13 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
       // Update stages UI
       setStages(initializeStages(realtimeSession.currentStage));
+    } else if (stageChanged || progressChanged) {
+      console.log('[OnboardingWizard] Ignoring stale Realtime update:', {
+        localStage: session.currentStage,
+        realtimeStage: realtimeSession.currentStage,
+        localProgress: session.overallProgress,
+        realtimeProgress: realtimeSession.overallProgress,
+      });
     }
   }, [realtimeSession, session, initializeStages]);
 
@@ -621,6 +641,16 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         setSavedVersion(saveResult.version);
       }
 
+      // Bug B6 fix: Update collected topics for question counter
+      if (saveResult.success && saveResult.collectedTopics) {
+        setCollectedTopics(prev => {
+          // Merge new topics with existing (dedupe)
+          const merged = [...new Set([...prev, ...saveResult.collectedTopics])];
+          console.log('[OnboardingWizard] Updated collectedTopics:', merged);
+          return merged;
+        });
+      }
+
       // Handle stage advancement from save response
       if (saveResult.stageAdvanced && saveResult.currentStage) {
         trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, saveResult.currentStage);
@@ -638,6 +668,9 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         } : null);
 
         setStages(initializeStages(saveResult.currentStage));
+
+        // Bug B6: Reset collected topics for new stage
+        setCollectedTopics([]);
       } else if (saveResult.overallProgress !== undefined) {
         // Update progress without stage change
         setSession(prev => prev ? {
@@ -1249,7 +1282,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
             overallProgress={session?.overallProgress || 0}
             agentPersonality={session?.agentPersonality}
             stageProgressData={{
-              collectedTopics: [], // TODO: Populate from session.stageData when available
+              collectedTopics, // Bug B6 fix: Now populated from save response
               stageProgress: session?.stageProgress || 0,
             }}
             onExit={handleExitOnboarding}
