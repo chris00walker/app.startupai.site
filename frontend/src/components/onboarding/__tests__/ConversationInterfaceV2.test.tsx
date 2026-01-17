@@ -466,12 +466,15 @@ describe('ConversationInterfaceV2', () => {
   });
 
   describe('Completion State', () => {
-    it('should show completion banner when progress >= 90% and at final stage', () => {
+    // ADR-005: Completion now uses status='completed' instead of progress >= 90%
+    it('should show completion banner when status is completed', () => {
       const completedSession = {
         ...defaultSession,
         currentStage: 7,
         totalStages: 7,
-        overallProgress: 95,
+        overallProgress: 100,
+        // ADR-005 Fix: Use status for completion check, not progress
+        status: 'completed' as const,
       };
 
       render(<ConversationInterface {...defaultProps} session={completedSession} />);
@@ -480,12 +483,13 @@ describe('ConversationInterfaceV2', () => {
       expect(screen.getByText('Complete Onboarding')).toBeInTheDocument();
     });
 
-    it('should NOT show completion banner when progress < 90%', () => {
+    it('should NOT show completion banner when status is not completed (even with high progress)', () => {
       const incompleteSession = {
         ...defaultSession,
         currentStage: 7,
         totalStages: 7,
-        overallProgress: 85,
+        overallProgress: 95, // High progress but status is still 'active'
+        status: 'active' as const,
       };
 
       render(<ConversationInterface {...defaultProps} session={incompleteSession} />);
@@ -499,7 +503,9 @@ describe('ConversationInterfaceV2', () => {
         ...defaultSession,
         currentStage: 7,
         totalStages: 7,
-        overallProgress: 95,
+        overallProgress: 100,
+        // ADR-005 Fix: Use status for completion check
+        status: 'completed' as const,
       };
 
       render(

@@ -146,6 +146,8 @@ interface OnboardingSession {
   stageProgress: number;
   agentPersonality: any;
   isActive: boolean;
+  // ADR-005: Track session status for completion check
+  status?: 'active' | 'paused' | 'completed' | 'abandoned';
 }
 
 interface Message {
@@ -274,8 +276,8 @@ export function ConversationInterface({
   }, []);
 
   // Check if conversation is complete
-  const isConversationComplete =
-    session.currentStage >= session.totalStages && session.overallProgress >= 90;
+  // ADR-005 Fix: Use status from database (source of truth) instead of progress threshold
+  const isConversationComplete = session.status === 'completed';
 
   return (
     <div className="flex flex-col h-full onboarding-atmosphere">

@@ -48,6 +48,8 @@ interface OnboardingSession {
   stageProgress: number;
   agentPersonality: any;
   isActive: boolean;
+  // ADR-005: Track session status for completion check
+  status?: 'active' | 'paused' | 'completed' | 'abandoned';
 }
 
 interface StageInfo {
@@ -647,6 +649,12 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
       // Handle onboarding completion (ADR-005: Queue-based)
       if (saveResult.completed) {
+        // ADR-005 Fix: Update session status to 'completed' for completion check
+        setSession(prev => prev ? {
+          ...prev,
+          status: 'completed',
+          overallProgress: 100,
+        } : null);
         console.log('[OnboardingWizard] Onboarding completed:', {
           queued: saveResult.queued,
           projectId: saveResult.projectId,
@@ -789,6 +797,8 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         stageProgress: data.stageProgress || 0,
         agentPersonality: data.conversationContext.agentPersonality,
         isActive: true,
+        // ADR-005: Track status for completion check
+        status: data.status || 'active',
       };
 
       setSession(newSession);
@@ -799,6 +809,8 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         // Restore conversation history
         setMessages(data.conversationHistory);
         setIsResuming(true);
+        // ADR-005 Fix: Initialize savedVersion from resume data for concurrency protection
+        setSavedVersion(data.version ?? 0);
 
         // Announce to screen readers
         const announcement = `Resuming onboarding session at stage ${newSession.currentStage}: ${data.stageInfo.stageName}. Conversation history restored.`;

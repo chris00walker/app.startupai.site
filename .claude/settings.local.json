@@ -53,7 +53,10 @@
       "Skill(supabase-docs)",
       "Skill(netlify-docs)",
       "Skill(docs-cache-sync)",
-      "WebFetch(domain:opennext.js.org)"
+      "WebFetch(domain:opennext.js.org)",
+      "mcp__netlify__netlify-deploy-services-updater",
+      "WebFetch(domain:console.groq.com)",
+      "WebFetch(domain:openrouter.ai)"
     ],
     "deny": [
       "Bash(rm:*)",

@@ -412,6 +412,7 @@ export async function POST(request: NextRequest) {
 
       // Return existing session data for resumption
       // Include agentIntroduction/firstQuestion as fallback if conversation_history is empty
+      // ADR-005 Fix: Include version for concurrency protection on resume
       return NextResponse.json({
         success: true,
         sessionId: session.session_id,
@@ -435,6 +436,10 @@ export async function POST(request: NextRequest) {
         overallProgress: session.overall_progress,
         stageProgress: session.stage_progress,
         stageData: session.stage_data,
+        // ADR-005: Version for concurrency protection (PR 7)
+        version: session.version ?? 0,
+        // ADR-005: Status for completion check (PR 4)
+        status: session.status,
         // Include greeting for fallback if conversation_history is empty
         agentIntroduction: `Hi there! I'm Alex, and I'm excited to help you think through your business idea using proven validation methods.
 
