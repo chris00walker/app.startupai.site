@@ -5,7 +5,7 @@
  * route correctly to Alex's onboarding instead of the quick wizard.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
@@ -123,6 +123,12 @@ describe('FounderDashboard Button Routing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Mock fetch for /api/onboarding/status - return no active session
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({ success: false }),
+    });
+
     // Default mock returns
     mockUseAuth.mockReturnValue({
       user: { id: 'user-123', email: 'test@example.com' },
@@ -157,36 +163,56 @@ describe('FounderDashboard Button Routing', () => {
       });
     });
 
-    it('should render "Start with Alex" as primary CTA', () => {
+    it('should render "Start with Alex" as primary CTA', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const primaryButton = screen.getByRole('button', { name: /start with alex/i });
       expect(primaryButton).toBeInTheDocument();
     });
 
-    it('should link primary CTA to /onboarding/founder', () => {
+    it('should link primary CTA to /onboarding/founder', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const primaryLink = screen.getByRole('link', { name: /start with alex/i });
       expect(primaryLink).toHaveAttribute('href', '/onboarding/founder');
     });
 
-    it('should render "Quick Create" as secondary option', () => {
+    it('should render "Quick Create" as secondary option', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const secondaryButton = screen.getByRole('button', { name: /quick create/i });
       expect(secondaryButton).toBeInTheDocument();
     });
 
-    it('should link secondary option to /projects/new', () => {
+    it('should link secondary option to /projects/new', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const quickCreateLink = screen.getByRole('link', { name: /quick create/i });
       expect(quickCreateLink).toHaveAttribute('href', '/projects/new');
     });
 
-    it('should show MessageSquare icon for Alex button', () => {
+    it('should show MessageSquare icon for Alex button', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       // The button should contain the MessageSquare icon
       const primaryButton = screen.getByRole('button', { name: /start with alex/i });
@@ -210,22 +236,34 @@ describe('FounderDashboard Button Routing', () => {
       });
     });
 
-    it('should render "New Project" button', () => {
+    it('should render "New Project" button', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const newProjectButton = screen.getByRole('button', { name: /new project/i });
       expect(newProjectButton).toBeInTheDocument();
     });
 
-    it('should link "New Project" to /onboarding/founder', () => {
+    it('should link "New Project" to /onboarding/founder', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const newProjectLink = screen.getByRole('link', { name: /new project/i });
       expect(newProjectLink).toHaveAttribute('href', '/onboarding/founder');
     });
 
-    it('should NOT link "New Project" to /projects/new (old behavior)', () => {
+    it('should NOT link "New Project" to /projects/new (old behavior)', async () => {
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       const newProjectLink = screen.getByRole('link', { name: /new project/i });
       expect(newProjectLink).not.toHaveAttribute('href', '/projects/new');
@@ -247,7 +285,7 @@ describe('FounderDashboard Button Routing', () => {
   });
 
   describe('error state', () => {
-    it('should show error message when projects fail to load', () => {
+    it('should show error message when projects fail to load', async () => {
       mockUseProjects.mockReturnValue({
         projects: [],
         isLoading: false,
@@ -255,6 +293,10 @@ describe('FounderDashboard Button Routing', () => {
       });
 
       render(<FounderDashboard />);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
+      });
 
       expect(screen.getByText(/error loading projects/i)).toBeInTheDocument();
     });

@@ -14,6 +14,28 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+  useSearchParams: () => ({
+    get: jest.fn().mockReturnValue(null),
+  }),
+}));
+
+// Mock useOnboardingSession hook (Realtime subscription)
+jest.mock('@/hooks/useOnboardingSession', () => ({
+  useOnboardingSession: () => ({
+    session: null,
+    realtimeStatus: 'connected',
+    refetch: jest.fn(),
+  }),
+}));
+
+// Mock useOnboardingRecovery hook (localStorage fallback)
+jest.mock('@/hooks/useOnboardingRecovery', () => ({
+  useOnboardingRecovery: () => ({
+    savePending: jest.fn(),
+    clearPending: jest.fn(),
+    hasPending: false,
+    recoverPending: jest.fn(),
+  }),
 }));
 
 // Mock sonner toast
@@ -613,10 +635,16 @@ describe('OnboardingWizardV2', () => {
 
     it('should redirect to founder-dashboard for founder plan type', async () => {
       const mockResponse = createMockStartResponse();
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        })
+        // Pause API call before redirect
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ success: true }),
+        });
 
       render(<OnboardingWizard {...defaultProps} planType="founder" />);
 
@@ -640,10 +668,16 @@ describe('OnboardingWizardV2', () => {
 
     it('should redirect to /clients for sprint plan type', async () => {
       const mockResponse = createMockStartResponse();
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      });
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        })
+        // Pause API call before redirect
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ success: true }),
+        });
 
       render(<OnboardingWizard {...defaultProps} planType="sprint" />);
 
