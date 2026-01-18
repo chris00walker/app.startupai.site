@@ -1,10 +1,14 @@
-// Legacy V1 components (Agentuity integration)
-export { OnboardingWizard } from './OnboardingWizard';
+// Journey-specific wizard components
+export { FounderOnboardingWizard } from './FounderOnboardingWizard';
+export { ConsultantOnboardingWizard } from './ConsultantOnboardingWizard';
+export { ClientOnboardingWizard } from './ClientOnboardingWizard';
+
+// Shared conversation interface
 export { ConversationInterface } from './ConversationInterface';
 
-// V2 components (Vercel AI SDK integration)
-export { OnboardingWizard as OnboardingWizardV2 } from './OnboardingWizardV2';
-export { ConversationInterface as ConversationInterfaceV2 } from './ConversationInterfaceV2';
-
-// Shared components
+// Shared UI components
 export { OnboardingSidebar } from './OnboardingSidebar';
+export { SummaryModal } from './SummaryModal';
+export { FoundersBriefReview } from './FoundersBriefReview';
+export { StageReviewModal } from './StageReviewModal';
+export { ProjectCreationWizard } from './ProjectCreationWizard';

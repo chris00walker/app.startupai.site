@@ -17,11 +17,11 @@ import { NextRequest } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import {
-  ONBOARDING_SYSTEM_PROMPT,
-  getStageSystemContext,
+  FOUNDER_SYSTEM_PROMPT,
+  getFounderStageSystemContext,
   getSystemPrompt,
   type OnboardingMode,
-} from '@/lib/ai/onboarding-prompt';
+} from '@/lib/ai/founder-onboarding-prompt';
 
 // ============================================================================
 // AI Model Configuration - OpenRouter (Multi-Provider Gateway)
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     // Determine mode from session context (defaults to 'founder')
     const mode: OnboardingMode = (aiContext.mode as OnboardingMode) || 'founder';
     const systemPrompt = getSystemPrompt(mode);
-    const stageContext = getStageSystemContext(currentStage, briefData);
+    const stageContext = getFounderStageSystemContext(currentStage, briefData);
 
     console.log('[api/chat/stream] Creating stream:', {
       sessionId,

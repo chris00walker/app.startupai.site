@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { getStageTopics } from '@/lib/onboarding/stages-config';
+import { getFounderStageTopics } from '@/lib/onboarding/founder-stages-config';
 
 // ============================================================================
 // Types and Interfaces
@@ -150,7 +150,7 @@ export function OnboardingSidebar({
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                 Collecting in Stage {currentStage}
               </p>
-              {getStageTopics(currentStage).map((topic) => {
+              {getFounderStageTopics(currentStage).map((topic) => {
                 const isCollected = stageProgressData?.collectedTopics?.includes(topic.key);
                 return (
                   <div

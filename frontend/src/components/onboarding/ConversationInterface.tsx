@@ -1,43 +1,142 @@
+/**
+ * ConversationInterface V2 - Clean Professional Design
+ *
+ * Redesigned with Linear/Notion-inspired aesthetics:
+ * - Minimal, clean message styling
+ * - Subtle animations
+ * - Refined typography and spacing
+ */
+
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Mic, MicOff, HelpCircle, Loader2 } from 'lucide-react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { Send, CheckCircle, ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+// ============================================================================
+// Simple Markdown Renderer with Question Highlighting
+// ============================================================================
+
+/**
+ * Renders basic markdown (bold, italic) to React elements
+ * Handles: **bold**, *italic*, `code`
+ */
+function renderMarkdownBasic(text: string, keyOffset: number = 0): { nodes: React.ReactNode[]; keyCount: number } {
+  if (!text) return { nodes: [], keyCount: 0 };
+
+  const parts: React.ReactNode[] = [];
+  let key = keyOffset;
+
+  // Process bold (**text**), italic (*text*), and code (`text`)
+  const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    // Add formatted text
+    if (match[2]) {
+      // Bold: **text**
+      parts.push(<strong key={key++} className="font-semibold">{match[2]}</strong>);
+    } else if (match[3]) {
+      // Italic: *text*
+      parts.push(<em key={key++}>{match[3]}</em>);
+    } else if (match[4]) {
+      // Code: `text`
+      parts.push(
+        <code key={key++} className="px-1.5 py-0.5 rounded bg-muted text-sm font-mono">
+          {match[4]}
+        </code>
+      );
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return { nodes: parts.length > 0 ? parts : [text], keyCount: key - keyOffset };
+}
+
+/**
+ * Renders markdown with question highlighting
+ * Questions (sentences ending with ?) are visually emphasized
+ */
+function renderMarkdown(text: string): React.ReactNode {
+  if (!text) return null;
+
+  // Split text into paragraphs (preserve double newlines)
+  const paragraphs = text.split(/\n\n+/);
+  const result: React.ReactNode[] = [];
+  let globalKey = 0;
+
+  paragraphs.forEach((paragraph, pIndex) => {
+    if (pIndex > 0) {
+      result.push(<br key={`br-${globalKey++}`} />);
+      result.push(<br key={`br-${globalKey++}`} />);
+    }
+
+    // Split paragraph into sentences, keeping the punctuation
+    // Match sentences ending with ? ! or .
+    const sentenceRegex = /([^.!?]*[.!?]+\s*)/g;
+    const sentences: string[] = [];
+    let lastEnd = 0;
+    let sentenceMatch;
+
+    while ((sentenceMatch = sentenceRegex.exec(paragraph)) !== null) {
+      sentences.push(sentenceMatch[1]);
+      lastEnd = sentenceRegex.lastIndex;
+    }
+
+    // Add any remaining text that doesn't end with punctuation
+    if (lastEnd < paragraph.length) {
+      sentences.push(paragraph.slice(lastEnd));
+    }
+
+    // If no sentences found, treat whole paragraph as one
+    if (sentences.length === 0) {
+      sentences.push(paragraph);
+    }
+
+    sentences.forEach((sentence, sIndex) => {
+      const trimmed = sentence.trim();
+      const isQuestion = trimmed.endsWith('?');
+
+      // Process markdown within the sentence
+      const { nodes, keyCount } = renderMarkdownBasic(sentence, globalKey);
+      globalKey += keyCount || 1;
+
+      if (isQuestion && trimmed.length > 0) {
+        // Highlight questions with accent color and slightly bolder
+        result.push(
+          <span
+            key={`q-${globalKey++}`}
+            className="text-primary font-medium"
+          >
+            {nodes}
+          </span>
+        );
+      } else {
+        result.push(...nodes);
+      }
+    });
+  });
+
+  return result;
+}
 
 // ============================================================================
 // Types and Interfaces
 // ============================================================================
-
-interface QualitySignals {
-  clarity: { label: 'high' | 'medium' | 'low'; score: number };
-  completeness: { label: 'complete' | 'partial' | 'insufficient'; score: number };
-  detailScore: number;
-  overall: number;
-  qualityTags?: string[];
-  suggestions?: string[];
-  encouragement?: string;
-}
-
-interface ConversationMessage {
-  id: string;
-  type: 'user' | 'ai' | 'system';
-  content: string;
-  timestamp: string;
-  stage: number;
-  isPending?: boolean;
-  qualitySignals?: QualitySignals;
-  systemActions?: {
-    triggerWorkflow?: boolean;
-    requestClarification?: boolean;
-    needsReview?: boolean;
-  };
-}
 
 interface OnboardingSession {
   sessionId: string;
@@ -46,78 +145,67 @@ interface OnboardingSession {
   overallProgress: number;
   stageProgress: number;
   agentPersonality: any;
-  conversationHistory: ConversationMessage[];
   isActive: boolean;
+  // ADR-005: Track session status for completion check
+  status?: 'active' | 'paused' | 'completed' | 'abandoned';
+}
+
+interface Message {
+  role: string;
+  content: string;
+  timestamp: string;
 }
 
 interface ConversationInterfaceProps {
   session: OnboardingSession;
-  onSendMessage: (message: string, messageType?: 'text' | 'voice_transcript') => Promise<void>;
+  messages: Message[];
+  input: string;
+  handleInputChange: (
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
+  ) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  isLoading: boolean;
+  isSaving?: boolean;
+  savedVersion?: number | null;
   onComplete: () => Promise<void>;
 }
 
 // ============================================================================
-// ConversationInterface Component
+// ConversationInterface Component - Clean Professional Design
 // ============================================================================
 
 export function ConversationInterface({
   session,
-  onSendMessage,
+  messages,
+  input,
+  handleInputChange,
+  handleSubmit,
+  isLoading,
+  isSaving = false,
+  savedVersion = null,
   onComplete,
 }: ConversationInterfaceProps) {
-  
-  // State management
-  const [currentMessage, setCurrentMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [showAIHelp, setShowAIHelp] = useState(false);
-  const [voiceSupported, setVoiceSupported] = useState(false);
-
   // Refs
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
-
-  // Voice recognition setup
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      setVoiceSupported(true);
-      const SpeechRecognition = (window as any).webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
-
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setCurrentMessage(transcript);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
-  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    // Use requestAnimationFrame to ensure DOM has updated before scrolling
+    requestAnimationFrame(() => {
+      if (scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector(
+          '[data-radix-scroll-area-viewport]'
+        );
+        if (scrollContainer) {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth',
+          });
+        }
       }
-    }
-  }, [session.conversationHistory]);
-
-  useEffect(() => {
-    setIsTyping(session.conversationHistory.some((msg) => msg.isPending));
-  }, [session.conversationHistory]);
+    });
+  }, [messages]);
 
   // Focus textarea on mount
   useEffect(() => {
@@ -126,366 +214,252 @@ export function ConversationInterface({
     }
   }, []);
 
-  // Handle message sending
-  const handleSendMessage = useCallback(async () => {
-    if (!currentMessage.trim() || isSending) return;
-
-    const message = currentMessage.trim();
-    setCurrentMessage('');
-    setIsSending(true);
-    setIsTyping(true);
-
-    try {
-      await onSendMessage(message, 'text');
-    } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
-      setIsSending(false);
-      setIsTyping(false);
-      
-      // Refocus textarea
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-      }
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
+      textareaRef.current.style.height = 'auto';
+      // Set height to scrollHeight, capped at max-height (200px)
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
     }
-  }, [currentMessage, isSending, onSendMessage]);
-
-  // Handle voice input
-  const handleVoiceInput = useCallback(() => {
-    if (!voiceSupported || !recognitionRef.current) return;
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      setIsListening(true);
-      recognitionRef.current.start();
-    }
-  }, [voiceSupported, isListening]);
+  }, [input]);
 
   // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      const form = e.currentTarget.closest('form');
+      if (form) {
+        form.requestSubmit();
+      }
     }
-  }, [handleSendMessage]);
+  }, []);
 
-  // Format timestamp for display
-  const formatTime = useCallback((timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+  // Handle button click explicitly to avoid race condition with disabled state
+  const handleButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    // Use requestSubmit for consistent behavior with Enter key
+    const form = e.currentTarget.closest('form');
+    if (form && input.trim() && !isLoading) {
+      // Let form's onSubmit handle the actual submission
+      form.requestSubmit();
+    }
+  }, [input, isLoading]);
+
+  // Format timestamp for display - handles missing/invalid timestamps gracefully
+  const formatTime = useCallback((timestamp: Date | string | undefined) => {
+    if (!timestamp) {
+      return '--:--'; // Fallback for legacy messages without timestamps
+    }
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      return '--:--'; // Fallback for invalid dates
+    }
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }, []);
 
   // Get stage name
   const getStageName = useCallback((stage: number) => {
     const stageNames = [
-      'Welcome', 'Customer Discovery', 'Problem Definition', 
-      'Solution Validation', 'Competitive Analysis', 
-      'Resources & Constraints', 'Goals & Next Steps'
+      'Welcome',
+      'Customer Discovery',
+      'Problem Definition',
+      'Solution Validation',
+      'Competitive Analysis',
+      'Resources & Constraints',
+      'Goals & Next Steps',
     ];
     return stageNames[stage - 1] || `Stage ${stage}`;
   }, []);
 
   // Check if conversation is complete
-  const isConversationComplete = session.currentStage >= session.totalStages && session.overallProgress >= 90;
+  // ADR-005 Fix: Use status from database (source of truth) instead of progress threshold
+  const isConversationComplete = session.status === 'completed';
 
   return (
-    <TooltipProvider>
-      <div className="flex flex-col h-full" data-testid="chat-interface">
-        {/* Header */}
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-semibold">
-                {getStageName(session.currentStage)}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Stage {session.currentStage} of {session.totalStages} • 
-                {session.agentPersonality?.name || 'AI Consultant'} is here to help
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">
-                {Math.round(session.overallProgress)}% Complete
-              </Badge>
-              {isConversationComplete && (
-                <Button onClick={onComplete} size="sm">
-                  Complete Onboarding
-                </Button>
-              )}
-            </div>
-          </div>
+    <div className="flex flex-col h-full onboarding-atmosphere">
+      {/* Header - Bold brand presence with display font */}
+      <header className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-card/50 backdrop-blur-sm reveal-1">
+        <div>
+          <h1 className="text-xl font-display font-normal text-foreground tracking-tight">{getStageName(session.currentStage)}</h1>
+          <p className="text-sm font-body text-muted-foreground">
+            Stage {session.currentStage} of {session.totalStages} &bull;{' '}
+            <span className="text-primary font-medium">{session.agentPersonality?.name || 'Alex'}</span> is here to help
+          </p>
         </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-primary tabular-nums">
+            {Math.round(session.overallProgress)}% Complete
+          </span>
+          {isConversationComplete && (
+            <Button onClick={onComplete} size="sm">
+              Complete
+            </Button>
+          )}
+        </div>
+      </header>
 
-        {/* Conversation Area */}
-        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-          <div className="space-y-4 max-w-4xl mx-auto">
-            {session.conversationHistory.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-3 ${
-                  message.type === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {/* AI Avatar */}
-                {message.type === 'ai' && (
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      {session.agentPersonality?.name?.charAt(0) || 'AI'}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-
-                {/* Message Content */}
-                <div
-                  className={`
-                    max-w-[80%] rounded-lg px-4 py-3 text-sm
-                    ${message.type === 'user'
-                      ? 'bg-primary text-primary-foreground ml-auto'
-                      : message.type === 'ai'
-                      ? 'bg-muted'
-                      : 'bg-muted/50 text-muted-foreground text-center'
-                    }
-                  `}
-                  role={message.type === 'system' ? 'status' : undefined}
-                  aria-label={
-                    message.type === 'ai'
-                      ? `AI response: ${message.content}`
-                      : message.type === 'user'
-                      ? `Your message: ${message.content}`
-                      : `System message: ${message.content}`
-                  }
-                  data-role={message.type === 'ai' ? 'assistant' : message.type}
-                  data-testid={message.type === 'ai' ? 'ai-message' : `${message.type}-message`}
-                >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
-
-                  {message.isPending && (
-                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                      <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                      <span>Analyzing your response…</span>
-                    </div>
-                  )}
-
-                  {message.type === 'ai' && message.qualitySignals && !message.isPending && (
-                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="outline" className="capitalize">
-                        Clarity: {message.qualitySignals.clarity.label}
-                      </Badge>
-                      <Badge variant="outline" className="capitalize">
-                        Completeness: {message.qualitySignals.completeness.label}
-                      </Badge>
-                      <span>
-                        Detail: {Math.round(message.qualitySignals.detailScore * 100)}%
-                      </span>
-                    </div>
-                  )}
-
-                  {message.type === 'ai' && message.qualitySignals?.qualityTags?.length && !message.isPending && (
-                    <div className="mt-2 text-xs text-yellow-600">
-                      {message.qualitySignals.qualityTags.includes('clarity_low') && (
-                        <div>Tip: add concrete examples or specifics so we can refine the analysis.</div>
-                      )}
-                      {message.qualitySignals.qualityTags.includes('incomplete') && (
-                        <div>We need a bit more information before we can advance to the next stage.</div>
-                      )}
-                    </div>
-                  )}
-
-                  {message.type === 'ai' && message.systemActions?.requestClarification && !message.isPending && (
-                    <div className="mt-2 text-xs text-amber-600">
-                      The AI flagged this response for clarification. Try expanding on the details above.
-                    </div>
-                  )}
-
-                  {/* Message metadata */}
-                  <div className={`
-                    flex items-center justify-between mt-2 text-xs
-                    ${message.type === 'user' 
-                      ? 'text-primary-foreground/70' 
-                      : 'text-muted-foreground'
-                    }
-                  `}>
-                    <span>{formatTime(message.timestamp)}</span>
-                    {message.stage !== session.currentStage && (
-                      <Badge variant="outline" className="text-xs">
-                        {getStageName(message.stage)}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* User Avatar */}
-                {message.type === 'user' && (
-                  <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                      You
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-              </div>
-            ))}
-
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex gap-3 justify-start" data-testid="ai-loading">
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                    {session.agentPersonality?.name?.charAt(0) || 'AI'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="bg-muted rounded-lg px-4 py-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                    <span className="text-muted-foreground text-xs">
-                      {session.agentPersonality?.name || 'AI'} is thinking...
+      {/* Conversation Area */}
+      <ScrollArea className="flex-1 min-h-0" ref={scrollAreaRef}>
+        <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+          {messages.map((message, index) => (
+            <div
+              key={`msg-${index}-${message.timestamp || 'legacy'}`}
+              className={cn(
+                'onboarding-message-animate',
+                message.role === 'user' ? 'flex justify-end' : ''
+              )}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              {message.role === 'assistant' ? (
+                // AI Message - Clean with left accent
+                <div data-role="assistant" className="onboarding-message-ai space-y-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-body font-medium">
+                      {session.agentPersonality?.name || 'Alex'}
+                    </span>
+                    <span className="text-xs font-body text-muted-foreground">
+                      {formatTime(message.timestamp)}
                     </span>
                   </div>
+                  <div className="text-[15px] font-body leading-relaxed text-foreground/90 whitespace-pre-wrap">
+                    {renderMarkdown(message.content)}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Input Area */}
-        <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex gap-2">
-              {/* Message Input */}
-              <div className="flex-1 relative">
-                <Textarea
-                  ref={textareaRef}
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={
-                    isListening 
-                      ? "Listening... Speak now"
-                      : "Type your response here... (Press Enter to send, Shift+Enter for new line)"
-                  }
-                  className="min-h-[60px] max-h-[120px] resize-none pr-20"
-                  disabled={isSending || isListening}
-                  aria-label="Type your message"
-                  aria-describedby="input-help"
-                />
-                
-                {/* Character count */}
-                <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-                  {currentMessage.length}/1000
+              ) : (
+                // User Message - Soft rounded bubble
+                <div data-role="user" className="max-w-[80%]">
+                  <div className="flex items-center gap-2 mb-1 justify-end">
+                    <span className="text-xs font-body text-muted-foreground">
+                      {formatTime(message.timestamp)}
+                    </span>
+                    <span className="text-sm font-body font-medium">You</span>
+                  </div>
+                  <div className="onboarding-message-user">
+                    <div className="text-[15px] font-body leading-relaxed whitespace-pre-wrap">
+                      {renderMarkdown(message.content)}
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+          ))}
+
+          {/* Typing Indicator with time estimate */}
+          {isLoading && (
+            <div className="onboarding-message-ai onboarding-message-animate">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium">
+                  {session.agentPersonality?.name || 'Alex'}
+                </span>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col gap-2">
-                {/* Voice Input Button */}
-                {voiceSupported && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleVoiceInput}
-                        disabled={isSending}
-                        className={isListening ? 'bg-red-100 border-red-300' : ''}
-                        aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
-                      >
-                        {isListening ? (
-                          <MicOff className="h-4 w-4 text-red-600" />
-                        ) : (
-                          <Mic className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isListening ? 'Stop voice input' : 'Voice input'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-
-                {/* AI Help Button */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowAIHelp(true)}
-                      disabled={isSending}
-                      aria-label="Get AI help with your response"
-                    >
-                      <HelpCircle className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Get help with your response</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                {/* Send Button */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleSendMessage}
-                      disabled={!currentMessage.trim() || isSending || currentMessage.length > 1000}
-                      size="sm"
-                      aria-label="Send message"
-                      data-testid="send-button"
-                    >
-                      {isSending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Send message (Enter)</p>
-                  </TooltipContent>
-                </Tooltip>
+              <div className="flex items-center gap-2 py-2">
+                <div className="flex space-x-1">
+                  <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" />
+                  <span
+                    className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                    style={{ animationDelay: '0.1s' }}
+                  />
+                  <span
+                    className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                    style={{ animationDelay: '0.2s' }}
+                  />
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  Thinking... <span className="text-xs opacity-70">(usually 3-5 seconds)</span>
+                </span>
               </div>
             </div>
+          )}
 
-            {/* Input Help Text */}
-            <div id="input-help" className="mt-2 text-xs text-muted-foreground">
-              <p>
-                Be specific and detailed in your responses to get the best strategic guidance. 
-                {voiceSupported && ' You can use voice input or type your response.'}
+          {/* Save Status Indicator (ADR-005: "Saved v{X}" UX) */}
+          {(isSaving || savedVersion) && !isLoading && (
+            <div
+              data-testid="save-indicator"
+              className="flex items-center justify-center gap-2 py-2 text-muted-foreground"
+            >
+              {isSaving ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <span className="text-xs">Saving progress...</span>
+                </>
+              ) : savedVersion ? (
+                <>
+                  <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                  <span data-testid="version-indicator" className="text-xs text-green-600 dark:text-green-400">
+                    Saved v{savedVersion}
+                  </span>
+                </>
+              ) : null}
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Completion Banner - More prominent than header button */}
+      {isConversationComplete && (
+        <div className="border-t border-accent/20 bg-gradient-to-r from-accent/5 to-accent/10 p-6">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h3 className="font-display text-lg font-semibold text-accent flex items-center gap-2 justify-center sm:justify-start">
+                <CheckCircle className="w-5 h-5" />
+                You're all set!
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                All stages complete. Ready to start your validation journey.
               </p>
             </div>
+            <Button
+              onClick={onComplete}
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-white min-w-[180px]"
+            >
+              Complete Onboarding
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* AI Help Dialog */}
-      <AlertDialog open={showAIHelp} onOpenChange={setShowAIHelp}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tips for Better Responses</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div className="space-y-3">
-                <p>To get the most value from this conversation:</p>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li><strong>Be specific:</strong> Include concrete examples and details</li>
-                  <li><strong>Share context:</strong> Explain your situation and constraints</li>
-                  <li><strong>Ask questions:</strong> If you're unsure about something, ask for clarification</li>
-                  <li><strong>Think out loud:</strong> Share your thought process and concerns</li>
-                  <li><strong>Be honest:</strong> Authentic responses lead to better guidance</li>
-                </ul>
-                <p className="text-sm">
-                  Remember, this conversation is confidential and designed to help you succeed.
+      {/* Input Area - Clean with floating send */}
+      <div className="border-t border-border/50 bg-muted/30 px-6 py-4">
+        <div className="max-w-3xl mx-auto">
+          <form onSubmit={handleSubmit}>
+            <div className="onboarding-input-container p-3">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your response... (Enter to send)"
+                className="onboarding-input min-h-[60px] max-h-[200px]"
+                disabled={isLoading}
+                rows={2}
+                aria-label="Type your message"
+                aria-describedby="input-instructions"
+              />
+              <div className="flex items-center justify-between mt-3">
+                <p id="input-instructions" className="text-xs text-muted-foreground">
+                  Be specific and detailed in your responses to get the best strategic guidance.
                 </p>
+                <Button
+                  type="submit"
+                  disabled={!input.trim() || isLoading}
+                  onClick={handleButtonClick}
+                  size="sm"
+                  className="h-8 px-4"
+                >
+                  <span className="mr-2">Send</span>
+                  <Send className="h-3.5 w-3.5" />
+                </Button>
               </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction>Got it!</AlertDialogAction>
-        </AlertDialogContent>
-      </AlertDialog>
-    </TooltipProvider>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

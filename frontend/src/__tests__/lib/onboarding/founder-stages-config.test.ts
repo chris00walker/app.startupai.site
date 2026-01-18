@@ -1,35 +1,35 @@
 /**
- * Stage Configuration Tests
+ * Founder Stage Configuration Tests
  *
- * Validates that the onboarding stage configuration supports deterministic
+ * Validates that Alex's onboarding stage configuration supports deterministic
  * topic-based progression through all 7 stages.
  *
  * @see Plan: /home/chris/.claude/plans/precious-kindling-balloon.md
  */
 
 import {
-  ONBOARDING_STAGES_CONFIG,
-  TOTAL_STAGES,
-  getStageConfig,
-  getStageConfigSafe,
-  getStageTopics,
-  getStageSystemContext,
-  getStageName,
-} from '@/lib/onboarding/stages-config';
+  FOUNDER_STAGES_CONFIG,
+  FOUNDER_TOTAL_STAGES,
+  getFounderStageConfig,
+  getFounderStageConfigSafe,
+  getFounderStageTopics,
+  getFounderStageSystemContext,
+  getFounderStageName,
+} from '@/lib/onboarding/founder-stages-config';
 
 describe('Stage Configuration - Structure', () => {
   it('should have exactly 7 stages', () => {
-    expect(TOTAL_STAGES).toBe(7);
-    expect(ONBOARDING_STAGES_CONFIG).toHaveLength(7);
+    expect(FOUNDER_TOTAL_STAGES).toBe(7);
+    expect(FOUNDER_STAGES_CONFIG).toHaveLength(7);
   });
 
   it('should have stages numbered 1 through 7', () => {
-    const stageNumbers = ONBOARDING_STAGES_CONFIG.map(s => s.stage);
+    const stageNumbers = FOUNDER_STAGES_CONFIG.map(s => s.stage);
     expect(stageNumbers).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 
   it('should have unique stage numbers', () => {
-    const stageNumbers = ONBOARDING_STAGES_CONFIG.map(s => s.stage);
+    const stageNumbers = FOUNDER_STAGES_CONFIG.map(s => s.stage);
     const uniqueNumbers = new Set(stageNumbers);
     expect(uniqueNumbers.size).toBe(stageNumbers.length);
   });
@@ -37,49 +37,49 @@ describe('Stage Configuration - Structure', () => {
 
 describe('Stage Configuration - Key Questions', () => {
   it('Stage 1 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(1);
+    const stage = getFounderStageConfig(1);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('Stage 2 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(2);
+    const stage = getFounderStageConfig(2);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('Stage 3 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(3);
+    const stage = getFounderStageConfig(3);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('Stage 4 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(4);
+    const stage = getFounderStageConfig(4);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('Stage 5 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(5);
+    const stage = getFounderStageConfig(5);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('Stage 6 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(6);
+    const stage = getFounderStageConfig(6);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('Stage 7 should have 3-4 key questions defined', () => {
-    const stage = getStageConfig(7);
+    const stage = getFounderStageConfig(7);
     expect(stage?.keyQuestions.length).toBeGreaterThanOrEqual(3);
     expect(stage?.keyQuestions.length).toBeLessThanOrEqual(4);
   });
 
   it('all stages combined should cover 21-28 questions', () => {
-    const totalQuestions = ONBOARDING_STAGES_CONFIG.reduce(
+    const totalQuestions = FOUNDER_STAGES_CONFIG.reduce(
       (sum, stage) => sum + stage.keyQuestions.length,
       0
     );
@@ -88,7 +88,7 @@ describe('Stage Configuration - Key Questions', () => {
   });
 
   it('each key question should be a non-empty string', () => {
-    for (const stage of ONBOARDING_STAGES_CONFIG) {
+    for (const stage of FOUNDER_STAGES_CONFIG) {
       for (const question of stage.keyQuestions) {
         expect(typeof question).toBe('string');
         expect(question.trim().length).toBeGreaterThan(0);
@@ -99,14 +99,14 @@ describe('Stage Configuration - Key Questions', () => {
 
 describe('Stage Configuration - Data Fields', () => {
   it('each stage should have 4-5 data fields to collect', () => {
-    for (const stage of ONBOARDING_STAGES_CONFIG) {
+    for (const stage of FOUNDER_STAGES_CONFIG) {
       expect(stage.dataToCollect.length).toBeGreaterThanOrEqual(4);
       expect(stage.dataToCollect.length).toBeLessThanOrEqual(5);
     }
   });
 
   it('each stage should have matching dataTopics for dataToCollect', () => {
-    for (const stage of ONBOARDING_STAGES_CONFIG) {
+    for (const stage of FOUNDER_STAGES_CONFIG) {
       const dataKeys = new Set(stage.dataToCollect);
       const topicKeys = new Set(stage.dataTopics.map(t => t.key));
 
@@ -118,7 +118,7 @@ describe('Stage Configuration - Data Fields', () => {
   });
 
   it('dataTopics should have valid labels and keys', () => {
-    for (const stage of ONBOARDING_STAGES_CONFIG) {
+    for (const stage of FOUNDER_STAGES_CONFIG) {
       for (const topic of stage.dataTopics) {
         expect(typeof topic.label).toBe('string');
         expect(topic.label.trim().length).toBeGreaterThan(0);
@@ -131,15 +131,15 @@ describe('Stage Configuration - Data Fields', () => {
 
 describe('Stage Configuration - Progress Thresholds', () => {
   it('each stage should have a progress threshold between 0.5 and 1.0', () => {
-    for (const stage of ONBOARDING_STAGES_CONFIG) {
+    for (const stage of FOUNDER_STAGES_CONFIG) {
       expect(stage.progressThreshold).toBeGreaterThanOrEqual(0.5);
       expect(stage.progressThreshold).toBeLessThanOrEqual(1.0);
     }
   });
 
   it('Stage 7 should have the highest threshold (final validation)', () => {
-    const stage7 = getStageConfig(7);
-    const otherStages = ONBOARDING_STAGES_CONFIG.filter(s => s.stage !== 7);
+    const stage7 = getFounderStageConfig(7);
+    const otherStages = FOUNDER_STAGES_CONFIG.filter(s => s.stage !== 7);
     const maxOtherThreshold = Math.max(...otherStages.map(s => s.progressThreshold));
 
     expect(stage7?.progressThreshold).toBeGreaterThanOrEqual(maxOtherThreshold);
@@ -160,61 +160,61 @@ describe('Stage Configuration - Stage Names', () => {
   it.each(expectedNames.map((name, i) => [i + 1, name]))(
     'Stage %i should be named "%s"',
     (stageNum, expectedName) => {
-      expect(getStageName(stageNum as number)).toBe(expectedName);
+      expect(getFounderStageName(stageNum as number)).toBe(expectedName);
     }
   );
 });
 
 describe('Stage Configuration - Utility Functions', () => {
-  describe('getStageConfig', () => {
+  describe('getFounderStageConfig', () => {
     it('should return stage config for valid stage numbers', () => {
       for (let i = 1; i <= 7; i++) {
-        const config = getStageConfig(i);
+        const config = getFounderStageConfig(i);
         expect(config).toBeDefined();
         expect(config?.stage).toBe(i);
       }
     });
 
     it('should return undefined for invalid stage numbers', () => {
-      expect(getStageConfig(0)).toBeUndefined();
-      expect(getStageConfig(8)).toBeUndefined();
-      expect(getStageConfig(-1)).toBeUndefined();
+      expect(getFounderStageConfig(0)).toBeUndefined();
+      expect(getFounderStageConfig(8)).toBeUndefined();
+      expect(getFounderStageConfig(-1)).toBeUndefined();
     });
   });
 
-  describe('getStageConfigSafe', () => {
+  describe('getFounderStageConfigSafe', () => {
     it('should return stage config for valid stage numbers', () => {
       for (let i = 1; i <= 7; i++) {
-        const config = getStageConfigSafe(i);
+        const config = getFounderStageConfigSafe(i);
         expect(config.stage).toBe(i);
       }
     });
 
     it('should return stage 1 config for invalid stage numbers', () => {
-      expect(getStageConfigSafe(0).stage).toBe(1);
-      expect(getStageConfigSafe(8).stage).toBe(1);
-      expect(getStageConfigSafe(-1).stage).toBe(1);
+      expect(getFounderStageConfigSafe(0).stage).toBe(1);
+      expect(getFounderStageConfigSafe(8).stage).toBe(1);
+      expect(getFounderStageConfigSafe(-1).stage).toBe(1);
     });
   });
 
-  describe('getStageTopics', () => {
+  describe('getFounderStageTopics', () => {
     it('should return topics array for valid stages', () => {
       for (let i = 1; i <= 7; i++) {
-        const topics = getStageTopics(i);
+        const topics = getFounderStageTopics(i);
         expect(Array.isArray(topics)).toBe(true);
         expect(topics.length).toBeGreaterThan(0);
       }
     });
 
     it('should return empty array for invalid stages', () => {
-      expect(getStageTopics(0)).toEqual([]);
-      expect(getStageTopics(8)).toEqual([]);
+      expect(getFounderStageTopics(0)).toEqual([]);
+      expect(getFounderStageTopics(8)).toEqual([]);
     });
   });
 
-  describe('getStageSystemContext', () => {
+  describe('getFounderStageSystemContext', () => {
     it('should generate context string with stage info', () => {
-      const context = getStageSystemContext(1, {});
+      const context = getFounderStageSystemContext(1, {});
 
       expect(context).toContain('Stage 1');
       expect(context).toContain('Welcome & Introduction');
@@ -223,7 +223,7 @@ describe('Stage Configuration - Utility Functions', () => {
     });
 
     it('should include collected data in context', () => {
-      const context = getStageSystemContext(1, {
+      const context = getFounderStageSystemContext(1, {
         business_concept: 'A meal planning app',
         inspiration: 'Personal experience',
       });
@@ -233,7 +233,7 @@ describe('Stage Configuration - Utility Functions', () => {
     });
 
     it('should show missing data points', () => {
-      const context = getStageSystemContext(1, {
+      const context = getFounderStageSystemContext(1, {
         business_concept: 'Test idea',
       });
 
@@ -244,7 +244,7 @@ describe('Stage Configuration - Utility Functions', () => {
     });
 
     it('should show "None - all topics covered!" when all data collected', () => {
-      const context = getStageSystemContext(1, {
+      const context = getFounderStageSystemContext(1, {
         business_concept: 'Test idea',
         inspiration: 'Personal experience',
         current_stage: 'Just starting',
@@ -256,7 +256,7 @@ describe('Stage Configuration - Utility Functions', () => {
 
     it('should truncate long values to ~100 characters', () => {
       const longValue = 'A'.repeat(200);
-      const context = getStageSystemContext(1, {
+      const context = getFounderStageSystemContext(1, {
         business_concept: longValue,
       });
 
@@ -269,7 +269,7 @@ describe('Stage Configuration - Utility Functions', () => {
 
 describe('Stage Configuration - Stage Content Validation', () => {
   describe('Stage 1: Welcome & Introduction', () => {
-    const stage = getStageConfig(1)!;
+    const stage = getFounderStageConfig(1)!;
 
     it('should focus on business concept and founder background', () => {
       expect(stage.dataToCollect).toContain('business_concept');
@@ -285,7 +285,7 @@ describe('Stage Configuration - Stage Content Validation', () => {
   });
 
   describe('Stage 2: Customer Discovery', () => {
-    const stage = getStageConfig(2)!;
+    const stage = getFounderStageConfig(2)!;
 
     it('should focus on target customers', () => {
       expect(stage.dataToCollect).toContain('target_customers');
@@ -301,7 +301,7 @@ describe('Stage Configuration - Stage Content Validation', () => {
   });
 
   describe('Stage 3: Problem Definition', () => {
-    const stage = getStageConfig(3)!;
+    const stage = getFounderStageConfig(3)!;
 
     it('should focus on problem description and evidence', () => {
       expect(stage.dataToCollect).toContain('problem_description');
@@ -317,7 +317,7 @@ describe('Stage Configuration - Stage Content Validation', () => {
   });
 
   describe('Stage 4: Solution Validation', () => {
-    const stage = getStageConfig(4)!;
+    const stage = getFounderStageConfig(4)!;
 
     it('should focus on solution and differentiation', () => {
       expect(stage.dataToCollect).toContain('solution_description');
@@ -333,7 +333,7 @@ describe('Stage Configuration - Stage Content Validation', () => {
   });
 
   describe('Stage 5: Competitive Analysis', () => {
-    const stage = getStageConfig(5)!;
+    const stage = getFounderStageConfig(5)!;
 
     it('should focus on competitors and alternatives', () => {
       expect(stage.dataToCollect).toContain('competitors');
@@ -352,7 +352,7 @@ describe('Stage Configuration - Stage Content Validation', () => {
   });
 
   describe('Stage 6: Resources & Constraints', () => {
-    const stage = getStageConfig(6)!;
+    const stage = getFounderStageConfig(6)!;
 
     it('should focus on budget and resources', () => {
       expect(stage.dataToCollect).toContain('budget_range');
@@ -371,7 +371,7 @@ describe('Stage Configuration - Stage Content Validation', () => {
   });
 
   describe('Stage 7: Goals & Next Steps', () => {
-    const stage = getStageConfig(7)!;
+    const stage = getFounderStageConfig(7)!;
 
     it('should focus on goals and success metrics', () => {
       expect(stage.dataToCollect).toContain('short_term_goals');

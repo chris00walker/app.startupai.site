@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizardV2';
+import { FounderOnboardingWizard } from '@/components/onboarding/FounderOnboardingWizard';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // ============================================================================
@@ -57,7 +57,7 @@ async function OnboardingPage() {
       {/* Main content with proper landmark */}
       <div id="main-content" data-testid="onboarding" role="main" aria-label="AI-guided onboarding conversation">
         <Suspense fallback={<OnboardingLoadingSkeleton />}>
-          <OnboardingWizard
+          <FounderOnboardingWizard
             userId={user.id as string}
             planType={planType}
             userEmail={user.email || ''}

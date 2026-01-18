@@ -1,27 +1,28 @@
 /**
- * AI Onboarding System Prompt Configuration
+ * Founder Onboarding Prompt - Alex's System Prompt Configuration
  *
- * This file contains the system prompt and configuration for the AI-powered
- * onboarding conversation. The AI guides users through 7 stages of business
- * validation, collecting information to generate strategic insights via CrewAI.
+ * Contains the system prompt and configuration for Alex, the Strategic
+ * Business Consultant who guides founders through 7 stages of validation.
  *
- * Stage configuration is now centralized in lib/onboarding/stages-config.ts
+ * Stage configuration is centralized in lib/onboarding/founder-stages-config.ts
  */
 
 // Re-export stage configuration from single source of truth
 export {
-  ONBOARDING_STAGES_CONFIG as ONBOARDING_STAGES,
-  TOTAL_STAGES,
-  getStageConfigSafe as getStageInfo,  // Backward-compatible (falls back to stage 1)
-  getStageConfig,
-  getStageConfigSafe,
-  getStageSystemContext,
-  getStageName,
-  type OnboardingStageConfig,
+  FOUNDER_STAGES_CONFIG,
+  FOUNDER_STAGES_CONFIG as FOUNDER_STAGES,
+  FOUNDER_STAGES_CONFIG as FOUNDER_ONBOARDING_STAGES,
+  FOUNDER_TOTAL_STAGES,
+  getFounderStageConfigSafe,
+  getFounderStageConfigSafe as getFounderStageInfo,
+  getFounderStageConfig,
+  getFounderStageSystemContext,
+  getFounderStageName,
+  type OnboardingStageConfig as FounderStageConfig,
   type StageDataTopic,
-} from '@/lib/onboarding/stages-config';
+} from '@/lib/onboarding/founder-stages-config';
 
-export const ONBOARDING_SYSTEM_PROMPT = `You are an expert startup consultant conducting an AI-powered onboarding session. Your role is to guide entrepreneurs through a structured 7-stage conversation to help them validate their business ideas using evidence-based methods.
+export const FOUNDER_SYSTEM_PROMPT = `You are an expert startup consultant conducting an AI-powered onboarding session. Your role is to guide entrepreneurs through a structured 7-stage conversation to help them validate their business ideas using evidence-based methods.
 
 ## Your Personality
 - **Name**: Alex
@@ -175,7 +176,7 @@ One thing I'm curious about: Have you talked to any of these businesses to under
 
 Now, greet the user warmly and start the conversation by asking about their business idea!`;
 
-export const INITIAL_GREETING = `Hi there! I'm Alex, your Strategic Business Consultant. I'm excited to help you think through your business idea using proven validation methods.
+export const FOUNDER_INITIAL_GREETING = `Hi there! I'm Alex, your Strategic Business Consultant. I'm excited to help you think through your business idea using proven validation methods.
 
 Over the next 15-20 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your goals. This isn't a pitch session - it's a strategic conversation to help you identify what assumptions you need to test and what experiments you should run first.
 
@@ -196,7 +197,7 @@ export type OnboardingMode = 'founder' | 'client';
 /**
  * Generate the initial greeting based on onboarding mode
  */
-export function getInitialGreeting(mode: OnboardingMode = 'founder'): string {
+export function getFounderInitialGreeting(mode: OnboardingMode = 'founder'): string {
   if (mode === 'client') {
     return `Hi! I'm Alex, your Strategic Business Consultant. I understand you're here to help validate a client's business idea - that's great!
 
@@ -211,7 +212,7 @@ Ready to begin? Let's start:
 **What business idea is your client working on?**`;
   }
 
-  return INITIAL_GREETING;
+  return FOUNDER_INITIAL_GREETING;
 }
 
 /**
@@ -294,6 +295,6 @@ Structure your responses as:
 - Keep questions focused on the client's business, not the consulting relationship`;
   }
 
-  return ONBOARDING_SYSTEM_PROMPT;
+  return FOUNDER_SYSTEM_PROMPT;
 }
 

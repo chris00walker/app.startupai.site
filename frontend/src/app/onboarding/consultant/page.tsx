@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ConsultantOnboardingWizardV2 } from '@/components/onboarding/ConsultantOnboardingWizardV2';
+import { ConsultantOnboardingWizard } from '@/components/onboarding/ConsultantOnboardingWizard';
 
 /**
  * Consultant Onboarding Page V2
@@ -45,10 +45,10 @@ export default async function ConsultantOnboardingPage() {
   // Note: We intentionally do NOT check onboarding_completed here.
   // This allows consultants to resume their onboarding session by clicking
   // "AI Assistant" from the dashboard, matching the founder experience.
-  // The ConsultantOnboardingWizardV2 component handles session resumption.
+  // The ConsultantOnboardingWizard component handles session resumption.
 
   return (
-    <ConsultantOnboardingWizardV2
+    <ConsultantOnboardingWizard
       userId={user.id}
       userEmail={profile?.email || user.email || ''}
     />

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ConversationInterface } from '../ConversationInterfaceV2';
+import { ConversationInterface } from '../ConversationInterface';
 
 // Mock the ScrollArea component to expose scroll behavior
 jest.mock('@/components/ui/scroll-area', () => ({

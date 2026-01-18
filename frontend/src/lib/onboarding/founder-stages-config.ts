@@ -1,11 +1,11 @@
 /**
- * Unified Stage Configuration for Onboarding
+ * Founder Stage Configuration - Alex's 7-Stage Validation Journey
  *
- * Single source of truth for all stage-related data.
+ * Single source of truth for founder onboarding stages.
  * Used by:
- * - OnboardingSidebar.tsx (progress topics display)
- * - onboarding-prompt.ts (AI context and prompts)
- * - app/api/chat/route.ts (stage progression logic)
+ * - FounderOnboardingWizard.tsx (progress display)
+ * - founder-onboarding-prompt.ts (AI context)
+ * - app/api/chat/stream/route.ts (stage progression)
  *
  * @see Plan: /home/chris/.claude/plans/snappy-hugging-lollipop.md
  */
@@ -34,7 +34,7 @@ export interface OnboardingStageConfig {
 // Stage Configuration (Single Source of Truth)
 // ============================================================================
 
-export const ONBOARDING_STAGES_CONFIG = [
+export const FOUNDER_STAGES_CONFIG = [
   {
     stage: 1,
     name: 'Welcome & Introduction',
@@ -180,7 +180,7 @@ export const ONBOARDING_STAGES_CONFIG = [
 // Derived Constants
 // ============================================================================
 
-export const TOTAL_STAGES = ONBOARDING_STAGES_CONFIG.length;
+export const FOUNDER_TOTAL_STAGES = FOUNDER_STAGES_CONFIG.length;
 
 // ============================================================================
 // Utility Functions
@@ -191,8 +191,8 @@ export const TOTAL_STAGES = ONBOARDING_STAGES_CONFIG.length;
  * @param stageNumber - 1-indexed stage number (1-7)
  * @returns Stage configuration or undefined if not found
  */
-export function getStageConfig(stageNumber: number): OnboardingStageConfig | undefined {
-  return ONBOARDING_STAGES_CONFIG.find(s => s.stage === stageNumber);
+export function getFounderStageConfig(stageNumber: number): OnboardingStageConfig | undefined {
+  return FOUNDER_STAGES_CONFIG.find(s => s.stage === stageNumber);
 }
 
 /**
@@ -200,8 +200,8 @@ export function getStageConfig(stageNumber: number): OnboardingStageConfig | und
  * @param stageNumber - 1-indexed stage number (1-7)
  * @returns Stage configuration (falls back to stage 1 if not found)
  */
-export function getStageConfigSafe(stageNumber: number): OnboardingStageConfig {
-  return getStageConfig(stageNumber) ?? ONBOARDING_STAGES_CONFIG[0];
+export function getFounderStageConfigSafe(stageNumber: number): OnboardingStageConfig {
+  return getFounderStageConfig(stageNumber) ?? FOUNDER_STAGES_CONFIG[0];
 }
 
 /**
@@ -209,8 +209,8 @@ export function getStageConfigSafe(stageNumber: number): OnboardingStageConfig {
  * @param stageNumber - 1-indexed stage number (1-7)
  * @returns Array of topics with labels and keys
  */
-export function getStageTopics(stageNumber: number): readonly StageDataTopic[] {
-  return getStageConfig(stageNumber)?.dataTopics ?? [];
+export function getFounderStageTopics(stageNumber: number): readonly StageDataTopic[] {
+  return getFounderStageConfig(stageNumber)?.dataTopics ?? [];
 }
 
 /**
@@ -223,11 +223,11 @@ export function getStageTopics(stageNumber: number): readonly StageDataTopic[] {
  * @param collectedData - Data collected so far
  * @returns Formatted context string for AI system prompt
  */
-export function getStageSystemContext(
+export function getFounderStageSystemContext(
   stageNumber: number,
   collectedData: Record<string, unknown>
 ): string {
-  const stage = getStageConfigSafe(stageNumber);
+  const stage = getFounderStageConfigSafe(stageNumber);
 
   const collectedEntries = Object.entries(collectedData)
     .map(([key, value]) => {
@@ -251,7 +251,7 @@ export function getStageSystemContext(
     : 'All topics covered for this stage.';
 
   return `
-## Current Stage: ${stage.name} (Stage ${stageNumber}/${TOTAL_STAGES})
+## Current Stage: ${stage.name} (Stage ${stageNumber}/${FOUNDER_TOTAL_STAGES})
 
 **Objective**: ${stage.objective}
 
@@ -276,6 +276,6 @@ ${collectedEntries || '(none yet)'}
  * @param stageNumber - 1-indexed stage number (1-7)
  * @returns Stage name or fallback string
  */
-export function getStageName(stageNumber: number): string {
-  return getStageConfig(stageNumber)?.name ?? `Stage ${stageNumber}`;
+export function getFounderStageName(stageNumber: number): string {
+  return getFounderStageConfig(stageNumber)?.name ?? `Stage ${stageNumber}`;
 }

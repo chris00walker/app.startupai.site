@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { BYPASS_LIMITS } from '@/lib/env';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
-import { getInitialGreeting, type OnboardingMode } from '@/lib/ai/onboarding-prompt';
+import { getFounderInitialGreeting, type OnboardingMode } from '@/lib/ai/founder-onboarding-prompt';
 
 type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
@@ -534,7 +534,7 @@ There are no wrong answers here. In fact, "I don't know yet" is often the most h
     }
 
     // Get mode-specific greeting
-    const greeting = getInitialGreeting(mode);
+    const greeting = getFounderInitialGreeting(mode);
 
     const response: StartOnboardingResponse = {
       success: true,

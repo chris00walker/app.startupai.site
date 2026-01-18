@@ -12,11 +12,11 @@
 
 import {
   mergeExtractedData,
-  shouldAdvanceStage,
+  shouldFounderAdvanceStage,
   hashMessageForIdempotency,
   calculateOverallProgress, // Added for Erratum 4 fix
   type QualityAssessment,
-} from '@/lib/onboarding/quality-assessment';
+} from '@/lib/onboarding/founder-quality-assessment';
 
 // Mock dependencies before imports
 jest.mock('@/lib/supabase/server', () => ({
@@ -163,7 +163,7 @@ describe('Chat API Route', () => {
       });
     });
 
-    describe('shouldAdvanceStage', () => {
+    describe('shouldFounderAdvanceStage', () => {
       // Topic-based advancement: advances when 75%+ of topics are covered
       // Stage 1 has 4 topics: business_concept, inspiration, current_stage, founder_background
 
@@ -175,7 +175,7 @@ describe('Chat API Route', () => {
           completeness: 'complete',
           notes: 'Good progress',
         };
-        expect(shouldAdvanceStage(assessment, 1)).toBe(true);
+        expect(shouldFounderAdvanceStage(assessment, 1)).toBe(true);
       });
 
       it('should return false when only 50% topics covered', () => {
@@ -186,7 +186,7 @@ describe('Chat API Route', () => {
           completeness: 'partial',
           notes: 'Needs more detail',
         };
-        expect(shouldAdvanceStage(assessment, 1)).toBe(false);
+        expect(shouldFounderAdvanceStage(assessment, 1)).toBe(false);
       });
 
       it('should advance via message fallback even with low topic coverage', () => {
@@ -198,7 +198,7 @@ describe('Chat API Route', () => {
           notes: 'Low topic coverage but fallback applies',
         };
         // With 6+ messages, fallback kicks in
-        expect(shouldAdvanceStage(assessment, 1, 6)).toBe(true);
+        expect(shouldFounderAdvanceStage(assessment, 1, 6)).toBe(true);
       });
 
       it('should return false at stage 7 (cannot advance past final)', () => {
@@ -209,7 +209,7 @@ describe('Chat API Route', () => {
           completeness: 'complete',
           notes: 'All done',
         };
-        expect(shouldAdvanceStage(assessment, 7)).toBe(false);
+        expect(shouldFounderAdvanceStage(assessment, 7)).toBe(false);
       });
     });
 

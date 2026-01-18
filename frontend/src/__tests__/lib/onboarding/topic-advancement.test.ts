@@ -13,11 +13,11 @@
  */
 
 import {
-  shouldAdvanceStage,
+  shouldFounderAdvanceStage,
   mergeExtractedData,
   type QualityAssessment,
-} from '@/lib/onboarding/quality-assessment';
-import { getStageConfig, TOTAL_STAGES } from '@/lib/onboarding/stages-config';
+} from '@/lib/onboarding/founder-quality-assessment';
+import { getFounderStageConfig, FOUNDER_TOTAL_STAGES } from '@/lib/onboarding/founder-stages-config';
 
 // ============================================================================
 // Test Data Helpers
@@ -68,7 +68,7 @@ function createUncertaintyAssessment(
   }
 
   const totalTopics = topicsDiscussed.length + uncertainTopics.length;
-  const stage1DataFields = getStageConfig(1)?.dataToCollect.length ?? 4;
+  const stage1DataFields = getFounderStageConfig(1)?.dataToCollect.length ?? 4;
 
   // All discussed topics (both confident and uncertain) count as covered
   const topicsCovered = [...topicsDiscussed, ...uncertainTopics];
@@ -102,7 +102,7 @@ describe('Topic-Based Stage Advancement', () => {
         },
       });
 
-      expect(shouldAdvanceStage(assessment, 1)).toBe(true);
+      expect(shouldFounderAdvanceStage(assessment, 1)).toBe(true);
     });
 
     it('should advance stage when 3 of 4 topics are covered', () => {
@@ -118,7 +118,7 @@ describe('Topic-Based Stage Advancement', () => {
         },
       });
 
-      expect(shouldAdvanceStage(assessment, 1)).toBe(true);
+      expect(shouldFounderAdvanceStage(assessment, 1)).toBe(true);
     });
 
     it('should NOT advance when only 1-2 topics are covered', () => {
@@ -132,7 +132,7 @@ describe('Topic-Based Stage Advancement', () => {
       });
 
       // With only 2 topics, we shouldn't advance yet
-      expect(shouldAdvanceStage(assessment, 1)).toBe(false);
+      expect(shouldFounderAdvanceStage(assessment, 1)).toBe(false);
     });
 
     it('should NOT advance past stage 7', () => {
@@ -141,8 +141,8 @@ describe('Topic-Based Stage Advancement', () => {
         completeness: 'complete',
       });
 
-      expect(shouldAdvanceStage(assessment, 7)).toBe(false);
-      expect(shouldAdvanceStage(assessment, TOTAL_STAGES)).toBe(false);
+      expect(shouldFounderAdvanceStage(assessment, 7)).toBe(false);
+      expect(shouldFounderAdvanceStage(assessment, FOUNDER_TOTAL_STAGES)).toBe(false);
     });
   });
 
@@ -156,7 +156,7 @@ describe('Topic-Based Stage Advancement', () => {
 
       // 4 topics discussed = 100% coverage, even if 2 are uncertain
       expect(assessment.coverage).toBe(1.0);
-      expect(shouldAdvanceStage(assessment, 1)).toBe(true);
+      expect(shouldFounderAdvanceStage(assessment, 1)).toBe(true);
     });
 
     it('should extract "I don\'t know" as a data point', () => {
@@ -194,7 +194,7 @@ describe('Topic-Based Stage Advancement', () => {
 
       // Should still advance because topics were COVERED (discussed)
       // The QUALITY of answers is separate from advancement
-      expect(shouldAdvanceStage(assessment, 1)).toBe(true);
+      expect(shouldFounderAdvanceStage(assessment, 1)).toBe(true);
     });
   });
 
@@ -207,7 +207,7 @@ describe('Topic-Based Stage Advancement', () => {
       });
 
       // With 6 messages in stage, fallback should trigger
-      expect(shouldAdvanceStage(assessment, 1, 6)).toBe(true);
+      expect(shouldFounderAdvanceStage(assessment, 1, 6)).toBe(true);
     });
 
     it('should advance after 4 exchanges with minimal coverage', () => {
@@ -217,7 +217,7 @@ describe('Topic-Based Stage Advancement', () => {
       });
 
       // 8 messages = 4 exchanges (user + assistant each)
-      expect(shouldAdvanceStage(assessment, 1, 8)).toBe(true);
+      expect(shouldFounderAdvanceStage(assessment, 1, 8)).toBe(true);
     });
 
     it('should NOT advance with too few messages and low coverage', () => {
@@ -227,7 +227,7 @@ describe('Topic-Based Stage Advancement', () => {
       });
 
       // Only 2 messages - not enough for fallback
-      expect(shouldAdvanceStage(assessment, 1, 2)).toBe(false);
+      expect(shouldFounderAdvanceStage(assessment, 1, 2)).toBe(false);
     });
   });
 
@@ -355,7 +355,7 @@ function createStageAssessment(
   stageNumber: number,
   topicCoverageRatio: number
 ): QualityAssessment {
-  const stageConfig = getStageConfig(stageNumber);
+  const stageConfig = getFounderStageConfig(stageNumber);
   const topics = stageConfig?.dataToCollect ?? [];
   const topicsCount = Math.round(topicCoverageRatio * topics.length);
   const topicsCovered = topics.slice(0, topicsCount);
@@ -394,7 +394,7 @@ describe('Stage-Specific Advancement', () => {
         // Topic-based advancement: 75% of topics covered = advance
         const assessment = createStageAssessment(stage, 0.75);
 
-        expect(shouldAdvanceStage(assessment, stage)).toBe(true);
+        expect(shouldFounderAdvanceStage(assessment, stage)).toBe(true);
       });
 
       it(`should NOT advance when only 50% topics covered without message fallback`, () => {
@@ -402,7 +402,7 @@ describe('Stage-Specific Advancement', () => {
         const assessment = createStageAssessment(stage, 0.5);
 
         // Without message count, should not advance
-        expect(shouldAdvanceStage(assessment, stage)).toBe(false);
+        expect(shouldFounderAdvanceStage(assessment, stage)).toBe(false);
       });
 
       it(`should advance via fallback after 6+ messages with 60% coverage`, () => {
@@ -416,7 +416,7 @@ describe('Stage-Specific Advancement', () => {
         // Add the required coverage for message-based fallback
         assessment.coverage = 0.6;
 
-        expect(shouldAdvanceStage(assessment, stage, 6)).toBe(true);
+        expect(shouldFounderAdvanceStage(assessment, stage, 6)).toBe(true);
       });
     }
   );

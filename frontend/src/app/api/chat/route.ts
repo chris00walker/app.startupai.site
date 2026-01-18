@@ -26,18 +26,18 @@ import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createModalClient } from '@/lib/crewai/modal-client';
 import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 import {
-  ONBOARDING_SYSTEM_PROMPT,
-  getStageSystemContext,
-} from '@/lib/ai/onboarding-prompt';
+  FOUNDER_SYSTEM_PROMPT,
+  getFounderStageSystemContext,
+} from '@/lib/ai/founder-onboarding-prompt';
 import {
-  assessConversationQuality,
-  shouldAdvanceStage,
-  isOnboardingComplete,
+  assessFounderConversation,
+  shouldFounderAdvanceStage,
+  isFounderOnboardingComplete,
   mergeExtractedData,
   hashMessageForIdempotency,
   calculateOverallProgress,
   type ConversationMessage,
-} from '@/lib/onboarding/quality-assessment';
+} from '@/lib/onboarding/founder-quality-assessment';
 
 // ============================================================================
 // AI Model Configuration - OpenRouter (Multi-Provider Gateway)
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     const stageData = (session.stage_data as Record<string, any>) || {};
     const briefData = stageData.brief || {};
 
-    const stageContext = getStageSystemContext(currentStage, briefData);
+    const stageContext = getFounderStageSystemContext(currentStage, briefData);
 
     // Capture request context at START for idempotency (before any async work)
     // This ensures retries produce the same hash even if state changes
@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
     try {
       console.log('[api/chat] Calling streamText with:', {
         modelType: typeof model,
-        systemPromptLength: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`.length,
+        systemPromptLength: `${FOUNDER_SYSTEM_PROMPT}\n\n${stageContext}`.length,
         messagesCount: messages.length,
         temperature: 0.7,
       });
@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
 
       result = streamText({
         model,
-        system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
+        system: `${FOUNDER_SYSTEM_PROMPT}\n\n${stageContext}`,
         messages,
         temperature: 0.7,
         // NO tools - Pass 2 handles assessment deterministically
@@ -260,7 +260,7 @@ export async function POST(req: NextRequest) {
             // ================================================================
             console.log('[api/chat] Starting Pass 2: Backend quality assessment');
 
-            const assessment = await assessConversationQuality(
+            const assessment = await assessFounderConversation(
               requestContext.stage,
               updatedHistory,
               briefData
@@ -293,7 +293,7 @@ export async function POST(req: NextRequest) {
               stage: requestContext.stage,
               coverage: assessment.coverage,
               completeness: assessment.completeness,
-              shouldAdvance: shouldAdvanceStage(assessment, requestContext.stage),
+              shouldAdvance: shouldFounderAdvanceStage(assessment, requestContext.stage),
               extractedFields: Object.keys(assessment.extractedData || {}),
             });
 
@@ -327,7 +327,7 @@ export async function POST(req: NextRequest) {
             );
 
             // Check for stage advancement
-            if (shouldAdvanceStage(assessment, requestContext.stage)) {
+            if (shouldFounderAdvanceStage(assessment, requestContext.stage)) {
               const fromStage = requestContext.stage;
               newStage = requestContext.stage + 1;
 
@@ -342,7 +342,7 @@ export async function POST(req: NextRequest) {
             }
 
             // Check for completion (Stage 7 finished)
-            if (isOnboardingComplete(assessment, requestContext.stage)) {
+            if (isFounderOnboardingComplete(assessment, requestContext.stage)) {
               completedNow = true;
               console.log('[api/chat] Onboarding complete, preparing CrewAI trigger');
 

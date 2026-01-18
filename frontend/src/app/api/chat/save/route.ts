@@ -17,12 +17,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import {
-  assessConversationQuality,
-  shouldAdvanceStage,
-  isOnboardingComplete,
+  assessFounderConversation,
+  shouldFounderAdvanceStage,
+  isFounderOnboardingComplete,
   calculateOverallProgress,
   type ConversationMessage,
-} from '@/lib/onboarding/quality-assessment';
+} from '@/lib/onboarding/founder-quality-assessment';
 
 // ============================================================================
 // Types
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     // ========================================================================
     console.log('[api/chat/save] Running Pass 2 assessment for stage', currentStage);
 
-    const assessment = await assessConversationQuality(currentStage, updatedHistory, briefData);
+    const assessment = await assessFounderConversation(currentStage, updatedHistory, briefData);
 
     // Build assessment data for RPC (even if assessment failed)
     let assessmentData: Record<string, unknown> | null = null;
@@ -172,8 +172,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     if (assessment) {
       // Bug B7 fix: Calculate stage message count for fallback advancement
       const stageMessageCount = updatedHistory.filter(m => m.stage === currentStage).length;
-      const shouldAdvance = shouldAdvanceStage(assessment, currentStage, stageMessageCount);
-      const isComplete = isOnboardingComplete(assessment, currentStage);
+      const shouldAdvance = shouldFounderAdvanceStage(assessment, currentStage, stageMessageCount);
+      const isComplete = isFounderOnboardingComplete(assessment, currentStage);
 
       // Calculate progress
       const coverageForProgress = shouldAdvance ? 0 : assessment.coverage;

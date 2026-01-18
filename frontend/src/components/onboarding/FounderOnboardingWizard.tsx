@@ -1,14 +1,12 @@
 /**
- * OnboardingWizard V2 - Vercel AI SDK Integration
+ * FounderOnboardingWizard - Alex guides founders through business validation
  *
- * This version uses Vercel AI SDK's useChat hook for streaming conversations
- * with the AI consultant, replacing the custom message handling logic.
+ * Uses Vercel AI SDK's useChat hook for streaming conversations
+ * with Alex, the Strategic Business Consultant.
  *
- * Key changes from V1:
- * - Uses useChat() instead of manual fetch calls
- * - Streaming responses from AI
- * - Automatic state management
- * - Optimistic UI updates
+ * Supports two modes:
+ * - 'founder': Alex talks directly to the founder about their business
+ * - 'client': Alex helps consultants intake client information
  */
 
 'use client';
@@ -18,7 +16,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 // Sidebar primitives no longer needed - using custom sidebar component
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
-import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
+import { ConversationInterface } from '@/components/onboarding/ConversationInterface';
 import { FoundersBriefReview, EntrepreneurBrief } from '@/components/onboarding/FoundersBriefReview';
 import { StageReviewModal } from '@/components/onboarding/StageReviewModal';
 import { SummaryModal, type StageSummaryData } from '@/components/onboarding/SummaryModal';
@@ -30,7 +28,7 @@ import { Progress } from '@/components/ui/progress';
 import { trackOnboardingEvent, trackCrewAIEvent } from '@/lib/analytics';
 import { useOnboardingSession } from '@/hooks/useOnboardingSession';
 import { useOnboardingRecovery } from '@/hooks/useOnboardingRecovery';
-import { ONBOARDING_STAGES_CONFIG, getStageName } from '@/lib/onboarding/stages-config';
+import { FOUNDER_STAGES_CONFIG, getFounderStageName } from '@/lib/onboarding/founder-stages-config';
 
 // ============================================================================
 // Types and Interfaces
@@ -70,7 +68,7 @@ interface StageInfo {
 // Main OnboardingWizard Component
 // ============================================================================
 
-export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder', clientProjectId }: OnboardingWizardProps) {
+export function FounderOnboardingWizard({ userId, planType, userEmail, mode = 'founder', clientProjectId }: OnboardingWizardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const forceNewFromUrl = searchParams?.get('forceNew') === 'true';
@@ -153,7 +151,7 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
 
   // Initialize stages from shared config
   const initializeStages = useCallback((currentStage: number = 1) => {
-    return ONBOARDING_STAGES_CONFIG.map((stageConfig) => ({
+    return FOUNDER_STAGES_CONFIG.map((stageConfig) => ({
       stage: stageConfig.stage,
       name: stageConfig.name,
       description: stageConfig.description,
@@ -195,7 +193,7 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
         trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, realtimeSession.currentStage);
 
         toast.success(
-          `Stage complete! Moving to: ${getStageName(realtimeSession.currentStage)}`,
+          `Stage complete! Moving to: ${getFounderStageName(realtimeSession.currentStage)}`,
           { duration: 4000 }
         );
       }
@@ -384,7 +382,7 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
 
             // Show toast notification for stage completion
             toast.success(
-              `Stage complete! Moving to: ${getStageName(data.currentStage)}`,
+              `Stage complete! Moving to: ${getFounderStageName(data.currentStage)}`,
               { duration: 4000 }
             );
           }
@@ -673,7 +671,7 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
         trackOnboardingEvent.stageAdvanced(session.sessionId, session.currentStage, saveResult.currentStage);
 
         toast.success(
-          `Stage complete! Moving to: ${getStageName(saveResult.currentStage)}`,
+          `Stage complete! Moving to: ${getFounderStageName(saveResult.currentStage)}`,
           { duration: 4000 }
         );
 
@@ -1235,8 +1233,8 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
   }, [messages, session]);
 
   // Get stage name for review modal
-  const getStageNameForReview = useCallback((stageNumber: number) => {
-    return getStageName(stageNumber);
+  const getFounderStageNameForReview = useCallback((stageNumber: number) => {
+    return getFounderStageName(stageNumber);
   }, []);
 
   // Handle HITL Brief approval
@@ -1604,7 +1602,7 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
             setReviewStage(null);
           }}
           stageNumber={reviewStage}
-          stageName={getStageNameForReview(reviewStage)}
+          stageName={getFounderStageNameForReview(reviewStage)}
           messages={getMessagesForStage(reviewStage)}
         />
       )}

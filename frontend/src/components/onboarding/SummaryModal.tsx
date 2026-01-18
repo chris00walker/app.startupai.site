@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/accordion';
 import { Loader2, CheckCircle2, HelpCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ONBOARDING_STAGES_CONFIG, type OnboardingStageConfig } from '@/lib/onboarding/stages-config';
+import { FOUNDER_STAGES_CONFIG, type OnboardingStageConfig } from '@/lib/onboarding/founder-stages-config';
 
 // ============================================================================
 // Types
@@ -197,7 +197,7 @@ export function SummaryModal({
   description = 'Review the information captured during your conversation with Alex. This will be used by our AI leadership team for strategic analysis.',
   approveButtonText = 'Approve & Continue',
   reviseButtonText = 'Revise with Alex',
-  stagesConfig = ONBOARDING_STAGES_CONFIG,
+  stagesConfig = FOUNDER_STAGES_CONFIG,
 }: SummaryModalProps) {
   const [isApproving, setIsApproving] = useState(false);
 

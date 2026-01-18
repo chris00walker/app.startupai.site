@@ -7,7 +7,7 @@
  * @see Plan: /home/chris/.claude/plans/precious-kindling-balloon.md
  */
 
-import { ONBOARDING_STAGES_CONFIG } from './stages-config';
+import { FOUNDER_STAGES_CONFIG } from './founder-stages-config';
 import type { StageSummaryData } from '@/components/onboarding/SummaryModal';
 
 /**
@@ -33,7 +33,7 @@ export function transformSessionToSummary(
   const briefData = stageData?.brief || {};
 
   // Build summary for each completed stage
-  return ONBOARDING_STAGES_CONFIG.slice(0, currentStage).map(stageConfig => {
+  return FOUNDER_STAGES_CONFIG.slice(0, currentStage).map(stageConfig => {
     // Extract data for this stage's fields from the brief
     const stageDataFields: Record<string, string | string[] | undefined> = {};
 
@@ -68,7 +68,7 @@ export function calculateSummaryStats(summaryData: StageSummaryData[]): {
   let uncertainFields = 0;
 
   for (const stage of summaryData) {
-    const stageConfig = ONBOARDING_STAGES_CONFIG.find(s => s.stage === stage.stage);
+    const stageConfig = FOUNDER_STAGES_CONFIG.find(s => s.stage === stage.stage);
     if (!stageConfig) continue;
 
     totalFields += stageConfig.dataToCollect.length;

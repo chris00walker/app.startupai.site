@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizardV2';
+import { ClientOnboardingWizard } from '@/components/onboarding/ClientOnboardingWizard';
 
 /**
  * Client Onboarding Page - Alex in Client Mode
@@ -49,11 +49,9 @@ export default async function ClientOnboardingPage() {
   // when the consultant approves the summary
 
   return (
-    <OnboardingWizard
+    <ClientOnboardingWizard
       userId={user.id}
-      planType="founder" // Use founder plan for clients
       userEmail={profile?.email || user.email || ''}
-      mode="client"
       // clientProjectId will be assigned after SummaryModal approval
     />
   );

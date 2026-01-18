@@ -1,13 +1,12 @@
 /**
- * Quality Assessment Module for Two-Pass Onboarding Architecture
+ * Founder Quality Assessment - Two-Pass Onboarding Architecture
  *
- * This module provides deterministic backend-driven quality assessment
- * for onboarding conversations. It replaces the previous tool-based
- * approach that had unreliable 18% call rates.
+ * Deterministic backend-driven quality assessment for founder onboarding.
+ * Used with Alex's 7-stage validation journey.
  *
  * Architecture:
  * - Pass 1: LLM generates conversational response (no tools)
- * - Pass 2: Backend ALWAYS calls assessConversationQuality() after each response
+ * - Pass 2: Backend ALWAYS calls assessFounderConversation() after each response
  *
  * @see Plan: /home/chris/.claude/plans/async-mixing-ritchie.md
  */
@@ -16,7 +15,7 @@ import { z } from 'zod';
 import { generateObject } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { createHash } from 'crypto';
-import { getStageConfigSafe, TOTAL_STAGES } from './stages-config';
+import { getFounderStageConfigSafe, FOUNDER_TOTAL_STAGES } from './founder-stages-config';
 
 // ============================================================================
 // Types & Schemas
@@ -158,7 +157,7 @@ export function buildAssessmentPrompt(
   history: ConversationMessage[],
   existingBrief: Record<string, unknown>
 ): string {
-  const config = getStageConfigSafe(stage);
+  const config = getFounderStageConfigSafe(stage);
 
   // Filter to messages from current stage only
   const stageMessages = history.filter(m => m.stage === stage);
@@ -224,7 +223,7 @@ ${conversationText}
 
 6. **Notes**: Brief observations about gaps or what needs validation.
 ${
-  stage === TOTAL_STAGES
+  stage === FOUNDER_TOTAL_STAGES
     ? `
 ## Stage 7 Completion (IMPORTANT)
 This is the final stage. If completeness is "complete", also provide:
@@ -241,7 +240,7 @@ Respond ONLY with a JSON object in this exact format (no markdown, no explanatio
   "clarity": "<high|medium|low>",
   "completeness": "<complete|partial|insufficient>",
   "notes": "<string>",
-  "extractedData": { <field>: <value>, ... }${stage === TOTAL_STAGES ? ',\n  "keyInsights": ["<insight1>", "<insight2>", "<insight3>"],\n  "recommendedNextSteps": ["<step1>", "<step2>", "<step3>"]' : ''}
+  "extractedData": { <field>: <value>, ... }${stage === FOUNDER_TOTAL_STAGES ? ',\n  "keyInsights": ["<insight1>", "<insight2>", "<insight3>"],\n  "recommendedNextSteps": ["<step1>", "<step2>", "<step3>"]' : ''}
 }`;
 }
 
@@ -315,7 +314,7 @@ export async function assessWithRetry(
  * @param existingBrief - Data already collected
  * @returns QualityAssessment or null if assessment fails
  */
-export async function assessConversationQuality(
+export async function assessFounderConversation(
   stage: number,
   history: ConversationMessage[],
   existingBrief: Record<string, unknown>
@@ -363,15 +362,15 @@ export async function assessConversationQuality(
  * @param stageMessageCount - Optional: Number of messages in current stage
  * @returns true if stage should advance
  */
-export function shouldAdvanceStage(
+export function shouldFounderAdvanceStage(
   assessment: QualityAssessment,
   currentStage: number,
   stageMessageCount?: number
 ): boolean {
-  const config = getStageConfigSafe(currentStage);
+  const config = getFounderStageConfigSafe(currentStage);
 
   // Cannot advance past final stage
-  if (currentStage >= TOTAL_STAGES) {
+  if (currentStage >= FOUNDER_TOTAL_STAGES) {
     return false;
   }
 
@@ -416,12 +415,12 @@ export function shouldAdvanceStage(
  * @param currentStage - Current stage number
  * @returns true if onboarding is complete
  */
-export function isOnboardingComplete(
+export function isFounderOnboardingComplete(
   assessment: QualityAssessment,
   currentStage: number
 ): boolean {
   // Must be at Stage 7 and marked complete
-  if (currentStage !== TOTAL_STAGES) {
+  if (currentStage !== FOUNDER_TOTAL_STAGES) {
     return false;
   }
 
@@ -528,8 +527,8 @@ export function calculateOverallProgress(
   if (isCompleted) return 100;
 
   // Base progress: Stage 1 = 0-14%, Stage 2 = 14-28%, ..., Stage 7 = 85-100%
-  const baseProgress = Math.floor(((newStage - 1) / TOTAL_STAGES) * 100);
-  const stageWeight = Math.floor(100 / TOTAL_STAGES); // ~14% per stage
+  const baseProgress = Math.floor(((newStage - 1) / FOUNDER_TOTAL_STAGES) * 100);
+  const stageWeight = Math.floor(100 / FOUNDER_TOTAL_STAGES); // ~14% per stage
 
   // Quality-based progress
   const qualityBasedProgress = baseProgress + Math.floor(coverage * stageWeight);

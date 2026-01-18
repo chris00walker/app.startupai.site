@@ -1,12 +1,12 @@
 /**
- * OnboardingWizardV2 Component Tests
+ * FounderOnboardingWizardV2 Component Tests
  *
  * Tests the main onboarding wizard component including session management,
  * conversation flow, and the "Start New Conversation" functionality.
  */
 
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { OnboardingWizard } from '../OnboardingWizardV2';
+import { FounderOnboardingWizard } from '../FounderOnboardingWizard';
 
 // Mock next/navigation
 const mockPush = jest.fn();
@@ -129,7 +129,7 @@ jest.mock('../OnboardingSidebar', () => ({
 }));
 
 // Mock ConversationInterface
-jest.mock('../ConversationInterfaceV2', () => ({
+jest.mock('../ConversationInterface', () => ({
   ConversationInterface: ({ session, messages }: any) => (
     <div data-testid="conversation-interface">
       <span data-testid="session-id">{session?.sessionId}</span>
@@ -167,7 +167,7 @@ function createMockStartResponse(options: {
   };
 }
 
-describe('OnboardingWizardV2', () => {
+describe('FounderOnboardingWizardV2', () => {
   const defaultProps = {
     userId: 'user-123',
     planType: 'founder' as const,
@@ -189,7 +189,7 @@ describe('OnboardingWizardV2', () => {
       // Create a fetch that never resolves
       (global.fetch as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       expect(screen.getByText(/loading onboarding|starting your ai consultation/i)).toBeInTheDocument();
     });
@@ -201,7 +201,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
@@ -221,7 +221,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(mockToast.success).toHaveBeenCalledWith('Onboarding session started successfully!');
@@ -234,7 +234,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve({ success: false, error: { message: 'Test error' } }),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByText('Unable to Start Onboarding')).toBeInTheDocument();
@@ -259,7 +259,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.isResuming).toBe(true);
@@ -274,7 +274,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.isResuming).toBe(false);
@@ -294,7 +294,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(mockToast.success).toHaveBeenCalledWith('Resuming your conversation with Alex...');
@@ -318,7 +318,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('message-count').textContent).toBe('3');
@@ -334,7 +334,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.onStartNew).toBeDefined();
@@ -349,7 +349,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -369,7 +369,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -401,7 +401,7 @@ describe('OnboardingWizardV2', () => {
           json: () => Promise.resolve(createMockStartResponse()),
         });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -442,7 +442,7 @@ describe('OnboardingWizardV2', () => {
           json: () => Promise.resolve(createMockStartResponse()),
         });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -481,7 +481,7 @@ describe('OnboardingWizardV2', () => {
           json: () => Promise.resolve(createMockStartResponse()),
         });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -521,7 +521,7 @@ describe('OnboardingWizardV2', () => {
           json: () => Promise.resolve(createMockStartResponse({ resuming: false })),
         });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.isResuming).toBe(true);
@@ -547,7 +547,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -586,7 +586,7 @@ describe('OnboardingWizardV2', () => {
       // Spy on console.warn to verify it was called
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('start-new-button')).toBeInTheDocument();
@@ -620,7 +620,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(screen.getByTestId('exit-button')).toBeInTheDocument();
@@ -646,7 +646,7 @@ describe('OnboardingWizardV2', () => {
           json: () => Promise.resolve({ success: true }),
         });
 
-      render(<OnboardingWizard {...defaultProps} planType="founder" />);
+      render(<FounderOnboardingWizard {...defaultProps} planType="founder" />);
 
       await waitFor(() => {
         expect(screen.getByTestId('exit-button')).toBeInTheDocument();
@@ -679,7 +679,7 @@ describe('OnboardingWizardV2', () => {
           json: () => Promise.resolve({ success: true }),
         });
 
-      render(<OnboardingWizard {...defaultProps} planType="sprint" />);
+      render(<FounderOnboardingWizard {...defaultProps} planType="sprint" />);
 
       await waitFor(() => {
         expect(screen.getByTestId('exit-button')).toBeInTheDocument();
@@ -707,7 +707,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.currentStage).toBe(1);
@@ -726,7 +726,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.currentStage).toBe(4);
@@ -746,7 +746,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.overallProgress).toBe(45);
@@ -762,7 +762,7 @@ describe('OnboardingWizardV2', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      render(<OnboardingWizard {...defaultProps} />);
+      render(<FounderOnboardingWizard {...defaultProps} />);
 
       await waitFor(() => {
         expect(capturedSidebarProps.agentPersonality).toEqual({

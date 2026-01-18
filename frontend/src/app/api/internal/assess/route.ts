@@ -12,9 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  assessConversationQuality,
+  assessFounderConversation,
   type ConversationMessage,
-} from '@/lib/onboarding/quality-assessment';
+} from '@/lib/onboarding/founder-quality-assessment';
 
 // ============================================================================
 // Types
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<AssessRespons
     // ========================================================================
     const briefData = (stageData?.brief as Record<string, unknown>) || {};
 
-    const assessment = await assessConversationQuality(
+    const assessment = await assessFounderConversation(
       currentStage,
       conversationHistory,
       briefData
