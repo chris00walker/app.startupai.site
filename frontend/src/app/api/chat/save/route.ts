@@ -309,44 +309,24 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
     }
 
     // ========================================================================
-    // 6. If completed, queue for background processing (ADR-005)
+    // 6. Completion handling (Split flow for SummaryModal Approve/Revise)
     // ========================================================================
-    // IMPORTANT: We no longer call Modal directly here.
-    // Instead, we atomically mark completion AND insert a queue row.
-    // A background worker will handle the CrewAI kickoff with retries.
-
-    let queued = false;
+    // CHANGED: We no longer auto-queue on completion.
+    // Session is marked completed by apply_onboarding_turn, but queue insertion
+    // now happens when user clicks "Approve" in SummaryModal.
+    // This enables the Revise flow to work correctly.
+    //
+    // Queue insertion: /api/onboarding/queue (calls queue_onboarding_for_kickoff RPC)
+    // Revise handling: /api/onboarding/revise (calls reset_session_for_revision RPC)
+    //
+    // @see prancy-tickling-quokka.md, precious-kindling-balloon.md
 
     if (result.completed) {
-      console.log('[api/chat/save] Onboarding completed, queuing for CrewAI kickoff');
-
-      try {
-        // Call atomic RPC: marks session complete AND inserts queue row
-        const { data: queueResult, error: queueError } = await supabaseClient.rpc(
-          'complete_onboarding_with_kickoff',
-          {
-            p_session_id: sessionId,
-            p_user_id: user.id,
-          }
-        );
-
-        if (queueError) {
-          console.error('[api/chat/save] Queue RPC error:', queueError);
-          // Don't fail the save - session is already marked complete by apply_onboarding_turn
-          // The recovery mechanism in complete_onboarding_with_kickoff will handle re-queuing
-        } else {
-          const queueStatus = (queueResult as { status: string })?.status;
-          console.log('[api/chat/save] Queue result:', queueStatus);
-
-          if (queueStatus === 'queued' || queueStatus === 'requeued' || queueStatus === 'already_completed') {
-            queued = true;
-          }
-        }
-      } catch (queueError) {
-        console.error('[api/chat/save] Error queuing completion:', queueError);
-        // Non-fatal: worker can recover from completed sessions missing queue rows
-      }
+      console.log('[api/chat/save] Onboarding completed - awaiting user approval in SummaryModal');
     }
+
+    // Always false - queue insertion happens on explicit user approval
+    const queued = false;
 
     // ========================================================================
     // 7. Return success response

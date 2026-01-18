@@ -892,9 +892,14 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
 
   /**
    * Handle approval from SummaryModal - triggers CrewAI analysis
+   *
+   * Split completion flow (prancy-tickling-quokka.md):
+   * 1. Call /api/onboarding/queue to insert pending_completions row
+   * 2. Poll for worker completion (pg_cron processes queue)
+   * 3. Start analysis polling once projectId/workflowId available
    */
   const handleSummaryApprove = useCallback(async () => {
-    if (!session || !pendingCompletion) {
+    if (!session) {
       toast.error('Session data not available');
       return;
     }
@@ -902,103 +907,145 @@ export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder'
     setIsSummarySubmitting(true);
 
     try {
-      console.log('[OnboardingWizard] User approved summary, triggering CrewAI:', pendingCompletion);
+      console.log('[OnboardingWizard] User approved summary, queueing for CrewAI');
+
+      // Step 1: Queue for processing (this is the explicit user approval)
+      const queueResponse = await fetch('/api/onboarding/queue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ sessionId: session.sessionId }),
+      });
+
+      const queueResult = await queueResponse.json();
+
+      if (!queueResult.success && queueResult.status !== 'already_queued') {
+        throw new Error(queueResult.error || 'Failed to queue for processing');
+      }
+
+      console.log('[OnboardingWizard] Queue result:', queueResult.status);
 
       // Close summary modal and show analysis modal
       setShowSummaryModal(false);
       setAnalysisState('analyzing');
       setAnalysisStatus('running');
       setShowAnalysisModal(true);
+      toast.success('Processing your Founder\'s Brief...');
 
-      if (pendingCompletion.queued) {
-        // Queue-based completion (ADR-005)
-        toast.success('Processing your Founder\'s Brief...');
+      // Step 2: Poll for worker completion
+      let attempts = 0;
+      const maxAttempts = 60; // 5 minutes (5s intervals)
 
-        // Poll the session status to get projectId/workflowId once worker processes
-        let attempts = 0;
-        const maxAttempts = 60; // 5 minutes (5s intervals)
+      const poll = async () => {
+        attempts++;
+        try {
+          const statusResponse = await fetch(
+            `/api/onboarding/status?sessionId=${session.sessionId}`,
+            { credentials: 'include' }
+          );
 
-        const poll = async () => {
-          attempts++;
-          try {
-            const statusResponse = await fetch(
-              `/api/onboarding/status?sessionId=${session.sessionId}`,
-              { credentials: 'include' }
-            );
-
-            if (statusResponse.ok) {
-              const statusData = await statusResponse.json();
-              if (statusData.success && statusData.completion) {
-                const { projectId: pid, workflowId: wid } = statusData.completion;
-                if (pid && wid) {
-                  console.log('[OnboardingWizard] Worker completed, starting polling:', { pid, wid });
-                  setProjectId(pid);
-                  setWorkflowId(wid);
-                  startAnalysisPolling(wid, pid);
-                  return;
-                }
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            if (statusData.success && statusData.completion) {
+              const { projectId: pid, workflowId: wid } = statusData.completion;
+              if (pid && wid) {
+                console.log('[OnboardingWizard] Worker completed, starting polling:', { pid, wid });
+                setProjectId(pid);
+                setWorkflowId(wid);
+                startAnalysisPolling(wid, pid);
+                return;
               }
             }
-          } catch (e) {
-            console.warn('[OnboardingWizard] Status poll error:', e);
           }
+        } catch (e) {
+          console.warn('[OnboardingWizard] Status poll error:', e);
+        }
 
-          if (attempts < maxAttempts) {
-            setTimeout(poll, 5000); // Poll every 5 seconds
-          } else {
-            console.error('[OnboardingWizard] Timeout waiting for worker');
-            toast.error('Processing is taking longer than expected. Check your dashboard.');
-            const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
-            router.push(dashboardRoute);
-          }
-        };
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 5000); // Poll every 5 seconds
+        } else {
+          console.error('[OnboardingWizard] Timeout waiting for worker');
+          toast.error('Processing is taking longer than expected. Check your dashboard.');
+          const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+          router.push(dashboardRoute);
+        }
+      };
 
-        // Start polling after short delay (give worker time to start)
-        setTimeout(poll, 3000);
-      } else if (pendingCompletion.projectId && pendingCompletion.workflowId) {
-        // Direct completion (legacy)
-        setProjectId(pendingCompletion.projectId);
-        setWorkflowId(pendingCompletion.workflowId);
-        toast.success('Compiling your Founder\'s Brief...');
-        startAnalysisPolling(pendingCompletion.workflowId, pendingCompletion.projectId);
-      } else {
-        // No workflow data - use handleCompleteOnboarding as fallback
-        console.log('[OnboardingWizard] No pending workflow data, using complete endpoint');
-        await handleCompleteOnboarding();
-      }
+      // Start polling after short delay (give worker time to start)
+      setTimeout(poll, 3000);
     } catch (error) {
       console.error('[OnboardingWizard] Error during approval:', error);
       toast.error('Failed to start analysis. Please try again.');
-    } finally {
       setIsSummarySubmitting(false);
+    } finally {
       setPendingCompletion(null);
     }
-  }, [session, pendingCompletion, planType, router, startAnalysisPolling]);
+  }, [session, planType, router, startAnalysisPolling]);
 
   /**
    * Handle revision from SummaryModal - returns to chat for corrections
+   *
+   * Split completion flow (prancy-tickling-quokka.md):
+   * 1. Call /api/onboarding/revise to reset session and cancel any pending queue
+   * 2. Reset local state
+   * 3. Add revision prompt message
    */
-  const handleSummaryRevise = useCallback(() => {
-    console.log('[OnboardingWizard] User chose to revise - returning to chat');
+  const handleSummaryRevise = useCallback(async () => {
+    if (!session) {
+      toast.error('Session data not available');
+      return;
+    }
 
-    // Reset completion state
-    setPendingCompletion(null);
-    setSession(prev => prev ? {
-      ...prev,
-      status: 'active', // Back to active status
-      overallProgress: 95, // Stay at high progress
-    } : null);
+    console.log('[OnboardingWizard] User chose to revise - resetting session');
 
-    // Add a message prompting the user to clarify
-    const revisionPrompt: { role: string; content: string; timestamp: string } = {
-      role: 'assistant',
-      content: "I understand you'd like to make some changes. What would you like to revise? You can clarify any of the information we discussed, and I'll update the summary accordingly.",
-      timestamp: new Date().toISOString(),
-    };
-    setMessages(prev => [...prev, revisionPrompt]);
+    try {
+      // Call revise API to reset session in database and cancel any pending queue
+      const reviseResponse = await fetch('/api/onboarding/revise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ sessionId: session.sessionId }),
+      });
 
-    toast.info('Please provide any corrections or additional details.');
-  }, []);
+      const reviseResult = await reviseResponse.json();
+
+      if (!reviseResult.success) {
+        if (reviseResult.status === 'cannot_revise') {
+          toast.error('Analysis already in progress. Cannot revise at this time.');
+          return;
+        }
+        throw new Error(reviseResult.error || 'Failed to reset session');
+      }
+
+      console.log('[OnboardingWizard] Revise result:', reviseResult);
+
+      // Reset local state
+      setPendingCompletion(null);
+      setShowSummaryModal(false);
+      setSession(prev => prev ? {
+        ...prev,
+        status: 'active',
+        overallProgress: 95,
+      } : null);
+
+      // Add revision prompt message
+      const revisionPrompt: { role: string; content: string; timestamp: string } = {
+        role: 'assistant',
+        content: "I understand you'd like to make some changes. What would you like to revise? You can clarify any of the information we discussed, and I'll update the summary accordingly.",
+        timestamp: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, revisionPrompt]);
+
+      if (reviseResult.queueDeleted) {
+        toast.info('Previous submission cancelled. Please provide your corrections.');
+      } else {
+        toast.info('Please provide any corrections or additional details.');
+      }
+    } catch (error) {
+      console.error('[OnboardingWizard] Error during revise:', error);
+      toast.error('Failed to reset session. Please try again.');
+    }
+  }, [session]);
 
   // Handle onboarding completion (used as fallback if no pending workflow)
   const handleCompleteOnboarding = useCallback(async () => {

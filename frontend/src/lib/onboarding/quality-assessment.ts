@@ -127,27 +127,19 @@ export interface ConversationMessage {
 // OpenRouter Configuration
 // ============================================================================
 
-function getAssessmentModel() {
-  const openrouter = createOpenRouter({
-    apiKey: process.env.OPENROUTER_API_KEY,
-  });
-
-  // Use Claude 3.5 Haiku for fast, cheap, reliable structured output
-  // Note: OpenRouter passes schema to Claude for JSON mode
-  return openrouter('anthropic/claude-3.5-haiku');
-}
-
 /**
- * Get Anthropic model directly for more reliable structured output
- * Fallback if OpenRouter has issues with JSON mode
+ * Assessment uses OpenRouter's intelligent auto-routing (openrouter/auto)
+ *
+ * Features:
+ * - Analyzes the prompt with a meta-model (NotDiamond)
+ * - Routes to the optimal model from 60+ options (GPT, Claude, Gemini, Llama, etc.)
+ * - Automatically benefits from new models as they're added
+ * - Response Healing fixes JSON defects (<1ms latency, free)
+ * - require_parameters ensures routing only to JSON-capable models
+ *
+ * @see https://openrouter.ai/openrouter/auto
+ * @see https://openrouter.ai/announcements/response-healing-reduce-json-defects-by-80percent
  */
-async function getAnthropicAssessmentModel() {
-  const { createAnthropic } = await import('@ai-sdk/anthropic');
-  const anthropic = createAnthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
-  return anthropic('claude-3-5-haiku-latest');
-}
 
 // ============================================================================
 // Assessment Functions
@@ -272,37 +264,31 @@ export async function assessWithRetry(
   prompt: string,
   maxRetries: number = 3
 ): Promise<QualityAssessment | null> {
-  // ALWAYS prefer Anthropic SDK directly for reliable structured output
-  // OpenRouter may not properly relay JSON mode settings to Claude
-  let model;
-  const useAnthropicDirect = !!process.env.ANTHROPIC_API_KEY;
+  console.log('[quality-assessment] Using OpenRouter auto-router for intelligent model selection');
 
-  if (useAnthropicDirect) {
-    try {
-      model = await getAnthropicAssessmentModel();
-      console.log('[quality-assessment] Using Anthropic SDK directly for structured output');
-    } catch (err) {
-      console.warn('[quality-assessment] Failed to initialize Anthropic, falling back to OpenRouter:', err);
-      model = getAssessmentModel();
-    }
-  } else {
-    model = getAssessmentModel();
-    console.log('[quality-assessment] Using OpenRouter for assessment (ANTHROPIC_API_KEY not set)');
-    console.warn('[quality-assessment] WARNING: OpenRouter may have unreliable JSON output. Set ANTHROPIC_API_KEY for better results.');
-  }
+  // Create model with require_parameters to ensure JSON mode support
+  const openrouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_API_KEY,
+  });
+
+  // Auto-router with extraBody for require_parameters
+  const model = openrouter('openrouter/auto', {
+    extraBody: {
+      require_parameters: true,
+    },
+  });
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      // AI SDK v5: `mode` parameter is deprecated/ignored
-      // Structured output is determined by the provider automatically when schema is passed
-      // For Anthropic, this uses tool-based JSON or native structured output
+      // AI SDK v5: Structured output determined automatically when schema is passed
+      // OpenRouter auto-router selects optimal model + Response Healing fixes JSON defects
       const { object } = await generateObject({
         model,
         schema: qualityAssessmentSchema,
         prompt,
-        // Note: Do NOT pass `mode: 'json'` - it's deprecated in AI SDK v5
-        // The schema alone tells the SDK to use structured output
       });
+
+      console.log('[quality-assessment] Assessment successful on attempt', attempt);
       return object;
     } catch (error) {
       const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 1s, 2s, 4s (capped)

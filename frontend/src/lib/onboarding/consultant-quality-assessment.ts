@@ -8,7 +8,7 @@
  */
 
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { z } from 'zod';
 import {
   CONSULTANT_STAGES_CONFIG,
@@ -97,13 +97,11 @@ export const consultantAssessmentSchema = z.object({
 // Assessment Function
 // ============================================================================
 
-function getAssessmentModel() {
-  const openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
-  });
-  return openai('gpt-4o-mini');
-}
+/**
+ * Assessment uses OpenRouter's intelligent auto-routing (openrouter/auto)
+ *
+ * @see https://openrouter.ai/openrouter/auto
+ */
 
 /**
  * Assess consultant conversation quality for the current stage
@@ -157,13 +155,27 @@ IMPORTANT: A topic is "covered" if the consultant engaged with it, even with unc
 "I'm not sure" or "haven't decided" counts as coverage - mark it and move on.`;
 
   try {
+    console.log('[consultant-quality-assessment] Using OpenRouter auto-router for assessment');
+
+    // Create model with require_parameters to ensure JSON mode support
+    const openrouter = createOpenRouter({
+      apiKey: process.env.OPENROUTER_API_KEY,
+    });
+
+    const model = openrouter('openrouter/auto', {
+      extraBody: {
+        require_parameters: true,
+      },
+    });
+
     const { object } = await generateObject({
-      model: getAssessmentModel(),
+      model,
       schema: consultantAssessmentSchema,
       prompt: assessmentPrompt,
       temperature: 0.1, // Low temp for consistent assessment
     });
 
+    console.log('[consultant-quality-assessment] Assessment successful');
     return object as ConsultantQualityAssessment;
   } catch (error) {
     console.error('[consultant-quality-assessment] Assessment failed:', error);
