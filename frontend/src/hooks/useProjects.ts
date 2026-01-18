@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/hooks';
 import type { PortfolioProject } from '@/types/portfolio';
@@ -89,7 +89,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     async function fetchProjects() {
@@ -228,7 +228,7 @@ export function useActiveProjects() {
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     async function fetchProjects() {
