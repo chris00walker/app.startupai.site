@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       stageProgress: session.stage_progress,
       status: session.status,
       completed: isCompleted,
-      briefData: isCompleted ? briefData : undefined,
+      briefData, // Always return for sidebar topic tracking
     });
 
   } catch (error: any) {

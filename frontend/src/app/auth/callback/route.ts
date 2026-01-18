@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
     // Update user metadata with plan and role selection if provided
     const plan = searchParams.get('plan');
     const role = searchParams.get('role');
+    const inviteToken = searchParams.get('invite');
 
     if ((plan || role) && data.session?.user) {
       console.log('Updating user metadata - plan:', plan, 'role:', role);
@@ -109,6 +110,30 @@ export async function GET(request: NextRequest) {
         console.log('User metadata updated successfully');
       } catch (metaError) {
         console.error('Failed to update user metadata:', metaError);
+        // Don't fail the auth flow, just log the error
+      }
+    }
+
+    // Handle invite token linking if present
+    if (inviteToken && data.session?.user) {
+      console.log('Linking account via invite token...');
+      try {
+        // Use the database function to link the account
+        const { data: linkResult, error: linkError } = await supabase.rpc('link_client_via_invite', {
+          p_invite_token: inviteToken,
+          p_client_id: data.session.user.id,
+        });
+
+        if (linkError) {
+          console.error('Failed to link account via invite:', linkError);
+          // Don't fail the auth flow, just log the error
+        } else if (linkResult?.success) {
+          console.log('Account linked to consultant:', linkResult.consultant_name);
+        } else {
+          console.warn('Invite linking returned:', linkResult);
+        }
+      } catch (linkError) {
+        console.error('Exception linking account via invite:', linkError);
         // Don't fail the auth flow, just log the error
       }
     }

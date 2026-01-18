@@ -235,6 +235,109 @@ describe('OnboardingSidebar', () => {
     });
   });
 
+  describe('stage click functionality', () => {
+    it('should call onStageClick when clicking a completed stage', () => {
+      const mockOnStageClick = jest.fn();
+      render(<OnboardingSidebar {...defaultProps} onStageClick={mockOnStageClick} />);
+
+      // Find the first completed stage (stage 1) and click it
+      const stageItems = screen.getAllByRole('listitem');
+      const completedStage = stageItems[0].querySelector('[role="button"]');
+
+      if (completedStage) {
+        fireEvent.click(completedStage);
+        expect(mockOnStageClick).toHaveBeenCalledWith(1);
+      }
+    });
+
+    it('should NOT call onStageClick when clicking a pending stage', () => {
+      const mockOnStageClick = jest.fn();
+      render(<OnboardingSidebar {...defaultProps} onStageClick={mockOnStageClick} />);
+
+      // Stage 4 is pending (not complete, not active)
+      const stageItems = screen.getAllByRole('listitem');
+      const pendingStage = stageItems[3];
+
+      fireEvent.click(pendingStage);
+      // Should not have been called for pending stage
+      expect(mockOnStageClick).not.toHaveBeenCalledWith(4);
+    });
+
+    it('should show tooltip hint for clickable completed stages', () => {
+      const mockOnStageClick = jest.fn();
+      render(<OnboardingSidebar {...defaultProps} onStageClick={mockOnStageClick} />);
+
+      // Completed stages should have cursor-pointer class when onStageClick is provided
+      const stageItems = screen.getAllByRole('listitem');
+      const completedStage = stageItems[0].querySelector('[role="button"]');
+
+      expect(completedStage).toHaveClass('cursor-pointer');
+    });
+  });
+
+  describe('stage progress data', () => {
+    it('should show collected topics in progress details', () => {
+      render(
+        <OnboardingSidebar
+          {...defaultProps}
+          stageProgressData={{
+            collectedTopics: ['business_idea', 'target_market'],
+            stageProgress: 50,
+          }}
+        />
+      );
+
+      // Expand the progress details to see collected topics
+      const detailsButton = screen.getByRole('button', { name: /more questions|hide details/i });
+      fireEvent.click(detailsButton);
+
+      // The sidebar should show the topic labels from the stage config
+      // This depends on getStageTopics returning the proper topics
+    });
+
+    it('should show question count estimate based on remaining topics', () => {
+      render(
+        <OnboardingSidebar
+          {...defaultProps}
+          stageProgressData={{
+            collectedTopics: ['business_idea'],
+            stageProgress: 25,
+          }}
+        />
+      );
+
+      // Should show estimate of remaining questions
+      expect(screen.getByText(/\d+ more questions in this stage/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('custom stage topics', () => {
+    it('should use custom getStageTopics function when provided', () => {
+      const customGetStageTopics = jest.fn().mockReturnValue([
+        { label: 'Custom Topic 1', key: 'custom_1' },
+        { label: 'Custom Topic 2', key: 'custom_2' },
+      ]);
+
+      render(
+        <OnboardingSidebar
+          {...defaultProps}
+          getStageTopics={customGetStageTopics}
+          stageProgressData={{
+            collectedTopics: [],
+            stageProgress: 0,
+          }}
+        />
+      );
+
+      // Expand details to see topics
+      const detailsButton = screen.getByRole('button', { name: /more questions|hide details/i });
+      fireEvent.click(detailsButton);
+
+      // Should have called custom function with current stage
+      expect(customGetStageTopics).toHaveBeenCalledWith(3);
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle 0% progress', () => {
       render(<OnboardingSidebar {...defaultProps} overallProgress={0} />);

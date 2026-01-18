@@ -16,11 +16,17 @@ import {
 } from '@/components/ui/sidebar';
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterface';
+import { StageReviewModal } from '@/components/onboarding/StageReviewModal';
 import { SummaryModal, type StageSummaryData } from '@/components/onboarding/SummaryModal';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { trackOnboardingEvent } from '@/lib/analytics';
-import { CONSULTANT_STAGES_CONFIG } from '@/lib/onboarding/consultant-stages-config';
+import {
+  CONSULTANT_STAGES_CONFIG,
+  getConsultantStageName,
+  getConsultantStageTopics,
+  getConsultantStageConfig,
+} from '@/lib/onboarding/consultant-stages-config';
 import { MAYA_INITIAL_GREETING, getMayaPersonality } from '@/lib/ai/consultant-onboarding-prompt';
 
 // ============================================================================
@@ -69,6 +75,11 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
   const [showStartNewDialog, setShowStartNewDialog] = useState(false);
   const [input, setInput] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [collectedTopics, setCollectedTopics] = useState<string[]>([]);
+
+  // Stage review modal state
+  const [showStageReview, setShowStageReview] = useState(false);
+  const [reviewStage, setReviewStage] = useState<number | null>(null);
 
   // Summary Modal state
   const [showSummaryModal, setShowSummaryModal] = useState(false);
@@ -78,6 +89,15 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
   // Handle input change
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
+  }, []);
+
+  // Derive collected topics from briefData for current stage
+  const deriveCollectedTopics = useCallback((briefData: Record<string, unknown>, currentStage: number): string[] => {
+    const stageConfig = getConsultantStageConfig(currentStage);
+    if (!stageConfig) return [];
+
+    // Check which dataToCollect fields exist in briefData
+    return stageConfig.dataToCollect.filter(field => briefData[field] !== undefined);
   }, []);
 
   // Initialize consultant-specific stages
@@ -149,6 +169,9 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
             );
           }
 
+          // Track if stage changed for topic reset
+          const stageChanged = session.currentStage !== data.currentStage;
+
           setSession(prev => prev ? {
             ...prev,
             currentStage: data.currentStage,
@@ -157,6 +180,18 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
           } : null);
 
           setStages(initializeStages(data.currentStage));
+
+          // Update collected topics from briefData
+          if (data.briefData) {
+            if (stageChanged) {
+              // Reset topics when advancing to new stage
+              setCollectedTopics([]);
+            } else {
+              // Update topics for current stage
+              const topics = deriveCollectedTopics(data.briefData, data.currentStage);
+              setCollectedTopics(topics);
+            }
+          }
 
           console.log('[ConsultantOnboarding] Session status updated:', {
             stage: data.currentStage,
@@ -176,7 +211,7 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
     } catch (error) {
       console.error('[ConsultantOnboarding] Failed to refetch session status:', error);
     }
-  }, [session, initializeStages, transformConsultantDataToSummary]);
+  }, [session, initializeStages, transformConsultantDataToSummary, deriveCollectedTopics]);
 
   // Handle form submit - stream AI response
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -503,6 +538,12 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
     setShowStartNewDialog(true);
   }, []);
 
+  // Handle stage click for review
+  const handleStageClick = useCallback((stageNumber: number) => {
+    setReviewStage(stageNumber);
+    setShowStageReview(true);
+  }, []);
+
   const confirmStartNew = useCallback(async () => {
     setShowStartNewDialog(false);
     setSession(null);
@@ -560,8 +601,14 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
           currentStage={session?.currentStage || 1}
           overallProgress={session?.overallProgress || 0}
           agentPersonality={session?.agentPersonality}
+          stageProgressData={{
+            collectedTopics,
+            stageProgress: session?.stageProgress || 0,
+          }}
           onExit={handleExitOnboarding}
           onStartNew={handleStartNew}
+          onStageClick={handleStageClick}
+          getStageTopics={getConsultantStageTopics}
         />
 
         {/* Main conversation area */}
@@ -616,6 +663,29 @@ export function ConsultantOnboardingWizard({ userId, userEmail }: ConsultantOnbo
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Stage Review Modal */}
+      {reviewStage !== null && (
+        <StageReviewModal
+          isOpen={showStageReview}
+          onClose={() => {
+            setShowStageReview(false);
+            setReviewStage(null);
+          }}
+          stageNumber={reviewStage}
+          stageName={getConsultantStageName(reviewStage)}
+          messages={messages.filter(m => {
+            // Find messages for the reviewed stage
+            // For simplicity, show all messages up to and including that stage
+            const stageIdx = stages.findIndex(s => s.stage === reviewStage);
+            if (stageIdx === -1) return false;
+            // Filter messages by finding stage boundaries in conversation
+            // For now, show all messages (user can scroll through)
+            return true;
+          })}
+          agentName="Maya"
+        />
+      )}
 
       {/* Practice Setup Summary Modal */}
       <SummaryModal

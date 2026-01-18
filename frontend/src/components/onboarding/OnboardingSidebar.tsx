@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { getFounderStageTopics } from '@/lib/onboarding/founder-stages-config';
+import { getFounderStageTopics, type StageDataTopic } from '@/lib/onboarding/founder-stages-config';
 
 // ============================================================================
 // Types and Interfaces
@@ -42,6 +42,8 @@ interface OnboardingSidebarProps {
   onStartNew?: () => void;
   onStageClick?: (stage: number) => void;
   isResuming?: boolean;
+  /** Optional function to get stage topics (defaults to founder topics) */
+  getStageTopics?: (stageNumber: number) => readonly StageDataTopic[];
 }
 
 // ============================================================================
@@ -58,6 +60,7 @@ export function OnboardingSidebar({
   onStartNew,
   onStageClick,
   isResuming,
+  getStageTopics = getFounderStageTopics,
 }: OnboardingSidebarProps) {
   const [isProgressExpanded, setIsProgressExpanded] = useState(false);
   const totalStages = stages.length || 7; // Default to 7 if stages empty
@@ -150,7 +153,7 @@ export function OnboardingSidebar({
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                 Collecting in Stage {currentStage}
               </p>
-              {getFounderStageTopics(currentStage).map((topic) => {
+              {getStageTopics(currentStage).map((topic) => {
                 const isCollected = stageProgressData?.collectedTopics?.includes(topic.key);
                 return (
                   <div

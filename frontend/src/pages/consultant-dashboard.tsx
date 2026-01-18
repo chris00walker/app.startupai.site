@@ -12,8 +12,10 @@ import { GateStageFilter, type GateStage, type GateStatus } from "@/components/p
 import { GateAlerts } from "@/components/portfolio/GateAlerts"
 import { useProjects } from "@/hooks/useProjects"
 import { useClients } from "@/hooks/useClients"
+import { useConsultantClients } from "@/hooks/useConsultantClients"
 import { useAuth } from "@/lib/auth/hooks"
 import { usePortfolioActivity } from "@/hooks/usePortfolioActivity"
+import { InviteClientModal } from "@/components/consultant/InviteClientModal"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,7 +30,13 @@ import {
   Plus,
   Filter,
   Loader2,
-  Brain
+  Brain,
+  Mail,
+  Clock,
+  RefreshCw,
+  X,
+  Copy,
+  UserPlus
 } from "lucide-react"
 import { trackEvent, trackPageView } from "@/lib/analytics"
 import { PortfolioProject, PortfolioMetrics } from "@/types/portfolio"
@@ -124,9 +132,181 @@ function PortfolioOverview({ projects }: { projects: PortfolioProject[] }) {
   )
 }
 
+// Pending Invites Section Component
+function PendingInvitesSection({
+  invites,
+  isLoading,
+  onResend,
+  onRevoke,
+  onCopyUrl,
+  actionLoading,
+}: {
+  invites: Array<{
+    id: string;
+    email: string;
+    name: string | null;
+    inviteToken: string;
+    expiresAt: string;
+    invitedAt: string;
+    isExpired: boolean;
+  }>;
+  isLoading: boolean;
+  onResend: (id: string) => Promise<{ success: boolean; error?: string }>;
+  onRevoke: (id: string) => Promise<{ success: boolean; error?: string }>;
+  onCopyUrl: (token: string) => Promise<boolean>;
+  actionLoading: boolean;
+}) {
+  const [copiedId, setCopiedId] = React.useState<string | null>(null);
+
+  const handleCopy = async (token: string, id: string) => {
+    const success = await onCopyUrl(token);
+    if (success) {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const getDaysUntilExpiry = (expiresAt: string) => {
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diffMs = expires.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Pending Invites
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Mail className="h-5 w-5" />
+          Pending Invites
+          {invites.length > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {invites.length}
+            </Badge>
+          )}
+        </CardTitle>
+        <CardDescription>Invitations waiting for clients to sign up</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {invites.length === 0 ? (
+          <div className="text-center text-muted-foreground text-sm py-4">
+            No pending invites
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {invites.map((invite) => {
+              const daysLeft = getDaysUntilExpiry(invite.expiresAt);
+              const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
+
+              return (
+                <div
+                  key={invite.id}
+                  className={`p-3 rounded-lg border ${
+                    invite.isExpired
+                      ? 'bg-red-50 border-red-200'
+                      : isExpiringSoon
+                      ? 'bg-amber-50 border-amber-200'
+                      : 'bg-muted/50 border-border'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">
+                        {invite.name || invite.email}
+                      </div>
+                      {invite.name && (
+                        <div className="text-xs text-muted-foreground truncate">
+                          {invite.email}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {invite.isExpired ? (
+                          <span className="text-red-600">Expired</span>
+                        ) : (
+                          <span className={isExpiringSoon ? 'text-amber-600' : ''}>
+                            Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                        <span>•</span>
+                        <span>Sent {formatDate(invite.invitedAt)}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleCopy(invite.inviteToken, invite.id)}
+                        disabled={actionLoading}
+                        title="Copy invite link"
+                      >
+                        {copiedId === invite.id ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => onResend(invite.id)}
+                        disabled={actionLoading}
+                        title="Resend invite"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => onRevoke(invite.id)}
+                        disabled={actionLoading}
+                        title="Revoke invite"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function Dashboard() {
   const { user } = useAuth()
   const [userRole, setUserRole] = React.useState<string | null>(null)
+  const [showInviteModal, setShowInviteModal] = React.useState(false)
 
   // Fetch user role
   React.useEffect(() => {
@@ -152,6 +332,17 @@ function Dashboard() {
   const isConsultant = userRole === 'consultant'
   const projectsData = useProjects()
   const clientsData = useClients()
+
+  // Consultant clients hook for invite management
+  const {
+    invites,
+    isLoading: invitesLoading,
+    actionLoading: inviteActionLoading,
+    createInvite,
+    resendInvite,
+    revokeInvite,
+    copyInviteUrl,
+  } = useConsultantClients()
 
   const { projects, isLoading, error } = isConsultant ? clientsData : projectsData
 
@@ -289,12 +480,10 @@ function Dashboard() {
                 <Settings className="h-4 w-4 mr-2" />
                 Gate Policies
               </Button>
-              <Link href="/consultant/client/new">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Client
-                </Button>
-              </Link>
+              <Button onClick={() => setShowInviteModal(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invite Client
+              </Button>
             </div>
           </div>
 
@@ -308,9 +497,20 @@ function Dashboard() {
             <div className="lg:col-span-2">
               <PortfolioOverview projects={allProjects} />
             </div>
-            <div>
-              <GateAlerts 
-                projects={allProjects} 
+            <div className="space-y-6">
+              {/* Pending Invites Section */}
+              {isConsultant && (
+                <PendingInvitesSection
+                  invites={invites}
+                  isLoading={invitesLoading}
+                  onResend={resendInvite}
+                  onRevoke={revokeInvite}
+                  onCopyUrl={copyInviteUrl}
+                  actionLoading={inviteActionLoading}
+                />
+              )}
+              <GateAlerts
+                projects={allProjects}
                 onProjectClick={handleProjectClick}
               />
             </div>
@@ -342,14 +542,12 @@ function Dashboard() {
                     <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">No clients yet</h3>
                     <p className="text-muted-foreground mb-4">
-                      Start building your portfolio by adding your first client project.
+                      Start building your portfolio by inviting your first client.
                     </p>
-                    <Link href="/consultant/client/new">
-                      <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Your First Client
-                      </Button>
-                    </Link>
+                    <Button onClick={() => setShowInviteModal(true)}>
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Invite Your First Client
+                    </Button>
                   </div>
                 ) : (
                   <PortfolioGrid
@@ -360,6 +558,13 @@ function Dashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Invite Client Modal */}
+          <InviteClientModal
+            isOpen={showInviteModal}
+            onClose={() => setShowInviteModal(false)}
+            onInvite={createInvite}
+          />
       </div>
     </DashboardLayout>
   )

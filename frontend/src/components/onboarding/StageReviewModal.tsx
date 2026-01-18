@@ -20,6 +20,8 @@ interface StageReviewModalProps {
   stageNumber: number;
   stageName: string;
   messages: Message[];
+  /** Optional agent name for display (defaults to "Alex") */
+  agentName?: string;
 }
 
 // ============================================================================
@@ -32,6 +34,7 @@ export function StageReviewModal({
   stageNumber,
   stageName,
   messages,
+  agentName = 'Alex',
 }: StageReviewModalProps) {
   // Format timestamp for display
   const formatTime = (timestamp: string) => {
@@ -73,7 +76,7 @@ export function StageReviewModal({
                   {message.role === 'assistant' ? (
                     <div className="space-y-1 max-w-[90%]">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-medium text-primary">Alex</span>
+                        <span className="text-xs font-medium text-primary">{agentName}</span>
                         <span className="text-[10px] text-muted-foreground">
                           {formatTime(message.timestamp)}
                         </span>

@@ -266,3 +266,12 @@ ${collectedEntries || '(none yet)'}
 export function getConsultantStageName(stageNumber: number): string {
   return getConsultantStageConfig(stageNumber)?.name ?? `Stage ${stageNumber}`;
 }
+
+/**
+ * Get topics to collect for a specific consultant stage
+ * @param stageNumber - 1-indexed stage number (1-7)
+ * @returns Array of topic objects with label and key
+ */
+export function getConsultantStageTopics(stageNumber: number): readonly ConsultantStageDataTopic[] {
+  return getConsultantStageConfig(stageNumber)?.dataTopics ?? [];
+}

@@ -20,12 +20,24 @@ type PlanOption = {
   disabledMessage?: string
 }
 
+interface InviteInfo {
+  valid: boolean
+  email: string
+  clientName: string | null
+  consultantId: string
+  consultantName: string
+  consultantCompany: string | null
+  expiresAt: string
+}
+
 type SignupFormProps = React.ComponentProps<"form"> & {
   planOptions?: PlanOption[]
   selectedPlan?: string
   selectedRole?: string
   onPlanChange?: (plan: string) => void
   onRoleChange?: (role: string) => void
+  inviteToken?: string | null
+  inviteInfo?: InviteInfo | null
 }
 
 export const DEFAULT_PLAN_OPTIONS: PlanOption[] = [
@@ -71,14 +83,16 @@ export function SignupForm({
   selectedRole,
   onPlanChange,
   onRoleChange,
+  inviteToken,
+  inviteInfo,
   ...props
 }: SignupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isOAuthLoading, setIsOAuthLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
+  const [name, setName] = useState(() => inviteInfo?.clientName || "")
+  const [email, setEmail] = useState(() => inviteInfo?.email || "")
   const [company, setCompany] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -115,6 +129,16 @@ export function SignupForm({
       setLocalRole(selectedRole)
     }
   }, [selectedRole])
+
+  // Update email and name when inviteInfo becomes available
+  useEffect(() => {
+    if (inviteInfo) {
+      setEmail(inviteInfo.email)
+      if (inviteInfo.clientName) {
+        setName(inviteInfo.clientName)
+      }
+    }
+  }, [inviteInfo])
 
   const plan = selectedPlan ?? localPlan
   const role = selectedRole ?? localRole
@@ -155,7 +179,7 @@ export function SignupForm({
             plan_choice: plan,
             role: role,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${inviteToken ? `&invite=${inviteToken}` : ''}`,
         },
       })
 
@@ -190,7 +214,7 @@ export function SignupForm({
         provider: 'github',
         options: {
           scopes: 'user:email read:user',
-          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}`,
+          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${inviteToken ? `&invite=${inviteToken}` : ''}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -286,7 +310,14 @@ export function SignupForm({
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             disabled={isSubmitting || isOAuthLoading}
+            readOnly={!!inviteInfo}
+            className={inviteInfo ? "bg-muted cursor-not-allowed" : ""}
           />
+          {inviteInfo && (
+            <p className="text-xs text-muted-foreground">
+              Email is pre-filled from your invitation
+            </p>
+          )}
         </div>
         <div className="grid gap-3">
           <Label htmlFor="company">Company (Optional)</Label>
