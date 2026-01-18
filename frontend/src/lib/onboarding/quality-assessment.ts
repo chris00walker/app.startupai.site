@@ -25,9 +25,19 @@ import { getStageConfigSafe, TOTAL_STAGES } from './stages-config';
 /**
  * Quality assessment schema for generateObject
  * Includes quality metrics and extracted data fields
+ *
+ * Topic-Based Advancement (TDD Refactoring):
+ * - Assessment extracts data only, does NOT gate progression
+ * - Stage advances when topics are covered (even with "I don't know")
+ * - topicsCovered array explicitly tracks which data fields were discussed
  */
 export const qualityAssessmentSchema = z.object({
-  // Quality metrics
+  // Topic tracking (PRIMARY for stage advancement)
+  topicsCovered: z
+    .array(z.string())
+    .describe('Array of dataToCollect field names that were DISCUSSED in this stage. Include a field if the topic was asked about AND the user responded (even with "I don\'t know")'),
+
+  // Quality metrics (for analytics/display only, NOT for gating)
   coverage: z
     .number()
     .min(0)
@@ -38,7 +48,7 @@ export const qualityAssessmentSchema = z.object({
     .describe('How clear and specific the user responses are'),
   completeness: z
     .enum(['complete', 'partial', 'insufficient'])
-    .describe('Whether there is enough information to advance to the next stage'),
+    .describe('Assessment of data completeness (for analytics only, does NOT gate advancement)'),
   notes: z.string().describe('Brief observations about quality gaps or areas needing more detail'),
 
   // Data extraction - merged into stage_data.brief
@@ -194,21 +204,33 @@ ${existingDataText}
 ${conversationText}
 
 ## Your Task
-1. **Coverage (0-1)**: What fraction of the required data fields (${config.dataToCollect.join(', ')}) have been meaningfully discussed? Be precise - 0.5 means half the fields have been covered.
+1. **Topics Covered** (MOST IMPORTANT): List which of the required data fields have been DISCUSSED in this stage.
+   - Required fields: ${config.dataToCollect.join(', ')}
+   - A topic is "covered" if:
+     * Alex asked about it AND the user responded (even with "I don't know")
+     * OR the user volunteered information about it
+   - IMPORTANT: "I don't know", "haven't thought about that", or similar uncertainty responses COUNT as the topic being covered
+   - Return an array of field names that have been discussed, e.g., ["business_concept", "inspiration"]
 
-2. **Clarity**: Rate overall response quality:
+2. **Coverage (0-1)**: Calculate as: topicsCovered.length / ${config.dataToCollect.length}
+   - Coverage measures TOPICS DISCUSSED, not QUALITY of answers
+   - Be precise - 0.5 means half the fields have been discussed
+
+3. **Clarity**: Rate overall response quality (for analytics only):
    - "high": Specific, concrete answers with examples or numbers
-   - "medium": Somewhat vague but understandable
-   - "low": Very vague or unclear responses
+   - "medium": Somewhat vague but understandable (including honest uncertainty)
+   - "low": Very vague, evasive, or unhelpful responses
 
-3. **Completeness**: Is there enough information to advance?
-   - "complete": Coverage >= ${(config.progressThreshold * 100).toFixed(0)}% with medium+ clarity
-   - "partial": Making progress but not ready to advance
-   - "insufficient": Major gaps remain
+4. **Completeness**: Assessment for analytics (does NOT gate advancement):
+   - "complete": Coverage >= ${(config.progressThreshold * 100).toFixed(0)}% (topics discussed, even if some answers are uncertain)
+   - "partial": Making progress but more topics need to be covered
+   - "insufficient": Major topics haven't been discussed yet
 
-4. **Extract Data**: Pull out specific values mentioned for the required fields. Only extract what was clearly stated.
+5. **Extract Data**: Pull out values mentioned for the required fields.
+   - If user said "I don't know" or expressed uncertainty, extract as "uncertain" or "unknown"
+   - This is VALID DATA - knowing what they don't know helps the analysis
 
-5. **Notes**: Brief observations about quality gaps or what's needed.
+6. **Notes**: Brief observations about gaps or what needs validation.
 ${
   stage === TOTAL_STAGES
     ? `
@@ -222,6 +244,7 @@ This is the final stage. If completeness is "complete", also provide:
 ## Required Response Format
 Respond ONLY with a JSON object in this exact format (no markdown, no explanation):
 {
+  "topicsCovered": ["<field1>", "<field2>", ...],
   "coverage": <number between 0 and 1>,
   "clarity": "<high|medium|low>",
   "completeness": "<complete|partial|insufficient>",
@@ -324,6 +347,7 @@ export async function assessConversationQuality(
   if (assessment) {
     console.log('[quality-assessment] Assessment complete:', {
       stage,
+      topicsCovered: assessment.topicsCovered || [],
       coverage: assessment.coverage,
       clarity: assessment.clarity,
       completeness: assessment.completeness,
@@ -339,12 +363,16 @@ export async function assessConversationQuality(
 // ============================================================================
 
 /**
- * Determine if stage should advance based on assessment
+ * Determine if stage should advance based on topic coverage
  *
- * Bug B7 fix: Added message-based fallback to prevent getting stuck
- * when LLM assessment is overly strict.
+ * TDD Refactoring: Topic-based advancement instead of quality gating
+ * - Stage advances when 75%+ of topics have been DISCUSSED (asked & responded)
+ * - "I don't know" responses COUNT as topic coverage (valid data)
+ * - Completeness field is for analytics only, NOT for gating
  *
- * @param assessment - Quality assessment result
+ * Fallback: Message-based advancement after 6+ messages (3 exchanges)
+ *
+ * @param assessment - Quality assessment result (includes topicsCovered array)
  * @param currentStage - Current stage number (1-7)
  * @param stageMessageCount - Optional: Number of messages in current stage
  * @returns true if stage should advance
@@ -356,34 +384,43 @@ export function shouldAdvanceStage(
 ): boolean {
   const config = getStageConfigSafe(currentStage);
 
-  // Check coverage meets threshold
-  const meetsThreshold = assessment.coverage >= config.progressThreshold;
+  // Cannot advance past final stage
+  if (currentStage >= TOTAL_STAGES) {
+    return false;
+  }
 
-  // Check completeness indicates ready
-  const isComplete = assessment.completeness === 'complete';
+  // PRIMARY: Topic-based advancement
+  // Advance when 75%+ of required topics have been discussed
+  const requiredTopics = config.dataToCollect;
+  const topicsCovered = assessment.topicsCovered || [];
+  const topicCoverageRatio = topicsCovered.length / requiredTopics.length;
 
-  // Quality-based advancement (original logic)
-  const qualityBasedAdvance = meetsThreshold && isComplete && currentStage < TOTAL_STAGES;
+  // Stage-specific threshold (from config) or default 75%
+  const topicThreshold = Math.min(config.progressThreshold, 0.75);
+  const topicBasedAdvance = topicCoverageRatio >= topicThreshold;
 
-  // Bug B7 fix: Message-based fallback
-  // After 6+ turns (12+ messages) in a stage, advance if coverage is at least 60%
-  // This prevents getting stuck when assessment is overly strict
+  // FALLBACK: Message-based advancement (safety net)
+  // After 6+ messages (3 exchanges) in a stage, advance if at least 60% coverage
+  // This prevents infinite loops if topic detection has issues
   const messageBasedAdvance =
     stageMessageCount !== undefined &&
-    stageMessageCount >= 6 && // 6 turns = 12 messages (user + assistant pairs)
-    assessment.coverage >= 0.6 && // Must have some reasonable coverage
-    currentStage < TOTAL_STAGES;
+    stageMessageCount >= 6 &&
+    assessment.coverage >= 0.6;
 
-  if (messageBasedAdvance && !qualityBasedAdvance) {
-    console.log('[quality-assessment] Message-based stage advancement triggered:', {
+  // Log advancement decision
+  if (topicBasedAdvance || messageBasedAdvance) {
+    console.log('[quality-assessment] Stage advancement:', {
       stage: currentStage,
+      method: topicBasedAdvance ? 'topic-based' : 'message-based',
+      topicsCovered: topicsCovered,
+      topicCoverageRatio: topicCoverageRatio.toFixed(2),
+      requiredTopics: requiredTopics,
       messageCount: stageMessageCount,
       coverage: assessment.coverage,
-      completeness: assessment.completeness,
     });
   }
 
-  return qualityBasedAdvance || messageBasedAdvance;
+  return topicBasedAdvance || messageBasedAdvance;
 }
 
 /**

@@ -279,7 +279,8 @@ describe('getStageSystemContext', () => {
     const context = getStageSystemContext(1, collectedData);
     // Should be truncated to ~100 chars
     expect(context).not.toContain(longValue);
-    expect(context.length).toBeLessThan(longValue.length + 500); // Allow for other content
+    // Context includes stage info, key questions, and instructions, so just verify truncation happened
+    expect(context).toContain('business_concept: ' + 'A'.repeat(100));
   });
 
   it('should identify missing data points', () => {
@@ -292,7 +293,7 @@ describe('getStageSystemContext', () => {
     expect(context).toContain('founder_background');
   });
 
-  it('should show "None - good progress!" when all data collected', () => {
+  it('should show "None - all topics covered!" when all data collected', () => {
     const collectedData = {
       business_concept: 'Test',
       inspiration: 'Test',
@@ -300,6 +301,6 @@ describe('getStageSystemContext', () => {
       founder_background: 'Test',
     };
     const context = getStageSystemContext(1, collectedData);
-    expect(context).toContain('None - good progress!');
+    expect(context).toContain('None - all topics covered!');
   });
 });

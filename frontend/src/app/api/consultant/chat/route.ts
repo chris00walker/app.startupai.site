@@ -1,31 +1,68 @@
-import { streamText, tool } from 'ai';
+import { streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { NextRequest } from 'next/server';
-import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import {
+  CONSULTANT_STAGES_CONFIG,
+  CONSULTANT_TOTAL_STAGES,
+  getConsultantStageSystemContext,
+} from '@/lib/onboarding/consultant-stages-config';
+import {
+  assessConsultantConversation,
+  shouldConsultantAdvanceStage,
+  isConsultantOnboardingComplete,
+  mergeConsultantExtractedData,
+  calculateConsultantProgress,
+  hashConsultantMessage,
+  type ConsultantConversationMessage,
+} from '@/lib/onboarding/consultant-quality-assessment';
 
-// Consultant-specific system prompt
-const CONSULTANT_SYSTEM_PROMPT = `You are Maya, a Consulting Practice Specialist helping consultants set up their workspace.
+// ============================================================================
+// Maya System Prompt (Consultant Practice Specialist)
+// ============================================================================
 
-Your goal is to gather information about their consulting practice in a conversational, friendly way:
+const MAYA_SYSTEM_PROMPT = `You are Maya, a Consulting Practice Specialist helping consultants set up their workspace in StartupAI.
 
-**Stage 1: Welcome & Practice Overview** - Get company name and basic overview
-**Stage 2: Practice Size & Structure** - Understand team size (solo, 2-10, 11-50, 51+)
-**Stage 3: Industries & Services** - Learn which industries and services they focus on
-**Stage 4: Current Tools & Workflow** - Discover what tools they currently use
-**Stage 5: Client Management** - Understand how they manage client relationships
-**Stage 6: Pain Points & Challenges** - Identify their biggest challenges
-**Stage 7: Goals & White-Label Setup** - Explore goals and white-label interest
+## Your Identity
+**Name**: Maya
+**Role**: Consulting Practice Specialist
+**Tone**: Professional yet warm and collaborative - you understand the consulting world
 
-Guidelines:
-- Be professional yet warm and collaborative
-- Ask one clear question at a time
-- Show genuine interest in their practice
-- Provide helpful context when asking questions
-- Keep responses concise (2-3 sentences)
-- Progress naturally through stages based on their responses
-- Use the assessment tools to evaluate response quality and advance stages appropriately`;
+## Your Team Context
+You work alongside the StartupAI AI leadership team:
+- **Sage** (Chief Strategy Officer) - Oversees strategic analysis
+- **Forge** (CTO) - Handles technical implementation
+- **Pulse** (CGO) - Focuses on growth strategies
+- **Compass** (CPO) - Manages product development
+- **Guardian** (CCO) - Ensures compliance
+- **Ledger** (CFO) - Handles financial analysis
+
+After you complete the practice setup, the consultant's clients will work with Alex (Strategic Business Consultant) for their business validation journey.
+
+## Your Conversation Structure
+You guide consultants through 7 stages of practice setup:
+
+1. **Welcome & Practice Overview** - Practice name, focus area, experience
+2. **Practice Size & Structure** - Team size, structure, client capacity
+3. **Industries & Services** - Target industries, service offerings, methodologies
+4. **Current Tools & Workflow** - Existing tools, project tracking, client workflow
+5. **Client Management** - Onboarding process, intake, communication, reporting
+6. **Pain Points & Challenges** - Biggest challenges, time sinks, desired improvements
+7. **Goals & White-Label Setup** - Goals for StartupAI, white-label interest, branding
+
+## Guidelines
+- Ask ONE question at a time from the stage's key questions
+- Show genuine interest in their consulting practice
+- Keep responses concise (2-3 sentences max)
+- If consultant says "I don't know" or is uncertain, acknowledge and move to the next topic
+- Do NOT say "final question" or "last thing" - you don't control when stages complete
+- The system will automatically advance stages based on topics covered
+
+## Important Notes
+- DO NOT mention "tools" or "assessment" - the backend handles that automatically
+- DO NOT over-explain the process - keep it natural and conversational
+- Occasionally mention that their setup will help customize the AI analysis for their clients`;
 
 function getAIModel() {
   // Use OpenAI with explicit baseURL to bypass Netlify AI Gateway
@@ -40,61 +77,10 @@ function getAIModel() {
 }
 
 // ============================================================================
-// AI Tools for Stage Progression
+// Two-Pass Architecture (matches Alex's founder onboarding)
 // ============================================================================
-
-const assessQualityTool = tool({
-  description: 'Assess the quality and completeness of a consultant response for the current stage. Use this frequently after receiving substantial information.',
-  inputSchema: z.object({
-    coverage: z.number().min(0).max(1).describe('How much of the required information has been collected (0.0 to 1.0)'),
-    clarity: z.enum(['high', 'medium', 'low']).describe('How clear and specific are the responses'),
-    completeness: z.enum(['complete', 'partial', 'insufficient']).describe('Is there enough information to move forward'),
-    notes: z.string().describe('Brief observations about response quality and any gaps'),
-  }),
-  execute: async ({ coverage, clarity, completeness, notes }) => {
-    return {
-      assessment: { coverage, clarity, completeness, notes },
-      message: 'Quality assessment recorded',
-    };
-  },
-});
-
-const advanceStageTool = tool({
-  description: 'Advance from the current stage to the next stage. Only use this when you have collected sufficient information (coverage above 0.7) and the consultant has shown good clarity.',
-  inputSchema: z.object({
-    fromStage: z.number().min(1).max(7).describe('The current stage number'),
-    toStage: z.number().min(1).max(7).describe('The next stage number (usually fromStage + 1)'),
-    summary: z.string().describe('Brief summary of what was learned in this stage'),
-    collectedData: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).describe('Key data points collected in this stage as key-value pairs'),
-  }),
-  execute: async ({ fromStage, toStage, summary, collectedData }) => {
-    return {
-      transition: { fromStage, toStage, summary, collectedData },
-      message: `Advancing from Stage ${fromStage} to Stage ${toStage}`,
-    };
-  },
-});
-
-const completeOnboardingTool = tool({
-  description: 'Signal that all 7 stages are complete and the onboarding conversation is ready for workspace setup. Only use this after Stage 7 is thoroughly completed.',
-  inputSchema: z.object({
-    readinessScore: z.number().min(0).max(1).describe('Overall readiness for workspace setup (0.0 to 1.0)'),
-    keyInsights: z.array(z.string()).describe('3-5 key insights about their consulting practice'),
-    recommendedActions: z.array(z.string()).describe('3-5 recommended setup actions'),
-  }),
-  execute: async ({ readinessScore, keyInsights, recommendedActions }) => {
-    return {
-      completion: { readinessScore, keyInsights, recommendedActions },
-      message: 'Onboarding complete - ready for workspace setup',
-    };
-  },
-});
-
-const consultantTools = {
-  assessQuality: assessQualityTool,
-  advanceStage: advanceStageTool,
-  completeOnboarding: completeOnboardingTool,
-};
+// Pass 1: LLM generates conversational response (NO tools, streaming)
+// Pass 2: Backend deterministically assesses quality after response (generateObject)
 
 export async function POST(req: NextRequest) {
   try {
@@ -145,148 +131,269 @@ export async function POST(req: NextRequest) {
     // Prepare context for AI
     const currentStage = session.current_stage || 1;
     const stageData = (session.stage_data as Record<string, any>) || {};
+    const briefData = stageData.brief || {};
 
-    // Stream AI response with tools
+    // Generate stage-specific context with deterministic questions
+    const stageContext = getConsultantStageSystemContext(currentStage, briefData);
+
+    // Capture request context at START for idempotency
+    const userMessage = messages[messages.length - 1]?.content || '';
+    const requestContext = {
+      sessionId,
+      messageIndex: messages.length,
+      stage: currentStage,
+      userMessage,
+    };
+
+    console.log('[ConsultantChat] Creating stream:', {
+      sessionId,
+      currentStage,
+      messageCount: messages.length,
+      lastMessage: userMessage.substring(0, 50),
+    });
+
+    // ========================================================================
+    // PASS 1: Stream AI Response (Conversation Only - NO Tools)
+    // ========================================================================
     const result = streamText({
       model: getAIModel(),
-      system: CONSULTANT_SYSTEM_PROMPT,
+      system: `${MAYA_SYSTEM_PROMPT}\n\n${stageContext}`,
       messages,
       temperature: 0.7,
-      tools: consultantTools,
-      onFinish: async ({ text, toolCalls, toolResults }) => {
+      // NO tools - Pass 2 handles assessment deterministically
+      onFinish: async ({ text, finishReason }) => {
+        console.log('[ConsultantChat] ========== PASS 1 COMPLETE ==========');
+        console.log('[ConsultantChat] Stream result:', {
+          textLength: text.length,
+          textPreview: text.substring(0, 100),
+          finishReason,
+        });
+
         try {
-          console.log('[ConsultantChat] onFinish triggered:', {
-            toolCallsCount: toolCalls?.length || 0,
-            toolResultsCount: toolResults?.length || 0,
-          });
-
-          // Process tool results
-          let newStage = currentStage;
-          let newStageData = { ...stageData };
-          let isCompleted = false;
-
-          if (toolResults && toolResults.length > 0) {
-            for (const result of toolResults) {
-              const toolCall = toolCalls?.find(tc => tc.toolCallId === result.toolCallId);
-              if (!toolCall) continue;
-
-              console.log('[ConsultantChat] Processing tool result:', {
-                toolName: toolCall.toolName,
-                input: toolCall.input,
-              });
-
-              // Handle advanceStage tool
-              if (toolCall.toolName === 'advanceStage') {
-                const { fromStage, toStage, summary, collectedData } = toolCall.input as any;
-                newStage = toStage;
-
-                // Store stage summary and collected data
-                newStageData[`stage_${fromStage}_summary`] = summary;
-                newStageData[`stage_${fromStage}_data`] = collectedData;
-
-                console.log('[ConsultantChat] Stage advanced:', {
-                  from: fromStage,
-                  to: toStage,
-                });
-              }
-
-              // Handle assessQuality tool
-              if (toolCall.toolName === 'assessQuality') {
-                const { coverage, clarity, completeness, notes } = toolCall.input as any;
-
-                // Store quality assessment for current stage
-                newStageData[`stage_${currentStage}_quality`] = {
-                  coverage,
-                  clarity,
-                  completeness,
-                  notes,
-                  timestamp: new Date().toISOString(),
-                };
-
-                console.log('[ConsultantChat] Quality assessed:', {
-                  stage: currentStage,
-                  coverage,
-                  clarity,
-                  completeness,
-                });
-              }
-
-              // Handle completeOnboarding tool
-              if (toolCall.toolName === 'completeOnboarding') {
-                const { readinessScore, keyInsights, recommendedActions } = toolCall.input as any;
-
-                isCompleted = true;
-                newStageData.completion = {
-                  readinessScore,
-                  keyInsights,
-                  recommendedActions,
-                  completedAt: new Date().toISOString(),
-                };
-
-                console.log('[ConsultantChat] Onboarding completed:', {
-                  readinessScore,
-                  insightsCount: keyInsights.length,
-                });
-              }
-            }
+          // Skip if no text
+          const hasText = text && text.trim().length > 0;
+          if (!hasText) {
+            console.warn('[ConsultantChat] Empty AI text response, skipping Pass 2');
+            return;
           }
 
-          // Update conversation history
-          const updatedHistory = [
-            ...(session.conversation_history || []),
+          // ================================================================
+          // Build Updated Conversation History
+          // ================================================================
+          const now = new Date().toISOString();
+          const updatedHistory: ConsultantConversationMessage[] = [
+            ...((session.conversation_history || []) as ConsultantConversationMessage[]),
             {
               role: 'user',
-              content: messages[messages.length - 1].content,
-              timestamp: new Date().toISOString(),
-              stage: currentStage,
+              content: requestContext.userMessage,
+              stage: requestContext.stage,
+              timestamp: now,
             },
             {
               role: 'assistant',
               content: text,
-              timestamp: new Date().toISOString(),
-              stage: newStage, // Use new stage if advanced
-              toolCalls: toolCalls || [],
+              stage: requestContext.stage,
+              timestamp: now,
             },
           ];
 
-          // Initialize update object
-          const updateData: any = {
-            conversation_history: updatedHistory,
-            last_activity: new Date().toISOString(),
-            current_stage: newStage,
-            stage_data: newStageData,
-          };
-
-          // Calculate progress based on stage completion
-          if (isCompleted) {
-            updateData.overall_progress = 100;
-            updateData.status = 'completed';
-          } else {
-            // Progress based on stage: Stage 1 = 0-14%, Stage 2 = 14-28%, ..., Stage 7 = 85-100%
-            const baseProgress = Math.floor(((newStage - 1) / 7) * 100);
-
-            // Check if we have quality assessment for current stage
-            const stageQuality = newStageData[`stage_${newStage}_quality`];
-            const stageProgress = stageQuality?.coverage || 0;
-
-            // Calculate overall progress: base progress + (stage progress * stage weight)
-            const stageWeight = Math.floor(100 / 7); // ~14% per stage
-            updateData.overall_progress = Math.min(
-              95,
-              baseProgress + Math.floor(stageProgress * stageWeight)
-            );
+          // ================================================================
+          // Check if Already Completed - Persist History Only
+          // ================================================================
+          const isSessionCompleted = !!stageData.completion;
+          if (isSessionCompleted) {
+            console.log('[ConsultantChat] Session already completed, persisting history only');
+            await supabaseClient
+              .from('consultant_onboarding_sessions')
+              .update({
+                conversation_history: updatedHistory,
+                last_activity: new Date().toISOString(),
+              })
+              .eq('session_id', sessionId);
+            return;
           }
 
-          // Update session in database
-          await supabaseClient
+          // ================================================================
+          // Idempotency Guard - Skip if Already Processed
+          // ================================================================
+          const assessmentKey = hashConsultantMessage(
+            requestContext.sessionId,
+            requestContext.messageIndex,
+            requestContext.stage,
+            requestContext.userMessage
+          );
+
+          if (stageData[assessmentKey]) {
+            console.log('[ConsultantChat] Assessment already exists for this message, skipping');
+            return;
+          }
+
+          // ================================================================
+          // PASS 2: Deterministic Quality Assessment
+          // ================================================================
+          console.log('[ConsultantChat] Starting Pass 2: Backend quality assessment');
+
+          const assessment = await assessConsultantConversation(
+            requestContext.stage,
+            updatedHistory,
+            briefData
+          );
+
+          // Handle assessment failure
+          if (!assessment) {
+            console.error('[ConsultantChat] Assessment failed, storing failure marker');
+            const failureStageData = {
+              ...stageData,
+              [`assessment_failure_${Date.now()}`]: {
+                timestamp: new Date().toISOString(),
+                stage: requestContext.stage,
+                error: 'Assessment failed',
+              },
+            };
+
+            await supabaseClient
+              .from('consultant_onboarding_sessions')
+              .update({
+                conversation_history: updatedHistory,
+                stage_data: failureStageData,
+                last_activity: new Date().toISOString(),
+              })
+              .eq('session_id', sessionId);
+            return;
+          }
+
+          console.log('[ConsultantChat] Pass 2 Assessment result:', {
+            stage: requestContext.stage,
+            topicsCovered: assessment.topicsCovered,
+            coverage: assessment.coverage,
+            shouldAdvance: shouldConsultantAdvanceStage(assessment, requestContext.stage),
+            extractedFields: Object.keys(assessment.extractedData || {}),
+          });
+
+          // ================================================================
+          // State Machine: Process Assessment Results
+          // ================================================================
+          let newStage = requestContext.stage;
+          let newStageData = { ...stageData };
+          let completedNow = false;
+
+          // Store idempotency key
+          newStageData[assessmentKey] = {
+            timestamp: new Date().toISOString(),
+            topicsCovered: assessment.topicsCovered,
+            coverage: assessment.coverage,
+            stage: requestContext.stage,
+          };
+
+          // Store quality assessment
+          newStageData[`stage_${requestContext.stage}_quality`] = {
+            topicsCovered: assessment.topicsCovered,
+            coverage: assessment.coverage,
+            clarity: assessment.clarity,
+            completeness: assessment.completeness,
+            notes: assessment.notes,
+            timestamp: new Date().toISOString(),
+          };
+
+          // Merge extracted data into brief
+          newStageData.brief = mergeConsultantExtractedData(
+            newStageData.brief || {},
+            assessment.extractedData
+          );
+
+          // Count messages in current stage
+          const stageMessageCount = updatedHistory.filter(
+            (m) => m.stage === requestContext.stage && m.role === 'user'
+          ).length;
+
+          // Check for stage advancement
+          if (shouldConsultantAdvanceStage(assessment, requestContext.stage, stageMessageCount)) {
+            const fromStage = requestContext.stage;
+            newStage = requestContext.stage + 1;
+
+            newStageData[`stage_${fromStage}_summary`] =
+              `Auto-advanced after covering ${assessment.topicsCovered.length} topics`;
+
+            console.log('[ConsultantChat] AUTO-ADVANCING:', {
+              from: fromStage,
+              to: newStage,
+              topicsCovered: assessment.topicsCovered,
+            });
+          }
+
+          // Check for completion (Stage 7 finished)
+          if (isConsultantOnboardingComplete(assessment, requestContext.stage)) {
+            completedNow = true;
+            console.log('[ConsultantChat] Practice setup complete');
+
+            const completionData = {
+              readinessScore: assessment.coverage,
+              keyInsights: assessment.keyInsights || [],
+              recommendedNextSteps: assessment.recommendedNextSteps || [],
+              completedAt: new Date().toISOString(),
+            };
+
+            // Atomic update - only succeeds if completion doesn't exist yet
+            const { data: completionResult, error: completionError } = await supabaseClient
+              .from('consultant_onboarding_sessions')
+              .update({
+                conversation_history: updatedHistory,
+                stage_data: { ...newStageData, completion: completionData },
+                current_stage: newStage,
+                overall_progress: 100,
+                status: 'completed',
+                last_activity: new Date().toISOString(),
+              })
+              .eq('session_id', sessionId)
+              .is('stage_data->completion', null) // Only update if not already completed
+              .select();
+
+            if (completionError || !completionResult || completionResult.length === 0) {
+              console.log('[ConsultantChat] Completion already recorded by another request');
+            } else {
+              console.log('[ConsultantChat] Consultant practice setup completed successfully');
+            }
+
+            return;
+          }
+
+          // ================================================================
+          // Regular Update (Not Completed)
+          // ================================================================
+          const didAutoAdvance = newStage !== requestContext.stage;
+          const coverageForProgress = didAutoAdvance ? 0 : assessment.coverage;
+
+          const overallProgress = calculateConsultantProgress(
+            newStage,
+            coverageForProgress,
+            false
+          );
+
+          console.log('[ConsultantChat] Updating database:', {
+            sessionId,
+            currentStage: newStage,
+            overallProgress,
+            briefFields: Object.keys(newStageData.brief || {}),
+          });
+
+          const { error: updateError } = await supabaseClient
             .from('consultant_onboarding_sessions')
-            .update(updateData)
+            .update({
+              conversation_history: updatedHistory,
+              current_stage: newStage,
+              stage_data: newStageData,
+              overall_progress: overallProgress,
+              last_activity: new Date().toISOString(),
+            })
             .eq('session_id', sessionId);
 
-          console.log(`[ConsultantChat] Session ${sessionId} updated: ${updateData.overall_progress}% progress`);
+          if (updateError) {
+            console.error('[ConsultantChat] Database update failed:', updateError);
+          } else {
+            console.log(`[ConsultantChat] Session ${sessionId} updated: ${overallProgress}% progress`);
+          }
         } catch (error) {
-          console.error('[ConsultantChat] Error updating session:', error);
-          // Don't throw - we still want to return the stream to the user
+          console.error('[ConsultantChat] Error in onFinish callback:', error);
         }
       },
     });

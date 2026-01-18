@@ -186,6 +186,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
       const stageProgress = shouldAdvance ? 0 : Math.round(assessment.coverage * 100);
 
       assessmentData = {
+        topicsCovered: assessment.topicsCovered || [],
         coverage: assessment.coverage,
         clarity: assessment.clarity,
         completeness: assessment.completeness,
@@ -200,6 +201,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<SaveResponse>
 
       console.log('[api/chat/save] Assessment result:', {
         stage: currentStage,
+        topicsCovered: assessment.topicsCovered || [],
         coverage: assessment.coverage,
         shouldAdvance,
         isComplete,

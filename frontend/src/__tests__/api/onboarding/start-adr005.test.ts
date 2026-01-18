@@ -12,43 +12,61 @@
  * @see Plan: /home/chris/.claude/plans/shiny-growing-sprout.md
  */
 
+/**
+ * The resume response must include these fields for proper
+ * state management in the frontend (Bug B3, B5 fixes)
+ */
+interface ResumeResponse {
+  success: boolean;
+  sessionId: string;
+  stageInfo: {
+    currentStage: number;
+    totalStages: number;
+    stageName: string;
+  };
+  conversationContext: {
+    agentPersonality: Record<string, unknown>;
+    userRole: string;
+    planType: string;
+  };
+  resuming: true;
+  conversationHistory: Array<{
+    role: string;
+    content: string;
+    timestamp?: string;
+  }>;
+  overallProgress: number;
+  stageProgress: number;
+  stageData: Record<string, unknown>;
+  // ADR-005 PR7: Version for concurrency protection
+  version: number;
+  // ADR-005 PR4: Status for completion check
+  status: 'active' | 'paused' | 'completed' | 'abandoned';
+  // Fallback greeting if history is empty
+  agentIntroduction?: string;
+  firstQuestion?: string;
+}
+
+interface NewSessionResponse {
+  success: boolean;
+  sessionId: string;
+  agentIntroduction: string;
+  firstQuestion: string;
+  estimatedDuration: string;
+  stageInfo: {
+    currentStage: number;
+    totalStages: number;
+    stageName: string;
+  };
+  conversationContext: {
+    agentPersonality: Record<string, unknown>;
+    expectedOutcomes: string[];
+    privacyNotice: string;
+  };
+}
+
 describe('/api/onboarding/start ADR-005 Response Structure', () => {
   describe('Resume response type contract (ADR-005 PR4 & PR7)', () => {
-    /**
-     * The resume response must include these fields for proper
-     * state management in the frontend (Bug B3, B5 fixes)
-     */
-    interface ResumeResponse {
-      success: boolean;
-      sessionId: string;
-      stageInfo: {
-        currentStage: number;
-        totalStages: number;
-        stageName: string;
-      };
-      conversationContext: {
-        agentPersonality: Record<string, any>;
-        userRole: string;
-        planType: string;
-      };
-      resuming: true;
-      conversationHistory: Array<{
-        role: string;
-        content: string;
-        timestamp?: string;
-      }>;
-      overallProgress: number;
-      stageProgress: number;
-      stageData: Record<string, any>;
-      // ADR-005 PR7: Version for concurrency protection
-      version: number;
-      // ADR-005 PR4: Status for completion check
-      status: 'active' | 'paused' | 'completed' | 'abandoned';
-      // Fallback greeting if history is empty
-      agentIntroduction?: string;
-      firstQuestion?: string;
-    }
-
     it('should include version in resume response (ADR-005 PR7 - Bug B3 fix)', () => {
       // Version is critical for concurrency protection when resuming
       const resumeResponse: ResumeResponse = {
@@ -158,24 +176,6 @@ describe('/api/onboarding/start ADR-005 Response Structure', () => {
   });
 
   describe('New session response type contract', () => {
-    interface NewSessionResponse {
-      success: boolean;
-      sessionId: string;
-      agentIntroduction: string;
-      firstQuestion: string;
-      estimatedDuration: string;
-      stageInfo: {
-        currentStage: number;
-        totalStages: number;
-        stageName: string;
-      };
-      conversationContext: {
-        agentPersonality: Record<string, any>;
-        expectedOutcomes: string[];
-        privacyNotice: string;
-      };
-    }
-
     it('should return initial greeting for new session', () => {
       const newSessionResponse: NewSessionResponse = {
         success: true,

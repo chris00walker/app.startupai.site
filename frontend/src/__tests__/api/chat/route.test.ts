@@ -164,40 +164,46 @@ describe('Chat API Route', () => {
     });
 
     describe('shouldAdvanceStage', () => {
-      it('should return true when coverage >= threshold and complete', () => {
+      // Topic-based advancement: advances when 75%+ of topics are covered
+      // Stage 1 has 4 topics: business_concept, inspiration, current_stage, founder_background
+
+      it('should return true when 75%+ topics covered (topic-based advancement)', () => {
         const assessment: QualityAssessment = {
-          coverage: 0.85,
+          topicsCovered: ['business_concept', 'inspiration', 'current_stage'], // 3 of 4 = 75%
+          coverage: 0.75,
           clarity: 'high',
           completeness: 'complete',
           notes: 'Good progress',
         };
-        // Stage 1 threshold = 0.8
         expect(shouldAdvanceStage(assessment, 1)).toBe(true);
       });
 
-      it('should return false when coverage < threshold', () => {
+      it('should return false when only 50% topics covered', () => {
         const assessment: QualityAssessment = {
+          topicsCovered: ['business_concept', 'inspiration'], // 2 of 4 = 50%
           coverage: 0.5,
           clarity: 'medium',
           completeness: 'partial',
           notes: 'Needs more detail',
         };
-        // Stage 1 threshold = 0.8
         expect(shouldAdvanceStage(assessment, 1)).toBe(false);
       });
 
-      it('should return false when completeness is not complete', () => {
+      it('should advance via message fallback even with low topic coverage', () => {
         const assessment: QualityAssessment = {
-          coverage: 0.9,
+          topicsCovered: ['business_concept'], // Only 1 of 4 = 25%
+          coverage: 0.6, // 60% coverage meets fallback threshold
           clarity: 'high',
-          completeness: 'partial', // Not complete
-          notes: 'Almost there',
+          completeness: 'partial',
+          notes: 'Low topic coverage but fallback applies',
         };
-        expect(shouldAdvanceStage(assessment, 1)).toBe(false);
+        // With 6+ messages, fallback kicks in
+        expect(shouldAdvanceStage(assessment, 1, 6)).toBe(true);
       });
 
       it('should return false at stage 7 (cannot advance past final)', () => {
         const assessment: QualityAssessment = {
+          topicsCovered: ['short_term_goals', 'success_metrics', 'priorities', 'first_experiment'],
           coverage: 1.0,
           clarity: 'high',
           completeness: 'complete',

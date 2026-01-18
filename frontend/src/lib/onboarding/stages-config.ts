@@ -215,6 +215,10 @@ export function getStageTopics(stageNumber: number): readonly StageDataTopic[] {
 
 /**
  * Generate system context string for AI prompt
+ *
+ * TDD Refactoring: Now includes keyQuestions to guide Alex on specific topics to cover.
+ * Alex should ask these questions in order, adapting naturally to the conversation.
+ *
  * @param stageNumber - Current stage number
  * @param collectedData - Data collected so far
  * @returns Formatted context string for AI system prompt
@@ -235,22 +239,35 @@ export function getStageSystemContext(
     .join('\n');
 
   const missingFields = stage.dataToCollect
-    .filter(field => !collectedData[field])
-    .join(', ');
+    .filter(field => !collectedData[field]);
+
+  // Map data fields to their corresponding questions
+  const questionsToAsk = missingFields.length > 0
+    ? missingFields.map((field, index) => {
+        const questionIndex = stage.dataToCollect.indexOf(field);
+        const question = stage.keyQuestions[questionIndex] || `Tell me about your ${field.replace(/_/g, ' ')}`;
+        return `${index + 1}. ${question} (collects: ${field})`;
+      }).join('\n')
+    : 'All topics covered for this stage.';
 
   return `
 ## Current Stage: ${stage.name} (Stage ${stageNumber}/${TOTAL_STAGES})
 
 **Objective**: ${stage.objective}
 
-**Data to Collect**: ${stage.dataToCollect.join(', ')}
+**Key Questions to Ask** (in order of priority):
+${questionsToAsk}
 
 **Already Collected**:
 ${collectedEntries || '(none yet)'}
 
-**Missing Data Points**: ${missingFields || 'None - good progress!'}
+**Missing Data Points**: ${missingFields.join(', ') || 'None - all topics covered!'}
 
-Focus on filling gaps and getting specificity. Use follow-up questions to dig deeper.
+**INSTRUCTIONS**:
+- Ask ONE question at a time from the "Key Questions to Ask" list above
+- If user responds with "I don't know", acknowledge it and move to the next question
+- Once all topics are covered, the system will automatically advance to the next stage
+- Do NOT say "final question" or "last thing" - you don't control when stages complete
 `;
 }
 

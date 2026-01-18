@@ -10,20 +10,55 @@
  * @see Plan: /home/chris/.claude/plans/shiny-growing-sprout.md (PR 7)
  */
 
+type VersionSaveRequest = {
+  sessionId: string;
+  messageId: string;
+  userMessage: { role: string; content: string; timestamp: string };
+  assistantMessage: { role: string; content: string; timestamp: string };
+  expectedVersion?: number;
+};
+
+type VersionConflictResponse = {
+  success: false;
+  status: 'version_conflict';
+  currentVersion: number;
+  expectedVersion: number;
+  error?: string;
+};
+
+type VersionSuccessResponse = {
+  success: true;
+  status: 'committed' | 'duplicate';
+  version: number;
+};
+
+type VersionSaveResponse = VersionConflictResponse | VersionSuccessResponse;
+
+type VersionTabState = {
+  savedVersion: number;
+  pendingMessage: string;
+};
+
+type VersionRPCParams = {
+  p_session_id: string;
+  p_message_id: string;
+  p_expected_version: number | null;
+};
+
+type VersionRPCResult = {
+  status: 'committed' | 'duplicate' | 'version_conflict';
+  version: number;
+  current_version?: number;
+  expected_version?: number;
+  message?: string;
+};
+
 describe('Version Conflict Handling (ADR-005 PR7)', () => {
   describe('expected_version parameter', () => {
-    interface SaveRequest {
-      sessionId: string;
-      messageId: string;
-      userMessage: { role: string; content: string; timestamp: string };
-      assistantMessage: { role: string; content: string; timestamp: string };
-      expectedVersion?: number;
-    }
-
     it('should pass expectedVersion from client state', () => {
       const clientSavedVersion = 5;
 
-      const request: SaveRequest = {
+      const request: VersionSaveRequest = {
         sessionId: 'test-session',
         messageId: 'msg_123',
         userMessage: { role: 'user', content: 'test', timestamp: new Date().toISOString() },
@@ -41,7 +76,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
     it('should omit expectedVersion for first message (savedVersion is null)', () => {
       const clientSavedVersion: number | null = null;
 
-      const request: SaveRequest = {
+      const request: VersionSaveRequest = {
         sessionId: 'test-session',
         messageId: 'msg_123',
         userMessage: { role: 'user', content: 'test', timestamp: new Date().toISOString() },
@@ -59,7 +94,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
     it('should include expectedVersion of 0 for resumed legacy sessions', () => {
       const clientSavedVersion = 0; // Legacy session default
 
-      const request: SaveRequest = {
+      const request: VersionSaveRequest = {
         sessionId: 'test-session',
         messageId: 'msg_123',
         userMessage: { role: 'user', content: 'test', timestamp: new Date().toISOString() },
@@ -76,24 +111,8 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
   });
 
   describe('version_conflict response', () => {
-    interface ConflictResponse {
-      success: false;
-      status: 'version_conflict';
-      currentVersion: number;
-      expectedVersion: number;
-      error?: string;
-    }
-
-    interface SuccessResponse {
-      success: true;
-      status: 'committed' | 'duplicate';
-      version: number;
-    }
-
-    type SaveResponse = ConflictResponse | SuccessResponse;
-
     it('should recognize version_conflict status', () => {
-      const response: SaveResponse = {
+      const response: VersionSaveResponse = {
         success: false,
         status: 'version_conflict',
         currentVersion: 10,
@@ -106,7 +125,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
     });
 
     it('should include both versions in conflict response', () => {
-      const response: ConflictResponse = {
+      const response: VersionConflictResponse = {
         success: false,
         status: 'version_conflict',
         currentVersion: 10,
@@ -122,7 +141,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
 
     it('should handle conflict where expected is ahead (out-of-order delivery)', () => {
       // Rare edge case: network reordering
-      const response: ConflictResponse = {
+      const response: VersionConflictResponse = {
         success: false,
         status: 'version_conflict',
         currentVersion: 3,
@@ -136,15 +155,10 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
   });
 
   describe('Concurrent tab conflict scenarios', () => {
-    interface TabState {
-      savedVersion: number;
-      pendingMessage: string;
-    }
-
     it('should simulate Tab A and Tab B concurrent edit conflict', () => {
       // Initial: Both tabs start with version 5
-      const tabA: TabState = { savedVersion: 5, pendingMessage: 'Message from Tab A' };
-      const tabB: TabState = { savedVersion: 5, pendingMessage: 'Message from Tab B' };
+      const tabA: VersionTabState = { savedVersion: 5, pendingMessage: 'Message from Tab A' };
+      const tabB: VersionTabState = { savedVersion: 5, pendingMessage: 'Message from Tab B' };
 
       // Tab B completes first (fast network)
       const tabBResult = {
@@ -225,22 +239,8 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
   });
 
   describe('RPC version check behavior', () => {
-    interface RPCParams {
-      p_session_id: string;
-      p_message_id: string;
-      p_expected_version: number | null;
-    }
-
-    interface RPCResult {
-      status: 'committed' | 'duplicate' | 'version_conflict';
-      version: number;
-      current_version?: number;
-      expected_version?: number;
-      message?: string;
-    }
-
     it('should pass when expectedVersion matches DB version', () => {
-      const params: RPCParams = {
+      const params: VersionRPCParams = {
         p_session_id: 'test-session',
         p_message_id: 'msg_123',
         p_expected_version: 5,
@@ -249,7 +249,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
       // Simulate: DB version is 5, expected is 5
       const dbVersion = 5;
 
-      const result: RPCResult =
+      const result: VersionRPCResult =
         params.p_expected_version === dbVersion
           ? { status: 'committed', version: dbVersion + 1 }
           : {
@@ -264,7 +264,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
     });
 
     it('should reject when expectedVersion does not match DB version', () => {
-      const params: RPCParams = {
+      const params: VersionRPCParams = {
         p_session_id: 'test-session',
         p_message_id: 'msg_123',
         p_expected_version: 5, // Client thinks version is 5
@@ -273,7 +273,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
       // Simulate: DB version is 8 (modified by another tab)
       const dbVersion = 8;
 
-      const result: RPCResult =
+      const result: VersionRPCResult =
         params.p_expected_version === dbVersion
           ? { status: 'committed', version: dbVersion + 1 }
           : {
@@ -290,7 +290,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
     });
 
     it('should allow save when expectedVersion is null (first message)', () => {
-      const params: RPCParams = {
+      const params: VersionRPCParams = {
         p_session_id: 'test-session',
         p_message_id: 'msg_123',
         p_expected_version: null, // First message, no version check
@@ -300,7 +300,7 @@ describe('Version Conflict Handling (ADR-005 PR7)', () => {
       const dbVersion = 0;
       const skipVersionCheck = params.p_expected_version === null;
 
-      const result: RPCResult = skipVersionCheck
+      const result: VersionRPCResult = skipVersionCheck
         ? { status: 'committed', version: dbVersion + 1 }
         : params.p_expected_version === dbVersion
           ? { status: 'committed', version: dbVersion + 1 }

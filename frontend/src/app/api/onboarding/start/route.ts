@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { BYPASS_LIMITS } from '@/lib/env';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
+import { getInitialGreeting, type OnboardingMode } from '@/lib/ai/onboarding-prompt';
 
 type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
 type SupabaseServerClient = Awaited<ReturnType<typeof createServerClient>>;
@@ -16,6 +17,10 @@ interface StartOnboardingRequest {
   planType: 'trial' | 'sprint' | 'founder' | 'enterprise';
   resumeSessionId?: string;
   forceNew?: boolean; // Skip session resumption and create fresh session
+  /** Mode for Alex: 'founder' (direct user) or 'client' (consultant's client) */
+  mode?: OnboardingMode;
+  /** Optional client project ID when in client mode */
+  clientProjectId?: string;
   userContext?: {
     referralSource?: string;
     previousExperience?: 'first_time' | 'experienced' | 'serial_entrepreneur';
@@ -290,7 +295,7 @@ async function saveOnboardingSession(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { planType, resumeSessionId, forceNew, userContext }: StartOnboardingRequest = body;
+    const { planType, resumeSessionId, forceNew, mode = 'founder', clientProjectId, userContext }: StartOnboardingRequest = body;
 
     const sessionClient = await createServerClient();
     const [
@@ -492,7 +497,7 @@ There are no wrong answers here. In fact, "I don't know yet" is often the most h
     const aiContext = {
       persona: {
         name: 'Alex',
-        role: 'Strategic Business Consultant',
+        role: mode === 'client' ? 'Strategic Business Consultant (Client Intake)' : 'Strategic Business Consultant',
         tone: 'friendly, encouraging, professionally direct',
         expertise: 'Lean Startup, Customer Development, Business Model Design',
         supervisor: 'Sage (Chief Strategy Officer)',
@@ -504,6 +509,9 @@ There are no wrong answers here. In fact, "I don't know yet" is often the most h
         detail_score: 0.5,
         overall: 0.5,
       },
+      // Store mode and client context for later use
+      mode,
+      clientProjectId: mode === 'client' ? clientProjectId : undefined,
     };
 
     // Save session to database (skip for test users in development)
@@ -525,28 +533,34 @@ There are no wrong answers here. In fact, "I don't know yet" is often the most h
       console.log('[onboarding/start] Skipping database save for test user in development mode');
     }
 
+    // Get mode-specific greeting
+    const greeting = getInitialGreeting(mode);
+
     const response: StartOnboardingResponse = {
       success: true,
       sessionId,
-      agentIntroduction: `Hi there! I'm Alex, and I'm excited to help you think through your business idea using proven validation methods.
-
-Over the next 15-20 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your goals. This isn't a pitch session - it's a strategic conversation to help you identify what assumptions you need to test and what experiments you should run first.
-
-There are no wrong answers here. In fact, "I don't know yet" is often the most honest and valuable response because it helps us identify what you need to learn.`,
-      firstQuestion: `Ready to dive in? Let's start with the most important question:
-
-**What business idea are you most excited about right now?**`,
+      agentIntroduction: greeting,
+      firstQuestion: '', // Already included in greeting
       estimatedDuration: '15-20 minutes',
       stageInfo: initialStage,
       conversationContext: {
         agentPersonality: aiContext.persona,
-        expectedOutcomes: [
-          'Clear understanding of your target customer',
-          'Validated problem statement',
-          'Defined unique value proposition',
-          'Strategic validation roadmap',
-        ],
-        privacyNotice: 'Your responses are confidential and used only to generate strategic recommendations.',
+        expectedOutcomes: mode === 'client'
+          ? [
+              "Clear understanding of your client's target customer",
+              "Validated problem statement for your client",
+              "Defined unique value proposition",
+              "Strategic validation roadmap for your client",
+            ]
+          : [
+              'Clear understanding of your target customer',
+              'Validated problem statement',
+              'Defined unique value proposition',
+              'Strategic validation roadmap',
+            ],
+        privacyNotice: mode === 'client'
+          ? "Your client's responses are confidential and used only to generate strategic recommendations."
+          : 'Your responses are confidential and used only to generate strategic recommendations.',
       },
       qualitySignals: aiContext.qualitySignals,
       stageSnapshot: initialStageData.coverage.stage_1,

@@ -3,7 +3,7 @@
  *
  * Tests for the critical data structures and response shapes
  * implemented in ADR-005 Split API Architecture:
- * - SaveResponse type structure (version, status, progress fields)
+ * - ChatSaveResponse type structure (version, status, progress fields)
  * - RPC result handling
  * - Completion status tracking
  *
@@ -13,30 +13,47 @@
  * @see Plan: /home/chris/.claude/plans/shiny-growing-sprout.md
  */
 
-describe('/api/chat/save ADR-005 Response Structure', () => {
-  describe('SaveResponse type contract (ADR-005 PR3)', () => {
-    /**
-     * The SaveResponse interface must include these fields for proper
-     * state management in the frontend (Bug B1, B2, B4 fixes)
-     */
-    interface SaveResponse {
-      success: boolean;
-      status: 'committed' | 'duplicate' | 'version_conflict' | 'error';
-      version?: number;
-      currentVersion?: number;
-      expectedVersion?: number;
-      currentStage?: number;
-      overallProgress?: number;
-      stageProgress?: number;
-      stageAdvanced?: boolean;
-      completed?: boolean;
-      queued?: boolean;
-      error?: string;
-    }
+/**
+ * The ChatSaveResponse type must include these fields for proper
+ * state management in the frontend (Bug B1, B2, B4 fixes)
+ */
+type ChatSaveResponse = {
+  success: boolean;
+  status: 'committed' | 'duplicate' | 'version_conflict' | 'error';
+  version?: number;
+  currentVersion?: number;
+  expectedVersion?: number;
+  currentStage?: number;
+  overallProgress?: number;
+  stageProgress?: number;
+  stageAdvanced?: boolean;
+  completed?: boolean;
+  queued?: boolean;
+  error?: string;
+};
 
-    it('should define all required fields in SaveResponse interface', () => {
+/**
+ * The apply_onboarding_turn RPC returns these fields which
+ * must be properly mapped to the ChatSaveResponse
+ */
+type ChatRPCResult = {
+  status: string;
+  version: number;
+  current_version?: number;
+  expected_version?: number;
+  current_stage: number;
+  overall_progress: number;
+  stage_progress: number;
+  stage_advanced: boolean;
+  completed: boolean;
+  message?: string;
+};
+
+describe('/api/chat/save ADR-005 Response Structure', () => {
+  describe('ChatSaveResponse type contract (ADR-005 PR3)', () => {
+    it('should define all required fields in ChatSaveResponse interface', () => {
       // Verify the shape of a successful response
-      const successResponse: SaveResponse = {
+      const successResponse: ChatSaveResponse = {
         success: true,
         status: 'committed',
         version: 5,
@@ -57,7 +74,7 @@ describe('/api/chat/save ADR-005 Response Structure', () => {
 
     it('should define version_conflict response shape (ADR-005 PR7)', () => {
       // Version conflict response includes current and expected versions
-      const conflictResponse: SaveResponse = {
+      const conflictResponse: ChatSaveResponse = {
         success: false,
         status: 'version_conflict',
         currentVersion: 10,
@@ -73,7 +90,7 @@ describe('/api/chat/save ADR-005 Response Structure', () => {
     });
 
     it('should define duplicate response shape (idempotency)', () => {
-      const duplicateResponse: SaveResponse = {
+      const duplicateResponse: ChatSaveResponse = {
         success: true, // Idempotent - duplicate is still "success"
         status: 'duplicate',
         version: 3,
@@ -90,7 +107,7 @@ describe('/api/chat/save ADR-005 Response Structure', () => {
     });
 
     it('should define completed response with queued flag (ADR-005 Stage 7)', () => {
-      const completedResponse: SaveResponse = {
+      const completedResponse: ChatSaveResponse = {
         success: true,
         status: 'committed',
         version: 15,
@@ -109,25 +126,8 @@ describe('/api/chat/save ADR-005 Response Structure', () => {
   });
 
   describe('RPC result processing', () => {
-    /**
-     * The apply_onboarding_turn RPC returns these fields which
-     * must be properly mapped to the SaveResponse
-     */
-    interface RPCResult {
-      status: string;
-      version: number;
-      current_version?: number;
-      expected_version?: number;
-      current_stage: number;
-      overall_progress: number;
-      stage_progress: number;
-      stage_advanced: boolean;
-      completed: boolean;
-      message?: string;
-    }
-
     it('should handle committed RPC result', () => {
-      const rpcResult: RPCResult = {
+      const rpcResult: ChatRPCResult = {
         status: 'committed',
         version: 5,
         current_stage: 3,
@@ -154,7 +154,7 @@ describe('/api/chat/save ADR-005 Response Structure', () => {
     });
 
     it('should handle version_conflict RPC result (ADR-005)', () => {
-      const rpcResult: RPCResult = {
+      const rpcResult: ChatRPCResult = {
         status: 'version_conflict',
         version: 0,
         current_version: 10,
@@ -183,7 +183,7 @@ describe('/api/chat/save ADR-005 Response Structure', () => {
     });
 
     it('should handle stage advancement', () => {
-      const rpcResult: RPCResult = {
+      const rpcResult: ChatRPCResult = {
         status: 'committed',
         version: 6,
         current_stage: 4, // Advanced from 3 to 4

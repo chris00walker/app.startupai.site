@@ -4,12 +4,15 @@ import { Page, expect } from '@playwright/test';
  * Send a message in the onboarding chat and wait for AI response
  */
 export async function sendMessage(page: Page, message: string) {
-  // Find the chat input - try various selectors
+  // Find the chat input - try various selectors (placeholder is "Type your response...")
   const chatInput = page.locator(
-    'textarea[placeholder*="message" i], textarea[placeholder*="type" i], input[type="text"][placeholder*="message" i], [data-testid="chat-input"]'
+    'textarea[placeholder*="response" i], textarea[aria-label*="message" i], textarea[placeholder*="type" i], [data-testid="chat-input"]'
   ).first();
 
   await expect(chatInput).toBeVisible({ timeout: 10000 });
+
+  // Wait for input to be enabled (may be disabled during AI response streaming)
+  await expect(chatInput).toBeEnabled({ timeout: 30000 });
 
   // Clear and fill input
   await chatInput.clear();

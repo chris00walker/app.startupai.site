@@ -289,10 +289,10 @@ function Dashboard() {
                 <Settings className="h-4 w-4 mr-2" />
                 Gate Policies
               </Button>
-              <Link href="/projects/new">
+              <Link href="/consultant/client/new">
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Project
+                  Add Client
                 </Button>
               </Link>
             </div>
@@ -344,7 +344,7 @@ function Dashboard() {
                     <p className="text-muted-foreground mb-4">
                       Start building your portfolio by adding your first client project.
                     </p>
-                    <Link href="/projects/new">
+                    <Link href="/consultant/client/new">
                       <Button>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Your First Client

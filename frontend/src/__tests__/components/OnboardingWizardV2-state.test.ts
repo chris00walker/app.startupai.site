@@ -13,40 +13,83 @@
  * @see Plan: /home/chris/.claude/plans/shiny-growing-sprout.md
  */
 
+interface StartResponse {
+  success: boolean;
+  sessionId: string;
+  stageInfo: {
+    currentStage: number;
+    totalStages: number;
+    stageName: string;
+  };
+  conversationContext: {
+    agentPersonality: Record<string, unknown>;
+  };
+  overallProgress?: number;
+  stageProgress?: number;
+  resuming?: boolean;
+  conversationHistory?: Array<{ role: string; content: string; timestamp: string }>;
+  version?: number;
+  status?: 'active' | 'paused' | 'completed' | 'abandoned';
+  agentIntroduction?: string;
+  firstQuestion?: string;
+}
+
+interface OnboardingSession {
+  sessionId: string;
+  currentStage: number;
+  totalStages: number;
+  overallProgress: number;
+  stageProgress: number;
+  agentPersonality: unknown;
+  isActive: boolean;
+  status: 'active' | 'paused' | 'completed' | 'abandoned';
+}
+
+interface SaveResponse {
+  success: boolean;
+  status: 'committed' | 'duplicate' | 'version_conflict' | 'error';
+  version?: number;
+  currentStage?: number;
+  overallProgress?: number;
+  stageProgress?: number;
+  stageAdvanced?: boolean;
+  completed?: boolean;
+  queued?: boolean;
+  currentVersion?: number;
+  expectedVersion?: number;
+  error?: string;
+}
+
+interface SessionState {
+  currentStage: number;
+  overallProgress: number;
+  stageProgress: number;
+  status: 'active' | 'paused' | 'completed' | 'abandoned';
+}
+
+interface StateConflictResponse {
+  success: false;
+  status: 'version_conflict';
+  currentVersion: number;
+  expectedVersion: number;
+  error: string;
+}
+
+interface SessionWithStatus {
+  status: 'active' | 'paused' | 'completed' | 'abandoned';
+  overallProgress: number;
+  currentStage: number;
+}
+
+interface PendingSave {
+  sessionId: string;
+  messageId: string;
+  userMessage: { role: string; content: string; timestamp: string };
+  assistantMessage: { role: string; content: string; timestamp: string };
+}
+
 describe('OnboardingWizardV2 State Management (ADR-005)', () => {
   describe('Session initialization from API response', () => {
-    interface StartResponse {
-      success: boolean;
-      sessionId: string;
-      stageInfo: {
-        currentStage: number;
-        totalStages: number;
-        stageName: string;
-      };
-      conversationContext: {
-        agentPersonality: Record<string, any>;
-      };
-      overallProgress?: number;
-      stageProgress?: number;
-      resuming?: boolean;
-      conversationHistory?: Array<{ role: string; content: string; timestamp: string }>;
-      version?: number;
-      status?: 'active' | 'paused' | 'completed' | 'abandoned';
-      agentIntroduction?: string;
-      firstQuestion?: string;
-    }
-
-    interface OnboardingSession {
-      sessionId: string;
-      currentStage: number;
-      totalStages: number;
-      overallProgress: number;
-      stageProgress: number;
-      agentPersonality: any;
-      isActive: boolean;
-      status: 'active' | 'paused' | 'completed' | 'abandoned';
-    }
-
     it('should initialize session from new session response', () => {
       const apiResponse: StartResponse = {
         success: true,
@@ -155,28 +198,6 @@ describe('OnboardingWizardV2 State Management (ADR-005)', () => {
   });
 
   describe('Save response state updates', () => {
-    interface SaveResponse {
-      success: boolean;
-      status: 'committed' | 'duplicate' | 'version_conflict' | 'error';
-      version?: number;
-      currentStage?: number;
-      overallProgress?: number;
-      stageProgress?: number;
-      stageAdvanced?: boolean;
-      completed?: boolean;
-      queued?: boolean;
-      currentVersion?: number;
-      expectedVersion?: number;
-      error?: string;
-    }
-
-    interface SessionState {
-      currentStage: number;
-      overallProgress: number;
-      stageProgress: number;
-      status: 'active' | 'paused' | 'completed' | 'abandoned';
-    }
-
     it('should update savedVersion from committed save response', () => {
       const saveResult: SaveResponse = {
         success: true,
@@ -298,16 +319,8 @@ describe('OnboardingWizardV2 State Management (ADR-005)', () => {
   });
 
   describe('Version conflict handling', () => {
-    interface VersionConflictResponse {
-      success: false;
-      status: 'version_conflict';
-      currentVersion: number;
-      expectedVersion: number;
-      error: string;
-    }
-
     it('should detect version conflict response', () => {
-      const conflictResponse: VersionConflictResponse = {
+      const conflictResponse: StateConflictResponse = {
         success: false,
         status: 'version_conflict',
         currentVersion: 10,
@@ -324,7 +337,7 @@ describe('OnboardingWizardV2 State Management (ADR-005)', () => {
     });
 
     it('should provide error message for version conflict', () => {
-      const conflictResponse: VersionConflictResponse = {
+      const conflictResponse: StateConflictResponse = {
         success: false,
         status: 'version_conflict',
         currentVersion: 10,
@@ -342,12 +355,6 @@ describe('OnboardingWizardV2 State Management (ADR-005)', () => {
   });
 
   describe('Completion state detection', () => {
-    interface SessionWithStatus {
-      status: 'active' | 'paused' | 'completed' | 'abandoned';
-      overallProgress: number;
-      currentStage: number;
-    }
-
     it('should use status for completion check, not progress (ADR-005 Bug B5 fix)', () => {
       // Session with high progress but not completed status
       const activeSession: SessionWithStatus = {
@@ -389,13 +396,6 @@ describe('OnboardingWizardV2 State Management (ADR-005)', () => {
   });
 
   describe('localStorage recovery integration', () => {
-    interface PendingSave {
-      sessionId: string;
-      messageId: string;
-      userMessage: { role: string; content: string; timestamp: string };
-      assistantMessage: { role: string; content: string; timestamp: string };
-    }
-
     it('should save pending message before API call (ADR-005 recovery)', () => {
       const pendingSave: PendingSave = {
         sessionId: 'test-session',

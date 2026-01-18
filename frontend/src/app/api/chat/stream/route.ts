@@ -19,6 +19,8 @@ import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import {
   ONBOARDING_SYSTEM_PROMPT,
   getStageSystemContext,
+  getSystemPrompt,
+  type OnboardingMode,
 } from '@/lib/ai/onboarding-prompt';
 
 // ============================================================================
@@ -101,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     const { data: sessionData, error: sessionError } = await supabaseClient
       .from('onboarding_sessions')
-      .select('current_stage, stage_data, user_id, status')
+      .select('current_stage, stage_data, user_id, status, ai_context')
       .eq('session_id', sessionId)
       .single();
 
@@ -126,12 +128,17 @@ export async function POST(req: NextRequest) {
     const currentStage = sessionData.current_stage || 1;
     const stageData = (sessionData.stage_data as Record<string, unknown>) || {};
     const briefData = (stageData.brief as Record<string, unknown>) || {};
+    const aiContext = (sessionData.ai_context as Record<string, unknown>) || {};
 
+    // Determine mode from session context (defaults to 'founder')
+    const mode: OnboardingMode = (aiContext.mode as OnboardingMode) || 'founder';
+    const systemPrompt = getSystemPrompt(mode);
     const stageContext = getStageSystemContext(currentStage, briefData);
 
     console.log('[api/chat/stream] Creating stream:', {
       sessionId,
       currentStage,
+      mode,
       messageCount: messages.length,
       lastMessage: messages[messages.length - 1]?.content?.substring(0, 50),
     });
@@ -153,7 +160,7 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model,
-      system: `${ONBOARDING_SYSTEM_PROMPT}\n\n${stageContext}`,
+      system: `${systemPrompt}\n\n${stageContext}`,
       messages,
       temperature: 0.7,
       // NO onFinish callback - persistence handled by /api/chat/save

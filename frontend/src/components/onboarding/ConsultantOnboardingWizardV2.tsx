@@ -18,9 +18,11 @@ import {
 } from '@/components/ui/sidebar';
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
+import { SummaryModal, type StageSummaryData } from '@/components/onboarding/SummaryModal';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { trackOnboardingEvent } from '@/lib/analytics';
+import { CONSULTANT_STAGES_CONFIG } from '@/lib/onboarding/consultant-stages-config';
 
 // ============================================================================
 // Types and Interfaces
@@ -69,6 +71,11 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
   const [input, setInput] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Summary Modal state
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [summaryStageData, setSummaryStageData] = useState<StageSummaryData[]>([]);
+  const [isSummarySubmitting, setIsSummarySubmitting] = useState(false);
+
   // Handle input change
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -105,6 +112,26 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
     }));
   }, []);
 
+  // Transform consultant stage data to SummaryModal format
+  const transformConsultantDataToSummary = useCallback((briefData: Record<string, unknown>): StageSummaryData[] => {
+    return CONSULTANT_STAGES_CONFIG.map(stageConfig => {
+      const stageDataFields: Record<string, string | string[] | undefined> = {};
+
+      for (const field of stageConfig.dataToCollect) {
+        const value = briefData[field];
+        if (value !== undefined) {
+          stageDataFields[field] = value as string | string[];
+        }
+      }
+
+      return {
+        stage: stageConfig.stage,
+        stageName: stageConfig.name,
+        data: stageDataFields,
+      };
+    });
+  }, []);
+
   // Refetch session status
   const refetchSessionStatus = useCallback(async () => {
     if (!session) return;
@@ -135,13 +162,22 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
           console.log('[ConsultantOnboarding] Session status updated:', {
             stage: data.currentStage,
             progress: data.overallProgress,
+            completed: data.completed,
           });
+
+          // Check if onboarding is complete - show SummaryModal
+          if (data.completed && data.briefData) {
+            const summaryData = transformConsultantDataToSummary(data.briefData);
+            setSummaryStageData(summaryData);
+            setShowSummaryModal(true);
+            console.log('[ConsultantOnboarding] Practice setup complete, showing summary modal');
+          }
         }
       }
     } catch (error) {
       console.error('[ConsultantOnboarding] Failed to refetch session status:', error);
     }
-  }, [session, initializeStages]);
+  }, [session, initializeStages, transformConsultantDataToSummary]);
 
   // Handle form submit - stream AI response
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -414,6 +450,42 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
     }
   }, [session, userId, messages, router]);
 
+  // Handle SummaryModal approve - finalize consultant setup
+  const handleSummaryApprove = useCallback(async () => {
+    if (!session) return;
+
+    setIsSummarySubmitting(true);
+    console.log('[ConsultantOnboarding] Summary approved, finalizing practice setup');
+
+    try {
+      // Call the complete endpoint to finalize the setup
+      await handleCompleteOnboarding();
+    } catch (error: any) {
+      console.error('[ConsultantOnboarding] Error finalizing practice setup:', error);
+      toast.error(`Failed to complete setup: ${error.message}`);
+    } finally {
+      setIsSummarySubmitting(false);
+      setShowSummaryModal(false);
+    }
+  }, [session, handleCompleteOnboarding]);
+
+  // Handle SummaryModal revise - return to chat for corrections
+  const handleSummaryRevise = useCallback(() => {
+    setShowSummaryModal(false);
+    console.log('[ConsultantOnboarding] User wants to revise, returning to chat');
+
+    // Add Maya's revision prompt to the conversation
+    const revisionMessage = {
+      role: 'assistant',
+      content: "I'd be happy to help you revise any of your practice information. What would you like to update or clarify? You can tell me which details need to be corrected, and I'll help you make those changes.",
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages(prev => [...prev, revisionMessage]);
+
+    toast.info('You can now revise your practice information. Just tell Maya what you\'d like to change.');
+  }, []);
+
   // Handle exit
   const handleExitOnboarding = useCallback(() => {
     setShowExitDialog(true);
@@ -550,6 +622,21 @@ export function ConsultantOnboardingWizardV2({ userId, userEmail }: ConsultantOn
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Practice Setup Summary Modal */}
+      <SummaryModal
+        isOpen={showSummaryModal}
+        onClose={() => setShowSummaryModal(false)}
+        stageData={summaryStageData}
+        onApprove={handleSummaryApprove}
+        onRevise={handleSummaryRevise}
+        isSubmitting={isSummarySubmitting}
+        title="Practice Setup Summary"
+        description="Review your practice information before finalizing your workspace setup. Maya has gathered this information to help customize your consultant experience."
+        approveButtonText="Complete Setup"
+        reviseButtonText="Make Changes"
+        stagesConfig={CONSULTANT_STAGES_CONFIG}
+      />
     </SidebarProvider>
   );
 }

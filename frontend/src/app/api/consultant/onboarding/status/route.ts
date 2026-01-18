@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
       supabaseClient = supabase;
     }
 
-    // Fetch session from database
+    // Fetch session from database (including stage_data for completion detection)
     const { data: session, error: sessionError } = await supabaseClient
       .from('consultant_onboarding_sessions')
-      .select('current_stage, overall_progress, stage_progress, status')
+      .select('current_stage, overall_progress, stage_progress, status, stage_data')
       .eq('session_id', sessionId)
       .single();
 
@@ -40,12 +40,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    // Extract stage_data for completion detection and SummaryModal
+    const stageData = session.stage_data as Record<string, unknown> | null;
+    const isCompleted = session.status === 'completed' || !!stageData?.completion;
+    const briefData = stageData?.brief || {};
+
     return NextResponse.json({
       success: true,
       currentStage: session.current_stage,
       overallProgress: session.overall_progress,
       stageProgress: session.stage_progress,
       status: session.status,
+      completed: isCompleted,
+      briefData: isCompleted ? briefData : undefined,
     });
 
   } catch (error: any) {

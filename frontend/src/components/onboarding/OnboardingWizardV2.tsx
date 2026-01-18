@@ -21,6 +21,8 @@ import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { ConversationInterface } from '@/components/onboarding/ConversationInterfaceV2';
 import { FoundersBriefReview, EntrepreneurBrief } from '@/components/onboarding/FoundersBriefReview';
 import { StageReviewModal } from '@/components/onboarding/StageReviewModal';
+import { SummaryModal, type StageSummaryData } from '@/components/onboarding/SummaryModal';
+import { transformSessionToSummary } from '@/lib/onboarding/summary-helpers';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -38,6 +40,10 @@ interface OnboardingWizardProps {
   userId: string;
   planType: 'trial' | 'sprint' | 'founder' | 'enterprise';
   userEmail: string;
+  /** Mode for Alex: 'founder' (direct user) or 'client' (consultant's client) */
+  mode?: 'founder' | 'client';
+  /** Optional client project ID when in client mode */
+  clientProjectId?: string;
 }
 
 interface OnboardingSession {
@@ -64,7 +70,7 @@ interface StageInfo {
 // Main OnboardingWizard Component
 // ============================================================================
 
-export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWizardProps) {
+export function OnboardingWizard({ userId, planType, userEmail, mode = 'founder', clientProjectId }: OnboardingWizardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const forceNewFromUrl = searchParams?.get('forceNew') === 'true';
@@ -108,6 +114,17 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
   // Stage review modal state
   const [showStageReview, setShowStageReview] = useState(false);
   const [reviewStage, setReviewStage] = useState<number | null>(null);
+
+  // Summary modal state (shown after Stage 7 completion, before CrewAI)
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [summaryStageData, setSummaryStageData] = useState<StageSummaryData[]>([]);
+  const [isSummarySubmitting, setIsSummarySubmitting] = useState(false);
+  // Store pending completion data until user approves
+  const [pendingCompletion, setPendingCompletion] = useState<{
+    queued?: boolean;
+    projectId?: string;
+    workflowId?: string;
+  } | null>(null);
 
   // Analysis state
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
@@ -680,7 +697,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
         } : null);
       }
 
-      // Handle onboarding completion (ADR-005: Queue-based)
+      // Handle onboarding completion - Show SummaryModal for Approve/Revise
       if (saveResult.completed) {
         // ADR-005 Fix: Update session status to 'completed' for completion check
         setSession(prev => prev ? {
@@ -688,73 +705,57 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           status: 'completed',
           overallProgress: 100,
         } : null);
-        console.log('[OnboardingWizard] Onboarding completed:', {
+        console.log('[OnboardingWizard] Onboarding completed - showing summary for approval:', {
           queued: saveResult.queued,
           projectId: saveResult.projectId,
           workflowId: saveResult.workflowId,
         });
 
-        // Show completion modal - processing will happen in background
+        // Store completion data for after user approval
+        setPendingCompletion({
+          queued: saveResult.queued,
+          projectId: saveResult.projectId,
+          workflowId: saveResult.workflowId,
+        });
+
+        // Fetch stage data and show summary modal
+        try {
+          const statusResponse = await fetch(
+            `/api/onboarding/status?sessionId=${session.sessionId}`,
+            { credentials: 'include' }
+          );
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+            const stageData = statusData.session?.stage_data || {};
+            const summaryData = transformSessionToSummary(stageData, 7);
+            setSummaryStageData(summaryData);
+          }
+        } catch (e) {
+          console.warn('[OnboardingWizard] Failed to fetch stage data for summary:', e);
+          // Fall back to empty summary if fetch fails
+          setSummaryStageData([]);
+        }
+
+        // Show summary modal for Approve/Revise decision
+        setShowSummaryModal(true);
+        toast.success('Stage 7 complete! Please review your responses.');
+
+        // NOTE: CrewAI is NOT triggered yet - waits for user to click Approve
+        // This allows user to revise if they want to correct anything
+        return; // Exit early - don't continue with immediate CrewAI trigger
+      }
+
+      // Legacy completion handling (direct CrewAI trigger) - kept for backwards compatibility
+      // This path is only used if saveResult.completed is false but other conditions apply
+      if (saveResult.projectId && saveResult.workflowId && !saveResult.completed) {
+        // Legacy direct completion (fallback - shouldn't normally happen)
+        setProjectId(saveResult.projectId);
+        setWorkflowId(saveResult.workflowId);
         setAnalysisState('analyzing');
         setAnalysisStatus('running');
         setShowAnalysisModal(true);
-
-        if (saveResult.queued) {
-          // Queue-based completion (ADR-005)
-          toast.success('Onboarding complete! Processing your Founder\'s Brief...');
-
-          // Poll the session status to get projectId/workflowId once worker processes
-          const pollForWorkflow = async () => {
-            let attempts = 0;
-            const maxAttempts = 60; // 5 minutes (5s intervals)
-
-            const poll = async () => {
-              attempts++;
-              try {
-                const statusResponse = await fetch(
-                  `/api/onboarding/status?sessionId=${session.sessionId}`,
-                  { credentials: 'include' }
-                );
-
-                if (statusResponse.ok) {
-                  const statusData = await statusResponse.json();
-                  if (statusData.success && statusData.completion) {
-                    const { projectId: pid, workflowId: wid } = statusData.completion;
-                    if (pid && wid) {
-                      console.log('[OnboardingWizard] Worker completed, starting polling:', { pid, wid });
-                      setProjectId(pid);
-                      setWorkflowId(wid);
-                      startAnalysisPolling(wid, pid);
-                      return;
-                    }
-                  }
-                }
-              } catch (e) {
-                console.warn('[OnboardingWizard] Status poll error:', e);
-              }
-
-              if (attempts < maxAttempts) {
-                setTimeout(poll, 5000); // Poll every 5 seconds
-              } else {
-                console.error('[OnboardingWizard] Timeout waiting for worker');
-                toast.error('Processing is taking longer than expected. Check your dashboard.');
-                const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
-                router.push(dashboardRoute);
-              }
-            };
-
-            // Start polling after short delay (give worker time to start)
-            setTimeout(poll, 3000);
-          };
-
-          pollForWorkflow();
-        } else if (saveResult.projectId && saveResult.workflowId) {
-          // Legacy direct completion (fallback)
-          setProjectId(saveResult.projectId);
-          setWorkflowId(saveResult.workflowId);
-          toast.success('Compiling your Founder\'s Brief...');
-          startAnalysisPolling(saveResult.workflowId, saveResult.projectId);
-        }
+        toast.success('Compiling your Founder\'s Brief...');
+        startAnalysisPolling(saveResult.workflowId, saveResult.projectId);
       }
 
     } catch (error: unknown) {
@@ -790,7 +791,7 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
 
     try {
       // Real mode - call API
-      console.log('📡 Calling /api/onboarding/start with:', { userId, planType });
+      console.log('📡 Calling /api/onboarding/start with:', { userId, planType, mode, clientProjectId });
       const response = await fetch('/api/onboarding/start/', {
         method: 'POST',
         headers: {
@@ -800,6 +801,8 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           userId,
           planType,
           forceNew,
+          mode, // 'founder' or 'client' - affects Alex's prompt framing
+          clientProjectId, // When in client mode, associates data with client's project
           userContext: {
             referralSource: 'direct',
             previousExperience: 'first_time',
@@ -883,7 +886,121 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
     }
   }, [userId, planType, initializeStages, announceToScreenReader]);
 
-  // Handle onboarding completion
+  // ========================================================================
+  // Summary Modal Handlers (Approve/Revise flow after Stage 7)
+  // ========================================================================
+
+  /**
+   * Handle approval from SummaryModal - triggers CrewAI analysis
+   */
+  const handleSummaryApprove = useCallback(async () => {
+    if (!session || !pendingCompletion) {
+      toast.error('Session data not available');
+      return;
+    }
+
+    setIsSummarySubmitting(true);
+
+    try {
+      console.log('[OnboardingWizard] User approved summary, triggering CrewAI:', pendingCompletion);
+
+      // Close summary modal and show analysis modal
+      setShowSummaryModal(false);
+      setAnalysisState('analyzing');
+      setAnalysisStatus('running');
+      setShowAnalysisModal(true);
+
+      if (pendingCompletion.queued) {
+        // Queue-based completion (ADR-005)
+        toast.success('Processing your Founder\'s Brief...');
+
+        // Poll the session status to get projectId/workflowId once worker processes
+        let attempts = 0;
+        const maxAttempts = 60; // 5 minutes (5s intervals)
+
+        const poll = async () => {
+          attempts++;
+          try {
+            const statusResponse = await fetch(
+              `/api/onboarding/status?sessionId=${session.sessionId}`,
+              { credentials: 'include' }
+            );
+
+            if (statusResponse.ok) {
+              const statusData = await statusResponse.json();
+              if (statusData.success && statusData.completion) {
+                const { projectId: pid, workflowId: wid } = statusData.completion;
+                if (pid && wid) {
+                  console.log('[OnboardingWizard] Worker completed, starting polling:', { pid, wid });
+                  setProjectId(pid);
+                  setWorkflowId(wid);
+                  startAnalysisPolling(wid, pid);
+                  return;
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('[OnboardingWizard] Status poll error:', e);
+          }
+
+          if (attempts < maxAttempts) {
+            setTimeout(poll, 5000); // Poll every 5 seconds
+          } else {
+            console.error('[OnboardingWizard] Timeout waiting for worker');
+            toast.error('Processing is taking longer than expected. Check your dashboard.');
+            const dashboardRoute = planType === 'sprint' ? '/clients' : '/founder-dashboard';
+            router.push(dashboardRoute);
+          }
+        };
+
+        // Start polling after short delay (give worker time to start)
+        setTimeout(poll, 3000);
+      } else if (pendingCompletion.projectId && pendingCompletion.workflowId) {
+        // Direct completion (legacy)
+        setProjectId(pendingCompletion.projectId);
+        setWorkflowId(pendingCompletion.workflowId);
+        toast.success('Compiling your Founder\'s Brief...');
+        startAnalysisPolling(pendingCompletion.workflowId, pendingCompletion.projectId);
+      } else {
+        // No workflow data - use handleCompleteOnboarding as fallback
+        console.log('[OnboardingWizard] No pending workflow data, using complete endpoint');
+        await handleCompleteOnboarding();
+      }
+    } catch (error) {
+      console.error('[OnboardingWizard] Error during approval:', error);
+      toast.error('Failed to start analysis. Please try again.');
+    } finally {
+      setIsSummarySubmitting(false);
+      setPendingCompletion(null);
+    }
+  }, [session, pendingCompletion, planType, router, startAnalysisPolling]);
+
+  /**
+   * Handle revision from SummaryModal - returns to chat for corrections
+   */
+  const handleSummaryRevise = useCallback(() => {
+    console.log('[OnboardingWizard] User chose to revise - returning to chat');
+
+    // Reset completion state
+    setPendingCompletion(null);
+    setSession(prev => prev ? {
+      ...prev,
+      status: 'active', // Back to active status
+      overallProgress: 95, // Stay at high progress
+    } : null);
+
+    // Add a message prompting the user to clarify
+    const revisionPrompt: { role: string; content: string; timestamp: string } = {
+      role: 'assistant',
+      content: "I understand you'd like to make some changes. What would you like to revise? You can clarify any of the information we discussed, and I'll update the summary accordingly.",
+      timestamp: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, revisionPrompt]);
+
+    toast.info('Please provide any corrections or additional details.');
+  }, []);
+
+  // Handle onboarding completion (used as fallback if no pending workflow)
   const handleCompleteOnboarding = useCallback(async () => {
     if (!session) return;
 
@@ -1415,6 +1532,21 @@ export function OnboardingWizard({ userId, planType, userEmail }: OnboardingWiza
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Summary Modal - Shown after Stage 7 completion for Approve/Revise */}
+      <SummaryModal
+        isOpen={showSummaryModal}
+        onClose={() => {
+          // Don't allow closing during submission
+          if (!isSummarySubmitting) {
+            setShowSummaryModal(false);
+          }
+        }}
+        stageData={summaryStageData}
+        onApprove={handleSummaryApprove}
+        onRevise={handleSummaryRevise}
+        isSubmitting={isSummarySubmitting}
+      />
 
       {/* Stage Review Modal */}
       {reviewStage !== null && (

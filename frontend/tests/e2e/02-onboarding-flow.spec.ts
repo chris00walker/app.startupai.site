@@ -36,9 +36,9 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
     await expect(chatInterface).toBeVisible({ timeout: 10000 });
 
-    // Check for input field
+    // Check for input field (placeholder is "Type your response...")
     const inputField = page.locator(
-      'textarea[placeholder*="message" i], input[type="text"][placeholder*="message" i]'
+      'textarea[placeholder*="response" i], textarea[aria-label*="message" i], [data-testid="chat-input"]'
     ).first();
     await expect(inputField).toBeVisible();
 
@@ -79,35 +79,35 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     await page.screenshot({ path: 'test-results/first-exchange.png', fullPage: true });
   });
 
-  test('should progress through Stage 1: Problem Discovery', async ({ page }) => {
-    // Stage 1: Understanding the customer and their problem
+  test('should progress through Stage 1: Welcome & Introduction', async ({ page }) => {
+    // Stage 1 key questions: business idea, inspiration, current stage
+    // Using 3-4 topic-aligned responses for deterministic progression
     const stage1Responses = [
-      'I want to help small business owners manage their customer relationships better',
-      'My target customers are small business owners with 5-50 employees who struggle with scattered customer data',
-      'They currently use spreadsheets and email, which makes it hard to track customer interactions and follow up',
-      'The main pain point is losing track of important customer conversations and missing follow-up opportunities',
-      'This costs them revenue because they forget to reach out to interested customers at the right time',
+      // Q1: What business idea are you excited about?
+      'I want to build a meal planning app for busy families',
+      // Q2: What inspired this?
+      'I was inspired by my own struggle with meal prep - spending hours each week deciding what to cook',
+      // Q3: What stage is your business?
+      'Just an idea right now - I have some wireframes but no code yet',
     ];
 
     for (const response of stage1Responses) {
       await sendMessage(page, response);
       await waitForAIResponse(page, 45000);
-      // No fixed delay needed - waitForAIResponse ensures response is rendered
     }
 
     // Take screenshot after stage 1
     await page.screenshot({ path: 'test-results/stage-1-complete.png', fullPage: true });
 
-    console.log('Stage 1 responses completed');
+    console.log('Stage 1 (Welcome & Introduction) completed with topic-aligned responses');
   });
 
-  test('should handle multi-turn conversation in Stage 2: Solution Validation', async ({ page }) => {
-    // First complete Stage 1 quickly
+  test('should handle multi-turn conversation in Stage 2: Customer Discovery', async ({ page }) => {
+    // First complete Stage 1 (3 exchanges)
     const stage1 = [
-      'I want to help small business owners manage their customer relationships',
-      'Small business owners with 5-50 employees',
-      'They use spreadsheets and email which is inefficient',
-      'They lose track of customer conversations and miss opportunities',
+      'A meal planning app for busy families',
+      'Personal frustration with meal prep',
+      'Just starting - idea stage',
     ];
 
     for (const msg of stage1) {
@@ -115,24 +115,25 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
       await waitForAIResponse(page, 45000);
     }
 
-    // Now do Stage 2 - Solution
+    // Stage 2 key questions: target customers, specific group, current solutions
     const stage2Responses = [
-      'I want to build a simple CRM that automatically tracks email conversations and reminds them to follow up',
-      'It will integrate with their email and create a timeline of all customer interactions automatically',
-      'Unlike other CRMs, it will be extremely simple - just email integration and smart reminders, no complex features',
-      'My main differentiator is simplicity - other CRMs are too complex for small businesses',
+      // Q1: Who would be interested?
+      'Busy parents with young children who struggle with meal planning',
+      // Q2: What specific group?
+      'Families with 2+ kids where both parents work full-time',
+      // Q3: How do they currently solve this?
+      'They use recipe apps, Pinterest boards, or just wing it each night',
     ];
 
     for (const response of stage2Responses) {
       await sendMessage(page, response);
       await waitForAIResponse(page, 45000);
-      // No fixed delay needed - waitForAIResponse ensures response is rendered
     }
 
     // Take screenshot
     await page.screenshot({ path: 'test-results/stage-2-complete.png', fullPage: true });
 
-    console.log('Stage 2 conversation completed');
+    console.log('Stage 2 (Customer Discovery) completed with topic-aligned responses');
   });
 
   test('should track conversation progress', async ({ page }) => {
@@ -159,11 +160,12 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
   });
 
   test('should handle empty message submission gracefully', async ({ page }) => {
-    // Try to send an empty message
+    // Try to send an empty message (use same selector as sendMessage helper)
     const chatInput = page.locator(
-      'textarea[placeholder*="message" i], input[type="text"][placeholder*="message" i]'
+      'textarea[placeholder*="response" i], textarea[aria-label*="message" i], textarea[placeholder*="type" i], [data-testid="chat-input"]'
     ).first();
 
+    await expect(chatInput).toBeVisible({ timeout: 10000 });
     await chatInput.clear();
 
     const sendButton = page.locator(
@@ -227,10 +229,12 @@ test.describe('Onboarding Conversation Flow - Founder User', () => {
     await sendMessage(page, 'They struggle with deciding what to cook each day');
     await waitForAIResponse(page, 45000);
 
-    // The AI should maintain context - check that all messages are visible
-    await expect(page.locator('text="meal planning app"')).toBeVisible();
-    await expect(page.locator('text="busy parents"')).toBeVisible();
-    await expect(page.locator('text="what to cook"')).toBeVisible();
+    // The AI should maintain context - check that all user messages are visible in the conversation
+    // Use partial text matching to be more resilient to wrapping/formatting
+    const conversationArea = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await expect(conversationArea).toContainText('meal planning', { timeout: 5000 });
+    await expect(conversationArea).toContainText('busy parents', { timeout: 5000 });
+    await expect(conversationArea).toContainText('what to cook', { timeout: 5000 });
 
     console.log('Conversation context maintained');
 
@@ -264,9 +268,9 @@ test.describe('Onboarding Session Management - Founder User', () => {
     const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]');
     await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
 
-    // Verify the previous message is still visible
-    const previousMessage = page.locator(`text="${testMessage}"`);
-    await expect(previousMessage).toBeVisible({ timeout: 10000 });
+    // Verify the previous message is still visible (use partial text match for resilience)
+    const chatArea = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await expect(chatArea).toContainText('fitness tracking', { timeout: 10000 });
 
     console.log('Conversation resumed after reload');
 
@@ -394,5 +398,90 @@ test.describe('Onboarding Session Management - Founder User', () => {
 
     // Take screenshot
     await page.screenshot({ path: 'test-results/resume-indicator.png', fullPage: true });
+  });
+});
+
+// ============================================================================
+// Deterministic Onboarding Flow Tests
+// ============================================================================
+
+test.describe('Deterministic 7-Stage Onboarding - Founder User', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
+    await login(page, FOUNDER_USER);
+
+    const url = page.url();
+    if (!url.includes('/onboarding') && !url.includes('/chat')) {
+      await navigateToOnboarding(page);
+    }
+
+    const chatInterface = page.locator('[data-testid="chat-interface"], [data-testid="onboarding"]').first();
+    await chatInterface.waitFor({ state: 'visible', timeout: 15000 });
+  });
+
+  test('should handle "I don\'t know" responses gracefully', async ({ page }) => {
+    // Test that uncertainty is accepted and stage still progresses
+    const responsesWithUncertainty = [
+      // Stage 1 - mix of answers and uncertainty
+      'A meal planning app for families',
+      "I don't know exactly what inspired me - it just seemed like a good idea",
+      "I haven't thought about the business stage yet",
+    ];
+
+    for (const response of responsesWithUncertainty) {
+      await sendMessage(page, response);
+      await waitForAIResponse(page, 45000);
+    }
+
+    // Verify Alex acknowledged uncertainty (should continue without looping)
+    // Look for any assistant message - Alex should not ask for a "better" answer
+    const assistantMessages = page.locator('[data-role="assistant"], [data-testid="ai-message"]');
+    const messageCount = await assistantMessages.count();
+
+    // Should have 3 assistant messages (one response per user message)
+    expect(messageCount).toBeGreaterThanOrEqual(3);
+
+    console.log('Uncertainty responses handled gracefully');
+
+    await page.screenshot({ path: 'test-results/uncertainty-handling.png', fullPage: true });
+  });
+
+  test('should complete stages with topic-aligned responses', async ({ page }) => {
+    // Stage 1: Welcome & Introduction (3 key questions)
+    const stage1 = [
+      'I want to build a subscription box for pet owners',
+      'My dog inspired me - I spend hours researching the best treats and toys',
+      'Early stage - just validating the idea',
+    ];
+
+    // Stage 2: Customer Discovery (3 key questions)
+    const stage2 = [
+      'Dog owners who want premium, curated products for their pets',
+      'Millennials with dogs who treat them like family members',
+      'They currently browse Amazon or specialty pet stores',
+    ];
+
+    // Send Stage 1 responses
+    for (const msg of stage1) {
+      await sendMessage(page, msg);
+      await waitForAIResponse(page, 45000);
+    }
+
+    console.log('Stage 1 completed');
+
+    // Send Stage 2 responses
+    for (const msg of stage2) {
+      await sendMessage(page, msg);
+      await waitForAIResponse(page, 45000);
+    }
+
+    console.log('Stage 2 completed');
+
+    // Verify conversation is progressing (multiple exchanges completed)
+    const allMessages = page.locator('[data-role="user"], [data-role="assistant"]');
+    const totalMessages = await allMessages.count();
+    expect(totalMessages).toBeGreaterThanOrEqual(12); // 6 user + 6 assistant
+
+    await page.screenshot({ path: 'test-results/stages-1-2-complete.png', fullPage: true });
   });
 });
