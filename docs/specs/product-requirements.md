@@ -1,8 +1,12 @@
+---
+purpose: "Product requirements document for StartupAI platform"
+status: "active"
+last_reviewed: "2025-10-27"
+---
+
 # Product Requirements Document (PRD)
 ## StartupAI Evidence-Led Strategy Platform
 
-**Document Status:** Active  
-**Last Updated:** October 27, 2025  
 **Version:** 2.0  
 
 ## Executive Summary

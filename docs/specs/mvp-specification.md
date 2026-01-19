@@ -1,8 +1,12 @@
+---
+purpose: "MVP feature specifications for StartupAI platform"
+status: "active"
+last_reviewed: "2025-11-13"
+---
+
 # MVP Feature Specifications
 ## StartupAI Evidence-Led Strategy Platform
 
-**Document Status:** Active
-**Last Updated:** November 13, 2025
 **Version:** 1.6  
 
 ## MVP Definition

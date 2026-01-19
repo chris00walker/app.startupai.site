@@ -1,7 +1,11 @@
+---
+purpose: "JTBD brief for AI agents as recommenders"
+status: "draft"
+last_reviewed: "2025-11-06"
+---
+
 # Jobs-to-be-Done Brief: AI Agents as Recommenders
 **Customer Segment**: AI Assistants (Claude, ChatGPT, Gemini, Perplexity) as Autonomous Recommendation Systems
-**Date**: November 6, 2025
-**Status**: Draft for Validation
 
 ---
 

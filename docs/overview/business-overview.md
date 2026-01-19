@@ -1,8 +1,12 @@
+---
+purpose: "Business case and executive summary"
+status: "active"
+last_reviewed: "2025-10-27"
+---
+
 # Business Case Executive Summary
 ## StartupAI Evidence-Led Strategy Platform
 
-**Document Status:** Active  
-**Last Updated:** October 27, 2025  
 **Version:** 1.0  
 
 ## Executive Summary

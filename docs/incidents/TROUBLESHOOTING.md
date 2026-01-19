@@ -1,3 +1,9 @@
+---
+purpose: "Troubleshooting guide for client management"
+status: "active"
+last_reviewed: "2026-01-18"
+---
+
 # Troubleshooting Guide: Client Management Architecture
 
 ## Common Issues and Solutions

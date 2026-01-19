@@ -1,9 +1,13 @@
+---
+purpose: "Strategic proposals under consideration"
+status: "draft"
+last_reviewed: "2025-11-28"
+---
+
 # Strategic Proposals Overview
 ## Future Strategic Options (Under Consideration)
 
-**Document Status:** Under Review
-**Last Updated:** November 28, 2025
-**Decision Timeline:** Q1 2026 (December 2025 recommendations, January 2026 decision)
+**Decision Timeline:** Q1 2026
 
 ---
 

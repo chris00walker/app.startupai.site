@@ -1,3 +1,9 @@
+---
+purpose: "Legacy Agentuity integration (deprecated)"
+status: "deprecated"
+last_reviewed: "2026-01-18"
+---
+
 # DEPRECATED - This file has been marked for deletion
 
 This Agentuity integration specification is no longer relevant. Agentuity has been fully replaced by Modal serverless (CrewAI Flows).

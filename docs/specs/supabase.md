@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for Supabase configuration"
 status: "active"
-last_reviewed: "2025-10-25"
+last_reviewed: "2026-01-18"
 ---
 
 # Supabase Configuration
@@ -34,6 +34,67 @@ Environment sources:
 - Stored procedures (`create_onboarding_session`, `upsert_entrepreneur_brief`, etc.) are `SECURITY DEFINER` so service-role processes can call them without exposing elevated privileges to clients.
 - Triggers: `set_updated_at_timestamp` (00005) and `entrepreneur_briefs_updated_at` keep timestamps consistent. Do not bypass triggers with direct SQL updates in code; use Supabase RPC or the provided functions.
 - JWT validation for serverless workloads happens inside Netlify functions (`netlify/functions/crew-analyze.py`). Those functions fetch the anon key to validate the bearer token before touching service credentials.
+
+## Realtime Configuration
+
+Supabase Realtime enables live updates for specific tables. Configure carefully - large JSONB columns can cause performance issues.
+
+### Enabled Tables
+
+| Table | Columns | Use Case |
+|-------|---------|----------|
+| `onboarding_sessions` | Scalar only (excludes JSONB) | Progress bar updates during onboarding |
+| `founders_briefs` | Full table | Brief completion notification |
+| `validation_progress` | Full table | Live progress during CrewAI validation |
+| `approval_requests` | Full table | New approval notifications |
+
+### Disabled Tables
+
+| Table | Reason |
+|-------|--------|
+| `crewai_validation_states` | `state_data` JSONB too large (100KB+) |
+| `evidence` | Batch updates, no real-time need |
+| `conversation_history` | Part of `onboarding_sessions.conversation_history` JSONB |
+
+### Frontend Subscription Pattern
+
+```typescript
+import { createClient } from '@/lib/supabase/client';
+
+// Subscribe to validation progress
+const supabase = createClient();
+const channel = supabase
+  .channel('validation-progress')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'validation_progress',
+    filter: `run_id=eq.${runId}`
+  }, (payload) => {
+    setProgress(payload.new.progress_pct);
+    setMessage(payload.new.message);
+  })
+  .subscribe();
+
+// Cleanup on unmount
+return () => {
+  supabase.removeChannel(channel);
+};
+```
+
+### Enabling Realtime
+
+Realtime is enabled per-table in the Supabase dashboard:
+1. Go to Database → Replication
+2. Select tables to enable
+3. For large tables, use column filters to exclude JSONB
+
+### Performance Considerations
+
+- **Scalar columns only**: For `onboarding_sessions`, only broadcast scalar columns (`current_stage`, `overall_progress`, `status`) to avoid sending large `conversation_history` JSONB
+- **Filter by user**: Always filter subscriptions by `user_id` or `project_id` to avoid receiving updates for other users
+- **Debounce updates**: Modal sends frequent progress updates; consider debouncing on the frontend
+- **Connection limits**: Each browser tab opens a WebSocket; use shared channels where possible
 
 ## Migrations
 

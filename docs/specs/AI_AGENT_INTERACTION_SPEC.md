@@ -1,8 +1,12 @@
+---
+purpose: "Technical spec for AI agent interaction framework"
+status: "draft"
+last_reviewed: "2025-11-08"
+---
+
 # AI Agent Interaction Specification & Implementation Framework
 
 **Customer Segment**: AI Agents as Discovery & Recommendation Channel
-**Date**: November 8, 2025
-**Status**: Technical Implementation Specification
 
 ---
 

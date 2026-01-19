@@ -1,8 +1,14 @@
+---
+purpose: "Incident analysis - onboarding workflow failure"
+status: "resolved"
+last_reviewed: "2025-11-12"
+---
+
 # Onboarding Workflow Failure - Systems Engineering Analysis
 
 **Date:** 2025-11-12
+**Status:** Resolved via Two-Pass Architecture (ADR-004)
 **Issue:** Completed onboarding conversation shows 0% progress, no stage advancement, no CrewAI trigger
-**Evidence:** Screenshot showing conversation with Alex completed but sidebar stuck at Stage 1, 0% progress
 
 ---
 

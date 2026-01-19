@@ -1,3 +1,9 @@
+---
+purpose: "Testing documentation index"
+status: "active"
+last_reviewed: "2026-01-18"
+---
+
 # Testing Documentation
 
 Testing infrastructure for the StartupAI platform.

@@ -1,7 +1,10 @@
-# E2E Testing Guide: Backend Integration
+---
+purpose: "E2E testing guide for backend integration"
+status: "active"
+last_reviewed: "2025-10-04"
+---
 
-**Created:** October 4, 2025  
-**Status:** Ready for execution
+# E2E Testing Guide: Backend Integration
 
 ## Overview
 

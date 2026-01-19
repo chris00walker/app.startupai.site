@@ -1,10 +1,16 @@
+---
+purpose: "Complete onboarding journey map and UX specification"
+status: "active"
+last_reviewed: "2026-01-18"
+---
+
 # 🗺️ Complete Onboarding Journey Map
 
 **End-to-End User Experience Specification**
 
-**Status:** 🟢 **IMPLEMENTED** - Core UX live, session management complete
-**Last Updated:** 2025-11-30
-**Cross-Reference:** [`features/stage-progression.md`](../features/stage-progression.md) - Implementation details  
+**Status:** 🟢 **IMPLEMENTED** - Two-Pass Architecture (Jan 2026)
+**Last Updated:** 2026-01-18
+**Cross-Reference:** [`features/stage-progression.md`](../features/stage-progression.md) - Implementation details
 
 ---
 
@@ -13,7 +19,36 @@
 This document maps the complete user journey from marketing site signup to receiving AI-generated strategic insights. Use this as a UX reference for the intended user experience and validation checklist.
 
 **Marketing Promise:** "AI-guided strategy session" leading to "comprehensive strategic analysis"
-**Implementation:** See `features/stage-progression.md` for current stage system  
+**Implementation:** See `features/stage-progression.md` for current stage system
+
+---
+
+## Architecture Reference (Jan 2026)
+
+> **Source of Truth**: See [ADR-004: Two-Pass Onboarding Architecture](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
+
+### Two-Pass Flow
+
+The onboarding uses a Two-Pass Architecture for deterministic progression:
+
+| Pass | Endpoint | Purpose |
+|------|----------|---------|
+| **Pass 1** | `/api/chat/stream` | LLM streams conversation (no tools) |
+| **Pass 2** | `/api/chat/save` | Backend assesses quality, advances stage |
+
+### Key Change from Previous Implementation
+
+| Old Approach (Pre-Jan 2026) | New Approach (Jan 2026) |
+|-----------------------------|-------------------------|
+| LLM called tools (`advanceStage`, `completeOnboarding`) | Backend assesses after each message |
+| Tool schemas caused hallucination errors | Deterministic topic coverage assessment |
+| Unpredictable progression | Consistent 7-stage progression |
+
+### Timing Impact
+
+- **User Experience**: Unchanged (still feels like natural conversation)
+- **Processing**: 2 LLM calls per message (stream + assessment)
+- **Latency**: Minimal increase (~200ms for assessment)  
 
 ---
 
@@ -745,18 +780,22 @@ cognitive_support:
 - [`crewai-frontend-integration.md`](../engineering/crewai-frontend-integration.md) - API integration
 - [`onboarding-agent-personality.md`](../features/onboarding-agent-personality.md) - AI personality design
 
-**Implementation Status (Updated Nov 30, 2025):**
-- ✅ `/onboarding/founder` page live and functioning
+**Implementation Status (Updated Jan 18, 2026):**
+- ✅ `/onboarding/founder` page live with Two-Pass Architecture
 - ✅ CrewAI backend Phase 2D complete (~85%), 18 tools implemented
+- ✅ Two-Pass Architecture: `/api/chat/stream` + `/api/chat/save`
+- ✅ Deterministic quality assessment (topic-based, not tool-based)
 - ✅ Real-time streaming conversation interface (Vercel AI SDK)
 - ✅ Multi-agent workflow integration (webhook + polling)
 - ✅ Session management (start new, resume indicator)
 - ✅ Team awareness (Alex → Sage handoff)
 - ✅ Project creation routes to Alex (not quick wizard)
+- ✅ StageReviewModal for stage transitions
+- ✅ SummaryModal with Approve/Revise flow
 
 ---
 
-**Status:** 🟢 **IMPLEMENTED**
+**Status:** 🟢 **IMPLEMENTED** (Two-Pass Architecture)
 **Business Impact:** Marketing promise of "AI-guided strategy session" now delivered
 **User Impact:** Full 7-stage onboarding with session management and team handoff
-**Test Coverage:** 108 unit tests + 4 E2E tests for Alex UX features  
+**Test Coverage:** 824+ unit tests + 101 E2E specs for Alex UX features  

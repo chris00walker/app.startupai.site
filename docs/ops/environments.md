@@ -1,3 +1,9 @@
+---
+purpose: "Multi-environment setup guide (local, staging, production)"
+status: "active"
+last_reviewed: "2026-01-18"
+---
+
 # Multi-Environment Setup Guide
 
 **StartupAI Product Platform** - Complete environment management across Local, Staging, and Production

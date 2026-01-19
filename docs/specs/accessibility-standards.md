@@ -1,9 +1,13 @@
+---
+purpose: "WCAG compliance framework for accessibility"
+status: "active"
+last_reviewed: "2025-10-27"
+---
+
 # Accessibility Standards
 ## WCAG 2.0, 2.1, 2.2 AA Compliance Framework
 
-**Document Status:** Active  
-**Last Updated:** October 27, 2025  
-**Version:** 2.0  
+**Version:** 2.0
 **Compliance Target:** WCAG 2.2 AA
 
 ## Executive Summary
