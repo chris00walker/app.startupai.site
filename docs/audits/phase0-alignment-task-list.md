@@ -1,8 +1,14 @@
+---
+purpose: "Phase 0 alignment task list (pre-Two-Pass audit)"
+status: "completed"
+last_reviewed: "2026-01-16"
+---
+
 > **RETROSPECTIVE UPDATE (2026-01-16)**: Many items below have been addressed by the Two-Pass Architecture. See [ADR-004](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md).
 
 ---
 
-Phase 0 Alignment Task List (No Code Changes Executed)
+# Phase 0 Alignment Task List (No Code Changes Executed)
 
 P0 - Spec Decisions (Documentation)
 - [x] ~~Decide canonical completion trigger (tool-driven vs /api/onboarding/complete)~~ **RESOLVED**: Backend-driven assessment in `quality-assessment.ts` (no tools).

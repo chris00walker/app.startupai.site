@@ -1,3 +1,9 @@
+---
+purpose: "Client architecture migration summary"
+status: "completed"
+last_reviewed: "2025-11-30"
+---
+
 # Client Management Architecture Migration
 
 ## Summary

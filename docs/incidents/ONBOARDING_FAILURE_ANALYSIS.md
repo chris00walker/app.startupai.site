@@ -1,18 +1,26 @@
 ---
 purpose: "Incident analysis - onboarding workflow failure"
 status: "resolved"
-last_reviewed: "2025-11-12"
+last_reviewed: "2026-01-18"
 ---
 
 # Onboarding Workflow Failure - Systems Engineering Analysis
 
 **Date:** 2025-11-12
-**Status:** Resolved via Two-Pass Architecture (ADR-004)
+**Status:** ✅ **RESOLVED** via Two-Pass Architecture (ADR-004)
 **Issue:** Completed onboarding conversation shows 0% progress, no stage advancement, no CrewAI trigger
 
 ---
 
-## Expected System Architecture
+> **RESOLUTION NOTE (Jan 2026)**: This incident was fully resolved by the [Two-Pass Architecture](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md). The tool-based progression system documented below (`assessQuality`, `advanceStage`, `completeOnboarding`) has been **completely removed**. The new system uses:
+> - **Pass 1**: `/api/chat/stream` - LLM streams conversation (no tools)
+> - **Pass 2**: `/api/chat/save` - Backend deterministically assesses topics and advances stages
+>
+> The old tool names below are preserved for historical context only.
+
+---
+
+## Expected System Architecture (HISTORICAL - Nov 2025)
 
 ### Data Flow Design
 ```

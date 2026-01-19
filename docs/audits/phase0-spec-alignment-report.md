@@ -1,3 +1,9 @@
+---
+purpose: "Phase 0 spec alignment report (pre-Two-Pass audit)"
+status: "completed"
+last_reviewed: "2026-01-16"
+---
+
 > **RETROSPECTIVE UPDATE (2026-01-16)**: This audit's gap analysis has been partially addressed by the Two-Pass Architecture. See [ADR-004](../../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md). Key changes:
 > - **Tools REMOVED**: `assessQuality`, `advanceStage`, `completeOnboarding` no longer exist
 > - **Dual completion paths RESOLVED**: Backend-driven assessment is now the single path
@@ -6,7 +12,7 @@
 
 ---
 
-Phase 0 Spec Alignment Report
+# Phase 0 Spec Alignment Report
 
 Spec Source
 - Master spec: /home/chris/projects/startupai-crew/docs/master-architecture/04-phase-0-onboarding.md

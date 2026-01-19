@@ -1,3 +1,9 @@
+---
+purpose: "Strategyzer UX audit report"
+status: "completed"
+last_reviewed: "2025-11-30"
+---
+
 # Strategyzer Artifact Rendering UX Audit Report
 
 ## Executive Summary

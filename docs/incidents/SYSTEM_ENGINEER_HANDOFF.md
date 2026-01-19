@@ -1,3 +1,9 @@
+---
+purpose: "Incident report - AI streaming forbidden errors"
+status: "resolved"
+last_reviewed: "2025-11-13"
+---
+
 # System Engineer Handoff: Diagnose and Resolve AI Streaming "Forbidden" Errors
 
 **⚠️ DOCUMENT STATUS: ISSUES RESOLVED (2025-11-13)**

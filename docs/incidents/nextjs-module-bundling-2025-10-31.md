@@ -1,8 +1,13 @@
+---
+purpose: "Incident report - Next.js 15 module bundling on Netlify"
+status: "resolved"
+last_reviewed: "2025-10-31"
+---
+
 # Incident Report: Next.js 15 Module Bundling on Netlify
 
-**Date:** 2025-10-31
-**Status:** 🟡 Partially Resolved - Investigation Ongoing
-**Severity:** Critical - Site Non-Functional
+**Status:** ✅ Resolved
+**Severity:** Critical - Site Non-Functional (when occurred)
 **Reported By:** Chris Walker
 
 ## Summary

@@ -1,3 +1,9 @@
+---
+purpose: "TypeScript and Pydantic alignment verification"
+status: "completed"
+last_reviewed: "2025-11-30"
+---
+
 # TypeScript ↔ Pydantic Alignment Verification Report
 
 ## Executive Summary

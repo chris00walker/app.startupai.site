@@ -1,6 +1,11 @@
+---
+purpose: "Testing checklist for onboarding hotfix"
+status: "completed"
+last_reviewed: "2025-11-12"
+---
+
 # Testing Checklist - Onboarding Hotfix
 
-**Created:** 2025-11-12 after production incident
 **Purpose:** Ensure proper testing workflow: local → staging → production
 
 ---

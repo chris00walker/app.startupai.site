@@ -1,3 +1,9 @@
+---
+purpose: "Linting status and approach documentation"
+status: "active"
+last_reviewed: "2026-01-18"
+---
+
 # Linting Status
 
 ## Current Approach

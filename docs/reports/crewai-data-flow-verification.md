@@ -1,3 +1,9 @@
+---
+purpose: "CrewAI data flow verification report"
+status: "completed"
+last_reviewed: "2025-11-30"
+---
+
 # End-to-End Data Flow Verification Report
 
 ## Executive Summary

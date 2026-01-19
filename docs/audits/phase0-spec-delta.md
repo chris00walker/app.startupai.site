@@ -1,7 +1,15 @@
-Phase 0 Spec Delta (Proposed Updates)
+---
+purpose: "Phase 0 spec delta (proposed updates - pre-Two-Pass)"
+status: "completed"
+last_reviewed: "2026-01-16"
+---
 
-Target Spec
-- /home/chris/projects/startupai-crew/docs/master-architecture/04-phase-0-onboarding.md
+# Phase 0 Spec Delta (Proposed Updates)
+
+> **Note (2026-01-18)**: Many proposed changes here were implemented via Two-Pass Architecture. See ADR-004.
+
+## Target Spec
+- `/home/chris/projects/startupai-crew/docs/master-architecture/04-phase-0-onboarding.md`
 
 Summary of Required Spec Changes
 1. Clarify progression criteria and tool behavior.
