@@ -103,13 +103,16 @@ export function useConsultantClients() {
 
   const supabase = useMemo(() => createClient(), []);
 
+  // Use stable user ID to prevent infinite loops from object reference changes
+  const userId = user?.id;
+
   /**
    * Fetch all invites and clients from the API
    */
   const fetchData = useCallback(async () => {
     if (authLoading) return;
 
-    if (!user) {
+    if (!userId) {
       setState(prev => ({
         ...prev,
         invites: [],
@@ -147,7 +150,7 @@ export function useConsultantClients() {
         error: err as Error,
       }));
     }
-  }, [user, authLoading]);
+  }, [userId, authLoading]);
 
   useEffect(() => {
     fetchData();
