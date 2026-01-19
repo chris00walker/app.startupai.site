@@ -1,8 +1,35 @@
 # Consultant vs Founder Onboarding Clarification
 
 **Date:** 2025-11-12
-**Status:** 🔴 Requires Decision
-**Priority:** HIGH - Impacts UX design and test expectations
+**Status:** ✅ RESOLVED (2026-01-19)
+**Priority:** CLOSED
+
+---
+
+## Resolution (2026-01-19)
+
+**Decision:** Interpretation 2 - Consultants Onboard Their Clients
+
+The consultant-client system was implemented with the following approach:
+- Consultants have their own practice setup (Maya AI) at `/onboarding/consultant`
+- Consultants invite clients via email tokens
+- Consultants can onboard clients on their behalf using "client mode"
+- Client data is stored to client projects, not consultant projects
+
+**Implementation:**
+- [`consultant-client-system.md`](../features/consultant-client-system.md) - Technical implementation
+- [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) - 6-phase consultant journey
+- [`user-personas.md`](../user-experience/user-personas.md) - Canonical role definitions
+- [`user-stories.md`](../user-experience/user-stories.md) - US-C01 through US-C07
+
+**E2E Tests:**
+- `09-consultant-practice-setup.spec.ts` - Practice setup flow
+- `10-consultant-client-onboarding.spec.ts` - Client onboarding flow
+- `06-consultant-portfolio.spec.ts` - Portfolio management
+
+---
+
+## Original Document (Historical Reference)
 
 ---
 
@@ -296,7 +323,7 @@ POST /api/consultant/onboarding/start 200 in 1428ms
 
 ---
 
-**Status:** 🔴 **BLOCKED** - Awaiting user decision on consultant workflow
+**Status:** ✅ **RESOLVED** - Decision made (Interpretation 2 implemented)
 
-**Last Updated:** 2025-11-12
-**Assigned To:** Product Owner / User
+**Last Updated:** 2026-01-19
+**Resolution:** See top of document for resolution details

@@ -327,11 +327,11 @@ This report synthesizes findings from the following preceding audits and reports
 
 | Report | Date | Location | Key Contribution |
 |--------|------|----------|------------------|
-| UI-to-CrewAI Wiring Audit | Nov 27, 2025 | `docs/audits/ui-to-crewai-wiring-audit.md` | Identified CrewAI display gap, 7-10 day estimate |
-| Security Audit | Nov 17, 2025 | `docs/audits/security-audit-*.md` | 16 migrations applied, RLS verified, 0 critical issues |
-| Strategyzer UX Audit | Nov 28, 2025 | `docs/reports/strategyzer-ux-audit.md` | 97% methodology alignment confirmed |
-| TypeScript-Pydantic Alignment | Nov 28, 2025 | `docs/reports/typescript-pydantic-alignment.md` | Schema sync verified across layers |
-| CrewAI E2E Data Flow | Nov 28, 2025 | `docs/reports/crewai-e2e-dataflow-verification.md` | Webhook → DB → UI pipeline validated |
+| UI-to-CrewAI Wiring Audit | Nov 27, 2025 | `docs/archive/audits/ui-crewai-wiring-audit.md` | Identified CrewAI display gap, 7-10 day estimate |
+| Security Audit | Nov 17, 2025 | `docs/archive/audits/security-audit.md` | 16 migrations applied, RLS verified, 0 critical issues |
+| Strategyzer UX Audit | Nov 28, 2025 | `docs/archive/audits/strategyzer-ux-audit.md` | 97% methodology alignment confirmed |
+| TypeScript-Pydantic Alignment | Nov 28, 2025 | `docs/archive/audits/typescript-pydantic-alignment.md` | Schema sync verified across layers |
+| CrewAI E2E Data Flow | Nov 28, 2025 | `docs/archive/audits/crewai-data-flow-verification.md` | Webhook → DB → UI pipeline validated |
 | Work Tracking (In-Progress) | Nov 26, 2025 | `docs/work/in-progress.md` | Current phase status and blockers |
 | Cross-Repo Blockers | Nov 26, 2025 | `docs/work/cross-repo-blockers.md` | Dependency chain status |
 

@@ -449,14 +449,27 @@ See `~/.claude/skills/` for cross-repo skills:
 Agents are automatically invoked based on context and trigger words in their descriptions. Skills are discovered and used when relevant to the current task. See individual agent/skill files for detailed capabilities.
 
 ## Documentation
+
+**6-folder structure** (see `docs/README.md` for full index):
+
+| Folder | Purpose |
+|--------|---------|
+| `docs/specs/` | Technical specifications (auth, APIs, data schema, architecture) |
+| `docs/features/` | Feature specifications and registry |
+| `docs/testing/` | Test strategy, E2E guides, coverage matrix |
+| `docs/user-experience/` | Journey maps, personas, user stories (TDD foundation) |
+| `docs/work/` | Active work tracking (backlog, in-progress, done) |
+| `docs/archive/` | Historical/deprecated content |
+
+**Key Documents:**
 - Authentication: `docs/specs/auth.md`
-- CrewAI Integration: `docs/overview/ONBOARDING_TO_CREWAI_ARCHITECTURE.md`
-- Architecture: `docs/overview/`
-- Specs: `docs/specs/`
-- Features: `docs/features/`
-- Work Tracking: `docs/work/`
+- Data Schema: `docs/specs/data-schema.md`
+- Architecture: `docs/specs/architecture.md`
+- User Personas: `docs/user-experience/user-personas.md`
+- User Stories: `docs/user-experience/user-stories.md`
+- Test Coverage: `docs/testing/journey-test-matrix.md`
 
 ---
-**Last Updated**: 2026-01-13
+**Last Updated**: 2026-01-19
 **Maintainer**: Chris Walker
 **Status**: ~85% Complete - Phase Alpha (Demo mode removed, real data only)

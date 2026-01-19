@@ -6,7 +6,7 @@ last_reviewed: "2025-10-27"
 
 # Implementation Status (Rolling)
 
-Master plan reference: `docs/overview/two-site-implementation-plan.md`. Update that file first; this status report summarises the same truth for quick scanning.
+Master plan reference: `../startupai.site/docs/technical/two-site-implementation-plan.md` (lives in marketing repo). Update that file first; this status report summarises the same truth for quick scanning.
 
 ## Snapshot - 27 Oct 2025
 
@@ -22,12 +22,12 @@ Master plan reference: `docs/overview/two-site-implementation-plan.md`. Update t
 
 ## Recent Work
 
-- Restored two-site master plan into this repo (`docs/overview/two-site-implementation-plan.md`) and aligned overview/status docs to its truth.
+- Restored two-site master plan into marketing repo (`../startupai.site/docs/technical/two-site-implementation-plan.md`) and aligned overview/status docs to its truth.
 - Completed `/api/analyze` App Router handler: enforces plan/trial limits, proxies the Netlify function, and persists CrewAI reports/evidence/brief updates via service-role Supabase.
 - Hardened `netlify/functions/crew-analyze.py`: active rate limiting, structured payload, and normalized insight/evidence scaffolding for downstream persistence.
 - Updated onboarding completion + project wizard flows to call `/api/analyze`, show progress/error states, and surface CrewAI summaries on project gate dashboards.
 - Accessibility improvements across onboarding components (skip link, aria labels, voice input fallbacks). Broader dashboard work still required.
-- Synced WCAG compliance spec with the refreshed onboarding layout and captured the linting deferral in `docs/status/linting.md`.
+- Synced WCAG compliance spec with the refreshed onboarding layout and captured the linting deferral in `docs/archive/status/linting.md`.
 
 ## Focus for Next Sprint
 

@@ -1,7 +1,7 @@
 ---
 purpose: "E2E testing guide for backend integration"
 status: "active"
-last_reviewed: "2025-10-04"
+last_reviewed: "2026-01-19"
 ---
 
 # E2E Testing Guide: Backend Integration
@@ -14,6 +14,22 @@ Comprehensive E2E tests for backend integration covering:
 3. ✅ Project CRUD operations
 4. ✅ OAuth callback handling
 5. ✅ Error handling and rate limiting
+
+## Story-Driven Test Mapping
+
+E2E tests are organized by user journeys and map to user stories. See [`journey-test-matrix.md`](./journey-test-matrix.md) for the complete coverage matrix.
+
+| Test File | Stories Covered | Primary Focus |
+|-----------|-----------------|---------------|
+| `01-login.spec.ts` | Cross-cutting | Authentication flows |
+| `02-onboarding-flow.spec.ts` | US-F01, US-F08, US-T01 | Founder onboarding |
+| `04-founder-analysis-journey.spec.ts` | US-F02, US-F06 | Dashboard & analysis |
+| `05-hitl-approval-flow.spec.ts` | US-F03 | Approval workflows |
+| `06-consultant-portfolio.spec.ts` | US-C03, US-C04 | Portfolio management |
+| `09-consultant-practice-setup.spec.ts` | US-C01 | Consultant setup |
+| `10-consultant-client-onboarding.spec.ts` | US-C02, US-C07 | Client onboarding |
+
+**Stories Reference:** [`user-stories.md`](../user-experience/user-stories.md)
 
 ## Quick Start
 
@@ -410,6 +426,12 @@ After these tests pass:
 
 ---
 
-**Status:** ✅ Ready for execution  
-**Last Updated:** October 4, 2025  
+**Status:** ✅ Ready for execution
+**Last Updated:** January 19, 2026
 **Maintainer:** Development Team
+
+## Related Documentation
+
+- [`strategy.md`](./strategy.md) - Testing strategy overview
+- [`journey-test-matrix.md`](./journey-test-matrix.md) - Story-to-test coverage matrix
+- [`user-stories.md`](../user-experience/user-stories.md) - User story definitions

@@ -1,7 +1,7 @@
 ---
 purpose: "UI entrypoints and wiring status (clickable actions)"
-status: "draft"
-last_reviewed: "2026-01-13"
+status: "active"
+last_reviewed: "2026-01-19"
 ---
 
 # UI Entrypoints Map
@@ -43,13 +43,16 @@ Legend:
 
 ### `/onboarding` and `/onboarding/founder` (`frontend/src/app/onboarding/page.tsx`, `frontend/src/components/onboarding/OnboardingWizardV2.tsx`)
 - Start/resume session -> `POST /api/onboarding/start` (wired)
-- Send message -> `POST /api/chat` (wired)
+- Send message (Two-Pass) -> `POST /api/chat/stream` (Pass 1: streaming) + `POST /api/chat/save` (Pass 2: persist) (wired)
+- Send message (legacy) -> `POST /api/chat` (wired, fallback)
 - Poll status -> `GET /api/onboarding/status` (wired)
+- Pause session -> `POST /api/onboarding/pause` (wired)
+- Revise previous stage -> `POST /api/onboarding/revise` (wired)
 - Complete onboarding -> `POST /api/onboarding/complete` (wired; triggers analysis workflow + redirect to `/project/[id]/gate`)
 - Exit onboarding -> client-only event + redirect to `/founder-dashboard` or `/clients` (no API call)
 - Start new conversation -> `POST /api/onboarding/abandon` (wired; clears current session before re-init)
 - Analysis status polling -> `GET /api/crewai/status?run_id=...` (wired)
-- Analysis completion redirect (analysis modal) -> `/dashboard/project/${id}` (legacy doc target; route not found in app)
+- Analysis completion redirect -> `/project/[id]/gate` (wired)
 
 ### `/onboarding/consultant` (`frontend/src/app/onboarding/consultant/page.tsx`, `frontend/src/components/onboarding/ConsultantOnboardingWizardV2.tsx`)
 - Start/resume session -> `POST /api/consultant/onboarding/start` (wired)
@@ -70,6 +73,10 @@ Legend:
 
 ### `/client/[id]/projects/new` (`frontend/src/app/client/[id]/projects/new/page.tsx`)
 - Same as `/projects/new`, but passes `clientId` to project creation (wired)
+
+### `/consultant/client/new` (`frontend/src/app/consultant/client/new/page.tsx`)
+- Create client invite -> `POST /api/consultant/invites` via `useConsultantClients()` (wired)
+- Cancel -> `/clients` or `/consultant-dashboard` (wired)
 
 ### `/project/current/evidence` (`frontend/src/app/project/current/evidence/page.tsx`)
 - Redirect -> `/project/[id]/evidence` via `useProjects()` (wired)
@@ -117,14 +124,15 @@ Legend:
 
 ### `/clients` (`frontend/src/pages/clients.tsx`)
 - View client -> link via table item (wired to `/client/[id]`)
-- New client -> `/clients/new` (wired)
-- Demo banner shown when no real data (demo)
-- Data sources -> Supabase via `useClients` with demo fallback (mixed)
+- New client -> `/clients/new` or `/consultant/client/new` (wired)
+- Resend invite -> `POST /api/consultant/invites/[id]/resend` via `useConsultantClients()` (wired)
+- Revoke invite -> `DELETE /api/consultant/invites/[id]` via `useConsultantClients()` (wired)
+- Data sources -> Supabase via `useClients`, `useConsultantClients` (wired)
 
 ### `/clients/new` (`frontend/src/pages/clients/new.tsx`)
 - Create client -> `POST /api/clients` via `services/api.ts` (wired)
 - Trigger discovery workflow -> `POST /api/clients/[id]/discovery` (demo)
-- Cancel -> `/` (legacy dashboard root, likely not defined)
+- Cancel -> `/clients` (wired)
 
 ### `/client/[id]` (`frontend/src/pages/client/[id].tsx`)
 - Back to Portfolio -> `/consultant-dashboard` (wired)
@@ -157,11 +165,11 @@ Legend:
 - Restore Project -> `PATCH /api/projects/[id]` with `{ status: 'active' }` (wired)
 - Delete Forever -> AlertDialog with type-to-confirm -> `DELETE /api/projects/[id]` (wired)
 
-### `/settings` → Clients tab (planned, Consultants only)
-- Select client -> dropdown via `useClients()` (planned)
-- Toggle "Show archived" -> local filter state (planned)
-- Archive Client -> `PATCH /api/clients/[id]/archive` with `{ archived: true }` (planned)
-- Restore Client -> `PATCH /api/clients/[id]/archive` with `{ archived: false }` (planned)
+### `/settings` → Clients tab (wired, Consultants only)
+- Select client -> dropdown via `useClients()` (wired)
+- Toggle "Show archived" -> local filter state (wired)
+- Archive Client -> `PATCH /api/clients/[id]/archive` with `{ archived: true }` (wired)
+- Restore Client -> `PATCH /api/clients/[id]/archive` with `{ archived: false }` (wired)
 
 ### `/export` (`frontend/src/pages/export.tsx`)
 - Export evidence pack -> console log only (stub)

@@ -72,7 +72,7 @@ pnpm crew:contract-check  # Requires CREW_CONTRACT_BEARER env var
 ### Linting and Documentation
 
 ```bash
-pnpm lint                 # Frontend linting (deferred - see docs/status/linting.md)
+pnpm lint                 # Frontend linting (deferred - see docs/archive/status/linting.md)
 pnpm lint:md              # Lint markdown docs
 pnpm lint:md:fix          # Auto-fix markdown issues
 pnpm docs:validate        # Validate documentation

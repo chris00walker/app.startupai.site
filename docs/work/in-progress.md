@@ -78,7 +78,7 @@ Local file exists but not applied to remote Supabase.
 
 **Problem**: Documentation is 71 days behind plan-driven development. Plans from Jan 4-18, 2026 implemented features that docs from Oct-Nov 2025 don't reflect.
 
-**Audit Report**: `docs/audits/documentation-staleness-audit-2026-01-18.md`
+**Audit Report**: `docs/archive/audits/documentation-staleness-audit-2026-01-18.md`
 
 **Key Findings**:
 | Metric | Value |
@@ -109,7 +109,7 @@ Local file exists but not applied to remote Supabase.
 - OpenRouter/Groq Integration (in production)
 - HITL Approval Flows (spec needed)
 
-**Reference**: See full audit at `docs/audits/documentation-staleness-audit-2026-01-18.md`
+**Reference**: See full audit at `docs/archive/audits/documentation-staleness-audit-2026-01-18.md`
 
 #### TDD Effectiveness: Journey-Driven Testing (2026-01-18) 🔴 NEW - HIGH PRIORITY
 
@@ -118,7 +118,7 @@ Local file exists but not applied to remote Supabase.
 **Root Cause Analysis**:
 - Tests derived from code implementation, not from user requirements
 - Heavy mocking means tests verify mocks work, not real behavior
-- Journey maps exist (`docs/user-experience/onboarding-journey-map.md`) but aren't driving test creation
+- Journey maps exist (`docs/user-experience/founder-journey-map.md`) but aren't driving test creation
 - No formal connection between `user_goal` in journey maps and test assertions
 
 **Current State**:
@@ -162,7 +162,7 @@ Local file exists but not applied to remote Supabase.
 - Test failures correlate with actual user-facing bugs
 
 **Reference**:
-- Journey Map: `docs/user-experience/onboarding-journey-map.md`
+- Journey Map: `docs/user-experience/founder-journey-map.md`
 - PRD User Journeys: `docs/specs/product-requirements.md` (lines 67-84)
 - Current E2E: `frontend/tests/e2e/` (11 spec files, 101 tests)
 
@@ -394,7 +394,7 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 **Changes (2026-01-18 - Documentation Audit + TDD Effectiveness):**
 - **NEW P1 PRIORITY**: Added "Documentation Refresh" - 71-day staleness gap identified
-- **Audit created**: `docs/audits/documentation-staleness-audit-2026-01-18.md`
+- **Audit created**: `docs/archive/audits/documentation-staleness-audit-2026-01-18.md`
 - Key finding: 37 plans from Jan 2026 implemented features that Oct-Nov 2025 docs don't reflect
 - Critical docs needing update: api-onboarding.md, architecture.md, stage-progression.md
 - Missing ADRs: ADR-0004 (Two-Pass), ADR-0005 (State-First Loop)
@@ -403,7 +403,7 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 - Problem: 824+ unit tests with mocks provide low confidence - test code mechanics, not user outcomes
 - Solution: Journey-Driven Test Development - derive tests from journey maps
 - Implementation: 4 phases - audit journey maps, map E2E to touchpoints, create acceptance tests, add integration layer
-- Reference: Journey maps already exist in `docs/user-experience/onboarding-journey-map.md`
+- Reference: Journey maps already exist in `docs/user-experience/founder-journey-map.md`
 - Success criteria: Every `user_goal` has corresponding test, E2E covers 100% of journey touchpoints
 
 **Changes (2026-01-16 - Two-Pass Architecture):**
@@ -425,7 +425,7 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 - **P0 MIGRATIONS**: Added Realtime + founders_briefs migrations to apply
 - **P1 PHASE 0 FIX**: Added 6 core fixes from team audit (backend auto-advance, webhook data model, etc.)
 - **P2 DEFERRED**: Added HITL UI data source update, deprecate /api/onboarding/complete, webhook tests
-- **NEW AUDIT DOCS**: 4 audit reports in `docs/audits/` + implementation plan `gentle-booping-mitten.md`
+- **NEW AUDIT DOCS**: 4 audit reports in `docs/archive/audits/` + implementation plan `gentle-booping-mitten.md`
 - **KEY INSIGHT**: Two-artifact data model - `entrepreneur_briefs` (Layer 1) vs `founders_briefs` (Layer 2)
 
 **Changes (2026-01-15 - Late Session):**

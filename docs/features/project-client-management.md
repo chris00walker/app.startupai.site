@@ -47,9 +47,11 @@ Both include a "Danger Zone" section styled with red border/background for destr
 
 ### User Stories
 
-- As a Founder, I want to archive a project so I can hide it from my dashboard without losing data
-- As a Founder, I want to unarchive a project to resume work on a previously archived idea
-- As a Founder, I want to delete a project permanently when I no longer need it and want to free up resources
+Stories defined in [`user-stories.md`](../user-experience/user-stories.md):
+
+- **US-F04**: As a Founder, I want to archive a project so I can hide it from my dashboard without losing data
+- **US-F05**: As a Founder, I want to delete a project permanently when I no longer need it and want to free up resources
+- (US-F04 includes unarchive as part of the archive story)
 
 ### Existing Infrastructure
 
@@ -120,9 +122,11 @@ Both include a "Danger Zone" section styled with red border/background for destr
 
 ### User Stories
 
-- As a Consultant, I want to archive a client relationship when I'm no longer actively working with them
-- As a Consultant, I want to restore an archived client if we resume our engagement
-- As a Consultant, I want archiving to NOT affect my client's actual project data
+Stories defined in [`user-stories.md`](../user-experience/user-stories.md):
+
+- **US-C05**: As a Consultant, I want to archive a client relationship when I'm no longer actively working with them
+- (US-C05 includes restore as part of the archive story)
+- **Critical Constraint**: Archiving must NOT affect client's actual project data
 
 ### Current Data Model
 

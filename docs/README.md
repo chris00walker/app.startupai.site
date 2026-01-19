@@ -1,7 +1,7 @@
 ---
 purpose: "Documentation index for the StartupAI product platform"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # StartupAI App Documentation
@@ -15,84 +15,91 @@ For new contributors, start with:
 
 ## Directory Structure
 
-| Section | Summary |
-| --- | --- |
-| [`overview/`](overview/) | Platform architecture, business context, and architecture references |
-| [`specs/`](specs/) | Technical specifications (auth, data schema, APIs, components) |
-| [`adrs/`](adrs/) | Architectural Decision Records (local to this repo) |
-| [`features/`](features/) | Feature specifications (stage progression, consultant system) |
-| [`work/`](work/) | Phases, roadmap, backlog, and in-progress items |
-| [`testing/`](testing/) | Testing strategy, E2E guides, journey-driven testing |
-| [`status/`](status/) | Implementation status and release notes |
-| [`incidents/`](incidents/) | Issue analysis and troubleshooting |
-| [`reports/`](reports/) | Security audits and data flow verification |
-| [`audits/`](audits/) | Integration audits and documentation reviews |
-| [`ops/`](ops/) | Environment configuration, SLOs, and runbooks |
-| [`public-interfaces/`](public-interfaces/) | Marketing contracts and API exports |
-| [`user-experience/`](user-experience/) | Journey maps and UX documentation |
-| [`archive/`](archive/) | Deprecated docs (historical reference only) |
+| Folder | Purpose |
+|--------|---------|
+| [`specs/`](specs/) | Technical specifications (auth, APIs, data schema, architecture) |
+| [`features/`](features/) | Feature specifications and registry |
+| [`testing/`](testing/) | Test strategy, E2E guides, coverage matrix |
+| [`user-experience/`](user-experience/) | Journey maps, personas, user stories |
+| [`work/`](work/) | Active work tracking (backlog, in-progress, done) |
+| [`archive/`](archive/) | Historical/deprecated content |
 
 ## Key Documents
 
-### Architecture
+### Specifications (`specs/`)
 
 | Document | Purpose |
-| --- | --- |
-| [overview/architecture.md](overview/architecture.md) | System architecture (Two-Pass, Modal, HITL) |
-| [overview/architecture-references.md](overview/architecture-references.md) | Links to master ADRs in startupai-crew |
+|----------|---------|
+| [auth.md](specs/auth.md) | Authentication (OAuth, JWT, RLS) |
+| [data-schema.md](specs/data-schema.md) | Database schema (Layer 1/2 briefs, Realtime) |
+| [supabase.md](specs/supabase.md) | Supabase configuration, RPC functions, environment |
+| [architecture.md](specs/architecture.md) | Redirect to canonical source in startupai-crew |
+| [api-onboarding.md](specs/api-onboarding.md) | Onboarding chat and session APIs (11 routes) |
+| [api-consultant.md](specs/api-consultant.md) | Consultant and client management (8 routes) |
+| [api-crewai.md](specs/api-crewai.md) | CrewAI/Modal integration webhooks (5 routes) |
+| [api-approvals.md](specs/api-approvals.md) | HITL approval workflow (3 routes) |
+| [frontend-components.md](specs/frontend-components.md) | Component architecture |
+| [accessibility-standards.md](specs/accessibility-standards.md) | WCAG 2.2 AA compliance framework |
+| [slos.md](specs/slos.md) | Service level objectives and analytics |
+| [phase-mapping.md](specs/phase-mapping.md) | CrewAI phase spec-to-code alignment |
 
-> **Master Architecture**: `startupai-crew/docs/master-architecture/` contains the ecosystem source of truth including ADR-004 (Two-Pass) and ADR-005 (State-First Loop).
-
-### API Specifications
-
-| Document | Routes | Purpose |
-| --- | --- | --- |
-| [specs/api-onboarding.md](specs/api-onboarding.md) | 11 | Onboarding chat and session APIs |
-| [specs/api-consultant.md](specs/api-consultant.md) | 8 | Consultant and client management |
-| [specs/api-crewai.md](specs/api-crewai.md) | 5 | CrewAI/Modal integration webhooks |
-| [specs/api-approvals.md](specs/api-approvals.md) | 3 | HITL approval workflow |
-
-### Data & Components
-
-| Document | Purpose |
-| --- | --- |
-| [specs/data-schema.md](specs/data-schema.md) | Database schema (Layer 1/2 briefs, Realtime) |
-| [specs/frontend-components.md](specs/frontend-components.md) | Component architecture |
-| [specs/supabase.md](specs/supabase.md) | Supabase configuration and Realtime |
-
-### Features
+### Features (`features/`)
 
 | Document | Purpose |
-| --- | --- |
-| [features/stage-progression.md](features/stage-progression.md) | 7-stage onboarding system |
-| [features/consultant-client-system.md](features/consultant-client-system.md) | Invite and client management |
+|----------|---------|
+| [stage-progression.md](features/stage-progression.md) | 7-stage onboarding system |
+| [consultant-client-system.md](features/consultant-client-system.md) | Invite and client management |
+| [feature-inventory.md](features/feature-inventory.md) | Complete feature inventory |
+| [feature-template.md](features/feature-template.md) | Template for new features |
 
-### Testing
-
-| Document | Purpose |
-| --- | --- |
-| [testing/strategy.md](testing/strategy.md) | Test pyramid and journey-driven testing |
-| [testing/specification-driven.md](testing/specification-driven.md) | Spec-driven testing (evolving to JDTD) |
-
-### Work Tracking
+### User Experience (`user-experience/`)
 
 | Document | Purpose |
-| --- | --- |
-| [work/in-progress.md](work/in-progress.md) | Active work items |
-| [work/cross-repo-blockers.md](work/cross-repo-blockers.md) | Cross-repo dependencies |
-| [work/backlog.md](work/backlog.md) | Backlog items |
-| [work/done.md](work/done.md) | Completed work |
+|----------|---------|
+| [user-personas.md](user-experience/user-personas.md) | Canonical role definitions (Founder, Consultant, Admin, Trial) |
+| [user-stories.md](user-experience/user-stories.md) | 18 user stories with acceptance criteria |
+| [founder-journey-map.md](user-experience/founder-journey-map.md) | 15-step Founder journey |
+| [consultant-journey-map.md](user-experience/consultant-journey-map.md) | 6-phase Consultant journey |
+
+### Testing (`testing/`)
+
+| Document | Purpose |
+|----------|---------|
+| [strategy.md](testing/strategy.md) | Test pyramid and story-driven testing |
+| [journey-test-matrix.md](testing/journey-test-matrix.md) | Story-to-test coverage matrix |
+| [e2e-guide.md](testing/e2e-guide.md) | E2E testing guide |
+
+### Work Tracking (`work/`)
+
+| Document | Purpose |
+|----------|---------|
+| [in-progress.md](work/in-progress.md) | Active work items |
+| [backlog.md](work/backlog.md) | Backlog items |
+| [done.md](work/done.md) | Completed work |
+| [phases.md](work/phases.md) | Development phases |
+| [cross-repo-blockers.md](work/cross-repo-blockers.md) | Cross-repo dependencies |
+
+### Archive (`archive/`)
+
+Historical reference only. Contains:
+- `audits/` - Past integration audits and reports
+- `incidents/` - Historical issue analysis
+- `status/` - Migration reports and old status tracking
+- `public-interfaces/` - Legacy API exports
+- `adrs/` - Local ADRs (canonical ADRs live in startupai-crew)
+- `completion-reports/` - Project completion records
+- `legacy/` - Deprecated documentation (includes archived `environments.md`, `architecture.md`)
 
 ## Cross-References
 
 | Repository | Purpose |
-| --- | --- |
+|------------|---------|
 | **startupai-crew** | CrewAI Flows on Modal (5-flow/14-crew/45-agent engine) |
 | **startupai.site** | Marketing site and lead capture |
 
-### Master Architecture (Do Not Duplicate)
+### Master Architecture (Source of Truth)
 
-The following ADRs live in `startupai-crew/docs/master-architecture/` and should NOT be duplicated:
+The following live in `startupai-crew/docs/master-architecture/` and should NOT be duplicated here:
 
 - **ADR-004**: Two-Pass Onboarding Architecture
 - **ADR-005**: State-First Synchronized Loop
@@ -100,4 +107,4 @@ The following ADRs live in `startupai-crew/docs/master-architecture/` and should
 - **reference/api-contracts.md**: Cross-service API contracts
 
 ---
-**Last Updated**: 2026-01-18
+**Last Updated**: 2026-01-19

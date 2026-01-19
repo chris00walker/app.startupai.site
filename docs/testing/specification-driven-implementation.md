@@ -43,7 +43,7 @@ src/__tests__/
 
 ### **Test Categories by Source Document**
 - **Business Requirements:** `onboarding-agent-integration.md` validation
-- **User Journey:** `onboarding-journey-map.md` 15-step validation  
+- **User Journey:** `founder-journey-map.md` 15-step validation  
 - **Accessibility:** `accessibility-standards.md` WCAG 2.2 AA compliance
 - **API Contracts:** `onboarding-api-endpoints.md` contract validation
 - **Success Metrics:** Measurable outcomes from all specifications
@@ -79,7 +79,7 @@ All P0 launch blockers from `two-site-implementation-plan.md` validated:
 ## 🛤️ User Journey Validation
 
 ### **15-Step Journey Tests**
-**Source:** `onboarding-journey-map.md` - Lines 21-377
+**Source:** `founder-journey-map.md` - Lines 21-377
 
 Complete validation of user journey from marketing site to value delivery:
 
@@ -109,7 +109,7 @@ Complete validation of user journey from marketing site to value delivery:
 - Next Steps & Action Planning (80%+ engagement, 60%+ selection)
 
 ### **Success Metrics Validation**
-**Source:** `onboarding-journey-map.md` - Lines 454-517
+**Source:** `founder-journey-map.md` - Lines 454-517
 
 **Conversation Quality Metrics:**
 - ✅ Completion Rate: >85% (Target: 85%)
@@ -211,7 +211,7 @@ Complete validation of user journey from marketing site to value delivery:
 **File:** `src/__tests__/utils/specification-data.ts`
 
 **Extracted from Business Documents:**
-- Journey specifications from `onboarding-journey-map.md`
+- Journey specifications from `founder-journey-map.md`
 - User tier specifications from `onboarding-agent-integration.md`  
 - 15-step journey metrics and targets
 - Performance targets and accessibility requirements

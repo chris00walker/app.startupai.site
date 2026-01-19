@@ -1,8 +1,8 @@
 ---
 purpose: "Private technical source of truth for onboarding API contracts"
 status: "active"
-last_reviewed: "2026-01-18"
-updated: "2026-01-18"
+last_reviewed: "2026-01-19"
+updated: "2026-01-19"
 ---
 
 # Onboarding API Specification
@@ -56,10 +56,11 @@ The CrewAI backend handles the strategic validation workflow with 5 flows, 14 cr
 | `/api/onboarding/pause` | POST | Save state for later |
 | `/api/onboarding/abandon` | POST | Mark session abandoned |
 | `/api/onboarding/recover` | POST | Resume abandoned session |
-| `/api/onboarding/revise` | POST | Return to previous stage |
+| `/api/onboarding/revise` | POST | Reset session for revision (from SummaryModal) |
 | `/api/onboarding/complete` | POST | Finalize and trigger CrewAI |
 | `/api/onboarding/brief` | GET | Retrieve extracted brief |
-| `/api/onboarding/queue` | POST | Queue session for background processing |
+| `/api/onboarding/queue` | POST | Queue completed session for CrewAI kickoff |
+| `/api/onboarding/debug` | GET | Debug endpoint (development only) |
 
 ## Endpoint Reference
 
@@ -71,51 +72,65 @@ The CrewAI backend handles the strategic validation workflow with 5 flows, 14 cr
 
 ```jsonc
 {
-  "planType": "trial",
-  "resumeSessionId": null,
-  "userContext": {
+  "userId": "uuid-of-user",  // Optional, derived from auth
+  "planType": "trial",       // 'trial' | 'sprint' | 'founder' | 'enterprise'
+  "resumeSessionId": null,   // Optional: resume specific session
+  "forceNew": false,         // Skip session resumption, create fresh
+  "mode": "founder",         // 'founder' (default) or 'client' (consultant intake)
+  "clientProjectId": null,   // Optional: project ID when in client mode
+  "userContext": {           // Optional metadata
     "referralSource": "pricing_page",
-    "previousExperience": "first_time",
-    "timeAvailable": 20
-  },
-  "mode": "founder" // or "client" for consultant intake
+    "previousExperience": "first_time",  // 'first_time' | 'experienced' | 'serial_entrepreneur'
+    "timeAvailable": 20      // minutes available
+  }
 }
 ```
-
-- `planType`: `'trial' | 'sprint' | 'founder' | 'enterprise'` (validated against `PLAN_LIMITS`).
-- `resumeSessionId`: optional previous session ID for resumption.
-- `userContext`: optional metadata (stored in `onboarding_sessions.user_context`).
-- `mode`: `'founder'` (default) or `'client'` for consultant-driven intake.
 
 #### Response (success)
 
 ```jsonc
 {
   "success": true,
-  "sessionId": "onb_abc123",
+  "sessionId": "founder-{userId}-{timestamp}",
   "agentIntroduction": "Hi, I'm Alex...",
   "firstQuestion": "What problem are you solving?",
-  "estimatedDuration": 20,
+  "estimatedDuration": "20 minutes",
   "stageInfo": {
     "currentStage": 1,
     "totalStages": 7,
-    "stageName": "Problem",
-    "stageDescription": "Understanding the core problem"
+    "stageName": "Welcome & Introduction",
+    "stageDescription": "Understanding you and your business concept"
   },
   "conversationContext": {
-    "persona": "Alex",
-    "expectedOutcomes": [...],
+    "agentPersonality": { /* Alex personality config */ },
+    "expectedOutcomes": ["Business concept clarity", "Problem definition"],
     "privacyNotice": "..."
+  },
+  "qualitySignals": {
+    "clarity": { "label": "low", "score": 0 },
+    "completeness": { "label": "low", "score": 0 },
+    "detail_score": 0,
+    "overall": 0
+  },
+  "stageSnapshot": {
+    "stage": 1,
+    "coverage": 0,
+    "quality": { /* ... */ },
+    "brief_fields": [],
+    "updated_at": "2026-01-19T10:00:00Z"
   }
 }
 ```
 
 #### Errors
 
-- `INVALID_PLAN` - Plan type not recognized
-- `SESSION_LIMIT_EXCEEDED` - Monthly limit reached
-- `USER_NOT_FOUND` - Auth user not found
-- `AI_SERVICE_UNAVAILABLE` - LLM provider down
+| Code | Description |
+|------|-------------|
+| `INVALID_REQUEST` | Missing required fields |
+| `INVALID_PLAN` | Plan type not recognized |
+| `SESSION_LIMIT_EXCEEDED` | Monthly limit reached |
+| `USER_NOT_FOUND` | Auth user not found |
+| `AI_SERVICE_UNAVAILABLE` | LLM provider down |
 
 ---
 
@@ -125,19 +140,33 @@ The CrewAI backend handles the strategic validation workflow with 5 flows, 14 cr
 
 #### Query Parameters
 
-- `sessionId` (required): The session identifier
+- `sessionId` (optional): The session identifier. If omitted, finds most recent active/paused session for user.
 
-#### Response
+#### Response (session found)
 
 ```jsonc
 {
   "success": true,
+  "sessionId": "founder-{userId}-{timestamp}",
   "currentStage": 3,
+  "totalStages": 7,
   "overallProgress": 45,
   "stageProgress": 60,
-  "status": "active",
-  "completed": false,
-  "briefData": { /* extracted data so far */ }
+  "messageCount": 12,
+  "status": "active",  // 'active' | 'paused' | 'completed' | 'abandoned'
+  "lastActivity": "2026-01-19T10:00:00Z",
+  // Only for completed sessions with stage_data.completion:
+  "completion": { /* completion data if available */ }
+}
+```
+
+#### Response (no session found, sessionId omitted)
+
+```jsonc
+{
+  "success": true,
+  "sessionId": null,
+  "status": null
 }
 ```
 
@@ -151,7 +180,7 @@ The CrewAI backend handles the strategic validation workflow with 5 flows, 14 cr
 
 ```jsonc
 {
-  "sessionId": "onb_abc123"
+  "sessionId": "founder-{userId}-{timestamp}"
 }
 ```
 
@@ -160,10 +189,18 @@ The CrewAI backend handles the strategic validation workflow with 5 flows, 14 cr
 ```jsonc
 {
   "success": true,
-  "status": "paused",
-  "resumeToken": "resume_xyz789"
+  "message": "Session paused successfully"
 }
 ```
+
+#### Idempotent
+
+If session is already paused, returns success without error.
+
+#### Errors
+
+- Cannot pause completed sessions
+- Cannot pause abandoned sessions
 
 ---
 
@@ -171,14 +208,28 @@ The CrewAI backend handles the strategic validation workflow with 5 flows, 14 cr
 
 **POST** - Mark session as abandoned (user explicitly quit).
 
+Session data is preserved for analytics and potential recovery via `/recover`.
+
 #### Request
 
 ```jsonc
 {
-  "sessionId": "onb_abc123",
-  "reason": "too_long" // optional
+  "sessionId": "founder-{userId}-{timestamp}"
 }
 ```
+
+#### Response
+
+```jsonc
+{
+  "success": true,
+  "message": "Session abandoned successfully"
+}
+```
+
+#### Errors
+
+- Cannot abandon completed sessions
 
 ---
 
@@ -202,31 +253,62 @@ Returns same structure as `/start` with session state restored.
 
 ### `/api/onboarding/revise`
 
-**POST** - Go back to a previous stage to revise answers.
+**POST** - Reset completed session for revision (called from SummaryModal "Revise" button).
+
+Cancels any pending queue row and resets session status to `active`.
 
 #### Request
 
 ```jsonc
 {
-  "sessionId": "onb_abc123",
-  "targetStage": 2
+  "sessionId": "founder-{userId}-{timestamp}"
 }
 ```
+
+#### Response (success)
+
+```jsonc
+{
+  "success": true,
+  "status": "reset",
+  "queueDeleted": true  // true if pending queue row was cancelled
+}
+```
+
+#### Response (cannot revise)
+
+```jsonc
+{
+  "success": false,
+  "status": "cannot_revise",
+  "error": "Analysis already in progress or completed"
+}
+```
+
+#### Notes
+
+Part of the split completion flow:
+1. Stage 7 completes → Session marked `completed` (no queue yet)
+2. User clicks "Approve" → `/api/onboarding/queue` inserts queue row
+3. User clicks "Revise" → This endpoint resets session to `active`
 
 ---
 
 ### `/api/onboarding/complete`
 
-**POST** - Finalize session and trigger CrewAI validation.
+**POST** - Finalize session, create project, and trigger CrewAI validation.
 
 #### Request
 
 ```jsonc
 {
-  "sessionId": "onb_abc123",
+  "sessionId": "founder-{userId}-{timestamp}",
   "finalConfirmation": true,
-  "userFeedback": {
-    "satisfaction": 5,
+  "entrepreneurBrief": { /* extracted brief data */ },
+  "userFeedback": {          // Optional
+    "conversationRating": 5, // 1-5
+    "clarityRating": 5,      // 1-5
+    "helpfulnessRating": 5,  // 1-5
     "comments": "Great flow"
   }
 }
@@ -235,24 +317,58 @@ Returns same structure as `/start` with session state restored.
 #### Behaviour
 
 1. Validates session ownership + status
-2. Extracts entrepreneur brief from conversation
-3. Writes to `entrepreneur_briefs` (Layer 1 artifact)
+2. Creates `entrepreneur_briefs` record (Layer 1 artifact)
+3. Creates `projects` record
 4. Updates `onboarding_sessions` status → `completed`
 5. Triggers CrewAI `/kickoff` on Modal
-6. Returns success with dashboard links
+6. Returns project details + workflow info
 
 #### Response
 
 ```jsonc
 {
   "success": true,
-  "briefId": "brief_abc123",
-  "nextSteps": {
-    "dashboardUrl": "/founder/dashboard",
-    "validationStatus": "queued"
+  "workflowId": "wf_1705656000_abc123",
+  "workflowTriggered": true,
+  "estimatedCompletionTime": "5-10 minutes",
+  "nextSteps": [
+    {
+      "step": "Review Brief",
+      "description": "Review your entrepreneur brief",
+      "estimatedTime": "2 minutes",
+      "priority": "high"
+    }
+  ],
+  "deliverables": {
+    "analysisId": "uuid",
+    "summary": "Brief summary...",
+    "insights": [{ "id": "...", "headline": "...", "confidence": "high" }],
+    "rawOutput": "..."
+  },
+  "dashboardRedirect": "/project/{projectId}/gate",
+  "projectCreated": {
+    "projectId": "uuid",
+    "projectName": "My Startup",
+    "projectUrl": "/project/{projectId}"
+  },
+  "analysisMetadata": {
+    "evidenceCount": 5,
+    "evidenceCreated": 5,
+    "reportCreated": true,
+    "rateLimit": { "limit": 10, "remaining": 9, "windowSeconds": 3600 }
   }
 }
 ```
+
+#### Errors
+
+| Code | Description |
+|------|-------------|
+| `INVALID_REQUEST` | Missing required fields |
+| `INVALID_SESSION` | Session not found or not owned |
+| `WORKFLOW_TRIGGER_FAILED` | Modal kickoff failed |
+| `PROJECT_CREATION_FAILED` | Database error creating project |
+| `PROCESSING_ERROR` | General processing error |
 
 ---
 
@@ -260,9 +376,14 @@ Returns same structure as `/start` with session state restored.
 
 **GET** - Retrieve the extracted entrepreneur brief.
 
+Used by HITL approval flow to display Founder's Brief for review.
+
 #### Query Parameters
 
-- `sessionId` (required): The session identifier
+- `projectId` (optional): The project ID to fetch brief for
+- `sessionId` (optional): The session ID to fetch brief for
+
+One of `projectId` or `sessionId` is required. If `projectId` is provided, looks up `sessionId` from project metadata.
 
 #### Response
 
@@ -270,15 +391,17 @@ Returns same structure as `/start` with session state restored.
 {
   "success": true,
   "brief": {
+    "id": "uuid",
+    "session_id": "founder-{userId}-{timestamp}",
+    "user_id": "uuid",
     "company_name": "...",
-    "problem_statement": "...",
-    "target_customer": "...",
-    // ... all extracted fields
-  },
-  "qualitySignals": {
-    "clarity": 0.85,
-    "completeness": 0.72,
-    "detail": 0.68
+    "problem_description": "...",
+    "solution_description": "...",
+    "target_customers": "...",
+    "competitive_advantages": "...",
+    // ... all extracted fields from entrepreneur_briefs table
+    "created_at": "2026-01-19T10:00:00Z",
+    "updated_at": "2026-01-19T10:00:00Z"
   }
 }
 ```
@@ -287,16 +410,52 @@ Returns same structure as `/start` with session state restored.
 
 ### `/api/onboarding/queue`
 
-**POST** - Queue session for background processing (bulk operations).
+**POST** - Queue completed session for CrewAI kickoff (called from SummaryModal "Approve" button).
+
+Inserts a row in `pending_completions` queue table.
 
 #### Request
 
 ```jsonc
 {
-  "sessionId": "onb_abc123",
-  "priority": "normal" // or "high"
+  "sessionId": "founder-{userId}-{timestamp}"
 }
 ```
+
+#### Response (success)
+
+```jsonc
+{
+  "success": true,
+  "status": "queued"
+}
+```
+
+#### Response (already queued)
+
+```jsonc
+{
+  "success": true,
+  "status": "already_queued"
+}
+```
+
+#### Response (invalid state)
+
+```jsonc
+{
+  "success": false,
+  "status": "invalid_state",
+  "error": "Session not in completed state"
+}
+```
+
+#### Notes
+
+Part of the split completion flow:
+1. Stage 7 completes → Session marked `completed` (no queue yet)
+2. User clicks "Approve" → This endpoint inserts queue row
+3. User clicks "Revise" → `/api/onboarding/revise` resets session
 
 ## Chat Endpoints
 
@@ -304,62 +463,120 @@ Returns same structure as `/start` with session state restored.
 
 **POST** - Stream AI response (Pass 1 of Two-Pass).
 
+Stateless streaming endpoint - NO persistence. Uses OpenRouter with Groq provider for ~300 tok/s streaming.
+
 #### Request
 
 ```jsonc
 {
-  "sessionId": "onb_abc123",
-  "message": "We build AI tooling for founders",
-  "stage": 2
+  "messages": [
+    { "role": "user", "content": "We build AI tooling for founders" }
+  ],
+  "sessionId": "founder-{userId}-{timestamp}"
 }
 ```
 
 #### Response
 
-Server-Sent Events stream with AI response chunks.
+Server-Sent Events stream (`text/event-stream`) with AI response chunks.
+
+After stream completes, client should call `/api/chat/save` to persist.
 
 ---
 
 ### `/api/chat/save`
 
-**POST** - Persist message and assessment (Pass 2 of Two-Pass).
+**POST** - Atomic message persistence (Pass 2 of Two-Pass).
+
+Persists messages via `apply_onboarding_turn` Supabase RPC. Runs quality assessment and may trigger stage advancement.
 
 #### Request
 
 ```jsonc
 {
-  "sessionId": "onb_abc123",
-  "userMessage": "We build AI tooling for founders",
-  "assistantMessage": "That's interesting! Who are your target customers?",
-  "stage": 2
+  "sessionId": "founder-{userId}-{timestamp}",
+  "messageId": "msg_unique_id",
+  "userMessage": {
+    "role": "user",
+    "content": "We build AI tooling for founders",
+    "timestamp": "2026-01-19T10:00:00Z"
+  },
+  "assistantMessage": {
+    "role": "assistant",
+    "content": "That's interesting! Who are your target customers?",
+    "timestamp": "2026-01-19T10:00:01Z"
+  },
+  "expectedVersion": 5  // Optional: for conflict detection (ADR-005)
 }
 ```
 
 #### Behaviour
 
-1. Persists both messages to `conversation_history` JSONB
-2. Runs quality assessment (founder-quality-assessment.ts)
-3. Updates `stage_progress`, `overall_progress`
-4. Determines if stage should advance
+1. Validates session ownership + status
+2. Checks for duplicate `messageId` (idempotency)
+3. Runs quality assessment (`founder-quality-assessment.ts`)
+4. Commits state atomically via `apply_onboarding_turn` RPC
+5. Returns updated progress and extracted topics
 
-#### Response
+#### Response (success)
 
 ```jsonc
 {
   "success": true,
-  "stageInfo": {
-    "currentStage": 2,
-    "stageProgress": 75,
-    "overallProgress": 28,
-    "shouldAdvance": false
-  },
-  "qualitySignals": {
-    "clarity": 0.82,
-    "completeness": 0.65,
-    "topicsCovered": ["problem", "target_customer"]
-  }
+  "status": "committed",
+  "version": 6,
+  "currentStage": 2,
+  "overallProgress": 28,
+  "stageProgress": 75,
+  "stageAdvanced": false,
+  "completed": false,
+  "collectedTopics": ["business_concept", "target_customers"]
 }
 ```
+
+#### Response (duplicate)
+
+```jsonc
+{
+  "success": true,
+  "status": "duplicate"
+}
+```
+
+#### Response (version conflict - ADR-005)
+
+```jsonc
+{
+  "success": false,
+  "status": "version_conflict",
+  "currentVersion": 6,
+  "expectedVersion": 5,
+  "error": "Version mismatch"
+}
+```
+
+#### Response (stage 7 completed)
+
+```jsonc
+{
+  "success": true,
+  "status": "committed",
+  "completed": true,
+  "queued": true,  // Queued for background processing
+  "workflowId": "wf_...",
+  "projectId": "uuid"
+}
+```
+
+---
+
+### `/api/chat` (Legacy)
+
+**POST** - Legacy chat endpoint (tool-based stage progression).
+
+Deprecated in favor of Two-Pass Architecture. Kept for backward compatibility.
+
+Uses Vercel AI SDK with tool calling for `assessQuality`, `advanceStage`, `completeOnboarding`.
 
 ## Plan Limits
 

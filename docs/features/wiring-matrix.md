@@ -1,7 +1,7 @@
 ---
 purpose: "Feature wiring matrix from UI -> hooks/services -> APIs -> data/services"
-status: "draft"
-last_reviewed: "2026-01-13"
+status: "active"
+last_reviewed: "2026-01-19"
 ---
 
 # Wiring Matrix
@@ -17,19 +17,28 @@ Legend: wired, demo, stub, broken, legacy.
 | Signup (GitHub) | `/signup` | `supabase.auth.signInWithOAuth()` | `/auth/callback` | Supabase OAuth + `handle_new_user` trigger -> `user_profiles` | wired |
 | Founder onboarding start | `/onboarding` | `OnboardingWizardV2` | `POST /api/onboarding/start` | `onboarding_sessions` | wired |
 | Founder onboarding chat | `/onboarding` | `OnboardingWizardV2` | `POST /api/chat` | OpenAI + `onboarding_sessions` | wired |
+| Founder onboarding chat (Two-Pass streaming) | `/onboarding` | `OnboardingWizardV2` | `POST /api/chat/stream` | OpenRouter → Groq streaming | wired |
+| Founder onboarding chat (Two-Pass save) | `/onboarding` | `OnboardingWizardV2` | `POST /api/chat/save` | `onboarding_sessions` + quality assessment | wired |
 | Founder onboarding status | `/onboarding` | `OnboardingWizardV2` | `GET /api/onboarding/status` | `onboarding_sessions` | wired |
 | Founder onboarding complete | `/onboarding` | `OnboardingWizardV2` | `POST /api/onboarding/complete` | Modal kickoff + `projects`, `entrepreneur_briefs` (reports/evidence via `/api/crewai/webhook`) | wired |
 | Onboarding start new conversation (abandon) | `/onboarding` | `OnboardingWizardV2` | `POST /api/onboarding/abandon` | `onboarding_sessions` | wired |
+| Onboarding pause | `/onboarding` | `OnboardingWizardV2` | `POST /api/onboarding/pause` | `onboarding_sessions` | wired |
+| Onboarding revise (return to stage) | `/onboarding` | `OnboardingWizardV2` | `POST /api/onboarding/revise` | `onboarding_sessions` | wired |
 | Consultant onboarding start | `/onboarding/consultant` | `ConsultantOnboardingWizardV2` | `POST /api/consultant/onboarding/start` | `consultant_onboarding_sessions` | wired |
 | Consultant onboarding chat | `/onboarding/consultant` | `ConsultantOnboardingWizardV2` | `POST /api/consultant/chat` | OpenAI + `consultant_onboarding_sessions` | wired |
 | Consultant onboarding complete | `/onboarding/consultant` | `ConsultantOnboardingWizardV2` | `POST /api/consultant/onboarding/complete` | `consultant_onboarding_sessions`, `consultant_profiles`, `user_profiles` | wired |
 | Consultant profile save (legacy V1) | `/onboarding/consultant` | `ConsultantOnboardingWizard` | `POST /api/consultant/onboarding` | `consultant_profiles`, `user_profiles` | legacy |
+| Consultant invite create | `/clients`, `/consultant/client/new` | `useConsultantClients()` | `POST /api/consultant/invites` | `consultant_clients` | wired |
+| Consultant invite resend | `/clients` | `useConsultantClients()` | `POST /api/consultant/invites/[id]/resend` | `consultant_clients` | wired |
+| Consultant invite revoke | `/clients` | `useConsultantClients()` | `DELETE /api/consultant/invites/[id]` | `consultant_clients` | wired |
+| Client-consultant unlink | `/settings` | `useConsultantClients()` | `POST /api/client/consultant/unlink` | `consultant_clients` | wired |
 | Project creation | `/projects/new` | `ProjectCreationWizard` | `POST /api/projects/create` | `projects`, `hypotheses` | wired |
 | Project analysis kickoff | `/projects/new` | `ProjectCreationWizard` | `POST /api/analyze` | Modal + `reports`, `evidence`, `entrepreneur_briefs`, `validation_runs` | wired |
 | Legacy AI analysis | `/ai-analysis` | page-level `fetch()` | `POST /.netlify/functions/crew-analyze` | Netlify CrewAI function | legacy |
 | CrewAI workflow status | onboarding | `OnboardingWizardV2` | `GET /api/crewai/status` | Modal + `validation_runs` cache | wired |
 | CrewAI legacy kickoff | `useCrewAIState` | `useCrewAIKickoff()` | `POST /api/crewai/analyze` | none (missing) | broken |
 | CrewAI legacy status | `useCrewAIState` | `useCrewAIKickoff()` | `GET /api/crewai/status/:id` | none (missing) | broken |
+| CrewAI workflow resume | `/approvals` | `useApprovals()` | `POST /api/crewai/resume` | Modal + `approval_requests` | wired |
 | Approvals list | `/approvals` | `useApprovals()` | `GET /api/approvals` | `approval_requests` | wired |
 | Approvals decisions | `/approvals` | `useApprovals()` | `PATCH /api/approvals/[id]` | `approval_requests` + Modal webhooks | wired |
 | Approval preferences | `/settings` | direct `fetch()` | `GET|PUT /api/settings/approvals` | `approval_preferences` | wired |
@@ -52,8 +61,8 @@ Legend: wired, demo, stub, broken, legacy.
 | Project archive | `/settings` | `useProjects()` | `PATCH /api/projects/[id]` | `projects.status` | wired |
 | Project unarchive | `/settings` | `useProjects()` | `PATCH /api/projects/[id]` | `projects.status` | wired |
 | Project delete | `/settings` | `useProjects()` | `DELETE /api/projects/[id]` | `projects` (cascade delete) | wired |
-| Client archive | `/settings` | `useClients()` | `PATCH /api/clients/[id]/archive` | TBD (junction table or clients) | planned |
-| Client unarchive | `/settings` | `useClients()` | `PATCH /api/clients/[id]/archive` | TBD (junction table or clients) | planned |
+| Client archive | `/settings` | `useClients()` | `PATCH /api/clients/[id]/archive` | `archived_clients` junction table | wired |
+| Client unarchive | `/settings` | `useClients()` | `PATCH /api/clients/[id]/archive` | `archived_clients` junction table | wired |
 
 ## Spec alignment notes (startupai-crew master architecture)
 

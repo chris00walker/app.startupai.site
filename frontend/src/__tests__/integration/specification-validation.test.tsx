@@ -156,7 +156,7 @@ describe('Specification-Driven Testing Framework Integration', () => {
       // Test that all metrics meet their specification targets
       const conversationMetrics = await SuccessMetricsValidator.validateConversationMetrics();
       
-      // From onboarding-journey-map.md specifications
+      // From founder-journey-map.md specifications
       expect(conversationMetrics.completionRate).toMeetSuccessMetric(0.85); // >85%
       expect(conversationMetrics.responseQuality).toMeetSuccessMetric(3.5); // >3.5/5
       expect(conversationMetrics.timeToComplete).toBeWithinRange(20, 25); // 20-25 minutes
@@ -188,7 +188,7 @@ describe('Specification-Driven Testing Framework Integration', () => {
       // Test that our framework maintains traceability to specifications
       const specificationSources = [
         'onboarding-agent-integration.md',
-        'onboarding-journey-map.md',
+        'founder-journey-map.md',
         'accessibility-standards.md',
         'onboarding-api-endpoints.md',
         'two-site-implementation-plan.md'

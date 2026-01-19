@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for frontend component architecture"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Frontend Components
@@ -86,20 +86,22 @@ Components for displaying CrewAI validation results.
 | Component | Path | Responsibilities |
 |-----------|------|------------------|
 | `ValidationResultsSummary` | `components/validation/ValidationResultsSummary.tsx` | High-level summary of validation run with D-F-V scores and key findings. |
+| `ValidationProgressTimeline` | `components/validation/ValidationProgressTimeline.tsx` | Timeline display of validation progress events. |
 | `CrewAIReportViewer` | `components/reports/CrewAIReportViewer.tsx` | Full report viewer with section navigation (Desirability, Feasibility, Viability, Governance). |
 | `DesirabilitySection` | `components/reports/sections/DesirabilitySection.tsx` | Customer and market analysis findings. |
 | `FeasibilitySection` | `components/reports/sections/FeasibilitySection.tsx` | Technical and operational feasibility findings. |
 | `ViabilitySection` | `components/reports/sections/ViabilitySection.tsx` | Business model and financial viability findings. |
 | `GovernanceSection` | `components/reports/sections/GovernanceSection.tsx` | Compliance, risk, and governance findings. |
+| `PDFExporter` | `components/reports/export/PDFExporter.tsx` | PDF export functionality for reports. |
 
 ---
 
-## Value Proposition Canvas (VPC)
+## Value Proposition Canvas (VPC) Display
+
+> Note: Core VPC canvas components live in `components/canvas/`. These are display/utility components.
 
 | Component | Path | Responsibilities |
 |-----------|------|------------------|
-| `ValuePropositionCanvas` | `components/canvas/ValuePropositionCanvas.tsx` | Interactive VPC display with Jobs, Pains, Gains sections. |
-| `EditableValuePropositionCanvas` | `components/canvas/EditableValuePropositionCanvas.tsx` | Editable version for user refinement. |
 | `VPCSummaryCard` | `components/vpc/VPCSummaryCard.tsx` | Compact VPC summary for dashboard cards. |
 | `VPCFitBadge` | `components/vpc/VPCFitBadge.tsx` | Visual badge showing product-market fit assessment. |
 | `VPCReportViewer` | `components/vpc/VPCReportViewer.tsx` | Detailed VPC report with evidence links. |
@@ -118,6 +120,7 @@ Components for displaying CrewAI validation results.
 | `SignalBadge` | `components/signals/SignalBadge.tsx` | Compact badge for signal status. |
 | `CrewAIEvidenceMetrics` | `components/fit/CrewAIEvidenceMetrics.tsx` | Metrics display for CrewAI-generated evidence quality. |
 | `EvidenceLedger` | `components/fit/EvidenceLedger.tsx` | Tabular view of all evidence with filtering. |
+| `ExperimentsPage` | `components/fit/ExperimentsPage.tsx` | Full page component for experiments management. |
 
 ---
 
@@ -130,11 +133,14 @@ Components for displaying CrewAI validation results.
 | `UserEvidenceCard` | `components/evidence-explorer/UserEvidenceCard.tsx` | Card display for user-provided evidence. |
 | `EvidenceFilters` | `components/evidence-explorer/EvidenceFilters.tsx` | Filter controls for evidence explorer. |
 | `EvidenceSummaryPanel` | `components/evidence-explorer/EvidenceSummaryPanel.tsx` | Summary panel in evidence explorer. |
+| `EvidenceTimeline` | `components/evidence-explorer/EvidenceTimeline.tsx` | Timeline view of evidence collection. |
+| `EvidenceDetailPanel` | `components/evidence-explorer/EvidenceDetailPanel.tsx` | Detail panel for individual evidence items. |
 | `ExperimentCard` | `components/strategyzer/ExperimentCard.tsx` | Card display for validation experiments. |
 | `ExperimentCardForm` | `components/strategyzer/ExperimentCardForm.tsx` | Form for creating/editing experiments. |
 | `ExperimentCardsGrid` | `components/strategyzer/ExperimentCardsGrid.tsx` | Grid layout for experiment cards. |
 | `EvidenceStrengthIndicator` | `components/strategyzer/EvidenceStrengthIndicator.tsx` | Visual indicator of evidence strength. |
 | `AssumptionMap` | `components/strategyzer/AssumptionMap.tsx` | Visual map of assumptions with risk levels. |
+| `CanvasesGallery` | `components/strategyzer/CanvasesGallery.tsx` | Gallery view of all strategy canvases. |
 
 ---
 
@@ -150,6 +156,7 @@ Components for displaying CrewAI validation results.
 | `PortfolioMetrics` | `components/portfolio/PortfolioMetrics.tsx` | Aggregate metrics for portfolio. |
 | `RiskBudgetWidget` | `components/portfolio/RiskBudgetWidget.tsx` | Risk budget allocation display. |
 | `StageProgressIndicator` | `components/portfolio/StageProgressIndicator.tsx` | Visual progress through validation stages. |
+| `GateAlerts` | `components/portfolio/GateAlerts.tsx` | Alert notifications for gate status changes. |
 
 ---
 
@@ -158,6 +165,7 @@ Components for displaying CrewAI validation results.
 | Component | Path | Responsibilities |
 |-----------|------|------------------|
 | `ClientValidationCard` | `components/consultant/ClientValidationCard.tsx` | Card showing client's validation progress for consultant view. |
+| `InviteClientModal` | `components/consultant/InviteClientModal.tsx` | Modal for consultants to invite new clients. |
 
 ---
 
@@ -167,7 +175,15 @@ Components for displaying CrewAI validation results.
 |-----------|------|------------------|
 | `TestingBusinessIdeasCanvas` | `components/canvas/TestingBusinessIdeasCanvas.tsx` | Main canvas for Testing Business Ideas methodology. |
 | `TestingBusinessIdeasTabs` | `components/canvas/TestingBusinessIdeasTabs.tsx` | Tab navigation for canvas sections. |
+| `GuidedTestingBusinessIdeasCanvas` | `components/canvas/GuidedTestingBusinessIdeasCanvas.tsx` | Guided version with step-by-step prompts. |
 | `CanvasEditor` | `components/canvas/CanvasEditor.tsx` | Generic canvas editing interface. |
+| `CanvasGallery` | `components/canvas/CanvasGallery.tsx` | Gallery view of all canvas types. |
+| `ValuePropositionCanvas` | `components/canvas/ValuePropositionCanvas.tsx` | Value Proposition Canvas display. |
+| `EditableValuePropositionCanvas` | `components/canvas/EditableValuePropositionCanvas.tsx` | Editable version of VPC. |
+| `EnhancedValuePropositionCanvas` | `components/canvas/EnhancedValuePropositionCanvas.tsx` | VPC with enhanced visual features. |
+| `GuidedValuePropositionCanvas` | `components/canvas/GuidedValuePropositionCanvas.tsx` | Guided VPC with step-by-step prompts. |
+| `BusinessModelCanvas` | `components/canvas/BusinessModelCanvas.tsx` | Standard 9-block Business Model Canvas. |
+| `GuidedBusinessModelCanvas` | `components/canvas/GuidedBusinessModelCanvas.tsx` | Guided BMC with step-by-step prompts. |
 | `BMCViabilityOverlay` | `components/canvas/BMCViabilityOverlay.tsx` | Business Model Canvas with viability overlay. |
 
 ---
@@ -177,14 +193,16 @@ Components for displaying CrewAI validation results.
 | Component | Path | Responsibilities |
 |-----------|------|------------------|
 | `DashboardLayout` | `components/layout/DashboardLayout.tsx` | Main layout wrapper for authenticated dashboard pages. |
+| `AppSidebar` | `components/layout/AppSidebar.tsx` | Application sidebar with navigation links. |
 | `DashboardAIAssistant` | `components/assistant/DashboardAIAssistant.tsx` | In-app AI assistant widget. |
 
 ---
 
 ## Routing & Layouts
 
-- Authenticated routes live under `frontend/src/app/(authenticated)/`. The onboarding page (`/onboarding/page.tsx`) checks Supabase session server-side and redirects unauthenticated users to `/login?returnUrl=/onboarding`.
-- Layouts reuse the marketing shell where possible. The onboarding page wraps the wizard in a full-height flex layout, preloading skeleton components while data loads.
+- Routes are organized directly under `frontend/src/app/` without route groups. Pages check Supabase session server-side and redirect unauthenticated users to `/login?returnUrl=...`.
+- Key route directories: `onboarding/`, `projects/`, `project/`, `consultant/`, `client/`, `approvals/`, `auth/`
+- The onboarding page wraps the wizard in a full-height flex layout with skeleton loading states.
 - Top-level app router (`frontend/src/app/layout.tsx`) handles global providers (theme, analytics, toast). Client components opt-in only when interactivity is required.
 
 ---
@@ -199,9 +217,30 @@ Components for displaying CrewAI validation results.
 
 ---
 
+## Additional Component Directories
+
+The following directories contain additional components not detailed above:
+
+| Directory | Purpose |
+|-----------|---------|
+| `components/auth/` | Authentication UI (LoginForm, SignupForm) |
+| `components/brief/` | Brief display and editing components |
+| `components/dashboard/` | Dashboard-specific widgets |
+| `components/demo/` | Demo mode components (deprecated) |
+| `components/founder/` | Founder-specific views |
+| `components/founders/` | AI Founders display components |
+| `components/hypothesis/` | Hypothesis management UI |
+| `components/providers/` | React context providers |
+| `components/settings/` | User settings components |
+| `components/viability/` | Viability analysis components |
+| `components/analytics/` | Analytics display components |
+| `components/ui/` | Shadcn UI primitives (50+ components) |
+
+---
+
 ## Related Documentation
 
 - **Stage Progression**: [`features/stage-progression.md`](../features/stage-progression.md)
-- **API Specs**: [`specs/api-onboarding.md`](api-onboarding.md), [`specs/api-approvals.md`](api-approvals.md)
-- **Architecture**: [`overview/architecture.md`](../overview/architecture.md)
-- **Journey Map**: [`user-experience/onboarding-journey-map.md`](../user-experience/onboarding-journey-map.md)
+- **API Specs**: [`api-onboarding.md`](api-onboarding.md), [`api-approvals.md`](api-approvals.md)
+- **Architecture**: [`architecture.md`](architecture.md) (redirects to startupai-crew canonical source)
+- **Journey Map**: [`user-experience/founder-journey-map.md`](../user-experience/founder-journey-map.md)

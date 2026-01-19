@@ -34,7 +34,7 @@ This overview details how the product platform operates within the three-service
 
 ## Contracts with Marketing
 
-- Shared copy lives in `marketing` repo, referenced here via `docs/public-interfaces`. Product must maintain parity with marketing promises tracked in specification-driven tests (see `frontend/src/components/onboarding/__tests__/OnboardingWizard.specification.test.tsx`).
+- Shared copy lives in `marketing` repo, referenced here via `docs/archive/public-interfaces`. Product must maintain parity with marketing promises tracked in specification-driven tests (see `frontend/src/components/onboarding/__tests__/OnboardingWizard.specification.test.tsx`).
 - CTAs guarantee “AI-guided strategic brief and validation plan.” Until CrewAI is live we continue shipping the deterministic fallback but call out TODO in release notes.
 - Accessibility and performance budgets mirror marketing targets (LCP < 2.2s, INP < 200ms). `frontend/src/lib/analytics` records Core Web Vitals to PostHog for monitoring.
 

@@ -1,15 +1,15 @@
 ---
-purpose: "Complete onboarding journey map and UX specification"
+purpose: "Complete founder journey map and UX specification"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
-# 🗺️ Complete Onboarding Journey Map
+# Complete Founder Journey Map
 
 **End-to-End User Experience Specification**
 
-**Status:** 🟢 **IMPLEMENTED** - Two-Pass Architecture (Jan 2026)
-**Last Updated:** 2026-01-18
+**Status:** IMPLEMENTED - Two-Pass Architecture (Jan 2026)
+**Last Updated:** 2026-01-19
 **Cross-Reference:** [`features/stage-progression.md`](../features/stage-progression.md) - Implementation details
 
 ---

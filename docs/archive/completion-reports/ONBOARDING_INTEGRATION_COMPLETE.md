@@ -104,7 +104,7 @@ Supabase (Results Storage)
 
 - ✅ `docs/specs/agentuity-integration.md` - Complete technical specification
 - ✅ `docs/specs/api-onboarding.md` - API contracts with Agentuity details
-- ✅ `docs/overview/two-site-implementation-plan.md` - Phase 4 marked complete
+- ✅ `../startupai.site/docs/technical/two-site-implementation-plan.md` - Phase 4 marked complete
 
 ## Next Steps
 

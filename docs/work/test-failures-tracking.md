@@ -113,7 +113,7 @@ Then update type assertions to use `HTMLElement` instead of `Element`.
 
 - **GH Issue #189:** Specification-driven test refresh (In Progress)
 - **docs/work/in-progress.md:** P1 priority item
-- **docs/audits/CREWAI-FRONTEND-INTEGRATION-QA.md:** "Tests are broken - Infrastructure issues"
+- **docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md:** "Tests are broken - Infrastructure issues"
 
 ---
 

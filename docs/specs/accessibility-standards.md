@@ -1,7 +1,7 @@
 ---
 purpose: "WCAG compliance framework for accessibility"
 status: "active"
-last_reviewed: "2025-10-27"
+last_reviewed: "2026-01-19"
 ---
 
 # Accessibility Standards
@@ -9,6 +9,23 @@ last_reviewed: "2025-10-27"
 
 **Version:** 2.0
 **Compliance Target:** WCAG 2.2 AA
+
+## Implementation Status
+
+> **Current Status**: Partial implementation. Core infrastructure exists but comprehensive testing pending.
+
+| Feature | Status | Implementation |
+|---------|--------|----------------|
+| Skip links | Partial | `app/onboarding/page.tsx`, `app/onboarding/founder/page.tsx` only |
+| Screen reader announcements | Implemented | `hooks/useScreenReaderAnnouncement.ts` |
+| Form accessibility | Implemented | `hooks/useFormAccessibility.ts` |
+| Language declaration | Implemented | `<html lang="en">` in `app/layout.tsx` |
+| ARIA attributes | Implemented | Across components (approvals, onboarding, canvas) |
+| jest-axe | Installed | Package available, tests skipped |
+| Playwright axe | Implemented | `tests/e2e/helpers/accessibility.ts` |
+| prefers-reduced-motion | Not Implemented | No support found |
+| Automated CI testing | Not Configured | Manual testing only |
+| Color contrast validation | Untested | No automated checks |
 
 ## Executive Summary
 
@@ -172,28 +189,42 @@ StartupAI is committed to providing an inclusive platform accessible to all user
 ```
 
 ### Focus Management
-```typescript
-// Focus management for dynamic content
-function handleAIResponse(response: string) {
-  const resultContainer = document.getElementById('ai-results');
-  resultContainer.innerHTML = response;
-  
-  // Move focus to results for screen readers
-  const firstHeading = resultContainer.querySelector('h1, h2, h3, h4, h5, h6');
-  if (firstHeading) {
-    firstHeading.setAttribute('tabindex', '-1');
-    firstHeading.focus();
-  }
-}
 
-// Skip navigation implementation
-function addSkipNavigation() {
-  const skipLink = document.createElement('a');
-  skipLink.href = '#main-content';
-  skipLink.textContent = 'Skip to main content';
-  skipLink.className = 'skip-link';
-  document.body.insertBefore(skipLink, document.body.firstChild);
-}
+**Screen Reader Announcements** (implemented in `hooks/useScreenReaderAnnouncement.ts`):
+```typescript
+import { useScreenReaderAnnouncement, announceToScreenReader } from '@/hooks/useScreenReaderAnnouncement';
+
+// Hook usage
+const { announce, announceLoading, announceSuccess, announceError } = useScreenReaderAnnouncement();
+announceLoading('Processing your request');
+announceSuccess('Response received');
+announceError('Failed to send message');
+
+// One-off announcement
+announceToScreenReader('New content loaded', 'polite');
+```
+
+**Form Accessibility** (implemented in `hooks/useFormAccessibility.ts`):
+```typescript
+import { useFormAccessibility } from '@/hooks/useFormAccessibility';
+
+const emailA11y = useFormAccessibility('email');
+
+<input id="email" {...emailA11y.fieldProps} />
+{emailA11y.hasError && (
+  <span {...emailA11y.errorProps}>{emailA11y.error}</span>
+)}
+```
+
+**Skip Navigation** (implemented on onboarding pages):
+```tsx
+// app/onboarding/page.tsx
+<a
+  href="#main-content"
+  className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50"
+>
+  Skip to main content
+</a>
 ```
 
 ## Multi-Disability Support
@@ -225,9 +256,12 @@ function addSkipNavigation() {
 
 ## Testing and Validation
 
-### Automated Testing
+### Current Testing Infrastructure
+
+**Jest + axe-core** (installed but tests skipped):
 ```typescript
-// Jest + axe-core integration
+// Package installed: jest-axe ^10.0.0
+// Tests in: src/__tests__/accessibility/wcag-compliance.test.tsx (SKIPPED)
 import { axe, toHaveNoViolations } from 'jest-axe';
 
 expect.extend(toHaveNoViolations);
@@ -237,6 +271,21 @@ test('should not have accessibility violations', async () => {
   const results = await axe(container);
   expect(results).toHaveNoViolations();
 });
+```
+
+**Playwright + axe-core** (implemented):
+```typescript
+// Location: tests/e2e/helpers/accessibility.ts
+import { checkA11y, checkKeyboardNavigation, checkHeadingStructure } from './helpers/accessibility';
+
+// Run WCAG 2.1 AA checks
+await checkA11y(page, 'login page');
+
+// Check keyboard navigation
+await checkKeyboardNavigation(page, 5);
+
+// Verify heading structure
+await checkHeadingStructure(page);
 ```
 
 ### Manual Testing Protocols
@@ -303,33 +352,49 @@ test('should not have accessibility violations', async () => {
 
 ## Implementation Roadmap
 
-### Phase 1: Foundation (Immediate)
-- Semantic HTML landmarks implementation
-- Skip navigation links
-- Basic ARIA labeling
-- Color contrast compliance
+### Completed
+- [x] Semantic HTML landmarks in layout
+- [x] Language declaration (`<html lang="en">`)
+- [x] Screen reader announcement hooks
+- [x] Form accessibility hooks with ARIA patterns
+- [x] Skip links on onboarding pages
+- [x] ARIA attributes in core components
+- [x] E2E accessibility helper functions
+- [x] jest-axe package installed
 
-### Phase 2: AI Integration (Next 30 days)
-- AI content identification
-- Processing state announcements
-- Alternative formats for AI outputs
-- Error handling improvements
+### Phase 1: Testing Foundation (Priority)
+- [ ] Enable skipped WCAG unit tests
+- [ ] Add axe checks to CI/CD pipeline
+- [ ] Run accessibility audit on all pages
+- [ ] Document color contrast compliance
 
-### Phase 3: Advanced Features (Next 90 days)
-- Voice input support
-- Advanced screen reader optimization
-- Multi-modal interaction modes
-- Comprehensive user testing
+### Phase 2: Core Accessibility
+- [ ] Add skip links to ALL pages (not just onboarding)
+- [ ] Implement `prefers-reduced-motion` support
+- [ ] AI content identification labeling
+- [ ] Processing state announcements in all AI interactions
 
-### Phase 4: Continuous Improvement (Ongoing)
-- Regular accessibility audits
-- User feedback integration
-- Emerging standard compliance
-- Accessibility training for team
+### Phase 3: Advanced Features
+- [ ] Voice input support
+- [ ] High contrast mode support
+- [ ] Comprehensive keyboard navigation testing
+- [ ] User testing with assistive technology users
+
+### Phase 4: Continuous Improvement
+- [ ] Regular accessibility audits
+- [ ] User feedback integration
+- [ ] VPAT documentation
+- [ ] Accessibility training for team
 
 ---
 
-**Document Owner:** Product Team  
-**Review Cycle:** Monthly  
-**Next Review:** November 27, 2025  
+**Document Owner:** Product Team
+**Review Cycle:** Monthly
+**Last Reviewed:** 2026-01-19
 **Compliance Contact:** accessibility@startupai.site
+
+## Related Documentation
+
+- **SLOs**: [slos.md](slos.md) (accessibility targets)
+- **Frontend Components**: [frontend-components.md](frontend-components.md)
+- **Testing Strategy**: [../testing/strategy.md](../testing/strategy.md)

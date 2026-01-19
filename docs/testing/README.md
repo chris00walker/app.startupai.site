@@ -1,7 +1,7 @@
 ---
 purpose: "Testing documentation index"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Testing Documentation
@@ -198,13 +198,34 @@ The `test:ci` script runs:
 
 ## Related Documentation
 
-- [Business Requirements Testing](./business-requirements-testing.md)
-- [User Journey Validation](./user-journey-validation.md)
-- [Accessibility Testing](./accessibility-testing.md)
+| Document | Purpose |
+|----------|---------|
+| [strategy.md](strategy.md) | Test pyramid and story-driven testing |
+| [journey-test-matrix.md](journey-test-matrix.md) | Story-to-test coverage matrix |
+| [e2e-guide.md](e2e-guide.md) | E2E testing guide |
+
+## Accessibility Testing
+
+E2E accessibility helpers are available in `tests/e2e/helpers/accessibility.ts`:
+
+```typescript
+import { checkA11y, checkKeyboardNavigation, checkHeadingStructure } from './helpers/accessibility';
+
+// Run WCAG 2.1 AA checks on a page
+await checkA11y(page, 'login page');
+
+// Verify keyboard navigation works
+await checkKeyboardNavigation(page, 5);
+
+// Check heading structure is valid
+await checkHeadingStructure(page);
+```
+
+See [accessibility-standards.md](../specs/accessibility-standards.md) for compliance requirements.
 
 ---
 
-**Last Updated**: 2025-12-01
-**Status**: Jest + Playwright infrastructure implemented
+**Last Updated**: 2026-01-19
+**Status**: Jest + Playwright infrastructure implemented, accessibility helpers available
 
-*Note: Verify available commands with `pnpm run` in the frontend directory. Some commands may vary based on package.json configuration.*
+*Note: Verify available commands with `pnpm run` in the frontend directory.*

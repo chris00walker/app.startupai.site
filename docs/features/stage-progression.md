@@ -1,7 +1,7 @@
 ---
 purpose: "Documentation for onboarding stage progression system"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Stage Progression System
@@ -10,7 +10,7 @@ last_reviewed: "2026-01-18"
 
 The onboarding journey consists of 7 stages. Users progress through stages as they cover required topics in conversation with Alex (the AI guide). Progression is determined by topic coverage, not tool calls.
 
-> **Architecture**: See [ADR-004: Two-Pass Onboarding](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
+> **Architecture**: See [ADR-004: Two-Pass Onboarding](../../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
 
 ## Key Change (Jan 2026)
 
@@ -160,13 +160,13 @@ overallProgress = ((currentStage - 1) / 7 * 100) + (stageProgress / 7);
 
 The assessment also calculates quality signals:
 
-| Signal | Description | Range |
-|--------|-------------|-------|
-| `clarity` | How clear responses are | 0.0-1.0 |
-| `completeness` | How thorough responses are | 0.0-1.0 |
-| `detail` | Level of specific detail | 0.0-1.0 |
+| Signal | Description | Values |
+|--------|-------------|--------|
+| `clarity` | How clear responses are | `high`, `medium`, `low` |
+| `completeness` | How thorough responses are | `complete`, `partial`, `insufficient` |
+| `coverage` | Fraction of topics discussed | 0.0-1.0 |
 
-These signals are stored in `stage_data.quality_signals` but don't gate progression.
+These signals are stored in `stage_data.quality_signals` but don't gate progression. Stage advancement is based on `topicsCovered` array, not quality scores.
 
 ## Key Files
 
@@ -197,16 +197,16 @@ These signals are stored in `stage_data.quality_signals` but don't gate progress
 {
   "brief": {
     "business_concept": "AI validation platform",
-    "target_customers": "Startup founders",
+    "target_customers": ["Startup founders", "Innovation consultants"],
     // ... accumulated across all stages
   },
   "quality_signals": {
-    "clarity": 0.85,
-    "completeness": 0.72,
-    "detail": 0.68
+    "clarity": "high",
+    "completeness": "partial",
+    "coverage": 0.75
   },
   "stage_1": {
-    "topics_covered": ["business_concept", "inspiration"],
+    "topics_covered": ["business_concept", "inspiration", "current_stage", "founder_background"],
     "completed_at": "2026-01-18T10:00:00Z"
   }
 }
@@ -228,9 +228,7 @@ See `consultant-stages-config.ts` for consultant stage definitions.
 
 ### Unit Tests
 
-- `frontend/src/__tests__/lib/onboarding/founder-stages-config.test.ts`
-- `frontend/src/__tests__/lib/onboarding/founder-quality-assessment.test.ts`
-- `frontend/src/__tests__/lib/onboarding/consultant-stages-config.test.ts`
+> **Note**: Unit tests for stage configuration are not yet implemented. See `docs/testing/journey-test-matrix.md` for E2E test coverage.
 
 ### Manual Testing
 
@@ -244,5 +242,5 @@ See `consultant-stages-config.ts` for consultant stage definitions.
 ## Related Documentation
 
 - **API Spec**: [specs/api-onboarding.md](../specs/api-onboarding.md)
-- **Architecture**: [overview/architecture.md](../overview/architecture.md)
+- **Architecture**: [specs/architecture.md](../specs/architecture.md)
 - **ADR-004**: `startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md`

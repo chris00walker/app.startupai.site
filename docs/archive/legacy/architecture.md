@@ -1,7 +1,7 @@
 ---
 purpose: "High-level architecture overview for StartupAI product platform"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Architecture Overview
@@ -24,8 +24,26 @@ StartupAI operates as a three-service ecosystem with clear separation of concern
 > **Master architecture documentation lives in `startupai-crew/docs/master-architecture/`**
 >
 > That is the single source of truth for cross-service architecture. This document provides product-specific context.
->
-> See also: [architecture-references.md](architecture-references.md) for links to ADRs and master docs.
+
+```
+startupai-crew/docs/master-architecture/
+├── 01-ecosystem.md           # Three-service reality diagram
+├── 02-organization.md        # C-suite → Agent hierarchy
+├── 03-validation-spec.md     # Technical implementation guide
+├── 04-phase-0-onboarding.md  # Phase 0 specification
+├── 05-hitl-checkpoints.md    # Human-in-the-loop workflow
+├── 10-dogfooding.md          # Dogfooding methodology
+└── reference/                # API contracts, schemas
+    ├── api-contracts.md      # Modal ↔ Product App contracts
+    └── modal-configuration.md # Modal deployment config
+```
+
+### Key ADRs
+
+| ADR | Title | Location |
+|-----|-------|----------|
+| ADR-004 | Two-Pass Onboarding | `startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md` |
+| ADR-005 | State-First Loop | `startupai-crew/docs/adr/005-state-first-synchronized-loop.md` |
 
 ## Service Responsibilities
 
@@ -218,11 +236,40 @@ See `work/in-progress.md` for detailed tracking.
 - pgvector search only via stored procedure - dashboard experiences must use RPC
 - Large JSONB columns not suitable for Realtime (use polling)
 
+## Domains & Ownership
+
+| Domain | Owner | Notes |
+|--------|-------|-------|
+| Marketing site (`startupai.site`) | Growth Engineering | Next.js static export, CTAs with plan hints |
+| Auth & Identity | Platform Engineering | Supabase Auth (GitHub OAuth, email) |
+| Application site (`app.startupai.site`) | Platform Engineering | Next.js hybrid router, dashboards |
+| Database & Storage | Platform Engineering | Supabase Postgres + pgvector |
+| AI Workflows | AI Platform | CrewAI Flows on Modal (`startupai-crew`) |
+| Analytics | Shared (Growth + Platform) | PostHog instrumentation |
+
+## When to Update This Repo vs Master
+
+### Update This Repo (`app.startupai.site`)
+
+- Product app implementation details
+- API route documentation
+- Frontend component specs
+- UI/UX patterns
+- Testing strategies
+
+### Update Master Repo (`startupai-crew`)
+
+- Cross-repo architecture decisions
+- Data contracts between services
+- ADRs (Architecture Decision Records)
+- CrewAI flow specifications
+- Modal deployment patterns
+- Webhook payload schemas
+
 ## Related Documentation
 
 - **Master Architecture**: `startupai-crew/docs/master-architecture/` (canonical)
-- **Architecture References**: [architecture-references.md](architecture-references.md)
-- **Database Schema**: [specs/data-schema.md](../specs/data-schema.md)
-- **Auth Spec**: [specs/auth.md](../specs/auth.md)
-- **API Specs**: [specs/api-onboarding.md](../specs/api-onboarding.md)
-- **Work Tracking**: [work/in-progress.md](../work/in-progress.md)
+- **Database Schema**: [data-schema.md](data-schema.md)
+- **Auth Spec**: [auth.md](auth.md)
+- **API Specs**: [api-onboarding.md](api-onboarding.md)
+- **Work Tracking**: [../work/in-progress.md](../work/in-progress.md)

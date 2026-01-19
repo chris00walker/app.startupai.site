@@ -1,7 +1,7 @@
 ---
 purpose: "API specification for consultant-specific routes"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Consultant API Specification
@@ -17,23 +17,24 @@ Consultants use these APIs to:
 
 ## Endpoint Summary
 
-### Consultant Onboarding (4 routes)
+### Consultant Onboarding (5 routes)
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/consultant/onboarding` | POST | Chat message during consultant onboarding |
-| `/api/consultant/onboarding/start` | POST | Start consultant profile creation |
+| `/api/consultant/onboarding/start` | POST | Start/resume consultant onboarding session |
+| `/api/consultant/chat` | POST | Chat message during onboarding (streaming) |
 | `/api/consultant/onboarding/status` | GET | Get onboarding progress |
-| `/api/consultant/onboarding/complete` | POST | Finalize consultant profile |
+| `/api/consultant/onboarding/complete` | POST | Finalize profile and trigger Modal workflow |
+| `/api/consultant/onboarding` | POST | Legacy: Direct profile save (V1 component) |
 
 ### Client Management (4 routes)
 
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/consultant/invites` | GET, POST | List/create client invites |
-| `/api/consultant/invites/[id]` | GET, PUT, DELETE | Manage specific invite |
-| `/api/consultant/invites/[id]/resend` | POST | Resend invite email |
-| `/api/consultant/clients/[id]/archive` | POST | Archive a client |
+| `/api/consultant/invites/[id]` | DELETE | Revoke pending invite |
+| `/api/consultant/invites/[id]/resend` | POST | Resend invite with new token |
+| `/api/consultant/clients/[id]/archive` | POST | Archive a client relationship |
 
 ---
 
@@ -41,44 +42,111 @@ Consultants use these APIs to:
 
 ### `/api/consultant/onboarding/start`
 
-**POST** - Start consultant onboarding session.
+**POST** - Start or resume consultant onboarding session.
 
 #### Request
 
 ```jsonc
 {
-  "resumeSessionId": null // optional, to resume previous session
+  "userId": "uuid-of-user",
+  "userEmail": "consultant@example.com"
 }
 ```
 
-#### Response
+#### Response (New Session)
 
 ```jsonc
 {
   "success": true,
-  "sessionId": "cons_abc123",
-  "agentIntroduction": "Hi, I'm Alex. I'll help set up your consultant profile...",
-  "firstQuestion": "Tell me about your consulting practice...",
+  "sessionId": "consultant-{userId}-{timestamp}",
   "stageInfo": {
     "currentStage": 1,
     "totalStages": 7,
-    "stageName": "Practice Overview"
-  }
+    "stageName": "Welcome & Practice Overview"
+  },
+  "conversationContext": {
+    "agentPersonality": {
+      "name": "Maya",
+      "role": "Consulting Practice Specialist",
+      "tone": "Professional and collaborative",
+      "expertise": "consulting practice management and client workflow optimization"
+    },
+    "userRole": "consultant",
+    "planType": "consultant"
+  },
+  "agentIntroduction": "Hi! I'm Maya, your Consulting Practice Specialist...",
+  "firstQuestion": "To get started, could you tell me about your consulting practice?",
+  "resuming": false
+}
+```
+
+#### Response (Resumed Session)
+
+```jsonc
+{
+  "success": true,
+  "sessionId": "consultant-{userId}-{timestamp}",
+  "stageInfo": {
+    "currentStage": 3,
+    "totalStages": 7,
+    "stageName": "Industries & Services"
+  },
+  "conversationContext": { /* same as above */ },
+  "resuming": true,
+  "conversationHistory": [ /* previous messages */ ],
+  "overallProgress": 35,
+  "stageProgress": 60
 }
 ```
 
 ---
 
-### `/api/consultant/onboarding`
+### `/api/consultant/chat`
 
-**POST** - Send message during consultant onboarding.
+**POST** - Send message during consultant onboarding (streaming response).
+
+Uses Two-Pass Architecture matching founder onboarding.
 
 #### Request
 
 ```jsonc
 {
-  "sessionId": "cons_abc123",
-  "message": "I specialize in startup strategy and go-to-market planning"
+  "messages": [
+    { "role": "user", "content": "I specialize in startup strategy" }
+  ],
+  "sessionId": "consultant-{userId}-{timestamp}",
+  "userId": "uuid-of-user"
+}
+```
+
+#### Response
+
+Streaming response (text/event-stream). After streaming completes, the backend:
+1. Assesses conversation quality
+2. Extracts structured data
+3. Updates session progress in database
+
+---
+
+### `/api/consultant/onboarding` (Legacy)
+
+**POST** - Direct profile save. Used by V1 component only.
+
+#### Request
+
+```jsonc
+{
+  "userId": "uuid-of-user",
+  "profile": {
+    "companyName": "Strategy Partners",
+    "practiceSize": "2-10",
+    "currentClients": 5,
+    "industries": ["Tech", "SaaS"],
+    "services": ["Strategy", "Go-to-market"],
+    "toolsUsed": ["Notion", "Miro"],
+    "painPoints": "Client communication",
+    "whiteLabelInterest": true
+  }
 }
 ```
 
@@ -87,12 +155,8 @@ Consultants use these APIs to:
 ```jsonc
 {
   "success": true,
-  "response": "That's great! What industries do you typically work with?",
-  "stageInfo": {
-    "currentStage": 1,
-    "stageProgress": 45,
-    "overallProgress": 12
-  }
+  "profile": { /* saved profile object */ },
+  "message": "Consultant profile created successfully"
 }
 ```
 
@@ -114,7 +178,7 @@ Consultants use these APIs to:
   "currentStage": 3,
   "overallProgress": 45,
   "stageProgress": 60,
-  "status": "active",
+  "status": "active",  // 'active', 'paused', 'completed'
   "completed": false,
   "briefData": {
     "company_name": "Strategy Partners",
@@ -127,14 +191,15 @@ Consultants use these APIs to:
 
 ### `/api/consultant/onboarding/complete`
 
-**POST** - Complete consultant onboarding and create profile.
+**POST** - Complete consultant onboarding, save profile, and trigger Modal workflow.
 
 #### Request
 
 ```jsonc
 {
-  "sessionId": "cons_abc123",
-  "finalConfirmation": true
+  "sessionId": "consultant-{userId}-{timestamp}",
+  "userId": "uuid-of-user",
+  "messages": [ /* optional: final conversation messages */ ]
 }
 ```
 
@@ -143,11 +208,34 @@ Consultants use these APIs to:
 ```jsonc
 {
   "success": true,
-  "profileId": "profile_xyz789",
-  "nextSteps": {
-    "dashboardUrl": "/consultant/dashboard",
-    "inviteClientsUrl": "/consultant/clients"
-  }
+  "profile": {
+    "id": "uuid-of-user",
+    "company_name": "Strategy Partners",
+    "practice_size": "2-10",
+    "current_clients": 5,
+    "industries": ["Tech", "SaaS"],
+    "services": ["Strategy", "Go-to-market"],
+    "tools_used": ["Notion", "Miro"],
+    "pain_points": "Client communication",
+    "white_label_enabled": true,
+    "onboarding_completed": true
+  },
+  "workflowId": "run_abc123",  // Modal run ID (null if kickoff failed)
+  "workflowTriggered": true,
+  "message": "Onboarding completed. Validation analysis started."
+}
+```
+
+#### Response (Modal kickoff failed)
+
+```jsonc
+{
+  "success": true,
+  "profile": { /* saved profile */ },
+  "workflowId": null,
+  "workflowTriggered": false,
+  "message": "Onboarding completed successfully",
+  "modalError": "Modal kickoff failed"
 }
 ```
 
@@ -210,51 +298,58 @@ Consultants use these APIs to:
 
 ### `/api/consultant/invites/[id]`
 
-**GET** - Get specific invite details.
+**DELETE** - Revoke a pending invite.
 
-**PUT** - Update invite (e.g., extend expiry).
-
-#### Request
-
-```jsonc
-{
-  "expiresAt": "2026-03-17T10:00:00Z"
-}
-```
-
-**DELETE** - Cancel/revoke an invite.
+Only pending invites (status: 'invited') can be revoked. Active or archived relationships cannot be deleted via this endpoint.
 
 #### Response
 
 ```jsonc
 {
   "success": true,
-  "message": "Invite revoked"
+  "message": "Invite revoked successfully"
 }
 ```
+
+#### Errors
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `Invite not found` | 404 | Invalid invite ID |
+| `You do not have permission...` | 403 | Not the invite owner |
+| `Only pending invites can be revoked` | 400 | Already active/archived |
 
 ---
 
 ### `/api/consultant/invites/[id]/resend`
 
-**POST** - Resend invite email to client.
+**POST** - Resend invite with new token and extended expiry.
+
+Generates a new invite token and extends expiry by 30 days.
 
 #### Request
 
-```jsonc
-{
-  "message": "Just following up on my earlier invite..." // optional custom message
-}
-```
+No body required.
 
 #### Response
 
 ```jsonc
 {
   "success": true,
-  "sentAt": "2026-01-18T12:00:00Z"
+  "invite": {
+    "id": "uuid",
+    "email": "founder@startup.com",
+    "name": "John Doe",
+    "inviteToken": "new_base64url_token",
+    "inviteUrl": "https://app.startupai.site/signup?invite=new_base64url_token",
+    "expiresAt": "2026-02-18T12:00:00Z",
+    "status": "invited"
+  },
+  "message": "Invite resent successfully"
 }
 ```
+
+> **Note**: Email sending is not yet implemented. Currently returns the new invite URL for manual sharing.
 
 ---
 
@@ -286,34 +381,52 @@ Consultants use these APIs to:
 ```
 1. Consultant calls POST /api/consultant/invites
    → Creates row in consultant_clients (status: 'invited')
-   → Generates unique token (30-day expiry)
-   → Sends email with signup link
+   → Generates base64url token (30-day expiry)
+   → Returns invite URL (email sending not yet implemented)
 
-2. Client clicks link: /signup?invite=tok_xyz789
-   → Validates token via GET /api/auth/validate-invite
-   → Client signs up normally
+2. Client clicks link: /signup?invite={base64url_token}
+   → Signup page calls GET /api/auth/validate-invite?token=XXX
+   → Returns consultant name, email pre-fill, expiry info
+   → Client completes signup form
 
-3. On signup completion:
+3. After signup completes:
+   → Signup handler calls POST /api/auth/validate-invite
+   → Calls database function link_client_via_invite()
    → consultant_clients.status → 'active'
-   → client.consultant_id → consultant's user ID
+   → consultant_clients.client_id → user's ID
+   → consultant_clients.linked_at → current timestamp
    → Consultant sees client in portfolio
 ```
+
+### Auth Integration Routes
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/auth/validate-invite` | GET | Validate token (public, for signup page) |
+| `/api/auth/validate-invite` | POST | Link account after signup (authenticated) |
 
 ## Database Schema
 
 ### `consultant_clients` Table
 
+**Drizzle ORM Schema**: `frontend/src/db/schema/consultant-clients.ts`
+
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | UUID | Primary key |
-| `consultant_id` | UUID | FK to users |
-| `client_id` | UUID | FK to users (nullable until signup) |
-| `email` | TEXT | Client's email |
-| `invite_token` | UUID | Unique signup token |
+| `consultant_id` | UUID | FK to user_profiles (cascade delete) |
+| `client_id` | UUID | FK to user_profiles (nullable, set null on delete) |
+| `invite_email` | TEXT | Client's email address |
+| `invite_token` | TEXT | Unique base64url signup token |
+| `invite_expires_at` | TIMESTAMP | Token expiry (30 days from creation) |
+| `client_name` | TEXT | Optional name for personalization |
 | `status` | TEXT | 'invited', 'active', 'archived' |
-| `created_at` | TIMESTAMP | Invite creation time |
-| `expires_at` | TIMESTAMP | Token expiry (30 days) |
-| `accepted_at` | TIMESTAMP | When client signed up |
+| `invited_at` | TIMESTAMP | When invite was created |
+| `linked_at` | TIMESTAMP | When client accepted (signed up) |
+| `archived_at` | TIMESTAMP | When relationship was archived |
+| `archived_by` | TEXT | 'consultant', 'client', or 'system' |
+| `created_at` | TIMESTAMP | Record creation time |
+| `updated_at` | TIMESTAMP | Last update time |
 
 ### RLS Policies
 
@@ -321,6 +434,8 @@ Consultants use these APIs to:
 - Clients can see their own relationship
 - Insert requires consultant role
 - Update/delete requires ownership
+
+See [features/consultant-client-system.md](../features/consultant-client-system.md) for full schema documentation.
 
 ## Error Codes
 

@@ -1,7 +1,7 @@
 ---
 purpose: "Spec-to-app phase mapping (startupai-crew -> app.startupai.site)"
-status: "draft"
-last_reviewed: "2026-01-13"
+status: "active"
+last_reviewed: "2026-01-19"
 ---
 
 # Phase Mapping (spec vs product app)
@@ -18,13 +18,15 @@ Legend:
 - partial: some wiring exists (UI or API) but missing spec steps or relies on external compute only
 - missing: no UI/API surface exists in the product app
 
+> **Note**: Onboarding uses Two-Pass Architecture (ADR-004). See [api-onboarding.md](api-onboarding.md) for details.
+
 ## Phase 0: Onboarding (Founder's Brief)
 
 | Spec feature | App implementation | Status | Notes |
 | --- | --- | --- | --- |
-| Founder interview conversation (O1) | `frontend/src/components/onboarding/OnboardingWizardV2.tsx`, `frontend/src/app/api/chat/route.ts` | implemented | 7-stage conversation collects onboarding inputs. |
-| Stage progression + data capture | `frontend/src/lib/ai/onboarding-prompt.ts`, `frontend/src/app/api/onboarding/message/route.ts`, `frontend/src/app/api/onboarding/status/route.ts` | implemented | Progress tracked in `onboarding_sessions`. |
-| Concept legitimacy + intent verification (GV1/GV2) | `frontend/src/lib/ai/onboarding-prompt.ts` | partial | Prompt includes hard rejection rules; no explicit GV1/GV2 artifacts or separate review step. |
+| Founder interview conversation (O1) | `frontend/src/components/onboarding/FounderOnboardingWizard.tsx`, `frontend/src/app/api/chat/route.ts` | implemented | 7-stage conversation collects onboarding inputs via Two-Pass architecture. |
+| Stage progression + data capture | `frontend/src/lib/ai/founder-onboarding-prompt.ts`, `frontend/src/app/api/chat/stream/route.ts`, `frontend/src/app/api/chat/save/route.ts`, `frontend/src/app/api/onboarding/status/route.ts` | implemented | Progress tracked in `onboarding_sessions`. Two-Pass: stream for conversation, save for persistence. |
+| Concept legitimacy + intent verification (GV1/GV2) | `frontend/src/lib/ai/founder-onboarding-prompt.ts` | partial | Prompt includes hard rejection rules; no explicit GV1/GV2 artifacts or separate review step. |
 | Founder's Brief artifact | `frontend/src/app/api/onboarding/complete/route.ts` | partial | Creates `entrepreneur_briefs` (not explicit spec schema) without an approval UI for the brief itself. |
 | HITL checkpoint `approve_founders_brief` | `frontend/src/app/api/crewai/webhook/route.ts`, `frontend/src/app/approvals/page.tsx` | partial | Webhook can create approval requests if Modal emits checkpoint; no dedicated brief review page. |
 | Intent gate loop (follow-up / reject) | none | missing | No explicit routing back to interview based on GV checks. |
@@ -34,7 +36,7 @@ Legend:
 
 | Spec feature | App implementation | Status | Notes |
 | --- | --- | --- | --- |
-| Segment validation + experiment design (DiscoveryCrew) | `frontend/src/components/strategyzer/AssumptionMap.tsx`, `frontend/src/components/strategyzer/ExperimentCardsGrid.tsx` | partial | UI exists (legacy `/founder-dashboard`), but no automated segment validation flow. |
+| Segment validation + experiment design (DiscoveryCrew) | `frontend/src/components/strategyzer/AssumptionMap.tsx`, `frontend/src/components/strategyzer/ExperimentCardsGrid.tsx` | partial | UI exists (Pages Router: `pages/founder-dashboard.tsx`), but no automated segment validation flow. |
 | Evidence capture (SAY/DO) | `frontend/src/components/fit/EvidenceLedger.tsx` | partial | Evidence ledger UI exists; no formal DiscoveryCrew workflow. |
 | Customer Profile (Jobs/Pains/Gains) | `frontend/src/components/vpc/VPCReportViewer.tsx` | partial | UI can display VPC data if present; relies on crew outputs. |
 | Value Map (Products/Pain Relievers/Gain Creators) | `frontend/src/app/api/vpc/[projectId]/route.ts` | partial | CRUD exists for VPC; generation from crew results is external. |

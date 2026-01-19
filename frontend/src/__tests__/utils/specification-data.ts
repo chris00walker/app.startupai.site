@@ -1,10 +1,10 @@
 /**
  * Specification-Driven Test Data
  * Extracted from business specification documents
- * Source: onboarding-journey-map.md, onboarding-agent-integration.md
+ * Source: founder-journey-map.md, onboarding-agent-integration.md
  */
 
-// Journey Specifications from onboarding-journey-map.md Lines 21-377
+// Journey Specifications from founder-journey-map.md Lines 21-377
 export const JOURNEY_SPECIFICATIONS = {
   stages: [
     { stage: 1, name: "Customer Discovery", targetDuration: { min: 5, max: 7 }, unit: "minutes" },
@@ -16,7 +16,7 @@ export const JOURNEY_SPECIFICATIONS = {
     { stage: 7, name: "Completion & Trigger", targetDuration: { min: 1, max: 2 }, unit: "minutes" }
   ],
   
-  // Success Metrics from onboarding-journey-map.md Lines 454-517
+  // Success Metrics from founder-journey-map.md Lines 454-517
   successMetrics: {
     conversationQuality: {
       completionRate: { target: 0.85, measurement: "percentage completing all stages" },
@@ -65,7 +65,7 @@ export const USER_TIER_SPECIFICATIONS = {
   consultant: { sessions: 50, messages: 500, workflows: 100 }
 };
 
-// 15-Step User Journey from onboarding-journey-map.md
+// 15-Step User Journey from founder-journey-map.md
 export const FIFTEEN_STEP_JOURNEY = [
   // Steps 1-3: Pre-Onboarding (Marketing Site)
   { 

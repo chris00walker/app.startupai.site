@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for testing strategy"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Testing Strategy
@@ -76,7 +76,7 @@ Journey Map → User Goal → Test Case
 ### Approach
 
 1. **Derive tests from journey maps**
-   - Source: `docs/user-experience/onboarding-journey-map.md`
+   - Source: `docs/user-experience/founder-journey-map.md`
    - Map each journey step to a test case
    - Test user outcomes, not implementation details
 
@@ -87,8 +87,9 @@ Journey Map → User Goal → Test Case
 
 3. **Acceptance test layer**
    - Tests verify user outcomes
-   - "As a founder, I can complete onboarding"
-   - "As a consultant, I can invite clients"
+   - Stories defined in [`user-stories.md`](../user-experience/user-stories.md)
+   - Example: US-F01 "Complete AI-Guided Onboarding"
+   - Example: US-C02 "Invite Client"
 
 4. **Integration tests with real DB**
    - Reduce mock dependency
@@ -107,9 +108,11 @@ Journey Map → User Goal → Test Case
 
 ### Reference
 
-- Journey map: `docs/user-experience/onboarding-journey-map.md`
-- Matrix: `docs/testing/journey-test-matrix.md` (planned)
-- In-progress plan: `docs/work/in-progress.md` (P1 Priority 0)
+- User Personas: [`user-personas.md`](../user-experience/user-personas.md) - Role definitions
+- User Stories: [`user-stories.md`](../user-experience/user-stories.md) - 18 stories with acceptance criteria
+- Founder Journey: [`founder-journey-map.md`](../user-experience/founder-journey-map.md) - 15-step journey
+- Consultant Journey: [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) - 6-phase journey
+- Coverage Matrix: [`journey-test-matrix.md`](./journey-test-matrix.md) - Story-to-test mapping with gap analysis
 
 ---
 
@@ -222,5 +225,5 @@ frontend/src/
 ## Related Documentation
 
 - **Work Tracking**: `docs/work/in-progress.md` (TDD Effectiveness - P1)
-- **Journey Maps**: `docs/user-experience/onboarding-journey-map.md`
+- **Journey Maps**: `docs/user-experience/founder-journey-map.md`
 - **API Specs**: `docs/specs/api-*.md`

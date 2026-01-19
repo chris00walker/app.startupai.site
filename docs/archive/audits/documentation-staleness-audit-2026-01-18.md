@@ -55,7 +55,7 @@ last_reviewed: "2026-01-18"
 | `specs/frontend-components.md` | 2025-10-25 | 85 days | New components added (StageReviewModal, etc.) |
 | `specs/data-schema.md` | 2025-10-25 | 85 days | Missing `founders_briefs` table (Layer 2) |
 | `public-interfaces/marketing-contracts.md` | 2025-10-25 | 85 days | API contracts evolved |
-| `user-experience/onboarding-journey-map.md` | 2025-11-30 | 49 days | Two-Pass Architecture changes UX flow |
+| `user-experience/founder-journey-map.md` | 2025-11-30 | 49 days | Two-Pass Architecture changes UX flow |
 
 ### ✅ Recently Updated (No Action Needed)
 
@@ -120,7 +120,7 @@ audits/phase0-*.md (5 files)
 ops/environments.md
 overview/business-overview.md
 features/stage-progression.md
-user-experience/onboarding-journey-map.md
+user-experience/founder-journey-map.md
 status/MIGRATION_COMPLETE.md
 status/MIGRATION_SUMMARY.md
 status/linting.md
@@ -174,7 +174,7 @@ Move these to `archive/` (no longer accurate):
 | P1 | `features/stage-progression.md` | Update for unified config | 1h |
 | P1 | `testing/strategy.md` | Add journey-driven testing section | 2h |
 | P2 | `specs/supabase.md` | Add Realtime subscriptions | 1h |
-| P2 | `user-experience/onboarding-journey-map.md` | Update for Two-Pass flow | 2h |
+| P2 | `user-experience/founder-journey-map.md` | Update for Two-Pass flow | 2h |
 | P2 | Create `features/consultant-client-system.md` | New feature spec | 3h |
 
 ### Backlog (As Features Complete)

@@ -1,67 +1,110 @@
 ---
 purpose: "Private technical source of truth for Supabase configuration"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Supabase Configuration
 
 ## Project
 
-- Production project id: `eqxropalhxjeyvfcoyxg` (us-east-1). Local development uses the Supabase CLI project declared in `supabase/config.toml` (`project_id = "app.startupai.site"`).
-- Managed Postgres is currently version 15; the CLI spins up Postgres 17. Keep SQL portable (no `generated always as identity` or other 17-only features) until Supabase upgrades production.
-- Extensions in use: `uuid-ossp` (migration `00001`), `pgvector` (enabled manually and used by `match_evidence`), and realtime/auth defaults. Additional extensions must be requested through the Supabase dashboard before adding migrations.
-- Auth configuration relies on PKCE + secure cookies. Callback domains: production marketing domain, `127.0.0.1:3000` for local, and Netlify previews via dashboard settings.
+- Production project id: `eqxropalhxjeyvfcoyxg` (us-east-1)
+- Managed Postgres version 15 (no 17-only features like `generated always as identity`)
+- Extensions in use: `uuid-ossp`, `pgvector` (for `match_evidence` similarity search), realtime/auth defaults
+- Auth: PKCE + secure cookies
+- Callback domains: production, `127.0.0.1:3000` (local), Netlify previews (via dashboard)
 
 ## Environment Management
 
-| Variable | Service | Notes |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Next.js frontend | Public URL for client SDK; mirrored in `.env.example` and Netlify UI. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Next.js frontend | Browser-safe key used by components that fetch directly from Supabase. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Next.js API routes, Netlify functions, Python backend | Required for RLS-bypassing writes (`EvidenceStoreTool`, onboarding session creation). Never expose to browsers. |
-| `DATABASE_URL` / `DIRECT_DATABASE_URL` | Drizzle migrations, backend scripts | Pooled connection for migrations; direct URL reserved for manual CLI use. |
-| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` (backend) | Python crew and Netlify wrapper | Loaded from `backend/.env`. CLI bootstraps `backend/src/startupai/main.py`. |
+### Supabase Variables
 
-Environment sources:
-- Frontend `.env.example` and `.env.local` for developer workstations.
-- Backend `.env.example` for CrewAI workers and Netlify functions.
-- Netlify dashboard maintains the deploy-time versions; update there when rotating keys.
+| Variable | Service | Notes |
+|----------|---------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Next.js frontend | Public URL for client SDK |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Next.js frontend | Browser-safe key for direct Supabase access |
+| `SUPABASE_SERVICE_ROLE_KEY` | Next.js API routes | RLS-bypassing admin access. **Never expose to browsers.** |
+| `DATABASE_URL` | Drizzle ORM | Pooled connection via Supavisor (`?pgbouncer=true`) |
+
+### Site Configuration
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SITE_URL` | Current site URL |
+| `NEXT_PUBLIC_APP_URL` | Product app URL |
+| `NEXT_PUBLIC_MARKETING_URL` | Marketing site URL |
+
+### Modal/CrewAI Integration
+
+| Variable | Purpose |
+|----------|---------|
+| `MODAL_KICKOFF_URL` | Modal `/kickoff` endpoint |
+| `MODAL_STATUS_URL` | Modal `/status` endpoint |
+| `MODAL_HITL_APPROVE_URL` | Modal `/hitl/approve` endpoint |
+| `MODAL_AUTH_TOKEN` | Shared secret for webhook verification |
+
+### AI Providers
+
+| Variable | Purpose |
+|----------|---------|
+| `ANTHROPIC_API_KEY` | Primary LLM provider |
+| `OPENROUTER_API_KEY` | Multi-provider gateway |
+| `OPENROUTER_MODEL` | Model selection (e.g., `meta-llama/llama-3.3-70b-instruct`) |
+| `OPENROUTER_PROVIDER` | Provider hint (e.g., `Groq`) |
+
+### Environment Sources
+
+- **Frontend**: `.env.example` → `.env.local` for local development
+- **Netlify**: Dashboard maintains deploy-time versions (update when rotating keys)
+- **CrewAI Backend**: See `startupai-crew` repo for Modal configuration
 
 ## Policies & Security
 
-- RLS is enabled on every user-owned table. Policies for `projects`, `hypotheses`, `experiments`, `evidence`, `trial_usage_counters`, `onboarding_sessions`, and `entrepreneur_briefs` ensure `auth.uid()` ownership. Review `supabase/migrations/00004`, `00007`, and `00009` for specifics.
-- Stored procedures (`create_onboarding_session`, `upsert_entrepreneur_brief`, etc.) are `SECURITY DEFINER` so service-role processes can call them without exposing elevated privileges to clients.
-- Triggers: `set_updated_at_timestamp` (00005) and `entrepreneur_briefs_updated_at` keep timestamps consistent. Do not bypass triggers with direct SQL updates in code; use Supabase RPC or the provided functions.
-- JWT validation for serverless workloads happens inside Netlify functions (`netlify/functions/crew-analyze.py`). Those functions fetch the anon key to validate the bearer token before touching service credentials.
+### Row Level Security
+
+RLS is enabled on user-owned tables with `auth.uid()` ownership checks:
+- `projects`, `hypotheses`, `experiments`, `evidence`
+- `trial_usage_counters`, `onboarding_sessions`, `entrepreneur_briefs`
+- `consultant_clients` (with consultant/client access patterns)
+
+See Drizzle migrations `0005_add_rls_policies_for_consultants.sql` and `0008_projects_rls_for_consultants.sql`.
+
+### Stored Procedures (RPC Functions)
+
+| Function | Purpose | Security |
+|----------|---------|----------|
+| `link_client_via_invite(token)` | Links client to consultant after signup | SECURITY DEFINER |
+| `upsert_entrepreneur_brief(...)` | Saves/updates Layer 1 brief | SECURITY DEFINER |
+| `create_project_from_onboarding(...)` | Creates project from completed onboarding | SECURITY DEFINER |
+| `apply_onboarding_turn(...)` | Atomic save for Two-Pass architecture | SECURITY DEFINER |
+| `queue_onboarding_for_kickoff(...)` | Queues session for CrewAI kickoff | SECURITY DEFINER |
+| `reset_session_for_revision(...)` | Resets completed session for revision | SECURITY DEFINER |
+
+### Triggers
+
+- `set_updated_at_timestamp` - Maintains `updated_at` consistency
+- Do not bypass triggers with direct SQL; use Supabase RPC functions
+
+### Webhook Authentication
+
+Modal webhooks use bearer token authentication:
+- Webhook handler validates `Authorization: Bearer ${MODAL_AUTH_TOKEN}`
+- Token shared between Modal deployment and this app
 
 ## Realtime Configuration
 
-Supabase Realtime enables live updates for specific tables. Configure carefully - large JSONB columns can cause performance issues.
+See [data-schema.md](data-schema.md#supabase-realtime-configuration) for full table configuration.
 
-### Enabled Tables
+### Quick Reference
 
-| Table | Columns | Use Case |
-|-------|---------|----------|
-| `onboarding_sessions` | Scalar only (excludes JSONB) | Progress bar updates during onboarding |
-| `founders_briefs` | Full table | Brief completion notification |
-| `validation_progress` | Full table | Live progress during CrewAI validation |
-| `approval_requests` | Full table | New approval notifications |
+**Enabled Tables**: `onboarding_sessions` (scalar only), `founders_briefs`, `validation_runs`, `validation_progress`, `approval_requests`
 
-### Disabled Tables
-
-| Table | Reason |
-|-------|--------|
-| `crewai_validation_states` | `state_data` JSONB too large (100KB+) |
-| `evidence` | Batch updates, no real-time need |
-| `conversation_history` | Part of `onboarding_sessions.conversation_history` JSONB |
+**Disabled Tables**: `crewai_validation_states` (too large), `evidence` (batch updates)
 
 ### Frontend Subscription Pattern
 
 ```typescript
 import { createClient } from '@/lib/supabase/client';
 
-// Subscribe to validation progress
 const supabase = createClient();
 const channel = supabase
   .channel('validation-progress')
@@ -72,45 +115,84 @@ const channel = supabase
     filter: `run_id=eq.${runId}`
   }, (payload) => {
     setProgress(payload.new.progress_pct);
-    setMessage(payload.new.message);
   })
   .subscribe();
 
-// Cleanup on unmount
-return () => {
-  supabase.removeChannel(channel);
-};
+// Cleanup
+return () => supabase.removeChannel(channel);
 ```
 
-### Enabling Realtime
+### Best Practices
 
-Realtime is enabled per-table in the Supabase dashboard:
-1. Go to Database → Replication
-2. Select tables to enable
-3. For large tables, use column filters to exclude JSONB
-
-### Performance Considerations
-
-- **Scalar columns only**: For `onboarding_sessions`, only broadcast scalar columns (`current_stage`, `overall_progress`, `status`) to avoid sending large `conversation_history` JSONB
-- **Filter by user**: Always filter subscriptions by `user_id` or `project_id` to avoid receiving updates for other users
-- **Debounce updates**: Modal sends frequent progress updates; consider debouncing on the frontend
-- **Connection limits**: Each browser tab opens a WebSocket; use shared channels where possible
+- **Scalar columns only**: Exclude large JSONB from `onboarding_sessions`
+- **Filter by user**: Always filter by `user_id` or `project_id`
+- **Debounce**: Modal sends frequent updates; debounce on frontend
+- **Connection limits**: Browser tabs share WebSocket connections
 
 ## Migrations
 
-- The migration folder is authoritative. `00001` through `00010` cover initial schema, role enums, trial usage, onboarding tables, and profile triggers. Timestamped migrations capture late adjustments; keep numbering consistent to avoid conflicts with Supabase `schema_migrations`.
-- After shipping a migration, run `supabase db pull` so local state aligns with production and future diffs stay clean.
-- Drizzle does not currently generate SQL for onboarding tables; those were authored manually. When we eventually add Drizzle models for onboarding we will backfill migrations with `--requires` comments to keep ordering explicit.
-- Production deploy checklist: (1) run migrations locally against staging, (2) deploy infrastructure (Netlify/Next), (3) run `supabase db push --include-all` from CI, (4) verify with the smoke checklist in `../archive/legacy/database-seeding.md`.
+### Drizzle Migrations
+
+Location: `frontend/src/db/migrations/`
+
+| Migration | Purpose |
+|-----------|---------|
+| `0000_steady_namorita.sql` | Initial schema |
+| `0001_user_roles_and_plans.sql` | User roles enum |
+| `0002_trial_usage_counters.sql` | Usage quotas |
+| `0003_create_clients_table.sql` | consultant_clients |
+| `0004_add_consultant_id_to_user_profiles.sql` | Consultant FK |
+| `0005_add_rls_policies_for_consultants.sql` | Consultant RLS |
+| `0006_add_strategyzer_fields.sql` | Evidence fields |
+| `0007_crewai_validation_states_and_bmc.sql` | CrewAI + canvas tables |
+| `0008_projects_rls_for_consultants.sql` | Projects consultant access |
+| `0009_archived_clients_table.sql` | Archive fields |
+| `0010_enable_onboarding_realtime.sql` | Realtime config |
+
+### Notes
+
+- Some tables (`onboarding_sessions`, `entrepreneur_briefs`, approval tables) were created via Supabase dashboard, not Drizzle
+- Production deploy: `pnpm db:push` after Netlify deployment
+- See [data-schema.md](data-schema.md#drizzle-migration-files) for full migration details
 
 ## Data Retention & Privacy
 
-- Conversation history and briefs remain in Supabase. Nothing is forwarded to CrewAI yet, so privacy risk is limited to Supabase storage. Once CrewAI is enabled, implement the masking rules preserved in `docs/archive/legacy/retention-and-pii.md` before sending prompts off-platform.
-- Trial usage data (`trial_usage_counters`) is intended to be aggregated after 90 days. Automation is still TODO; until then, manual clean-up happens via Supabase SQL editor.
-- Evidence attachments are not stored today. When we re-enable file uploads we will revive the storage bucket policies from the legacy docs and ensure automated expiry scripts are in place.
-- Auditability: Supabase logs capture auth operations. For onboarding, `onboarding_sessions.ai_context` stores the workflow metadata so we can trace which agent or worker wrote a change.
+- **Conversation data**: Stored in Supabase only. Onboarding transcripts forwarded to Modal/CrewAI for analysis
+- **Trial usage**: `trial_usage_counters` intended for 90-day aggregation (manual cleanup via SQL editor)
+- **Evidence attachments**: Not currently stored (file uploads disabled)
+- **Auditability**: Supabase logs capture auth operations; `approval_history` tracks HITL decisions
 
-Open tasks:
-- Add Drizzle models for `onboarding_sessions` and `entrepreneur_briefs` so we stop juggling raw JSON in API routes.
-- Finish wiring Netlify CrewAI workers to write evidence via stored procedures instead of direct table inserts.
-- Document rotation procedures for Supabase keys alongside the Netlify deploy runbook.
+## Supabase Client Architecture
+
+Three client types in `frontend/src/lib/supabase/`:
+
+| Client | File | Use Case |
+|--------|------|----------|
+| **Browser** | `client.ts` | Client components, auth, realtime |
+| **Server** | `server.ts` | Server components, API routes (cookie-based auth) |
+| **Admin** | `admin.ts` | API routes needing RLS bypass (service role key) |
+
+```typescript
+// Browser client (client components)
+import { createClient } from '@/lib/supabase/client';
+
+// Server client (server components, API routes)
+import { createClient } from '@/lib/supabase/server';
+
+// Admin client (RLS bypass)
+import { createClient } from '@/lib/supabase/admin';
+```
+
+## Open Tasks
+
+- [ ] Add Drizzle models for `onboarding_sessions` and `entrepreneur_briefs`
+- [ ] Document key rotation procedures
+- [ ] Implement automated trial usage cleanup (90-day aggregation)
+
+---
+
+## Related Documentation
+
+- **Data Schema**: [data-schema.md](data-schema.md) (table definitions, Realtime config)
+- **Authentication**: [auth.md](auth.md) (PKCE flow, OAuth setup)
+- **CrewAI Integration**: [api-crewai.md](api-crewai.md) (webhook handlers)

@@ -1,7 +1,7 @@
 ---
 purpose: "Documentation for consultant-client relationship system"
 status: "active"
-last_reviewed: "2026-01-18"
+last_reviewed: "2026-01-19"
 ---
 
 # Consultant-Client Relationship System
@@ -71,53 +71,65 @@ The consultant-client system allows consultants (advisors) to:
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/consultant/invites` | GET | List all invites |
+| `/api/consultant/invites` | GET | List all invites, clients, and archived |
 | `/api/consultant/invites` | POST | Create new invite |
-| `/api/consultant/invites/[id]` | GET | Get invite details |
-| `/api/consultant/invites/[id]` | PUT | Update invite |
-| `/api/consultant/invites/[id]` | DELETE | Revoke invite |
-| `/api/consultant/invites/[id]/resend` | POST | Resend email |
+| `/api/consultant/invites/[id]` | DELETE | Revoke pending invite |
+| `/api/consultant/invites/[id]/resend` | POST | Resend email with new token |
 
 ### Client Management
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/consultant/clients/[id]/archive` | POST | Archive client |
-| `/api/client/consultant/unlink` | POST | Client removes link |
+| `/api/consultant/clients/[id]/archive` | POST | Archive client relationship |
+| `/api/client/consultant/unlink` | POST | Client removes consultant link |
 
 ### Auth Integration
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/auth/validate-invite` | GET | Validate invite token |
+| `/api/auth/validate-invite` | POST | Validate invite token during signup |
 
 ## Database Schema
 
 ### `consultant_clients` Table
 
+**Drizzle ORM Schema**: `frontend/src/db/schema/consultant-clients.ts`
+
 ```sql
 CREATE TABLE consultant_clients (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  consultant_id UUID NOT NULL REFERENCES auth.users(id),
-  client_id UUID REFERENCES auth.users(id),  -- nullable until signup
-  email TEXT NOT NULL,
-  name TEXT,
-  invite_token UUID NOT NULL DEFAULT gen_random_uuid(),
+  consultant_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,  -- nullable until signup
+  invite_email TEXT NOT NULL,
+  invite_token TEXT NOT NULL UNIQUE,
+  invite_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  client_name TEXT,  -- optional personalization before signup
   status TEXT NOT NULL DEFAULT 'invited',  -- invited, active, archived
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  expires_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() + INTERVAL '30 days',
-  accepted_at TIMESTAMP WITH TIME ZONE,
+  invited_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  linked_at TIMESTAMP WITH TIME ZONE,  -- when client accepts
   archived_at TIMESTAMP WITH TIME ZONE,
-  UNIQUE(consultant_id, email)
+  archived_by TEXT,  -- 'consultant', 'client', or 'system'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Indexes
+CREATE INDEX idx_consultant_clients_consultant ON consultant_clients(consultant_id);
+CREATE INDEX idx_consultant_clients_client ON consultant_clients(client_id);
+CREATE INDEX idx_consultant_clients_token ON consultant_clients(invite_token);
+CREATE INDEX idx_consultant_clients_status ON consultant_clients(status);
+CREATE INDEX idx_consultant_clients_invite_email ON consultant_clients(invite_email);
+CREATE INDEX idx_consultant_clients_consultant_status ON consultant_clients(consultant_id, status);
 ```
 
 ### Status Flow
 
 ```
 invited → active → archived
+   │         │         │
+   │         │         └── archived_by: 'consultant', 'client', or 'system'
    │         │
-   └─expired─┘ (auto-expire after 30 days)
+   └─expired─┘ (auto-expire after 30 days, archived_by: 'system')
 ```
 
 ### RLS Policies
@@ -174,20 +186,26 @@ This invite expires in 30 days.
 
 ### Consultant Dashboard
 
-| Component | Location |
-|-----------|----------|
-| `ConsultantDashboard` | `/consultant/dashboard` |
-| `ClientList` | Shows active clients |
-| `InviteList` | Shows pending invites |
-| `InviteModal` | Create new invite form |
-| `ClientCard` | Individual client info |
+| Component | File |
+|-----------|------|
+| Consultant Dashboard | `pages/consultant-dashboard.tsx` (Pages Router) |
+| `InviteClientModal` | `components/consultant/InviteClientModal.tsx` |
+| `ClientValidationCard` | `components/consultant/ClientValidationCard.tsx` |
+
+### Hooks
+
+| Hook | File |
+|------|------|
+| `useConsultantClients` | `hooks/useConsultantClients.ts` |
+| `useClients` | `hooks/useClients.ts` (portfolio projects) |
+
+**Note**: Invites and clients are rendered inline in the dashboard using the `useConsultantClients` hook. There are no separate `ClientList` or `InviteList` components.
 
 ### Client Features
 
-| Component | Location |
-|-----------|----------|
-| `LinkedConsultant` | Shows consultant info in sidebar |
-| `UnlinkButton` | Remove consultant link |
+Client unlinking is handled via:
+- API: `POST /api/client/consultant/unlink`
+- UI: Settings page or in-app prompt (implementation varies)
 
 ## Security Considerations
 
@@ -210,13 +228,21 @@ This invite expires in 30 days.
 
 ### Unit Tests
 
-- `src/__tests__/api/consultant/invites/route.test.ts`
-- `src/__tests__/api/consultant/clients/archive/route.test.ts`
+| Test | File |
+|------|------|
+| Hook tests | `src/__tests__/hooks/useConsultantClients.test.ts` |
+| InviteClientModal | `components/consultant/__tests__/InviteClientModal.test.tsx` |
+| ClientValidationCard | `components/consultant/__tests__/ClientValidationCard.test.tsx` |
 
 ### E2E Tests
 
-- `e2e/consultant-invite.spec.ts`
-- `e2e/client-signup-invite.spec.ts`
+| Test | File |
+|------|------|
+| Consultant portfolio flow | `tests/e2e/06-consultant-portfolio.spec.ts` |
+| Consultant practice setup | `tests/e2e/09-consultant-practice-setup.spec.ts` |
+| Consultant client onboarding | `tests/e2e/10-consultant-client-onboarding.spec.ts` |
+
+> **Note**: Dedicated invite flow E2E tests (`e2e/consultant-invite.spec.ts`, `e2e/client-signup-invite.spec.ts`) are not yet implemented. Invite flows are partially covered in the existing consultant E2E tests.
 
 ## Metrics
 
