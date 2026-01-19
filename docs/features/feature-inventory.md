@@ -144,6 +144,83 @@ Legend:
 - OAuth and storage setup scripts (`scripts/setup-oauth-all.sh`, `scripts/setup-storage.sh`)
 - Crew contract checker (`scripts/crew-contract-check.ts`)
 
+## Trial Limits and Upgrade (spec-based)
+
+Status: Specified in `docs/features/trial-limits-and-upgrade.md`, not yet fully implemented.
+
+- spec: Trial badge in header showing days remaining
+- spec: Trial status card on dashboard with limits
+- spec: Project limit enforcement (1 project for trial)
+- spec: Phase limit enforcement (Phase 0 only for trial)
+- spec: Blurred preview for locked D-F-V signals
+- spec: Upgrade modal on limit hit
+- spec: Stripe checkout integration for plan upgrade
+- spec: Trial expiration handling (30-day period)
+- spec: Data preservation (90 days post-expiration)
+- spec: `GET /api/user/trial-status` - trial limits API
+- spec: `POST /api/stripe/create-checkout-session` - Stripe checkout API
+
+User Stories: US-T02, US-T03
+E2E Tests: `13-trial-limits.spec.ts`
+
+## Pivot Workflows (spec-based)
+
+Status: Specified in `docs/specs/pivot-workflows.md`, triggered by Modal HITL checkpoints.
+
+- spec: Segment pivot notification (problem resonance < 30%)
+- spec: Alternative segment selection UI
+- spec: Custom segment definition option
+- spec: Pivot count tracking (3 segment pivots max)
+- spec: Value pivot notification (zombie ratio >= 70%)
+- spec: Alternative value proposition selection
+- spec: Iterate current messaging option
+- spec: Feature downgrade notification (ORANGE feasibility)
+- spec: Feature scope reduction options
+- spec: Desirability retest confirmation
+- spec: Strategic pivot notification (marginal LTV:CAC)
+- spec: Price pivot and cost pivot options
+- spec: Override proceed option for all pivots
+- spec: Kill project option for all pivots
+- spec: `GET /api/hitl/pivot-options` - pivot alternatives API
+- spec: `POST /api/hitl/pivot-decision` - pivot decision submission
+
+User Stories: US-P01, US-P02, US-P03, US-P04
+E2E Tests: `15-pivot-workflows.spec.ts`
+
+## Project Lifecycle Management (spec-based)
+
+Status: Partially implemented, Settings page exists but needs archive/delete flows.
+
+- active: `/settings` → Projects tab (partial) (`frontend/src/components/settings/ProjectsTab.tsx`)
+- spec: Project archive button and confirmation
+- spec: Archived projects toggle filter
+- spec: Project restore functionality
+- spec: Danger zone section with delete button
+- spec: Delete confirmation with project name input
+- spec: Impact summary before permanent delete
+- active: `PATCH /api/projects/[id]` - archive/unarchive
+- active: `DELETE /api/projects/[id]` - permanent delete
+
+User Stories: US-F04, US-F05
+E2E Tests: `11-project-lifecycle.spec.ts`
+
+## Client Lifecycle Management (spec-based)
+
+Status: Partially implemented, Settings page exists but needs full flows.
+
+- active: `/settings` → Clients tab (partial) (`frontend/src/components/settings/ClientsTab.tsx`)
+- spec: Client archive button and confirmation
+- spec: Archived clients toggle filter
+- spec: Client restore functionality
+- spec: Resend invite button for pending clients
+- spec: Resend count tracking (max 3 resends)
+- spec: Invite expiry display (30-day validity)
+- active: `PATCH /api/consultant/clients/[id]/archive` - archive client
+- active: `POST /api/consultant/invites/[id]/resend` - resend invite
+
+User Stories: US-C05, US-C06
+E2E Tests: `12-client-lifecycle.spec.ts`
+
 ## Cross-repo references
 
 - `../startupai-crew/docs/master-architecture/01-ecosystem.md` (three-layer architecture + Modal endpoints)

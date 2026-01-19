@@ -516,6 +516,433 @@ Stories needing E2E tests:
 
 ---
 
+## HITL Checkpoint Stories (US-H)
+
+These stories are derived from the [hitl-approval-ui.md](../specs/hitl-approval-ui.md) specification.
+
+### US-H01: Review Founder's Brief
+
+**As a** Founder,
+**I want to** review the AI-extracted Founder's Brief before analysis begins,
+**So that** I can confirm my business idea is accurately captured.
+
+**Acceptance Criteria:**
+
+**Given** I have completed the 7-stage onboarding interview
+**When** the AI compiles my Founder's Brief
+**Then** I should see the `approve_founders_brief` HITL checkpoint
+
+**Given** I am reviewing the Founder's Brief
+**When** I view the modal
+**Then** I should see: The Idea (one-liner, description), Problem Hypothesis, Customer Hypothesis, Solution Hypothesis, Key Assumptions (by risk), Success Criteria, and QA Report
+
+**Given** I have reviewed the brief
+**When** I select "Approve & Start Analysis"
+**Then** Phase 1 VPC Discovery should begin automatically
+
+**Given** I find inaccuracies in the brief
+**When** I select "Request Revisions" with feedback
+**Then** I should return to the interview for clarification
+
+**E2E Test:** `05-hitl-approval-flow.spec.ts` - "should approve founders brief"
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 0
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 0
+
+---
+
+### US-H02: Approve Experiment Plan
+
+**As a** Founder,
+**I want to** review proposed experiments before they run,
+**So that** I can approve the testing approach and budget.
+
+**Acceptance Criteria:**
+
+**Given** the AI has designed test cards for my assumptions
+**When** the `approve_experiment_plan` checkpoint is triggered
+**Then** I should see a list of proposed experiments with: hypothesis, method, metrics, pass criteria, cost, and duration
+
+**Given** I am reviewing the experiment plan
+**When** I view assumptions being tested
+**Then** I should see which assumptions are covered and which are not
+
+**Given** I approve the plan
+**When** I click "Approve Plan"
+**Then** the experiments should begin execution
+
+**Given** I want to adjust the budget
+**When** I select "Modify Budget"
+**Then** I should be able to specify new spending limits
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 1
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 1
+
+---
+
+### US-H03: Approve VPC Completion
+
+**As a** Founder,
+**I want to** review my Value Proposition Canvas fit score before market testing,
+**So that** I can confirm readiness to test with real customers.
+
+**Acceptance Criteria:**
+
+**Given** my VPC fit score reaches ≥70
+**When** the `approve_vpc_completion` checkpoint is triggered
+**Then** I should see: Fit Score, Fit Status, Customer Profile (validated Jobs, Pains, Gains), Value Map coverage, and Evidence Summary
+
+**Given** I have a strong fit
+**When** I select "Proceed to Desirability"
+**Then** Phase 2 should begin automatically
+
+**Given** I want more evidence
+**When** I select "Run More Experiments"
+**Then** additional Phase 1 experiments should run
+
+**Given** evidence suggests wrong segment
+**When** I select "Pivot to New Segment"
+**Then** the Segment Pivot flow should begin
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 1 Gate
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 1
+
+---
+
+### US-H04: Approve Campaign Launch
+
+**As a** Founder,
+**I want to** review ad creatives and landing pages before they go live,
+**So that** I can protect my brand and control public messaging.
+
+**Acceptance Criteria:**
+
+**Given** the AI has generated ad variants and landing pages
+**When** the `campaign_launch` checkpoint is triggered
+**Then** I should see previews of all creative assets with Guardian QA status
+
+**Given** I am reviewing creatives
+**When** I view the modal
+**Then** I should see: Ad variants (headline, platform, hook type, CTA), Landing page variants (preview URLs), Budget and timeline, Expected metrics
+
+**Given** I approve the campaign
+**When** I click "Launch Campaign"
+**Then** the ads should begin running on specified platforms
+
+**Given** I want to edit creatives
+**When** I select "Edit Creatives"
+**Then** I should be directed to the creative editing flow
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 2
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 2
+
+---
+
+### US-H05: Approve Budget Increase
+
+**As a** Founder,
+**I want to** approve budget increases during experiments,
+**So that** I maintain financial accountability for my validation spend.
+
+**Acceptance Criteria:**
+
+**Given** my experiment budget threshold is reached
+**When** the AI recommends a budget increase
+**Then** the `spend_increase` checkpoint should be triggered
+
+**Given** I am reviewing a budget increase request
+**When** I view the modal
+**Then** I should see: Current spend, Results so far (impressions, clicks, signups, CPA), Recommended increase amount, Expected additional signups
+
+**Given** I approve the full increase
+**When** I click "Approve Full Increase"
+**Then** the new budget should be applied and experiments should continue
+
+**Given** I want a smaller increase
+**When** I select "Approve Partial"
+**Then** I should be able to specify the amount
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 2
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 2
+
+---
+
+### US-H06: Review Desirability Gate
+
+**As a** Founder,
+**I want to** review market evidence before proceeding to feasibility testing,
+**So that** I can make an informed go/no-go decision.
+
+**Acceptance Criteria:**
+
+**Given** desirability experiments have completed
+**When** the `gate_progression` checkpoint is triggered for Phase 2
+**Then** I should see: Desirability Signal (strong_commitment/weak_interest/no_interest), Problem Resonance score, Zombie Ratio, Conversion metrics, Key learnings
+
+**Given** I have strong commitment signals
+**When** I select "Proceed to Feasibility"
+**Then** Phase 3 should begin automatically
+
+**Given** I have high zombie ratio
+**When** I select "Pivot Value Prop"
+**Then** the Value Pivot flow should begin
+
+**Given** I have low problem resonance
+**When** I select "Pivot Segment"
+**Then** the Segment Pivot flow should begin
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 2 Gate
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 2
+
+---
+
+### US-H07: Review Feasibility Gate
+
+**As a** Founder,
+**I want to** review technical feasibility assessment before viability analysis,
+**So that** I understand if my solution can be built.
+
+**Acceptance Criteria:**
+
+**Given** feasibility assessment has completed
+**When** the `gate_progression` checkpoint is triggered for Phase 3
+**Then** I should see: Feasibility Signal (green/orange/red), Feature assessment (POSSIBLE/CONSTRAINED/IMPOSSIBLE per feature), Cost estimates, Technical constraints
+
+**Given** I have a green feasibility signal
+**When** I select "Proceed to Viability"
+**Then** Phase 4 should begin automatically
+
+**Given** I have an orange (constrained) signal
+**When** I view the modal
+**Then** I should see downgrade options with impact assessment
+
+**Given** I select "Accept Downgrade"
+**When** the decision is confirmed
+**Then** Phase 4 should begin with reduced scope
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 3 Gate
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 3
+
+---
+
+### US-H08: Review Viability Gate
+
+**As a** Founder,
+**I want to** review unit economics analysis before final decision,
+**So that** I understand if my business can be profitable.
+
+**Acceptance Criteria:**
+
+**Given** viability analysis has completed
+**When** the `gate_progression` checkpoint is triggered for Phase 4
+**Then** I should see: Viability Signal (profitable/marginal/underwater), CAC, LTV, LTV/CAC ratio, Gross margin, Payback period, Market sizing (TAM/SAM/SOM)
+
+**Given** I have profitable unit economics (LTV/CAC ≥ 3)
+**When** I select "Proceed to Launch"
+**Then** the final decision checkpoint should be triggered
+
+**Given** I have marginal unit economics
+**When** I view the modal
+**Then** I should see options: Price Pivot, Cost Pivot, or Kill
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 4 Gate
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 4
+
+---
+
+### US-H09: Make Final Validation Decision
+
+**As a** Founder,
+**I want to** make a final decision on my validated business idea,
+**So that** I can move forward with confidence.
+
+**Acceptance Criteria:**
+
+**Given** all validation phases have completed
+**When** the `final_decision` checkpoint is triggered
+**Then** I should see: Validation Summary (D-F-V signals), Journey metrics (duration, spend, experiments), AI recommendation with confidence level, Recommended next steps
+
+**Given** I have validated signals across all three axes
+**When** I select "Mark as Validated"
+**Then** my project status should change to "Validated"
+
+**Given** I want more evidence
+**When** I select "Continue Testing"
+**Then** I should be able to choose which phase to revisit
+
+**Given** I want to pause the project
+**When** I select "Archive Project"
+**Then** my project status should change to "Archived"
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Final Decision
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 4
+
+---
+
+## Pivot Flow Stories (US-P)
+
+These stories are derived from the [phase-transitions.md](../specs/phase-transitions.md) pivot flows.
+
+### US-P01: Approve Segment Pivot
+
+**As a** Founder,
+**I want to** choose a new customer segment when my current segment shows no interest,
+**So that** I can test a more promising audience.
+
+**Acceptance Criteria:**
+
+**Given** desirability testing shows low problem resonance (<30%)
+**When** the AI triggers a segment pivot recommendation
+**Then** the `segment_pivot` checkpoint should appear
+
+**Given** I am reviewing the segment pivot
+**When** I view the modal
+**Then** I should see: Current segment evidence (problem resonance, conversion), Why it's failing, 3 AI-recommended alternative segments with rationale and TAM
+
+**Given** I select an alternative segment
+**When** I click the recommended option
+**Then** Phase 1 should restart with the new segment hypothesis
+
+**Given** I want to define my own segment
+**When** I select "Custom Segment"
+**Then** I should be able to specify segment details before restart
+
+**Given** I don't want to pivot
+**When** I select "Continue with Current"
+**Then** I should proceed with a warning acknowledgment
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Segment Pivot Flow
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Pivot Flows
+
+---
+
+### US-P02: Approve Value Pivot
+
+**As a** Founder,
+**I want to** refine my value proposition when customers are interested but not committing,
+**So that** I can convert interest into action.
+
+**Acceptance Criteria:**
+
+**Given** desirability testing shows high zombie ratio (≥70%)
+**When** the AI triggers a value pivot recommendation
+**Then** the `value_pivot` checkpoint should appear
+
+**Given** I am reviewing the value pivot
+**When** I view the modal
+**Then** I should see: Current value proposition, Zombie ratio and conversion evidence, 2 AI-recommended alternative value propositions focusing on different pain points
+
+**Given** I select an alternative value proposition
+**When** I click the recommended option
+**Then** Desirability testing should restart with the new messaging
+
+**Given** I want to refine, not replace
+**When** I select "Refine Current VP"
+**Then** I should iterate on messaging without a full restart
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Value Pivot Flow
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Pivot Flows
+
+---
+
+### US-P03: Approve Feature Downgrade
+
+**As a** Founder,
+**I want to** accept scope reduction when core features are technically impossible,
+**So that** I can still build a viable product.
+
+**Acceptance Criteria:**
+
+**Given** feasibility assessment shows ORANGE (constrained) signal
+**When** core features are marked as IMPOSSIBLE
+**Then** the `feature_downgrade` checkpoint should appear
+
+**Given** I am reviewing the feature downgrade
+**When** I view the modal
+**Then** I should see: Impossible features with technical reasons, Suggested alternatives where available, Downgrade options with impact assessment
+
+**Given** I accept a downgrade option
+**When** I select "Downgrade Option A"
+**Then** the features should be marked as removed and Desirability testing should be re-run with reduced scope
+
+**Given** I want to explore technical alternatives
+**When** I select "Explore Technical Alternatives"
+**Then** the AI should research other implementation approaches
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Feature Downgrade Flow
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Pivot Flows
+
+---
+
+### US-P04: Approve Strategic Pivot
+
+**As a** Founder,
+**I want to** adjust my pricing or acquisition strategy when unit economics are marginal,
+**So that** I can improve viability without killing the project.
+
+**Acceptance Criteria:**
+
+**Given** viability analysis shows MARGINAL signal (1 < LTV/CAC < 3)
+**When** the AI recommends a strategic pivot
+**Then** the `strategic_pivot` checkpoint should appear
+
+**Given** I am reviewing the strategic pivot
+**When** I view the modal
+**Then** I should see: Current unit economics breakdown, Options: Increase pricing, Reduce CAC, or Both, Impact projections for each option
+
+**Given** I select "Increase Pricing"
+**When** I confirm the decision
+**Then** the pricing strategy should be updated and viability re-tested
+
+**Given** I select "Reduce CAC"
+**When** I confirm the decision
+**Then** the acquisition strategy should be optimized and viability re-tested
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Strategic Pivot Flow
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Pivot Flows
+
+---
+
+## Updated Coverage Summary
+
+### Stories by Category
+
+| Category | Total Stories | With E2E Tests | Gaps |
+|----------|---------------|----------------|------|
+| Founder (US-F) | 8 | 6 | 2 |
+| Consultant (US-C) | 7 | 5 | 2 |
+| Trial (US-T) | 3 | 1 | 2 |
+| HITL Checkpoint (US-H) | 9 | 1 | 8 |
+| Pivot Flow (US-P) | 4 | 0 | 4 |
+| **Total** | **31** | **13** | **18** |
+
+### HITL Story Priority
+
+| Story ID | Description | Priority | Blocking |
+|----------|-------------|----------|----------|
+| US-H01 | Review Founder's Brief | P0 | Phase 1 start |
+| US-H02 | Approve Experiment Plan | P1 | Experiments |
+| US-H03 | Approve VPC Completion | P1 | Phase 2 start |
+| US-H04 | Approve Campaign Launch | P1 | Ads go live |
+| US-H05 | Approve Budget Increase | P2 | Budget control |
+| US-H06 | Review Desirability Gate | P1 | Phase 3 start |
+| US-H07 | Review Feasibility Gate | P1 | Phase 4 start |
+| US-H08 | Review Viability Gate | P1 | Final decision |
+| US-H09 | Make Final Decision | P0 | Validation complete |
+
+---
+
 ## Cross-References
 
 | Document | Relationship |
@@ -533,4 +960,5 @@ Stories needing E2E tests:
 
 | Date | Change |
 |------|--------|
+| 2026-01-19 | Added 13 HITL/Pivot stories (US-H01-H09, US-P01-P04) derived from phase-transitions.md and hitl-approval-ui.md |
 | 2026-01-19 | Initial creation - consolidated 18 user stories with acceptance criteria |
