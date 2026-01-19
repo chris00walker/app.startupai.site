@@ -17,14 +17,18 @@ const mockClientFull: ClientValidationProgress = {
   clientName: 'John Smith',
   clientEmail: 'john@example.com',
   company: 'Acme Corp',
+  projectId: 'project-123',
+  projectName: 'Acme Project',
   currentPhase: 'FEASIBILITY',
   gateStatus: 'Passed',
   evidenceCount: 15,
   evidenceQuality: 0.85,
   hasReport: true,
+  reportId: 'report-123',
   reportOutcome: 'Strong market validation',
   pivotRecommendation: 'Proceed with development',
   lastActivity: new Date().toISOString(),
+  createdAt: '2026-01-01T00:00:00Z',
 };
 
 const mockClientIdeation: ClientValidationProgress = {
@@ -32,14 +36,18 @@ const mockClientIdeation: ClientValidationProgress = {
   clientName: 'Jane Doe',
   clientEmail: 'jane@startup.com',
   company: null,
+  projectId: null,
+  projectName: null,
   currentPhase: 'IDEATION',
   gateStatus: 'Pending',
   evidenceCount: 3,
   evidenceQuality: 0.5,
   hasReport: false,
+  reportId: null,
   reportOutcome: null,
   pivotRecommendation: null,
   lastActivity: '2026-01-17T10:00:00Z',
+  createdAt: '2026-01-10T00:00:00Z',
 };
 
 const mockClientFailed: ClientValidationProgress = {
@@ -47,14 +55,18 @@ const mockClientFailed: ClientValidationProgress = {
   clientName: 'Bob Wilson',
   clientEmail: 'bob@company.com',
   company: 'Tech Inc',
+  projectId: 'project-789',
+  projectName: 'Tech Project',
   currentPhase: 'DESIRABILITY',
   gateStatus: 'Failed',
   evidenceCount: 8,
   evidenceQuality: 0.35,
   hasReport: true,
+  reportId: 'report-789',
   reportOutcome: 'Market validation inconclusive',
   pivotRecommendation: 'Pivot recommended',
   lastActivity: '2026-01-15T08:00:00Z',
+  createdAt: '2026-01-05T00:00:00Z',
 };
 
 const mockClientViability: ClientValidationProgress = {
@@ -62,14 +74,18 @@ const mockClientViability: ClientValidationProgress = {
   clientName: 'Alice Brown',
   clientEmail: 'alice@enterprise.com',
   company: 'Big Corp',
+  projectId: 'project-101',
+  projectName: 'Enterprise Project',
   currentPhase: 'VIABILITY',
   gateStatus: 'Passed',
   evidenceCount: 25,
   evidenceQuality: 0.92,
   hasReport: true,
+  reportId: 'report-101',
   reportOutcome: 'Excellent unit economics',
   pivotRecommendation: 'Proceed to scale',
   lastActivity: new Date().toISOString(),
+  createdAt: '2025-12-15T00:00:00Z',
 };
 
 const mockClientValidated: ClientValidationProgress = {
@@ -77,14 +93,18 @@ const mockClientValidated: ClientValidationProgress = {
   clientName: 'Charlie Green',
   clientEmail: 'charlie@validated.com',
   company: 'Success Co',
+  projectId: 'project-102',
+  projectName: 'Success Project',
   currentPhase: 'VALIDATED',
   gateStatus: 'Passed',
   evidenceCount: 40,
   evidenceQuality: 0.95,
   hasReport: true,
+  reportId: 'report-102',
   reportOutcome: 'Fully validated business model',
   pivotRecommendation: 'Proceed with confidence',
   lastActivity: new Date().toISOString(),
+  createdAt: '2025-11-01T00:00:00Z',
 };
 
 // ============================================================================

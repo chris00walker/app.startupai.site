@@ -9,12 +9,12 @@ import { render, screen } from '@testing-library/react';
 import { ClientOnboardingWizard } from '../ClientOnboardingWizard';
 
 // Mock FounderOnboardingWizard to verify props are passed correctly
-const mockFounderOnboardingWizard = jest.fn(() => (
+const mockFounderOnboardingWizard = jest.fn((props: Record<string, unknown>) => (
   <div data-testid="founder-wizard">FounderOnboardingWizard Mock</div>
 ));
 
 jest.mock('../FounderOnboardingWizard', () => ({
-  FounderOnboardingWizard: (props: any) => mockFounderOnboardingWizard(props),
+  FounderOnboardingWizard: (props: Record<string, unknown>) => mockFounderOnboardingWizard(props),
 }));
 
 // ============================================================================

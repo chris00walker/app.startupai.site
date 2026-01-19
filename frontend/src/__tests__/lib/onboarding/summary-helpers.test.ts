@@ -416,7 +416,7 @@ describe('Summary Helpers - extractBriefForDisplay', () => {
       const stageData = {
         brief: {
           business_concept: 'Valid',
-          inspiration: null,
+          inspiration: undefined,
         },
       };
 
