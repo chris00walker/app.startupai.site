@@ -1,12 +1,14 @@
 ---
-purpose: "Specification-driven testing approach (evolving to journey-driven)"
-status: "active"
-last_reviewed: "2026-01-18"
+purpose: "Deprecated - superseded by testing/strategy.md (JDTD)"
+status: "archived"
+last_reviewed: "2026-01-19"
 ---
 
 # Specification-Driven Testing
 
-> **Note (Jan 2026)**: This approach is evolving into **Journey-Driven Test Development (JDTD)**. See [`testing/strategy.md`](strategy.md) for the updated methodology that derives tests from user journey maps.
+> ⚠️ **ARCHIVED**: This document has been superseded by [`testing/strategy.md`](../../testing/strategy.md) which covers Journey-Driven Test Development (JDTD).
+
+> **Note (Jan 2026)**: This approach evolved into **Journey-Driven Test Development (JDTD)**. See [`testing/strategy.md`](../../testing/strategy.md) for the updated methodology that derives tests from user journey maps.
 
 Specification-driven tests encode product requirements as executable scenarios. Sources include PRD, onboarding specs, and gate scoring rules.
 

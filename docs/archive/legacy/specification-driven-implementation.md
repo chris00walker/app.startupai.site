@@ -1,10 +1,12 @@
 ---
-purpose: "Specification-driven testing implementation summary"
-status: "active"
-last_reviewed: "2025-10-23"
+purpose: "Deprecated - specification-driven testing evolved to JDTD"
+status: "archived"
+last_reviewed: "2026-01-19"
 ---
 
 # 🧪 Specification-Driven Testing Implementation Summary
+
+> ⚠️ **ARCHIVED**: This document describes the original specification-driven testing approach from October 2025. The methodology has since evolved into **Journey-Driven Test Development (JDTD)**. See [`testing/strategy.md`](../../testing/strategy.md) for the current approach.
 
 **Status:** ✅ **COMPLETE** - Production-ready testing framework
 **Test Results:** 13/13 tests passing ✅  

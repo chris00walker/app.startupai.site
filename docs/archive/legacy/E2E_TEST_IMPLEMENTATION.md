@@ -1,10 +1,12 @@
 ---
-purpose: "E2E testing infrastructure implementation"
-status: "active"
-last_reviewed: "2025-11-12"
+purpose: "Deprecated - E2E implementation status from Nov 2025"
+status: "archived"
+last_reviewed: "2026-01-19"
 ---
 
 # E2E Testing Infrastructure Implementation
+
+> ⚠️ **ARCHIVED**: This document captured E2E test status as of November 2025. Most issues documented here have been resolved. For current E2E guidance, see [`testing/e2e-guide.md`](../../testing/e2e-guide.md).
 
 **Status:** ✅ Implemented, Needs UI data-testid Attributes
 **Purpose:** Automated end-to-end testing for authentication and onboarding flows

@@ -49,10 +49,10 @@ pnpm test:e2e --headed     # With browser UI
 pnpm test:e2e --ui         # Interactive mode
 ```
 
-### 4. Specification-Driven Tests
-Tests derived from marketing promises.
+### 4. TDD Workflow
+Tests written before implementation using Red-Green-Refactor cycle.
 
-See [`testing/specification-driven.md`](specification-driven.md) (archived).
+See [`testing/tdd-workflow.md`](tdd-workflow.md) for the complete TDD methodology.
 
 ---
 

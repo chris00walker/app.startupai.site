@@ -1,10 +1,12 @@
 ---
-purpose: "Testing checklist for onboarding hotfix"
-status: "completed"
-last_reviewed: "2025-11-12"
+purpose: "Deprecated - hotfix-specific checklist from Nov 2025"
+status: "archived"
+last_reviewed: "2026-01-19"
 ---
 
 # Testing Checklist - Onboarding Hotfix
+
+> ⚠️ **ARCHIVED**: This was a one-time checklist for the November 2025 onboarding hotfix. For current testing guidance, see [`testing/README.md`](../../testing/README.md).
 
 **Purpose:** Ensure proper testing workflow: local → staging → production
 

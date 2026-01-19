@@ -6,226 +6,181 @@ last_reviewed: "2026-01-19"
 
 # Testing Documentation
 
-Testing infrastructure for the StartupAI platform.
+Testing infrastructure for the StartupAI platform, centered on **Test-Driven Development (TDD)** and **Journey-Driven Test Development (JDTD)**.
 
-## Overview
+## Quick Start
 
-The platform uses **Jest** for unit/integration testing and **Playwright** for end-to-end testing, with React Testing Library for component testing and axe-core for accessibility checks.
+```bash
+# Run all unit tests
+pnpm test
+
+# Run tests in watch mode (TDD workflow)
+pnpm test:watch
+
+# Run E2E tests
+pnpm test:e2e
+
+# Run with coverage
+pnpm test:coverage
+```
+
+## Documentation Index
+
+| Document | Purpose |
+|----------|---------|
+| **[tdd-workflow.md](tdd-workflow.md)** | TDD methodology, Red-Green-Refactor, practical examples |
+| **[strategy.md](strategy.md)** | Test strategy, JDTD approach, test pyramid |
+| **[journey-test-matrix.md](journey-test-matrix.md)** | Story-to-test coverage matrix with gap analysis |
+| **[e2e-guide.md](e2e-guide.md)** | E2E testing guide for backend integration |
+
+## Test-Driven Development
+
+**TDD is the primary development methodology for this codebase.**
+
+The workflow is:
+1. **Red** - Write a failing test that defines expected behavior
+2. **Green** - Write minimal code to make the test pass
+3. **Refactor** - Clean up while keeping tests green
+
+See **[tdd-workflow.md](tdd-workflow.md)** for detailed guidance and examples.
+
+## Journey-Driven Test Development (JDTD)
+
+JDTD extends TDD by deriving tests from user journey maps:
+
+```
+Journey Map → User Goal → Test Case → Implementation
+```
+
+**Key principle:** Tests verify *user outcomes*, not *code mechanics*.
+
+**Sources for test cases:**
+- [`user-stories.md`](../user-experience/user-stories.md) - 18 user stories with acceptance criteria
+- [`founder-journey-map.md`](../user-experience/founder-journey-map.md) - 15-step Founder journey
+- [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) - 6-phase Consultant journey
 
 ## Test Stack
 
-| Purpose | Tool | Location |
-|---------|------|----------|
-| Unit/Integration | Jest + React Testing Library | `*.test.tsx`, `*.spec.ts` |
-| E2E | Playwright | `e2e/`, `*.spec.ts` |
-| Accessibility | axe-core + @axe-core/react | Integrated in component tests |
+| Layer | Tool | Location | Purpose |
+|-------|------|----------|---------|
+| **Unit** | Jest + RTL | `*.test.tsx`, `*.test.ts` | Component/function logic |
+| **Integration** | Jest | `__tests__/integration/` | API + database interactions |
+| **E2E** | Playwright | `tests/e2e/*.spec.ts` | Full user journey validation |
+| **Accessibility** | axe-core | Integrated in E2E | WCAG 2.1 AA compliance |
 
-## Running Tests
-
-```bash
-# All tests
-pnpm test
-
-# Watch mode (development)
-pnpm test:watch
-
-# Coverage report
-pnpm test:coverage
-
-# Unit tests only
-pnpm test:unit
-
-# Integration tests only
-pnpm test:integration
-
-# E2E tests (Playwright)
-pnpm test:e2e
-
-# E2E with UI (visual debugging)
-pnpm test:e2e:ui
-
-# Backend integration E2E
-pnpm test:e2e:backend
-
-# Run all test types
-pnpm test:all
-
-# CI pipeline (coverage + E2E)
-pnpm test:ci
-```
-
-## Test Structure
+## Test Organization
 
 ```
 frontend/
 ├── src/
 │   ├── __tests__/           # Unit and integration tests
-│   │   └── production/      # Production validation tests
+│   │   ├── api/             # API route tests
+│   │   ├── hooks/           # Hook tests
+│   │   ├── integration/     # Integration tests
+│   │   └── lib/             # Library tests
 │   └── components/
-│       └── *.test.tsx       # Component-adjacent tests
-├── e2e/                     # Playwright E2E tests
-│   └── *.spec.ts
-└── jest.config.js           # Jest configuration
+│       └── */__tests__/     # Component-adjacent tests
+└── tests/
+    └── e2e/                 # Playwright E2E tests
+        ├── helpers/         # Test utilities
+        └── *.spec.ts        # Test specs
 ```
 
-## Test Categories
+## Coverage Targets
 
-### Unit Tests
+| Category | Target | Current |
+|----------|--------|---------|
+| Unit tests | >70% | ~65% |
+| Story coverage | 100% | 67% (12/18 stories) |
+| Critical paths | 100% | ~85% |
 
-Test individual functions and utilities in isolation.
+## Running Tests
 
-```typescript
-// Example: src/__tests__/utils/validation.test.ts
-import { validateEmail } from '@/lib/validation';
+### Development (TDD Mode)
 
-describe('validateEmail', () => {
-  it('accepts valid emails', () => {
-    expect(validateEmail('user@example.com')).toBe(true);
-  });
-});
+```bash
+# Watch mode - reruns on file changes
+pnpm test:watch
+
+# Run specific test file
+pnpm test -- path/to/file.test.ts
+
+# Run tests matching pattern
+pnpm test -- -t "should handle"
 ```
 
-### Component Tests
+### E2E Tests
 
-Test React components with React Testing Library.
+```bash
+# Headless
+pnpm test:e2e
 
-```typescript
-// Example: src/components/Button.test.tsx
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { Button } from './Button';
+# With browser UI (debugging)
+pnpm test:e2e:ui
 
-describe('Button', () => {
-  it('calls onClick when clicked', async () => {
-    const onClick = jest.fn();
-    render(<Button onClick={onClick}>Click me</Button>);
-
-    await userEvent.click(screen.getByRole('button'));
-    expect(onClick).toHaveBeenCalled();
-  });
-});
+# Specific test file
+pnpm test:e2e -- 02-onboarding-flow.spec.ts
 ```
-
-### Integration Tests
-
-Test API routes and database interactions.
-
-```typescript
-// Example: src/__tests__/integration/api.test.ts
-describe('API /api/projects', () => {
-  it('returns user projects', async () => {
-    const response = await fetch('/api/projects');
-    expect(response.status).toBe(200);
-  });
-});
-```
-
-### E2E Tests (Playwright)
-
-Test complete user journeys.
-
-```typescript
-// Example: e2e/onboarding.spec.ts
-import { test, expect } from '@playwright/test';
-
-test('user can complete onboarding', async ({ page }) => {
-  await page.goto('/onboarding');
-  await page.fill('[data-testid="business-idea"]', 'My startup idea');
-  await page.click('[data-testid="submit"]');
-  await expect(page).toHaveURL(/dashboard/);
-});
-```
-
-### Accessibility Tests
-
-Integrated with component tests using axe-core.
-
-```typescript
-// Example: src/components/Form.test.tsx
-import { axe, toHaveNoViolations } from 'jest-axe';
-expect.extend(toHaveNoViolations);
-
-it('has no accessibility violations', async () => {
-  const { container } = render(<Form />);
-  const results = await axe(container);
-  expect(results).toHaveNoViolations();
-});
-```
-
-## Configuration
-
-### Jest (`jest.config.js`)
-
-```javascript
-module.exports = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  testPathIgnorePatterns: ['/node_modules/', '/.next/'],
-};
-```
-
-### Playwright (`playwright.config.ts`)
-
-```typescript
-import { defineConfig } from '@playwright/test';
-
-export default defineConfig({
-  testDir: './e2e',
-  use: {
-    baseURL: 'http://localhost:3000',
-  },
-});
-```
-
-## Quality Gates
-
-### Pre-Deployment Requirements
-
-- [ ] All unit tests passing
-- [ ] All integration tests passing
-- [ ] All E2E tests passing
-- [ ] Coverage targets met for critical paths
-- [ ] No accessibility violations in component tests
 
 ### CI Pipeline
 
-The `test:ci` script runs:
-1. `test:coverage` - Unit/integration with coverage
-2. `test:e2e` - Playwright end-to-end tests
+```bash
+# Full quality gate
+pnpm type-check && pnpm test && pnpm test:e2e && pnpm build
+```
 
-## Related Documentation
+## Writing Tests
+
+### Before Writing Code
+
+1. Check if a user story exists in [`user-stories.md`](../user-experience/user-stories.md)
+2. Write a failing test based on acceptance criteria
+3. Only then implement the feature
+
+### Test File Naming
+
+- Unit tests: `ComponentName.test.tsx` or `functionName.test.ts`
+- Integration tests: `feature.integration.test.ts`
+- E2E tests: `NN-feature-name.spec.ts` (numbered for execution order)
+
+### Test Structure
+
+```typescript
+describe('ComponentName', () => {
+  describe('when [condition]', () => {
+    it('should [expected behavior]', () => {
+      // Arrange
+      // Act
+      // Assert
+    });
+  });
+});
+```
+
+## Cross-References
 
 | Document | Purpose |
 |----------|---------|
-| [strategy.md](strategy.md) | Test pyramid and story-driven testing |
-| [journey-test-matrix.md](journey-test-matrix.md) | Story-to-test coverage matrix |
-| [e2e-guide.md](e2e-guide.md) | E2E testing guide |
+| **User Experience** | |
+| [`user-stories.md`](../user-experience/user-stories.md) | Story definitions with acceptance criteria |
+| [`founder-journey-map.md`](../user-experience/founder-journey-map.md) | Founder journey steps |
+| [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) | Consultant journey phases |
+| **Specs** | |
+| [`api-onboarding.md`](../specs/api-onboarding.md) | Onboarding API specification |
+| [`accessibility-standards.md`](../specs/accessibility-standards.md) | WCAG compliance requirements |
 
-## Accessibility Testing
+## Archived Documentation
 
-E2E accessibility helpers are available in `tests/e2e/helpers/accessibility.ts`:
+The following docs were archived during the Jan 2026 reorganization:
 
-```typescript
-import { checkA11y, checkKeyboardNavigation, checkHeadingStructure } from './helpers/accessibility';
-
-// Run WCAG 2.1 AA checks on a page
-await checkA11y(page, 'login page');
-
-// Verify keyboard navigation works
-await checkKeyboardNavigation(page, 5);
-
-// Check heading structure is valid
-await checkHeadingStructure(page);
-```
-
-See [accessibility-standards.md](../specs/accessibility-standards.md) for compliance requirements.
+| Document | Reason | Location |
+|----------|--------|----------|
+| `specification-driven.md` | Evolved into JDTD | `archive/legacy/` |
+| `specification-driven-implementation.md` | Outdated (Oct 2025) | `archive/legacy/` |
+| `TESTING_CHECKLIST.md` | Hotfix-specific | `archive/legacy/` |
+| `E2E_TEST_IMPLEMENTATION.md` | Outdated status | `archive/legacy/` |
 
 ---
 
 **Last Updated**: 2026-01-19
-**Status**: Jest + Playwright infrastructure implemented, accessibility helpers available
-
-*Note: Verify available commands with `pnpm run` in the frontend directory.*
+**Maintainer**: Engineering Team
