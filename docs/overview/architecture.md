@@ -1,7 +1,7 @@
 ---
 purpose: "High-level architecture overview for StartupAI product platform"
 status: "active"
-last_reviewed: "2025-11-21"
+last_reviewed: "2026-01-18"
 ---
 
 # Architecture Overview
@@ -24,6 +24,8 @@ StartupAI operates as a three-service ecosystem with clear separation of concern
 > **Master architecture documentation lives in `startupai-crew/docs/master-architecture/`**
 >
 > That is the single source of truth for cross-service architecture. This document provides product-specific context.
+>
+> See also: [architecture-references.md](architecture-references.md) for links to ADRs and master docs.
 
 ## Service Responsibilities
 
@@ -51,20 +53,90 @@ StartupAI operates as a three-service ecosystem with clear separation of concern
 **Key Flows**:
 - Plan selection → signup → redirect to product app
 - Waitlist capture
-- AI Founders activity display
+- AI Founders activity display (public feed)
 
 ### 3. Product Interface (app.startupai.site)
 
 **Role**: Customer portal, validation delivery, results dashboard
 
 - Next.js 15 (hybrid App + Pages Router)
-- Supabase Auth + PostgreSQL
+- Supabase Auth + PostgreSQL + Realtime
 - Deployed on Netlify
 
 **Key Flows**:
 - OAuth callback → onboarding wizard
 - Project creation → CrewAI analysis
 - Dashboard → AI-generated insights
+- HITL approvals → resume validation
+
+## System Architecture (Updated Jan 2026)
+
+### AI Integration Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Frontend | Next.js 15 + Vercel AI SDK | Streaming chat UI |
+| Chat Provider | OpenRouter → Groq | 300 tok/s streaming |
+| Assessment | OpenRouter auto-router | Backend quality evaluation |
+| Validation | Modal serverless | CrewAI Flows execution |
+
+### Two-Pass Architecture
+
+> **ADR-004**: See `startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md`
+
+```
+User Message
+    ↓
+Pass 1: /api/chat/stream
+    → LLM streams response (no tools)
+    → Pure conversation
+    ↓
+Pass 2: /api/chat/save
+    → Backend assesses quality
+    → Updates stage progress
+    → Persists to DB
+```
+
+### Modal Connection
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /kickoff` | Start validation run |
+| `GET /status/{run_id}` | Poll execution status |
+| `POST /hitl/approve` | Resume from checkpoint |
+
+### Webhook Flow
+
+`POST /api/crewai/webhook` routes by `flow_type`:
+
+| Flow Type | Action |
+|-----------|--------|
+| `founder_validation` | Persist to 4 tables (briefs, evidence, experiments, costs) |
+| `consultant_onboarding` | Update consultant_profiles |
+| `progress_update` | Append to validation_progress |
+| `hitl_checkpoint` | Create approval_requests entry |
+
+### HITL Approval Flow
+
+```
+1. Modal pauses at checkpoint
+2. Webhook creates approval_requests entry
+3. User reviews via EvidenceSummary component
+4. Decision submitted via /api/approvals/[id]
+5. Modal resumes via callback URL
+```
+
+### Database Layer
+
+- **Supabase PostgreSQL** + pgvector for embeddings
+- **Drizzle ORM** (13 schema files)
+- **Realtime enabled**:
+  - `onboarding_sessions` (scalar columns only)
+  - `founders_briefs` (full table)
+  - `validation_progress` (progress updates)
+- **Realtime disabled** (too large):
+  - `crewai_validation_states`
+  - `conversation_history` JSONB
 
 ## Data Flow
 
@@ -79,16 +151,29 @@ startupai.site/signup
         → /onboarding or /dashboard
 ```
 
+### Onboarding Flow (Two-Pass)
+
+```
+/onboarding page
+    → /api/onboarding/start (create/resume session)
+    → User types message
+    → /api/chat/stream (Pass 1: LLM response)
+    → /api/chat/save (Pass 2: assess + persist)
+    → Stage advances when topics covered
+    → /api/onboarding/complete (finalize + kickoff CrewAI)
+```
+
 ### AI Analysis Flow
 
 ```
-User Input (Onboarding/Project)
-    → app.startupai.site API
-    → Modal serverless
-        → 5-flow pipeline
-        → Strategic analysis + HITL
-    → Results stored in Supabase
-    → Dashboard displays insights
+Onboarding Complete
+    → POST /api/onboarding/complete
+    → Modal /kickoff (start validation)
+    → 5-flow pipeline executes
+    → Webhooks persist results to Supabase
+    → HITL checkpoints pause for approval
+    → User reviews → resumes
+    → Final results to dashboard
 ```
 
 ## Technical Stack
@@ -101,42 +186,43 @@ User Input (Onboarding/Project)
 
 ### Product-Specific
 - **ORM**: Drizzle for type-safe queries
-- **State**: TanStack Query
-- **Testing**: Jest + Playwright
-- **AI**: CrewAI via Modal
+- **State**: TanStack Query + Supabase Realtime
+- **Testing**: Jest (824+ unit) + Playwright (101 E2E)
+- **AI Chat**: Vercel AI SDK + OpenRouter
+- **AI Validation**: CrewAI via Modal
 
-## System Flow
+## Current Status (Jan 2026)
 
-1. **Marketing → Auth**: Marketing pages capture plan context and hand off to `/signup`. Authentication completes via Supabase and drops users into the App Router scope.
+| Area | Status | Notes |
+|------|--------|-------|
+| Infrastructure | 95% | Netlify + Modal stable |
+| Database | 100% | 13 migrations deployed |
+| Auth | Working | GitHub OAuth + PKCE |
+| Onboarding | 85% | Two-Pass Architecture live |
+| AI Backend | 85% | Modal deployed, HITL working |
+| Accessibility | 0% | P0 launch blocker |
 
-2. **Onboarding**: The wizard lives in App Router (`/onboarding`). API handlers mutate `onboarding_sessions` and `entrepreneur_briefs` in Supabase.
+See `work/in-progress.md` for detailed tracking.
 
-3. **AI Analysis**: `POST /api/crewai/analyze` triggers Modal `/kickoff`, which writes structured evidence and recommendations back to Supabase.
+## Layer 1 / Layer 2 Artifacts
 
-4. **Dashboards**: Server components consume Supabase data. Analytics events push to PostHog for funnel monitoring.
-
-## Current Status
-
-| Area | Status |
-|------|--------|
-| Infrastructure | 95% complete |
-| Database | 100% complete |
-| Auth | Working (GitHub OAuth + PKCE) |
-| AI Backend | Modal deployed (UI integration in progress) |
-
-See `work/implementation-status.md` for detailed tracking.
+| Layer | Table | Source | Purpose |
+|-------|-------|--------|---------|
+| Layer 1 | `entrepreneur_briefs` | Alex chat extraction | Raw brief from onboarding |
+| Layer 2 | `founders_briefs` | S1 agent validation | Validated + enriched brief |
 
 ## Known Risks
 
-- Modal integration in progress - needed for end-to-end UI
+- Accessibility compliance not yet implemented (launch blocker)
 - Service-role credentials for Supabase must be rotated carefully
 - pgvector search only via stored procedure - dashboard experiences must use RPC
-- Accessibility compliance not yet implemented (launch blocker)
+- Large JSONB columns not suitable for Realtime (use polling)
 
 ## Related Documentation
 
 - **Master Architecture**: `startupai-crew/docs/master-architecture/` (canonical)
-- **Database Schema**: `specs/database-schema.md`
-- **Auth Spec**: `specs/auth.md`
-- **Implementation Status**: `work/implementation-status.md`
-- **ADRs**: `docs/adrs/`
+- **Architecture References**: [architecture-references.md](architecture-references.md)
+- **Database Schema**: [specs/data-schema.md](../specs/data-schema.md)
+- **Auth Spec**: [specs/auth.md](../specs/auth.md)
+- **API Specs**: [specs/api-onboarding.md](../specs/api-onboarding.md)
+- **Work Tracking**: [work/in-progress.md](../work/in-progress.md)

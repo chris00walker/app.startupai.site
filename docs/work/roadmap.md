@@ -1,7 +1,7 @@
 ---
 purpose: "Private technical source of truth for engineering roadmap"
 status: "active"
-last_reviewed: "2025-11-28"
+last_reviewed: "2026-01-18"
 ---
 
 # Roadmap
@@ -23,6 +23,12 @@ last_reviewed: "2025-11-28"
 1. Fix E2E test infrastructure (4-6h) - enables launch
 2. Complete accessibility (8-10h) - legal compliance
 3. Build CrewAI Report Viewer (5-7 days) - show full analysis results
+
+**Q1 2026 Testing Priority:**
+- **Journey-Driven Testing (P1)** - Derive tests from journey maps, not code mechanics
+- Current 824+ unit tests provide low confidence (mock-heavy)
+- Need acceptance test layer verifying user outcomes
+- See `in-progress.md` for implementation phases
 
 **Cross-Reference**: See [in-progress.md](in-progress.md) for current priorities
 
@@ -86,4 +92,4 @@ Accessibility  ━━━━━━━━━━━━━━━◉━━━━━�
 
 Roadmap is reviewed monthly with product + marketing. Update deliverables once backlog items graduate into committed work.
 
-**Last Updated**: 2025-11-28
+**Last Updated**: 2026-01-18

@@ -62,6 +62,8 @@ Local file exists but not applied to remote Supabase.
 
 | Priority | Item | Status | Owner | Effort | Notes |
 |----------|------|--------|-------|--------|-------|
+| 0 | **TDD Effectiveness: Journey-Driven Tests** | **NEW - HIGH PRIORITY** | @testing | ~2 days | Derive tests from journey maps, not code mechanics |
+| 0.5 | **Documentation Refresh** | **NEW - HIGH PRIORITY** | @docs | ~8 hours | 71-day staleness gap - see audit below |
 | 1 | **Phase 0 Stage Progression Fix** | ✅ **IMPLEMENTED** | @backend | ~2 hours | Two-Pass Architecture (ADR-004) - Backend assessment replaces tools |
 | 1.5 | **Phase 0 Durability (ADR-005)** | ✅ **APPROVED** | @backend | ~8 hours | State-First Synchronized Loop - PR 1 next |
 | 2 | **Phase 0 Webhook Data Model Fix** | **Ready** | @backend | ~1 hour | Fix webhook to create `founders_briefs` (not overwrite `entrepreneur_briefs`) |
@@ -71,6 +73,98 @@ Local file exists but not applied to remote Supabase.
 | 6 | Phase 2 Desirability Testing | **IN PROGRESS** | @dogfooding | ~2 hours | Landing pages, experiments |
 | 7 | Dashboard insights from CrewAI | ✅ Done | @frontend | ~4 hours | Consultant dashboard showing real client data |
 | 8 | PostHog coverage gaps | **Ready** | @frontend | 2-3 days | 13+ events defined but not implemented |
+
+#### Documentation Refresh (2026-01-18) 🔴 NEW - HIGH PRIORITY
+
+**Problem**: Documentation is 71 days behind plan-driven development. Plans from Jan 4-18, 2026 implemented features that docs from Oct-Nov 2025 don't reflect.
+
+**Audit Report**: `docs/audits/documentation-staleness-audit-2026-01-18.md`
+
+**Key Findings**:
+| Metric | Value |
+|--------|-------|
+| Total docs | 121 (71 active, 50 archived) |
+| Plans created Jan 2026 | 37 |
+| Oldest doc (git) | 2025-10-25 (85 days) |
+| Docs missing status field | 30 |
+| **Staleness gap** | **71 days** |
+
+**Critical Contradictions**:
+| Doc | Issue |
+|-----|-------|
+| `specs/api-onboarding.md` | Two-Pass Architecture not documented |
+| `overview/architecture.md` | Shows old CrewAI AMP, not Modal (85% migrated) |
+| `testing/strategy.md` | Doesn't reflect journey-driven evolution |
+| `features/stage-progression.md` | Unified config not reflected |
+
+**Immediate Actions (P0)**:
+1. Rewrite `specs/api-onboarding.md` for Two-Pass Architecture (2h)
+2. Create `adrs/adr-0004-two-pass-architecture.md` (1h)
+3. Create `adrs/adr-0005-state-first-loop.md` (1h)
+4. Update `overview/architecture.md` for Modal (2h)
+
+**Missing Feature Docs**:
+- Consultant-Client Invite System (new feature)
+- Realtime Subscriptions (implemented but undocumented)
+- OpenRouter/Groq Integration (in production)
+- HITL Approval Flows (spec needed)
+
+**Reference**: See full audit at `docs/audits/documentation-staleness-audit-2026-01-18.md`
+
+#### TDD Effectiveness: Journey-Driven Testing (2026-01-18) 🔴 NEW - HIGH PRIORITY
+
+**Problem**: Current test suite (824+ unit tests) tests code mechanics with mocks, not user outcomes. This provides low confidence that software actually works for users.
+
+**Root Cause Analysis**:
+- Tests derived from code implementation, not from user requirements
+- Heavy mocking means tests verify mocks work, not real behavior
+- Journey maps exist (`docs/user-experience/onboarding-journey-map.md`) but aren't driving test creation
+- No formal connection between `user_goal` in journey maps and test assertions
+
+**Current State**:
+| Test Type | Count | Confidence Level | Issue |
+|-----------|-------|------------------|-------|
+| Unit tests (mocked) | 824+ | Low | Test implementation, not behavior |
+| E2E tests (Playwright) | 101 | Medium | Exist but not derived from journey maps |
+| Integration tests | ~0 | None | Gap between unit and E2E |
+
+**Solution**: Journey-Driven Test Development (JDTD)
+
+1. **Extract testable assertions from journey maps**
+   - Each `user_goal` becomes a test case
+   - Each `success_metrics` becomes an assertion
+   - Each `pain_points` becomes an edge case test
+
+2. **Create acceptance test layer**
+   - Tests that verify user outcomes, not code paths
+   - Example: "User completes Stage 1 in <5 minutes" not "mockSingle returns data"
+
+3. **Map existing E2E tests to journey touchpoints**
+   - Audit 101 E2E tests against journey map steps
+   - Identify coverage gaps by journey phase
+
+4. **Prioritize integration tests over unit tests**
+   - Real Supabase test database (not mocks)
+   - Real API calls (not mocked routes)
+
+**Implementation Phases**:
+
+| Phase | Task | Effort | Output |
+|-------|------|--------|--------|
+| 1 | Audit journey maps, extract test cases | 4h | `docs/testing/journey-test-matrix.md` |
+| 2 | Map existing E2E to journey touchpoints | 2h | Gap analysis report |
+| 3 | Create missing acceptance tests | 8h | New E2E specs derived from journey |
+| 4 | Add integration test layer (real DB) | 8h | `tests/integration/` folder |
+
+**Success Criteria**:
+- Every `user_goal` in journey map has corresponding test
+- E2E tests cover 100% of journey touchpoints
+- Test failures correlate with actual user-facing bugs
+
+**Reference**:
+- Journey Map: `docs/user-experience/onboarding-journey-map.md`
+- PRD User Journeys: `docs/specs/product-requirements.md` (lines 67-84)
+- Current E2E: `frontend/tests/e2e/` (11 spec files, 101 tests)
 
 #### Phase 0 Architecture Fix (2026-01-16) - Two-Pass Architecture ✅ IMPLEMENTED
 
@@ -296,7 +390,21 @@ See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for det
 
 ---
 
-**Last Updated**: 2026-01-16
+**Last Updated**: 2026-01-18
+
+**Changes (2026-01-18 - Documentation Audit + TDD Effectiveness):**
+- **NEW P1 PRIORITY**: Added "Documentation Refresh" - 71-day staleness gap identified
+- **Audit created**: `docs/audits/documentation-staleness-audit-2026-01-18.md`
+- Key finding: 37 plans from Jan 2026 implemented features that Oct-Nov 2025 docs don't reflect
+- Critical docs needing update: api-onboarding.md, architecture.md, stage-progression.md
+- Missing ADRs: ADR-0004 (Two-Pass), ADR-0005 (State-First Loop)
+- 30 docs missing `status:` frontmatter field
+- **NEW P1 PRIORITY**: Added "TDD Effectiveness: Journey-Driven Tests" as top P1 item
+- Problem: 824+ unit tests with mocks provide low confidence - test code mechanics, not user outcomes
+- Solution: Journey-Driven Test Development - derive tests from journey maps
+- Implementation: 4 phases - audit journey maps, map E2E to touchpoints, create acceptance tests, add integration layer
+- Reference: Journey maps already exist in `docs/user-experience/onboarding-journey-map.md`
+- Success criteria: Every `user_goal` has corresponding test, E2E covers 100% of journey touchpoints
 
 **Changes (2026-01-16 - Two-Pass Architecture):**
 - **MAJOR**: Implemented Two-Pass Onboarding Architecture (ADR-004)

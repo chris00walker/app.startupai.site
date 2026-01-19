@@ -1,58 +1,371 @@
 ---
 purpose: "Private technical source of truth for application data schema"
 status: "active"
-last_reviewed: "2025-10-25"
+last_reviewed: "2026-01-18"
 ---
 
 # Data Schema
 
 ## Overview
 
-- Supabase Postgres is the canonical store. All DDL lives under `supabase/migrations` and is applied with `supabase db push --include-all` so remote history stays in sync.
-- Drizzle models in `frontend/src/db/schema/*` mirror the public schema for type-safe queries. Whenever we add or rename columns we need to update both Drizzle and SQL migrations so shared tooling (Netlify functions, Playwright fixtures) compile.
-- Local development uses the Supabase CLI (`supabase/config.toml`), which targets Postgres 17. Production is still on the managed Postgres 15 image; keep migrations portable (no version-specific syntax).
-- Schema changes follow the flow: update Drizzle, generate a migration (`pnpm drizzle-kit generate`), review SQL, run locally, and land the SQL file under `supabase/migrations`. Stored procedures are hand-written to keep comments and permission blocks readable.
+- **Supabase Postgres** is the canonical store. All DDL lives under `supabase/migrations` and is applied with `supabase db push --include-all`.
+- **Drizzle models** in `frontend/src/db/schema/*` mirror the public schema for type-safe queries (13 schema files).
+- Local development uses the Supabase CLI (`supabase/config.toml`), targeting Postgres 17. Production is on managed Postgres 15.
+- Schema changes follow: update Drizzle → generate migration → review SQL → run locally → land under `supabase/migrations`.
+
+## Layer 1 / Layer 2 Artifacts
+
+StartupAI uses a two-layer artifact model for briefs:
+
+| Layer | Table | Source | Purpose |
+|-------|-------|--------|---------|
+| **Layer 1** | `entrepreneur_briefs` | Alex chat extraction | Raw brief from onboarding conversation |
+| **Layer 2** | `founders_briefs` | S1 agent validation | Validated, enriched, and structured brief |
+
+**Key Insight**: Layer 1 is user-provided data (possibly incomplete/uncertain). Layer 2 is AI-validated data (enriched with research).
+
+---
 
 ## Core Tables
 
 ### User & Access
 
-- `user_profiles` (`supabase/migrations/00001_initial_schema.sql` plus `00005_user_roles_and_plans.sql`): email, plan metadata, `user_role` enum, and timestamps. Trigger `handle_new_user` (`00010_user_profile_trigger.sql`) mirrors auth metadata into this table on signup. Drizzle mapping lives in `frontend/src/db/schema/users.ts`.
-- `trial_usage_counters` (`00007_trial_usage_counters.sql` and `frontend/src/db/schema/usage-quota.ts`): enforces free-tier limits via `(user_id, action, period, period_start)` unique index. The Next.js onboarding API uses this to decide whether a session should start.
+#### `user_profiles`
+User metadata mirrored from Supabase Auth.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | FK to auth.users |
+| `email` | TEXT | User email |
+| `user_role` | ENUM | trial, founder, consultant, admin |
+| `plan_type` | TEXT | trial, sprint, founder, enterprise |
+| `created_at` | TIMESTAMP | Account creation |
+| `updated_at` | TIMESTAMP | Last update |
+
+**Drizzle**: `frontend/src/db/schema/users.ts`
+**Migrations**: `00001_initial_schema.sql`, `00005_user_roles_and_plans.sql`
+
+#### `trial_usage_counters`
+Enforces free-tier limits.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `user_id` | UUID | FK to users |
+| `action` | TEXT | onboarding, analysis, export |
+| `period` | TEXT | monthly |
+| `count` | INT | Usage count |
+| `period_start` | DATE | Period start date |
+
+**Drizzle**: `frontend/src/db/schema/usage-quota.ts`
+
+---
 
 ### Projects & Experimentation
 
-- `projects` mixes portfolio data (stage, gate status, risk budget) with onboarding metadata. Columns were expanded in `00004_validation_tables.sql` and enriched again in `00009_onboarding_schema.sql` to link back to onboarding sessions (`onboarding_session_id`, `entrepreneur_brief_id`, `onboarding_quality_score`). Drizzle model: `frontend/src/db/schema/projects.ts`.
-- `hypotheses` and `experiments` capture validation work. SQL migrations add RLS and timestamp triggers (`00004_validation_tables.sql`), and Drizzle equivalents live in `frontend/src/db/schema/hypotheses.ts` (legacy) and `experiments.ts`.
-- `reports` supports AI-generated deliverables. Today it stores the stubbed output from onboarding completion; once CrewAI deposits artifacts we will backfill links from Netlify workflows.
+#### `projects`
+User's business ideas/startups.
 
-### Evidence & Insights
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | FK to users |
+| `name` | TEXT | Project name |
+| `description` | TEXT | Brief description |
+| `stage` | TEXT | Current validation stage |
+| `gate_status` | TEXT | Gate progression status |
+| `onboarding_session_id` | UUID | FK to onboarding_sessions |
+| `entrepreneur_brief_id` | UUID | FK to entrepreneur_briefs (Layer 1) |
+| `founders_brief_id` | UUID | FK to founders_briefs (Layer 2) |
+| `onboarding_quality_score` | DECIMAL | Quality score from onboarding |
 
-- `evidence` was expanded in `00004_validation_tables.sql` to include categories, embeddings, contradiction flags, and fit types. The match function (`20251004082434_vector_search_function.sql`) exposes pgvector similarity search via `match_evidence(query_embedding, ...)`. Drizzle column definitions reference a 1536-dimension vector (`frontend/src/db/schema/evidence.ts`).
-- Supporting functions: `EvidenceStoreTool` in the Python backend writes to `evidence` using the service role and attaches accessibility metadata so downstream dashboards know when content is AI generated.
+**Drizzle**: `frontend/src/db/schema/projects.ts`
+
+#### `hypotheses`
+Testable assumptions for validation.
+
+**Drizzle**: `frontend/src/db/schema/hypotheses.ts`
+
+#### `experiments`
+Validation experiments linked to hypotheses.
+
+**Drizzle**: `frontend/src/db/schema/experiments.ts`
+
+---
 
 ### Onboarding & Briefs
 
-- `onboarding_sessions` and `entrepreneur_briefs` were introduced in `00009_onboarding_schema.sql`. They store JSON conversation history, per-stage data, completeness scores, and AI guidance fields. `frontend/src/app/api/onboarding/*` reads and writes these tables directly.
-- Helper functions such as `create_onboarding_session`, `upsert_entrepreneur_brief`, and `create_project_from_onboarding` encapsulate common workflows. They are granted to both `authenticated` and `service_role` roles so we can drive them from API routes or future CrewAI workers.
-- Drizzle does not yet expose these tables; queries currently go through Supabase JS clients. Tracking issue: add `onboardingSessions` and `entrepreneurBriefs` models so we can move business logic into shared repositories.
+#### `onboarding_sessions`
+Tracks onboarding conversation state.
 
-### Upcoming CrewAI Tables
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | FK to users |
+| `status` | TEXT | active, paused, completed, abandoned |
+| `mode` | TEXT | founder, client |
+| `current_stage` | INT | Current stage (1-7) |
+| `stage_progress` | INT | Progress within stage (0-100) |
+| `overall_progress` | INT | Overall progress (0-100) |
+| `conversation_history` | JSONB | Full chat history |
+| `stage_data` | JSONB | Extracted data per stage |
+| `version` | INT | Optimistic locking (ADR-005) |
+| `created_at` | TIMESTAMP | Session start |
+| `completed_at` | TIMESTAMP | Session completion |
 
-- We have placeholders in `docs/work/roadmap.md` for `crew_analysis_runs` and evidence audit logs. The Python workflow currently returns raw structures; when we wire the Netlify function we will introduce dedicated tables so the web app can consume structured outputs instead of parsing markdown.
+**Realtime**: Enabled (scalar columns only, not JSONB)
+**Drizzle**: `frontend/src/db/schema/onboarding-sessions.ts`
+
+#### `entrepreneur_briefs` (Layer 1)
+Raw brief extracted from Alex conversation.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | FK to users |
+| `session_id` | UUID | FK to onboarding_sessions |
+| `company_name` | TEXT | Extracted company name |
+| `problem_statement` | TEXT | Problem being solved |
+| `target_customer` | TEXT | Target customer description |
+| `solution` | TEXT | Proposed solution |
+| `market_size` | TEXT | Market size estimate |
+| `competition` | TEXT | Competitive landscape |
+| `business_model` | TEXT | Revenue model |
+| `quality_signals` | JSONB | {clarity, completeness, detail} |
+| `uncertain_fields` | TEXT[] | Fields marked uncertain |
+
+**Drizzle**: `frontend/src/db/schema/entrepreneur-briefs.ts`
+
+#### `founders_briefs` (Layer 2)
+Validated and enriched brief from S1 agent.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `project_id` | UUID | FK to projects |
+| `entrepreneur_brief_id` | UUID | FK to entrepreneur_briefs |
+| `company_name` | TEXT | Validated company name |
+| `problem_statement` | TEXT | Enriched problem statement |
+| `target_customer` | JSONB | Detailed customer profile |
+| `market_analysis` | JSONB | Market research findings |
+| `competitive_analysis` | JSONB | Competitor research |
+| `validation_metadata` | JSONB | AI validation details |
+| `dfv_scores` | JSONB | {desirability, feasibility, viability} |
+| `created_at` | TIMESTAMP | Brief creation |
+| `updated_at` | TIMESTAMP | Last update |
+
+**Realtime**: Enabled (full table)
+**Drizzle**: `frontend/src/db/schema/founders-briefs.ts`
+
+---
+
+### Evidence & Insights
+
+#### `evidence`
+Validation evidence with embeddings.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `project_id` | UUID | FK to projects |
+| `hypothesis_id` | UUID | FK to hypotheses (optional) |
+| `type` | TEXT | Evidence category |
+| `content` | TEXT | Evidence content |
+| `source` | TEXT | Data source |
+| `embedding` | VECTOR(1536) | OpenAI embedding |
+| `fit_type` | TEXT | D-F-V classification |
+| `confidence` | DECIMAL | Confidence score |
+| `is_ai_generated` | BOOLEAN | AI vs human sourced |
+| `contradiction_flag` | BOOLEAN | Contradicts other evidence |
+
+**Vector Search**: `match_evidence(query_embedding, ...)` function
+
+---
+
+### CrewAI Integration
+
+#### `crewai_validation_states`
+Full state persistence for validation runs.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `project_id` | UUID | FK to projects |
+| `run_id` | TEXT | Modal run ID |
+| `phase` | TEXT | Current phase (phase_0-4) |
+| `status` | TEXT | running, paused, completed, failed |
+| `state_data` | JSONB | Full serialized state |
+| `checkpoint_data` | JSONB | HITL checkpoint info |
+| `started_at` | TIMESTAMP | Run start |
+| `completed_at` | TIMESTAMP | Run completion |
+
+**Realtime**: Disabled (state_data too large)
+
+#### `validation_progress`
+Real-time progress updates from Modal.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `run_id` | TEXT | Modal run ID |
+| `phase` | TEXT | Current phase |
+| `step` | TEXT | Current step |
+| `progress_pct` | INT | Progress percentage |
+| `message` | TEXT | Status message |
+| `agent` | TEXT | Active AI Founder |
+| `created_at` | TIMESTAMP | Update time |
+
+**Realtime**: Enabled (triggers UI updates)
+
+---
+
+### HITL Approvals
+
+#### `approval_requests`
+Pending human approvals for HITL checkpoints.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | FK to users (owner) |
+| `project_id` | UUID | FK to projects |
+| `run_id` | TEXT | Modal run ID |
+| `checkpoint_name` | TEXT | Checkpoint identifier |
+| `approval_type` | TEXT | evidence_review, strategy_approval, etc. |
+| `status` | TEXT | pending, approved, rejected, revised, auto_approved |
+| `data` | JSONB | Checkpoint data for review |
+| `resume_url` | TEXT | Modal callback URL |
+| `low_risk` | BOOLEAN | Auto-approve eligible |
+| `decision` | TEXT | User's decision |
+| `feedback` | TEXT | User's feedback |
+| `created_at` | TIMESTAMP | Checkpoint received |
+| `decided_at` | TIMESTAMP | Decision submitted |
+| `expires_at` | TIMESTAMP | Review deadline |
+
+#### `approval_history`
+Audit trail for approval actions.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `approval_id` | UUID | FK to approval_requests |
+| `action` | TEXT | created, viewed, decided, auto_approved |
+| `actor_id` | UUID | FK to users |
+| `metadata` | JSONB | Action details |
+| `created_at` | TIMESTAMP | Action time |
+
+---
+
+### Consultant System
+
+#### `consultant_profiles`
+Extended profile for consultant users.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | FK to users |
+| `company_name` | TEXT | Consulting firm name |
+| `specializations` | TEXT[] | Areas of expertise |
+| `industries` | TEXT[] | Target industries |
+| `practice_analysis` | JSONB | AI analysis of practice |
+| `onboarding_session_id` | UUID | FK to onboarding_sessions |
+
+#### `consultant_clients`
+Consultant-client relationships.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `consultant_id` | UUID | FK to users |
+| `client_id` | UUID | FK to users (nullable until signup) |
+| `email` | TEXT | Client's email |
+| `name` | TEXT | Client's name (optional) |
+| `invite_token` | UUID | Unique signup token |
+| `status` | TEXT | invited, active, archived |
+| `created_at` | TIMESTAMP | Invite creation |
+| `expires_at` | TIMESTAMP | Token expiry (30 days) |
+| `accepted_at` | TIMESTAMP | When client signed up |
+| `archived_at` | TIMESTAMP | When archived |
+
+---
+
+## Supabase Realtime Configuration
+
+### Enabled Tables
+
+| Table | Columns | Use Case |
+|-------|---------|----------|
+| `onboarding_sessions` | Scalar only (not JSONB) | Progress bar updates |
+| `founders_briefs` | Full table | Brief completion notification |
+| `validation_progress` | Full table | Live progress during validation |
+| `approval_requests` | Full table | New approval notifications |
+
+### Disabled Tables
+
+| Table | Reason |
+|-------|--------|
+| `crewai_validation_states` | state_data JSONB too large |
+| `conversation_history` | Part of onboarding_sessions JSONB |
+| `evidence` | Batch updates, no real-time need |
+
+### Frontend Subscription Pattern
+
+```typescript
+// Subscribe to validation progress
+const channel = supabase
+  .channel('validation-progress')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'validation_progress',
+    filter: `run_id=eq.${runId}`
+  }, (payload) => {
+    setProgress(payload.new.progress_pct);
+  })
+  .subscribe();
+```
+
+---
 
 ## Row Level Security
 
-- `user_profiles`, `projects`, `evidence`, `hypotheses`, `experiments`, `onboarding_sessions`, `entrepreneur_briefs`, and `trial_usage_counters` all enforce `auth.uid()` checks introduced across `00001`, `00004`, `00007`, and `00009` migrations.
-- Service access is handled through explicit stored procedures (see onboarding functions above) and the Supabase service key. The backend falls back to user-scoped clients when the service key is unavailable to keep local development productive.
-- Authenticated users can only manage resources tied to their projects. Policies join through `projects.user_id` to keep authorisation logic centralised.
+All tables enforce `auth.uid()` checks:
 
-## Migration Notes
+| Table | Policy |
+|-------|--------|
+| `user_profiles` | Own profile only |
+| `projects` | Own projects only |
+| `onboarding_sessions` | Own sessions only |
+| `entrepreneur_briefs` | Own briefs only |
+| `founders_briefs` | Via project ownership |
+| `evidence` | Via project ownership |
+| `approval_requests` | Own approvals only |
+| `consultant_clients` | Own clients only (consultant role) |
+| `validation_progress` | Via project ownership |
 
-- `00005_user_roles_and_plans.sql` defines the `user_role` enum and shared `set_updated_at_timestamp()` trigger. Reuse it for any new tables that require timestamps to stay accurate.
-- `00007_trial_usage_counters.sql` introduced quotas; remember to seed new actions whenever we add features that should respect plan limits.
-- `00009_onboarding_schema.sql` is the largest change set: onboarding tables, helper functions, and new columns on `projects`. Read through it before extending the onboarding journey so you reuse the existing functions instead of duplicating logic in the app layer.
-- `00010_user_profile_trigger.sql` (duplicated as `20251024130830_user_profile_trigger.sql`) keeps profiles in sync. When updating triggers, modify both copies or delete the redundant migration after validating production state.
-- Always run `supabase db pull` after applying migrations in production so local migrations stay linear. The migration folder contains verified history through October 2025; keep adding numbered files to maintain deterministic ordering.
+Service access uses stored procedures and the Supabase service key.
 
-Refer to the archived timeline in `docs/archive/legacy/database-schema-updates.md` when researching historical decisions.
+---
+
+## Migration Files
+
+| Migration | Purpose |
+|-----------|---------|
+| `00001_initial_schema.sql` | Core tables |
+| `00004_validation_tables.sql` | Evidence, hypotheses, experiments |
+| `00005_user_roles_and_plans.sql` | User roles enum, plans |
+| `00007_trial_usage_counters.sql` | Usage quotas |
+| `00009_onboarding_schema.sql` | Onboarding, entrepreneur_briefs |
+| `00010_user_profile_trigger.sql` | Auth sync trigger |
+| `00011_founders_briefs.sql` | Layer 2 briefs |
+| `00012_crewai_tables.sql` | CrewAI state, progress |
+| `00013_approval_tables.sql` | HITL approvals |
+| `00014_consultant_tables.sql` | Consultant profiles, clients |
+
+---
+
+## Related Documentation
+
+- **API Specs**: [api-onboarding.md](api-onboarding.md), [api-crewai.md](api-crewai.md)
+- **Architecture**: [overview/architecture.md](../overview/architecture.md)
+- **Supabase Config**: [supabase.md](supabase.md)
