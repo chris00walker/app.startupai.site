@@ -377,7 +377,7 @@ Issues found during dogfooding testing of Founder onboarding flow:
 **What's Missing:**
 - PostHog coverage gaps (13+ events not implemented - P1 remaining item)
 
-See [Integration QA Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for details.
+See [Integration QA Report](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) for details.
 
 ---
 

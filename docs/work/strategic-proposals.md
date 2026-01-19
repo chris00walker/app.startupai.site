@@ -18,7 +18,7 @@ last_reviewed: "2025-11-28"
 | Milestone | Original Target | Status |
 |-----------|-----------------|--------|
 | Complete market research | November 2025 | ⚠️ Pending |
-| Technical planning | November 2025 | ✅ In Progress - see [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) |
+| Technical planning | November 2025 | ✅ In Progress - see [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) |
 | Present recommendations | December 2025 | On Track |
 | Final strategic decision | January 2026 | On Track |
 | Begin implementation | February 2026 | On Track |
@@ -233,11 +233,11 @@ The following technical assessments have been completed:
 
 | Assessment | Date | Finding | Link |
 |------------|------|---------|------|
-| Security Audit | Nov 17 | 0 critical issues, production-ready | [Report](../reports/security-audit.md) |
-| Schema Alignment | Nov 28 | 97% TypeScript-Pydantic alignment | [Report](../reports/typescript-pydantic-alignment.md) |
-| Data Flow | Nov 28 | 6/7 flows connected | [Report](../reports/crewai-data-flow-verification.md) |
-| UX Methodology | Nov 28 | 97% Strategyzer alignment | [Report](../reports/strategyzer-ux-audit.md) |
-| Integration QA | Nov 28 | 65-70% complete, gaps identified | [Report](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) |
+| Security Audit | Nov 17 | 0 critical issues, production-ready | [Report](../archive/audits/security-audit.md) |
+| Schema Alignment | Nov 28 | 97% TypeScript-Pydantic alignment | [Report](../archive/audits/typescript-pydantic-alignment.md) |
+| Data Flow | Nov 28 | 6/7 flows connected | [Report](../archive/audits/crewai-data-flow-verification.md) |
+| UX Methodology | Nov 28 | 97% Strategyzer alignment | [Report](../archive/audits/strategyzer-ux-audit.md) |
+| Integration QA | Nov 28 | 65-70% complete, gaps identified | [Report](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) |
 
 **Key Technical Insight**: Platform architecture is sound and extensible. The 95-100% infrastructure completion supports all three strategic options. Current focus should be completing user-facing features before strategic decision.
 

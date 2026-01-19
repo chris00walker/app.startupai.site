@@ -17,11 +17,11 @@ last_reviewed: "2026-01-15"
 
 | Item | Effort | Source | Notes |
 |------|--------|--------|-------|
-| **HITL Approval UI Data Source** | 2-4h | [Phase 0 Audit](../audits/phase0-spec-alignment-report.md) | **DEFERRED from P1** - see details below |
+| **HITL Approval UI Data Source** | 2-4h | [Phase 0 Audit](../archive/audits/phase0-spec-alignment-report.md) | **DEFERRED from P1** - see details below |
 | **Consultant Alex UX Improvements** | 4-5h | Alex UX Plan | Mirror founder improvements for consultant onboarding flow |
-| VPC geometric shapes (circle/square) | 2-3h | [Strategyzer UX Audit](../reports/strategyzer-ux-audit.md) | Visual polish to match Strategyzer methodology |
+| VPC geometric shapes (circle/square) | 2-3h | [Strategyzer UX Audit](../archive/audits/strategyzer-ux-audit.md) | Visual polish to match Strategyzer methodology |
 | ~~VPC visual fit lines~~ | ~~4-6h~~ | ~~[Strategyzer UX Audit]~~ | ✅ Done - commit `0cf17ca` (Nov 29) |
-| HITL comment display | 2-4h | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Show `human_comment` in UI |
+| HITL comment display | 2-4h | [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Show `human_comment` in UI |
 
 ### HITL Approval UI Data Source (Deferred from P1) ⚠️ DO NOT FORGET
 
@@ -76,11 +76,11 @@ These events are defined in `ProductEvent` type but not implemented in user jour
 | experiment_planned | Evidence | 1h | Add to experiment planning flow |
 | canvas_completed | Canvas | 1h | Add to canvas save handlers |
 | canvas_bmc_updated / vpc_updated / tbi_updated | Canvas | 2h | Add to respective canvas components |
-| Realtime subscription for useCrewAIState() | 1-2h | [E2E Data Flow](../reports/crewai-data-flow-verification.md) | Subscribe to Supabase Realtime for live updates |
-| "Sync to CrewAI" action for VPC edits | 2-3h | [E2E Data Flow](../reports/crewai-data-flow-verification.md) | User edits → trigger CrewAI re-analysis |
-| Realtime updates for approvals history | 2-3h | [E2E Data Flow](../reports/crewai-data-flow-verification.md) | Live approval status updates |
-| Assumption Map page | 1-2 days | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Risk visibility dashboard |
-| Metrics Dashboard (CAC, LTV, margins) | 2-3 days | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Business intelligence from CrewAI data |
+| Realtime subscription for useCrewAIState() | 1-2h | [E2E Data Flow](../archive/audits/crewai-data-flow-verification.md) | Subscribe to Supabase Realtime for live updates |
+| "Sync to CrewAI" action for VPC edits | 2-3h | [E2E Data Flow](../archive/audits/crewai-data-flow-verification.md) | User edits → trigger CrewAI re-analysis |
+| Realtime updates for approvals history | 2-3h | [E2E Data Flow](../archive/audits/crewai-data-flow-verification.md) | Live approval status updates |
+| Assumption Map page | 1-2 days | [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Risk visibility dashboard |
+| Metrics Dashboard (CAC, LTV, margins) | 2-3 days | [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Business intelligence from CrewAI data |
 
 ---
 
@@ -88,11 +88,11 @@ These events are defined in `ProductEvent` type but not implemented in user jour
 
 | Item | Effort | Source | Notes |
 |------|--------|--------|-------|
-| PDF/PowerPoint export | 3-5 days | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | External sharing of analysis results |
-| Canvas versioning | 5-7 days | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | History tracking for VPC/BMC changes |
-| Multi-segment VPC comparison | 3-5 days | [Integration QA](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Side-by-side segment analysis |
-| Drag-and-drop VPC fit mapping | 8+h | [Strategyzer UX Audit](../reports/strategyzer-ux-audit.md) | Interactive fit mapping UX |
-| Evidence history preservation | 2-3 days | [E2E Data Flow](../reports/crewai-data-flow-verification.md) | INSERT vs UPSERT or history table |
+| PDF/PowerPoint export | 3-5 days | [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | External sharing of analysis results |
+| Canvas versioning | 5-7 days | [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | History tracking for VPC/BMC changes |
+| Multi-segment VPC comparison | 3-5 days | [Integration QA](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md) | Side-by-side segment analysis |
+| Drag-and-drop VPC fit mapping | 8+h | [Strategyzer UX Audit](../archive/audits/strategyzer-ux-audit.md) | Interactive fit mapping UX |
+| Evidence history preservation | 2-3 days | [E2E Data Flow](../archive/audits/crewai-data-flow-verification.md) | INSERT vs UPSERT or history table |
 | Internationalisation & localisation | TBD | Original backlog | Translate onboarding copy, locale support |
 
 ---
@@ -128,9 +128,9 @@ Team audit created comprehensive documentation of Phase 0 issues:
 
 | Report | Purpose |
 |--------|---------|
-| [phase0-retrospective-48h.md](../audits/phase0-retrospective-48h.md) | Git forensics of 10+ failed fixes |
-| [phase0-spec-alignment-report.md](../audits/phase0-spec-alignment-report.md) | Spec vs implementation gaps |
-| [phase0-alignment-task-list.md](../audits/phase0-alignment-task-list.md) | Prioritized task list |
-| [phase0-spec-delta.md](../audits/phase0-spec-delta.md) | Proposed spec updates |
+| [phase0-retrospective-48h.md](../archive/audits/phase0-retrospective-48h.md) | Git forensics of 10+ failed fixes |
+| [phase0-spec-alignment-report.md](../archive/audits/phase0-spec-alignment-report.md) | Spec vs implementation gaps |
+| [phase0-alignment-task-list.md](../archive/audits/phase0-alignment-task-list.md) | Prioritized task list |
+| [phase0-spec-delta.md](../archive/audits/phase0-spec-delta.md) | Proposed spec updates |
 
 **Implementation Plan**: `~/.claude/plans/gentle-booping-mitten.md`

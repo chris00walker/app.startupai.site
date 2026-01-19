@@ -170,7 +170,7 @@ last_reviewed: "2026-01-14"
 | SECURITY DEFINER functions secured | ✅ Done | 8 functions fixed with `SET search_path` |
 | Trigger functions secured | ✅ Done | 6 trigger functions with deterministic behavior |
 
-**Report**: See [Security Audit](../reports/security-audit.md) - 0 critical issues remaining
+**Report**: See [Security Audit](../archive/audits/security-audit.md) - 0 critical issues remaining
 
 ---
 
@@ -197,10 +197,10 @@ last_reviewed: "2026-01-14"
 | Schema alignment across layers | ✅ Verified | TypeScript ↔ Pydantic ↔ Supabase in sync |
 
 **Reports**:
-- [TypeScript-Pydantic Alignment](../reports/typescript-pydantic-alignment.md)
-- [CrewAI E2E Data Flow](../reports/crewai-data-flow-verification.md)
-- [Strategyzer UX Audit](../reports/strategyzer-ux-audit.md)
-- [Integration QA Summary](../audits/CREWAI-FRONTEND-INTEGRATION-QA.md)
+- [TypeScript-Pydantic Alignment](../archive/audits/typescript-pydantic-alignment.md)
+- [CrewAI E2E Data Flow](../archive/audits/crewai-data-flow-verification.md)
+- [Strategyzer UX Audit](../archive/audits/strategyzer-ux-audit.md)
+- [Integration QA Summary](../archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md)
 
 ---
 
