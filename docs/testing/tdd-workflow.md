@@ -225,18 +225,18 @@ User Journey → User Goal → Acceptance Criteria → Test Cases → Implementa
 
    From [`founder-journey-map.md`](../user-experience/founder-journey-map.md):
    ```
-   Step 6-11: AI-Guided Conversation
-   - user_goal: "Provide information about my business idea"
-   - success_metrics: "Completion rate > 85%"
+   Step 5: Quick Start Form
+   - user_goal: "Submit business idea for validation"
+   - success_metrics: "Submission rate > 95%"
    ```
 
 2. **Map to User Story**
 
    From [`user-stories.md`](../user-experience/user-stories.md):
    ```
-   US-F01: Complete AI-Guided Onboarding
-   - Acceptance: User completes all 7 stages
-   - Acceptance: Progress saves automatically
+   US-F01: Complete Quick Start Onboarding
+   - Acceptance: User submits Quick Start form
+   - Acceptance: Phase 1 starts automatically
    ```
 
 3. **Write E2E Test**
@@ -244,20 +244,17 @@ User Journey → User Goal → Acceptance Criteria → Test Cases → Implementa
    ```typescript
    // tests/e2e/02-onboarding-flow.spec.ts
 
-   test('user completes 7-stage onboarding', async ({ page }) => {
+   test('user completes Quick Start onboarding', async ({ page }) => {
      // Arrange
      await loginAsFounder(page);
-     await page.goto('/onboarding/founder');
+     await page.goto('/onboarding/quick-start');
 
-     // Act - simulate conversation through stages
-     for (const stage of stages) {
-       await page.fill('[data-testid="chat-input"]', stage.response);
-       await page.click('[data-testid="send-button"]');
-       await page.waitForSelector(`[data-testid="stage-${stage.number}-complete"]`);
-     }
+     // Act - submit Quick Start form
+     await page.fill('[data-testid="business-idea-input"]', 'AI-powered startup validation platform');
+     await page.click('[data-testid="start-validation-button"]');
 
-     // Assert
-     await expect(page.locator('[data-testid="onboarding-complete"]')).toBeVisible();
+     // Assert - Phase 1 starts
+     await expect(page.locator('[data-testid="phase-1-started"]')).toBeVisible();
    });
    ```
 

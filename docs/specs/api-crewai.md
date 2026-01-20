@@ -2,9 +2,12 @@
 purpose: "API specification for CrewAI/Modal integration routes (this repo's endpoints)"
 status: "active"
 last_reviewed: "2026-01-19"
+architectural_pivot: "2026-01-19"
 ---
 
 # CrewAI Integration API
+
+> **Architectural Pivot (2026-01-19)**: Phase 0 was simplified to Quick Start. The `approve_founders_brief` checkpoint was replaced by `approve_discovery_output` in Phase 1. See [ADR-006](../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 Implementation lives in `frontend/src/app/api/crewai/*/route.ts`. These routes handle communication between the product app and Modal serverless (CrewAI Flows).
 
@@ -227,9 +230,9 @@ Creates approval request for human review and pauses workflow.
   "run_id": "run_xyz789",
   "project_id": "uuid",
   "user_id": "uuid",
-  "checkpoint": "approve_founders_brief",  // checkpoint name
-  "title": "Approve Founder's Brief",
-  "description": "Review and approve the compiled founder's brief before proceeding.",
+  "checkpoint": "approve_discovery_output",  // checkpoint name
+  "title": "Review Discovery Outputs",
+  "description": "Review AI-generated Founder's Brief and VPC before proceeding.",
   "options": [
     { "id": "approved", "label": "Approve", "description": "Proceed with validation" },
     { "id": "rejected", "label": "Reject", "description": "Request revisions" },
@@ -238,8 +241,9 @@ Creates approval request for human review and pauses workflow.
   "recommended": "approved",  // optional: suggested option
   "context": {
     // Checkpoint-specific data for UI display
-    "founders_brief": { /* ... */ },
-    "session_id": "session_xyz"
+    "founders_brief": { /* AI-generated from Phase 1 research */ },
+    "value_proposition_canvas": { /* VPC data */ },
+    "raw_idea": "Original user input from Quick Start"
   },
   "expires_at": "2026-01-25T12:00:00Z",  // optional
   "timestamp": "2026-01-18T12:00:00Z"
@@ -247,8 +251,7 @@ Creates approval request for human review and pauses workflow.
 ```
 
 **Checkpoint Names**:
-- `approve_founders_brief` - Phase 0: Founder's Brief approval
-- `approve_vpc_completion` - Phase 1: VPC Discovery complete
+- `approve_discovery_output` - Phase 1: Combined Brief + VPC approval (replaces `approve_founders_brief` + `approve_vpc_completion`)
 - `approve_experiment_plan` - Phase 1: Experiment plan
 - `approve_pricing_test` - Phase 1: Pricing test
 - `approve_campaign_launch` - Phase 2: Marketing campaign
@@ -260,11 +263,15 @@ Creates approval request for human review and pauses workflow.
 - `approve_proceed` - Final proceed decision
 - `request_human_decision` - Generic human decision request
 
+**Deprecated Checkpoints** (removed by Quick Start pivot):
+- ~~`approve_founders_brief`~~ - Removed (Phase 0 has no HITL)
+- ~~`approve_vpc_completion`~~ - Combined into `approve_discovery_output`
+
 **Tables Updated**:
 - `validation_runs` - Status set to `paused`, `hitl_checkpoint` stored
 - `approval_requests` - New approval request created
 - `validation_progress` - Progress entry with `status: paused`
-- `founders_briefs` - Created for `approve_founders_brief` checkpoint (Layer 2)
+- `entrepreneur_briefs` - Created for `approve_discovery_output` checkpoint (AI-generated in Phase 1)
 
 #### Response
 
@@ -311,7 +318,7 @@ Responses vary by flow type:
   "success": true,
   "flow_type": "hitl_checkpoint",
   "run_id": "run_xyz789",
-  "checkpoint": "approve_founders_brief",
+  "checkpoint": "approve_discovery_output",
   "approval_request_id": "uuid",
   "message": "HITL checkpoint recorded and approval request created"
 }
@@ -379,7 +386,7 @@ This is a fallback endpoint when no `approval_id` is available. The preferred pa
 ```jsonc
 {
   "run_id": "run_xyz789",
-  "checkpoint": "approve_founders_brief",
+  "checkpoint": "approve_discovery_output",
   "decision": "approved",   // any string: approved, rejected, iterate, segment_1, etc.
   "feedback": "Looks good"  // optional
 }

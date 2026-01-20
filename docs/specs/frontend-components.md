@@ -17,13 +17,15 @@ last_reviewed: "2026-01-19"
 
 ## Onboarding Experience
 
-> **Architecture**: See [ADR-004: Two-Pass Onboarding Architecture](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
+> **Architecture**: See [ADR-006: Quick Start Architecture](../../startupai-crew/docs/adr/006-quick-start-architecture.md)
+>
+> **Note (2026-01-19)**: The 7-stage AI conversation was replaced by Quick Start. Founders submit a simple form, and the Founder's Brief is AI-generated in Phase 1.
 
 ### Core Wizard Components
 
 | Component | Path | Responsibilities |
 |-----------|------|------------------|
-| `FounderOnboardingWizard` | `components/onboarding/FounderOnboardingWizard.tsx` | 7-stage founder journey. Orchestrates Two-Pass flow (stream + save), manages stage progression, handles completion via SummaryModal. |
+| `FounderOnboardingWizard` | `components/onboarding/FounderOnboardingWizard.tsx` | Quick Start form. Collects business idea and optional context, triggers Phase 1 automatically. (Legacy 7-stage code may still exist but is superseded.) |
 | `ConsultantOnboardingWizard` | `components/onboarding/ConsultantOnboardingWizard.tsx` | Consultant profile creation. Same Two-Pass architecture with consultant-specific stages and data collection. |
 | `ClientOnboardingWizard` | `components/onboarding/ClientOnboardingWizard.tsx` | Client (invited by consultant) onboarding. Simpler flow, linked to consultant relationship. |
 | `ConversationInterface` | `components/onboarding/ConversationInterface.tsx` | Renders chat timeline, manages voice input via `webkitSpeechRecognition`, auto-scrolls, wraps follow-up prompts + validation feedback. |
@@ -45,12 +47,21 @@ last_reviewed: "2026-01-19"
 
 ### Implementation Highlights
 
-- **Two-Pass Architecture**: Wizards use `/api/chat/stream` for conversation, then `/api/chat/save` for persistence and quality assessment. No LLM tool calls for progression.
-- **Topic-Based Progression**: Backend assesses topics covered per stage. Stage advances when all required topics are discussed.
-- **Accessibility**: Wizards announce state changes to screen readers via `announceToScreenReader` utility. Skip links provided on onboarding pages.
-- **Message Handling**: Optimistic updates append user messages before API round-trip. AI responses reconciled on completion.
-- **Voice Input**: `ConversationInterface` toggles recording state, writes transcripts into textarea.
-- **Completion Flow**: SummaryModal presents Approve/Revise options. Approve triggers CrewAI via `/api/crewai/kickoff`.
+- **Quick Start Architecture**: Simple form submission replaces 7-stage conversation. User enters business idea (~30 seconds), Phase 1 starts automatically.
+- **AI-Generated Brief**: BriefGenerationCrew in Phase 1 generates the Founder's Brief from market research.
+- **Combined HITL Checkpoint**: `approve_discovery_output` combines Brief + VPC approval into a single checkpoint.
+- **Accessibility**: Forms announce validation errors to screen readers. Skip links provided on onboarding pages.
+- **Completion Flow**: Quick Start submission triggers Phase 1 via `/api/crewai/kickoff` immediately.
+
+<details>
+<summary>Legacy Two-Pass Architecture (Superseded)</summary>
+
+- **Two-Pass Architecture**: Wizards used `/api/chat/stream` for conversation, then `/api/chat/save` for persistence and quality assessment.
+- **Topic-Based Progression**: Backend assessed topics covered per stage. Stage advanced when all required topics were discussed.
+- **Voice Input**: `ConversationInterface` toggled recording state, wrote transcripts into textarea.
+- **Completion Flow**: SummaryModal presented Approve/Revise options.
+
+</details>
 
 ---
 
@@ -240,7 +251,8 @@ The following directories contain additional components not detailed above:
 
 ## Related Documentation
 
-- **Stage Progression**: [`features/stage-progression.md`](../features/stage-progression.md)
+- **Quick Start Architecture**: [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md)
+- **Stage Progression**: [`features/stage-progression.md`](../features/stage-progression.md) (deprecated - see ADR-006)
 - **API Specs**: [`api-onboarding.md`](api-onboarding.md), [`api-approvals.md`](api-approvals.md)
 - **Architecture**: [`architecture.md`](architecture.md) (redirects to startupai-crew canonical source)
 - **Journey Map**: [`user-experience/founder-journey-map.md`](../user-experience/founder-journey-map.md)

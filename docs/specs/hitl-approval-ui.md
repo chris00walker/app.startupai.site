@@ -2,16 +2,19 @@
 purpose: "HITL Approval UI Specification - defines what users see at each checkpoint"
 status: "active"
 last_reviewed: "2026-01-19"
+architectural_pivot: "2026-01-19"
 derived_from: "startupai-crew/docs/master-architecture/reference/approval-workflows.md"
 ---
 
 # HITL Approval UI Specification
 
+> **Architectural Pivot (2026-01-19)**: Phase 0 was simplified to Quick Start (no AI, no HITL). The first HITL checkpoint is now `approve_discovery_output` in Phase 1, which combines Brief review with VPC review. See [ADR-006](../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
+
 This document resolves Category A ambiguities from the master-architecture translation plan by specifying exactly what users see and do at each Human-in-the-Loop checkpoint.
 
 ## Overview
 
-StartupAI has **10+ HITL checkpoints** across 5 validation phases. Each checkpoint:
+StartupAI has **10+ HITL checkpoints** across Phases 1-4. Each checkpoint:
 
 1. Pauses AI execution
 2. Presents evidence and options to the user
@@ -55,11 +58,25 @@ All HITL checkpoints use the same modal architecture with phase-specific content
 
 ---
 
-## Phase 0: Onboarding Checkpoints
+## Phase 0: Quick Start (No HITL)
 
-### Checkpoint: `approve_founders_brief`
+> **Note**: Phase 0 was simplified to Quick Start. There are no HITL checkpoints in Phase 0.
 
-**When triggered**: After 7-stage onboarding interview completes
+Phase 0 is now a single form submission:
+1. User enters business idea (1-3 sentences)
+2. Optionally uploads pitch deck or notes
+3. System creates project and triggers Phase 1
+4. **No approval required** - Phase 1 starts immediately
+
+The first HITL checkpoint is `approve_discovery_output` in Phase 1.
+
+---
+
+## Phase 1: VPC Discovery Checkpoints
+
+### Checkpoint: `approve_discovery_output` (Combined Brief + VPC)
+
+**When triggered**: After BriefGenerationCrew and DiscoveryCrew complete Phase 1 research
 
 **Approver**: Founder + Guardian (dual approval)
 
@@ -67,79 +84,86 @@ All HITL checkpoints use the same modal architecture with phase-specific content
 
 | Field | Content |
 |-------|---------|
-| **Title** | "Review Your Founder's Brief" |
-| **Description** | "The AI has extracted these hypotheses from your interview. Confirm they accurately capture your business idea before analysis begins." |
+| **Title** | "Review Discovery Outputs" |
+| **Description** | "The AI has researched your market and generated a Founder's Brief and Value Proposition Canvas. Review and edit before proceeding to Desirability testing." |
 
 **Phase-Specific Content:**
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ THE IDEA                                            │
+│ FOUNDER'S BRIEF (AI-Generated from Research)        │
 ├─────────────────────────────────────────────────────┤
-│ One-liner: {the_idea.one_liner}                     │
+│ Your Idea: {raw_idea}                               │
 │                                                     │
-│ Description:                                        │
+│ One-liner: {the_idea.one_liner}            [Edit]   │
+│                                                     │
+│ Description:                               [Edit]   │
 │ {the_idea.description}                              │
 │                                                     │
-│ Unique Insight:                                     │
+│ Unique Insight:                            [Edit]   │
 │ {the_idea.unique_insight}                           │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
-│ PROBLEM HYPOTHESIS (NOT VALIDATED)                  │
+│ PROBLEM HYPOTHESIS (From Research)                  │
 ├─────────────────────────────────────────────────────┤
 │ Problem: {problem_hypothesis.problem_statement}     │
 │ Who: {problem_hypothesis.who_has_this_problem}      │
 │ Frequency: {problem_hypothesis.frequency}           │
 │ Current alternatives: {current_alternatives}        │
 │ Why alternatives fail: {why_alternatives_fail}      │
+│                                                     │
+│ Research Sources: {n} sources analyzed              │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
-│ CUSTOMER HYPOTHESIS (NOT VALIDATED)                 │
+│ CUSTOMER PROFILE (VPC Left Side)                    │
 ├─────────────────────────────────────────────────────┤
-│ Primary Segment: {customer_hypothesis.primary_segment}
-│ Characteristics: {characteristics}                  │
-│ Where to find them: {where_to_find_them}           │
-│ Estimated size: {estimated_size}                   │
+│ Primary Segment: {customer_profile.segment}         │
+│                                                     │
+│ Jobs to Be Done:                                    │
+│ • {job_1}                                           │
+│ • {job_2}                                           │
+│                                                     │
+│ Pains:                                              │
+│ • {pain_1} (Severity: High)                         │
+│ • {pain_2} (Severity: Medium)                       │
+│                                                     │
+│ Gains:                                              │
+│ • {gain_1} (Essential)                              │
+│ • {gain_2} (Nice to have)                           │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
-│ SOLUTION HYPOTHESIS (NOT VALIDATED)                 │
+│ VALUE MAP (VPC Right Side)                          │
 ├─────────────────────────────────────────────────────┤
-│ Proposed Solution: {solution_hypothesis.proposed_solution}
-│ Key Features:                                       │
-│ • {feature_1}                                       │
-│ • {feature_2}                                       │
-│ Differentiation: {differentiation}                  │
+│ Products & Services:                                │
+│ • {product_1}                                       │
+│ • {product_2}                                       │
+│                                                     │
+│ Pain Relievers:                                     │
+│ • {pain_1} → {reliever}                             │
+│                                                     │
+│ Gain Creators:                                      │
+│ • {gain_1} → {creator}                              │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
-│ KEY ASSUMPTIONS (ranked by risk)                    │
+│ KEY HYPOTHESES TO TEST                              │
 ├─────────────────────────────────────────────────────┤
 │ 🔴 HIGH RISK:                                       │
-│    • {assumption_1}                                 │
-│    • {assumption_2}                                 │
+│    • {hypothesis_1}                                 │
+│    • {hypothesis_2}                                 │
 │ 🟠 MEDIUM RISK:                                     │
-│    • {assumption_3}                                 │
-│ 🟢 LOW RISK:                                        │
-│    • {assumption_4}                                 │
-└─────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────┐
-│ SUCCESS CRITERIA                                    │
-├─────────────────────────────────────────────────────┤
-│ Problem Resonance Target: {target}%                 │
-│ Max Zombie Ratio: {max}%                            │
-│ Fit Score Target: {score}                           │
-│ Deal Breakers: {deal_breakers}                      │
+│    • {hypothesis_3}                                 │
 └─────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────┐
 │ QA REPORT                                           │
 ├─────────────────────────────────────────────────────┤
-│ Concept Legitimacy: ✅ Pass / ❌ Fail / ⚠️ Review   │
-│ Intent Verification: ✅ Pass / ❌ Fail / ⚠️ Review  │
+│ Concept Legitimacy (GV1): ✅ Pass / ❌ Fail / ⚠️    │
+│ Brief Quality (S1): {quality_score}%                │
+│ VPC Completeness: {completeness}%                   │
 │ Notes: {qa_notes}                                   │
 └─────────────────────────────────────────────────────┘
 ```
@@ -148,19 +172,15 @@ All HITL checkpoints use the same modal architecture with phase-specific content
 
 | Option | Label | Description | Outcome |
 |--------|-------|-------------|---------|
-| `approve` | "Approve & Start Analysis" | Brief accurately captures my idea | → Phase 1 VPC Discovery |
-| `revise` | "Request Revisions" | Some sections need clarification | → Return to interview |
-| `reject` | "Reject Brief" | This doesn't represent my idea at all | → Close project |
+| `approve` | "Approve & Continue" | Discovery outputs are accurate | → Continue Phase 1 experiments |
+| `edit` | "Save Edits" | I've made corrections | → Save edits, continue Phase 1 |
+| `reject` | "Start Over" | Research is fundamentally wrong | → Return to Quick Start |
 
 **User Actions:**
-- **Inline Edit**: NO (Brief is AI-generated; revisions go through interview)
+- **Inline Edit**: YES (Brief sections are editable before approval)
 - **Comment**: YES (feedback textarea)
-- **Approve**: YES (starts Phase 1)
-- **Reject**: YES (closes project with reason)
-
----
-
-## Phase 1: VPC Discovery Checkpoints
+- **Approve**: YES (continues Phase 1)
+- **Reject**: YES (returns to Quick Start with feedback)
 
 ### Checkpoint: `approve_experiment_plan`
 
@@ -881,7 +901,7 @@ When user clicks **Reject**:
 1. Feedback textarea becomes required
 2. User must explain why they're rejecting
 3. Based on checkpoint type:
-   - `approve_founders_brief` → Return to interview for clarification
+   - `approve_discovery_output` → Return to Quick Start with feedback
    - `campaign_launch` → Halt campaign, return to creative review
    - `gate_progression` → Choose alternative path or kill
    - `segment_pivot` / `value_pivot` → Choose different direction or kill
@@ -904,7 +924,7 @@ Founder is ultimately accountable for their business decisions. Guardian provide
 
 | Checkpoint Type | Inline Edit? | Rationale |
 |-----------------|--------------|-----------|
-| `approve_founders_brief` | NO | Revisions via interview |
+| `approve_discovery_output` | YES | User can edit AI-generated Brief before approval |
 | `approve_experiment_plan` | YES (budget only) | Quick adjustments |
 | `campaign_launch` | NO | Edit creatives separately |
 | `spend_increase` | YES (amount field) | Quick adjustments |

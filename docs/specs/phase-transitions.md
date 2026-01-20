@@ -3,9 +3,12 @@ purpose: "Phase Transitions State Machine - defines when phases auto-start vs re
 status: "active"
 last_reviewed: "2026-01-19"
 derived_from: "startupai-crew/src/modal_app/"
+architectural_pivot: "2026-01-19"
 ---
 
 # Phase Transitions State Machine
+
+> **Architectural Pivot (2026-01-19)**: Phase 0 simplified to Quick Start. No HITL in Phase 0. First HITL is now `approve_discovery_output` in Phase 1. See [ADR-006](../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 This document resolves Category B ambiguities by specifying exactly when phases auto-start and when they pause for HITL approval.
 
@@ -23,15 +26,15 @@ StartupAI uses a **checkpoint-and-resume** pattern on Modal serverless:
 │                         PHASE STATE MACHINE                                       │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                   │
-│   [KICKOFF] ───► [Phase 0: Onboarding] ───(HITL)───► [Phase 1: VPC Discovery]   │
-│                            │                                    │                 │
-│                            │ approve_founders_brief             │ approve_vpc_completion
-│                            │ ↓approve → Phase 1               │ ↓approve → Phase 2
-│                            │ ↓revise → Re-interview           │ ↓iterate → More experiments
-│                            │ ↓reject → Close project          │ ↓pivot → Segment pivot flow
-│                            │                                    │                 │
-│                            ▼                                    ▼                 │
-│   [Phase 2: Desirability] ◄────────────────────────────────────┘                 │
+│   [QUICK START] ───► [Phase 1: VPC Discovery] ───(HITL)───► [Phase 2]           │
+│        │                       │                                                  │
+│        │ (no HITL)             │ approve_discovery_output                        │
+│        │ immediate             │ ↓approve → Phase 2                              │
+│        │                       │ ↓request_changes → Edit & regenerate            │
+│        ▼                       │ ↓reject → Close project                         │
+│   Phase 1 auto-starts          ▼                                                  │
+│                                                                                   │
+│   [Phase 2: Desirability] ◄────────────────────────────────────────────────────  │
 │             │                                                                     │
 │             │ gate_progression (Desirability gate)                               │
 │             │ ↓strong_commitment → Phase 3                                       │
@@ -61,57 +64,59 @@ StartupAI uses a **checkpoint-and-resume** pattern on Modal serverless:
 
 ## Phase Definitions
 
-### Phase 0: Onboarding
+### Phase 0: Quick Start (No AI)
 
-**Purpose**: Extract Founder's Brief from 7-stage interview
+> **Architectural Pivot (2026-01-19)**: Phase 0 was simplified from 7-stage AI conversation to Quick Start form submission. No crews, no agents, no HITL checkpoint.
 
-**Entry**: POST `/kickoff` with `entrepreneur_input` and `conversation_transcript`
+**Purpose**: Capture business idea and trigger Phase 1
 
-**Crews**: OnboardingCrew (4 agents: O1, GV1, GV2, S1)
+**Entry**: POST `/api/projects/quick-start` with `raw_idea`
 
-**Auto-Start**: YES - triggered by `/kickoff` call
+**Crews**: None (no AI in Phase 0)
 
-**HITL Checkpoint**: `approve_founders_brief`
+**Auto-Start**: N/A - user submits form
 
-| Trigger | Condition |
-|---------|-----------|
-| Always | After crew completes Brief compilation |
+**HITL Checkpoint**: None
 
 **Exit Transitions**:
 
-| Decision | Next State | Auto-Start Next? |
-|----------|------------|------------------|
-| `approve` | Phase 1 | YES |
-| `revise` | Return to interview (product app) | NO |
-| `reject` | Project closed | N/A |
+| Trigger | Next State | Auto-Start Next? |
+|---------|------------|------------------|
+| Form submitted | Phase 1 | YES (immediate) |
+
+**Duration**: ~30 seconds
+
+**AI Cost**: $0
 
 ---
 
-### Phase 1: VPC Discovery
+### Phase 1: VPC Discovery + Brief Generation
 
-**Purpose**: Build Customer Profile + Value Map with fit assessment
+**Purpose**: Research market, generate Founder's Brief, build Customer Profile + Value Map
 
-**Entry**: After `approve_founders_brief` OR after segment pivot
+**Entry**: Immediately after Quick Start form submission
 
-**Crews**: 5 crews (DiscoveryCrew, CustomerProfileCrew, ValueDesignCrew, WTPCrew, FitAssessmentCrew)
+**Crews**: 6 crews (BriefGenerationCrew, DiscoveryCrew, CustomerProfileCrew, ValueDesignCrew, WTPCrew, FitAssessmentCrew)
 
-**Auto-Start**: YES - immediately after Phase 0 approval
+**Auto-Start**: YES - triggered by Quick Start submission
 
 **HITL Checkpoints**:
 
 | Checkpoint | Trigger | Blocking |
 |------------|---------|----------|
+| `approve_discovery_output` | After Brief + VPC generation | YES |
 | `approve_experiment_plan` | After E1 designs test cards | YES |
 | `approve_pricing_test` | Before WTP experiments | YES |
-| `approve_vpc_completion` | When fit_score ≥ 70 | YES |
 
-**Exit Transitions (from `approve_vpc_completion`)**:
+> **Note**: `approve_discovery_output` replaces the old `approve_founders_brief` (Phase 0) + `approve_vpc_completion` (Phase 1). User reviews Brief and VPC together.
+
+**Exit Transitions (from `approve_discovery_output`)**:
 
 | Decision | Next State | Auto-Start Next? |
 |----------|------------|------------------|
-| `proceed` | Phase 2 | YES |
-| `iterate` | Re-run experiments (same phase) | YES |
-| `pivot_segment` | Segment pivot flow → Phase 1 restart | NO (HITL) |
+| `approve` | Phase 2 | YES |
+| `request_changes` | User edits, system regenerates | NO |
+| `reject` | Project closed | N/A |
 
 ---
 
@@ -328,8 +333,8 @@ If `downgrade_a` or `downgrade_b`: Returns to Phase 2 to retest desirability wit
 
 | Transition | Condition |
 |------------|-----------|
-| Phase 0 → Phase 1 | `approve` decision |
-| Phase 1 → Phase 2 | `proceed` decision (fit ≥ 70) |
+| Quick Start → Phase 1 | Form submitted (immediate) |
+| Phase 1 → Phase 2 | `approve` decision on discovery output |
 | Phase 2 → Phase 3 | `proceed` decision (strong commitment) |
 | Phase 3 → Phase 4 | `proceed` decision (green signal) |
 | Phase 4 → Complete | `validate` decision (profitable) |
@@ -338,29 +343,39 @@ If `downgrade_a` or `downgrade_b`: Returns to Phase 2 to retest desirability wit
 
 | Checkpoint | Why |
 |------------|-----|
-| `approve_founders_brief` | Ensure accurate capture before analysis |
+| `approve_discovery_output` | Review AI-generated Brief + VPC before experiments |
 | `approve_experiment_plan` | Budget approval before spending |
 | `approve_pricing_test` | Founder consent for pricing tests |
-| `approve_vpc_completion` | Gate decision before market testing |
 | `campaign_launch` | Brand protection before going public |
 | `spend_increase` | Budget accountability |
 | All gate progressions | Phase advancement requires confirmation |
 | All pivot flows | Strategic direction requires human judgment |
 
+> **Note**: `approve_founders_brief` and `approve_vpc_completion` were merged into `approve_discovery_output` in the Quick Start pivot.
+
 ---
 
 ## Artifact Handoff Between Phases (B3 Ambiguity Resolution)
 
-### Phase 0 → Phase 1
+### Quick Start → Phase 1
 
 | Field | From | To | Required |
 |-------|------|-----|----------|
-| `founders_brief.the_idea` | FoundersBrief | DiscoveryCrew context | YES |
-| `founders_brief.problem_hypothesis` | FoundersBrief | CustomerProfileCrew | YES |
-| `founders_brief.customer_hypothesis` | FoundersBrief | CustomerProfileCrew | YES |
-| `founders_brief.solution_hypothesis` | FoundersBrief | ValueDesignCrew | YES |
-| `founders_brief.key_assumptions` | FoundersBrief | DiscoveryCrew | YES |
-| `founders_brief.success_criteria` | FoundersBrief | FitAssessmentCrew | YES |
+| `raw_idea` | Quick Start form | BriefGenerationCrew | YES |
+| `additional_context` | Quick Start form (optional) | BriefGenerationCrew | NO |
+
+> **Note**: Phase 1 now generates the Founder's Brief internally via BriefGenerationCrew (GV1, S1). The brief is no longer collected from user input.
+
+### Phase 1 Internal (BriefGenerationCrew → Other Crews)
+
+| Field | From | To | Required |
+|-------|------|-----|----------|
+| `founders_brief.the_idea` | BriefGenerationCrew | DiscoveryCrew context | YES |
+| `founders_brief.problem_hypothesis` | BriefGenerationCrew | CustomerProfileCrew | YES |
+| `founders_brief.customer_hypothesis` | BriefGenerationCrew | CustomerProfileCrew | YES |
+| `founders_brief.solution_hypothesis` | BriefGenerationCrew | ValueDesignCrew | YES |
+| `founders_brief.key_assumptions` | BriefGenerationCrew | DiscoveryCrew | YES |
+| `founders_brief.success_criteria` | BriefGenerationCrew | FitAssessmentCrew | YES |
 
 ### Phase 1 → Phase 2
 

@@ -4,7 +4,9 @@
 
 > **Modal Migration Complete**: Now integrated with Modal serverless backend. See `startupai-crew/docs/adr/002-modal-serverless-migration.md`.
 >
-> **Current Focus**: Phase 0 durability. Two-Pass Architecture ([ADR-004](../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)) implemented. State-First Synchronized Loop ([ADR-005](../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)) approved.
+> **Current Focus**: Quick Start Architecture implemented. Phase 0 is now a simple form submission (~30 seconds, no AI). See [ADR-006](../startupai-crew/docs/adr/006-quick-start-architecture.md).
+
+> **Architectural Pivot (2026-01-19)**: The 7-stage AI conversation was replaced by Quick Start. Founder's Brief is now AI-generated in Phase 1.
 
 ## Architecture Overview
 
@@ -31,7 +33,7 @@ Marketing  DB   Product
 
 - **startupai.site** - Marketing & lead capture
 - **app.startupai.site** - Product delivery ← THIS REPO
-- **startupai-crew** - AI Founders engine (14 crews / 45 agents)
+- **startupai-crew** - AI Founders engine (14 crews / 43 agents)
 
 ---
 
@@ -39,7 +41,8 @@ Marketing  DB   Product
 
 **Evidence-Led Strategy Platform** that helps entrepreneurs validate business ideas:
 
-- **AI-Powered Onboarding** - Vercel AI SDK with 7-stage conversation flow (Two-Pass Architecture)
+- **Quick Start Onboarding** - Simple form submission (~30 seconds), Phase 1 starts immediately
+- **AI-Generated Founder's Brief** - BriefGenerationCrew creates the Brief from research
 - **CrewAI Integration** - Triggers and displays results from AI Founders analysis
 - **Project Management** - Track validation projects and hypotheses
 - **Gate-Based Validation** - Desirability → Feasibility → Viability → Scale
@@ -55,7 +58,7 @@ Marketing  DB   Product
 - **ORM:** Drizzle ORM for type-safe operations
 - **Storage:** Supabase Storage with RLS policies
 - **Vector Search:** pgvector with 1536-dim embeddings
-- **AI Founders Backend:** Modal Serverless (14-crew/45-agent architecture)
+- **AI Founders Backend:** Modal Serverless (14-crew/43-agent architecture)
 - **Authentication:** JWT + GitHub OAuth with role-based routing
 - **Deployment:** Netlify
 
@@ -135,19 +138,19 @@ app.startupai.site/
 - GitHub OAuth with role-based routing
 - Database migrations deployed with Modal columns
 - Vector search function (match_evidence)
-- AI onboarding with Vercel AI SDK (7 stages, streaming, Two-Pass Architecture)
+- Quick Start form for onboarding (~30 seconds)
 - Modal integration (kickoff, status polling, HITL approval)
 - Public APIs for Marketing site (Activity Feed, Metrics)
 - Trial usage guardrails
 
-### Recent Architecture Changes (2026-01-16)
-- **Two-Pass Onboarding** ([ADR-004](../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)): Replaced unreliable LLM tool-calling (18% call rate) with deterministic backend assessment
-- **State-First Architecture** ([ADR-005](../startupai-crew/docs/adr/005-state-first-synchronized-loop.md)): Approved - PostgreSQL RPC atomic commits to address durability risks
+### Recent Architecture Changes (2026-01-19)
+- **Quick Start Architecture** ([ADR-006](../startupai-crew/docs/adr/006-quick-start-architecture.md)): Replaced 7-stage AI conversation with simple form submission
+- **BriefGenerationCrew** added to Phase 1 to generate Founder's Brief from research
 
 ### In Progress
-- ADR-005 State-First implementation (PR 1: Schema + Migration)
-- First production validation run (after crews complete)
-- E2E test coverage expansion
+- Quick Start UI implementation
+- Delete legacy 7-stage conversation code
+- E2E test coverage expansion for Quick Start flow
 
 ### Integration with Modal
 
@@ -158,7 +161,7 @@ The platform connects to the AI Founders engine via:
 - `/api/approvals` - Handles HITL approvals via Modal `/hitl/approve`
 - Results stored in `validation_runs`, `reports`, and `evidence` tables
 
-**Architecture:** 5 Flows / 14 Crews / 45 Agents with Innovation Physics routers (Modal serverless).
+**Architecture:** 4 Flows / 14 Crews / 43 Agents with Innovation Physics routers (Modal serverless).
 
 ---
 

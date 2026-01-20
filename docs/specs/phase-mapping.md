@@ -2,9 +2,12 @@
 purpose: "Spec-to-app phase mapping (startupai-crew -> app.startupai.site)"
 status: "active"
 last_reviewed: "2026-01-19"
+architectural_pivot: "2026-01-19"
 ---
 
 # Phase Mapping (spec vs product app)
+
+> **Architectural Pivot (2026-01-19)**: Phase 0 was simplified to Quick Start. See [ADR-006](../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 Sources:
 - `../startupai-crew/docs/master-architecture/04-phase-0-onboarding.md`
@@ -17,33 +20,39 @@ Legend:
 - implemented: app has UI + API/data path wired for the feature
 - partial: some wiring exists (UI or API) but missing spec steps or relies on external compute only
 - missing: no UI/API surface exists in the product app
+- deprecated: feature removed by Quick Start pivot
 
-> **Note**: Onboarding uses Two-Pass Architecture (ADR-004). See [api-onboarding.md](api-onboarding.md) for details.
+## Phase 0: Quick Start (formerly Onboarding)
 
-## Phase 0: Onboarding (Founder's Brief)
-
-| Spec feature | App implementation | Status | Notes |
-| --- | --- | --- | --- |
-| Founder interview conversation (O1) | `frontend/src/components/onboarding/FounderOnboardingWizard.tsx`, `frontend/src/app/api/chat/route.ts` | implemented | 7-stage conversation collects onboarding inputs via Two-Pass architecture. |
-| Stage progression + data capture | `frontend/src/lib/ai/founder-onboarding-prompt.ts`, `frontend/src/app/api/chat/stream/route.ts`, `frontend/src/app/api/chat/save/route.ts`, `frontend/src/app/api/onboarding/status/route.ts` | implemented | Progress tracked in `onboarding_sessions`. Two-Pass: stream for conversation, save for persistence. |
-| Concept legitimacy + intent verification (GV1/GV2) | `frontend/src/lib/ai/founder-onboarding-prompt.ts` | partial | Prompt includes hard rejection rules; no explicit GV1/GV2 artifacts or separate review step. |
-| Founder's Brief artifact | `frontend/src/app/api/onboarding/complete/route.ts` | partial | Creates `entrepreneur_briefs` (not explicit spec schema) without an approval UI for the brief itself. |
-| HITL checkpoint `approve_founders_brief` | `frontend/src/app/api/crewai/webhook/route.ts`, `frontend/src/app/approvals/page.tsx` | partial | Webhook can create approval requests if Modal emits checkpoint; no dedicated brief review page. |
-| Intent gate loop (follow-up / reject) | none | missing | No explicit routing back to interview based on GV checks. |
-| Transition to Phase 1 | `frontend/src/app/api/analyze/route.ts` | implemented | Kickoff to Modal occurs on onboarding completion; phase execution happens off-app. |
-
-## Phase 1: VPC Discovery
+> **Note**: Phase 0 was simplified from 7-stage AI conversation to Quick Start form. See [api-onboarding.md](api-onboarding.md) for API details.
 
 | Spec feature | App implementation | Status | Notes |
 | --- | --- | --- | --- |
+| Quick Start form | `frontend/src/app/api/projects/quick-start/route.ts` (planned) | missing | Single form: business idea + optional context. Triggers Phase 1 immediately. |
+| Project creation with `raw_idea` | `frontend/src/app/api/projects/quick-start/route.ts` (planned) | missing | Creates project record, triggers Modal `/kickoff`. |
+| Transition to Phase 1 | `frontend/src/app/api/projects/quick-start/route.ts` (planned) | missing | Automatic on form submission. |
+| ~~Founder interview conversation~~ | ~~`frontend/src/components/onboarding/FounderOnboardingWizard.tsx`~~ | deprecated | Removed by Quick Start pivot. |
+| ~~Stage progression + data capture~~ | ~~`frontend/src/lib/ai/founder-onboarding-prompt.ts`~~ | deprecated | Removed - no stages in Quick Start. |
+| ~~Concept legitimacy (GV1)~~ | ~~`frontend/src/lib/ai/founder-onboarding-prompt.ts`~~ | deprecated | Moved to Phase 1 BriefGenerationCrew. |
+| ~~Intent verification (GV2)~~ | N/A | deprecated | Deleted - no transcript to verify. |
+| ~~HITL checkpoint `approve_founders_brief`~~ | N/A | deprecated | Replaced by `approve_discovery_output` in Phase 1. |
+
+## Phase 1: VPC Discovery + Brief Generation
+
+> **Note (2026-01-19)**: Phase 1 now includes BriefGenerationCrew (GV1, S1) which generates the Founder's Brief from research. The combined HITL checkpoint `approve_discovery_output` replaces the separate `approve_founders_brief` and `approve_vpc_completion`.
+
+| Spec feature | App implementation | Status | Notes |
+| --- | --- | --- | --- |
+| **Brief Generation (NEW)** | `frontend/src/app/api/crewai/webhook/route.ts` | partial | BriefGenerationCrew (GV1, S1) generates brief from research. Webhook persists to `entrepreneur_briefs`. |
+| **HITL `approve_discovery_output` (NEW)** | `frontend/src/app/api/crewai/webhook/route.ts`, `frontend/src/app/approvals/page.tsx` | partial | Combined Brief + VPC approval. User can edit brief before approving. |
 | Segment validation + experiment design (DiscoveryCrew) | `frontend/src/components/strategyzer/AssumptionMap.tsx`, `frontend/src/components/strategyzer/ExperimentCardsGrid.tsx` | partial | UI exists (Pages Router: `pages/founder-dashboard.tsx`), but no automated segment validation flow. |
 | Evidence capture (SAY/DO) | `frontend/src/components/fit/EvidenceLedger.tsx` | partial | Evidence ledger UI exists; no formal DiscoveryCrew workflow. |
 | Customer Profile (Jobs/Pains/Gains) | `frontend/src/components/vpc/VPCReportViewer.tsx` | partial | UI can display VPC data if present; relies on crew outputs. |
 | Value Map (Products/Pain Relievers/Gain Creators) | `frontend/src/app/api/vpc/[projectId]/route.ts` | partial | CRUD exists for VPC; generation from crew results is external. |
 | WTP experiments | none | missing | No pricing experiment UI or workflow. |
+| HITL `approve_experiment_plan` | `frontend/src/app/api/crewai/webhook/route.ts`, `frontend/src/app/approvals/page.tsx` | partial | Approval infrastructure exists. |
 | HITL `approve_pricing_test` | `frontend/src/app/api/crewai/webhook/route.ts`, `frontend/src/app/approvals/page.tsx` | partial | Approval infrastructure exists; no pricing test UI. |
 | Fit score + routing (pivot/iterate/advance) | `frontend/src/components/gates/GateDashboard.tsx`, `frontend/src/components/fit/FitDashboard.tsx` | partial | UI present but no explicit fit-gate logic tied to VPC outcomes. |
-| HITL `approve_vpc_completion` | `frontend/src/app/api/crewai/webhook/route.ts`, `frontend/src/app/approvals/page.tsx` | partial | Approval request can be created if Modal sends checkpoint. |
 
 ## Phase 2: Desirability
 

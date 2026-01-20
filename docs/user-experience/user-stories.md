@@ -36,28 +36,30 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Founder Stories (US-F)
 
-### US-F01: Complete AI-Guided Onboarding
+### US-F01: Complete Quick Start Onboarding
+
+> **Updated (2026-01-19)**: The 7-stage AI conversation was replaced by Quick Start. See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 **As a** Founder,
-**I want to** complete the 7-stage AI conversation with Alex,
+**I want to** submit my business idea via Quick Start,
 **So that** my business idea is captured for strategic analysis.
 
 **Acceptance Criteria:**
 
 **Given** I am logged in as a Founder or Trial user
-**When** I navigate to `/onboarding/founder`
-**Then** I should see the chat interface with Alex's welcome message
+**When** I navigate to `/onboarding/quick-start`
+**Then** I should see the Quick Start form with business idea input
 
-**Given** I have provided responses covering all 7 conversation topics
-**When** the quality assessment threshold is reached for each stage
-**Then** the system should advance me through all stages automatically
+**Given** I have entered my business idea (min 10 characters)
+**When** I click "Start Validation"
+**Then** Phase 1 should begin automatically and I should see progress
 
-**Given** I have completed Stage 7 (Goals & Next Steps)
-**When** I click "Approve" in the Summary Modal
-**Then** CrewAI analysis should be triggered and I should be redirected to my dashboard
+**Given** Phase 1 has completed BriefGenerationCrew
+**When** the AI-generated Founder's Brief is ready
+**Then** I should see the `approve_discovery_output` HITL checkpoint
 
-**E2E Test:** `02-onboarding-flow.spec.ts` - "should progress through Stage 1-7"
-**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Steps 6-11
+**E2E Test:** `02-onboarding-flow.spec.ts` - "should complete Quick Start form" (needs update)
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 5
 
 ---
 
@@ -520,33 +522,39 @@ Stories needing E2E tests:
 
 These stories are derived from the [hitl-approval-ui.md](../specs/hitl-approval-ui.md) specification.
 
-### US-H01: Review Founder's Brief
+### US-H01: Review Discovery Output (Founder's Brief + VPC)
+
+> **Updated (2026-01-19)**: This checkpoint is now in Phase 1 (not Phase 0) and combines Brief + VPC approval.
 
 **As a** Founder,
-**I want to** review the AI-extracted Founder's Brief before analysis begins,
+**I want to** review the AI-generated Founder's Brief and VPC before deeper analysis,
 **So that** I can confirm my business idea is accurately captured.
 
 **Acceptance Criteria:**
 
-**Given** I have completed the 7-stage onboarding interview
-**When** the AI compiles my Founder's Brief
-**Then** I should see the `approve_founders_brief` HITL checkpoint
+**Given** Phase 1 BriefGenerationCrew has completed
+**When** the AI generates Founder's Brief and VPC
+**Then** I should see the `approve_discovery_output` HITL checkpoint
 
-**Given** I am reviewing the Founder's Brief
+**Given** I am reviewing the discovery output
 **When** I view the modal
-**Then** I should see: The Idea (one-liner, description), Problem Hypothesis, Customer Hypothesis, Solution Hypothesis, Key Assumptions (by risk), Success Criteria, and QA Report
+**Then** I should see: Founder's Brief (AI-generated from research), Customer Profile (Jobs, Pains, Gains), Value Map coverage, Fit Score, and QA Report
 
-**Given** I have reviewed the brief
-**When** I select "Approve & Start Analysis"
-**Then** Phase 1 VPC Discovery should begin automatically
+**Given** I have reviewed the output
+**When** I select "Approve"
+**Then** Phase 1 VPC Discovery should continue to completion
 
-**Given** I find inaccuracies in the brief
-**When** I select "Request Revisions" with feedback
-**Then** I should return to the interview for clarification
+**Given** I find inaccuracies in the output
+**When** I select "Save Edits" with corrections
+**Then** Phase 1 should continue with my edits incorporated
 
-**E2E Test:** `05-hitl-approval-flow.spec.ts` - "should approve founders brief"
-**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 0
-**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 0
+**Given** the research is fundamentally wrong
+**When** I select "Reject"
+**Then** I should return to Quick Start to try again
+
+**E2E Test:** `05-hitl-approval-flow.spec.ts` - "should approve discovery output"
+**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 1
+**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 1
 
 ---
 
@@ -931,7 +939,7 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 
 | Story ID | Description | Priority | Blocking |
 |----------|-------------|----------|----------|
-| US-H01 | Review Founder's Brief | P0 | Phase 1 start |
+| US-H01 | Review Discovery Output (Brief + VPC) | P0 | Phase 1 continuation |
 | US-H02 | Approve Experiment Plan | P1 | Experiments |
 | US-H03 | Approve VPC Completion | P1 | Phase 2 start |
 | US-H04 | Approve Campaign Launch | P1 | Ads go live |

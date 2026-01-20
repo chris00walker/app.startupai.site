@@ -88,7 +88,7 @@ Journey Map → User Goal → Test Case
 3. **Acceptance test layer**
    - Tests verify user outcomes
    - Stories defined in [`user-stories.md`](../user-experience/user-stories.md)
-   - Example: US-F01 "Complete AI-Guided Onboarding"
+   - Example: US-F01 "Complete Quick Start Onboarding"
    - Example: US-C02 "Invite Client"
 
 4. **Integration tests with real DB**
@@ -100,8 +100,8 @@ Journey Map → User Goal → Test Case
 
 | Journey | User Goal | Test Type | File |
 |---------|-----------|-----------|------|
-| Founder Onboarding | Complete 7 stages | E2E | `onboarding.spec.ts` |
-| Founder Onboarding | Brief extracted correctly | Integration | `brief-extraction.test.ts` |
+| Founder Onboarding | Submit Quick Start | E2E | `onboarding.spec.ts` |
+| Founder Onboarding | AI generates Brief correctly | Integration | `brief-generation.test.ts` |
 | Consultant Setup | Create profile | E2E | `consultant-onboarding.spec.ts` |
 | Client Invite | Invite accepted | Integration | `invite-flow.test.ts` |
 | Validation | Review HITL checkpoint | E2E | `approvals.spec.ts` |

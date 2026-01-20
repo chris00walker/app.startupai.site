@@ -20,7 +20,7 @@ Legend:
 - active: `/auth/auth-code-error` - OAuth error display (`frontend/src/app/auth/auth-code-error/page.tsx`)
 - active: `/debug-oauth` - OAuth debugging screen (`frontend/src/app/debug-oauth/page.tsx`)
 - active: `/test-auth` - auth test screen (`frontend/src/app/test-auth/page.tsx`)
-- active: `/onboarding` - AI-guided founder onboarding (7-stage conversation) (`frontend/src/app/onboarding/page.tsx`, `frontend/src/components/onboarding/OnboardingWizardV2.tsx`)
+- active: `/onboarding` - Founder onboarding (Quick Start form) (`frontend/src/app/onboarding/page.tsx`, `frontend/src/components/onboarding/OnboardingWizardV2.tsx`)
 - active: `/onboarding/founder` - founder-specific onboarding entry (`frontend/src/app/onboarding/founder/page.tsx`)
 - active: `/onboarding/consultant` - consultant onboarding flow (`frontend/src/app/onboarding/consultant/page.tsx`, `frontend/src/components/onboarding/ConsultantOnboardingWizardV2.tsx`)
 - active: `/approvals` - approvals dashboard (personal + client approvals) (`frontend/src/app/approvals/page.tsx`, `frontend/src/components/approvals/ApprovalList.tsx`)
@@ -151,7 +151,7 @@ Status: Specified in `docs/features/trial-limits-and-upgrade.md`, not yet fully 
 - spec: Trial badge in header showing days remaining
 - spec: Trial status card on dashboard with limits
 - spec: Project limit enforcement (1 project for trial)
-- spec: Phase limit enforcement (Phase 0 only for trial)
+- spec: Phase limit enforcement (limited Phase 1-4 runs for trial)
 - spec: Blurred preview for locked D-F-V signals
 - spec: Upgrade modal on limit hit
 - spec: Stripe checkout integration for plan upgrade
@@ -224,6 +224,7 @@ E2E Tests: `12-client-lifecycle.spec.ts`
 ## Cross-repo references
 
 - `../startupai-crew/docs/master-architecture/01-ecosystem.md` (three-layer architecture + Modal endpoints)
-- `../startupai-crew/docs/master-architecture/04-phase-0-onboarding.md` (Founder's Brief + `approve_founders_brief` checkpoint)
-- `../startupai-crew/docs/master-architecture/reference/api-contracts.md` (Modal API contracts + Phase 0 endpoints)
+- `../startupai-crew/docs/master-architecture/04-phase-0-onboarding.md` (Quick Start + Phase 1 `approve_discovery_output` checkpoint)
+- `../startupai-crew/docs/master-architecture/reference/api-contracts.md` (Modal API contracts)
 - `../startupai-crew/docs/features/api-entrypoints.md` (Modal API source of truth)
+- `../startupai-crew/docs/adr/006-quick-start-architecture.md` (ADR for Quick Start pivot)

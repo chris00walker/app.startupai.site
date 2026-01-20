@@ -8,9 +8,11 @@ last_reviewed: "2026-01-19"
 
 **End-to-End User Experience Specification**
 
-**Status:** IMPLEMENTED - Two-Pass Architecture (Jan 2026)
-**Last Updated:** 2026-01-19
-**Cross-Reference:** [`features/stage-progression.md`](../features/stage-progression.md) - Implementation details
+**Status:** IMPLEMENTED - Quick Start Architecture (Jan 2026)
+**Last Updated:** 2026-01-20
+**Cross-Reference:** [ADR-006: Quick Start Architecture](../../startupai-crew/docs/adr/006-quick-start-architecture.md)
+
+> **Architectural Pivot (2026-01-19)**: The 7-stage AI conversation with Alex was replaced by Quick Start - a simple form that takes ~30 seconds. The Founder's Brief is now AI-generated in Phase 1. See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 ---
 
@@ -25,18 +27,27 @@ This document maps the complete user journey from marketing site signup to recei
 
 ## Architecture Reference (Jan 2026)
 
-> **Source of Truth**: See [ADR-004: Two-Pass Onboarding Architecture](../../startupai-crew/docs/adr/004-two-pass-onboarding-architecture.md)
+> **⚠️ SUPERSEDED**: The Two-Pass Architecture below was replaced by Quick Start (2026-01-19). See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
-### Two-Pass Flow
+### Quick Start Architecture (Current)
 
-The onboarding uses a Two-Pass Architecture for deterministic progression:
+| Component | Description |
+|-----------|-------------|
+| **Quick Start Form** | User enters business idea + optional context (~30 seconds) |
+| **Phase 1 Auto-Start** | AI generates Founder's Brief via BriefGenerationCrew |
+| **HITL Checkpoint** | `approve_discovery_output` (combined Brief + VPC approval) |
+
+### ~~Two-Pass Flow~~ (Superseded)
+
+<details>
+<summary>Historical Reference (Two-Pass Architecture - Superseded Jan 19, 2026)</summary>
+
+The onboarding previously used a Two-Pass Architecture for deterministic progression:
 
 | Pass | Endpoint | Purpose |
 |------|----------|---------|
 | **Pass 1** | `/api/chat/stream` | LLM streams conversation (no tools) |
 | **Pass 2** | `/api/chat/save` | Backend assesses quality, advances stage |
-
-### Key Change from Previous Implementation
 
 | Old Approach (Pre-Jan 2026) | New Approach (Jan 2026) |
 |-----------------------------|-------------------------|
@@ -44,11 +55,12 @@ The onboarding uses a Two-Pass Architecture for deterministic progression:
 | Tool schemas caused hallucination errors | Deterministic topic coverage assessment |
 | Unpredictable progression | Consistent 7-stage progression |
 
-### Timing Impact
-
+**Timing Impact:**
 - **User Experience**: Unchanged (still feels like natural conversation)
 - **Processing**: 2 LLM calls per message (stream + assessment)
-- **Latency**: Minimal increase (~200ms for assessment)  
+- **Latency**: Minimal increase (~200ms for assessment)
+
+</details>  
 
 ---
 
@@ -138,27 +150,33 @@ success_metrics:
   - authentication_time: <30 seconds
 ```
 
-**Step 5: Welcome & Onboarding Introduction (1-2 minutes)**
+**Step 5: Quick Start Form (~30 seconds)**
 ```yaml
-touchpoint: app.startupai.site/onboarding (CURRENTLY 404!)
+touchpoint: app.startupai.site/onboarding/quick-start
 user_state: newly_authenticated
-user_goal: understand_what_happens_next
+user_goal: submit_business_idea_quickly
 user_actions:
-  - reads AI agent introduction
-  - reviews estimated time commitment (20-25 minutes)
-  - confirms readiness to begin conversation
-user_emotions: excited, slightly_nervous
+  - enters business idea (1-3 sentences)
+  - optionally adds context (pitch deck notes, market info)
+  - clicks "Start Validation"
+user_emotions: eager, focused
 pain_points:
-  - unclear expectations
-  - time commitment concerns
-  - AI interaction unfamiliarity
+  - uncertainty about what to include
+  - desire to provide more context
 success_metrics:
-  - onboarding_start_rate: >90%
-  - time_to_start: <2 minutes
-  - user_confidence_score: >4.0/5
+  - form_completion_rate: >95%
+  - time_to_submit: <30 seconds
+  - abandonment_rate: <5%
 ```
 
-### 1.3 AI-Guided Conversation (20-25 minutes)
+> **Architectural Note**: The 7-stage AI conversation with Alex has been replaced by this Quick Start form. The Founder's Brief is now AI-generated in Phase 1 by BriefGenerationCrew.
+
+### 1.3 ~~AI-Guided Conversation~~ → AI Analysis (15-20 minutes)
+
+> **⚠️ SUPERSEDED**: The 7-stage AI conversation below was replaced by Quick Start (2026-01-19). Users now submit a Quick Start form, and the AI generates the Founder's Brief automatically in Phase 1.
+
+<details>
+<summary>Historical Reference (7-Stage Conversation - Superseded)</summary>
 
 **Step 6: Customer Segment Discovery (5-7 minutes)**
 ```yaml
@@ -304,26 +322,27 @@ success_metrics:
   - timeline_realism: >3.0/5
 ```
 
+</details>
+
 ### 1.4 AI Processing & Analysis (15-20 minutes)
 
-**Step 12: Conversation Completion & Workflow Trigger (1-2 minutes)**
+**Step 12: Quick Start Submission & Workflow Trigger (instant)**
 ```yaml
-touchpoint: onboarding completion interface
-user_state: conversation_complete
-user_goal: understand_next_steps_and_timeline
+touchpoint: Quick Start form submission
+user_state: idea_submitted
+user_goal: start_validation_immediately
 user_actions:
-  - reviews collected information summary
-  - confirms accuracy and completeness
-  - authorizes full AI analysis workflow
+  - clicks "Start Validation" on Quick Start form
+  - receives confirmation of submission
+  - sees Phase 1 begin automatically
 user_emotions: accomplished, anticipatory
 pain_points:
-  - information accuracy concerns
-  - unclear about analysis process
+  - wondering if they provided enough context
   - impatience for results
 success_metrics:
-  - completion_rate: >90%
-  - data_accuracy_confirmation: >95%
-  - workflow_authorization: >95%
+  - submission_success_rate: >99%
+  - phase_1_trigger_rate: >99%
+  - time_to_phase_1: <5 seconds
 ```
 
 **Step 13: AI Multi-Agent Processing (15-20 minutes)**
@@ -780,22 +799,18 @@ cognitive_support:
 - [`crewai-frontend-integration.md`](../engineering/crewai-frontend-integration.md) - API integration
 - [`onboarding-agent-personality.md`](../features/onboarding-agent-personality.md) - AI personality design
 
-**Implementation Status (Updated Jan 18, 2026):**
-- ✅ `/onboarding/founder` page live with Two-Pass Architecture
-- ✅ CrewAI backend Phase 2D complete (~85%), 18 tools implemented
-- ✅ Two-Pass Architecture: `/api/chat/stream` + `/api/chat/save`
-- ✅ Deterministic quality assessment (topic-based, not tool-based)
-- ✅ Real-time streaming conversation interface (Vercel AI SDK)
+**Implementation Status (Updated Jan 20, 2026):**
+- ✅ Quick Start form for simple business idea input
+- ✅ Phase 1 BriefGenerationCrew generates Founder's Brief from research
+- ✅ Combined HITL checkpoint: `approve_discovery_output` (Brief + VPC)
+- ✅ CrewAI backend: 4 Flows, 14 Crews, 43 Agents
 - ✅ Multi-agent workflow integration (webhook + polling)
-- ✅ Session management (start new, resume indicator)
-- ✅ Team awareness (Alex → Sage handoff)
-- ✅ Project creation routes to Alex (not quick wizard)
-- ✅ StageReviewModal for stage transitions
-- ✅ SummaryModal with Approve/Revise flow
+- ⏳ Quick Start UI implementation (pending)
+- ⏳ Delete legacy 7-stage conversation code (pending)
 
 ---
 
-**Status:** 🟢 **IMPLEMENTED** (Two-Pass Architecture)
-**Business Impact:** Marketing promise of "AI-guided strategy session" now delivered
-**User Impact:** Full 7-stage onboarding with session management and team handoff
-**Test Coverage:** 824+ unit tests + 101 E2E specs for Alex UX features  
+**Status:** 🟢 **DOCUMENTED** (Quick Start Architecture)
+**Business Impact:** ~30 second onboarding instead of 20-25 minute conversation
+**User Impact:** Faster time-to-value with AI-generated Founder's Brief
+**Test Coverage:** Tests need updating for Quick Start flow  

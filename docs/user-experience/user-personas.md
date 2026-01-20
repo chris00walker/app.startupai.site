@@ -88,8 +88,8 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant
 
 | Feature | Access | Notes |
 |---------|--------|-------|
-| 7-Stage Onboarding | Yes | Guided by Alex AI |
-| CrewAI Analysis | Yes | Triggered after onboarding |
+| Quick Start Form | Yes | Simple business idea input |
+| CrewAI Analysis | Yes | Triggered after Quick Start |
 | Canvas Tools | Yes | VPC, BMC, TBI |
 | Project Archive/Delete | Yes | Via Settings |
 | Report Generation | Yes | AI-generated strategic docs |
@@ -210,7 +210,7 @@ Founder (paid)
 
 | Feature | Access | Notes |
 |---------|--------|-------|
-| 7-Stage Onboarding | Yes | Full access |
+| Quick Start Form | Yes | Full access |
 | CrewAI Analysis | Limited | 5 runs/month |
 | Project Creation | Limited | 3 total |
 | Report Generation | Limited | 3/day |
