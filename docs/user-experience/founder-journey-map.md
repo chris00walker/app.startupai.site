@@ -1,7 +1,7 @@
 ---
 purpose: "Complete founder journey map and UX specification"
 status: "active"
-last_reviewed: "2026-01-19"
+last_reviewed: "2026-01-21"
 ---
 
 # Complete Founder Journey Map
@@ -9,14 +9,14 @@ last_reviewed: "2026-01-19"
 **End-to-End User Experience Specification**
 
 **Status:** IMPLEMENTED - Quick Start Architecture (Jan 2026)
-**Last Updated:** 2026-01-20
+**Last Updated:** 2026-01-21
 **Cross-Reference:** [ADR-006: Quick Start Architecture](../../startupai-crew/docs/adr/006-quick-start-architecture.md)
 
 > **Architectural Pivot (2026-01-19)**: The 7-stage AI conversation with Alex was replaced by Quick Start - a simple form that takes ~30 seconds. The Founder's Brief is now AI-generated in Phase 1. See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 ---
 
-## 📋 Document Purpose
+## Document Purpose
 
 This document maps the complete user journey from marketing site signup to receiving AI-generated strategic insights. Use this as a UX reference for the intended user experience and validation checklist.
 
@@ -27,7 +27,7 @@ This document maps the complete user journey from marketing site signup to recei
 
 ## Architecture Reference (Jan 2026)
 
-> **⚠️ SUPERSEDED**: The Two-Pass Architecture below was replaced by Quick Start (2026-01-19). See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
+> **SUPERSEDED**: The Two-Pass Architecture below was replaced by Quick Start (2026-01-19). See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 ### Quick Start Architecture (Current)
 
@@ -60,7 +60,7 @@ The onboarding previously used a Two-Pass Architecture for deterministic progres
 - **Processing**: 2 LLM calls per message (stream + assessment)
 - **Latency**: Minimal increase (~200ms for assessment)
 
-</details>  
+</details>
 
 ---
 
@@ -78,7 +78,7 @@ user_actions:
   - views social proof and case studies
   - clicks "See How It Works" or navigates to pricing
 user_emotions: curious, cautiously_optimistic
-pain_points: 
+pain_points:
   - skeptical about AI capabilities
   - unclear about time commitment
   - uncertain about value vs cost
@@ -130,15 +130,54 @@ success_metrics:
 
 ### 1.2 Authentication & Handoff (Cross-Site)
 
-**Step 4: OAuth Authentication (30-60 seconds)**
+**Step 4: Login Page (returning users) or OAuth Authentication (30-60 seconds)**
 ```yaml
-touchpoint: GitHub OAuth + app.startupai.site/auth/callback
+touchpoint: app.startupai.site/login or GitHub OAuth
 user_state: authenticating
 user_goal: complete_authentication_seamlessly
+
+# Login Page Design (Updated 2026-01-21)
+ui_design:
+  layout: "Single-column centered (no marketing panel)"
+  background: "Subtle branded gradient with grid pattern"
+  logo: "Rocket icon in gradient container with shadow"
+  title: "Welcome back"
+  subtitle: "Sign in to continue to StartupAI"
+
+ui_components:
+  github_button:
+    type: "primary"
+    height: "48px (touch-friendly)"
+    text: "Continue with GitHub"
+    icon: "GitHub logo"
+    loading_state: "Connecting to GitHub..."
+
+  divider:
+    text: "or"
+    style: "horizontal line with centered text"
+
+  email_field:
+    height: "44px"
+    placeholder: "you@example.com"
+    autocomplete: "email"
+
+  password_field:
+    height: "44px"
+    visibility_toggle: true  # Eye/EyeOff icons
+    forgot_link: "Forgot password?"
+
+  submit_button:
+    type: "secondary"
+    height: "44px"
+    text: "Sign in"
+    loading_state: "Signing in..."
+
+  signup_link: "Don't have an account? Sign up"
+
 user_actions:
-  - authorizes GitHub OAuth permissions
+  - clicks "Continue with GitHub" (primary) OR
+  - enters email and password with visibility toggle
   - gets redirected to app.startupai.site
-  - waits for authentication processing
 user_emotions: trusting, expectant
 pain_points:
   - OAuth permission concerns
@@ -152,13 +191,104 @@ success_metrics:
 
 **Step 5: Quick Start Form (~30 seconds)**
 ```yaml
-touchpoint: app.startupai.site/onboarding/quick-start
+touchpoint: app.startupai.site/onboarding/founder
 user_state: newly_authenticated
 user_goal: submit_business_idea_quickly
+
+# Quick Start Form Design (Updated 2026-01-21)
+ui_design:
+  layout: "Centered card with max-width 672px"
+  card_style: "Atmospheric with gradient orbs and grid pattern"
+  shadow: "shadow-xl shadow-black/[0.08]"
+  border: "border border-border/60"
+  animations: "Staggered reveal (reveal-1 through reveal-4)"
+
+ui_components:
+  header:
+    logo: "Rocket icon in gradient container (64x64)"
+    title: "Start Validating Your Idea"
+    subtitle: "Describe your business idea and our AI will research the market, analyze competitors, and generate a structured brief."
+    trust_indicators:
+      - icon: "Sparkles"
+        text: "AI-Powered"
+      - icon: "Pulse dot"
+        text: "30 seconds"
+
+  business_idea_textarea:
+    label: "Your Business Idea"
+    required: true
+    height: "140px"
+    border: "2px solid, darkened for visibility"
+    placeholder: "Describe your business idea here..."
+    helper_text: "What problem are you solving? Who is it for? What makes your solution unique?"
+    validation:
+      min_length: 10
+      max_length: 5000
+      feedback_when_typing: "X more characters needed"
+      feedback_when_valid: "Looking good!"
+    character_counter:
+      position: "bottom-right"
+      color_at_80_percent: "amber"
+      color_at_95_percent: "red"
+    example_feature:
+      trigger_when_empty: "Not sure where to start? See an example idea"
+      trigger_after_typing: "Need inspiration? See an example"
+      example_text: "A mobile app that helps busy professionals meal plan..."
+      use_example_button: true
+
+  optional_hints_section:
+    type: "collapsible"
+    trigger_style: "Dashed border, lightbulb icon"
+    label: "Add optional hints to improve analysis (optional)"
+    section_header: "Quick Hints"
+    fields:
+      industry:
+        type: "select"
+        height: "44px (touch-friendly)"
+        placeholder_color: "muted-foreground/60"
+        selected_color: "foreground"
+        options: [SaaS, E-commerce, Fintech, Healthcare, EdTech, Marketplace, etc.]
+      target_user:
+        type: "select"
+        height: "44px"
+        options: [Enterprise, Mid-Market, SMB, Consumers, Developers, etc.]
+      geography:
+        type: "select"
+        height: "44px"
+        options: [Global, North America, Europe, APAC, etc.]
+    separator: "Subtle border line before Additional Context"
+    additional_context:
+      type: "textarea"
+      height: "80px"
+      helper: "Market research, competitor names, existing traction..."
+
+  submit_button:
+    height: "56px"
+    font: "font-display font-semibold"
+    states:
+      disabled:
+        text: "Describe your idea to get started"
+        style: "bg-muted text-muted-foreground opacity-60"
+      enabled:
+        text: "Validate My Idea"
+        icon: "Rocket + ArrowRight"
+        style: "gradient bg, shadow-lg, hover lift effect"
+      loading:
+        text: "Starting Validation..."
+        subtext: "(~30 seconds)"
+        icon: "Spinner"
+
+  accessibility:
+    aria_required: true
+    aria_disabled_on_button: true
+    sr_only_required_text: "(required)"
+    focus_rings: "2px primary with offset"
+
 user_actions:
   - enters business idea (1-3 sentences)
+  - optionally expands hints section
   - optionally adds context (pitch deck notes, market info)
-  - clicks "Start Validation"
+  - clicks "Validate My Idea"
 user_emotions: eager, focused
 pain_points:
   - uncertainty about what to include
@@ -173,166 +303,34 @@ success_metrics:
 
 ### 1.3 ~~AI-Guided Conversation~~ → AI Analysis (15-20 minutes)
 
-> **⚠️ SUPERSEDED**: The 7-stage AI conversation below was replaced by Quick Start (2026-01-19). Users now submit a Quick Start form, and the AI generates the Founder's Brief automatically in Phase 1.
+> **SUPERSEDED**: The 7-stage AI conversation below was replaced by Quick Start (2026-01-19). Users now submit a Quick Start form, and the AI generates the Founder's Brief automatically in Phase 1.
 
 <details>
 <summary>Historical Reference (7-Stage Conversation - Superseded)</summary>
 
-**Step 6: Customer Segment Discovery (5-7 minutes)**
-```yaml
-touchpoint: AI conversation interface
-user_state: engaged_in_conversation
-user_goal: clearly_articulate_target_customers
-ai_questions:
-  - "Who do you believe would be most excited about your solution?"
-  - "What specific group of people face the problem you're solving?"
-  - "How do these customers currently handle this problem?"
-user_actions:
-  - types detailed responses about target customers
-  - clarifies when AI asks follow-up questions
-  - reviews AI's understanding summary
-user_emotions: thoughtful, engaged
-pain_points:
-  - difficulty articulating customer segments
-  - uncertainty about market size
-  - AI questions too generic or too specific
-success_metrics:
-  - response_quality_score: >3.5/5
-  - stage_completion_rate: >85%
-  - user_satisfaction: >4.0/5
-```
+**Old Steps 6-11: Customer Segment Discovery through Business Stage & Goals Definition**
 
-**Step 7: Problem/Opportunity Analysis (5-7 minutes)**
-```yaml
-touchpoint: AI conversation interface
-user_state: problem_focused
-user_goal: clearly_define_problem_being_solved
-ai_questions:
-  - "What specific problem or opportunity are you addressing?"
-  - "How painful is this problem for your customers?"
-  - "What happens if this problem isn't solved?"
-user_actions:
-  - describes problem in detail
-  - quantifies pain level and impact
-  - provides examples and evidence
-user_emotions: passionate, analytical
-pain_points:
-  - difficulty quantifying problem severity
-  - lack of concrete evidence
-  - problem too broad or too narrow
-success_metrics:
-  - problem_clarity_score: >3.5/5
-  - evidence_quality: >3.0/5
-  - stage_completion_rate: >85%
-```
+These steps involved a 20-25 minute AI conversation covering:
+- Customer Segment Discovery (5-7 min)
+- Problem/Opportunity Analysis (5-7 min)
+- Solution Concept Development (5-7 min)
+- Competitive Landscape Mapping (3-5 min)
+- Resource Assessment (3-5 min)
+- Business Stage & Goals Definition (2-3 min)
 
-**Step 8: Solution Concept Development (5-7 minutes)**
-```yaml
-touchpoint: AI conversation interface
-user_state: solution_focused
-user_goal: articulate_unique_solution_approach
-ai_questions:
-  - "How does your solution address this problem?"
-  - "What makes your approach unique or better?"
-  - "What's the core value you're creating?"
-user_actions:
-  - explains solution mechanics
-  - identifies unique differentiators
-  - connects solution to customer value
-user_emotions: creative, confident
-pain_points:
-  - solution too complex to explain
-  - unclear differentiation
-  - value proposition not compelling
-success_metrics:
-  - solution_clarity_score: >3.5/5
-  - differentiation_strength: >3.0/5
-  - value_connection: >3.5/5
-```
-
-**Step 9: Competitive Landscape Mapping (3-5 minutes)**
-```yaml
-touchpoint: AI conversation interface
-user_state: competitive_analysis
-user_goal: understand_competitive_positioning
-ai_questions:
-  - "Who else is solving this problem?"
-  - "How do customers currently solve this without you?"
-  - "What would make customers switch to your solution?"
-user_actions:
-  - identifies direct and indirect competitors
-  - analyzes current customer alternatives
-  - defines switching barriers and incentives
-user_emotions: strategic, competitive
-pain_points:
-  - limited competitive knowledge
-  - unclear positioning
-  - overestimating uniqueness
-success_metrics:
-  - competitor_identification: >2 competitors
-  - positioning_clarity: >3.0/5
-  - switching_analysis: >3.0/5
-```
-
-**Step 10: Resource Assessment (3-5 minutes)**
-```yaml
-touchpoint: AI conversation interface
-user_state: resource_planning
-user_goal: define_available_resources_and_constraints
-ai_questions:
-  - "What's your budget for validation and testing?"
-  - "What channels do you have access to reach customers?"
-  - "What assets or advantages do you already have?"
-user_actions:
-  - specifies budget ranges and constraints
-  - lists available marketing channels
-  - identifies existing assets and advantages
-user_emotions: realistic, planning-focused
-pain_points:
-  - limited budget concerns
-  - unclear channel effectiveness
-  - underestimating required resources
-success_metrics:
-  - budget_clarity: realistic_ranges_provided
-  - channel_identification: >2 channels
-  - asset_inventory: comprehensive_list
-```
-
-**Step 11: Business Stage & Goals Definition (2-3 minutes)**
-```yaml
-touchpoint: AI conversation interface
-user_state: goal_setting
-user_goal: define_current_stage_and_success_metrics
-ai_questions:
-  - "What stage is your business currently in?"
-  - "What do you want to achieve in the next 3 months?"
-  - "What would success look like for you?"
-user_actions:
-  - selects appropriate business stage
-  - defines 3-month objectives
-  - establishes success criteria
-user_emotions: forward-looking, motivated
-pain_points:
-  - unclear about business stage
-  - unrealistic timeline expectations
-  - vague success definitions
-success_metrics:
-  - stage_accuracy: appropriate_selection
-  - goal_specificity: >3.0/5 (SMART criteria)
-  - timeline_realism: >3.0/5
-```
+This conversation has been replaced by the Quick Start form + AI-generated Founder's Brief.
 
 </details>
 
 ### 1.4 AI Processing & Analysis (15-20 minutes)
 
-**Step 12: Quick Start Submission & Workflow Trigger (instant)**
+**Step 6: Quick Start Submission & Workflow Trigger (instant)**
 ```yaml
 touchpoint: Quick Start form submission
 user_state: idea_submitted
 user_goal: start_validation_immediately
 user_actions:
-  - clicks "Start Validation" on Quick Start form
+  - clicks "Validate My Idea" on Quick Start form
   - receives confirmation of submission
   - sees Phase 1 begin automatically
 user_emotions: accomplished, anticipatory
@@ -345,7 +343,7 @@ success_metrics:
   - time_to_phase_1: <5 seconds
 ```
 
-**Step 13: AI Multi-Agent Processing (15-20 minutes)**
+**Step 7: AI Multi-Agent Processing (15-20 minutes)**
 ```yaml
 touchpoint: workflow progress dashboard
 user_state: waiting_for_analysis
@@ -373,7 +371,7 @@ success_metrics:
 
 ### 1.5 Results Delivery & First Value (5-10 minutes)
 
-**Step 14: Results Presentation (5-10 minutes)**
+**Step 8: Results Presentation (5-10 minutes)**
 ```yaml
 touchpoint: results dashboard
 user_state: receiving_insights
@@ -402,7 +400,7 @@ success_metrics:
   - satisfaction_score: >4.2/5
 ```
 
-**Step 15: Next Steps & Action Planning (2-3 minutes)**
+**Step 9: Next Steps & Action Planning (2-3 minutes)**
 ```yaml
 touchpoint: action planning interface
 user_state: planning_implementation
@@ -430,53 +428,252 @@ success_metrics:
 
 ---
 
-## 2. Quick Start Form Specification
+## 2. UI Component Specifications
 
-> **Updated (2026-01-20)**: This replaces the old "Expected AI Interactions" section. With Quick Start, there is no AI conversation - just a simple form.
+### 2.1 Login Page Specification
 
-### 2.1 Quick Start Form UI
+> **Updated (2026-01-21)**: Redesigned following competitor best practices (Linear, Notion, Vercel, Figma).
 
 ```yaml
-form_specification:
-  location: /onboarding/founder
+login_page_specification:
+  location: /login
+
+  design_principles:
+    - "Single purpose: get users authenticated"
+    - "No marketing content (users already decided to sign in)"
+    - "Centered, distraction-free layout"
+    - "Multiple auth options with clear hierarchy"
+
+  layout:
+    type: "single-column centered"
+    max_width: "448px"
+    background: "subtle gradient from-primary/[0.02] via-background to-accent/[0.02]"
+    grid_pattern: "opacity-[0.02]"
+
   components:
-    business_idea:
-      type: textarea
-      required: true
-      min_length: 10
-      max_length: 5000
-      placeholder: "Describe your business idea in a few sentences..."
-      validation: "Please provide at least 10 characters"
+    back_link:
+      position: "top-left"
+      text: "Back to home"
+      icon: "ArrowLeft"
+      variant: "ghost"
 
-    optional_hints:
-      type: collapsible_section
-      label: "Add optional hints to improve analysis"
-      fields:
-        industry:
-          type: select
-          options: [SaaS, E-commerce, Fintech, Healthcare, EdTech, Marketplace, etc.]
-        target_user:
-          type: select
-          options: [Enterprise, Mid-Market, SMB, Consumers, Developers, etc.]
-        geography:
-          type: select
-          options: [Global, North America, Europe, APAC, etc.]
+    logo:
+      icon: "Rocket"
+      size: "56px"
+      style: "gradient container with shadow"
 
-    additional_context:
-      type: textarea
-      required: false
-      max_length: 10000
-      placeholder: "Any additional context..."
+    header:
+      title: "Welcome back"
+      subtitle: "Sign in to continue to StartupAI"
+      typography: "font-display for title"
+
+    github_button:
+      variant: "default (primary)"
+      size: "lg (48px height)"
+      text: "Continue with GitHub"
+      icon: "GitHub"
+      loading_text: "Connecting to GitHub..."
+
+    divider:
+      text: "or"
+      style: "border-t with centered text"
+
+    email_input:
+      height: "44px"
+      placeholder: "you@example.com"
+      autocomplete: "email"
+
+    password_input:
+      height: "44px"
+      visibility_toggle: true
+      autocomplete: "current-password"
+      forgot_link: "Forgot password?"
 
     submit_button:
-      label: "Start Validation"
-      loading_label: "Starting Validation..."
-      disabled_until: business_idea.length >= 10
+      variant: "secondary"
+      size: "lg (44px height)"
+      text: "Sign in"
+      loading_text: "Signing in..."
 
-success_metrics:
-  form_completion_rate: ">95%"
-  time_to_submit: "<30 seconds"
-  abandonment_rate: "<5%"
+    signup_link:
+      position: "below card"
+      text: "Don't have an account? Sign up"
+
+  accessibility:
+    focus_indicators: "2px primary ring with offset"
+    aria_labels: "on all buttons"
+    error_announcements: "aria-live assertive"
+
+  success_metrics:
+    login_completion_rate: ">90%"
+    time_to_login: "<30 seconds"
+    error_recovery_rate: ">80%"
+```
+
+### 2.2 Quick Start Form Specification
+
+> **Updated (2026-01-21)**: Redesigned with atmospheric styling and improved UX.
+
+```yaml
+quick_start_form_specification:
+  location: /onboarding/founder
+
+  design_principles:
+    - "Distinctive, atmospheric design (not generic)"
+    - "Progressive disclosure (optional hints collapsed)"
+    - "Clear visual feedback on all interactions"
+    - "Mobile-first touch targets (44px minimum)"
+
+  layout:
+    max_width: "672px"
+    card_style:
+      background: "gradient from-card via-card to-primary/[0.02]"
+      border: "border-border/60"
+      shadow: "shadow-xl shadow-black/[0.08]"
+      overflow: "hidden (for orb effects)"
+
+    atmospheric_elements:
+      grid_pattern: "opacity-[0.03]"
+      gradient_orbs:
+        - position: "-top-24 -right-24"
+          color: "bg-primary/10"
+          size: "w-48 h-48"
+          blur: "blur-3xl"
+        - position: "-bottom-24 -left-24"
+          color: "bg-accent/10"
+          size: "w-48 h-48"
+          blur: "blur-3xl"
+
+    animations:
+      type: "staggered reveal"
+      classes: ["reveal-1", "reveal-2", "reveal-3", "reveal-4"]
+      timing: "0.1s increments"
+
+  components:
+    header:
+      logo:
+        icon: "Rocket"
+        size: "64px"
+        style: "gradient bg, rounded-2xl, shadow-lg, subtle rotation on hover"
+      title:
+        text: "Start Validating Your Idea"
+        typography: "font-display text-3xl md:text-4xl font-bold"
+      subtitle:
+        text: "Describe your business idea and our AI will research the market, analyze competitors, and generate a structured brief."
+        typography: "text-base md:text-lg text-muted-foreground"
+      trust_indicators:
+        - icon: "Sparkles"
+          text: "AI-Powered"
+        - icon: "pulse dot"
+          text: "30 seconds"
+
+    business_idea_field:
+      label: "Your Business Idea"
+      required_indicator: "asterisk + sr-only (required)"
+      helper_text: "What problem are you solving? Who is it for? What makes your solution unique?"
+      textarea:
+        min_height: "140px"
+        border: "2px border-input/80"
+        focus_border: "border-primary"
+        error_border: "border-destructive + bg-destructive/5"
+      validation:
+        min_length: 10
+        max_length: 5000
+        feedback:
+          empty: null
+          typing: "X more characters needed (amber)"
+          valid: "Looking good! (accent)"
+          over_limit: "red text"
+      character_counter:
+        position: "bottom-right"
+        colors:
+          normal: "text-muted-foreground"
+          at_80_percent: "text-amber-600"
+          at_95_percent: "text-destructive"
+          over_limit: "text-destructive font-medium"
+      example_feature:
+        when_empty:
+          style: "full-width dashed border card"
+          text: "Not sure where to start? See an example idea"
+          icon: "Lightbulb"
+        when_typing:
+          style: "small inline link"
+          text: "Need inspiration? See an example"
+        expanded:
+          style: "gradient background card"
+          buttons: ["Use this example", "Dismiss"]
+
+    optional_hints_section:
+      trigger:
+        style: "dashed border, rounded-xl"
+        icon: "Lightbulb in accent bg"
+        text: "Add optional hints to improve analysis"
+        badge: "(optional)"
+        chevron: "rotates on expand"
+
+      content:
+        section_header: "Quick Hints (uppercase, muted)"
+
+        dropdowns:
+          layout: "grid-cols-1 md:grid-cols-3"
+          height: "44px (h-11)"
+          border: "2px border-input/80"
+          placeholder_color: "text-muted-foreground/60"
+          selected_color: "text-foreground"
+          focus_ring: "ring-2 ring-primary ring-offset-1"
+
+          industry:
+            label: "Industry (optional)"
+            options: ["SaaS / Software", "E-commerce / Retail", "Fintech / Finance", "Healthcare / Health Tech", "Education / EdTech", "Marketplace", "Media / Content", "B2B Services", "Consumer App", "Hardware / IoT", "Other"]
+
+          target_user:
+            label: "Target User (optional)"
+            options: ["Enterprise (1000+)", "Mid-Market (100-999)", "Small Business (10-99)", "Micro Business (1-9)", "Consumers (B2C)", "Prosumers / Power Users", "Developers / Technical", "Creators / Freelancers"]
+
+          geography:
+            label: "Geography (optional)"
+            options: ["Global", "North America", "Europe", "Asia Pacific", "Latin America", "Middle East & North Africa", "Local / Single City"]
+
+        separator: "border-t border-border/50"
+
+        additional_context:
+          label: "Additional Context (optional)"
+          helper: "Market research, competitor names, existing traction, or any other helpful details."
+          height: "80px"
+          max_length: 10000
+
+    submit_button:
+      height: "56px (h-14)"
+      typography: "font-display font-semibold text-base tracking-wide"
+      states:
+        disabled:
+          text: "Describe your idea to get started"
+          style: "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+          aria_disabled: true
+        enabled:
+          text: "Validate My Idea"
+          icons: ["Rocket", "ArrowRight"]
+          style: "gradient bg-primary, shadow-lg shadow-primary/25, hover:-translate-y-0.5"
+        loading:
+          text: "Starting Validation..."
+          subtext: "(~30 seconds)"
+          icon: "Loader2 animate-spin"
+
+    help_text:
+      text: "Our AI will analyze your idea and present a structured brief for your review. You'll be able to edit before proceeding."
+      position: "below submit button"
+      style: "text-center text-sm text-muted-foreground"
+
+  accessibility:
+    required_field: "aria-required + sr-only text"
+    button_disabled: "aria-disabled + sr-only explanation"
+    focus_visible: "ring-2 ring-primary ring-offset-2"
+    error_messages: "role=alert, aria-live=assertive"
+
+  success_metrics:
+    form_completion_rate: ">95%"
+    time_to_submit: "<30 seconds"
+    abandonment_rate: "<5%"
 ```
 
 <details>
@@ -504,7 +701,6 @@ expertise_demonstration:
 
 ### Old 2.2 Sample AI Conversation Flow
 
-**Opening Introduction:**
 ```
 AI: "Hi! I'm your AI Strategy Consultant. I'm here to guide you through a structured conversation..."
 ```
@@ -522,9 +718,28 @@ AI: "Hi! I'm your AI Strategy Consultant. I'm here to guide you through a struct
 
 ## 3. Success Metrics and Completion Criteria
 
-### 3.1 Quick Start Success Metrics
+### 3.1 Authentication Success Metrics
 
-> **Updated (2026-01-20)**: Metrics now focus on Quick Start form completion, not AI conversation.
+```yaml
+login_metrics:
+  login_completion_rate:
+    target: ">90%"
+    measurement: "users who successfully authenticate"
+
+  oauth_success_rate:
+    target: ">95%"
+    measurement: "GitHub OAuth completions"
+
+  time_to_login:
+    target: "<30 seconds"
+    measurement: "time from page load to successful auth"
+
+  error_recovery_rate:
+    target: ">80%"
+    measurement: "users who recover from login errors"
+```
+
+### 3.2 Quick Start Success Metrics
 
 ```yaml
 quick_start_metrics:
@@ -545,7 +760,7 @@ quick_start_metrics:
     measurement: "users who leave without submitting"
 ```
 
-### 3.2 Phase 1 Analysis Quality
+### 3.3 Phase 1 Analysis Quality
 
 ```yaml
 phase_1_quality_metrics:
@@ -566,22 +781,22 @@ phase_1_quality_metrics:
     measurement: "users who edit brief at Stage A (healthy refinement)"
 ```
 
-### 3.3 Workflow Trigger Success
+### 3.4 Workflow Trigger Success
 
 ```yaml
 workflow_success_metrics:
   trigger_rate:
     target: ">90%"
     measurement: "conversations that successfully trigger full analysis"
-    
+
   analysis_completion:
     target: ">95%"
     measurement: "triggered workflows that complete successfully"
-    
+
   results_quality:
     target: ">4.0/5 average"
     measurement: "user rating of analysis quality and usefulness"
-    
+
   time_to_results:
     target: "<20 minutes"
     measurement: "time from workflow trigger to results delivery"
@@ -734,12 +949,12 @@ screen_reader_support:
     - proper heading structure (h1 → h2 → h3)
     - landmark regions (main, navigation, complementary)
     - skip links for conversation navigation
-    
+
   message_announcements:
     - AI messages: aria-live="polite"
     - System messages: aria-live="assertive"
     - Progress updates: aria-live="polite"
-    
+
   form_accessibility:
     - proper label associations
     - error message announcements
@@ -756,7 +971,7 @@ motor_accessibility:
     - large click targets (minimum 44px)
     - keyboard-only navigation
     - switch control compatibility
-    
+
   timing_considerations:
     - no time limits on responses
     - pause/resume conversation capability
@@ -773,13 +988,13 @@ cognitive_support:
     - short sentences and common vocabulary
     - business terms explained in context
     - clear, direct questions
-    
+
   memory_aids:
     - conversation summary always visible
     - previous answers easily reviewable
     - progress indicators and milestones
     - clear expectations for next steps
-    
+
   attention_support:
     - minimal distractions in UI
     - single question focus
@@ -802,18 +1017,6 @@ cognitive_support:
 - [`crewai-frontend-integration.md`](../engineering/crewai-frontend-integration.md) - API integration
 - [`onboarding-agent-personality.md`](../features/onboarding-agent-personality.md) - AI personality design
 
-**Implementation Status (Updated Jan 20, 2026):**
-- ✅ Quick Start form for simple business idea input
-- ✅ Phase 1 BriefGenerationCrew generates Founder's Brief from research
-- ✅ Combined HITL checkpoint: `approve_discovery_output` (Brief + VPC)
-- ✅ CrewAI backend: 4 Flows, 14 Crews, 43 Agents
-- ✅ Multi-agent workflow integration (webhook + polling)
-- ⏳ Quick Start UI implementation (pending)
-- ⏳ Delete legacy 7-stage conversation code (pending)
-
 ---
 
-**Status:** 🟢 **DOCUMENTED** (Quick Start Architecture)
-**Business Impact:** ~30 second onboarding instead of 20-25 minute conversation
-**User Impact:** Faster time-to-value with AI-generated Founder's Brief
-**Test Coverage:** Tests need updating for Quick Start flow  
+*Last updated: 2026-01-21*
