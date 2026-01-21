@@ -1,8 +1,11 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { QuickStartForm } from '@/components/onboarding/QuickStartForm';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 // ============================================================================
 // Founder Onboarding Page (Quick Start - ADR-006)
@@ -35,7 +38,11 @@ async function FounderOnboardingPage() {
   const hasExistingProjects = existingProjects && existingProjects.length > 0;
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen flex flex-col relative bg-background">
+      {/* Subtle branded background (consistent with login) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-background to-accent/[0.02]" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+
       {/* Skip navigation for accessibility */}
       <a
         href="#main-content"
@@ -44,11 +51,21 @@ async function FounderOnboardingPage() {
         Skip to main content
       </a>
 
+      {/* Back to home link (consistent with login) */}
+      <div className="relative z-10 p-6 lg:p-8">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href={process.env.NEXT_PUBLIC_MARKETING_URL || "/"}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to home
+          </Link>
+        </Button>
+      </div>
+
       <div
         id="main-content"
         role="main"
         aria-label="Start validation"
-        className="container max-w-4xl mx-auto py-12 px-4"
+        className="relative z-10 container max-w-4xl mx-auto pb-12 px-4"
       >
         {/* Optional: Show link to dashboard if user has projects */}
         {hasExistingProjects && (
