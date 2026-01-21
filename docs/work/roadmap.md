@@ -1,95 +1,75 @@
----
-purpose: "Private technical source of truth for engineering roadmap"
-status: "active"
-last_reviewed: "2026-01-18"
----
+# Validation Roadmap
 
-# Roadmap
+**Philosophy**: StartupAI is its own first customer. This roadmap tracks our progress through our own 5-phase validation system.
 
-## Q4 2025: CrewAI-enabled onboarding
+## Dogfooding Journey
 
-**Status: 70% Complete** (as of Nov 28, 2025)
+| Phase | Name | Status | Evidence |
+|-------|------|--------|----------|
+| 0 | Onboarding | **Complete** | Founder's Brief approved |
+| 1 | VPC Discovery | **Complete** | VPC fit score 73/100, approved |
+| 2 | Desirability | **Active** | Landing pages, experiments |
+| 3 | Feasibility | Pending | Technical validation |
+| 4 | Viability | Pending | Business model validation |
 
-| Deliverable | Status | Notes |
-|-------------|--------|-------|
-| Netlify workflow launch | ⚠️ Pending | E2E tests blocked; CI/CD not ready |
-| Supabase evidence persistence | ✅ Done | Webhook persists 80+ fields. Flywheel tables deployed. |
-| CrewAI integration | ✅ Done | Phase 2D complete (~85%), 18 tools, real web research |
-| Onboarding dashboards | ⚠️ Partial | Core signals displayed; full reports not visible to users |
-| Spec-driven tests | 🔄 In Progress | GH Issue #189, fixtures being updated |
-| Accessibility polish | ❌ Not Started | P0 launch blocker (8-10 hours) |
+**Test Accounts**:
+- Founder: chris00walker@proton.me (validates StartupAI as business idea)
+- Consultant: chris00walker@gmail.com (advises StartupAI as client)
 
-**Remaining Q4 Work:**
-1. Fix E2E test infrastructure (4-6h) - enables launch
-2. Complete accessibility (8-10h) - legal compliance
-3. Build CrewAI Report Viewer (5-7 days) - show full analysis results
+## Phase 2: Desirability (Current)
 
-**Q1 2026 Testing Priority:**
-- **Journey-Driven Testing (P1)** - Derive tests from journey maps, not code mechanics
-- Current 824+ unit tests provide low confidence (mock-heavy)
-- Need acceptance test layer verifying user outcomes
-- See `in-progress.md` for implementation phases
+**Objective**: Prove market demand before building more features.
 
-**Cross-Reference**: See [in-progress.md](in-progress.md) for current priorities
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Landing page generation | Pending | A/B test messaging |
+| WTP pricing survey | Pending | No pricing data yet (A4) |
+| IH community launch | Pending | Channel validation (A8) |
+| PostHog funnel tracking | Ready | Track conversion rates |
 
----
+## Phase 3: Feasibility (Next)
 
-## Q1 2026: Evidence ledger & founder insights
+**Objective**: Prove we can deliver what we're promising.
 
-| Deliverable | Status | Notes |
-|-------------|--------|-------|
-| Evidence search UI (pgvector) | Planned | Tables deployed, UI not built |
-| Experiment tracking | Planned | Part of Evidence Explorer |
-| Automated validation plan updates | Planned | Depends on CrewAI Report Viewer |
-| Analytics dashboards | Planned | PostHog + Supabase metrics |
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| E2E journey completion | Pending | Full founder flow works |
+| Modal reliability SLOs | Pending | AI backend stability |
+| Performance benchmarks | Pending | Response times acceptable |
 
-**Dependencies**: Requires Q4 P0/P1 items complete
+## Phase 4: Viability (Future)
 
----
+**Objective**: Prove sustainable business model.
 
-## Q2 2026: Advisor & workspace expansion
+| Milestone | Status | Notes |
+|-----------|--------|-------|
+| Pricing tiers implemented | Pending | Based on WTP survey |
+| First paying customer | Pending | Revenue validation |
+| Unit economics positive | Pending | CAC < LTV |
 
-| Deliverable | Status | Notes |
-|-------------|--------|-------|
-| Multi-workspace support | Planned | - |
-| Advisor-facing reports/export | Planned | PDF/PowerPoint export in backlog |
-| Billing + plan upgrade path | Planned | - |
-| Marketing contract automation | Planned | - |
+## Key Assumptions Being Tested
 
----
+See [assumptions.md](../validation/assumptions.md) for full details.
 
-## TBD: Internationalisation & compliance
+| ID | Assumption | Phase | Status |
+|----|------------|-------|--------|
+| A1 | Founders trust AI recommendations | 0-1 | Testing |
+| A2 | Quick Start converts to engagement | 0 | Testing |
+| A3 | AI extracts accurate business context | 0-1 | Testing |
+| A4 | WTP for validation platform | 2-4 | Untested |
+| A5 | VPD methodology resonates | 2 | Untested |
+| A6 | Consultants see portfolio value | 2-3 | Untested |
+| A7 | "AI Founders" messaging attracts | 2 | Untested |
+| A8 | IH community is right channel | 2 | Untested |
 
-| Deliverable | Status | Notes |
-|-------------|--------|-------|
-| Localised onboarding copy | Planned | - |
-| Data residency review | Planned | - |
-| Enhanced audit logs | Planned | CrewAI prompts and responses |
+## Decision Points
 
----
-
-## Current Trajectory
-
-**Platform Completion**: 65-70%
-
-```
-                 Q4 2025           Q1 2026          Q2 2026
-                    │                 │                 │
-Infrastructure ━━━━━●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 95%
-Database       ━━━━━●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100%
-Authentication ━━━━━●━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Working
-Frontend UI    ━━━━━━━━━━◉━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 70%
-AI Integration ━━━━━━━━◉━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60%
-CrewAI Output  ━━━━━━━━━━━━━━━━━━━━━━━━━◉━━━━━━━━━━━━━━━ 40%
-Accessibility  ━━━━━━━━━━━━━━━◉━━━━━━━━━━━━━━━━━━━━━━━━━ 0%
-                    │                 │                 │
-             Current Focus      Evidence UI        Advisor
-```
-
-**Key Insight**: Infrastructure is solid (95-100%), but user-facing features are lagging (40-70%). The critical gap is displaying CrewAI's analysis results to users.
+| Gate | Criteria | Action if Fail |
+|------|----------|----------------|
+| Phase 2 → 3 | >20% landing page conversion | Pivot messaging |
+| Phase 3 → 4 | E2E journey <10min completion | Simplify flow |
+| Phase 4 → Launch | First paying customer | Re-evaluate pricing |
 
 ---
 
-Roadmap is reviewed monthly with product + marketing. Update deliverables once backlog items graduate into committed work.
-
-**Last Updated**: 2026-01-18
+**Last Updated**: 2026-01-21
