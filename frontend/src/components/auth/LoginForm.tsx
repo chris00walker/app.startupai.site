@@ -1,5 +1,17 @@
 "use client"
 
+/**
+ * LoginForm Component
+ *
+ * Minimal, distraction-free login form following competitor best practices.
+ * Features:
+ * - GitHub OAuth as primary option
+ * - Email/password with visibility toggle
+ * - Loading states on all buttons
+ * - Clear error messaging
+ * - Accessible form controls
+ */
+
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -13,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Brain, Loader2, Github, AlertCircle } from "lucide-react"
+import { Rocket, Loader2, Github, AlertCircle, Eye, EyeOff } from "lucide-react"
 import { signIn, signInWithGitHub } from "@/lib/auth/actions"
 import { getRedirectForRole, deriveRole } from "@/lib/auth/roles"
 import { createClient } from "@/lib/supabase/client"
@@ -27,6 +39,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [isGitHubLoading, setIsGitHubLoading] = React.useState(false)
   const [formError, setFormError] = React.useState<string | null>(null)
+  const [showPassword, setShowPassword] = React.useState(false)
   const emailA11y = useFormAccessibility('email')
   const passwordA11y = useFormAccessibility('password')
 
@@ -114,50 +127,62 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
     }
   }
 
+  const isDisabled = isLoading || isGitHubLoading
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Brain className="h-6 w-6" />
+      <Card className="border-0 shadow-xl shadow-black/[0.08]">
+        <CardHeader className="text-center space-y-4 pb-2">
+          {/* Logo */}
+          <div className="flex justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/25">
+              <Rocket className="h-7 w-7" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to StartupAI</CardTitle>
-          <CardDescription>
-            Sign in to access your evidence-led strategy platform
-          </CardDescription>
+
+          {/* Title - simplified, no feature selling */}
+          <div className="space-y-2">
+            <CardTitle className="text-2xl font-display font-bold">
+              Welcome back
+            </CardTitle>
+            <CardDescription className="text-base">
+              Sign in to continue to StartupAI
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-6">
-            {/* GitHub OAuth - Primary */}
-            <Button 
+
+        <CardContent className="pt-4">
+          <div className="flex flex-col gap-5">
+            {/* GitHub OAuth - Primary CTA */}
+            <Button
               onClick={handleGitHubSignIn}
-              variant="default" 
-              className="w-full" 
-              disabled={isGitHubLoading || isLoading}
+              variant="default"
+              size="lg"
+              className="w-full h-12 text-base font-medium"
+              disabled={isDisabled}
               aria-label="Sign in with GitHub"
             >
               {isGitHubLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Connecting to GitHub...
                 </>
               ) : (
                 <>
-                  <Github className="mr-2 h-4 w-4" />
-                  Sign in with GitHub
+                  <Github className="mr-2 h-5 w-5" />
+                  Continue with GitHub
                 </>
               )}
             </Button>
 
+            {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with email
+                <span className="bg-card px-3 text-muted-foreground">
+                  or
                 </span>
               </div>
             </div>
@@ -165,7 +190,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
             {/* Form Error Alert */}
             {formError && (
               <div role="alert" aria-live="assertive">
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="border-destructive/50">
                   <AlertCircle className="h-4 w-4" aria-hidden="true" />
                   <AlertDescription>{formError}</AlertDescription>
                 </Alert>
@@ -175,16 +200,20 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
             {/* Email/Password Form */}
             <form action={handleEmailSignIn}>
               <div className="grid gap-4">
+                {/* Email Field */}
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     placeholder="you@example.com"
-                    disabled={isLoading || isGitHubLoading}
+                    disabled={isDisabled}
                     required
                     autoComplete="email"
+                    className="h-11"
                     {...emailA11y.fieldProps}
                   />
                   {emailA11y.hasError && (
@@ -193,36 +222,59 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                     </p>
                   )}
                 </div>
+
+                {/* Password Field with visibility toggle */}
                 <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-sm font-medium">
+                      Password
+                    </Label>
                     <a
                       href="/forgot-password"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
                       Forgot password?
                     </a>
                   </div>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    disabled={isLoading || isGitHubLoading}
-                    required
-                    autoComplete="current-password"
-                    {...passwordA11y.fieldProps}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      disabled={isDisabled}
+                      required
+                      autoComplete="current-password"
+                      className="h-11 pr-10"
+                      {...passwordA11y.fieldProps}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                   {passwordA11y.hasError && (
                     <p {...passwordA11y.errorProps} className="text-sm text-destructive">
                       {passwordA11y.error}
                     </p>
                   )}
                 </div>
+
+                {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full"
                   variant="secondary"
-                  disabled={isLoading || isGitHubLoading}
+                  size="lg"
+                  className="w-full h-11 text-base font-medium mt-1"
+                  disabled={isDisabled}
                 >
                   {isLoading ? (
                     <>
@@ -235,16 +287,20 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                 </Button>
               </div>
             </form>
-
-            <div className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <a href="/signup" className="underline underline-offset-4 hover:text-primary">
-                Sign up
-              </a>
-            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Sign up link - outside the card for visual balance */}
+      <p className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <a
+          href="/signup"
+          className="font-medium text-primary hover:text-primary/80 transition-colors"
+        >
+          Sign up
+        </a>
+      </p>
     </div>
   )
 }

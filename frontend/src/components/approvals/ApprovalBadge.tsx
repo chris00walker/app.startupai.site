@@ -54,7 +54,7 @@ function getUrgentCount(approvals: ApprovalRequest[]): number {
 }
 
 export function ApprovalBadge({ className, variant = 'icon' }: ApprovalBadgeProps) {
-  const { approvals, clientApprovals, pendingCount, isLoading } = useApprovals('pending');
+  const { approvals, clientApprovals, pendingCount, isLoading, error } = useApprovals('pending');
   const [isUrgent, setIsUrgent] = useState(false);
   const [urgentCount, setUrgentCount] = useState(0);
 
@@ -65,8 +65,8 @@ export function ApprovalBadge({ className, variant = 'icon' }: ApprovalBadgeProp
     setUrgentCount(getUrgentCount(allApprovals));
   }, [approvals, clientApprovals]);
 
-  // Don't render if loading or no pending approvals
-  if (isLoading) {
+  // Don't render if loading, error, or no pending approvals
+  if (isLoading || error) {
     return null;
   }
 

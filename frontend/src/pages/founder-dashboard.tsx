@@ -43,8 +43,7 @@ import {
   LayoutGrid,
   Users,
   BookOpen,
-  Map,
-  MessageSquare
+  Map
 } from "lucide-react"
 
 function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
@@ -278,93 +277,6 @@ function NextSteps({ projectId }: { projectId?: string }) {
   )
 }
 
-// Active session type for onboarding resume
-interface ActiveSession {
-  session_id: string;
-  overall_progress: number;
-  current_stage: number;
-  last_activity: string;
-  status: string;
-}
-
-function ContinueSessionCard({ session, onStartFresh }: { session: ActiveSession; onStartFresh: () => void }) {
-  // Format relative time
-  const lastActivity = new Date(session.last_activity);
-  const now = new Date();
-  const diffMs = now.getTime() - lastActivity.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  let timeAgo = '';
-  if (diffDays > 0) {
-    timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  } else if (diffHours > 0) {
-    timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  } else if (diffMins > 0) {
-    timeAgo = `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-  } else {
-    timeAgo = 'just now';
-  }
-
-  return (
-    <div className="text-center py-16 space-y-6">
-      <div className="space-y-4">
-        <MessageSquare className="h-16 w-16 text-blue-600 mx-auto" />
-        <div className="space-y-2">
-          <h2 className="text-3xl font-bold">Continue Your Session</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            You have an onboarding session in progress with Alex.
-          </p>
-        </div>
-      </div>
-
-      <Card className="max-w-md mx-auto">
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-semibold">{Math.round(session.overall_progress)}%</span>
-          </div>
-          <div className="h-2 w-full rounded-full bg-primary/10 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-500"
-              style={{ width: `${session.overall_progress}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Stage {session.current_stage} of 7</span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {timeAgo}
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="flex flex-col items-center gap-3">
-        <Link href="/onboarding/founder">
-          <Button
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <MessageSquare className="h-5 w-5 mr-2" />
-            Resume Session
-          </Button>
-        </Link>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground"
-          onClick={onStartFresh}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Start Fresh Instead
-        </Button>
-      </div>
-    </div>
-  )
-}
-
 function EmptyState() {
   return (
     <div className="text-center py-16 space-y-6">
@@ -416,20 +328,13 @@ function EmptyState() {
             size="lg"
             className="bg-blue-600 hover:bg-blue-700"
           >
-            <MessageSquare className="h-5 w-5 mr-2" />
-            Start with Alex (Recommended)
+            <Rocket className="h-5 w-5 mr-2" />
+            Start Validating Your Idea
           </Button>
         </Link>
-        <Link href="/projects/new">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Quick Create (Skip AI Conversation)
-          </Button>
-        </Link>
+        <p className="text-sm text-muted-foreground">
+          Takes about 30 seconds to get started
+        </p>
       </div>
     </div>
   )
@@ -437,8 +342,6 @@ function EmptyState() {
 
 export default function FounderDashboard() {
   const [activeTab, setActiveTab] = React.useState('overview')
-  const [activeSession, setActiveSession] = React.useState<ActiveSession | null>(null)
-  const [sessionLoading, setSessionLoading] = React.useState(true)
   const { projects, isLoading, error } = useProjects()
   const { user } = useAuth()
   const router = useRouter()
@@ -447,54 +350,6 @@ export default function FounderDashboard() {
   const currentProject = projects.length > 0 ? projects[0] : null
   const projectId = currentProject?.id
   const currentStage = currentProject?.stage || 'FEASIBILITY'
-
-  // Check for active onboarding sessions
-  React.useEffect(() => {
-    const checkActiveSession = async () => {
-      try {
-        const response = await fetch('/api/onboarding/status');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.status !== 'completed' && data.status !== 'abandoned') {
-            setActiveSession({
-              session_id: data.sessionId,
-              overall_progress: data.overallProgress || 0,
-              current_stage: data.currentStage || 1,
-              last_activity: data.lastActivity || new Date().toISOString(),
-              status: data.status || 'active',
-            });
-          }
-        }
-      } catch (e) {
-        // No active session or error - that's OK
-        console.log('[FounderDashboard] No active session found');
-      } finally {
-        setSessionLoading(false);
-      }
-    };
-
-    if (user) {
-      checkActiveSession();
-    } else {
-      setSessionLoading(false);
-    }
-  }, [user]);
-
-  // Handle starting fresh (abandon current session)
-  const handleStartFresh = React.useCallback(async () => {
-    if (activeSession) {
-      try {
-        await fetch('/api/onboarding/abandon', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: activeSession.session_id }),
-        });
-      } catch (e) {
-        console.warn('[FounderDashboard] Failed to abandon session:', e);
-      }
-    }
-    router.push('/onboarding/founder?forceNew=true');
-  }, [activeSession, router]);
 
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -526,7 +381,7 @@ export default function FounderDashboard() {
   }
 
   // Show loading state
-  if (isLoading || sessionLoading) {
+  if (isLoading) {
     return (
       <DashboardLayout
         breadcrumbs={[
@@ -565,7 +420,7 @@ export default function FounderDashboard() {
     )
   }
 
-  // Show continue session or empty state if no projects
+  // Show empty state if no projects - direct to Quick Start onboarding
   if (projects.length === 0) {
     return (
       <DashboardLayout
@@ -575,11 +430,7 @@ export default function FounderDashboard() {
         userType="founder"
       >
         <div data-testid="dashboard">
-          {activeSession ? (
-            <ContinueSessionCard session={activeSession} onStartFresh={handleStartFresh} />
-          ) : (
-            <EmptyState />
-          )}
+          <EmptyState />
         </div>
       </DashboardLayout>
     )

@@ -7,9 +7,10 @@ export async function GET(request: Request) {
   // Sign out from Supabase
   await supabase.auth.signOut();
 
-  // Determine the marketing site URL based on environment
-  const marketingSiteUrl = process.env.NEXT_PUBLIC_MARKETING_URL || 'http://localhost:3000';
+  // Get the origin from the request to redirect back to the same host
+  const url = new URL(request.url);
+  const redirectUrl = `${url.origin}/login`;
 
-  // Redirect to marketing site homepage
-  return NextResponse.redirect(marketingSiteUrl);
+  // Redirect to login page
+  return NextResponse.redirect(redirectUrl);
 }
