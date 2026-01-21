@@ -1,7 +1,7 @@
 ---
 purpose: "Comprehensive user stories with acceptance criteria linked to E2E tests"
 status: "active"
-last_reviewed: "2026-01-19"
+last_reviewed: "2026-01-21"
 ---
 
 # User Stories
@@ -217,28 +217,54 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ### US-F08: View Phase 1 Progress
 
-> **Added (2026-01-20)**: New story for Quick Start flow monitoring.
+> **Updated (2026-01-21)**: Enhanced with detailed UI acceptance criteria.
 
 **As a** Founder,
 **I want to** see progress while Phase 1 is running,
-**So that** I know validation is happening.
+**So that** I know validation is happening and can stay engaged.
 
 **Acceptance Criteria:**
 
 **Given** I have submitted Quick Start and Phase 1 is running
 **When** I view my dashboard
-**Then** I should see "Phase 1: Researching..." with progress indicators
+**Then** I should see:
+  - Phase indicator with "IN PROGRESS" badge
+  - Segmented progress bar (Market Research → Competitor Analysis → Brief Generation → QA)
+  - Current segment highlighted with shimmer animation
+  - Estimated time remaining
 
 **Given** Phase 1 is running
-**When** I hover over progress
-**Then** I should see current crew/agent activity
+**When** I view the AI Team Activity section
+**Then** I should see:
+  - Vertical timeline of completed activities
+  - Agent name and avatar for each activity
+  - Timestamp (HH:MM format)
+  - Activity description (e.g., "Completed market size analysis")
+
+**Given** Phase 1 is taking longer than expected (>20 minutes)
+**When** the estimated time passes
+**Then** I should see:
+  - "Taking longer than expected" message
+  - Updated time estimate
+  - Reassurance that work is continuing
+
+**Given** Phase 1 encounters an error
+**When** the system detects a failure
+**Then** I should see:
+  - Error card with retry option
+  - "AI Analysis Temporarily Unavailable" message
+  - Auto-retry countdown (30 second intervals, 3 attempts)
 
 **Given** Phase 1 reaches a HITL checkpoint
 **When** the checkpoint is ready
-**Then** I should be notified and see the approval UI
+**Then** I should:
+  - Receive browser notification (if enabled)
+  - See progress bar complete
+  - See "Ready for Review" state
+  - Have one-click access to approval UI
 
 **E2E Test:** `16-quick-start-founder.spec.ts` - "should show loading state during submission"
-**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 12
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Steps 6-7
 
 ---
 
@@ -904,6 +930,171 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 
 ---
 
+## Edge Case Stories (US-E)
+
+These stories cover error recovery, timeout handling, and other edge cases that ensure a robust user experience.
+
+### US-E01: Recover from Interrupted Quick Start
+
+**As a** Founder,
+**I want to** recover my draft if I accidentally close the browser during Quick Start,
+**So that** I don't have to retype my business idea.
+
+**Acceptance Criteria:**
+
+**Given** I have typed content in the Quick Start form
+**When** I close the browser or navigate away
+**Then** my draft should be saved to localStorage
+
+**Given** I return to the Quick Start form within 24 hours
+**When** the page loads
+**Then** I should see a "Resume draft?" prompt with preview text
+
+**Given** I click "Resume"
+**When** the draft loads
+**Then** my previous input should be restored (business idea + any hints)
+
+**Given** I click "Start Fresh"
+**When** the form resets
+**Then** the localStorage draft should be cleared
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 5
+
+---
+
+### US-E02: Handle Concurrent Project Creation
+
+**As a** Founder,
+**I want to** be warned if I try to start a new project while one is already processing,
+**So that** I don't accidentally create duplicate projects.
+
+**Acceptance Criteria:**
+
+**Given** I have a project in "phase_1_running" status
+**When** I navigate to Quick Start to create another project
+**Then** I should see a warning: "You have a project currently being analyzed"
+
+**Given** I see the concurrent project warning
+**When** I click "View Current Project"
+**Then** I should be taken to my in-progress project's dashboard
+
+**Given** I see the concurrent project warning
+**When** I click "Create Anyway"
+**Then** I should be able to proceed with Quick Start (multi-project is allowed)
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 5
+
+---
+
+### US-E03: Handle Invalid or Malformed Input
+
+**As a** Founder,
+**I want to** receive clear feedback if my input is invalid,
+**So that** I can correct it before submission.
+
+**Acceptance Criteria:**
+
+**Given** I enter fewer than 10 characters in the business idea field
+**When** I try to submit the form
+**Then** I should see inline validation: "Please describe your idea in at least 10 characters"
+
+**Given** I exceed the 5000 character limit
+**When** I continue typing
+**Then** the character counter should turn red and additional characters should be blocked
+
+**Given** I paste content with potentially malicious characters (script tags, etc.)
+**When** the form processes my input
+**Then** the content should be sanitized without losing legitimate text
+
+**Given** I submit with only whitespace characters
+**When** the validation runs
+**Then** I should see: "Please enter a valid business idea"
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 5
+
+---
+
+### US-E04: Handle Phase 1 Timeout
+
+**As a** Founder,
+**I want to** know what to do if Phase 1 takes unusually long,
+**So that** I don't think my project is stuck.
+
+**Acceptance Criteria:**
+
+**Given** Phase 1 has been running for more than 20 minutes
+**When** I view my dashboard
+**Then** I should see: "Taking longer than expected - our team is still working"
+
+**Given** Phase 1 has been running for more than 30 minutes
+**When** I view my dashboard
+**Then** I should see:
+  - "Extended processing time" message
+  - "Contact Support" link
+  - Option to cancel and retry
+
+**Given** I click "Contact Support"
+**When** the support form opens
+**Then** my project ID should be pre-filled
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 7
+
+---
+
+### US-E05: Handle HITL Checkpoint Expiry
+
+**As a** Founder,
+**I want to** know if my HITL checkpoint is about to expire,
+**So that** I don't lose progress by not responding in time.
+
+**Acceptance Criteria:**
+
+**Given** a HITL checkpoint has been pending for 7 days
+**When** I view my dashboard or email
+**Then** I should receive a reminder: "Action required: Your brief is ready for review"
+
+**Given** a HITL checkpoint has been pending for 14 days
+**When** I view my dashboard
+**Then** I should see an urgent badge on the approval card
+
+**Given** a HITL checkpoint has been pending for 30 days
+**When** the deadline passes
+**Then** my project status should change to "paused" with option to resume
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Timeout Handling
+
+---
+
+### US-E06: Consultant Handles Client Unlink
+
+**As a** Consultant,
+**I want to** be notified if a client unlinks from my portfolio,
+**So that** I can follow up if needed.
+
+**Acceptance Criteria:**
+
+**Given** a client decides to unlink from my portfolio
+**When** they complete the unlink action
+**Then** I should receive an email notification
+
+**Given** I have been notified of an unlink
+**When** I view my consultant dashboard
+**Then** the client should no longer appear in my active clients
+
+**Given** I want to re-invite the unlinked client
+**When** I send a new invitation
+**Then** the client should receive a fresh invite (previous relationship history preserved)
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`consultant-client-system.md`](../features/consultant-client-system.md) - Unlink Flow
+
+---
+
 ## Updated Coverage Summary
 
 ### Stories by Category
@@ -915,7 +1106,8 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 | Trial (US-T) | 3 | 1 | 2 |
 | HITL Checkpoint (US-H) | 8 | 1 | 7 |
 | Pivot Flow (US-P) | 4 | 0 | 4 |
-| **Total** | **30** | **14** | **16** |
+| Edge Case (US-E) | 6 | 0 | 6 |
+| **Total** | **36** | **14** | **22** |
 
 ### HITL Story Priority
 
@@ -929,6 +1121,17 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 | US-H07 | Review Feasibility Gate | P1 | Phase 4 start |
 | US-H08 | Review Viability Gate | P1 | Final decision |
 | US-H09 | Make Final Decision | P0 | Validation complete |
+
+### Edge Case Story Priority
+
+| Story ID | Description | Priority | Impact |
+|----------|-------------|----------|--------|
+| US-E01 | Recover from Interrupted Quick Start | P1 | User retention |
+| US-E02 | Handle Concurrent Project Creation | P2 | Data integrity |
+| US-E03 | Handle Invalid or Malformed Input | P1 | Security, UX |
+| US-E04 | Handle Phase 1 Timeout | P1 | User confidence |
+| US-E05 | Handle HITL Checkpoint Expiry | P2 | Workflow continuity |
+| US-E06 | Consultant Handles Client Unlink | P3 | Relationship management |
 
 ---
 
@@ -949,6 +1152,7 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 
 | Date | Change |
 |------|--------|
+| 2026-01-21 | Enhanced US-F08 with detailed UI criteria; added 6 edge case stories (US-E01-E06) |
 | 2026-01-20 | Updated for Quick Start (ADR-006): Replaced US-F07/F08 with Quick Start stories, updated US-C01/C07, removed US-H03 |
 | 2026-01-19 | Added 13 HITL/Pivot stories (US-H01-H09, US-P01-P04) derived from phase-transitions.md and hitl-approval-ui.md |
 | 2026-01-19 | Initial creation - consolidated 18 user stories with acceptance criteria |

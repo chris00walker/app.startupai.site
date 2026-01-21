@@ -1,7 +1,7 @@
 ---
 purpose: "Single source of truth for user personas and role definitions"
 status: "active"
-last_reviewed: "2026-01-19"
+last_reviewed: "2026-01-21"
 ---
 
 # User Personas & Role Definitions
@@ -58,6 +58,26 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant
 | **Business Stage** | Idea validation to early traction |
 | **Budget** | $49/month (Founder plan) |
 
+### Behavioral Profile
+
+| Dimension | Value |
+|-----------|-------|
+| **Decision Style** | Fast iteration, "fail fast" mentality |
+| **Risk Tolerance** | High (left stable employment for this) |
+| **Learning Preference** | Self-directed, prefers doing over reading |
+| **Tech Adoption** | Early adopter, comfortable with beta products |
+| **Information Sources** | Twitter/X, podcasts, indie hacker communities |
+
+### Psychographics
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Motivation** | Independence, building something meaningful |
+| **Core Fear** | Wasting months/years on an idea nobody wants |
+| **Success Definition** | Paying customers + personal freedom |
+| **Frustration Triggers** | Slow processes, corporate-speak, unclear ROI |
+| **Delight Triggers** | Fast results, actionable insights, feeling understood |
+
 ### Goals & Motivations
 
 1. **Validate business ideas** before investing significant time/money
@@ -95,6 +115,50 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant
 | Report Generation | Yes | AI-generated strategic docs |
 | Evidence Collection | Yes | Manual + AI-assisted |
 
+### Founder Sub-Segments
+
+The Founder persona encompasses several distinct sub-segments with different needs:
+
+#### First-Time Founder
+
+| Attribute | Value |
+|-----------|-------|
+| **Experience** | 0 prior startups, often leaving corporate |
+| **Key Need** | Structured methodology, validation confidence |
+| **Pain Point** | "I don't know what I don't know" |
+| **Platform Adaptation** | Extended onboarding tooltips, methodology explanations |
+| **Support Level** | High-touch, proactive check-ins |
+
+#### Serial Founder
+
+| Attribute | Value |
+|-----------|-------|
+| **Experience** | 2+ prior startups (exits or failures) |
+| **Key Need** | Speed and efficiency, skip basics |
+| **Pain Point** | "Don't waste my time with beginner content" |
+| **Platform Adaptation** | Skip-ahead options, power-user shortcuts |
+| **Support Level** | Low-touch, self-serve preferred |
+
+#### Technical Founder
+
+| Attribute | Value |
+|-----------|-------|
+| **Background** | Engineering, product, or technical PM |
+| **Key Need** | Go-to-market validation (not technical feasibility) |
+| **Pain Point** | "I can build anything, but will anyone buy it?" |
+| **Platform Adaptation** | API access, data export, technical integrations |
+| **Support Level** | Documentation-first, community forums |
+
+#### Non-Technical Founder
+
+| Attribute | Value |
+|-----------|-------|
+| **Background** | Domain expert, business, sales, or operations |
+| **Key Need** | Technical feasibility translation |
+| **Pain Point** | "How do I know if this can actually be built?" |
+| **Platform Adaptation** | Plain-language explanations, visual outputs |
+| **Support Level** | Human support access, consultant recommendations |
+
 ---
 
 ## Consultant Persona
@@ -108,6 +172,26 @@ export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant
 | **Client Load** | 5-20 active clients |
 | **Value Proposition** | Scale expertise with AI assistance |
 | **Budget** | $149/month (Consultant plan) |
+
+### Behavioral Profile
+
+| Dimension | Value |
+|-----------|-------|
+| **Decision Style** | Methodical, values proven frameworks |
+| **Risk Tolerance** | Moderate (protects professional reputation) |
+| **Learning Preference** | Structured courses, peer learning, case studies |
+| **Tech Adoption** | Pragmatic adopter, needs clear ROI |
+| **Information Sources** | Industry publications, professional networks, conferences |
+
+### Psychographics
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Motivation** | Scale impact without burning out |
+| **Core Fear** | Delivering inconsistent quality, client failure |
+| **Success Definition** | Client outcomes + sustainable practice |
+| **Frustration Triggers** | Tools that don't integrate, unreliable AI |
+| **Delight Triggers** | Clients succeeding, time saved on repetitive work |
 
 ### Goals & Motivations
 
@@ -253,6 +337,62 @@ Admins access the platform via the Consultant dashboard (`/consultant-dashboard`
 
 ---
 
+## Negative Personas (Anti-Personas)
+
+These are user types we explicitly do **not** design for. Recognizing them helps avoid feature creep and misaligned expectations.
+
+### The Tire Kicker
+
+| Attribute | Value |
+|-----------|-------|
+| **Behavior** | Creates account, explores, never commits |
+| **Motivation** | Curiosity, benchmarking competitors |
+| **Why Not a Target** | Will never convert regardless of features |
+| **How to Identify** | Multiple projects started, none past Phase 1 |
+| **Platform Response** | Standard trial limits, no special retention |
+
+### The Enterprise PM
+
+| Attribute | Value |
+|-----------|-------|
+| **Behavior** | Needs procurement approval, IT security review |
+| **Motivation** | Innovation theater for large company |
+| **Why Not a Target** | Sales cycle incompatible with self-serve model |
+| **How to Identify** | Corporate email, SSO/SAML requests, legal review asks |
+| **Platform Response** | Redirect to "Contact Sales" (future enterprise tier) |
+
+### The Academic Researcher
+
+| Attribute | Value |
+|-----------|-------|
+| **Behavior** | Studies the platform, no commercial intent |
+| **Motivation** | Research paper, teaching material |
+| **Why Not a Target** | No path to paid conversion |
+| **How to Identify** | .edu email, asks about methodology citations |
+| **Platform Response** | Read-only access, academic partnership inquiry |
+
+### The Get-Rich-Quick Seeker
+
+| Attribute | Value |
+|-----------|-------|
+| **Behavior** | Wants validation to "prove" predetermined idea |
+| **Motivation** | Confirmation bias, not genuine learning |
+| **Why Not a Target** | Unreceptive to negative evidence, high support burden |
+| **How to Identify** | Rejects all pivot suggestions, disputes AI findings |
+| **Platform Response** | Clear expectation-setting in onboarding |
+
+### The Competitor Scout
+
+| Attribute | Value |
+|-----------|-------|
+| **Behavior** | Signs up to analyze our AI outputs and methodology |
+| **Motivation** | Competitive intelligence gathering |
+| **Why Not a Target** | Extractive behavior, no commercial intent |
+| **How to Identify** | Competitor domain email, screenshot-heavy sessions |
+| **Platform Response** | Standard access (nothing to hide), no special treatment |
+
+---
+
 ## Cross-References
 
 | Document | What It Covers |
@@ -270,4 +410,5 @@ Admins access the platform via the Consultant dashboard (`/consultant-dashboard`
 
 | Date | Change |
 |------|--------|
+| 2026-01-21 | Added behavioral/psychographic profiles, founder sub-segments, negative personas |
 | 2026-01-19 | Initial creation - consolidated from 8 scattered sources |

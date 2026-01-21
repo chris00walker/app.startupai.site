@@ -341,6 +341,68 @@ success_metrics:
   - submission_success_rate: >99%
   - phase_1_trigger_rate: >99%
   - time_to_phase_1: <5 seconds
+
+submission_confirmation_ui:
+  transition:
+    type: "inline (no page navigation)"
+    animation: "form fades out, confirmation fades in"
+    duration: "300ms ease-out"
+
+  layout:
+    max_width: "672px (same as form)"
+    alignment: "centered"
+    background: "same atmospheric card as form"
+
+  components:
+    success_icon:
+      icon: "CheckCircle2"
+      size: "64px"
+      color: "text-green-500"
+      animation: "scale-in with slight bounce"
+
+    header:
+      title: "Validation Started!"
+      typography: "font-display text-2xl font-bold"
+      subtitle: "Our AI team is now researching your business idea"
+      subtitle_style: "text-muted-foreground"
+
+    progress_indicator:
+      type: "segmented bar"
+      segments: 3
+      labels: ["Researching", "Analyzing", "Generating Brief"]
+      current_segment: 1
+      animation: "pulse on current segment"
+
+    time_estimate:
+      text: "~15-20 minutes"
+      icon: "Clock"
+      style: "text-sm text-muted-foreground"
+
+    next_steps_card:
+      header: "What happens next?"
+      style: "bg-muted/30 rounded-lg p-4"
+      items:
+        - icon: "Search"
+          text: "Market research and competitor analysis"
+        - icon: "FileText"
+          text: "AI-generated Founder's Brief"
+        - icon: "Bell"
+          text: "Notification when ready for your review"
+
+    cta_buttons:
+      primary:
+        text: "View Progress"
+        action: "navigate to /founder-dashboard"
+        icon: "ArrowRight"
+      secondary:
+        text: "Start Another Project"
+        action: "reset form for new submission"
+        variant: "outline"
+
+  accessibility:
+    aria_live: "polite"
+    focus_management: "move focus to success header"
+    screen_reader: "announces 'Validation started successfully'"
 ```
 
 **Step 7: AI Multi-Agent Processing (15-20 minutes)**
@@ -367,6 +429,84 @@ success_metrics:
   - user_retention_during_processing: >80%
   - progress_engagement: >60%
   - abandonment_rate: <15%
+
+progress_dashboard_ui:
+  location: "/founder-dashboard (during Phase 1)"
+
+  layout:
+    type: "dashboard with hero card"
+    hero_position: "top of page, full width"
+
+  components:
+    progress_hero:
+      style: "gradient border, elevated shadow"
+      header:
+        phase_badge:
+          text: "PHASE 1"
+          style: "bg-primary/10 text-primary text-xs font-semibold"
+        title: "Validating Your Idea"
+        subtitle: "Our AI team is researching and analyzing your business"
+
+      progress_bar:
+        type: "segmented"
+        segments:
+          - label: "Market Research"
+            status: "complete | in_progress | pending"
+          - label: "Competitor Analysis"
+            status: "complete | in_progress | pending"
+          - label: "Brief Generation"
+            status: "complete | in_progress | pending"
+          - label: "Quality Check"
+            status: "complete | in_progress | pending"
+        animation: "shimmer on in_progress segment"
+
+      current_activity:
+        label: "Current Activity"
+        text: "{agent_name} is {current_task}"
+        example: "Customer Researcher is analyzing target market demographics"
+        style: "text-sm text-muted-foreground"
+        icon: "Sparkles (animated pulse)"
+
+      time_remaining:
+        label: "Estimated time remaining"
+        format: "~X minutes"
+        style: "text-sm"
+        note: "(updates based on crew progress)"
+
+    agent_activity_feed:
+      header: "AI Team Activity"
+      layout: "vertical timeline"
+      max_visible: 5
+      show_more_button: true
+
+      activity_item:
+        timestamp: "HH:MM"
+        agent_name: "Customer Researcher | Competitor Analyst | Brief Generator | QA Agent"
+        agent_icon: "avatar with role color"
+        activity_text: "Completed market size analysis"
+        status_indicator: "checkmark for complete, spinner for in_progress"
+
+    notification_preferences:
+      header: "Notify me when complete"
+      options:
+        - type: "browser"
+          label: "Browser notification"
+          default: true
+        - type: "email"
+          label: "Email notification"
+          default: false
+      style: "collapsible section"
+
+  polling_behavior:
+    interval: "10 seconds"
+    endpoint: "/api/projects/{id}/status"
+    updates: ["progress percentage", "current crew", "activity feed"]
+    stops_when: "HITL checkpoint reached"
+
+  accessibility:
+    aria_live: "polite for progress updates"
+    aria_busy: "true during active processing"
+    progress_announcements: "every 25% completion"
 ```
 
 ### 1.5 Results Delivery & First Value (5-10 minutes)
@@ -836,6 +976,108 @@ user_communication: "Your session is about to expire. Would you like to extend i
 fallback_action: "save state and offer session extension"
 recovery_process: "restore from saved state or restart option"
 user_experience: "warning with extension option"
+```
+
+### 4.1.1 Error State UI Specifications
+
+```yaml
+error_states_ui:
+
+  ai_service_unavailable:
+    trigger: "API timeout (>30s) or 5xx response"
+    display_location: "inline where content would appear"
+
+    error_card:
+      style: "border-destructive/50 bg-destructive/5 rounded-lg p-6"
+      icon: "AlertTriangle"
+      icon_color: "text-destructive"
+      title: "AI Analysis Temporarily Unavailable"
+      message: "Our AI team is experiencing high demand. Your request has been queued."
+
+      actions:
+        primary:
+          text: "Retry Now"
+          icon: "RefreshCw"
+          behavior: "attempt immediate retry"
+          loading_state: "Retrying..."
+        secondary:
+          text: "Check Status"
+          icon: "ExternalLink"
+          behavior: "open status.startupai.site in new tab"
+
+      auto_retry:
+        enabled: true
+        interval: "30 seconds"
+        max_attempts: 3
+        countdown_display: "Retrying in X seconds..."
+
+    accessibility:
+      role: "alert"
+      aria_live: "assertive"
+
+  network_connectivity:
+    trigger: "navigator.onLine === false or fetch timeout"
+    display_location: "toast notification + inline indicator"
+
+    toast:
+      position: "bottom-right"
+      style: "bg-amber-500/10 border-amber-500/50"
+      icon: "WifiOff"
+      title: "Connection Lost"
+      message: "Your changes are saved locally"
+      duration: "persistent until reconnected"
+
+    inline_indicator:
+      location: "header bar, next to user menu"
+      icon: "WifiOff"
+      tooltip: "Offline - changes will sync when reconnected"
+      color: "text-amber-500"
+
+    reconnection:
+      detection: "online event + successful ping"
+      toast_message: "Back online! Syncing your changes..."
+      sync_indicator: "spinner in header"
+
+    accessibility:
+      aria_live: "polite"
+      screen_reader: "announces connection status changes"
+
+  session_timeout:
+    trigger: "25 minutes inactivity (5 min warning before 30 min expiry)"
+
+    warning_modal:
+      style: "modal with backdrop blur"
+      icon: "Clock"
+      title: "Session Expiring Soon"
+      message: "Your session will expire in {countdown} due to inactivity."
+
+      countdown_display:
+        format: "M:SS"
+        style: "text-2xl font-mono text-destructive"
+        final_30_seconds: "flash animation"
+
+      actions:
+        primary:
+          text: "Stay Signed In"
+          behavior: "refresh session token"
+        secondary:
+          text: "Save & Sign Out"
+          behavior: "save draft to localStorage, redirect to login"
+
+      auto_save:
+        enabled: true
+        message: "Your work has been automatically saved"
+        icon: "CheckCircle"
+
+    expired_state:
+      redirect: "/login?expired=true"
+      login_message: "Your session expired. Please sign in to continue."
+      draft_recovery: "Draft found - click to restore"
+
+    accessibility:
+      aria_modal: true
+      focus_trap: true
+      aria_live: "assertive for countdown"
 ```
 
 ### 4.2 User Experience Failures
