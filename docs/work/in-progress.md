@@ -6,17 +6,10 @@
 
 | Item | Owner | Status | Assumption |
 |------|-------|--------|------------|
-| Delete deploy zip with secrets | @devops | **BLOCKED** | - |
 | Apply pending migrations | @supabase | Ready | - |
 | PostHog Quick Start events | @frontend | Ready | A2 |
 | PostHog HITL approval events | @frontend | Ready | A1 |
 | WTP pricing survey | @product | Ready | A4 |
-
-## Blocked Items
-
-| Item | Blocker | Action Needed |
-|------|---------|---------------|
-| Deploy zip deletion | 423MB file with SERVICE_ROLE_KEY | `rm frontend/deploy-*.zip` |
 
 ## Recently Completed (Move to done.md)
 

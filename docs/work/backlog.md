@@ -24,7 +24,7 @@ Prioritized by validation impact. Items testing assumptions rank higher.
 |------|--------|-------|
 | Documentation refresh | 8h | 71-day staleness gap |
 | Journey-Driven Testing | 2 days | Derive tests from journey maps |
-| PostHog coverage gaps | 2-3 days | 13+ events not implemented |
+| PostHog Quick Start + HITL events | 4h | Add events for new Quick Start flow (48 types defined, 100+ calls exist) |
 | VPC geometric shapes | 2-3h | Visual polish |
 | HITL comment display | 2-4h | Show human_comment in UI |
 
