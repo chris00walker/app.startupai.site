@@ -1,39 +1,48 @@
 /**
- * Client Onboarding Wizard
+ * Client Onboarding Wizard (Quick Start - ADR-006)
  *
- * Alex guides consultants through client intake using client-specific prompts.
- * This is a thin wrapper that makes the mode explicit rather than hidden.
+ * Consultants use this to start a validation project on behalf of a client.
+ * Uses the same Quick Start form but with client_id populated.
  *
- * When a Consultant onboards a Client:
- * - Alex references "your client" instead of "you"
- * - Uses same 7 stages as Founder journey
- * - Stores data to client project, not consultant
- *
- * @see Plan: /home/chris/.claude/plans/prancy-tickling-quokka.md
+ * The data collected here will be associated with the client's project,
+ * not the consultant's profile.
  */
 'use client';
 
-import { FounderOnboardingWizard } from './FounderOnboardingWizard';
+import { useRouter } from 'next/navigation';
+import { QuickStartForm } from './QuickStartForm';
 
 interface ClientOnboardingWizardProps {
-  userId: string;
-  userEmail: string;
-  clientProjectId?: string;
+  consultantId: string;
+  clientId: string;
+  clientName?: string;
 }
 
 export function ClientOnboardingWizard({
-  userId,
-  userEmail,
-  clientProjectId,
+  clientId,
+  clientName,
 }: ClientOnboardingWizardProps) {
+  const router = useRouter();
+
+  const handleSuccess = (projectId: string) => {
+    // Redirect to consultant's client view
+    router.push(`/consultant/clients/${clientId}/projects/${projectId}`);
+  };
+
   return (
-    <FounderOnboardingWizard
-      userId={userId}
-      planType="founder"
-      userEmail={userEmail}
-      mode="client"
-      clientProjectId={clientProjectId}
-    />
+    <div className="space-y-6">
+      {clientName && (
+        <div className="text-center">
+          <p className="text-muted-foreground">
+            Starting validation for <span className="font-semibold text-foreground">{clientName}</span>
+          </p>
+        </div>
+      )}
+      <QuickStartForm
+        clientId={clientId}
+        onSuccess={handleSuccess}
+      />
+    </div>
   );
 }
 

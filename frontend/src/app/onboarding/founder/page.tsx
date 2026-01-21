@@ -1,16 +1,16 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { FounderOnboardingWizard } from '@/components/onboarding/FounderOnboardingWizard';
+import { QuickStartForm } from '@/components/onboarding/QuickStartForm';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // ============================================================================
-// Founder Onboarding Page
+// Founder Onboarding Page (Quick Start - ADR-006)
 // ============================================================================
 
 export const metadata = {
-  title: 'Founder Onboarding | StartupAI',
-  description: 'Get personalized strategic guidance from our AI consultant to validate and develop your business idea.',
+  title: 'Start Validating | StartupAI',
+  description: 'Describe your business idea and let our AI research the market, analyze competitors, and generate a structured brief.',
 };
 
 async function FounderOnboardingPage() {
@@ -19,30 +19,20 @@ async function FounderOnboardingPage() {
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error || !user) {
-    // Redirect to login with return URL
     redirect('/login?returnUrl=/onboarding/founder');
   }
 
-  // Get user profile to determine plan type (skip in test mode)
-  let profile: { subscription_tier: any; role: any; } | null = null;
-  const { data: profileData } = await supabase
-    .from('user_profiles')
-    .select('subscription_tier, role')
-    .eq('id', user.id)
-    .single();
-  profile = profileData;
+  // Check if user already has active projects
+  const { data: existingProjects } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .limit(1);
 
-  // Map subscription tier to plan type for onboarding API
-  const planTypeMapping = {
-    'free': 'trial',
-    'trial': 'trial',
-    'sprint': 'sprint',
-    'founder': 'founder',
-    'pro': 'founder',
-    'enterprise': 'enterprise',
-  };
-
-  const planType = (planTypeMapping[profile?.subscription_tier as keyof typeof planTypeMapping] || 'trial') as 'trial' | 'sprint' | 'founder' | 'enterprise';
+  // If user has projects, they might want the dashboard instead
+  // But we still allow them to start a new project
+  const hasExistingProjects = existingProjects && existingProjects.length > 0;
 
   return (
     <main className="min-h-screen bg-background">
@@ -54,14 +44,26 @@ async function FounderOnboardingPage() {
         Skip to main content
       </a>
 
-      {/* Main content with proper landmark */}
-      <div id="main-content" data-testid="onboarding" role="main" aria-label="Founder onboarding conversation">
-        <Suspense fallback={<OnboardingLoadingSkeleton />}>
-          <FounderOnboardingWizard
-            userId={user.id as string}
-            planType={planType}
-            userEmail={user.email || ''}
-          />
+      <div
+        id="main-content"
+        role="main"
+        aria-label="Start validation"
+        className="container max-w-4xl mx-auto py-12 px-4"
+      >
+        {/* Optional: Show link to dashboard if user has projects */}
+        {hasExistingProjects && (
+          <div className="text-center mb-8">
+            <p className="text-muted-foreground">
+              Already have projects?{' '}
+              <a href="/dashboard" className="text-primary hover:underline">
+                Go to Dashboard
+              </a>
+            </p>
+          </div>
+        )}
+
+        <Suspense fallback={<QuickStartLoadingSkeleton />}>
+          <QuickStartForm />
         </Suspense>
       </div>
     </main>
@@ -72,45 +74,28 @@ async function FounderOnboardingPage() {
 // Loading Skeleton Component
 // ============================================================================
 
-function OnboardingLoadingSkeleton() {
+function QuickStartLoadingSkeleton() {
   return (
-    <div className="flex h-screen">
-      {/* Sidebar skeleton */}
-      <div className="w-80 border-r bg-muted/10 p-6">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5, 6, 7].map((stage) => (
-              <div key={stage} className="flex items-center space-x-3">
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content skeleton */}
-      <div className="flex-1 flex flex-col">
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="rounded-xl border bg-card p-6 space-y-6">
         {/* Header skeleton */}
-        <div className="border-b p-6">
-          <Skeleton className="h-6 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
+        <div className="text-center space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+          <Skeleton className="h-8 w-64 mx-auto" />
+          <Skeleton className="h-4 w-full max-w-md mx-auto" />
         </div>
 
-        {/* Conversation area skeleton */}
-        <div className="flex-1 p-6 space-y-4">
-          <div className="space-y-3">
-            <Skeleton className="h-16 w-3/4" />
-            <Skeleton className="h-12 w-1/2 ml-auto" />
-            <Skeleton className="h-20 w-4/5" />
-          </div>
+        {/* Textarea skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-32 w-full" />
         </div>
 
-        {/* Input area skeleton */}
-        <div className="border-t p-6">
-          <Skeleton className="h-12 w-full" />
-        </div>
+        {/* Hints toggle skeleton */}
+        <Skeleton className="h-10 w-full" />
+
+        {/* Button skeleton */}
+        <Skeleton className="h-12 w-full" />
       </div>
     </div>
   );

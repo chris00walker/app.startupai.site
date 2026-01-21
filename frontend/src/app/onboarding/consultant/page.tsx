@@ -1,20 +1,19 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ConsultantOnboardingWizard } from '@/components/onboarding/ConsultantOnboardingWizard';
 
 /**
- * Consultant Onboarding Page V2
+ * Consultant Onboarding Page (ADR-006)
  *
- * This page handles the conversational onboarding flow for consultants,
- * gathering practice information through AI-guided conversation and
- * configuring their workspace.
+ * Per ADR-006, the Maya AI conversation has been removed.
+ * Consultants are now redirected to their dashboard immediately.
+ * Practice profile configuration is available via Settings.
  *
- * Related to Phase 3: Consultant Features
+ * Future: Add simple profile form for practice setup.
  */
 
 export const metadata = {
-  title: 'Consultant Onboarding | StartupAI',
-  description: 'Set up your consultant workspace and configure your practice',
+  title: 'Consultant Setup | StartupAI',
+  description: 'Set up your consultant workspace',
 };
 
 export default async function ConsultantOnboardingPage() {
@@ -33,7 +32,7 @@ export default async function ConsultantOnboardingPage() {
   // Check if user has consultant role
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('role, email')
+    .select('role')
     .eq('id', user.id)
     .single();
 
@@ -42,15 +41,7 @@ export default async function ConsultantOnboardingPage() {
     redirect('/onboarding/founder');
   }
 
-  // Note: We intentionally do NOT check onboarding_completed here.
-  // This allows consultants to resume their onboarding session by clicking
-  // "AI Assistant" from the dashboard, matching the founder experience.
-  // The ConsultantOnboardingWizard component handles session resumption.
-
-  return (
-    <ConsultantOnboardingWizard
-      userId={user.id}
-      userEmail={profile?.email || user.email || ''}
-    />
-  );
+  // Per ADR-006: Skip conversational onboarding, go directly to dashboard
+  // Consultants can start adding clients immediately
+  redirect('/consultant-dashboard');
 }

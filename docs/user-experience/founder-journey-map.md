@@ -430,9 +430,59 @@ success_metrics:
 
 ---
 
-## 2. Expected AI Interactions and Responses
+## 2. Quick Start Form Specification
 
-### 2.1 AI Agent Personality & Communication Style
+> **Updated (2026-01-20)**: This replaces the old "Expected AI Interactions" section. With Quick Start, there is no AI conversation - just a simple form.
+
+### 2.1 Quick Start Form UI
+
+```yaml
+form_specification:
+  location: /onboarding/founder
+  components:
+    business_idea:
+      type: textarea
+      required: true
+      min_length: 10
+      max_length: 5000
+      placeholder: "Describe your business idea in a few sentences..."
+      validation: "Please provide at least 10 characters"
+
+    optional_hints:
+      type: collapsible_section
+      label: "Add optional hints to improve analysis"
+      fields:
+        industry:
+          type: select
+          options: [SaaS, E-commerce, Fintech, Healthcare, EdTech, Marketplace, etc.]
+        target_user:
+          type: select
+          options: [Enterprise, Mid-Market, SMB, Consumers, Developers, etc.]
+        geography:
+          type: select
+          options: [Global, North America, Europe, APAC, etc.]
+
+    additional_context:
+      type: textarea
+      required: false
+      max_length: 10000
+      placeholder: "Any additional context..."
+
+    submit_button:
+      label: "Start Validation"
+      loading_label: "Starting Validation..."
+      disabled_until: business_idea.length >= 10
+
+success_metrics:
+  form_completion_rate: ">95%"
+  time_to_submit: "<30 seconds"
+  abandonment_rate: "<5%"
+```
+
+<details>
+<summary>Historical Reference (AI Conversation - Superseded Jan 19, 2026)</summary>
+
+### Old 2.1 AI Agent Personality & Communication Style
 
 ```yaml
 ai_personality:
@@ -444,7 +494,7 @@ ai_personality:
     - provides examples when needed
     - acknowledges good responses
     - gently guides when responses are unclear
-  
+
 expertise_demonstration:
   - references business frameworks (BMC, VPC, Jobs-to-be-Done)
   - asks follow-up questions that show deep understanding
@@ -452,100 +502,68 @@ expertise_demonstration:
   - provides relevant examples from similar businesses
 ```
 
-### 2.2 Sample AI Conversation Flow
+### Old 2.2 Sample AI Conversation Flow
 
 **Opening Introduction:**
 ```
-AI: "Hi! I'm your AI Strategy Consultant. I'm here to guide you through a structured conversation that will help us understand your startup idea and create a comprehensive validation plan.
-
-Over the next 20-25 minutes, I'll ask you questions about your customers, the problem you're solving, your solution approach, and your resources. This will give us everything we need to generate a detailed strategic analysis with specific recommendations.
-
-Are you ready to begin? This works best when you can focus without distractions."
+AI: "Hi! I'm your AI Strategy Consultant. I'm here to guide you through a structured conversation..."
 ```
 
-**Customer Segment Discovery:**
-```
-AI: "Let's start with your customers. Who do you believe would be most excited about your solution?"
+(Truncated - see archived conversation examples)
 
-[User responds: "Small restaurant owners who struggle with inventory management"]
+### Old 2.3 AI Response Patterns
 
-AI: "Great! Restaurant owners face many operational challenges. When you say 'small restaurant owners,' can you be more specific? Are we talking about independent restaurants, small chains, specific cuisine types, or restaurants in particular locations?"
+- Acknowledgment, clarification, and transition patterns for AI conversation
+- (No longer applicable with Quick Start form)
 
-[User provides more detail]
-
-AI: "Perfect. Now, what specific inventory management problems do these restaurant owners face? Is it overstocking, understocking, waste management, or something else?"
-```
-
-**Problem Validation:**
-```
-AI: "You mentioned inventory management challenges. Help me understand - how painful is this problem for restaurant owners? What happens when they get inventory wrong?"
-
-[User explains impact]
-
-AI: "That's a significant problem. On a scale of 1-10, how would you rate the pain level of this problem for restaurant owners? And how frequently does this problem occur?"
-```
-
-### 2.3 AI Response Patterns
-
-**Acknowledgment Patterns:**
-- "That's a great insight about..."
-- "I can see you've thought deeply about..."
-- "That's exactly the kind of detail that will help us..."
-
-**Clarification Patterns:**
-- "Help me understand what you mean by..."
-- "Can you give me a specific example of..."
-- "When you say X, are you referring to..."
-
-**Transition Patterns:**
-- "Now that we understand your customers, let's explore..."
-- "Building on what you've shared about the problem..."
-- "This connects well to what we discussed earlier about..."
+</details>
 
 ---
 
 ## 3. Success Metrics and Completion Criteria
 
-### 3.1 Conversation Quality Metrics
+### 3.1 Quick Start Success Metrics
+
+> **Updated (2026-01-20)**: Metrics now focus on Quick Start form completion, not AI conversation.
 
 ```yaml
-conversation_success_metrics:
-  completion_rate:
-    target: ">85%"
-    measurement: "users who complete all 7 conversation stages"
-    
-  response_quality:
-    target: ">3.5/5 average"
-    measurement: "AI assessment of response clarity and completeness"
-    
-  time_to_complete:
-    target: "20-25 minutes average"
-    measurement: "time from start to conversation completion"
-    
-  user_satisfaction:
-    target: ">4.0/5"
-    measurement: "post-conversation satisfaction survey"
+quick_start_metrics:
+  form_completion_rate:
+    target: ">95%"
+    measurement: "users who submit Quick Start form"
+
+  time_to_submit:
+    target: "<30 seconds"
+    measurement: "time from page load to form submission"
+
+  phase_1_trigger_rate:
+    target: ">99%"
+    measurement: "successful API call to /api/projects/quick-start"
+
+  abandonment_rate:
+    target: "<5%"
+    measurement: "users who leave without submitting"
 ```
 
-### 3.2 Data Collection Quality
+### 3.2 Phase 1 Analysis Quality
 
 ```yaml
-data_quality_metrics:
-  customer_segment_clarity:
-    target: ">80% clear identification"
-    measurement: "AI assessment of segment specificity"
-    
-  problem_definition_strength:
-    target: ">75% well-defined problems"
-    measurement: "problem specificity and impact clarity"
-    
-  solution_differentiation:
-    target: ">70% clear differentiation"
-    measurement: "unique value proposition articulation"
-    
-  resource_assessment_realism:
-    target: ">80% realistic assessments"
-    measurement: "budget and timeline feasibility"
+phase_1_quality_metrics:
+  brief_generation_success:
+    target: ">95%"
+    measurement: "BriefGenerationCrew successful completions"
+
+  hitl_approval_rate:
+    target: ">80%"
+    measurement: "users who approve at approve_discovery_output checkpoint"
+
+  time_to_checkpoint:
+    target: "<15 minutes"
+    measurement: "time from Quick Start submit to first HITL checkpoint"
+
+  user_edit_rate:
+    target: "30-50%"
+    measurement: "users who edit brief at Stage A (healthy refinement)"
 ```
 
 ### 3.3 Workflow Trigger Success
@@ -639,84 +657,69 @@ user_experience: "flexible control over conversation flow"
 
 ---
 
-## 4.3 Session Management (Implemented Nov 30, 2025)
+## 4.3 Quick Start State Management
 
-### Start New Conversation
-Users can start fresh at any time via the sidebar button:
+> **Updated (2026-01-20)**: Session management simplified with Quick Start. No conversation to pause/resume.
+
+### Project States
+```yaml
+project_states:
+  created: "Quick Start submitted, Phase 1 starting"
+  phase_1_running: "BriefGenerationCrew active"
+  phase_1_hitl: "Waiting for approve_brief or approve_discovery_output"
+  phase_2_running: "Desirability testing active"
+  completed: "Validation journey complete"
+  archived: "User archived the project"
+```
+
+### Start New Project
+With Quick Start, users simply navigate to `/onboarding/founder` to start a new project:
 
 ```yaml
-feature: start_new_conversation
-location: OnboardingSidebar footer
-trigger: "Start New Conversation" button click
+feature: start_new_project
+location: Dashboard or direct navigation
 flow:
-  1. User clicks button
-  2. Confirmation dialog appears: "Start New Conversation?"
-  3. Options: "Continue Current" (cancel) or "Start Fresh" (confirm)
-  4. If confirmed:
-     - Current session marked as "abandoned" via API
-     - Local state reset
-     - New session initialized
-     - Toast: "Starting fresh conversation with Alex..."
-api_endpoint: POST /api/onboarding/abandon
-preserves_data: true (abandoned sessions retained for analytics)
-```
-
-### Resume Indicator
-When resuming an existing session:
-
-```yaml
-feature: resume_indicator
-trigger: Page load with existing active session
-display:
-  - Sidebar shows "Resuming previous conversation" banner
-  - Toast notification on resume
-  - Conversation history restored
-  - Progress bar reflects saved state
-user_benefit: Clear indication that work is preserved
-```
-
-### Session States
-```yaml
-session_states:
-  active: "User currently engaged in conversation"
-  paused: "User exited but can resume"
-  abandoned: "User explicitly started fresh"
-  completed: "All 7 stages finished, CrewAI triggered"
+  1. User navigates to /onboarding/founder
+  2. Quick Start form loads
+  3. User enters new business idea
+  4. New project created on submit
+note: "No conversation to abandon - each Quick Start creates a new project"
 ```
 
 ---
 
-## 4.4 Team Awareness (Implemented Nov 30, 2025)
+## 4.4 AI Founder Team (Unchanged)
 
-Alex is aware of the AI leadership team and mentions the handoff naturally:
+The AI leadership team processes validation (unchanged from before Quick Start):
 
-### Alex's Team Context
+### AI Team Structure
 ```yaml
-ai_personality:
-  name: "Alex"
-  role: "Strategic Business Consultant"
-  supervisor: "Sage (Chief Strategy Officer)"
-  team_members:
-    - "Sage (CSO) - Strategic analysis lead"
-    - "Forge (CTO) - Technical feasibility"
-    - "Pulse (CGO) - Growth and desirability"
-    - "Compass (CPO) - Synthesis and recommendations"
-    - "Guardian (CCO) - Governance and quality"
-    - "Ledger (CFO) - Financial viability"
+ai_founders:
+  sage: "Chief Strategy Officer - leads strategic analysis"
+  forge: "CTO - technical feasibility assessment"
+  pulse: "CGO - growth and desirability testing"
+  compass: "CPO - synthesis and recommendations"
+  guardian: "CCO - governance and quality"
+  ledger: "CFO - financial viability"
 ```
 
-### Natural Handoff Mentions
-Alex mentions the team when contextually appropriate (Stage 7, completion):
-- "I'll pass this to Sage and our AI leadership team for Fortune 500-quality analysis"
-- "Sage and the team will generate detailed validation experiments"
-- "You'll receive strategic analysis from our AI founders within minutes"
-
-### Initial Greeting (Updated)
+### Phase 1 Crews
+```yaml
+phase_1_crews:
+  BriefGenerationCrew:
+    agents: [GV1, S1]
+    output: "Entrepreneur's Brief (AI-generated)"
+  DiscoveryCrew:
+    agents: [GV1, S1]
+    output: "VPC data, competitor analysis"
 ```
-"Once we finish our conversation, I'll hand everything off to Sage, our Chief
-Strategy Officer, and our AI leadership team. They'll generate Fortune 500-quality
-strategic analysis, including a detailed validation roadmap and experiments
-tailored to your business."
+
+### Messaging (Quick Start UI)
+```yaml
+quick_start_messaging:
+  form_description: "Our AI will research the market, analyze competitors, and generate a structured brief."
+  post_submit: "Phase 1 started - BriefGenerationCrew is analyzing your idea."
+  hitl_notification: "Your Entrepreneur's Brief is ready for review."
 ```
 
 ---

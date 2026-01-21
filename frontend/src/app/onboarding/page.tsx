@@ -1,119 +1,35 @@
-import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { FounderOnboardingWizard } from '@/components/onboarding/FounderOnboardingWizard';
-import { Skeleton } from '@/components/ui/skeleton';
 
 // ============================================================================
-// Onboarding Page - Resolves 404 Error for All Users
+// Onboarding Page - Redirects to Role-Specific Path
 // ============================================================================
 
 export const metadata = {
-  title: 'AI-Guided Strategic Onboarding | StartupAI',
-  description: 'Get personalized strategic guidance from our AI consultant to validate and develop your business idea.',
+  title: 'Start Validating | StartupAI',
+  description: 'Start validating your business idea with AI-powered analysis.',
 };
 
-async function OnboardingPage() {
-  // Check authentication
+export default async function OnboardingPage() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error || !user) {
-    // Redirect to login with return URL
     redirect('/login?returnUrl=/onboarding');
   }
 
-  // Get user profile to determine plan type (skip in test mode)
-  let profile: { subscription_tier: any; role: any; } | null = null;
-  const { data: profileData } = await supabase
+  // Get user role to determine redirect
+  const { data: profile } = await supabase
     .from('user_profiles')
-    .select('subscription_tier, role')
+    .select('role')
     .eq('id', user.id)
     .single();
-  profile = profileData;
 
-  // Map subscription tier to plan type for onboarding API
-  const planTypeMapping = {
-    'free': 'trial',
-    'trial': 'trial',
-    'sprint': 'sprint',
-    'founder': 'founder',
-    'pro': 'founder',
-    'enterprise': 'enterprise',
-  };
+  // Redirect based on role
+  if (profile?.role === 'consultant') {
+    redirect('/consultant/client/new');
+  }
 
-  const planType = (planTypeMapping[profile?.subscription_tier as keyof typeof planTypeMapping] || 'trial') as 'trial' | 'sprint' | 'founder' | 'enterprise';
-
-  return (
-    <main className="min-h-screen bg-background">
-      {/* Skip navigation for accessibility */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50"
-      >
-        Skip to main content
-      </a>
-
-      {/* Main content with proper landmark */}
-      <div id="main-content" data-testid="onboarding" role="main" aria-label="AI-guided onboarding conversation">
-        <Suspense fallback={<OnboardingLoadingSkeleton />}>
-          <FounderOnboardingWizard
-            userId={user.id as string}
-            planType={planType}
-            userEmail={user.email || ''}
-          />
-        </Suspense>
-      </div>
-    </main>
-  );
+  // Default to founder onboarding (Quick Start)
+  redirect('/onboarding/founder');
 }
-
-// ============================================================================
-// Loading Skeleton Component
-// ============================================================================
-
-function OnboardingLoadingSkeleton() {
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar skeleton */}
-      <div className="w-80 border-r bg-muted/10 p-6">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5, 6, 7].map((stage) => (
-              <div key={stage} className="flex items-center space-x-3">
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <Skeleton className="h-4 w-32" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content skeleton */}
-      <div className="flex-1 flex flex-col">
-        {/* Header skeleton */}
-        <div className="border-b p-6">
-          <Skeleton className="h-6 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-
-        {/* Conversation area skeleton */}
-        <div className="flex-1 p-6 space-y-4">
-          <div className="space-y-3">
-            <Skeleton className="h-16 w-3/4" />
-            <Skeleton className="h-12 w-1/2 ml-auto" />
-            <Skeleton className="h-20 w-4/5" />
-          </div>
-        </div>
-
-        {/* Input area skeleton */}
-        <div className="border-t p-6">
-          <Skeleton className="h-12 w-full" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default OnboardingPage;

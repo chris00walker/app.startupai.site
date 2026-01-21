@@ -108,46 +108,46 @@ success_metrics:
 
 ---
 
-### Phase 2: Practice Setup (Maya Introduction)
+### Phase 2: Practice Setup (Profile Form)
 
-**Step 5: Welcome & Practice Setup Introduction (1-2 minutes)**
+> **Updated (2026-01-20)**: Maya AI conversation removed per ADR-006. Practice setup is now a simple profile form.
+
+**Step 5: Welcome & Practice Profile Form (~2 minutes)**
 ```yaml
 touchpoint: app.startupai.site/onboarding/consultant
 user_state: newly_authenticated_consultant
-user_goal: understand_setup_process
+user_goal: complete_practice_profile
 user_actions:
-  - reads Maya (Consultant AI) introduction
-  - reviews estimated time commitment (10-15 minutes)
-  - confirms readiness to begin setup conversation
-user_emotions: professional, ready_to_configure
+  - reads welcome message
+  - fills practice profile form
+  - submits profile
+user_emotions: professional, efficient
 pain_points:
   - unclear what information is needed
-  - concerned about time investment
-  - wants to skip to client management
+  - wants to get to client management quickly
 success_metrics:
-  - setup_start_rate: >90%
-  - time_to_start: <2 minutes
+  - form_completion_rate: >95%
+  - time_to_complete: <2 minutes
 ```
 
-**Step 6: Practice Configuration Conversation (10-15 minutes)**
+**Step 6: Practice Profile Form Fields**
 ```yaml
-touchpoint: Maya conversation interface
+touchpoint: Profile form
 user_state: configuring_practice
 user_goal: set_up_consulting_profile
-maya_questions:
-  - "What's your consulting specialty or focus area?"
-  - "What industries do you primarily serve?"
-  - "How do you typically work with startup clients?"
-  - "What validation frameworks do you use?"
+form_fields:
+  - consulting_specialty: text (required)
+  - industries_served: multi-select
+  - typical_engagement_model: select
+  - years_experience: number
+  - firm_name: text (optional)
 user_actions:
-  - describes consulting practice
-  - specifies target industries
-  - explains typical engagement model
-  - sets preferences for client interactions
-user_emotions: reflective, professional
+  - fills in specialization
+  - selects target industries
+  - describes engagement approach
+user_emotions: efficient, professional
 pain_points:
-  - questions feel too generic
-  - unclear how this affects client experience
+  - may want more customization options
   - wants to customize more
 success_metrics:
   - completion_rate: >85%
@@ -240,28 +240,32 @@ success_metrics:
   - token_validation_success: >99%
 ```
 
-**Step 11: Alternative - Onboard Client in Person (20-25 minutes)**
+**Step 11: Start Client Project via Quick Start (~30 seconds)**
+
+> **Updated (2026-01-20)**: Now uses Quick Start form instead of 7-stage conversation.
+
 ```yaml
-touchpoint: add client → "Onboard Now" option
-user_state: facilitating_client_onboarding
-user_goal: guide_client_through_alex_conversation
+touchpoint: /consultant/client/new
+user_state: starting_client_project
+user_goal: initiate_validation_for_client
 user_actions:
-  - selects "Onboard Now" instead of sending invite
-  - sits with client (in person or screen share)
-  - facilitates 7-stage conversation with Alex
+  - navigates to "Start Client Project"
+  - selects client from active clients list
+  - enters client's business idea in Quick Start form
+  - clicks "Start Validation"
 system_behavior:
-  - Alex uses "client mode" language
-  - references "your client" not "you"
-  - data stored to client project, not consultant
-user_emotions: collaborative, guiding
+  - form shows client's name header
+  - project created under client's account
+  - Phase 1 starts for client's project
+  - consultant redirected to client's project view
+user_emotions: efficient, helpful
 pain_points:
-  - client may not be available immediately
-  - time investment is significant
-  - wants to prep client beforehand
+  - needs accurate understanding of client's idea
+  - may want client present for input
 success_metrics:
-  - in_person_onboarding_completion: >90%
-  - time_to_complete: 20-25 minutes
-  - data_quality_score: >4.0/5
+  - quick_start_completion: >95%
+  - time_to_complete: <30 seconds
+  - phase_1_trigger_rate: >99%
 ```
 
 ---
@@ -438,47 +442,60 @@ success_metrics:
 
 ---
 
-## 2. Expected AI Interactions (Maya)
+## 2. Practice Profile Form Specification
 
-### 2.1 Maya Personality & Communication Style
+> **Updated (2026-01-20)**: Maya AI conversation removed per ADR-006. Practice setup is now a simple profile form.
+
+### 2.1 Profile Form UI
 
 ```yaml
-ai_personality:
-  role: "Practice Setup Assistant"
-  name: "Maya"
-  tone: "Professional, efficient, consultant-friendly"
-  communication_style:
-    - respects consultant's expertise
-    - asks focused configuration questions
-    - explains how settings affect client experience
-    - acknowledges business context
+form_specification:
+  location: /onboarding/consultant
+  components:
+    consulting_specialty:
+      type: text
+      required: true
+      placeholder: "e.g., Early-stage B2B SaaS"
+      help_text: "Your primary consulting focus area"
 
-expertise_demonstration:
-  - references consulting industry practices
-  - understands client management workflows
-  - connects profile settings to platform features
+    industries_served:
+      type: multi-select
+      required: true
+      options: [SaaS, E-commerce, Fintech, Healthcare, EdTech, etc.]
+      help_text: "Select all industries you work with"
+
+    engagement_model:
+      type: select
+      required: true
+      options: [Retainer, Project-based, Advisory, Accelerator]
+      help_text: "How you typically engage with clients"
+
+    years_experience:
+      type: number
+      required: false
+      placeholder: "Years of consulting experience"
+
+    firm_name:
+      type: text
+      required: false
+      placeholder: "Your firm or practice name"
+
+    submit_button:
+      label: "Complete Setup"
+
+success_metrics:
+  form_completion_rate: ">95%"
+  time_to_complete: "<2 minutes"
+  abandonment_rate: "<5%"
 ```
 
-### 2.2 Sample Maya Conversation Flow
+### 2.2 Welcome Message
 
-**Opening Introduction:**
-```
-Maya: "Welcome to StartupAI! I'm Maya, and I'll help you set up your consulting practice profile.
-
-This will take about 10-15 minutes. The information you provide helps us customize the platform for your clients and ensures you get the most relevant insights.
-
-Ready to begin?"
-```
-
-**Practice Configuration:**
-```
-Maya: "What's your primary consulting specialty or focus area?"
-
-[Consultant responds: "Early-stage B2B SaaS startups"]
-
-Maya: "Great! B2B SaaS is a strong niche. The AI analysis will prioritize market validation and product-market fit metrics for your clients.
-
-What industries do you typically serve? This helps us tailor competitive analysis."
+```yaml
+welcome_copy:
+  headline: "Set Up Your Practice Profile"
+  description: "Tell us about your consulting practice so we can customize the platform for your clients."
+  time_estimate: "Takes less than 2 minutes"
 ```
 
 ---
@@ -494,8 +511,8 @@ acquisition_success_metrics:
     measurement: "consultant plan selections / pricing visits"
 
   practice_setup_completion:
-    target: ">85%"
-    measurement: "consultants completing Maya conversation"
+    target: ">95%"
+    measurement: "consultants completing profile form"
 
   time_to_first_client:
     target: "<24 hours"
@@ -523,9 +540,9 @@ portfolio_success_metrics:
 
 ```yaml
 client_success_metrics:
-  client_onboarding_completion:
+  client_project_start:
     target: ">80%"
-    measurement: "invited clients completing 7-stage onboarding"
+    measurement: "clients with Quick Start project initiated"
 
   validation_progression:
     target: ">70% reach Stage 4+"

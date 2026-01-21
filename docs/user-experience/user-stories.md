@@ -188,53 +188,57 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ---
 
-### US-F07: Resume Paused Session
+### US-F07: Quick Start with Hints (Optional)
+
+> **Added (2026-01-20)**: Supports optional hints in Quick Start form.
 
 **As a** Founder,
-**I want to** resume a paused onboarding conversation,
-**So that** I don't lose progress if I need to step away.
+**I want to** provide optional hints about my industry, target user, and geography,
+**So that** the AI can provide more targeted analysis from the start.
 
 **Acceptance Criteria:**
 
-**Given** I have an active onboarding session with conversation history
-**When** I close the browser and return later
-**Then** my conversation should be restored at the same stage
+**Given** I am on the Quick Start form
+**When** I click "Add optional hints"
+**Then** I should see dropdowns for industry, target user, and geography
 
-**Given** I am resuming a session
-**When** the page loads
-**Then** I should see a "Resuming previous conversation" indicator
+**Given** I have selected optional hints
+**When** I submit the Quick Start form
+**Then** Phase 1 should use my hints to focus the research
 
-**Given** a message was pending when I left
-**When** I return to the session
-**Then** the pending message should be recovered from localStorage
+**Given** I don't want to provide hints
+**When** I submit without expanding the hints section
+**Then** Phase 1 should proceed with general research
 
-**E2E Test:** `07-adr005-persistence.spec.ts` - "should preserve conversation history after page refresh"
-**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Section 4.3
+**E2E Test:** `16-quick-start-founder.spec.ts` - "should expand optional hints section"
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 5
 
 ---
 
-### US-F08: Start New Conversation
+### US-F08: View Phase 1 Progress
+
+> **Added (2026-01-20)**: New story for Quick Start flow monitoring.
 
 **As a** Founder,
-**I want to** start a new onboarding conversation,
-**So that** I can begin fresh if my previous attempt was off-track.
+**I want to** see progress while Phase 1 is running,
+**So that** I know validation is happening.
 
 **Acceptance Criteria:**
 
-**Given** I have an existing onboarding session
-**When** I click "Start New Conversation" in the sidebar
-**Then** I should see a confirmation dialog
+**Given** I have submitted Quick Start and Phase 1 is running
+**When** I view my dashboard
+**Then** I should see "Phase 1: Researching..." with progress indicators
 
-**Given** I confirm starting a new conversation
-**When** the dialog closes
-**Then** my current session should be marked as "abandoned" and a fresh session should begin
+**Given** Phase 1 is running
+**When** I hover over progress
+**Then** I should see current crew/agent activity
 
-**Given** I started a new conversation
-**When** I see the chat interface
-**Then** Alex should greet me with the initial welcome message
+**Given** Phase 1 reaches a HITL checkpoint
+**When** the checkpoint is ready
+**Then** I should be notified and see the approval UI
 
-**E2E Test:** `02-onboarding-flow.spec.ts` - "should show Start New Conversation option in sidebar"
-**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Section 4.3
+**E2E Test:** `16-quick-start-founder.spec.ts` - "should show loading state during submission"
+**Journey Reference:** [`founder-journey-map.md`](./founder-journey-map.md) - Step 12
 
 ---
 
@@ -242,25 +246,27 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ### US-C01: Complete Practice Setup
 
+> **Updated (2026-01-20)**: Maya AI removed per ADR-006. Practice setup is now a static form.
+
 **As a** Consultant,
-**I want to** complete my practice setup with Maya,
+**I want to** complete my practice setup via a profile form,
 **So that** I can configure my consulting profile and specializations.
 
 **Acceptance Criteria:**
 
 **Given** I am logged in as a Consultant without a completed profile
 **When** I access the platform
-**Then** I should be directed to practice setup with Maya (Consultant AI)
+**Then** I should be directed to the practice setup form
 
-**Given** I am in practice setup
-**When** I provide information about my specializations and industries
-**Then** my consultant profile should be populated
+**Given** I am on the practice setup form
+**When** I fill in my specializations, industries, and experience
+**Then** my consultant profile should be saved
 
 **Given** I complete practice setup
-**When** the setup is finalized
+**When** I submit the form
 **Then** I should be redirected to `/consultant-dashboard`
 
-**E2E Test:** `09-consultant-practice-setup.spec.ts` - "should complete consultant practice setup stages"
+**E2E Test:** `09-consultant-practice-setup.spec.ts` - "should complete consultant practice setup"
 **Journey Reference:** [`consultant-journey-map.md`](./consultant-journey-map.md) - Phase 2
 
 ---
@@ -386,27 +392,33 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ---
 
-### US-C07: Onboard Client on Behalf
+### US-C07: Start Client Project via Quick Start
+
+> **Updated (2026-01-20)**: Now uses Quick Start form instead of 7-stage conversation.
 
 **As a** Consultant,
-**I want to** guide a client through onboarding in their presence,
-**So that** I can facilitate their business validation conversation.
+**I want to** start a validation project for a client via Quick Start,
+**So that** I can initiate their validation process quickly.
 
 **Acceptance Criteria:**
 
 **Given** I am logged in as a Consultant
-**When** I start "Add Client" → "Onboard Now"
-**Then** Alex should start in "client mode" referencing "your client" not "you"
+**When** I click "Start Client Project"
+**Then** I should see a client selection list (active clients only)
 
-**Given** I am onboarding on behalf of a client
-**When** the 7-stage conversation completes
-**Then** the data should be stored to the client's project, not mine
+**Given** I have selected a client
+**When** I click the client's name
+**Then** I should see the Quick Start form with the client's name displayed
 
-**Given** client onboarding completes
-**When** I approve the summary
-**Then** I should be redirected to the client detail page
+**Given** I have entered the client's business idea
+**When** I click "Start Validation"
+**Then** Phase 1 should begin for the client's project (not mine)
 
-**E2E Test:** `10-consultant-client-onboarding.spec.ts` - "should complete 7-stage business validation for client"
+**Given** the Quick Start submission completes
+**When** the project is created
+**Then** I should be redirected to the client's project detail page
+
+**E2E Test:** `17-quick-start-consultant.spec.ts` - "should submit Quick Start for client and redirect"
 **Journey Reference:** [`consultant-journey-map.md`](./consultant-journey-map.md) - Phase 3 (Client Mode)
 
 ---
@@ -584,36 +596,6 @@ These stories are derived from the [hitl-approval-ui.md](../specs/hitl-approval-
 
 **E2E Test:** Gap - needs test
 **Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 1
-**UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 1
-
----
-
-### US-H03: Approve VPC Completion
-
-**As a** Founder,
-**I want to** review my Value Proposition Canvas fit score before market testing,
-**So that** I can confirm readiness to test with real customers.
-
-**Acceptance Criteria:**
-
-**Given** my VPC fit score reaches ≥70
-**When** the `approve_vpc_completion` checkpoint is triggered
-**Then** I should see: Fit Score, Fit Status, Customer Profile (validated Jobs, Pains, Gains), Value Map coverage, and Evidence Summary
-
-**Given** I have a strong fit
-**When** I select "Proceed to Desirability"
-**Then** Phase 2 should begin automatically
-
-**Given** I want more evidence
-**When** I select "Run More Experiments"
-**Then** additional Phase 1 experiments should run
-
-**Given** evidence suggests wrong segment
-**When** I select "Pivot to New Segment"
-**Then** the Segment Pivot flow should begin
-
-**E2E Test:** Gap - needs test
-**Journey Reference:** [`phase-transitions.md`](../specs/phase-transitions.md) - Phase 1 Gate
 **UI Spec:** [`hitl-approval-ui.md`](../specs/hitl-approval-ui.md) - Phase 1
 
 ---
@@ -928,12 +910,12 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 
 | Category | Total Stories | With E2E Tests | Gaps |
 |----------|---------------|----------------|------|
-| Founder (US-F) | 8 | 6 | 2 |
+| Founder (US-F) | 8 | 7 | 1 |
 | Consultant (US-C) | 7 | 5 | 2 |
 | Trial (US-T) | 3 | 1 | 2 |
-| HITL Checkpoint (US-H) | 9 | 1 | 8 |
+| HITL Checkpoint (US-H) | 8 | 1 | 7 |
 | Pivot Flow (US-P) | 4 | 0 | 4 |
-| **Total** | **31** | **13** | **18** |
+| **Total** | **30** | **14** | **16** |
 
 ### HITL Story Priority
 
@@ -941,7 +923,6 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 |----------|-------------|----------|----------|
 | US-H01 | Review Discovery Output (Brief + VPC) | P0 | Phase 1 continuation |
 | US-H02 | Approve Experiment Plan | P1 | Experiments |
-| US-H03 | Approve VPC Completion | P1 | Phase 2 start |
 | US-H04 | Approve Campaign Launch | P1 | Ads go live |
 | US-H05 | Approve Budget Increase | P2 | Budget control |
 | US-H06 | Review Desirability Gate | P1 | Phase 3 start |
@@ -968,5 +949,6 @@ These stories are derived from the [phase-transitions.md](../specs/phase-transit
 
 | Date | Change |
 |------|--------|
+| 2026-01-20 | Updated for Quick Start (ADR-006): Replaced US-F07/F08 with Quick Start stories, updated US-C01/C07, removed US-H03 |
 | 2026-01-19 | Added 13 HITL/Pivot stories (US-H01-H09, US-P01-P04) derived from phase-transitions.md and hitl-approval-ui.md |
 | 2026-01-19 | Initial creation - consolidated 18 user stories with acceptance criteria |

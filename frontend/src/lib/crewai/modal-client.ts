@@ -11,13 +11,51 @@
 // Types
 // =============================================================================
 
-export interface ModalKickoffRequest {
+/**
+ * Quick Start hints for seeding Phase 1 analysis.
+ * All fields are optional.
+ */
+export interface QuickStartHints {
+  industry?: string;
+  target_user?: string;
+  geography?: string;
+}
+
+/**
+ * Legacy kickoff request (7-stage conversation flow)
+ * @deprecated Use QuickStartKickoffRequest instead
+ */
+export interface LegacyKickoffRequest {
   entrepreneur_input: string;
   project_id: string;
   user_id: string;
   session_id?: string;
   conversation_transcript?: string;  // Full conversation from Alex chat
   user_type?: 'founder' | 'consultant';
+}
+
+/**
+ * Quick Start kickoff request (ADR-006)
+ * Replaces 7-stage conversation with 30-second form
+ */
+export interface QuickStartKickoffRequest {
+  raw_idea: string;           // Business idea (min 10 chars)
+  project_id: string;
+  user_id: string;
+  hints?: QuickStartHints;    // Optional context hints
+  additional_context?: string; // Optional free-form context (max 10k chars)
+  user_type?: 'founder' | 'consultant';
+  client_id?: string;          // For consultant flow
+}
+
+// Union type for backward compatibility
+export type ModalKickoffRequest = LegacyKickoffRequest | QuickStartKickoffRequest;
+
+/**
+ * Type guard to check if request is Quick Start format
+ */
+export function isQuickStartRequest(request: ModalKickoffRequest): request is QuickStartKickoffRequest {
+  return 'raw_idea' in request;
 }
 
 export interface ModalKickoffResponse {
@@ -309,8 +347,7 @@ export function createModalClient(config?: Partial<ModalClientConfig>): ModalCli
 // =============================================================================
 
 export const PHASE_NAMES: Record<number, string> = {
-  0: 'Onboarding',
-  1: 'VPC Discovery',
+  1: 'Research & Brief Generation',  // Phase 1 with BriefGenerationCrew (ADR-006)
   2: 'Desirability',
   3: 'Feasibility',
   4: 'Viability',
@@ -328,14 +365,143 @@ export function getPhaseName(phase: number): string {
  * Calculate overall progress percentage across all phases
  */
 export function calculateOverallProgress(status: ModalStatusResponse): number {
-  const phaseWeights = [10, 25, 30, 15, 20]; // Weights for phases 0-4
+  const phaseWeights = [25, 30, 25, 20]; // Weights for phases 1-4 (no Phase 0 in Quick Start)
   const completedPhaseProgress = phaseWeights
-    .slice(0, status.current_phase)
+    .slice(0, Math.max(0, status.current_phase - 1))
     .reduce((sum, w) => sum + w, 0);
 
-  const currentPhaseWeight = phaseWeights[status.current_phase] || 0;
+  const currentPhaseWeight = phaseWeights[status.current_phase - 1] || 0;
   const currentPhaseProgress = status.progress?.progress_pct || 0;
   const currentContribution = (currentPhaseProgress / 100) * currentPhaseWeight;
 
   return Math.min(completedPhaseProgress + currentContribution, 100);
+}
+
+// =============================================================================
+// Mock Implementation (for development until Modal backend is ready)
+// =============================================================================
+
+/**
+ * Mock Modal kickoff for Quick Start flow.
+ * Used when MODAL_USE_MOCK=true or Modal backend doesn't support Quick Start yet.
+ *
+ * @returns Mock response simulating Modal /kickoff
+ */
+export async function mockQuickStartKickoff(
+  request: QuickStartKickoffRequest
+): Promise<ModalKickoffResponse> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const runId = `mock-${crypto.randomUUID()}`;
+
+  console.log('[Modal Mock] Quick Start kickoff:', {
+    run_id: runId,
+    raw_idea: request.raw_idea.substring(0, 50) + '...',
+    hints: request.hints,
+    project_id: request.project_id,
+  });
+
+  return {
+    run_id: runId,
+    status: 'started',
+    message: 'Mock: Phase 1 validation run initiated. BriefGenerationCrew will analyze your idea.',
+  };
+}
+
+/**
+ * Mock status response for Quick Start flow.
+ * Simulates Phase 1 progress and HITL checkpoint.
+ */
+export function mockQuickStartStatus(runId: string, progressPct: number = 0): ModalStatusResponse {
+  // Simulate progression through Phase 1
+  if (progressPct < 50) {
+    return {
+      run_id: runId,
+      status: 'running',
+      current_phase: 1,
+      phase_name: 'Research & Brief Generation',
+      progress: {
+        crew: 'BriefGenerationCrew',
+        task: 'Generating entrepreneur brief',
+        agent: 'GV1 (Brief Generator)',
+        progress_pct: progressPct,
+      },
+    };
+  } else if (progressPct < 75) {
+    // Pause at Stage A - approve_brief
+    return {
+      run_id: runId,
+      status: 'paused',
+      current_phase: 1,
+      phase_name: 'Research & Brief Generation',
+      hitl_checkpoint: {
+        checkpoint: 'approve_brief',
+        title: 'Review Your Entrepreneur Brief',
+        description: 'We\'ve generated a structured brief based on your business idea. Please review and edit if needed.',
+        options: [
+          { id: 'approved', label: 'Approve', description: 'Continue with this brief' },
+          { id: 'rejected', label: 'Revise', description: 'Make changes before continuing' },
+        ],
+        recommended: 'approved',
+        context: {
+          brief: {
+            business_idea: 'Your business idea summary...',
+            target_segments: ['Segment A', 'Segment B'],
+            problem_statement: 'The core problem you\'re solving...',
+            solution_description: 'Your proposed solution...',
+          },
+          editable: true,  // Stage A allows edits
+        },
+      },
+    };
+  } else if (progressPct < 100) {
+    // Pause at Stage B - approve_discovery_output
+    return {
+      run_id: runId,
+      status: 'paused',
+      current_phase: 1,
+      phase_name: 'Research & Brief Generation',
+      hitl_checkpoint: {
+        checkpoint: 'approve_discovery_output',
+        title: 'Review Discovery Analysis',
+        description: 'Our AI has completed market research and competitor analysis. Review the findings.',
+        options: [
+          { id: 'approved', label: 'Approve & Continue', description: 'Proceed to Phase 2' },
+          { id: 'rejected', label: 'Request Changes', description: 'Flag issues for review' },
+        ],
+        recommended: 'approved',
+        context: {
+          vpc_data: {
+            customer_profiles: {},
+            value_maps: {},
+          },
+          competitor_report: {
+            competitors: [],
+            analysis: 'Competitive landscape summary...',
+          },
+          editable: false,  // Stage B is read-only
+        },
+      },
+    };
+  }
+
+  return {
+    run_id: runId,
+    status: 'completed',
+    current_phase: 1,
+    phase_name: 'Research & Brief Generation',
+    outputs: {
+      entrepreneur_brief: {},
+      vpc_data: {},
+      ready_for_phase_2: true,
+    },
+  };
+}
+
+/**
+ * Check if Mock Mode is enabled via environment variable.
+ */
+export function isModalMockEnabled(): boolean {
+  return process.env.MODAL_USE_MOCK === 'true' || process.env.NODE_ENV === 'test';
 }

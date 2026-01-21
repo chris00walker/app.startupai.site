@@ -56,7 +56,10 @@
       "WebFetch(domain:opennext.js.org)",
       "mcp__netlify__netlify-deploy-services-updater",
       "WebFetch(domain:console.groq.com)",
-      "WebFetch(domain:openrouter.ai)"
+      "WebFetch(domain:openrouter.ai)",
+      "Skill(phase-status)",
+      "Skill(tool-status)",
+      "WebFetch(domain:developers.openai.com)"
     ],
     "deny": [
       "Bash(rm:*)",
