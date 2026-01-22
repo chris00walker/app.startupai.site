@@ -33,7 +33,7 @@ Prioritized by validation impact. Items testing assumptions rank higher.
 | **Admin UI: Health dashboard** | 1 day | `/admin/health` - Modal/Supabase status, error rate |
 | **Admin UI: Feature flags** | 1 day | `/admin/features` - Enable/disable per user or globally |
 | **Admin UI: Audit logs** | 1 day | `/admin/audit` - All admin actions logged and viewable |
-| **E2E tests: Admin stories (US-A01-A10)** | 2 days | 4 test files created as stubs |
+| **E2E tests: Admin stories (US-A01-A12)** | 2 days | 4 test files created as stubs |
 | **E2E tests: Consultant Trial (US-CT01-CT05)** | 1 day | 1 test file created as stub |
 | **E2E tests: Edge cases (US-E01-E06)** | 1 day | Interrupted Quick Start, timeouts, etc. |
 | **E2E tests: Support (US-S01-S05)** | 1 day | `23-support.spec.ts` stub created |

@@ -316,3 +316,34 @@ last_reviewed: "2026-01-22"
 **Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Phase 1, Step 1
 
 ---
+
+### US-A12: Manage User Billing Issues
+
+**As an** Admin,
+**I want to** review and take billing actions for a user,
+**So that** I can resolve billing issues without engineering escalation.
+
+**Acceptance Criteria:**
+
+**Given** I am viewing a user's profile
+**When** I open the Billing tab
+**Then** I should see: current plan, billing status, invoices, payment method status, dunning state, and next charge date
+
+**Given** a user's payment has failed
+**When** I click "Retry Payment"
+**Then** the system should attempt the charge and show the result with a clear success/failure message
+
+**Given** a user requests a refund
+**When** I select refund amount and reason and confirm
+**Then** the refund should be processed and recorded in the audit log
+
+**Given** a user needs temporary access
+**When** I apply a credit or grant a grace period
+**Then** the updated status and expiration should be visible on the Billing tab
+
+**Given** I perform any billing action
+**When** the action completes
+**Then** an audit log entry should be created with action type, amount (if applicable), and reason
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Phase 6, Step 12

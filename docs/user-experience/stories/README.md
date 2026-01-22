@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-22**: Quality audit remediation - 89 stories after US-F08 split, US-H03 removal, and new stories.
+> **Updated 2026-01-22**: Quality audit remediation + US-A12 billing management; total stories now 90.
 
 ### Stories by Category
 
@@ -49,14 +49,14 @@ This document contains all user stories for the StartupAI platform. Each story i
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
-| Admin | US-A01-A11 | 11 | 0 | 11 |
+| Admin | US-A01-A12 | 12 | 0 | 12 |
 | Support | US-S01-S05 | 5 | 0 | 5 |
 | Offboarding | US-O01-O05 | 5 | 0 | 5 |
 | Billing | US-B01-B10 | 10 | 0 | 10 |
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF03 | 3 | 0 | 3 |
-| **Total** | | **89** | **33** | **56** |
+| **Total** | | **90** | **33** | **57** |
 
 ### E2E Test File Mapping
 
@@ -81,7 +81,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `16-quick-start-founder.spec.ts` | US-F01, US-FT01 |
 | `17-quick-start-consultant.spec.ts` | US-C07 |
 
-### Gap Analysis (51 Stories Need Implementation)
+### Gap Analysis (52 Stories Need Implementation)
 
 Stories with test stubs created but not yet implemented:
 
@@ -89,7 +89,7 @@ Stories with test stubs created but not yet implemented:
 |----------|-----------|-----------|----------|
 | Consultant Trial | US-CT01-CT05 | `22-consultant-trial.spec.ts` | High |
 | Edge Cases | US-E01-E06 | `18-edge-cases.spec.ts` | Medium |
-| Admin | US-A01-A10 | `19-21-admin-*.spec.ts` | High |
+| Admin | US-A01-A12 | `19-21-admin-*.spec.ts` | High |
 | Support | US-S01-S05 | `23-support.spec.ts` | High |
 | Offboarding | US-O01-O05 | `24-offboarding.spec.ts` | Medium |
 | Billing | US-B01-B10 | `25-billing.spec.ts` | Critical |
@@ -100,7 +100,7 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-22**: Quality audit remediation - added US-MF, US-A11, US-FT04, US-CT06, split US-F08, removed US-H03.
+> **Updated 2026-01-22**: Quality audit remediation + US-A12 billing management; total stories now 90.
 
 ### Stories by Category
 
@@ -110,7 +110,7 @@ Stories with test stubs created but not yet implemented:
 | Consultant (US-C) | 7 | 7 | 0 |
 | Founder Trial (US-FT) | 4 | 4 | 0 |
 | Consultant Trial (US-CT) | 6 | 0 | 6 |
-| Admin (US-A) | 11 | 0 | 11 |
+| Admin (US-A) | 12 | 0 | 12 |
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
 | Edge Case (US-E) | 6 | 0 | 6 |
@@ -120,7 +120,7 @@ Stories with test stubs created but not yet implemented:
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 3 | 0 | 3 |
-| **Total** | **89** | **33** | **56** |
+| **Total** | **90** | **33** | **57** |
 
 ### HITL Story Priority
 
@@ -173,6 +173,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-22 | **Admin Billing:** Added US-A12 for billing management and updated coverage counts. |
 | 2026-01-22 | **Quality Audit Remediation:** P0: Fixed US-O03 retention timeline (30+60 days), US-O05 win-back emails (7/30/60/90 days), US-B04 dunning (6 stages), US-B05 refund tiers (4 tiers + US-S05 clarification), US-B07 tax registries (VIES/HMRC/ABN), US-N04 escalation (6 stages). P1: Added US-MF01-03 marketing funnel, US-A11 admin login, US-FT04/CT06 post-upgrade, enhanced US-B03 backup payment. P2: Split US-F08→F08/F09/F10, replaced faceless "User" with "any authenticated user" in US-N/AS/S sections, defined US-AS04 suspicious login criteria. Removed US-H03 reference from journey-test-matrix.md. Total stories now 89. |
 | 2026-01-22 | **Major Expansion:** Added 30 new stories across 5 categories: Support (US-S01-S05), Offboarding (US-O01-O05), Billing (US-B01-B10), Notification (US-N01-N05), Account Settings (US-AS01-AS05). Total stories now 82. |
 | 2026-01-22 | **Major Update:** Added 10 Admin stories (US-A01-A10), 5 Consultant Trial stories (US-CT01-CT05); Renamed Trial to Founder Trial (US-T → US-FT) |

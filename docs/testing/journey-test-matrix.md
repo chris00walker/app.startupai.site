@@ -126,6 +126,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 | Phase 5 | View Audit Logs | US-A07 | `21-admin-audit.spec.ts` | Gap |
 | Phase 6 | Export User Data | US-A09 | `21-admin-audit.spec.ts` | Gap |
 | Phase 6 | Data Integrity Check | US-A10 | `21-admin-audit.spec.ts` | Gap |
+| Phase 6 | Manage Billing Issues | US-A12 | `21-admin-audit.spec.ts` | Gap |
 
 ---
 
@@ -356,7 +357,7 @@ The original core stories plus HITL and Pivot workflows are fully covered.
 | Consultant (US-C) | 7 | 7 | 0 | 100% |
 | Founder Trial (US-FT) | 4 | 3 | 1 | 75% |
 | Consultant Trial (US-CT) | 6 | 0 | 6 | 0% |
-| Admin (US-A) | 11 | 0 | 11 | 0% |
+| Admin (US-A) | 12 | 0 | 12 | 0% |
 | HITL (US-H) | 8 | 8 | 0 | 100% |
 | Pivot (US-P) | 4 | 4 | 0 | 100% |
 | Edge Case (US-E) | 6 | 0 | 6 | 0% |
@@ -366,7 +367,7 @@ The original core stories plus HITL and Pivot workflows are fully covered.
 | Notification (US-N) | 5 | 0 | 5 | 0% |
 | Account Settings (US-AS) | 5 | 0 | 5 | 0% |
 | Marketing Funnel (US-MF) | 3 | 0 | 3 | 0% |
-| **Total** | **89** | **32** | **57** | **36%** |
+| **Total** | **90** | **32** | **58** | **36%** |
 
 ### New Test Files Needed
 
@@ -375,7 +376,7 @@ The original core stories plus HITL and Pivot workflows are fully covered.
 | `18-edge-cases.spec.ts` | US-E01-E06 | P2 |
 | `19-admin-user-management.spec.ts` | US-A01, US-A02, US-A03, US-A08, US-A11 | P1 |
 | `20-admin-operations.spec.ts` | US-A04, US-A05, US-A06 | P1 |
-| `21-admin-audit.spec.ts` | US-A07, US-A09, US-A10 | P2 |
+| `21-admin-audit.spec.ts` | US-A07, US-A09, US-A10, US-A12 | P2 |
 | `22-consultant-trial.spec.ts` | US-CT01-CT06 | P1 |
 | `23-support.spec.ts` | US-S01-S05 | P1 |
 | `24-offboarding.spec.ts` | US-O01-O05 | P2 |

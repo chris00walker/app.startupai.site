@@ -29,18 +29,18 @@ The Admin journey consists of 6 phases covering different operational responsibi
 
 | Phase | Focus | Key Workflows | Stories |
 |-------|-------|---------------|---------|
-| Phase 1 | User Support | Search, profile view, role changes | US-A01, US-A02, US-A08 |
+| Phase 1 | User Support | Login, search, profile view, role changes | US-A11, US-A01, US-A02, US-A08 |
 | Phase 2 | Debugging | User impersonation | US-A03 |
 | Phase 3 | Operations | Workflow retry, health monitoring | US-A04, US-A05 |
 | Phase 4 | Feature Management | Feature flags | US-A06 |
 | Phase 5 | Compliance | Audit log review | US-A07 |
-| Phase 6 | Data Operations | Export, integrity checks | US-A09, US-A10 |
+| Phase 6 | Data & Billing Operations | Export, integrity checks, billing management | US-A09, US-A10, US-A12 |
 
 ---
 
 ## Phase 1: User Support
 
-### Step 1: Admin Login (30 seconds)
+### Step 1: Admin Login (US-A11)
 
 ```yaml
 touchpoint: app.startupai.site/login
@@ -241,7 +241,7 @@ success_metrics:
 
 ---
 
-## Phase 6: Data Operations
+## Phase 6: Data & Billing Operations
 
 ### Step 10: Export User Data (US-A09)
 
@@ -286,6 +286,29 @@ success_metrics:
   - ticket_creation_rate: 100% (when issues found)
 ```
 
+### Step 12: Manage Billing Issues (US-A12)
+
+```yaml
+touchpoint: /admin/users/:id/billing
+user_state: resolving_billing_issue
+user_goal: restore_access_or_process_refund
+user_actions:
+  - opens Billing tab from user profile
+  - reviews plan, billing status, invoices, and dunning state
+  - retries payment or sends payment update link
+  - issues refund or applies account credit with reason
+  - updates plan or grants temporary access if needed
+user_emotions: cautious, accountable
+pain_points:
+  - unclear refund policy by tier
+  - fear of double-processing refunds
+  - billing status not synced in real time
+success_metrics:
+  - billing_issue_resolution_time: <10 minutes
+  - refund_processing_time: <24 hours
+  - audit_log_capture_rate: 100%
+```
+
 ---
 
 ## Success Metrics Summary
@@ -297,6 +320,7 @@ success_metrics:
 | User satisfaction (post-support) | >4.5/5 | Survey after support interaction |
 | Audit log completeness | 100% | All admin actions logged |
 | Platform health check frequency | Every 15 minutes | Automated + manual checks |
+| Billing issue resolution time | <10 minutes | Admin billing actions completed |
 
 ---
 
@@ -305,7 +329,8 @@ success_metrics:
 | Document | What It Covers |
 |----------|---------------|
 | [`personas/admin.md`](../../personas/admin.md) | Admin persona definition |
-| [`stories/admin.md`](../../stories/admin.md) | Admin user stories (US-A01-A10) |
+| [`stories/admin.md`](../../stories/admin.md) | Admin user stories (US-A01-A12) |
+| [`billing-journey-map.md`](../platform/billing-journey-map.md) | Billing lifecycle and policy reference |
 | [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
@@ -314,4 +339,5 @@ success_metrics:
 
 | Date | Change |
 |------|--------|
+| 2026-01-22 | Added billing management step (US-A12) and expanded Phase 6 scope |
 | 2026-01-22 | Initial creation - 6-phase admin journey with 11 steps |

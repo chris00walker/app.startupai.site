@@ -63,6 +63,7 @@ last_reviewed: "2026-01-22"
 | System Health | `/admin/health` | `admin-journey-map.md` Phase 3 |
 | Feature Flags | `/admin/features` | `admin-journey-map.md` Phase 4 |
 | Audit Logs | `/admin/audit` | `admin-journey-map.md` Phase 5 |
+| Billing Support | `/admin/users/:id/billing` | `admin-journey-map.md` Phase 6 |
 | Data Operations | `/admin/data` | `admin-journey-map.md` Phase 6 |
 
 ### Feature Access
@@ -75,6 +76,7 @@ last_reviewed: "2026-01-22"
 | Workflow Retry | Yes | Re-trigger failed CrewAI jobs |
 | Feature Flag Management | Yes | Enable/disable features per user or globally |
 | Audit Log Access | Yes | View all system activity |
+| Billing Management | Yes | Retry payments, issue refunds/credits, grant grace |
 | Data Export | Yes | Export user data for support/compliance |
 | User Role Changes | Yes | Upgrade trial to paid, fix role issues |
 | Bulk Operations | Yes | With approval workflow for destructive actions |
@@ -112,6 +114,16 @@ The Admin persona encompasses distinct sub-segments with different primary respo
 | **Pain Point** | "I need to fix data issues without making things worse" |
 | **Platform Adaptation** | Audit logs, data export, integrity checks |
 | **Escalation Path** | → Engineering for schema issues, → Legal for compliance |
+
+#### Billing Admin
+
+| Attribute | Value |
+|-----------|-------|
+| **Primary Focus** | Billing issue resolution |
+| **Key Need** | Clear policy controls and safe billing actions |
+| **Pain Point** | "I need to resolve billing fast without refund mistakes" |
+| **Platform Adaptation** | Billing tab, refund/credit controls, audit trail |
+| **Escalation Path** | → Finance for policy exceptions, → Engineering for Stripe failures |
 
 ### Security Boundaries
 
