@@ -7,7 +7,7 @@
  * - US-C05: Archive Client
  * - US-C06: Resend Client Invite
  *
- * Story Reference: docs/user-experience/user-stories.md
+ * Story Reference: docs/user-experience/stories/README.md
  * Feature Reference: docs/features/consultant-client-system.md
  */
 

@@ -18,9 +18,9 @@ The consultant-client system was implemented with the following approach:
 
 **Implementation:**
 - [`consultant-client-system.md`](../features/consultant-client-system.md) - Technical implementation
-- [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) - 6-phase consultant journey
-- [`user-personas.md`](../user-experience/user-personas.md) - Canonical role definitions
-- [`user-stories.md`](../user-experience/user-stories.md) - US-C01 through US-C07
+- [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) - 6-phase consultant journey
+- [`roles/role-definitions.md`](../user-experience/roles/role-definitions.md) - Canonical role definitions
+- [`stories/README.md`](../user-experience/stories/README.md) - US-C01 through US-C07
 
 **E2E Tests:**
 - `09-consultant-practice-setup.spec.ts` - Practice setup flow

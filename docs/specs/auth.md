@@ -93,7 +93,7 @@ const ROLE_REDIRECTS: Record<UserRole, string> = {
 
 All user-owned tables enforce RLS. Policy snippets live in [`specs/data-schema.md`](data-schema.md). Supabase session claims (`app_metadata.role`) map to application roles.
 
-**Canonical Role Reference:** [`user-personas.md`](../user-experience/user-personas.md) - Complete persona definitions, access matrices, and role hierarchy.
+**Canonical Role Reference:** [`roles/role-definitions.md`](../user-experience/roles/role-definitions.md) - Complete persona definitions, access matrices, and role hierarchy.
 
 **Current Status (Needs Verification):**
 > ⚠️ Status below dated 2025-11-13 - verify current state in Supabase dashboard
@@ -262,5 +262,5 @@ export function getRedirectForRole(role: UserRole): string {
 ## Related Documentation
 
 - **Consultant API**: [api-consultant.md](api-consultant.md) (invite flow)
-- **User Personas**: [user-personas.md](../user-experience/user-personas.md) (role definitions)
+- **User Personas**: [roles/role-definitions.md](../user-experience/roles/role-definitions.md) (role definitions)
 - **Data Schema**: [data-schema.md](data-schema.md) (RLS policies)

@@ -15,7 +15,7 @@
  * - US-H09: Make Final Decision (final_decision)
  *
  * Spec Reference: docs/specs/hitl-approval-ui.md
- * Story Reference: docs/user-experience/user-stories.md
+ * Story Reference: docs/user-experience/stories/README.md
  */
 
 import { test, expect, Page } from '@playwright/test';

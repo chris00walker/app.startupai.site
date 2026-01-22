@@ -10,7 +10,7 @@ last_reviewed: "2026-01-22"
 
 **Status:** Active
 **Last Updated:** 2026-01-22
-**Persona Reference:** [`user-personas.md`](./user-personas.md#founder-trial-founder_trial)
+**Persona Reference:** [`personas/trials.md`](../../personas/trials.md#founder-trial-founder_trial)
 
 ---
 
@@ -538,7 +538,7 @@ success_metrics:
   - self_service_resolution: >50%
   - trial_to_paid_after_support: >40%
 
-journey_reference: support-journey-map.md
+journey_reference: ../platform/support-journey-map.md
 
 gdpr_note: "GDPR rights (data export, account deletion) apply to ALL users including trial users."
 
@@ -598,11 +598,11 @@ Day 14 Reached (Trial Expires)
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md#founder-trial-founder_trial) | Founder Trial persona definition |
-| [`user-stories.md`](./user-stories.md#founder-trial-stories-us-ft) | Founder Trial stories (US-FT01-FT03) |
-| [`founder-journey-map.md`](./founder-journey-map.md) | Full founder journey (post-upgrade) |
-| [`billing-journey-map.md`](./billing-journey-map.md) | Payment and upgrade flows |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`personas/trials.md`](../../personas/trials.md#founder-trial-founder_trial) | Founder Trial persona definition |
+| [`stories/trials.md`](../../stories/trials.md) | Founder Trial stories (US-FT01-FT03) |
+| [`founder-journey-map.md`](../founder/founder-journey-map.md) | Full founder journey (post-upgrade) |
+| [`billing-journey-map.md`](../platform/billing-journey-map.md) | Payment and upgrade flows |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

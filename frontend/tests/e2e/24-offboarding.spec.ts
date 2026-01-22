@@ -10,8 +10,8 @@
  * - US-O04: Reactivate Cancelled Account
  * - US-O05: Win-back Email Response
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/offboarding-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/platform/offboarding-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

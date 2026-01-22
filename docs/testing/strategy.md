@@ -76,7 +76,7 @@ Journey Map → User Goal → Test Case
 ### Approach
 
 1. **Derive tests from journey maps**
-   - Source: `docs/user-experience/founder-journey-map.md`
+   - Source: `docs/user-experience/journeys/founder/founder-journey-map.md`
    - Map each journey step to a test case
    - Test user outcomes, not implementation details
 
@@ -87,7 +87,7 @@ Journey Map → User Goal → Test Case
 
 3. **Acceptance test layer**
    - Tests verify user outcomes
-   - Stories defined in [`user-stories.md`](../user-experience/user-stories.md)
+   - Stories defined in [`stories/README.md`](../user-experience/stories/README.md)
    - Example: US-F01 "Complete Quick Start Onboarding"
    - Example: US-C02 "Invite Client"
 
@@ -108,10 +108,10 @@ Journey Map → User Goal → Test Case
 
 ### Reference
 
-- User Personas: [`user-personas.md`](../user-experience/user-personas.md) - Role definitions
-- User Stories: [`user-stories.md`](../user-experience/user-stories.md) - 18 stories with acceptance criteria
-- Founder Journey: [`founder-journey-map.md`](../user-experience/founder-journey-map.md) - 15-step journey
-- Consultant Journey: [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) - 6-phase journey
+- User Personas: [`roles/role-definitions.md`](../user-experience/roles/role-definitions.md) - Role definitions
+- User Stories: [`stories/README.md`](../user-experience/stories/README.md) - 18 stories with acceptance criteria
+- Founder Journey: [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) - 15-step journey
+- Consultant Journey: [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) - 6-phase journey
 - Coverage Matrix: [`journey-test-matrix.md`](./journey-test-matrix.md) - Story-to-test mapping with gap analysis
 
 ---
@@ -225,5 +225,5 @@ frontend/src/
 ## Related Documentation
 
 - **Work Tracking**: `docs/work/in-progress.md` (TDD Effectiveness - P1)
-- **Journey Maps**: `docs/user-experience/founder-journey-map.md`
+- **Journey Maps**: `docs/user-experience/journeys/founder/founder-journey-map.md`
 - **API Specs**: `docs/specs/api-*.md`

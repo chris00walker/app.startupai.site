@@ -555,7 +555,7 @@ Pivot flows integrate with the phase transition state machine:
 
 - [phase-transitions.md](./phase-transitions.md) - Phase state machine
 - [hitl-approval-ui.md](./hitl-approval-ui.md) - HITL checkpoint UI specs
-- [user-stories.md](../user-experience/user-stories.md) - US-P01 through US-P04
+- [stories/README.md](../user-experience/stories/README.md) - US-P01 through US-P04
 
 ---
 

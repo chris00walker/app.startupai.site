@@ -47,7 +47,7 @@ Both include a "Danger Zone" section styled with red border/background for destr
 
 ### User Stories
 
-Stories defined in [`user-stories.md`](../user-experience/user-stories.md):
+Stories defined in [`stories/README.md`](../user-experience/stories/README.md):
 
 - **US-F04**: As a Founder, I want to archive a project so I can hide it from my dashboard without losing data
 - **US-F05**: As a Founder, I want to delete a project permanently when I no longer need it and want to free up resources
@@ -122,7 +122,7 @@ Stories defined in [`user-stories.md`](../user-experience/user-stories.md):
 
 ### User Stories
 
-Stories defined in [`user-stories.md`](../user-experience/user-stories.md):
+Stories defined in [`stories/README.md`](../user-experience/stories/README.md):
 
 - **US-C05**: As a Consultant, I want to archive a client relationship when I'm no longer actively working with them
 - (US-C05 includes restore as part of the archive story)

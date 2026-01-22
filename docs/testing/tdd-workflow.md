@@ -80,7 +80,7 @@ function calculateProjectCompletion(project: Project): number {
 
 ### Step 1: Start with a User Story
 
-Before writing any code, find or create the user story in [`user-stories.md`](../user-experience/user-stories.md).
+Before writing any code, find or create the user story in [`stories/README.md`](../user-experience/stories/README.md).
 
 **Example: US-F04 "Archive Project"**
 
@@ -223,7 +223,7 @@ User Journey → User Goal → Acceptance Criteria → Test Cases → Implementa
 
 1. **Find the Journey Step**
 
-   From [`founder-journey-map.md`](../user-experience/founder-journey-map.md):
+   From [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md):
    ```
    Step 5: Quick Start Form
    - user_goal: "Submit business idea for validation"
@@ -232,7 +232,7 @@ User Journey → User Goal → Acceptance Criteria → Test Cases → Implementa
 
 2. **Map to User Story**
 
-   From [`user-stories.md`](../user-experience/user-stories.md):
+   From [`stories/README.md`](../user-experience/stories/README.md):
    ```
    US-F01: Complete Quick Start Onboarding
    - Acceptance: User submits Quick Start form
@@ -522,7 +522,7 @@ it('should map user data to UserProfile type', () => {
 
 Before starting any feature:
 
-- [ ] User story exists in `user-stories.md`
+- [ ] User story exists in `stories/README.md`
 - [ ] Acceptance criteria are clear
 - [ ] Test file created
 - [ ] First failing test written

@@ -594,7 +594,7 @@ success_metrics:
   - self_service_resolution: >60%
   - support_response_time: <4 hours
 
-journey_reference: support-journey-map.md
+journey_reference: ../platform/support-journey-map.md
 ```
 
 ---
@@ -1285,10 +1285,10 @@ cognitive_support:
 - Section 2.5: Backend & AI integration status
 
 **Related Documentation:**
-- [`onboarding-agent-integration.md`](../features/onboarding-agent-integration.md) - Technical implementation
-- [`ai-conversation-interface.md`](../features/ai-conversation-interface.md) - Chat interface specification
+- [`onboarding-agent-integration.md`](../../../features/onboarding-agent-integration.md) - Technical implementation
+- [`ai-conversation-interface.md`](../../../features/ai-conversation-interface.md) - Chat interface specification
 - [`crewai-frontend-integration.md`](../engineering/crewai-frontend-integration.md) - API integration
-- [`onboarding-agent-personality.md`](../features/onboarding-agent-personality.md) - AI personality design
+- [`onboarding-agent-personality.md`](../../../features/onboarding-agent-personality.md) - AI personality design
 
 ---
 

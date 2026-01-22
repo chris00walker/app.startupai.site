@@ -8,8 +8,8 @@
  * - US-A09: Export User Data
  * - US-A10: Run Data Integrity Check
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/admin-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/platform/admin-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

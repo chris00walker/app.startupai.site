@@ -8,8 +8,8 @@
  * - US-A05: View System Health Dashboard
  * - US-A06: Manage Feature Flags
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/admin-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/platform/admin-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

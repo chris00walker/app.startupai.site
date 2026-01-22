@@ -55,9 +55,9 @@ Journey Map → User Goal → Test Case → Implementation
 **Key principle:** Tests verify *user outcomes*, not *code mechanics*.
 
 **Sources for test cases:**
-- [`user-stories.md`](../user-experience/user-stories.md) - 18 user stories with acceptance criteria
-- [`founder-journey-map.md`](../user-experience/founder-journey-map.md) - 15-step Founder journey
-- [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) - 6-phase Consultant journey
+- [`stories/README.md`](../user-experience/stories/README.md) - 18 user stories with acceptance criteria
+- [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) - 15-step Founder journey
+- [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) - 6-phase Consultant journey
 
 ## Test Stack
 
@@ -133,7 +133,7 @@ pnpm type-check && pnpm test && pnpm test:e2e && pnpm build
 
 ### Before Writing Code
 
-1. Check if a user story exists in [`user-stories.md`](../user-experience/user-stories.md)
+1. Check if a user story exists in [`stories/README.md`](../user-experience/stories/README.md)
 2. Write a failing test based on acceptance criteria
 3. Only then implement the feature
 
@@ -162,9 +162,9 @@ describe('ComponentName', () => {
 | Document | Purpose |
 |----------|---------|
 | **User Experience** | |
-| [`user-stories.md`](../user-experience/user-stories.md) | Story definitions with acceptance criteria |
-| [`founder-journey-map.md`](../user-experience/founder-journey-map.md) | Founder journey steps |
-| [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) | Consultant journey phases |
+| [`stories/README.md`](../user-experience/stories/README.md) | Story definitions with acceptance criteria |
+| [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) | Founder journey steps |
+| [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) | Consultant journey phases |
 | **Specs** | |
 | [`api-onboarding.md`](../specs/api-onboarding.md) | Onboarding API specification |
 | [`accessibility-standards.md`](../specs/accessibility-standards.md) | WCAG compliance requirements |

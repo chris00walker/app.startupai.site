@@ -29,7 +29,7 @@ E2E tests are organized by user journeys and map to user stories. See [`journey-
 | `09-consultant-practice-setup.spec.ts` | US-C01 | Consultant setup |
 | `10-consultant-client-onboarding.spec.ts` | US-C02, US-C07 | Client onboarding |
 
-**Stories Reference:** [`user-stories.md`](../user-experience/user-stories.md)
+**Stories Reference:** [`stories/README.md`](../user-experience/stories/README.md)
 
 ## Quick Start
 
@@ -434,4 +434,4 @@ After these tests pass:
 
 - [`strategy.md`](./strategy.md) - Testing strategy overview
 - [`journey-test-matrix.md`](./journey-test-matrix.md) - Story-to-test coverage matrix
-- [`user-stories.md`](../user-experience/user-stories.md) - User story definitions
+- [`stories/README.md`](../user-experience/stories/README.md) - User story definitions

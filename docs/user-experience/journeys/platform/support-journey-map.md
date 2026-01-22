@@ -622,7 +622,7 @@ post_deletion:
 
 ## Admin Integration
 
-All support requests flow to the Admin dashboard (documented in `admin-journey-map.md`):
+All support requests flow to the Admin dashboard (documented in `../platform/admin-journey-map.md`):
 
 ```
 User Submits Request (US-S01)
@@ -661,11 +661,11 @@ User Submits Request (US-S01)
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md) | All user type definitions |
-| [`user-stories.md`](./user-stories.md#support-stories-us-s) | Support user stories (US-S01-S05) |
-| [`admin-journey-map.md`](./admin-journey-map.md) | Admin support workflows |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
-| [`offboarding-journey-map.md`](./offboarding-journey-map.md) | Subscription cancellation |
+| [`roles/role-definitions.md`](../../roles/role-definitions.md) | All user type definitions |
+| [`stories/platform.md`](../../stories/platform.md) | Support user stories (US-S01-S05) |
+| [`admin-journey-map.md`](../platform/admin-journey-map.md) | Admin support workflows |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
+| [`offboarding-journey-map.md`](../platform/offboarding-journey-map.md) | Subscription cancellation |
 
 ---
 

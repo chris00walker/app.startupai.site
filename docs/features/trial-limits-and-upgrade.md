@@ -408,7 +408,7 @@ Action: Update user.plan, remove trial_expires_at
 
 ## Related Documentation
 
-- [user-stories.md](../user-experience/user-stories.md) - US-FT01, US-FT02, US-FT03
+- [stories/README.md](../user-experience/stories/README.md) - US-FT01, US-FT02, US-FT03
 - [auth.md](../specs/auth.md) - Authentication flow
 - [journey-test-matrix.md](../testing/journey-test-matrix.md) - Test coverage
 

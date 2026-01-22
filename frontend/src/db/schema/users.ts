@@ -4,8 +4,8 @@
  * Stores user profile information linked to Supabase Auth.
  * Extends the built-in auth.users table with application-specific data.
  *
- * @see docs/user-experience/user-personas.md - Canonical persona definitions
- * @see docs/user-experience/user-stories.md - User stories with acceptance criteria
+ * @see docs/user-experience/roles/role-definitions.md - Canonical persona definitions
+ * @see docs/user-experience/stories/README.md - User stories with acceptance criteria
  */
 
 import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
@@ -18,7 +18,7 @@ import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
  * - `consultant`: Advisor managing founder clients
  * - `trial`: Free trial user with limited access
  *
- * @see docs/user-experience/user-personas.md for complete role definitions
+ * @see docs/user-experience/roles/role-definitions.md for complete role definitions
  */
 export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant', 'trial']);
 

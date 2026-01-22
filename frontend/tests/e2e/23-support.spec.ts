@@ -10,8 +10,8 @@
  * - US-S04: Request Data Export (GDPR)
  * - US-S05: Delete Account (GDPR)
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/support-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/platform/support-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

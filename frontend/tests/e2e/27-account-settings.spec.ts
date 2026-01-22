@@ -10,8 +10,8 @@
  * - US-AS04: View Login History
  * - US-AS05: Manage Connected Devices
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/account-settings-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/platform/account-settings-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

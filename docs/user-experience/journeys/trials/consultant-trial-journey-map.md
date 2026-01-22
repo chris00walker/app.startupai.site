@@ -10,7 +10,7 @@ last_reviewed: "2026-01-22"
 
 **Status:** Active
 **Last Updated:** 2026-01-22
-**Persona Reference:** [`user-personas.md`](./user-personas.md#consultant-trial-consultant_trial)
+**Persona Reference:** [`personas/trials.md`](../../personas/trials.md#consultant-trial-consultant_trial)
 
 ---
 
@@ -303,7 +303,7 @@ success_metrics:
   - self_service_resolution: >50%
   - trial_to_paid_after_support: >40%
 
-journey_reference: support-journey-map.md
+journey_reference: ../platform/support-journey-map.md
 
 gdpr_note: "GDPR rights (data export, account deletion) apply to ALL users including trial users."
 
@@ -371,10 +371,10 @@ trial_specific_help:
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md#consultant-trial-consultant_trial) | Consultant Trial persona definition |
-| [`user-stories.md`](./user-stories.md#consultant-trial-stories-us-ct) | Consultant Trial stories (US-CT01-CT05) |
-| [`consultant-journey-map.md`](./consultant-journey-map.md) | Full consultant journey (post-conversion) |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`personas/trials.md`](../../personas/trials.md#consultant-trial-consultant_trial) | Consultant Trial persona definition |
+| [`stories/trials.md`](../../stories/trials.md) | Consultant Trial stories (US-CT01-CT05) |
+| [`consultant-journey-map.md`](../consultant/consultant-journey-map.md) | Full consultant journey (post-conversion) |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

@@ -25,12 +25,12 @@ last_reviewed: "2026-01-22"
 **Problem Solved**: Critical documentation gaps for cross-cutting concerns (Help/Support, Offboarding, Billing, Notifications, Account Settings) that affected all 5 user types.
 
 **Files Created:**
-- `docs/user-experience/support-journey-map.md` - 5 phases, US-S01-S05
-- `docs/user-experience/offboarding-journey-map.md` - 5 phases, US-O01-O05
-- `docs/user-experience/billing-journey-map.md` - 6 phases, US-B01-B10
-- `docs/user-experience/notification-journey-map.md` - 5 phases, US-N01-N05
-- `docs/user-experience/founder-trial-journey-map.md` - 4 phases
-- `docs/user-experience/account-settings-journey-map.md` - 5 phases, US-AS01-AS05
+- `docs/user-experience/journeys/platform/support-journey-map.md` - 5 phases, US-S01-S05
+- `docs/user-experience/journeys/platform/offboarding-journey-map.md` - 5 phases, US-O01-O05
+- `docs/user-experience/journeys/platform/billing-journey-map.md` - 6 phases, US-B01-B10
+- `docs/user-experience/journeys/platform/notification-journey-map.md` - 5 phases, US-N01-N05
+- `docs/user-experience/journeys/trials/founder-trial-journey-map.md` - 4 phases
+- `docs/user-experience/journeys/platform/account-settings-journey-map.md` - 5 phases, US-AS01-AS05
 - `frontend/tests/e2e/23-support.spec.ts` - 19 test stubs
 - `frontend/tests/e2e/24-offboarding.spec.ts` - 25 test stubs
 - `frontend/tests/e2e/25-billing.spec.ts` - 44 test stubs
@@ -38,9 +38,9 @@ last_reviewed: "2026-01-22"
 - `frontend/tests/e2e/27-account-settings.spec.ts` - 31 test stubs
 
 **Files Modified:**
-- `docs/user-experience/user-stories.md` - Added 30 new stories (S, O, B, N, AS groups)
+- `docs/user-experience/stories/README.md` - Added 30 new stories (S, O, B, N, AS groups)
 - `docs/testing/journey-test-matrix.md` - Added 6 matrices, coverage now 38%
-- `docs/user-experience/user-personas.md` - Added lifecycle states and billing states
+- `docs/user-experience/roles/role-definitions.md` - Added lifecycle states and billing states
 
 **Impact**: Enables TDD for all cross-cutting user experiences. Coverage increased from 52 to 82 user stories. All 5 user types now have documented paths for support, billing, and account management.
 

@@ -10,8 +10,8 @@
  * - US-CT04: View Consultant Trial Limits and Status
  * - US-CT05: Upgrade to Consultant Plan
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/consultant-trial-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/trials/consultant-trial-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

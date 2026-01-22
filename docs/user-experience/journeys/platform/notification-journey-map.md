@@ -686,11 +686,11 @@ notifications (
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md) | Role definitions |
-| [`user-stories.md`](./user-stories.md#notification-stories-us-n) | Notification user stories (US-N01-N05) |
-| [`founder-journey-map.md`](./founder-journey-map.md) | HITL approval flow |
-| [`consultant-journey-map.md`](./consultant-journey-map.md) | Client notification flow |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`roles/role-definitions.md`](../../roles/role-definitions.md) | Role definitions |
+| [`stories/platform.md`](../../stories/platform.md) | Notification user stories (US-N01-N05) |
+| [`founder-journey-map.md`](../founder/founder-journey-map.md) | HITL approval flow |
+| [`consultant-journey-map.md`](../consultant/consultant-journey-map.md) | Client notification flow |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

@@ -10,7 +10,7 @@ architectural_pivot: "2026-01-20"
 > **Architectural Pivot (2026-01-20)**: Phase 0 was simplified to Quick Start. The 7-stage AI conversation code has been deleted. See [ADR-006](../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 **Status:** Active
-**Stories Reference:** [`user-stories.md`](../user-experience/user-stories.md)
+**Stories Reference:** [`stories/README.md`](../user-experience/stories/README.md)
 
 This matrix maps each journey step to its corresponding user story and E2E test, enabling gap analysis and test-driven development.
 
@@ -29,7 +29,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 ## Founder Journey Matrix
 
-**Journey Map:** [`founder-journey-map.md`](../user-experience/founder-journey-map.md)
+**Journey Map:** [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md)
 
 | Journey Step | User Story | E2E Test File | Test Description | Status |
 |--------------|------------|---------------|------------------|--------|
@@ -52,7 +52,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 ## Consultant Journey Matrix
 
-**Journey Map:** [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md)
+**Journey Map:** [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Test Description | Status |
 |---------------|--------------|------------|---------------|------------------|--------|
@@ -78,7 +78,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for consultant trial experience with mock clients.
 
-**Journey Map:** [`consultant-trial-journey-map.md`](../user-experience/consultant-trial-journey-map.md)
+**Journey Map:** [`consultant-trial-journey-map.md`](../user-experience/journeys/trials/consultant-trial-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -96,7 +96,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for founder trial experience.
 
-**Journey Map:** [`founder-trial-journey-map.md`](../user-experience/founder-trial-journey-map.md)
+**Journey Map:** [`founder-trial-journey-map.md`](../user-experience/journeys/trials/founder-trial-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -111,7 +111,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for platform administration workflows.
 
-**Journey Map:** [`admin-journey-map.md`](../user-experience/admin-journey-map.md)
+**Journey Map:** [`admin-journey-map.md`](../user-experience/journeys/platform/admin-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -133,7 +133,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for founder trial experience.
 
-**Journey Map:** [`founder-trial-journey-map.md`](../user-experience/founder-trial-journey-map.md)
+**Journey Map:** [`founder-trial-journey-map.md`](../user-experience/journeys/trials/founder-trial-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -150,7 +150,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for support and GDPR flows.
 
-**Journey Map:** [`support-journey-map.md`](../user-experience/support-journey-map.md)
+**Journey Map:** [`support-journey-map.md`](../user-experience/journeys/platform/support-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -167,7 +167,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for cancellation and churn flows.
 
-**Journey Map:** [`offboarding-journey-map.md`](../user-experience/offboarding-journey-map.md)
+**Journey Map:** [`offboarding-journey-map.md`](../user-experience/journeys/platform/offboarding-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -183,7 +183,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for payment lifecycle.
 
-**Journey Map:** [`billing-journey-map.md`](../user-experience/billing-journey-map.md)
+**Journey Map:** [`billing-journey-map.md`](../user-experience/journeys/platform/billing-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -204,7 +204,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for pre-signup marketing touchpoints. Cross-repo: stories documented in app.startupai.site, implementation in startupai.site.
 
-**Journey Map:** [`founder-journey-map.md`](../user-experience/founder-journey-map.md) Steps 1-4
+**Journey Map:** [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) Steps 1-4
 
 | Journey Step | User Story | E2E Test File | Status |
 |--------------|------------|---------------|--------|
@@ -218,7 +218,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for notification delivery.
 
-**Journey Map:** [`notification-journey-map.md`](../user-experience/notification-journey-map.md)
+**Journey Map:** [`notification-journey-map.md`](../user-experience/journeys/platform/notification-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -234,7 +234,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 > **Added (2026-01-22)**: New matrix for profile and security.
 
-**Journey Map:** [`account-settings-journey-map.md`](../user-experience/account-settings-journey-map.md)
+**Journey Map:** [`account-settings-journey-map.md`](../user-experience/journeys/platform/account-settings-journey-map.md)
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Status |
 |---------------|--------------|------------|---------------|--------|
@@ -414,19 +414,19 @@ The original core stories plus HITL and Pivot workflows are fully covered.
 
 | Document | Purpose |
 |----------|---------|
-| [`user-stories.md`](../user-experience/user-stories.md) | Story definitions and acceptance criteria |
+| [`stories/README.md`](../user-experience/stories/README.md) | Story definitions and acceptance criteria |
 | [`strategy.md`](./strategy.md) | Testing strategy and approach |
 | [`e2e-guide.md`](./e2e-guide.md) | E2E test implementation guide |
-| [`founder-journey-map.md`](../user-experience/founder-journey-map.md) | Founder journey steps |
-| [`founder-trial-journey-map.md`](../user-experience/founder-trial-journey-map.md) | Founder trial journey |
-| [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) | Consultant journey phases |
-| [`consultant-trial-journey-map.md`](../user-experience/consultant-trial-journey-map.md) | Consultant trial journey |
-| [`admin-journey-map.md`](../user-experience/admin-journey-map.md) | Admin journey phases |
-| [`support-journey-map.md`](../user-experience/support-journey-map.md) | Support and GDPR flows |
-| [`offboarding-journey-map.md`](../user-experience/offboarding-journey-map.md) | Cancellation and churn |
-| [`billing-journey-map.md`](../user-experience/billing-journey-map.md) | Payment lifecycle |
-| [`notification-journey-map.md`](../user-experience/notification-journey-map.md) | Notification delivery |
-| [`account-settings-journey-map.md`](../user-experience/account-settings-journey-map.md) | Profile and security |
+| [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) | Founder journey steps |
+| [`founder-trial-journey-map.md`](../user-experience/journeys/trials/founder-trial-journey-map.md) | Founder trial journey |
+| [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) | Consultant journey phases |
+| [`consultant-trial-journey-map.md`](../user-experience/journeys/trials/consultant-trial-journey-map.md) | Consultant trial journey |
+| [`admin-journey-map.md`](../user-experience/journeys/platform/admin-journey-map.md) | Admin journey phases |
+| [`support-journey-map.md`](../user-experience/journeys/platform/support-journey-map.md) | Support and GDPR flows |
+| [`offboarding-journey-map.md`](../user-experience/journeys/platform/offboarding-journey-map.md) | Cancellation and churn |
+| [`billing-journey-map.md`](../user-experience/journeys/platform/billing-journey-map.md) | Payment lifecycle |
+| [`notification-journey-map.md`](../user-experience/journeys/platform/notification-journey-map.md) | Notification delivery |
+| [`account-settings-journey-map.md`](../user-experience/journeys/platform/account-settings-journey-map.md) | Profile and security |
 
 ---
 

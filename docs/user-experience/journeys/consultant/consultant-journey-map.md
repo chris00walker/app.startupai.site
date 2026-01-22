@@ -10,7 +10,7 @@ last_reviewed: "2026-01-19"
 
 **Status:** Active
 **Last Updated:** 2026-01-19
-**Cross-Reference:** [`consultant-client-system.md`](../features/consultant-client-system.md) - Technical implementation
+**Cross-Reference:** [`consultant-client-system.md`](../../../features/consultant-client-system.md) - Technical implementation
 
 ---
 
@@ -19,7 +19,7 @@ last_reviewed: "2026-01-19"
 This document maps the complete user journey for Consultants from marketing site signup to managing a portfolio of clients. Use this as a UX reference for the intended user experience and validation checklist.
 
 **Marketing Promise:** "Scale your consulting practice with AI-powered analysis"
-**Persona Reference:** [`user-personas.md`](./user-personas.md#consultant-persona)
+**Persona Reference:** [`personas/consultant.md`](../../personas/consultant.md)
 
 ---
 
@@ -468,7 +468,7 @@ success_metrics:
   - self_service_resolution: >60%
   - support_response_time: <4 hours
 
-journey_reference: support-journey-map.md
+journey_reference: ../platform/support-journey-map.md
 ```
 
 ---
@@ -627,11 +627,11 @@ resolution: "consultant creates new invite for client"
 
 | Document | Relationship |
 |----------|-------------|
-| [`user-personas.md`](./user-personas.md#consultant-persona) | Consultant persona definition |
-| [`user-stories.md`](./user-stories.md#consultant-stories-us-c) | Consultant user stories |
-| [`consultant-client-system.md`](../features/consultant-client-system.md) | Technical implementation |
-| [`api-consultant.md`](../specs/api-consultant.md) | API specification |
-| [`founder-journey-map.md`](./founder-journey-map.md) | Founder journey (client experience) |
+| [`personas/consultant.md`](../../personas/consultant.md) | Consultant persona definition |
+| [`stories/consultant.md`](../../stories/consultant.md) | Consultant user stories |
+| [`consultant-client-system.md`](../../../features/consultant-client-system.md) | Technical implementation |
+| [`api-consultant.md`](../../../specs/api-consultant.md) | API specification |
+| [`founder-journey-map.md`](../founder/founder-journey-map.md) | Founder journey (client experience) |
 
 ---
 

@@ -7,7 +7,7 @@
  * - US-FT02: View Trial Limits
  * - US-FT03: Upgrade to Founder
  *
- * Story Reference: docs/user-experience/user-stories.md
+ * Story Reference: docs/user-experience/stories/README.md
  * Feature Reference: docs/features/trial-limits-and-upgrade.md
  */
 

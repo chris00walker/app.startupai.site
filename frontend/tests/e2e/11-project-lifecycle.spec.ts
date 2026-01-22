@@ -7,7 +7,7 @@
  * - US-F04: Archive Project
  * - US-F05: Delete Project Permanently
  *
- * Story Reference: docs/user-experience/user-stories.md
+ * Story Reference: docs/user-experience/stories/README.md
  * Feature Reference: docs/features/project-client-management.md
  */
 

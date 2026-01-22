@@ -56,7 +56,7 @@ User metadata mirrored from Supabase Auth.
 | `subscription_status` | TEXT | trial (default) |
 | `trial_expires_at` | TIMESTAMP | Trial expiry |
 | `plan_status` | TEXT | active (default) |
-| `role` | ENUM | trial, founder, consultant, admin ([canonical source](../user-experience/user-personas.md)) |
+| `role` | ENUM | trial, founder, consultant, admin ([canonical source](../user-experience/roles/role-definitions.md)) |
 | `created_at` | TIMESTAMP | Account creation |
 | `updated_at` | TIMESTAMP | Last update |
 
@@ -573,4 +573,4 @@ Located in `frontend/src/db/migrations/`:
 - **API Specs**: [api-onboarding.md](api-onboarding.md), [api-crewai.md](api-crewai.md), [api-approvals.md](api-approvals.md)
 - **Consultant System**: [consultant-client-system.md](../features/consultant-client-system.md)
 - **Authentication**: [auth.md](auth.md)
-- **User Personas**: [user-personas.md](../user-experience/user-personas.md)
+- **User Personas**: [roles/role-definitions.md](../user-experience/roles/role-definitions.md)

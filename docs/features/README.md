@@ -49,5 +49,5 @@ Used in `feature-inventory.md` and `wiring-matrix.md`:
 
 - **Code is truth**: Features are derived from codebase, not aspirational
 - **Status tracking**: Update status when code changes
-- **Cross-references**: Link to user stories in `../user-experience/user-stories.md`
+- **Cross-references**: Link to user stories in `../user-experience/stories/README.md`
 - **Test mapping**: Reference E2E tests in `../testing/journey-test-matrix.md`

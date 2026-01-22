@@ -15,8 +15,8 @@
  * - US-B09: Switch Billing Cycle
  * - US-B10: Resume After Payment Recovery
  *
- * Story Reference: docs/user-experience/user-stories.md
- * Journey Reference: docs/user-experience/billing-journey-map.md
+ * Story Reference: docs/user-experience/stories/README.md
+ * Journey Reference: docs/user-experience/journeys/platform/billing-journey-map.md
  */
 
 import { test, expect, Page } from '@playwright/test';

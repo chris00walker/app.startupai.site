@@ -9,7 +9,7 @@
  * - US-P03: Approve Feature Downgrade
  * - US-P04: Approve Strategic Pivot
  *
- * Story Reference: docs/user-experience/user-stories.md
+ * Story Reference: docs/user-experience/stories/README.md
  * Spec Reference: docs/specs/pivot-workflows.md
  */
 

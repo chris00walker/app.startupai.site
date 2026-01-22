@@ -10,7 +10,7 @@ last_reviewed: "2026-01-22"
 
 **Status:** Active
 **Last Updated:** 2026-01-22
-**Persona Reference:** [`user-personas.md`](./user-personas.md#admin-persona)
+**Persona Reference:** [`personas/admin.md`](../../personas/admin.md)
 
 ---
 
@@ -304,9 +304,9 @@ success_metrics:
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md#admin-persona) | Admin persona definition |
-| [`user-stories.md`](./user-stories.md#admin-stories-us-a) | Admin user stories (US-A01-A10) |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`personas/admin.md`](../../personas/admin.md) | Admin persona definition |
+| [`stories/admin.md`](../../stories/admin.md) | Admin user stories (US-A01-A10) |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

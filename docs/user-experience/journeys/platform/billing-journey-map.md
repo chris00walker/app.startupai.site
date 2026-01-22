@@ -828,11 +828,11 @@ promo_types:
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md) | Role definitions and billing tiers |
-| [`user-stories.md`](./user-stories.md#billing-stories-us-b) | Billing user stories (US-B01-B10) |
-| [`offboarding-journey-map.md`](./offboarding-journey-map.md) | Cancellation flows |
-| [`support-journey-map.md`](./support-journey-map.md) | Billing support requests |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`roles/role-definitions.md`](../../roles/role-definitions.md) | Role definitions and billing tiers |
+| [`stories/platform.md`](../../stories/platform.md) | Billing user stories (US-B01-B10) |
+| [`offboarding-journey-map.md`](../platform/offboarding-journey-map.md) | Cancellation flows |
+| [`support-journey-map.md`](../platform/support-journey-map.md) | Billing support requests |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

@@ -255,4 +255,4 @@ The following directories contain additional components not detailed above:
 - **Stage Progression**: [`features/stage-progression.md`](../features/stage-progression.md) (deprecated - see ADR-006)
 - **API Specs**: [`api-onboarding.md`](api-onboarding.md), [`api-approvals.md`](api-approvals.md)
 - **Architecture**: [`architecture.md`](architecture.md) (redirects to startupai-crew canonical source)
-- **Journey Map**: [`user-experience/founder-journey-map.md`](../user-experience/founder-journey-map.md)
+- **Journey Map**: [`user-experience/journeys/founder/founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md)

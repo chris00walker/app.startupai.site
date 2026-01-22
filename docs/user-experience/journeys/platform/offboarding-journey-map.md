@@ -48,11 +48,11 @@ Voluntary Churn (User-Initiated)
     │
     ├─ Trial expiration without upgrade
     │
-    └─ Account deletion (see support-journey-map.md)
+    └─ Account deletion (see ../platform/support-journey-map.md)
 
 Involuntary Churn (Payment-Related)
     │
-    ├─ Payment failure (see billing-journey-map.md)
+    ├─ Payment failure (see ../platform/billing-journey-map.md)
     │
     └─ Credit card expiration
 
@@ -581,11 +581,11 @@ unsubscribe:
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md) | Role definitions |
-| [`user-stories.md`](./user-stories.md#offboarding-stories-us-o) | Offboarding user stories (US-O01-O05) |
-| [`billing-journey-map.md`](./billing-journey-map.md) | Payment failure flows |
-| [`support-journey-map.md`](./support-journey-map.md) | Account deletion (GDPR) |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`roles/role-definitions.md`](../../roles/role-definitions.md) | Role definitions |
+| [`stories/platform.md`](../../stories/platform.md) | Offboarding user stories (US-O01-O05) |
+| [`billing-journey-map.md`](../platform/billing-journey-map.md) | Payment failure flows |
+| [`support-journey-map.md`](../platform/support-journey-map.md) | Account deletion (GDPR) |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

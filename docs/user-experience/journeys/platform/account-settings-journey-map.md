@@ -50,11 +50,11 @@ The Account Settings journey consists of 5 phases covering account management an
     │       ├── Login History
     │       └── Connected Devices
     │
-    ├── /settings/billing      ← See billing-journey-map.md
+    ├── /settings/billing      ← See ../platform/billing-journey-map.md
     │
-    ├── /settings/notifications ← See notification-journey-map.md
+    ├── /settings/notifications ← See ../platform/notification-journey-map.md
     │
-    └── /settings/privacy      ← See support-journey-map.md (GDPR)
+    └── /settings/privacy      ← See ../platform/support-journey-map.md (GDPR)
 ```
 
 ---
@@ -621,12 +621,12 @@ All security-related changes trigger notifications:
 
 | Document | What It Covers |
 |----------|---------------|
-| [`user-personas.md`](./user-personas.md) | Role definitions |
-| [`user-stories.md`](./user-stories.md#account-settings-stories-us-as) | Account settings user stories (US-AS01-AS05) |
-| [`billing-journey-map.md`](./billing-journey-map.md) | Billing settings |
-| [`notification-journey-map.md`](./notification-journey-map.md) | Notification preferences |
-| [`support-journey-map.md`](./support-journey-map.md) | Privacy settings and GDPR |
-| [`journey-test-matrix.md`](../testing/journey-test-matrix.md) | E2E test coverage |
+| [`roles/role-definitions.md`](../../roles/role-definitions.md) | Role definitions |
+| [`stories/platform.md`](../../stories/platform.md) | Account settings user stories (US-AS01-AS05) |
+| [`billing-journey-map.md`](../platform/billing-journey-map.md) | Billing settings |
+| [`notification-journey-map.md`](../platform/notification-journey-map.md) | Notification preferences |
+| [`support-journey-map.md`](../platform/support-journey-map.md) | Privacy settings and GDPR |
+| [`journey-test-matrix.md`](../../../testing/journey-test-matrix.md) | E2E test coverage |
 
 ---
 

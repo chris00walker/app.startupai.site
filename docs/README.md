@@ -56,10 +56,11 @@ For new contributors, start with:
 
 | Document | Purpose |
 |----------|---------|
-| [user-personas.md](user-experience/user-personas.md) | Canonical role definitions (Founder, Consultant, Admin, Trial) |
-| [user-stories.md](user-experience/user-stories.md) | 18 user stories with acceptance criteria |
-| [founder-journey-map.md](user-experience/founder-journey-map.md) | 15-step Founder journey |
-| [consultant-journey-map.md](user-experience/consultant-journey-map.md) | 6-phase Consultant journey |
+| [role-definitions.md](user-experience/roles/role-definitions.md) | Canonical role definitions (Founder, Consultant, Admin, Trial) |
+| [personas/README.md](user-experience/personas/README.md) | Persona index and behavioral profiles |
+| [stories/README.md](user-experience/stories/README.md) | Story format, coverage, and cross-references |
+| [founder-journey-map.md](user-experience/journeys/founder/founder-journey-map.md) | 15-step Founder journey |
+| [consultant-journey-map.md](user-experience/journeys/consultant/consultant-journey-map.md) | 6-phase Consultant journey |
 
 ### Testing (`testing/`)
 

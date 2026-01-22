@@ -338,7 +338,7 @@ The fix is successful when:
 - **Master Architecture**: `startupai-crew/docs/master-architecture/`
 - **ADR-005 (Split API)**: `startupai-crew/docs/adr/005-state-first-synchronized-loop.md`
 - **Plan File**: `/home/chris/.claude/plans/hidden-knitting-canyon.md`
-- **User Stories**: `docs/user-experience/user-stories.md` (US-F01)
+- **User Stories**: `docs/user-experience/stories/README.md` (US-F01)
 
 ---
 
