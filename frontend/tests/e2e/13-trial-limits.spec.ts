@@ -4,8 +4,8 @@
  * Trial Limits and Upgrade E2E Tests
  *
  * Covers user stories:
- * - US-T02: View Trial Limits
- * - US-T03: Upgrade to Founder
+ * - US-FT02: View Trial Limits
+ * - US-FT03: Upgrade to Founder
  *
  * Story Reference: docs/user-experience/user-stories.md
  * Feature Reference: docs/features/trial-limits-and-upgrade.md
@@ -24,7 +24,7 @@ import { test, expect, Page } from '@playwright/test';
 const TRIAL_USER = {
   email: 'trial-test@startupai.com',
   password: 'TrialTest123!',
-  type: 'trial' as const,
+  type: 'founder_trial' as const,
 };
 
 /**
@@ -172,10 +172,10 @@ async function mockTrialProjects(
 }
 
 // =============================================================================
-// Test Suite: US-T02 - View Trial Limits
+// Test Suite: US-FT02 - View Trial Limits
 // =============================================================================
 
-test.describe('US-T02: View Trial Limits', () => {
+test.describe('US-FT02: View Trial Limits', () => {
   test('should display trial badge in header', async ({ page }) => {
     // Given: I am logged in as a Trial user
     await mockTrialUser(page, { daysRemaining: 12 });
@@ -353,10 +353,10 @@ test.describe('US-T02: View Trial Limits', () => {
 });
 
 // =============================================================================
-// Test Suite: US-T03 - Upgrade to Founder
+// Test Suite: US-FT03 - Upgrade to Founder
 // =============================================================================
 
-test.describe('US-T03: Upgrade to Founder', () => {
+test.describe('US-FT03: Upgrade to Founder', () => {
   test('should display upgrade CTA in trial card', async ({ page }) => {
     await mockTrialUser(page);
     await page.goto('/founder-dashboard');
