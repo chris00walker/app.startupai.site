@@ -440,6 +440,37 @@ success_metrics:
   - unlink_notification_rate: (future feature)
 ```
 
+### Cross-Cutting: Get Help (Any Time)
+
+**Get Help Step (available throughout journey)**
+```yaml
+touchpoint: help icon / Settings > Support
+user_state: needs_assistance
+user_goal: get_help_with_issue_or_question
+user_actions:
+  - clicks help icon (?) in header or footer
+  - browses knowledge base articles
+  - submits support request if needed
+  - tracks existing support tickets
+available_options:
+  - knowledge_base: "Search help articles (US-S02)"
+  - contact_support: "Submit support request (US-S01)"
+  - track_tickets: "View existing requests (US-S03)"
+  - data_export: "Request data export (US-S04)"
+  - account_deletion: "Delete account (US-S05)"
+user_emotions: frustrated_or_curious, seeking_resolution
+pain_points:
+  - unclear where to find help
+  - client-related issues need fast resolution
+  - portfolio management questions
+success_metrics:
+  - help_access_rate: >5% of users/month
+  - self_service_resolution: >60%
+  - support_response_time: <4 hours
+
+journey_reference: support-journey-map.md
+```
+
 ---
 
 ## 2. Practice Profile Form Specification

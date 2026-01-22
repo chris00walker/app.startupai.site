@@ -160,7 +160,7 @@ Status: Specified in `docs/features/trial-limits-and-upgrade.md`, not yet fully 
 - spec: `GET /api/user/trial-status` - trial limits API
 - spec: `POST /api/stripe/create-checkout-session` - Stripe checkout API
 
-User Stories: US-T02, US-T03
+User Stories: US-FT02, US-FT03
 E2E Tests: `13-trial-limits.spec.ts`
 
 ## Pivot Workflows (spec-based)

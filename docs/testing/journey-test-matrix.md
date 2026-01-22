@@ -1,7 +1,7 @@
 ---
 purpose: "Matrix mapping journey steps to user stories and E2E tests"
 status: "active"
-last_reviewed: "2026-01-20"
+last_reviewed: "2026-01-22"
 architectural_pivot: "2026-01-20"
 ---
 
@@ -34,7 +34,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 | Journey Step | User Story | E2E Test File | Test Description | Status |
 |--------------|------------|---------------|------------------|--------|
 | Step 1-4: Signup & Auth | N/A (cross-cutting) | `01-login.spec.ts` | Authentication flows | Covered |
-| Step 5: Quick Start Form | US-F01, US-T01 | `16-quick-start-founder.spec.ts` | "should submit Quick Start form" | Covered |
+| Step 5: Quick Start Form | US-F01, US-FT01 | `16-quick-start-founder.spec.ts` | "should submit Quick Start form" | Covered |
 | Step 5: Optional Hints | US-F01 | `16-quick-start-founder.spec.ts` | "should expand and use hint fields" | Covered |
 | Step 6: Phase 1 Starts | US-F01 | `16-quick-start-founder.spec.ts` | "should redirect to dashboard after submit" | Covered |
 | Step 7: HITL Approvals | US-F03 | `05-hitl-approval-flow.spec.ts` | "should display approval stats cards" | Covered |
@@ -42,6 +42,9 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 | Step 8: View Canvases | US-F06 | `04-founder-analysis-journey.spec.ts` | "should display VPC content in Canvases tab" | Covered |
 | Step 8: AI Attribution | US-F02 | `03-founder-attribution.spec.ts` | "should display founder status panel" | Covered |
 | Step 9: Action Planning | US-F06 | `04-founder-analysis-journey.spec.ts` | "should navigate between dashboard tabs" | Covered |
+| Step 6-7: Progress Indicators | US-F08 | `04-founder-analysis-journey.spec.ts` | "should show phase progress indicators" | Covered |
+| Step 6: Activity Feed | US-F09 | `04-founder-analysis-journey.spec.ts` | "should update activity feed" | Covered |
+| Step 7: Error Handling | US-F10 | `04-founder-analysis-journey.spec.ts` | "should handle phase errors gracefully" | Covered |
 | Archive Project | US-F04 | `11-project-lifecycle.spec.ts` | "should archive project when confirmed" | Covered |
 | Delete Project | US-F05 | `11-project-lifecycle.spec.ts` | "should delete project permanently when confirmed" | Covered |
 
@@ -71,14 +74,175 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 ---
 
-## Trial User Journey Matrix
+## Consultant Trial Journey Matrix
 
-| Journey Step | User Story | E2E Test File | Test Description | Status |
-|--------------|------------|---------------|------------------|--------|
-| Trial Signup | US-T01 | `01-login.spec.ts` | Authentication redirect | Covered |
-| Start Onboarding | US-T01 | `02-onboarding-flow.spec.ts` | "should start onboarding" | Covered |
-| View Trial Limits | US-T02 | `13-trial-limits.spec.ts` | "should display trial status card on dashboard" | Covered |
-| Upgrade to Founder | US-T03 | `13-trial-limits.spec.ts` | "should initiate Stripe checkout" | Covered |
+> **Added (2026-01-22)**: New matrix for consultant trial experience with mock clients.
+
+**Journey Map:** [`consultant-trial-journey-map.md`](../user-experience/consultant-trial-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Trial Signup | US-CT01 | `22-consultant-trial.spec.ts` | Gap |
+| Phase 1 | Practice Setup | US-CT01 | `22-consultant-trial.spec.ts` | Gap |
+| Phase 2 | View Mock Clients | US-CT02 | `22-consultant-trial.spec.ts` | Gap |
+| Phase 2 | View Trial Status | US-CT04 | `22-consultant-trial.spec.ts` | Gap |
+| Phase 3 | Attempt Real Invite | US-CT03 | `22-consultant-trial.spec.ts` | Gap |
+| Phase 4 | Upgrade to Paid | US-CT05 | `22-consultant-trial.spec.ts` | Gap |
+| Phase 4 | Post-Upgrade Orientation | US-CT06 | `22-consultant-trial.spec.ts` | Gap |
+
+---
+
+## Founder Trial Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for founder trial experience.
+
+**Journey Map:** [`founder-trial-journey-map.md`](../user-experience/founder-trial-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Trial Signup | US-FT01 | `16-quick-start-founder.spec.ts` | Covered |
+| Phase 2-3 | Trial Limits | US-FT02 | `13-trial-limits.spec.ts` | Covered |
+| Phase 4 | Upgrade to Paid | US-FT03 | `13-trial-limits.spec.ts` | Covered |
+| Phase 4 | Post-Upgrade Orientation | US-FT04 | `13-trial-limits.spec.ts` | Gap |
+
+---
+
+## Admin Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for platform administration workflows.
+
+**Journey Map:** [`admin-journey-map.md`](../user-experience/admin-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Admin Login | US-A11 | `19-admin-user-management.spec.ts` | Gap |
+| Phase 1 | User Search | US-A01 | `19-admin-user-management.spec.ts` | Gap |
+| Phase 1 | View User Profile | US-A02 | `19-admin-user-management.spec.ts` | Gap |
+| Phase 1 | Change User Role | US-A08 | `19-admin-user-management.spec.ts` | Gap |
+| Phase 2 | Impersonate User | US-A03 | `19-admin-user-management.spec.ts` | Gap |
+| Phase 3 | Retry Failed Workflow | US-A04 | `20-admin-operations.spec.ts` | Gap |
+| Phase 3 | View System Health | US-A05 | `20-admin-operations.spec.ts` | Gap |
+| Phase 4 | Manage Feature Flags | US-A06 | `20-admin-operations.spec.ts` | Gap |
+| Phase 5 | View Audit Logs | US-A07 | `21-admin-audit.spec.ts` | Gap |
+| Phase 6 | Export User Data | US-A09 | `21-admin-audit.spec.ts` | Gap |
+| Phase 6 | Data Integrity Check | US-A10 | `21-admin-audit.spec.ts` | Gap |
+
+---
+
+## Founder Trial Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for founder trial experience.
+
+**Journey Map:** [`founder-trial-journey-map.md`](../user-experience/founder-trial-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Trial Signup & Onboarding | US-FT01 | `02-onboarding-flow.spec.ts` | Covered |
+| Phase 1 | Quick Start Form | US-FT01 | `16-quick-start-founder.spec.ts` | Covered |
+| Phase 2 | View Trial Dashboard | US-FT02 | `13-trial-limits.spec.ts` | Covered |
+| Phase 2 | View Trial Limits | US-FT02 | `13-trial-limits.spec.ts` | Covered |
+| Phase 3 | Review HITL Checkpoint | US-F03 | `14-hitl-extended.spec.ts` | Covered |
+| Phase 4 | Upgrade to Founder | US-FT03 | `13-trial-limits.spec.ts` | Covered |
+
+---
+
+## Support Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for support and GDPR flows.
+
+**Journey Map:** [`support-journey-map.md`](../user-experience/support-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Access Help Center | US-S02 | `23-support.spec.ts` | Gap |
+| Phase 1 | Search Knowledge Base | US-S02 | `23-support.spec.ts` | Gap |
+| Phase 2 | Submit Support Request | US-S01 | `23-support.spec.ts` | Gap |
+| Phase 3 | Track Support Ticket | US-S03 | `23-support.spec.ts` | Gap |
+| Phase 4 | Request Data Export | US-S04 | `23-support.spec.ts` | Gap |
+| Phase 5 | Delete Account | US-S05 | `23-support.spec.ts` | Gap |
+
+---
+
+## Offboarding Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for cancellation and churn flows.
+
+**Journey Map:** [`offboarding-journey-map.md`](../user-experience/offboarding-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Cancel Subscription | US-O01 | `24-offboarding.spec.ts` | Gap |
+| Phase 2 | Complete Exit Survey | US-O02 | `24-offboarding.spec.ts` | Gap |
+| Phase 3 | View Data Retention | US-O03 | `24-offboarding.spec.ts` | Gap |
+| Phase 4 | Reactivate Account | US-O04 | `24-offboarding.spec.ts` | Gap |
+| Phase 5 | Win-Back Response | US-O05 | `24-offboarding.spec.ts` | Gap |
+
+---
+
+## Billing Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for payment lifecycle.
+
+**Journey Map:** [`billing-journey-map.md`](../user-experience/billing-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | View Billing History | US-B01 | `25-billing.spec.ts` | Gap |
+| Phase 1 | Download Invoice | US-B02 | `25-billing.spec.ts` | Gap |
+| Phase 2 | Update Payment Method | US-B03 | `25-billing.spec.ts` | Gap |
+| Phase 3 | Handle Payment Failure | US-B04 | `25-billing.spec.ts` | Gap |
+| Phase 3 | Resume After Recovery | US-B10 | `25-billing.spec.ts` | Gap |
+| Phase 4 | Change Plan | US-B06 | `25-billing.spec.ts` | Gap |
+| Phase 4 | Switch Billing Cycle | US-B09 | `25-billing.spec.ts` | Gap |
+| Phase 5 | View Tax Invoice | US-B07 | `25-billing.spec.ts` | Gap |
+| Phase 6 | Request Refund | US-B05 | `25-billing.spec.ts` | Gap |
+| Phase 6 | Apply Promo Code | US-B08 | `25-billing.spec.ts` | Gap |
+
+---
+
+## Marketing Funnel Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for pre-signup marketing touchpoints. Cross-repo: stories documented in app.startupai.site, implementation in startupai.site.
+
+**Journey Map:** [`founder-journey-map.md`](../user-experience/founder-journey-map.md) Steps 1-4
+
+| Journey Step | User Story | E2E Test File | Status |
+|--------------|------------|---------------|--------|
+| Landing Page Value Props | US-MF01 | Cross-repo (marketing site) | Gap |
+| Pricing Page | US-MF02 | Cross-repo (marketing site) | Gap |
+| Signup Form | US-MF03 | Cross-repo (marketing site) | Gap |
+
+---
+
+## Notification Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for notification delivery.
+
+**Journey Map:** [`notification-journey-map.md`](../user-experience/notification-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Receive In-App Notification | US-N01 | `26-notifications.spec.ts` | Gap |
+| Phase 2 | Receive Email Notification | US-N02 | `26-notifications.spec.ts` | Gap |
+| Phase 3 | Manage Preferences | US-N03 | `26-notifications.spec.ts` | Gap |
+| Phase 4 | Escalation Alert | US-N04 | `26-notifications.spec.ts` | Gap |
+| Phase 5 | Unsubscribe | US-N05 | `26-notifications.spec.ts` | Gap |
+
+---
+
+## Account Settings Journey Matrix
+
+> **Added (2026-01-22)**: New matrix for profile and security.
+
+**Journey Map:** [`account-settings-journey-map.md`](../user-experience/account-settings-journey-map.md)
+
+| Journey Phase | Journey Step | User Story | E2E Test File | Status |
+|---------------|--------------|------------|---------------|--------|
+| Phase 1 | Update Profile | US-AS01 | `27-account-settings.spec.ts` | Gap |
+| Phase 2 | Change Password | US-AS02 | `27-account-settings.spec.ts` | Gap |
+| Phase 3 | Enable 2FA | US-AS03 | `27-account-settings.spec.ts` | Gap |
+| Phase 4 | View Login History | US-AS04 | `27-account-settings.spec.ts` | Gap |
+| Phase 5 | Manage Devices | US-AS05 | `27-account-settings.spec.ts` | Gap |
 
 ---
 
@@ -120,7 +284,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 |-----------|------------|-----------------|---------------|
 | `00-smoke.spec.ts` | 3 | - | Infrastructure health |
 | `01-login.spec.ts` | 6 | Cross-cutting | Authentication flows |
-| `02-onboarding-flow.spec.ts` | 14 | US-F01, US-T01 | Legacy onboarding (to be updated) |
+| `02-onboarding-flow.spec.ts` | 14 | US-F01, US-FT01 | Legacy onboarding (to be updated) |
 | `03-founder-attribution.spec.ts` | 9 | US-F02 | AI Founder display |
 | `04-founder-analysis-journey.spec.ts` | 14 | US-F02, US-F06 | Dashboard & analysis |
 | `05-hitl-approval-flow.spec.ts` | 13 | US-F03, US-C04 | Approval workflows |
@@ -131,22 +295,24 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 | `10-consultant-client-onboarding.spec.ts` | 6 | US-C02 | Client onboarding (invites) |
 | `11-project-lifecycle.spec.ts` | 16 | US-F04, US-F05 | Project archive & delete |
 | `12-client-lifecycle.spec.ts` | 18 | US-C05, US-C06 | Client archive & resend |
-| `13-trial-limits.spec.ts` | 20 | US-T02, US-T03 | Trial limits & upgrade |
+| `13-trial-limits.spec.ts` | 20 | US-FT02, US-FT03 | Trial limits & upgrade |
 | `14-hitl-extended.spec.ts` | 24 | US-H01-H09 | Extended HITL checkpoints |
 | `15-pivot-workflows.spec.ts` | 22 | US-P01-P04 | Pivot decision workflows |
-| `16-quick-start-founder.spec.ts` | 8 | US-F01, US-T01 | **NEW:** Founder Quick Start flow |
+| `16-quick-start-founder.spec.ts` | 8 | US-F01, US-FT01 | **NEW:** Founder Quick Start flow |
 | `17-quick-start-consultant.spec.ts` | 8 | US-C07 | **NEW:** Consultant Quick Start for clients |
-| **Total** | **222** | **31 of 31** | |
+| **Total** | **222** | **31 of 82** | See Coverage Statistics below |
 
 ---
 
 ## Gap Analysis Summary
 
-### All Stories Now Covered
+> **Updated 2026-01-22**: Reflects expanded story count (82 total) with 51 gaps.
 
-All 31 user stories now have E2E test coverage.
+### Core Stories Covered (31 of 82)
 
-#### Original Stories (US-F, US-C, US-T)
+The original core stories plus HITL and Pivot workflows are fully covered.
+
+#### Core User Stories (US-F, US-C, US-FT)
 
 | Story ID | Title | Test File | Status |
 |----------|-------|-----------|--------|
@@ -154,8 +320,8 @@ All 31 user stories now have E2E test coverage.
 | US-F05 | Delete Project | `11-project-lifecycle.spec.ts` | ✅ Covered |
 | US-C05 | Archive Client | `12-client-lifecycle.spec.ts` | ✅ Covered |
 | US-C06 | Resend Client Invite | `12-client-lifecycle.spec.ts` | ✅ Covered |
-| US-T02 | View Trial Limits | `13-trial-limits.spec.ts` | ✅ Covered |
-| US-T03 | Upgrade to Founder | `13-trial-limits.spec.ts` | ✅ Covered |
+| US-FT02 | View Trial Limits | `13-trial-limits.spec.ts` | ✅ Covered |
+| US-FT03 | Upgrade to Founder | `13-trial-limits.spec.ts` | ✅ Covered |
 
 #### HITL Checkpoint Stories (US-H)
 
@@ -182,27 +348,55 @@ All 31 user stories now have E2E test coverage.
 
 ### Coverage Statistics
 
+> **Updated 2026-01-22**: Quality audit remediation - added Marketing Funnel, split F08, removed H03.
+
 | Category | Stories | Covered | Gaps | Coverage % |
 |----------|---------|---------|------|------------|
-| Founder (US-F) | 8 | 8 | 0 | 100% |
+| Founder (US-F) | 10 | 10 | 0 | 100% |
 | Consultant (US-C) | 7 | 7 | 0 | 100% |
-| Trial (US-T) | 3 | 3 | 0 | 100% |
-| HITL (US-H) | 9 | 9 | 0 | 100% |
+| Founder Trial (US-FT) | 4 | 3 | 1 | 75% |
+| Consultant Trial (US-CT) | 6 | 0 | 6 | 0% |
+| Admin (US-A) | 11 | 0 | 11 | 0% |
+| HITL (US-H) | 8 | 8 | 0 | 100% |
 | Pivot (US-P) | 4 | 4 | 0 | 100% |
-| **Total** | **31** | **31** | **0** | **100%** |
+| Edge Case (US-E) | 6 | 0 | 6 | 0% |
+| Support (US-S) | 5 | 0 | 5 | 0% |
+| Offboarding (US-O) | 5 | 0 | 5 | 0% |
+| Billing (US-B) | 10 | 0 | 10 | 0% |
+| Notification (US-N) | 5 | 0 | 5 | 0% |
+| Account Settings (US-AS) | 5 | 0 | 5 | 0% |
+| Marketing Funnel (US-MF) | 3 | 0 | 3 | 0% |
+| **Total** | **89** | **32** | **57** | **36%** |
+
+### New Test Files Needed
+
+| Test File | Stories | Priority |
+|-----------|---------|----------|
+| `18-edge-cases.spec.ts` | US-E01-E06 | P2 |
+| `19-admin-user-management.spec.ts` | US-A01, US-A02, US-A03, US-A08, US-A11 | P1 |
+| `20-admin-operations.spec.ts` | US-A04, US-A05, US-A06 | P1 |
+| `21-admin-audit.spec.ts` | US-A07, US-A09, US-A10 | P2 |
+| `22-consultant-trial.spec.ts` | US-CT01-CT06 | P1 |
+| `23-support.spec.ts` | US-S01-S05 | P1 |
+| `24-offboarding.spec.ts` | US-O01-O05 | P2 |
+| `25-billing.spec.ts` | US-B01-B10 | P0 (Critical) |
+| `26-notifications.spec.ts` | US-N01-N05 | P2 |
+| `27-account-settings.spec.ts` | US-AS01-AS05 | P2 |
+| Marketing site tests (cross-repo) | US-MF01-MF03 | P2 |
 
 ### Completed Priorities
 
 1. ~~**P0 - Critical:** Founder's Brief and Final Decision (US-H01, US-H09)~~ ✅ DONE
    - Covered in `14-hitl-extended.spec.ts`
 
-2. ~~**P1 - High:** All Phase Gate checkpoints (US-H03, US-H06, US-H07, US-H08)~~ ✅ DONE
+2. ~~**P1 - High:** All Phase Gate checkpoints (US-H06, US-H07, US-H08)~~ ✅ DONE
    - Covered in `14-hitl-extended.spec.ts`
+   - Note: US-H03 was removed per ADR-006 (Quick Start architecture)
 
 3. ~~**P1 - High:** Pivot flows (US-P01, US-P02)~~ ✅ DONE
    - Covered in `15-pivot-workflows.spec.ts`
 
-4. ~~**High Priority:** Trial limits and upgrade flow (US-T02, US-T03)~~ ✅ DONE
+4. ~~**High Priority:** Trial limits and upgrade flow (US-FT02, US-FT03)~~ ✅ DONE
    - Covered in `13-trial-limits.spec.ts`
 
 5. ~~**Medium Priority:** Project lifecycle (US-F04, US-F05)~~ ✅ DONE
@@ -224,7 +418,15 @@ All 31 user stories now have E2E test coverage.
 | [`strategy.md`](./strategy.md) | Testing strategy and approach |
 | [`e2e-guide.md`](./e2e-guide.md) | E2E test implementation guide |
 | [`founder-journey-map.md`](../user-experience/founder-journey-map.md) | Founder journey steps |
+| [`founder-trial-journey-map.md`](../user-experience/founder-trial-journey-map.md) | Founder trial journey |
 | [`consultant-journey-map.md`](../user-experience/consultant-journey-map.md) | Consultant journey phases |
+| [`consultant-trial-journey-map.md`](../user-experience/consultant-trial-journey-map.md) | Consultant trial journey |
+| [`admin-journey-map.md`](../user-experience/admin-journey-map.md) | Admin journey phases |
+| [`support-journey-map.md`](../user-experience/support-journey-map.md) | Support and GDPR flows |
+| [`offboarding-journey-map.md`](../user-experience/offboarding-journey-map.md) | Cancellation and churn |
+| [`billing-journey-map.md`](../user-experience/billing-journey-map.md) | Payment lifecycle |
+| [`notification-journey-map.md`](../user-experience/notification-journey-map.md) | Notification delivery |
+| [`account-settings-journey-map.md`](../user-experience/account-settings-journey-map.md) | Profile and security |
 
 ---
 
@@ -232,12 +434,14 @@ All 31 user stories now have E2E test coverage.
 
 | Date | Change |
 |------|--------|
+| 2026-01-22 | **CROSS-CUTTING JOURNEYS**: Added 6 new journey matrices (Founder Trial, Support, Offboarding, Billing, Notification, Account Settings). Added 30 new stories. Coverage dropped to 38% pending 10 new test files. |
+| 2026-01-22 | **PERSONA EXPANSION**: Added Admin (10 stories) and Consultant Trial (5 stories) matrices; Renamed Trial to Founder Trial; Coverage dropped from 100% to 60% pending new test files |
 | 2026-01-20 | **QUICK START IMPLEMENTATION COMPLETE**: Created `16-quick-start-founder.spec.ts` and `17-quick-start-consultant.spec.ts`. Legacy conversation code deleted. |
 | 2026-01-19 | **QUICK START PIVOT**: Multiple tests deprecated (7-stage conversation, session persistence, stage indicators). New tests needed for Quick Start form and `approve_discovery_output` checkpoint. |
 | 2026-01-19 | **100% COVERAGE ACHIEVED** - All 31 user stories now have E2E tests |
 | 2026-01-19 | Created `11-project-lifecycle.spec.ts` - US-F04, US-F05 covered |
 | 2026-01-19 | Created `12-client-lifecycle.spec.ts` - US-C05, US-C06 covered |
-| 2026-01-19 | Created `13-trial-limits.spec.ts` - US-T02, US-T03 covered |
+| 2026-01-19 | Created `13-trial-limits.spec.ts` - US-FT02, US-FT03 covered |
 | 2026-01-19 | Created `15-pivot-workflows.spec.ts` - US-P01 through US-P04 covered |
 | 2026-01-19 | Created `14-hitl-extended.spec.ts` - all 9 HITL stories now covered (US-H01-H09) |
 | 2026-01-19 | Coverage improved from 42% to 68% (21 of 31 stories) |

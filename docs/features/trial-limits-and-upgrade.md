@@ -1,8 +1,8 @@
 ---
-purpose: "Feature specification for trial user limits and upgrade flow"
+purpose: "Feature specification for founder trial user limits and upgrade flow"
 status: "active"
-last_reviewed: "2026-01-19"
-user_stories: ["US-T01", "US-T02", "US-T03"]
+last_reviewed: "2026-01-22"
+user_stories: ["US-FT01", "US-FT02", "US-FT03"]
 ---
 
 # Trial Limits and Upgrade Feature
@@ -15,9 +15,9 @@ Trial users have limited access to StartupAI features to experience the platform
 
 | Story | Title | Priority |
 |-------|-------|----------|
-| US-T01 | Start Trial Onboarding | High |
-| US-T02 | View Trial Limits | High |
-| US-T03 | Upgrade to Founder | High |
+| US-FT01 | Start Founder Trial Onboarding | High |
+| US-FT02 | View Trial Limits | High |
+| US-FT03 | Upgrade to Founder | High |
 
 ---
 
@@ -363,7 +363,7 @@ Action: Update user.plan, remove trial_expires_at
 
 ## Acceptance Criteria
 
-### US-T02: View Trial Limits
+### US-FT02: View Trial Limits
 
 - [ ] Trial badge visible in header with days remaining
 - [ ] Trial status card on dashboard shows limits
@@ -371,7 +371,7 @@ Action: Update user.plan, remove trial_expires_at
 - [ ] Blurred preview for premium content (D-F-V signals)
 - [ ] Expiration warnings at 7, 3, and 1 day marks
 
-### US-T03: Upgrade to Founder
+### US-FT03: Upgrade to Founder
 
 - [ ] Multiple upgrade entry points (dashboard, limit hits, nav)
 - [ ] Clear plan comparison on upgrade modal
@@ -408,11 +408,11 @@ Action: Update user.plan, remove trial_expires_at
 
 ## Related Documentation
 
-- [user-stories.md](../user-experience/user-stories.md) - US-T01, US-T02, US-T03
+- [user-stories.md](../user-experience/user-stories.md) - US-FT01, US-FT02, US-FT03
 - [auth.md](../specs/auth.md) - Authentication flow
 - [journey-test-matrix.md](../testing/journey-test-matrix.md) - Test coverage
 
 ---
 
-**Last Updated**: 2026-01-19
+**Last Updated**: 2026-01-22
 **Status**: Active specification

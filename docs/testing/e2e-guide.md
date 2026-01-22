@@ -22,7 +22,7 @@ E2E tests are organized by user journeys and map to user stories. See [`journey-
 | Test File | Stories Covered | Primary Focus |
 |-----------|-----------------|---------------|
 | `01-login.spec.ts` | Cross-cutting | Authentication flows |
-| `02-onboarding-flow.spec.ts` | US-F01, US-F08, US-T01 | Founder onboarding |
+| `02-onboarding-flow.spec.ts` | US-F01, US-F08, US-FT01 | Founder onboarding |
 | `04-founder-analysis-journey.spec.ts` | US-F02, US-F06 | Dashboard & analysis |
 | `05-hitl-approval-flow.spec.ts` | US-F03 | Approval workflows |
 | `06-consultant-portfolio.spec.ts` | US-C03, US-C04 | Portfolio management |

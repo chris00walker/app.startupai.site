@@ -1,12 +1,50 @@
 ---
 purpose: "Private technical source of truth for recently delivered work"
 status: "active"
-last_reviewed: "2026-01-14"
+last_reviewed: "2026-01-22"
 ---
 
 # Recently Delivered
 
 ## January 2026
+
+### User Journey Documentation Complete (Jan 22)
+| Item | Status | Notes |
+|------|--------|-------|
+| Support Journey Map | ✅ Done | US-S01-S05: Help, tickets, GDPR flows |
+| Offboarding Journey Map | ✅ Done | US-O01-O05: Cancellation, exit survey, reactivation |
+| Billing Journey Map | ✅ Done | US-B01-B10: Payment lifecycle, dunning, plan changes |
+| Notification Journey Map | ✅ Done | US-N01-N05: In-app, email, preferences, escalation |
+| Founder Trial Journey Map | ✅ Done | Trial onboarding through conversion |
+| Account Settings Journey Map | ✅ Done | US-AS01-AS05: Profile, security, 2FA, devices |
+| User Stories Update | ✅ Done | Added 30 new stories, total now 82 |
+| Journey Test Matrix Update | ✅ Done | Added 6 matrices, 10 test files listed |
+| User Personas Update | ✅ Done | Added Account Lifecycle + Billing States |
+| E2E Test Stubs (5 files) | ✅ Done | 23-27.spec.ts with 146 test stubs |
+
+**Problem Solved**: Critical documentation gaps for cross-cutting concerns (Help/Support, Offboarding, Billing, Notifications, Account Settings) that affected all 5 user types.
+
+**Files Created:**
+- `docs/user-experience/support-journey-map.md` - 5 phases, US-S01-S05
+- `docs/user-experience/offboarding-journey-map.md` - 5 phases, US-O01-O05
+- `docs/user-experience/billing-journey-map.md` - 6 phases, US-B01-B10
+- `docs/user-experience/notification-journey-map.md` - 5 phases, US-N01-N05
+- `docs/user-experience/founder-trial-journey-map.md` - 4 phases
+- `docs/user-experience/account-settings-journey-map.md` - 5 phases, US-AS01-AS05
+- `frontend/tests/e2e/23-support.spec.ts` - 19 test stubs
+- `frontend/tests/e2e/24-offboarding.spec.ts` - 25 test stubs
+- `frontend/tests/e2e/25-billing.spec.ts` - 44 test stubs
+- `frontend/tests/e2e/26-notifications.spec.ts` - 27 test stubs
+- `frontend/tests/e2e/27-account-settings.spec.ts` - 31 test stubs
+
+**Files Modified:**
+- `docs/user-experience/user-stories.md` - Added 30 new stories (S, O, B, N, AS groups)
+- `docs/testing/journey-test-matrix.md` - Added 6 matrices, coverage now 38%
+- `docs/user-experience/user-personas.md` - Added lifecycle states and billing states
+
+**Impact**: Enables TDD for all cross-cutting user experiences. Coverage increased from 52 to 82 user stories. All 5 user types now have documented paths for support, billing, and account management.
+
+---
 
 ### Project Archive/Delete Feature (Jan 14)
 | Item | Status | Notes |
