@@ -1,7 +1,8 @@
 ---
 purpose: "Private technical source of truth for application data schema"
 status: "active"
-last_reviewed: "2026-01-19"
+last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Data Schema
@@ -54,11 +55,14 @@ User metadata mirrored from Supabase Auth.
 | `consultant_id` | UUID | FK to user_profiles (assigned consultant) |
 | `subscription_tier` | TEXT | free (default) |
 | `subscription_status` | TEXT | trial (default) |
+| `trial_intent` | TEXT | founder_trial or consultant_trial (required for trial routing) |
 | `trial_expires_at` | TIMESTAMP | Trial expiry |
 | `plan_status` | TEXT | active (default) |
-| `role` | ENUM | trial, founder, consultant, admin ([canonical source](../user-experience/roles/role-definitions.md)) |
+| `role` | ENUM | founder, consultant, admin, founder_trial, consultant_trial (legacy: trial) ([canonical source](../user-experience/roles/role-definitions.md)) |
 | `created_at` | TIMESTAMP | Account creation |
 | `updated_at` | TIMESTAMP | Last update |
+
+**Note:** `trial` remains a legacy role until the schema migration adds `founder_trial` and `consultant_trial`.
 
 **Drizzle**: `frontend/src/db/schema/users.ts`
 

@@ -2,11 +2,13 @@
 purpose: "Trial user stories for founder and consultant trials"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Founder Trial Stories (US-FT)
 
 > **Updated (2026-01-22)**: Renamed from "Trial User Stories (US-T)" to reflect the trial split. Original US-T01/T02/T03 are now US-FT01/FT02/FT03.
+> **Trial Support:** US-S01–US-S05 apply to trial users (limited support SLA).
 
 ### US-FT01: Start Founder Trial Onboarding
 
@@ -18,7 +20,11 @@ last_reviewed: "2026-01-22"
 
 **Given** I am a new user who signed up with "founder" intent
 **When** I complete authentication
-**Then** I should be redirected to `/onboarding/founder`
+**Then** I should be redirected to `/trial/founder/`
+
+**Given** I selected a Founder Trial on pricing
+**When** my account is created
+**Then** my trial intent should be stored as `founder_trial` and my role should be `founder_trial`
 
 **Given** I am on the onboarding page
 **When** the page loads
@@ -122,7 +128,11 @@ last_reviewed: "2026-01-22"
 
 **Given** I am a new user who signed up with "consultant" intent
 **When** I complete authentication
-**Then** I should be redirected to `/onboarding/consultant`
+**Then** I should be redirected to `/trial/consultant/`
+
+**Given** I selected a Consultant Trial on pricing
+**When** my account is created
+**Then** my trial intent should be stored as `consultant_trial` and my role should be `consultant_trial`
 
 **Given** I am on the consultant onboarding page
 **When** the page loads

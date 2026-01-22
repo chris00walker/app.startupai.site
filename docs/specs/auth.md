@@ -1,7 +1,8 @@
 ---
 purpose: "Private technical source of truth for the authentication stack"
 status: "active"
-last_reviewed: "2026-01-19"
+last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Authentication Specification
@@ -79,9 +80,15 @@ const ROLE_REDIRECTS: Record<UserRole, string> = {
   admin: '/consultant-dashboard',
   consultant: '/consultant-dashboard',
   founder: '/founder-dashboard',
-  trial: '/onboarding/founder'
+  trial: '/trial/founder/'
 };
 ```
+
+**Trial Routing Requirement:**
+- Capture `trial_intent` at signup (`founder_trial` or `consultant_trial`).
+- Persist `trial_intent` in user profile metadata for reliable redirects.
+- Route trial users to `/trial/founder/` or `/trial/consultant/` based on `trial_intent`.
+- If `trial_intent` is missing, default to `/trial/founder/`.
 
 **Architecture Benefits:**
 - Single source of truth for role redirects
@@ -249,13 +256,15 @@ const ROLE_REDIRECTS: Record<UserRole, string> = {
   admin: '/consultant-dashboard',
   consultant: '/consultant-dashboard',
   founder: '/founder-dashboard',
-  trial: '/onboarding/founder'
+  trial: '/trial/founder/'
 };
 
 export function getRedirectForRole(role: UserRole): string {
   return ROLE_REDIRECTS[role] || ROLE_REDIRECTS.trial;
 }
 ```
+
+**Planned update:** Replace legacy `trial` fallback with `founder_trial` and `consultant_trial`, using `trial_intent` to select `/trial/founder/` or `/trial/consultant/` when role is missing.
 
 ---
 

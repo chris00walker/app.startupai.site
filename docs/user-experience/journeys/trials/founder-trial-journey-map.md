@@ -2,6 +2,7 @@
 purpose: "Complete founder trial journey map and UX specification"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Complete Founder Trial Journey Map
@@ -50,6 +51,10 @@ user_actions:
   - enters email and name
   - completes OAuth authentication (GitHub)
   - gets redirected to app.startupai.site
+system_actions:
+  - store trial_intent: founder_trial
+  - assign user role: founder_trial
+  - default redirect: /trial/founder/
 user_emotions: curious, cautiously_optimistic
 pain_points:
   - unclear what trial includes
@@ -78,7 +83,7 @@ signup_ui:
 ### Step 2: Quick Start Form (US-FT01) (~30 seconds)
 
 ```yaml
-touchpoint: /onboarding/founder
+touchpoint: /trial/founder/
 user_state: newly_authenticated
 user_goal: submit_business_idea_for_analysis
 user_actions:

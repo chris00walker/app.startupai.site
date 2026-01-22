@@ -2,13 +2,14 @@
 purpose: "Founder user stories with acceptance criteria and E2E coverage"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Founder Stories (US-F)
 
 ### US-F01: Complete Quick Start Onboarding
 
-> **Updated (2026-01-19)**: The 7-stage AI conversation was replaced by Quick Start. See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
+> **Updated (2026-01-19)**: The 7-stage AI conversation was replaced by Quick Start. See [ADR-006](../../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 **As a** Founder,
 **I want to** submit my business idea via Quick Start,

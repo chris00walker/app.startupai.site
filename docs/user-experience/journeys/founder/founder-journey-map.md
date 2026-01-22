@@ -1,7 +1,8 @@
 ---
 purpose: "Complete founder journey map and UX specification"
 status: "active"
-last_reviewed: "2026-01-21"
+last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Complete Founder Journey Map
@@ -10,9 +11,9 @@ last_reviewed: "2026-01-21"
 
 **Status:** IMPLEMENTED - Quick Start Architecture (Jan 2026)
 **Last Updated:** 2026-01-21
-**Cross-Reference:** [ADR-006: Quick Start Architecture](../../startupai-crew/docs/adr/006-quick-start-architecture.md)
+**Cross-Reference:** [ADR-006: Quick Start Architecture](../../../../../startupai-crew/docs/adr/006-quick-start-architecture.md)
 
-> **Architectural Pivot (2026-01-19)**: The 7-stage AI conversation with Alex was replaced by Quick Start - a simple form that takes ~30 seconds. The Founder's Brief is now AI-generated in Phase 1. See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
+> **Architectural Pivot (2026-01-19)**: The 7-stage AI conversation with Alex was replaced by Quick Start - a simple form that takes ~30 seconds. The Founder's Brief is now AI-generated in Phase 1. See [ADR-006](../../../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 ---
 
@@ -27,7 +28,7 @@ This document maps the complete user journey from marketing site signup to recei
 
 ## Architecture Reference (Jan 2026)
 
-> **SUPERSEDED**: The Two-Pass Architecture below was replaced by Quick Start (2026-01-19). See [ADR-006](../../startupai-crew/docs/adr/006-quick-start-architecture.md).
+> **SUPERSEDED**: The Two-Pass Architecture below was replaced by Quick Start (2026-01-19). See [ADR-006](../../../../../startupai-crew/docs/adr/006-quick-start-architecture.md).
 
 ### Quick Start Architecture (Current)
 
@@ -1279,17 +1280,17 @@ cognitive_support:
 
 ## 6. Cross-References
 
-**Primary Reference:** [`two-site-implementation-plan.md`](../../startupai.site/docs/technical/two-site-implementation-plan.md)
-- Section 1.2.5: Launch Readiness Assessment (onboarding as launch blocker)
-- Lines 332-333: AI onboarding tutorial requirement
-- Section 2.5: Backend & AI integration status
+**Primary Reference:** [`platform-overview.md`](../../../../../startupai.site/docs/overview/platform-overview.md)
+- User Journey: marketing → auth → onboarding handoff
+- Navigation Snapshot: onboarding wizard route coverage
+- Contracts with Marketing: onboarding promise alignment
 
 **Related Documentation:**
-- [`onboarding-agent-integration.md`](../../../features/onboarding-agent-integration.md) - Technical implementation
-- [`ai-conversation-interface.md`](../../../features/ai-conversation-interface.md) - Chat interface specification
-- [`crewai-frontend-integration.md`](../engineering/crewai-frontend-integration.md) - API integration
-- [`onboarding-agent-personality.md`](../../../features/onboarding-agent-personality.md) - AI personality design
+- [`onboarding-agent-integration.md`](../../../archive/legacy/onboarding-agent-integration.md) - Technical implementation
+- [`ai-conversation-interface.md`](../../../archive/legacy/ai-conversation-interface.md) - Chat interface specification
+- [`crewai-frontend-integration.md`](../../../archive/legacy/crewai-frontend-integration.md) - API integration
+- [`onboarding-agent-personality.md`](../../../archive/legacy/onboarding-agent-personality.md) - AI personality design
 
 ---
 
-*Last updated: 2026-01-21*
+*Last updated: 2026-01-22*

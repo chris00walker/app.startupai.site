@@ -2,6 +2,7 @@
 purpose: "Trial user profiles, restrictions, and conversion paths"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Trial Personas
@@ -69,6 +70,7 @@ Upgrade Prompt → Founder ($49/mo)
 | Canvas Tools | Yes | Full access |
 | Dashboard | Yes | Full access |
 | Settings | Limited | Cannot delete projects |
+| Help Center & Support | Limited | Knowledge base + support form |
 | HITL Approvals | Yes | For their projects |
 
 ---
@@ -150,6 +152,7 @@ Upgrade Prompt → Consultant ($149/mo)
 | Quick Start for Client | Yes | On mock clients only |
 | White-Label Export | No | Upgrade required |
 | Client Archive/Restore | Yes | On mock clients |
+| Help Center & Support | Limited | Knowledge base + support form |
 
 #### Conversion Triggers
 

@@ -2,6 +2,7 @@
 purpose: "Complete support journey map for all users seeking help"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Complete Support Journey Map
@@ -20,6 +21,7 @@ This document maps the complete user journey for all users seeking help, submitt
 
 **Support Promise:** "Get help quickly without frustration"
 **GDPR Promise:** "Control your data with transparency"
+**Trial Support:** Trial users have access to Help Center + Contact Support with best-effort response times (no priority SLA).
 
 ---
 

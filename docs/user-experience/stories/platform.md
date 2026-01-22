@@ -2,6 +2,7 @@
 purpose: "Cross-cutting platform user stories and acceptance criteria"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # HITL Checkpoint Stories (US-H)
@@ -546,7 +547,7 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 ## Support Stories (US-S)
 
 > **Added (2026-01-22)**: New story category for user-facing support and GDPR compliance flows.
-> **User Scope**: All authenticated users including Admin.
+> **User Scope**: All authenticated users including Trial and Admin.
 
 ### US-S01: Contact Support
 

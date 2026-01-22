@@ -2,6 +2,7 @@
 purpose: "Complete consultant trial journey map and UX specification"
 status: "active"
 last_reviewed: "2026-01-22"
+last_updated: "2026-01-22"
 ---
 
 # Complete Consultant Trial Journey Map
@@ -50,6 +51,10 @@ user_actions:
   - fills basic info (email, name)
   - completes OAuth authentication
   - gets redirected to app.startupai.site
+system_actions:
+  - store trial_intent: consultant_trial
+  - assign user role: consultant_trial
+  - default redirect: /trial/consultant/
 user_emotions: curious, evaluating_roi
 pain_points:
   - unclear what trial includes
@@ -62,7 +67,7 @@ success_metrics:
 ### Step 2: Practice Setup (US-CT01) (3-5 minutes)
 
 ```yaml
-touchpoint: /onboarding/consultant
+touchpoint: /trial/consultant/
 user_state: configuring_practice
 user_goal: set_up_consulting_profile
 user_actions:
