@@ -24,6 +24,9 @@ async function FounderOnboardingPage() {
   if (error || !user) {
     redirect('/login?returnUrl=/onboarding/founder');
   }
+  const marketingUrl =
+    process.env.NEXT_PUBLIC_MARKETING_URL ??
+    (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '/');
 
   // Check if user already has active projects
   const { data: existingProjects } = await supabase
@@ -54,7 +57,7 @@ async function FounderOnboardingPage() {
       {/* Back to home link (consistent with login) */}
       <div className="relative z-10 p-6 lg:p-8">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={process.env.NEXT_PUBLIC_MARKETING_URL || "/"}>
+          <Link href={marketingUrl}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to home
           </Link>

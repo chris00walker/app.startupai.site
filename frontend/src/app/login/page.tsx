@@ -26,6 +26,9 @@ export default async function LoginPage({
 }) {
   // Await searchParams for Next.js 15 compatibility
   const params = await searchParams;
+  const marketingUrl =
+    process.env.NEXT_PUBLIC_MARKETING_URL ??
+    (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '/');
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -36,7 +39,7 @@ export default async function LoginPage({
       {/* Back to home link */}
       <div className="relative z-10 p-6 lg:p-8">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={process.env.NEXT_PUBLIC_MARKETING_URL || "/"}>
+          <Link href={marketingUrl}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to home
           </Link>

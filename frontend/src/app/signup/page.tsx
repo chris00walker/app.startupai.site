@@ -48,6 +48,9 @@ function SignupContent() {
       validateInvite(invite)
     }
   }, [searchParams])
+  const marketingUrl =
+    process.env.NEXT_PUBLIC_MARKETING_URL ??
+    (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '/')
 
   const validateInvite = async (token: string) => {
     setInviteLoading(true)
@@ -79,7 +82,7 @@ function SignupContent() {
     <div className="min-h-screen flex flex-col p-8 lg:p-12">
       <div className="mb-8">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={process.env.NEXT_PUBLIC_MARKETING_URL || "http://localhost:3000"}>
+          <Link href={marketingUrl}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to marketing site
           </Link>
