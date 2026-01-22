@@ -59,7 +59,9 @@
       "WebFetch(domain:openrouter.ai)",
       "Skill(phase-status)",
       "Skill(tool-status)",
-      "WebFetch(domain:developers.openai.com)"
+      "WebFetch(domain:developers.openai.com)",
+      "mcp__shadcn__get_audit_checklist",
+      "WebFetch(domain:developers.figma.com)"
     ],
     "deny": [
       "Bash(rm:*)",
