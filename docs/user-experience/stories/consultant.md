@@ -78,6 +78,10 @@ last_reviewed: "2026-01-22"
 **When** I use the search/filter functionality
 **Then** I should be able to find clients by name or filter by stage
 
+> **Note:** The main portfolio view is on the Consultant Dashboard (`/consultant-dashboard`).
+> A dedicated Client Portfolio page exists at `/clients` with extended filtering and management features.
+> The sidebar "Client Portfolio" link points to `/clients` for direct access to client management.
+
 **E2E Test:** `06-consultant-portfolio.spec.ts` - "should display portfolio grid with client cards"
 **Journey Reference:** [`consultant-journey-map.md`](../journeys/consultant/consultant-journey-map.md) - Phase 4
 

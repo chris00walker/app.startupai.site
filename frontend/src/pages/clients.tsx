@@ -1,6 +1,9 @@
 /**
  * Client Portfolio Page
  *
+ * Dedicated client management view with extended filtering.
+ * Main portfolio overview is on /consultant-dashboard.
+ *
  * @story US-C03
  */
 

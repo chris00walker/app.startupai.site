@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T21:18:31.803Z",
+    "generated_at": "2026-01-23T21:23:25.639Z",
     "version": "1.0.0",
     "story_count": 134,
-    "annotated_file_count": 129
+    "annotated_file_count": 130
   },
   "stories": {
     "US-F01": {
@@ -1943,10 +1943,14 @@
       "pages": [],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP01": {
       "title": "Browse Canvas Gallery",
@@ -1957,10 +1961,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP02": {
       "title": "Edit Value Proposition Canvas",
@@ -1971,10 +1979,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP03": {
       "title": "Edit Business Model Canvas",
@@ -1985,10 +1997,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP04": {
       "title": "Edit Testing Business Ideas Canvas",
@@ -1999,10 +2015,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP05": {
       "title": "Run AI Workflows",
@@ -2013,10 +2033,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP06": {
       "title": "View Analytics Dashboard",
@@ -2027,10 +2051,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP07": {
       "title": "Export Evidence Pack",
@@ -2041,10 +2069,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "29-platform-tooling.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CP08": {
       "title": "View Validation Summary",
@@ -3240,6 +3272,18 @@
     "frontend/src/components/layout/AppSidebar.tsx": {
       "stories": [
         "US-AU03"
+      ]
+    },
+    "frontend/tests/e2e/29-platform-tooling.spec.ts": {
+      "stories": [
+        "US-AU03",
+        "US-CP01",
+        "US-CP02",
+        "US-CP03",
+        "US-CP04",
+        "US-CP05",
+        "US-CP06",
+        "US-CP07"
       ]
     },
     "frontend/src/pages/canvas.tsx": {
