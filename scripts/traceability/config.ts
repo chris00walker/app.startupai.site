@@ -62,10 +62,15 @@ export const STORY_SOURCES = [
   'docs/user-experience/stories/founder.md',
   'docs/user-experience/stories/consultant.md',
   'docs/user-experience/stories/trials.md',
-  'docs/user-experience/stories/agent-journeys.md',
-  'docs/user-experience/stories/agent-specs.md',
   'docs/user-experience/stories/platform.md',
   'docs/user-experience/stories/admin.md',
+  // Agent stories (new structure - replaces agent-journeys.md and agent-specs.md)
+  'docs/user-experience/stories/agents/phase-1-brief-generation.md',
+  'docs/user-experience/stories/agents/phase-1-vpc-discovery.md',
+  'docs/user-experience/stories/agents/phase-2-desirability.md',
+  'docs/user-experience/stories/agents/phase-3-feasibility.md',
+  'docs/user-experience/stories/agents/phase-4-viability.md',
+  'docs/user-experience/stories/agents/hitl-checkpoints.md',
 ] as const;
 
 /**
@@ -213,8 +218,6 @@ export const STORY_CATEGORIES: Record<string, string> = {
   'US-CT': 'Consultant Trial',
   'US-H': 'HITL Checkpoint',
   'US-P': 'Pivot Flow',
-  'US-AJ': 'Agent Journey',
-  'US-AG': 'Agent Specs',
   'US-E': 'Edge Case',
   'US-AU': 'Authentication',
   'US-CP': 'Core Product',
@@ -225,6 +228,13 @@ export const STORY_CATEGORIES: Record<string, string> = {
   'US-N': 'Notification',
   'US-AS': 'Account Settings',
   'US-MF': 'Marketing Funnel',
+  // Agent stories (new structure - replaces US-AJ and US-AG)
+  'US-AB': 'Agent Brief',
+  'US-AD': 'Agent Discovery',
+  'US-ADB': 'Agent Desirability',
+  'US-AFB': 'Agent Feasibility',
+  'US-AVB': 'Agent Viability',
+  'US-AH': 'Agent HITL',
 };
 
 /**

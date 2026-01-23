@@ -101,7 +101,7 @@ def handle_checkpoint(payload):
 ### YAML (CrewAI config)
 
 ```yaml
-# @story US-AG01
+# @story US-AB01
 o1_interview_gap_analyzer:
   role: "Interview Gap Analyzer"
 ```

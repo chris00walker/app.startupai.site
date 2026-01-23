@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T21:42:52.570Z",
+    "generated_at": "2026-01-23T22:50:27.425Z",
     "version": "1.0.0",
-    "story_count": 142,
-    "annotated_file_count": 160
+    "story_count": 157,
+    "annotated_file_count": 166
   },
   "stories": {
     "US-F01": {
@@ -783,345 +783,6 @@
         "users"
       ],
       "implementation_status": "gap"
-    },
-    "US-AJ01": {
-      "title": "Kickoff Validation Run",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/app.py",
-        "../startupai-crew/src/modal_app/phases/phase_0.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AJ02": {
-      "title": "Generate Founder's Brief (Phase 1 Stage A)",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/phases/phase_1.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AJ03": {
-      "title": "Produce VPC + Fit Assessment (Phase 1 Stage B)",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/phases/phase_1.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AJ04": {
-      "title": "Run Desirability Evidence + Gate (Phase 2)",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/phases/phase_2.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AJ05": {
-      "title": "Run Feasibility Assessment + Gate (Phase 3)",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/phases/phase_3.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AJ06": {
-      "title": "Run Viability Assessment + Final Decision (Phase 4)",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/phases/phase_4.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AJ07": {
-      "title": "Route Pivot Decisions",
-      "components": [],
-      "api_routes": [
-        "../startupai-crew/src/modal_app/phases/phase_2.py",
-        "../startupai-crew/src/modal_app/phases/phase_3.py",
-        "../startupai-crew/src/modal_app/phases/phase_4.py"
-      ],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
-    },
-    "US-AG01": {
-      "title": "Specify Brief Generation Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/onboarding/config/agents.yaml",
-        "../startupai-crew/src/crews/onboarding/config/tasks.yaml",
-        "../startupai-crew/src/crews/onboarding/crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "OnboardingCrew - Phase 0 Brief Generation"
-    },
-    "US-AG02": {
-      "title": "Specify Discovery Evidence Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/discovery/config/agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/tasks.yaml",
-        "../startupai-crew/src/crews/discovery/discovery_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "DiscoveryCrew - Phase 1 Evidence Collection"
-    },
-    "US-AG03": {
-      "title": "Specify Customer Profile Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml",
-        "../startupai-crew/src/crews/discovery/customer_profile_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "CustomerProfileCrew - Phase 1 Jobs/Pains/Gains"
-    },
-    "US-AG04": {
-      "title": "Specify Value Map Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml",
-        "../startupai-crew/src/crews/discovery/value_design_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "ValueDesignCrew - Phase 1 Value Map"
-    },
-    "US-AG05": {
-      "title": "Specify WTP Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml",
-        "../startupai-crew/src/crews/discovery/wtp_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "WTPCrew - Phase 1 Willingness to Pay"
-    },
-    "US-AG06": {
-      "title": "Specify Fit Assessment Agents and Routing",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml",
-        "../startupai-crew/src/crews/discovery/fit_assessment_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "FitAssessmentCrew - Phase 1 Fit Scoring"
-    },
-    "US-AG07": {
-      "title": "Specify Desirability BuildCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/desirability/build_crew.py",
-        "../startupai-crew/src/crews/desirability/config/build_agents.yaml",
-        "../startupai-crew/src/crews/desirability/config/build_tasks.yaml"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "BuildCrew - Phase 2 Testable Artifacts"
-    },
-    "US-AG08": {
-      "title": "Specify Desirability GrowthCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/desirability/config/growth_agents.yaml",
-        "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml",
-        "../startupai-crew/src/crews/desirability/growth_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "GrowthCrew - Phase 2 Ad Campaigns"
-    },
-    "US-AG09": {
-      "title": "Specify Desirability GovernanceCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/desirability/config/governance_agents.yaml",
-        "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml",
-        "../startupai-crew/src/crews/desirability/governance_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "GovernanceCrew - Phase 2 Oversight"
-    },
-    "US-AG10": {
-      "title": "Specify Feasibility BuildCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/feasibility/build_crew.py",
-        "../startupai-crew/src/crews/feasibility/config/build_agents.yaml",
-        "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "FeasibilityBuildCrew - Phase 3 Technical Assessment"
-    },
-    "US-AG11": {
-      "title": "Specify Feasibility GovernanceCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml",
-        "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml",
-        "../startupai-crew/src/crews/feasibility/governance_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "FeasibilityGovernanceCrew - Phase 3 Gate Validation"
-    },
-    "US-AG12": {
-      "title": "Specify Viability FinanceCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/viability/config/finance_agents.yaml",
-        "../startupai-crew/src/crews/viability/config/finance_tasks.yaml",
-        "../startupai-crew/src/crews/viability/finance_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "FinanceCrew - Phase 4 Unit Economics"
-    },
-    "US-AG13": {
-      "title": "Specify Viability SynthesisCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml",
-        "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml",
-        "../startupai-crew/src/crews/viability/synthesis_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "SynthesisCrew - Phase 4 Evidence Synthesis"
-    },
-    "US-AG14": {
-      "title": "Specify Viability GovernanceCrew Agents and Tasks",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [
-        "../startupai-crew/src/crews/viability/config/governance_agents.yaml",
-        "../startupai-crew/src/crews/viability/config/governance_tasks.yaml",
-        "../startupai-crew/src/crews/viability/governance_crew.py"
-      ],
-      "e2e_tests": [],
-      "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial",
-      "notes": "ViabilityGovernanceCrew - Phase 4 Final Governance"
     },
     "US-H01": {
       "title": "Review Discovery Output (Founder's Brief + VPC)",
@@ -2823,6 +2484,768 @@
       ],
       "implementation_status": "gap",
       "notes": "Billing management"
+    },
+    "US-AB01": {
+      "title": "Generate Founder's Brief from Quick Start Input",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_0.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/onboarding/config/agents.yaml",
+        "../startupai-crew/src/crews/onboarding/config/tasks.yaml",
+        "../startupai-crew/src/crews/onboarding/crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "30-agent-brief-generation.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "BriefGenerationCrew - Generate Founder's Brief"
+    },
+    "US-AB02": {
+      "title": "Validate Brief Legitimacy",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "30-agent-brief-generation.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "GV1 Agent - Validate Brief Legitimacy"
+    },
+    "US-AB03": {
+      "title": "Handle Brief Rejection and Edits",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "30-agent-brief-generation.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "Handle Brief Rejection/Edits at approve_brief checkpoint"
+    },
+    "US-AD01": {
+      "title": "Design Experiment Plan",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/tasks.yaml",
+        "../startupai-crew/src/crews/discovery/discovery_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "E1 Agent - Design Experiment Plan"
+    },
+    "US-AD02": {
+      "title": "Collect SAY Evidence",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "D1 Agent - Collect SAY Evidence"
+    },
+    "US-AD03": {
+      "title": "Collect DO Evidence (Indirect)",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "D2 Agent - Collect DO Evidence (Indirect)"
+    },
+    "US-AD04": {
+      "title": "Collect DO Evidence (Direct)",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "D3 Agent - Collect DO Evidence (Direct)"
+    },
+    "US-AD05": {
+      "title": "Triangulate Evidence",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "D4 Agent - Triangulate Evidence"
+    },
+    "US-AD06": {
+      "title": "Build Customer Profile",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/customer_profile_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "CustomerProfileCrew - Build Customer Profile"
+    },
+    "US-AD07": {
+      "title": "Build Value Map",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/value_design_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "ValueDesignCrew - Build Value Map"
+    },
+    "US-AD08": {
+      "title": "Validate Willingness to Pay",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/wtp_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "WTPCrew - Validate WTP, approve_pricing_test checkpoint"
+    },
+    "US-AD09": {
+      "title": "Calculate Fit Score",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/fit_assessment_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "FIT_SCORE Agent - Calculate Fit Score"
+    },
+    "US-AD10": {
+      "title": "Complete Discovery Output",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "31-agent-vpc-discovery.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "FIT_ROUTE Agent - Route to Phase 2 or iterate"
+    },
+    "US-ADB01": {
+      "title": "Build Landing Page",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/desirability/build_crew.py",
+        "../startupai-crew/src/crews/desirability/config/build_agents.yaml",
+        "../startupai-crew/src/crews/desirability/config/build_tasks.yaml"
+      ],
+      "e2e_tests": [
+        {
+          "file": "32-agent-desirability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "BuildCrew - Build Landing Page"
+    },
+    "US-ADB02": {
+      "title": "Deploy Test Artifacts",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "32-agent-desirability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "F3 Agent - Deploy Test Artifacts to Netlify"
+    },
+    "US-ADB03": {
+      "title": "Create Ad Campaigns",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/desirability/config/growth_agents.yaml",
+        "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml",
+        "../startupai-crew/src/crews/desirability/growth_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "32-agent-desirability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "GrowthCrew - Create Ad Campaigns, approve_campaign_launch"
+    },
+    "US-ADB04": {
+      "title": "Measure Desirability Signal",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "32-agent-desirability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "P3 Agent - Measure Desirability Signal, approve_spend_increase"
+    },
+    "US-ADB05": {
+      "title": "Evaluate Desirability Gate",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/desirability/config/governance_agents.yaml",
+        "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml",
+        "../startupai-crew/src/crews/desirability/governance_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "32-agent-desirability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "GovernanceCrew - Evaluate Desirability Gate"
+    },
+    "US-AFB01": {
+      "title": "Assess Feature Requirements",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_3.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "33-agent-feasibility.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "F1 Agent - Assess Feature Requirements"
+    },
+    "US-AFB02": {
+      "title": "Evaluate Technical Feasibility",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/feasibility/build_crew.py",
+        "../startupai-crew/src/crews/feasibility/config/build_agents.yaml",
+        "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml"
+      ],
+      "e2e_tests": [
+        {
+          "file": "33-agent-feasibility.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "BuildCrew (feasibility) - Evaluate Technical Feasibility"
+    },
+    "US-AFB03": {
+      "title": "Evaluate Feasibility Gate",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml",
+        "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml",
+        "../startupai-crew/src/crews/feasibility/governance_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "33-agent-feasibility.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "GovernanceCrew - Evaluate Feasibility Gate"
+    },
+    "US-AVB01": {
+      "title": "Calculate Unit Economics",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/viability/config/finance_agents.yaml",
+        "../startupai-crew/src/crews/viability/config/finance_tasks.yaml",
+        "../startupai-crew/src/crews/viability/finance_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "34-agent-viability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "L1 Agent - Calculate Unit Economics"
+    },
+    "US-AVB02": {
+      "title": "Assess Compliance",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "34-agent-viability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial",
+      "notes": "L2 Agent - Assess Compliance"
+    },
+    "US-AVB03": {
+      "title": "Compile Viability Signal",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "34-agent-viability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "L3 Agent - Compile Viability Signal, approve_viability_gate"
+    },
+    "US-AVB04": {
+      "title": "Synthesize Evidence",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml",
+        "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml",
+        "../startupai-crew/src/crews/viability/synthesis_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "34-agent-viability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "C1 Agent - Synthesize Evidence"
+    },
+    "US-AVB05": {
+      "title": "Request Final Human Decision",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/viability/config/governance_agents.yaml",
+        "../startupai-crew/src/crews/viability/config/governance_tasks.yaml",
+        "../startupai-crew/src/crews/viability/governance_crew.py"
+      ],
+      "e2e_tests": [
+        {
+          "file": "34-agent-viability.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "validation_runs",
+        "hitl_requests"
+      ],
+      "implementation_status": "partial",
+      "notes": "C2 Agent - Request Final Decision"
+    },
+    "US-AH01": {
+      "title": "Approve Founder's Brief",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_brief checkpoint - Phase 1A"
+    },
+    "US-AH02": {
+      "title": "Approve Experiment Plan",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_experiment_plan checkpoint - Phase 1B"
+    },
+    "US-AH03": {
+      "title": "Approve Pricing Test",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_pricing_test checkpoint - Phase 1B"
+    },
+    "US-AH04": {
+      "title": "Approve Discovery Output",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_discovery_output checkpoint - Phase 1B"
+    },
+    "US-AH05": {
+      "title": "Approve Campaign Launch",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_campaign_launch checkpoint - Phase 2"
+    },
+    "US-AH06": {
+      "title": "Approve Spend Increase",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_spend_increase checkpoint - Phase 2"
+    },
+    "US-AH07": {
+      "title": "Approve Desirability Gate",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_desirability_gate checkpoint - Phase 2"
+    },
+    "US-AH08": {
+      "title": "Approve Feasibility Gate",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_3.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_feasibility_gate checkpoint - Phase 3"
+    },
+    "US-AH09": {
+      "title": "Approve Viability Gate",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "approve_viability_gate checkpoint - Phase 4"
+    },
+    "US-AH10": {
+      "title": "Request Human Decision",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "35-agent-hitl-checkpoints.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [
+        "hitl_requests",
+        "validation_runs"
+      ],
+      "implementation_status": "partial",
+      "notes": "request_human_decision checkpoint - Phase 4 final"
     }
   },
   "files": {
@@ -2851,7 +3274,6 @@
         "US-F10",
         "US-C07",
         "US-FT01",
-        "US-AJ01",
         "US-H01",
         "US-H02",
         "US-H04",
@@ -2864,14 +3286,15 @@
         "US-P02",
         "US-P03",
         "US-P04",
-        "US-A05"
+        "US-A05",
+        "US-AB01"
       ]
     },
     "../startupai-crew/src/modal_app/phases/phase_0.py": {
       "stories": [
         "US-F01",
         "US-FT01",
-        "US-AJ01"
+        "US-AB01"
       ]
     },
     "frontend/src/app/onboarding/founder/page.tsx": {
@@ -3030,10 +3453,10 @@
     "../startupai-crew/src/modal_app/phases/phase_1.py": {
       "stories": [
         "US-F06",
-        "US-AJ02",
-        "US-AJ03",
         "US-H01",
-        "US-H02"
+        "US-H02",
+        "US-AD01",
+        "US-AH02"
       ]
     },
     "frontend/src/app/project/[id]/analysis/page.tsx": {
@@ -3230,240 +3653,13 @@
     },
     "../startupai-crew/src/modal_app/phases/phase_2.py": {
       "stories": [
-        "US-AJ04",
-        "US-AJ07",
         "US-H04",
         "US-H05",
         "US-H06",
         "US-P01",
-        "US-P02"
-      ]
-    },
-    "../startupai-crew/src/modal_app/phases/phase_3.py": {
-      "stories": [
-        "US-AJ05",
-        "US-AJ07",
-        "US-H07",
-        "US-P03"
-      ]
-    },
-    "../startupai-crew/src/modal_app/phases/phase_4.py": {
-      "stories": [
-        "US-AJ06",
-        "US-AJ07",
-        "US-H08",
-        "US-H09",
-        "US-P04"
-      ]
-    },
-    "../startupai-crew/src/crews/onboarding/config/agents.yaml": {
-      "stories": [
-        "US-AG01"
-      ]
-    },
-    "../startupai-crew/src/crews/onboarding/config/tasks.yaml": {
-      "stories": [
-        "US-AG01"
-      ]
-    },
-    "../startupai-crew/src/crews/onboarding/crew.py": {
-      "stories": [
-        "US-AG01"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/agents.yaml": {
-      "stories": [
-        "US-AG02"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/tasks.yaml": {
-      "stories": [
-        "US-AG02"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/discovery_crew.py": {
-      "stories": [
-        "US-AG02"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml": {
-      "stories": [
-        "US-AG03"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml": {
-      "stories": [
-        "US-AG03"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/customer_profile_crew.py": {
-      "stories": [
-        "US-AG03"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml": {
-      "stories": [
-        "US-AG04"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml": {
-      "stories": [
-        "US-AG04"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/value_design_crew.py": {
-      "stories": [
-        "US-AG04"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml": {
-      "stories": [
-        "US-AG05"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml": {
-      "stories": [
-        "US-AG05"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/wtp_crew.py": {
-      "stories": [
-        "US-AG05"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml": {
-      "stories": [
-        "US-AG06"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml": {
-      "stories": [
-        "US-AG06"
-      ]
-    },
-    "../startupai-crew/src/crews/discovery/fit_assessment_crew.py": {
-      "stories": [
-        "US-AG06"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/build_crew.py": {
-      "stories": [
-        "US-AG07"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/config/build_agents.yaml": {
-      "stories": [
-        "US-AG07"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/config/build_tasks.yaml": {
-      "stories": [
-        "US-AG07"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/config/growth_agents.yaml": {
-      "stories": [
-        "US-AG08"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml": {
-      "stories": [
-        "US-AG08"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/growth_crew.py": {
-      "stories": [
-        "US-AG08"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/config/governance_agents.yaml": {
-      "stories": [
-        "US-AG09"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml": {
-      "stories": [
-        "US-AG09"
-      ]
-    },
-    "../startupai-crew/src/crews/desirability/governance_crew.py": {
-      "stories": [
-        "US-AG09"
-      ]
-    },
-    "../startupai-crew/src/crews/feasibility/build_crew.py": {
-      "stories": [
-        "US-AG10"
-      ]
-    },
-    "../startupai-crew/src/crews/feasibility/config/build_agents.yaml": {
-      "stories": [
-        "US-AG10"
-      ]
-    },
-    "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml": {
-      "stories": [
-        "US-AG10"
-      ]
-    },
-    "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml": {
-      "stories": [
-        "US-AG11"
-      ]
-    },
-    "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml": {
-      "stories": [
-        "US-AG11"
-      ]
-    },
-    "../startupai-crew/src/crews/feasibility/governance_crew.py": {
-      "stories": [
-        "US-AG11"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/config/finance_agents.yaml": {
-      "stories": [
-        "US-AG12"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/config/finance_tasks.yaml": {
-      "stories": [
-        "US-AG12"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/finance_crew.py": {
-      "stories": [
-        "US-AG12"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml": {
-      "stories": [
-        "US-AG13"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml": {
-      "stories": [
-        "US-AG13"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/synthesis_crew.py": {
-      "stories": [
-        "US-AG13"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/config/governance_agents.yaml": {
-      "stories": [
-        "US-AG14"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/config/governance_tasks.yaml": {
-      "stories": [
-        "US-AG14"
-      ]
-    },
-    "../startupai-crew/src/crews/viability/governance_crew.py": {
-      "stories": [
-        "US-AG14"
+        "US-P02",
+        "US-ADB01",
+        "US-AH07"
       ]
     },
     "backend/netlify/functions/gate-evaluate.py": {
@@ -3471,6 +3667,23 @@
         "US-H06",
         "US-H07",
         "US-H08"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_3.py": {
+      "stories": [
+        "US-H07",
+        "US-P03",
+        "US-AFB01",
+        "US-AH08"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_4.py": {
+      "stories": [
+        "US-H08",
+        "US-H09",
+        "US-P04",
+        "US-AVB01",
+        "US-AH10"
       ]
     },
     "frontend/tests/e2e/15-pivot-workflows.spec.ts": {
@@ -3810,6 +4023,276 @@
         "US-A09",
         "US-A10",
         "US-A12"
+      ]
+    },
+    "../startupai-crew/src/crews/onboarding/config/agents.yaml": {
+      "stories": [
+        "US-AB01"
+      ]
+    },
+    "../startupai-crew/src/crews/onboarding/config/tasks.yaml": {
+      "stories": [
+        "US-AB01"
+      ]
+    },
+    "../startupai-crew/src/crews/onboarding/crew.py": {
+      "stories": [
+        "US-AB01"
+      ]
+    },
+    "frontend/tests/e2e/30-agent-brief-generation.spec.ts": {
+      "stories": [
+        "US-AB01",
+        "US-AB02",
+        "US-AB03"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/agents.yaml": {
+      "stories": [
+        "US-AD01"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/tasks.yaml": {
+      "stories": [
+        "US-AD01"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/discovery_crew.py": {
+      "stories": [
+        "US-AD01"
+      ]
+    },
+    "frontend/tests/e2e/31-agent-vpc-discovery.spec.ts": {
+      "stories": [
+        "US-AD01",
+        "US-AD02",
+        "US-AD03",
+        "US-AD04",
+        "US-AD05",
+        "US-AD06",
+        "US-AD07",
+        "US-AD08",
+        "US-AD09",
+        "US-AD10"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml": {
+      "stories": [
+        "US-AD06"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml": {
+      "stories": [
+        "US-AD06"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/customer_profile_crew.py": {
+      "stories": [
+        "US-AD06"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml": {
+      "stories": [
+        "US-AD07"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml": {
+      "stories": [
+        "US-AD07"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/value_design_crew.py": {
+      "stories": [
+        "US-AD07"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml": {
+      "stories": [
+        "US-AD08"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml": {
+      "stories": [
+        "US-AD08"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/wtp_crew.py": {
+      "stories": [
+        "US-AD08"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml": {
+      "stories": [
+        "US-AD09"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml": {
+      "stories": [
+        "US-AD09"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/fit_assessment_crew.py": {
+      "stories": [
+        "US-AD09"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/build_crew.py": {
+      "stories": [
+        "US-ADB01"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/build_agents.yaml": {
+      "stories": [
+        "US-ADB01"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/build_tasks.yaml": {
+      "stories": [
+        "US-ADB01"
+      ]
+    },
+    "frontend/tests/e2e/32-agent-desirability.spec.ts": {
+      "stories": [
+        "US-ADB01",
+        "US-ADB02",
+        "US-ADB03",
+        "US-ADB04",
+        "US-ADB05"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/growth_agents.yaml": {
+      "stories": [
+        "US-ADB03"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml": {
+      "stories": [
+        "US-ADB03"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/growth_crew.py": {
+      "stories": [
+        "US-ADB03"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/governance_agents.yaml": {
+      "stories": [
+        "US-ADB05"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml": {
+      "stories": [
+        "US-ADB05"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/governance_crew.py": {
+      "stories": [
+        "US-ADB05"
+      ]
+    },
+    "frontend/tests/e2e/33-agent-feasibility.spec.ts": {
+      "stories": [
+        "US-AFB01",
+        "US-AFB02",
+        "US-AFB03"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/build_crew.py": {
+      "stories": [
+        "US-AFB02"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/build_agents.yaml": {
+      "stories": [
+        "US-AFB02"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml": {
+      "stories": [
+        "US-AFB02"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml": {
+      "stories": [
+        "US-AFB03"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml": {
+      "stories": [
+        "US-AFB03"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/governance_crew.py": {
+      "stories": [
+        "US-AFB03"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/finance_agents.yaml": {
+      "stories": [
+        "US-AVB01"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/finance_tasks.yaml": {
+      "stories": [
+        "US-AVB01"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/finance_crew.py": {
+      "stories": [
+        "US-AVB01"
+      ]
+    },
+    "frontend/tests/e2e/34-agent-viability.spec.ts": {
+      "stories": [
+        "US-AVB01",
+        "US-AVB02",
+        "US-AVB03",
+        "US-AVB04",
+        "US-AVB05"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml": {
+      "stories": [
+        "US-AVB04"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml": {
+      "stories": [
+        "US-AVB04"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/synthesis_crew.py": {
+      "stories": [
+        "US-AVB04"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/governance_agents.yaml": {
+      "stories": [
+        "US-AVB05"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/governance_tasks.yaml": {
+      "stories": [
+        "US-AVB05"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/governance_crew.py": {
+      "stories": [
+        "US-AVB05"
+      ]
+    },
+    "frontend/tests/e2e/35-agent-hitl-checkpoints.spec.ts": {
+      "stories": [
+        "US-AH01",
+        "US-AH02",
+        "US-AH03",
+        "US-AH04",
+        "US-AH05",
+        "US-AH06",
+        "US-AH07",
+        "US-AH08",
+        "US-AH09",
+        "US-AH10"
       ]
     }
   }

@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-23**: Added US-AG07-14 (Phase 2-4 agent specs); total stories now 142.
+> **Updated 2026-01-23**: Restructured agent stories (US-AJ/AG → US-AB/AD/ADB/AFB/AVB/AH); total stories now 157.
 
 ### Stories by Category
 
@@ -48,8 +48,12 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Consultant Trial | US-CT01-CT06 | 6 | 0 | 6 |
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
-| Agent Journey | US-AJ01-AJ07 | 7 | 0 | 7 |
-| Agent Specs | US-AG01-AG14 | 14 | 0 | 14 |
+| Agent Brief | US-AB01-AB03 | 3 | 0 | 3 |
+| Agent Discovery | US-AD01-AD10 | 10 | 0 | 10 |
+| Agent Desirability | US-ADB01-ADB05 | 5 | 0 | 5 |
+| Agent Feasibility | US-AFB01-AFB03 | 3 | 0 | 3 |
+| Agent Viability | US-AVB01-AVB05 | 5 | 0 | 5 |
+| Agent HITL | US-AH01-AH10 | 10 | 0 | 10 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
 | Authentication | US-AU01-AU03 | 3 | 1 | 2 |
 | Core Product | US-CP01-CP09 | 9 | 0 | 9 |
@@ -60,7 +64,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
-| **Total** | | **134** | **34** | **100** |
+| **Total** | | **157** | **34** | **123** |
 
 ### E2E Test File Mapping
 
@@ -85,6 +89,12 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `16-quick-start-founder.spec.ts` | US-F01, US-FT01 |
 | `17-quick-start-consultant.spec.ts` | US-C07 |
 | `28-hypotheses.spec.ts` | US-F17 |
+| `30-agent-brief-generation.spec.ts` | US-AB01-AB03 |
+| `31-agent-vpc-discovery.spec.ts` | US-AD01-AD10 |
+| `32-agent-desirability.spec.ts` | US-ADB01-ADB05 |
+| `33-agent-feasibility.spec.ts` | US-AFB01-AFB03 |
+| `34-agent-viability.spec.ts` | US-AVB01-AVB05 |
+| `35-agent-hitl-checkpoints.spec.ts` | US-AH01-AH10 |
 
 ### Gap Analysis (100 Stories Need Implementation)
 
@@ -108,7 +118,7 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-23**: Added US-AG07-14 (Phase 2-4 agent specs); total stories now 142.
+> **Updated 2026-01-23**: Restructured agent stories for JDTD effectiveness; total stories now 157.
 
 ### Stories by Category
 
@@ -121,8 +131,12 @@ Stories with test stubs created but not yet implemented:
 | Admin (US-A) | 12 | 0 | 12 |
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
-| Agent Journey (US-AJ) | 7 | 0 | 7 |
-| Agent Specs (US-AG) | 14 | 0 | 14 |
+| Agent Brief (US-AB) | 3 | 0 | 3 |
+| Agent Discovery (US-AD) | 10 | 0 | 10 |
+| Agent Desirability (US-ADB) | 5 | 0 | 5 |
+| Agent Feasibility (US-AFB) | 3 | 0 | 3 |
+| Agent Viability (US-AVB) | 5 | 0 | 5 |
+| Agent HITL (US-AH) | 10 | 0 | 10 |
 | Edge Case (US-E) | 6 | 0 | 6 |
 | Authentication (US-AU) | 3 | 1 | 2 |
 | Core Product (US-CP) | 9 | 0 | 9 |
@@ -132,7 +146,7 @@ Stories with test stubs created but not yet implemented:
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 15 | 0 | 15 |
-| **Total** | **134** | **34** | **100** |
+| **Total** | **157** | **34** | **123** |
 
 ### HITL Story Priority
 
@@ -175,9 +189,9 @@ Stories with test stubs created but not yet implemented:
 | [`billing-journey-map.md`](../journeys/platform/billing-journey-map.md) | Payment lifecycle |
 | [`notification-journey-map.md`](../journeys/platform/notification-journey-map.md) | Notification delivery |
 | [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) | Profile and security |
-| [`agent-journey-map.md`](../journeys/agents/agent-journey-map.md) | AI agent phase journeys |
-| [`agent-specs.md`](agent-specs.md) | Agent spec stories for crew contracts |
+| [`agents/`](agents/) | Agent stories by phase (US-AB, US-AD, US-ADB, US-AFB, US-AVB, US-AH) |
 | [`journey-test-matrix.md`](../../testing/journey-test-matrix.md) | Test coverage matrix |
+| [`agent-journey-test-matrix.md`](../../testing/agent-journey-test-matrix.md) | Agent journey test matrix |
 | [`project-client-management.md`](../../features/project-client-management.md) | Archive/delete feature specs |
 | [`consultant-client-system.md`](../../features/consultant-client-system.md) | Invite system specs |
 
@@ -187,6 +201,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-23 | **Agent Story Restructure:** Replaced US-AJ01-07 and US-AG01-14 with new phase-organized stories: US-AB01-03 (Brief), US-AD01-10 (Discovery), US-ADB01-05 (Desirability), US-AFB01-03 (Feasibility), US-AVB01-05 (Viability), US-AH01-10 (HITL). Total stories now 157. |
 | 2026-01-23 | **Founder Hypotheses:** Added US-F17 (Hypotheses) and updated story totals to 134. |
 | 2026-01-23 | **Agent Specs:** Added US-AG01-AG06 (agent spec stories) and updated story totals to 133. |
 | 2026-01-23 | **Agent Journeys:** Added US-AJ01-AJ07 (agent journey stories) and updated story totals to 127. |

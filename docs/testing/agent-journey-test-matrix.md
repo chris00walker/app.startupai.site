@@ -16,27 +16,86 @@ It focuses on artifacts, signals, and persistence invariants rather than UI beha
 - **Integration**: Modal flow + Supabase persistence + HITL checkpoint routing
 - **Routing**: Pivot or gate decisions based on signal thresholds
 
-## Agent Journey Coverage
+## Phase 1 Stage A: Brief Generation
 
-| Story ID | Phase | Artifacts / Signals | Persistence Invariants | Contract / Integration Tests | Status |
-|----------|-------|---------------------|------------------------|------------------------------|--------|
-| US-AJ01 | Phase 0 Kickoff | `validation_runs`, Phase 0 progress | `validation_runs` created with `run_id`, `project_id`, `current_phase=0`; `validation_progress` entry | `/kickoff` contract + Supabase insert verification | Gap |
-| US-AJ02 | Phase 1 Stage A | `FoundersBrief` | `phase_state.founders_brief` present; `hitl_requests` for `approve_brief` | Phase 1 Stage A contract + HITL insert | Gap |
-| US-AJ03 | Phase 1 Stage B | `CustomerProfile`, `ValueMap`, `FitAssessment` | Phase 1 outputs stored; `hitl_requests` for `approve_discovery_output` | Phase 1 Stage B contract + HITL insert | Gap |
-| US-AJ04 | Phase 2 | `desirability_evidence`, signals | `desirability_evidence` stored; gate or pivot checkpoint created | Phase 2 contract + gate checkpoint routing | Gap |
-| US-AJ05 | Phase 3 | `feasibility_evidence`, signals | `feasibility_evidence` stored; gate or downgrade checkpoint created | Phase 3 contract + gate routing | Gap |
-| US-AJ06 | Phase 4 | `viability_evidence`, unit economics | Viability outputs stored; final decision checkpoint created | Phase 4 contract + final decision routing | Gap |
-| US-AJ07 | Cross-Phase Router | pivot decisions | `pivot_recommendation` set; `hitl_requests` created for pivots | Router decision tests using synthetic signals | Gap |
+| Story ID | Crew/Agent | Artifacts | Persistence Invariants | E2E Test File | Status |
+|----------|------------|-----------|------------------------|---------------|--------|
+| US-AB01 | BriefGenerationCrew | `FoundersBrief` | `validation_runs.phase_state.founders_brief` populated | `30-agent-brief-generation.spec.ts` | Gap |
+| US-AB02 | GV1 Agent | `LegitimacyReport` | Internal crew state | `30-agent-brief-generation.spec.ts` | Gap |
+| US-AB03 | HITL | Brief edits | `hitl_requests` for `approve_brief` | `30-agent-brief-generation.spec.ts` | Gap |
+
+## Phase 1 Stage B: VPC Discovery
+
+| Story ID | Crew/Agent | Artifacts | Persistence Invariants | E2E Test File | Status |
+|----------|------------|-----------|------------------------|---------------|--------|
+| US-AD01 | E1 Agent | `ExperimentPlan`, `TestCard[]` | `hitl_requests` for `approve_experiment_plan` | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD02 | D1 Agent | `SAYEvidence` | Internal crew state | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD03 | D2 Agent | `DOIndirectEvidence` | Internal crew state | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD04 | D3 Agent | `DODirectEvidence` | Internal crew state | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD05 | D4 Agent | `EvidenceSynthesis` | Internal crew state | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD06 | CustomerProfileCrew | `CustomerProfile` | `validation_runs.phase_state.customer_profile` | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD07 | ValueDesignCrew | `ValueMap` | `validation_runs.phase_state.value_map` | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD08 | WTPCrew | `WTPEvidence` | `hitl_requests` for `approve_pricing_test` | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD09 | FIT_SCORE Agent | `FitAssessment` | `validation_runs.phase_state.fit_assessment` | `31-agent-vpc-discovery.spec.ts` | Gap |
+| US-AD10 | FIT_ROUTE Agent | `IterationRouting` | `hitl_requests` for `approve_discovery_output` | `31-agent-vpc-discovery.spec.ts` | Gap |
+
+## Phase 2: Desirability
+
+| Story ID | Crew/Agent | Artifacts | Persistence Invariants | E2E Test File | Status |
+|----------|------------|-----------|------------------------|---------------|--------|
+| US-ADB01 | BuildCrew | `LandingPageBuild` | `validation_runs.phase_state.landing_page_url` | `32-agent-desirability.spec.ts` | Gap |
+| US-ADB02 | F3 Agent | `DeploymentResult` | Site deployed to Netlify | `32-agent-desirability.spec.ts` | Gap |
+| US-ADB03 | GrowthCrew | `AdCreatives` | `hitl_requests` for `approve_campaign_launch` | `32-agent-desirability.spec.ts` | Gap |
+| US-ADB04 | P3 Agent | `DesirabilitySignal` | `validation_runs.phase_state.desirability_evidence` | `32-agent-desirability.spec.ts` | Gap |
+| US-ADB05 | GovernanceCrew | `QAReport`, gate decision | `hitl_requests` for `approve_desirability_gate` | `32-agent-desirability.spec.ts` | Gap |
+
+## Phase 3: Feasibility
+
+| Story ID | Crew/Agent | Artifacts | Persistence Invariants | E2E Test File | Status |
+|----------|------------|-----------|------------------------|---------------|--------|
+| US-AFB01 | F1 Agent | `FeatureRequirements` | Internal crew state | `33-agent-feasibility.spec.ts` | Gap |
+| US-AFB02 | BuildCrew | `FeasibilitySignal` | `validation_runs.phase_state.feasibility_evidence` | `33-agent-feasibility.spec.ts` | Gap |
+| US-AFB03 | GovernanceCrew | `QAReport`, gate decision | `hitl_requests` for `approve_feasibility_gate` | `33-agent-feasibility.spec.ts` | Gap |
+
+## Phase 4: Viability
+
+| Story ID | Crew/Agent | Artifacts | Persistence Invariants | E2E Test File | Status |
+|----------|------------|-----------|------------------------|---------------|--------|
+| US-AVB01 | L1 Agent | `UnitEconomics` | `validation_runs.phase_state.viability_evidence` | `34-agent-viability.spec.ts` | Gap |
+| US-AVB02 | L2 Agent | `ComplianceReport` | Internal crew state | `34-agent-viability.spec.ts` | Gap |
+| US-AVB03 | L3 Agent | `ViabilitySignal` | `hitl_requests` for `approve_viability_gate` | `34-agent-viability.spec.ts` | Gap |
+| US-AVB04 | C1 Agent | `EvidenceSynthesis` | Internal crew state | `34-agent-viability.spec.ts` | Gap |
+| US-AVB05 | C2 Agent | `HumanDecisionRequest` | `hitl_requests` for `request_human_decision` | `34-agent-viability.spec.ts` | Gap |
+
+## HITL Checkpoints
+
+| Story ID | Checkpoint | Phase | Trigger | E2E Test File | Status |
+|----------|------------|-------|---------|---------------|--------|
+| US-AH01 | approve_brief | 1A | Brief generated | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH02 | approve_experiment_plan | 1B | Test cards ready | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH03 | approve_pricing_test | 1B | WTP experiment planned | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH04 | approve_discovery_output | 1B | VPC complete, fit >= 70 | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH05 | approve_campaign_launch | 2 | Ads ready | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH06 | approve_spend_increase | 2 | Budget threshold | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH07 | approve_desirability_gate | 2 | D signal ready | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH08 | approve_feasibility_gate | 3 | F signal ready | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH09 | approve_viability_gate | 4 | V signal ready | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+| US-AH10 | request_human_decision | 4 | Final synthesis ready | `35-agent-hitl-checkpoints.spec.ts` | Gap |
+
+## Summary
+
+| Phase | Stories | Crew Tests | HITL Tests | Status |
+|-------|---------|------------|------------|--------|
+| Phase 1A (Brief) | US-AB01-03 | 3 | 1 | Gap |
+| Phase 1B (VPC) | US-AD01-10 | 10 | 3 | Gap |
+| Phase 2 (Desirability) | US-ADB01-05 | 5 | 3 | Gap |
+| Phase 3 (Feasibility) | US-AFB01-03 | 3 | 1 | Gap |
+| Phase 4 (Viability) | US-AVB01-05 | 5 | 2 | Gap |
+| HITL | US-AH01-10 | - | 10 | Gap |
+| **Total** | **36** | **26** | **10** | Gap |
 
 ## References
 
-- `startupai-crew/docs/master-architecture/04-phase-0-onboarding.md`
-- `startupai-crew/docs/master-architecture/05-phase-1-vpc-discovery.md`
-- `startupai-crew/docs/master-architecture/06-phase-2-desirability.md`
-- `startupai-crew/docs/master-architecture/07-phase-3-feasibility.md`
-- `startupai-crew/docs/master-architecture/08-phase-4-viability.md`
-- `startupai-crew/docs/master-architecture/reference/approval-workflows.md`
-- `startupai-crew/docs/master-architecture/reference/state-schemas.md`
-- `startupai-crew/docs/master-architecture/reference/output-schemas.md`
-- `startupai-crew/docs/master-architecture/reference/data-flow.md`
-
+- `docs/user-experience/stories/agents/` - Story definitions with acceptance criteria
+- `startupai-crew/docs/master-architecture/reference/state-schemas.md` - Pydantic schemas
+- `startupai-crew/docs/master-architecture/reference/approval-workflows.md` - HITL patterns
