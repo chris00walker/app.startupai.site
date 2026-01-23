@@ -150,3 +150,205 @@ They focus on structured outputs, persistence invariants, and HITL checkpoints.
 **E2E Test:** Gap - needs test
 **Journey Reference:** `startupai-crew/docs/master-architecture/05-phase-1-vpc-discovery.md`
 
+---
+
+## Phase 2: Desirability Agent Specifications
+
+### US-AG07: Specify Desirability BuildCrew Agents and Tasks
+
+**As the** desirability system owner,
+**I want to** define BuildCrew agents and tasks with clear contracts,
+**So that** Phase 2 reliably builds landing pages and deployments.
+
+**Acceptance Criteria:**
+
+**Given** the BuildCrew loads agent configs
+**When** the crew is initialized
+**Then** F1 (UX/UI), F2 (Frontend), F3 (Backend) include `role`, `goal`, and `backstory`
+
+**Given** `build_landing_page` completes
+**When** the page is deployed
+**Then** output conforms to `LandingPageBuild` and `DeploymentResult` schemas
+
+**Given** the landing page is deployed
+**When** Phase 2 continues to GrowthCrew
+**Then** `validation_progress` records the build milestone
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/06-phase-2-desirability.md`
+
+---
+
+### US-AG08: Specify Desirability GrowthCrew Agents and Tasks
+
+**As the** desirability system owner,
+**I want to** define GrowthCrew agents and tasks with explicit outputs,
+**So that** ad campaigns run with proper HITL approvals.
+
+**Acceptance Criteria:**
+
+**Given** the GrowthCrew loads agent configs
+**When** the crew is initialized
+**Then** P1 (Ad Creative), P2 (Communications), P3 (Analytics) include `role`, `goal`, and `backstory`
+
+**Given** `generate_ad_creatives` completes
+**When** ad variants are ready
+**Then** a `hitl_requests` entry exists for `approve_campaign_launch`
+
+**Given** `analyze_desirability_signal` completes
+**When** the signal is computed
+**Then** output conforms to `DesirabilitySignal` with confidence interval
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/06-phase-2-desirability.md`
+
+---
+
+### US-AG09: Specify Desirability GovernanceCrew Agents and Tasks
+
+**As the** governance system owner,
+**I want to** define Phase 2 GovernanceCrew agents with QA and security contracts,
+**So that** desirability artifacts pass governance before gate.
+
+**Acceptance Criteria:**
+
+**Given** the GovernanceCrew loads agent configs
+**When** the crew is initialized
+**Then** G1 (QA), G2 (Security), G3 (Audit) include `role`, `goal`, and `backstory`
+
+**Given** `validate_desirability_output` completes
+**When** governance review is done
+**Then** output conforms to `QAReport`, `SecurityReport`, and `AuditReport` schemas
+
+**Given** the gate is reached
+**When** governance passes
+**Then** a `hitl_requests` entry exists for `approve_desirability_gate`
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/reference/approval-workflows.md`
+
+---
+
+## Phase 3: Feasibility Agent Specifications
+
+### US-AG10: Specify Feasibility BuildCrew Agents and Tasks
+
+**As the** feasibility system owner,
+**I want to** define BuildCrew agents reused with feasibility context,
+**So that** Phase 3 reliably assesses technical feasibility.
+
+**Acceptance Criteria:**
+
+**Given** the BuildCrew loads agent configs in feasibility context
+**When** the crew is initialized
+**Then** F1, F2, F3 run with feasibility-specific prompts and outputs
+
+**Given** `assess_feasibility` completes
+**When** the assessment is compiled
+**Then** output conforms to `FeasibilitySignal` with RED/YELLOW/GREEN status
+
+**Given** the feasibility assessment is ready
+**When** the gate is reached
+**Then** a `hitl_requests` entry exists for `approve_feasibility_gate`
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/07-phase-3-feasibility.md`
+
+---
+
+### US-AG11: Specify Feasibility GovernanceCrew Agents and Tasks
+
+**As the** governance system owner,
+**I want to** define Phase 3 GovernanceCrew agents with feasibility QA contracts,
+**So that** feasibility artifacts are validated before gate.
+
+**Acceptance Criteria:**
+
+**Given** the GovernanceCrew loads agent configs in feasibility context
+**When** the crew is initialized
+**Then** G1 (QA) and G2 (Security) include feasibility-specific validation rules
+
+**Given** `validate_feasibility_output` completes
+**When** governance review is done
+**Then** output conforms to `QAReport` with feasibility-specific checks
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/reference/approval-workflows.md`
+
+---
+
+## Phase 4: Viability Agent Specifications
+
+### US-AG12: Specify Viability FinanceCrew Agents and Tasks
+
+**As the** viability system owner,
+**I want to** define FinanceCrew agents and tasks with financial modeling contracts,
+**So that** Phase 4 reliably produces unit economics and compliance analysis.
+
+**Acceptance Criteria:**
+
+**Given** the FinanceCrew loads agent configs
+**When** the crew is initialized
+**Then** L1 (Financial Controller), L2 (Legal & Compliance), L3 (Economics Reviewer) include `role`, `goal`, and `backstory`
+
+**Given** `calculate_unit_economics` completes
+**When** the model is compiled
+**Then** output conforms to `UnitEconomics` with CAC, LTV, and LTV/CAC ratio
+
+**Given** `compile_viability_signal` completes
+**When** the signal is ready
+**Then** output conforms to `ViabilitySignal` with UNPROFITABLE/MARGINAL/PROFITABLE status
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/08-phase-4-viability.md`
+
+---
+
+### US-AG13: Specify Viability SynthesisCrew Agents and Tasks
+
+**As the** synthesis system owner,
+**I want to** define SynthesisCrew agents with evidence synthesis contracts,
+**So that** Phase 4 produces a final validation recommendation.
+
+**Acceptance Criteria:**
+
+**Given** the SynthesisCrew loads agent configs
+**When** the crew is initialized
+**Then** C1 (Product PM), C2 (Human Approval), C3 (Final Report) include `role`, `goal`, and `backstory`
+
+**Given** `synthesize_evidence` completes
+**When** all phase signals are combined
+**Then** output conforms to `EvidenceSynthesis` with recommendation (pivot/proceed/stop)
+
+**Given** the final decision is ready
+**When** the gate is reached
+**Then** a `hitl_requests` entry exists for `approve_final_decision`
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/08-phase-4-viability.md`
+
+---
+
+### US-AG14: Specify Viability GovernanceCrew Agents and Tasks
+
+**As the** governance system owner,
+**I want to** define Phase 4 GovernanceCrew agents with final audit contracts,
+**So that** viability artifacts are fully audited before final decision.
+
+**Acceptance Criteria:**
+
+**Given** the GovernanceCrew loads agent configs in viability context
+**When** the crew is initialized
+**Then** G1 (QA), G2 (Security), G3 (Audit) include viability-specific validation rules
+
+**Given** `audit_final_decision` completes
+**When** the audit is recorded
+**Then** output conforms to `AuditReport` with flywheel capture and compliance attestation
+
+**Given** the validation journey is complete
+**When** the project is marked validated or pivoted
+**Then** `validation_progress` records the final milestone with audit trail
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** `startupai-crew/docs/master-architecture/reference/approval-workflows.md`
+

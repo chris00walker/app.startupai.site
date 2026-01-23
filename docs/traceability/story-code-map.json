@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T21:23:25.639Z",
+    "generated_at": "2026-01-23T21:31:23.398Z",
     "version": "1.0.0",
-    "story_count": 134,
-    "annotated_file_count": 130
+    "story_count": 142,
+    "annotated_file_count": 146
   },
   "stories": {
     "US-F01": {
@@ -969,6 +969,126 @@
       "lib": [
         "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml",
         "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG07": {
+      "title": "Specify Desirability BuildCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/desirability/config/build_agents.yaml",
+        "../startupai-crew/src/crews/desirability/config/build_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG08": {
+      "title": "Specify Desirability GrowthCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/desirability/config/growth_agents.yaml",
+        "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG09": {
+      "title": "Specify Desirability GovernanceCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/desirability/config/governance_agents.yaml",
+        "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG10": {
+      "title": "Specify Feasibility BuildCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/feasibility/config/build_agents.yaml",
+        "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG11": {
+      "title": "Specify Feasibility GovernanceCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml",
+        "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG12": {
+      "title": "Specify Viability FinanceCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/viability/config/finance_agents.yaml",
+        "../startupai-crew/src/crews/viability/config/finance_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG13": {
+      "title": "Specify Viability SynthesisCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml",
+        "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG14": {
+      "title": "Specify Viability GovernanceCrew Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/viability/config/governance_agents.yaml",
+        "../startupai-crew/src/crews/viability/config/governance_tasks.yaml"
       ],
       "e2e_tests": [],
       "unit_tests": [],
@@ -3166,6 +3286,86 @@
     "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml": {
       "stories": [
         "US-AG06"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/build_agents.yaml": {
+      "stories": [
+        "US-AG07"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/build_tasks.yaml": {
+      "stories": [
+        "US-AG07"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/growth_agents.yaml": {
+      "stories": [
+        "US-AG08"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml": {
+      "stories": [
+        "US-AG08"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/governance_agents.yaml": {
+      "stories": [
+        "US-AG09"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml": {
+      "stories": [
+        "US-AG09"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/build_agents.yaml": {
+      "stories": [
+        "US-AG10"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml": {
+      "stories": [
+        "US-AG10"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml": {
+      "stories": [
+        "US-AG11"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml": {
+      "stories": [
+        "US-AG11"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/finance_agents.yaml": {
+      "stories": [
+        "US-AG12"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/finance_tasks.yaml": {
+      "stories": [
+        "US-AG12"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml": {
+      "stories": [
+        "US-AG13"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml": {
+      "stories": [
+        "US-AG13"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/governance_agents.yaml": {
+      "stories": [
+        "US-AG14"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/config/governance_tasks.yaml": {
+      "stories": [
+        "US-AG14"
       ]
     },
     "backend/netlify/functions/gate-evaluate.py": {

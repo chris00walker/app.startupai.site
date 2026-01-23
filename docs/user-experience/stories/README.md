@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-23**: Added US-F17 (Hypotheses) and Agent Spec stories (US-AG01-AG06); total stories now 134.
+> **Updated 2026-01-23**: Added US-AG07-14 (Phase 2-4 agent specs); total stories now 142.
 
 ### Stories by Category
 
@@ -49,7 +49,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
 | Agent Journey | US-AJ01-AJ07 | 7 | 0 | 7 |
-| Agent Specs | US-AG01-AG06 | 6 | 0 | 6 |
+| Agent Specs | US-AG01-AG14 | 14 | 0 | 14 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
 | Authentication | US-AU01-AU03 | 3 | 1 | 2 |
 | Core Product | US-CP01-CP09 | 9 | 0 | 9 |
@@ -108,7 +108,7 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-23**: Added US-F17 (Hypotheses) and Agent Spec stories (US-AG01-AG06); total stories now 134.
+> **Updated 2026-01-23**: Added US-AG07-14 (Phase 2-4 agent specs); total stories now 142.
 
 ### Stories by Category
 
@@ -122,7 +122,7 @@ Stories with test stubs created but not yet implemented:
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
 | Agent Journey (US-AJ) | 7 | 0 | 7 |
-| Agent Specs (US-AG) | 6 | 0 | 6 |
+| Agent Specs (US-AG) | 14 | 0 | 14 |
 | Edge Case (US-E) | 6 | 0 | 6 |
 | Authentication (US-AU) | 3 | 1 | 2 |
 | Core Product (US-CP) | 9 | 0 | 9 |
