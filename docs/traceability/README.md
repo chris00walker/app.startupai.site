@@ -104,6 +104,7 @@ def handle_checkpoint(payload):
 - Multiple stories comma-separated: `@story US-F01, US-FT01, US-H01`
 - No wildcards (explicit IDs only)
 - Story IDs must exist in `stories/*.md`
+- Agent journey stories use the `US-AJ##` prefix and map to AI flow code
 
 ## Override Rules
 

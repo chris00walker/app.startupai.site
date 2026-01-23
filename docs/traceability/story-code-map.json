@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T15:32:30.355Z",
+    "generated_at": "2026-01-23T16:01:14.825Z",
     "version": "1.0.0",
-    "story_count": 120,
+    "story_count": 127,
     "annotated_file_count": 115
   },
   "stories": {
@@ -763,6 +763,107 @@
         "users"
       ],
       "implementation_status": "gap"
+    },
+    "US-AJ01": {
+      "title": "Kickoff Validation Run",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_0.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AJ02": {
+      "title": "Generate Founder's Brief (Phase 1 Stage A)",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AJ03": {
+      "title": "Produce VPC + Fit Assessment (Phase 1 Stage B)",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AJ04": {
+      "title": "Run Desirability Evidence + Gate (Phase 2)",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AJ05": {
+      "title": "Run Feasibility Assessment + Gate (Phase 3)",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_3.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AJ06": {
+      "title": "Run Viability Assessment + Final Decision (Phase 4)",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AJ07": {
+      "title": "Route Pivot Decisions",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_2.py",
+        "../startupai-crew/src/modal_app/phases/phase_3.py",
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
     },
     "US-H01": {
       "title": "Review Discovery Output (Founder's Brief + VPC)",
@@ -2460,6 +2561,7 @@
         "US-F10",
         "US-C07",
         "US-FT01",
+        "US-AJ01",
         "US-H01",
         "US-H02",
         "US-H04",
@@ -2478,7 +2580,8 @@
     "../startupai-crew/src/modal_app/phases/phase_0.py": {
       "stories": [
         "US-F01",
-        "US-FT01"
+        "US-FT01",
+        "US-AJ01"
       ]
     },
     "frontend/src/app/onboarding/founder/page.tsx": {
@@ -2636,6 +2739,8 @@
     "../startupai-crew/src/modal_app/phases/phase_1.py": {
       "stories": [
         "US-F06",
+        "US-AJ02",
+        "US-AJ03",
         "US-H01",
         "US-H02"
       ]
@@ -2824,6 +2929,8 @@
     },
     "../startupai-crew/src/modal_app/phases/phase_2.py": {
       "stories": [
+        "US-AJ04",
+        "US-AJ07",
         "US-H04",
         "US-H05",
         "US-H06",
@@ -2831,24 +2938,28 @@
         "US-P02"
       ]
     },
-    "backend/netlify/functions/gate-evaluate.py": {
-      "stories": [
-        "US-H06",
-        "US-H07",
-        "US-H08"
-      ]
-    },
     "../startupai-crew/src/modal_app/phases/phase_3.py": {
       "stories": [
+        "US-AJ05",
+        "US-AJ07",
         "US-H07",
         "US-P03"
       ]
     },
     "../startupai-crew/src/modal_app/phases/phase_4.py": {
       "stories": [
+        "US-AJ06",
+        "US-AJ07",
         "US-H08",
         "US-H09",
         "US-P04"
+      ]
+    },
+    "backend/netlify/functions/gate-evaluate.py": {
+      "stories": [
+        "US-H06",
+        "US-H07",
+        "US-H08"
       ]
     },
     "frontend/tests/e2e/15-pivot-workflows.spec.ts": {

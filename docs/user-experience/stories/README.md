@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-23**: Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout); total stories now 120.
+> **Updated 2026-01-23**: Added Agent Journey stories (US-AJ01-AJ07); total stories now 127.
 
 ### Stories by Category
 
@@ -48,6 +48,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Consultant Trial | US-CT01-CT06 | 6 | 0 | 6 |
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
+| Agent Journey | US-AJ01-AJ07 | 7 | 0 | 7 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
 | Authentication | US-AU01-AU03 | 3 | 1 | 2 |
 | Core Product | US-CP01-CP09 | 9 | 0 | 9 |
@@ -58,7 +59,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
-| **Total** | | **120** | **34** | **86** |
+| **Total** | | **127** | **34** | **93** |
 
 ### E2E Test File Mapping
 
@@ -83,7 +84,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `16-quick-start-founder.spec.ts` | US-F01, US-FT01 |
 | `17-quick-start-consultant.spec.ts` | US-C07 |
 
-### Gap Analysis (86 Stories Need Implementation)
+### Gap Analysis (93 Stories Need Implementation)
 
 Stories with test stubs created but not yet implemented:
 
@@ -105,7 +106,7 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-23**: Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout); total stories now 120.
+> **Updated 2026-01-23**: Added Agent Journey stories (US-AJ01-AJ07); total stories now 127.
 
 ### Stories by Category
 
@@ -118,6 +119,7 @@ Stories with test stubs created but not yet implemented:
 | Admin (US-A) | 12 | 0 | 12 |
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
+| Agent Journey (US-AJ) | 7 | 0 | 7 |
 | Edge Case (US-E) | 6 | 0 | 6 |
 | Authentication (US-AU) | 3 | 1 | 2 |
 | Core Product (US-CP) | 9 | 0 | 9 |
@@ -127,7 +129,7 @@ Stories with test stubs created but not yet implemented:
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 15 | 0 | 15 |
-| **Total** | **120** | **34** | **86** |
+| **Total** | **127** | **34** | **93** |
 
 ### HITL Story Priority
 
@@ -170,6 +172,7 @@ Stories with test stubs created but not yet implemented:
 | [`billing-journey-map.md`](../journeys/platform/billing-journey-map.md) | Payment lifecycle |
 | [`notification-journey-map.md`](../journeys/platform/notification-journey-map.md) | Notification delivery |
 | [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) | Profile and security |
+| [`agent-journey-map.md`](../journeys/agents/agent-journey-map.md) | AI agent phase journeys |
 | [`journey-test-matrix.md`](../../testing/journey-test-matrix.md) | Test coverage matrix |
 | [`project-client-management.md`](../../features/project-client-management.md) | Archive/delete feature specs |
 | [`consultant-client-system.md`](../../features/consultant-client-system.md) | Invite system specs |
@@ -180,6 +183,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-23 | **Agent Journeys:** Added US-AJ01-AJ07 (agent journey stories) and updated story totals to 127. |
 | 2026-01-23 | **Founder & Auth Expansion:** Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout). Total stories now 120. |
 | 2026-01-23 | **Marketing Funnel Expansion:** Added US-MF04-MF15 and updated story counts to 114. |
 | 2026-01-23 | **Traceability Expansion:** Added US-AU01-AU02 (Authentication), US-CP01-CP09 (Core Product tools), and US-F11 (Manual Project Creation). Total stories now 102. |

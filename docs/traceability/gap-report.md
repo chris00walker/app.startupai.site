@@ -1,6 +1,6 @@
 # Story-Code Gap Report
 
-Generated: 2026-01-23T15:32:30.355Z
+Generated: 2026-01-23T16:01:14.825Z
 
 ## Stories Without Implementations
 
@@ -55,7 +55,7 @@ Generated: 2026-01-23T15:32:30.355Z
 | US-S04 | Request Data Export (GDPR) | Support |
 | US-S05 | Delete Account (GDPR) | Support |
 
-**Total Gaps: 48 / 120**
+**Total Gaps: 48 / 127**
 
 ## Gaps by Category
 

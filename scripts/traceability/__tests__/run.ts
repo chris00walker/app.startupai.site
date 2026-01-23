@@ -194,6 +194,7 @@ describe('getCategoryForStory', () => {
     expect(getCategoryForStory('US-CT03')).toBe('Consultant Trial');
     expect(getCategoryForStory('US-H01')).toBe('HITL Checkpoint');
     expect(getCategoryForStory('US-P01')).toBe('Pivot Flow');
+    expect(getCategoryForStory('US-AJ01')).toBe('Agent Journey');
     expect(getCategoryForStory('US-E01')).toBe('Edge Case');
     expect(getCategoryForStory('US-A01')).toBe('Admin');
     expect(getCategoryForStory('US-AS01')).toBe('Account Settings');

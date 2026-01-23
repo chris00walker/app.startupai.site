@@ -1,7 +1,7 @@
 ---
 purpose: "Testing documentation index"
 status: "active"
-last_reviewed: "2026-01-19"
+last_reviewed: "2026-01-23"
 ---
 
 # Testing Documentation
@@ -31,6 +31,7 @@ pnpm test:coverage
 | **[tdd-workflow.md](tdd-workflow.md)** | TDD methodology, Red-Green-Refactor, practical examples |
 | **[strategy.md](strategy.md)** | Test strategy, JDTD approach, test pyramid |
 | **[journey-test-matrix.md](journey-test-matrix.md)** | Story-to-test coverage matrix with gap analysis |
+| **[agent-journey-test-matrix.md](agent-journey-test-matrix.md)** | Agent journey test coverage matrix |
 | **[e2e-guide.md](e2e-guide.md)** | E2E testing guide for backend integration |
 
 ## Test-Driven Development
@@ -55,9 +56,10 @@ Journey Map → User Goal → Test Case → Implementation
 **Key principle:** Tests verify *user outcomes*, not *code mechanics*.
 
 **Sources for test cases:**
-- [`stories/README.md`](../user-experience/stories/README.md) - 18 user stories with acceptance criteria
-- [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) - 15-step Founder journey
-- [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) - 6-phase Consultant journey
+- [`stories/README.md`](../user-experience/stories/README.md) - Story catalog with acceptance criteria
+- [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) - Founder journey steps
+- [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) - Consultant journey phases
+- [`agent-journey-map.md`](../user-experience/journeys/agents/agent-journey-map.md) - Agent journey phases
 
 ## Test Stack
 
@@ -91,7 +93,7 @@ frontend/
 | Category | Target | Current |
 |----------|--------|---------|
 | Unit tests | >70% | ~65% |
-| Story coverage | 100% | 67% (12/18 stories) |
+| Story coverage | 100% | 27% (34/127 stories) |
 | Critical paths | 100% | ~85% |
 
 ## Running Tests
@@ -165,6 +167,7 @@ describe('ComponentName', () => {
 | [`stories/README.md`](../user-experience/stories/README.md) | Story definitions with acceptance criteria |
 | [`founder-journey-map.md`](../user-experience/journeys/founder/founder-journey-map.md) | Founder journey steps |
 | [`consultant-journey-map.md`](../user-experience/journeys/consultant/consultant-journey-map.md) | Consultant journey phases |
+| [`agent-journey-map.md`](../user-experience/journeys/agents/agent-journey-map.md) | Agent journey phases |
 | **Specs** | |
 | [`api-onboarding.md`](../specs/api-onboarding.md) | Onboarding API specification |
 | [`accessibility-standards.md`](../specs/accessibility-standards.md) | WCAG compliance requirements |
@@ -182,5 +185,5 @@ The following docs were archived during the Jan 2026 reorganization:
 
 ---
 
-**Last Updated**: 2026-01-19
+**Last Updated**: 2026-01-23
 **Maintainer**: Engineering Team
