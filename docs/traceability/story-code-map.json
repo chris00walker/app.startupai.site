@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T17:25:07.509Z",
+    "generated_at": "2026-01-23T21:18:31.803Z",
     "version": "1.0.0",
     "story_count": 134,
     "annotated_file_count": 129
@@ -314,7 +314,9 @@
         "frontend/src/components/hypothesis/HypothesisManager.tsx"
       ],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/founder-dashboard.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -2721,6 +2723,7 @@
         "US-F09",
         "US-F10",
         "US-F12",
+        "US-F17",
         "US-F13",
         "US-F15",
         "US-F16"

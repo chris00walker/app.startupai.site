@@ -6,7 +6,7 @@
  * Main dashboard for founders showing fit dashboard, gates,
  * validation summary, and evidence ledger.
  *
- * @story US-F02, US-F06, US-F08, US-F09, US-F10, US-F12, US-F13, US-F15, US-F16
+ * @story US-F02, US-F06, US-F08, US-F09, US-F10, US-F12, US-F13, US-F15, US-F16, US-F17
  */
 
 import * as React from "react"
@@ -34,6 +34,8 @@ import { VPCSummaryCard } from "@/components/vpc"
 import { InnovationPhysicsPanel } from "@/components/signals"
 // Strategyzer Components
 import { AssumptionMap, ExperimentCardsGrid, CanvasesGallery } from "@/components/strategyzer"
+// Hypothesis Management
+import HypothesisManager from "@/components/hypothesis/HypothesisManager"
 // Hooks for real data
 import { useRecentActivity, type ActivityItem } from "@/hooks/useRecentActivity"
 import { useRecommendedActions, type RecommendedAction } from "@/hooks/useRecommendedActions"
@@ -52,7 +54,8 @@ import {
   LayoutGrid,
   Users,
   BookOpen,
-  Map
+  Map,
+  FlaskConical
 } from "lucide-react"
 
 function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
@@ -455,7 +458,7 @@ export default function FounderDashboard() {
     >
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6" data-testid="dashboard">
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5">
+          <TabsList className="grid w-full max-w-4xl grid-cols-6">
             <TabsTrigger value="overview">
               <Target className="h-4 w-4 mr-1.5 hidden sm:inline" />
               Overview
@@ -468,13 +471,17 @@ export default function FounderDashboard() {
               <Map className="h-4 w-4 mr-1.5 hidden sm:inline" />
               Assumption Map
             </TabsTrigger>
+            <TabsTrigger value="hypotheses">
+              <FlaskConical className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Hypotheses
+            </TabsTrigger>
             <TabsTrigger value="experiments">
               <Beaker className="h-4 w-4 mr-1.5 hidden sm:inline" />
-              Experiment Cards
+              Experiments
             </TabsTrigger>
             <TabsTrigger value="evidence">
               <BookOpen className="h-4 w-4 mr-1.5 hidden sm:inline" />
-              Evidence & Learnings
+              Evidence
             </TabsTrigger>
           </TabsList>
 
@@ -549,6 +556,11 @@ export default function FounderDashboard() {
         {/* ASSUMPTION MAP TAB - Strategyzer terminology */}
         <TabsContent value="assumptions" className="space-y-6">
           <AssumptionMap projectId={projectId} />
+        </TabsContent>
+
+        {/* HYPOTHESES TAB - Business hypotheses management */}
+        <TabsContent value="hypotheses" className="space-y-6">
+          <HypothesisManager />
         </TabsContent>
 
         {/* EXPERIMENT CARDS TAB - Strict Strategyzer format */}

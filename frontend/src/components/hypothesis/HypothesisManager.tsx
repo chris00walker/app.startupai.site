@@ -12,7 +12,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Target, Users, Cog, DollarSign, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Plus, Target, Users, Cog, DollarSign, AlertTriangle, CheckCircle, XCircle, Clock, Pencil, Trash2 } from 'lucide-react'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { createClient } from '@/lib/supabase/client'
 import { useProjects } from '@/hooks/useProjects'
 
@@ -115,6 +116,14 @@ export default function HypothesisManager() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Edit dialog state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editHypothesis, setEditHypothesis] = useState<Hypothesis | null>(null)
+
+  // Delete confirmation state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [deleteHypothesis, setDeleteHypothesis] = useState<Hypothesis | null>(null)
+
   const fetchHypotheses = useCallback(async () => {
     if (!activeProjectId) {
       setHypotheses([])
@@ -183,6 +192,76 @@ export default function HypothesisManager() {
       setIsSubmitting(false)
     }
   }, [activeProjectId, fetchHypotheses, newHypothesis.importance, newHypothesis.source, newHypothesis.statement, newHypothesis.type, supabase])
+
+  const handleUpdateHypothesis = useCallback(async () => {
+    if (!activeProjectId || !editHypothesis) return
+
+    try {
+      setIsSubmitting(true)
+      const { error: updateError } = await supabase
+        .from('hypotheses')
+        .update({
+          statement: editHypothesis.statement,
+          type: editHypothesis.type,
+          importance: editHypothesis.importance,
+          evidence_strength: editHypothesis.evidence,
+          status: editHypothesis.status,
+          source: editHypothesis.source || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editHypothesis.id)
+        .eq('project_id', activeProjectId)
+
+      if (updateError) throw updateError
+
+      setEditHypothesis(null)
+      setIsEditDialogOpen(false)
+      setError(null)
+      await fetchHypotheses()
+    } catch (err) {
+      console.error('Error updating hypothesis:', err)
+      setError((err as Error).message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [activeProjectId, editHypothesis, fetchHypotheses, supabase])
+
+  const handleDeleteHypothesis = useCallback(async () => {
+    if (!activeProjectId || !deleteHypothesis) return
+
+    try {
+      setIsSubmitting(true)
+      // Delete is hard remove - experiments.hypothesis_id will be set to null
+      // via foreign key ON DELETE SET NULL constraint
+      const { error: deleteError } = await supabase
+        .from('hypotheses')
+        .delete()
+        .eq('id', deleteHypothesis.id)
+        .eq('project_id', activeProjectId)
+
+      if (deleteError) throw deleteError
+
+      setDeleteHypothesis(null)
+      setIsDeleteDialogOpen(false)
+      setError(null)
+      await fetchHypotheses()
+    } catch (err) {
+      console.error('Error deleting hypothesis:', err)
+      setError((err as Error).message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [activeProjectId, deleteHypothesis, fetchHypotheses, supabase])
+
+  const openEditDialog = useCallback((hypothesis: Hypothesis) => {
+    setEditHypothesis({ ...hypothesis })
+    setIsEditDialogOpen(true)
+  }, [])
+
+  const openDeleteDialog = useCallback((hypothesis: Hypothesis) => {
+    setDeleteHypothesis(hypothesis)
+    setIsDeleteDialogOpen(true)
+  }, [])
 
   // Prioritization Matrix Data
   const getMatrixPosition = (hypothesis: Hypothesis) => {
@@ -402,11 +481,22 @@ export default function HypothesisManager() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" disabled>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(hypothesis)}
+                          >
+                            <Pencil className="h-3 w-3 mr-1" />
                             Edit
                           </Button>
-                          <Button variant="outline" size="sm" disabled>
-                            Test
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => openDeleteDialog(hypothesis)}
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
                           </Button>
                         </div>
                       </div>
@@ -569,6 +659,164 @@ export default function HypothesisManager() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Hypothesis Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Hypothesis</DialogTitle>
+            <DialogDescription>
+              Update your hypothesis statement and attributes
+            </DialogDescription>
+          </DialogHeader>
+          {editHypothesis && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-statement">Hypothesis Statement</Label>
+                <Textarea
+                  id="edit-statement"
+                  placeholder="We believe that..."
+                  value={editHypothesis.statement}
+                  onChange={(e) => setEditHypothesis({...editHypothesis, statement: e.target.value})}
+                  className="min-h-20"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-type">Type</Label>
+                  <Select
+                    value={editHypothesis.type}
+                    onValueChange={(value: Hypothesis['type']) => setEditHypothesis({...editHypothesis, type: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="desirable">Desirable</SelectItem>
+                      <SelectItem value="feasible">Feasible</SelectItem>
+                      <SelectItem value="viable">Viable</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="edit-importance">Importance</Label>
+                  <Select
+                    value={editHypothesis.importance}
+                    onValueChange={(value: Hypothesis['importance']) => setEditHypothesis({...editHypothesis, importance: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-status">Status</Label>
+                  <Select
+                    value={editHypothesis.status}
+                    onValueChange={(value: Hypothesis['status']) => setEditHypothesis({...editHypothesis, status: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="untested">Untested</SelectItem>
+                      <SelectItem value="testing">Testing</SelectItem>
+                      <SelectItem value="validated">Validated</SelectItem>
+                      <SelectItem value="invalidated">Invalidated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="edit-evidence">Evidence Strength</Label>
+                  <Select
+                    value={editHypothesis.evidence}
+                    onValueChange={(value: Hypothesis['evidence']) => setEditHypothesis({...editHypothesis, evidence: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Evidence</SelectItem>
+                      <SelectItem value="weak">Weak</SelectItem>
+                      <SelectItem value="medium">Moderate</SelectItem>
+                      <SelectItem value="strong">Strong</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-source">Source</Label>
+                <Select
+                  value={editHypothesis.source}
+                  onValueChange={(value) => setEditHypothesis({...editHypothesis, source: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Value Propositions">Value Propositions</SelectItem>
+                    <SelectItem value="Customer Segments">Customer Segments</SelectItem>
+                    <SelectItem value="Channels">Channels</SelectItem>
+                    <SelectItem value="Customer Relationships">Customer Relationships</SelectItem>
+                    <SelectItem value="Revenue Streams">Revenue Streams</SelectItem>
+                    <SelectItem value="Key Resources">Key Resources</SelectItem>
+                    <SelectItem value="Key Activities">Key Activities</SelectItem>
+                    <SelectItem value="Key Partners">Key Partners</SelectItem>
+                    <SelectItem value="Cost Structure">Cost Structure</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateHypothesis} disabled={!editHypothesis?.statement.trim() || isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Hypothesis</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this hypothesis? This action cannot be undone.
+              Any linked experiments will be unlinked but not deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {deleteHypothesis && (
+            <div className="my-4 p-3 bg-muted rounded-lg text-sm">
+              <p className="font-medium mb-1">"{deleteHypothesis.statement}"</p>
+              <p className="text-muted-foreground text-xs">
+                Type: {typeConfig[deleteHypothesis.type].label} |
+                Status: {statusConfig[deleteHypothesis.status].label}
+              </p>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteHypothesis}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
