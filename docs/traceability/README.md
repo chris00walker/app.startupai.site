@@ -34,7 +34,7 @@ Story Definitions          Code Annotations          Manual Overrides
 ┌──────────────────────────────────────────────────────────────┐
 │                    generate-story-map.ts                      │
 │                                                               │
-│  1. Parse story definitions → empty entries for all 90 stories│
+│  1. Parse story definitions → empty entries for all stories   │
 │  2. Parse journey-test-matrix.md → baseline test mappings     │
 │  3. Parse feature-inventory.md → baseline code hints          │
 │  4. Parse code annotations → overwrites baselines (authoritative)
@@ -98,6 +98,14 @@ def handle_checkpoint(payload):
     ...
 ```
 
+### YAML (CrewAI config)
+
+```yaml
+# @story US-AG01
+o1_interview_gap_analyzer:
+  role: "Interview Gap Analyzer"
+```
+
 ### Syntax Rules
 
 - Single tag only: `@story US-F01`
@@ -105,6 +113,7 @@ def handle_checkpoint(payload):
 - No wildcards (explicit IDs only)
 - Story IDs must exist in `stories/*.md`
 - Agent journey stories use the `US-AJ##` prefix and map to AI flow code
+- Agent spec stories use the `US-AG##` prefix and map to crew configs + tasks
 
 ## Override Rules
 
@@ -164,14 +173,14 @@ netlify/functions/      # Serverless functions
 ../startupai-crew/src   # CrewAI backend (cross-repo)
 ```
 
-Extensions: `.ts`, `.tsx`, `.py`
+Extensions: `.ts`, `.tsx`, `.py`, `.yaml`, `.yml`
 
 ## Verification
 
 ```bash
 # Verify annotations are greppable
 grep -rE "@story\s+US-" frontend/src/ frontend/tests/e2e/ backend/netlify/functions/ netlify/functions/ ../startupai.site/src/ ../startupai-crew/src/ \
-  --include="*.ts" --include="*.tsx" --include="*.py"
+  --include="*.ts" --include="*.tsx" --include="*.py" --include="*.yaml" --include="*.yml"
 
 # Verify regeneration is idempotent
 pnpm traceability:generate

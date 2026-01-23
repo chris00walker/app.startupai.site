@@ -114,6 +114,7 @@ describe('STORY_ID_PATTERN', () => {
     expect(STORY_ID_PATTERN.test('US-H09')).toBe(true);
     expect(STORY_ID_PATTERN.test('US-AS01')).toBe(true);
     expect(STORY_ID_PATTERN.test('US-MF03')).toBe(true);
+    expect(STORY_ID_PATTERN.test('US-AG01')).toBe(true);
   });
 
   test('rejects invalid story IDs', () => {
@@ -195,6 +196,7 @@ describe('getCategoryForStory', () => {
     expect(getCategoryForStory('US-H01')).toBe('HITL Checkpoint');
     expect(getCategoryForStory('US-P01')).toBe('Pivot Flow');
     expect(getCategoryForStory('US-AJ01')).toBe('Agent Journey');
+    expect(getCategoryForStory('US-AG01')).toBe('Agent Specs');
     expect(getCategoryForStory('US-E01')).toBe('Edge Case');
     expect(getCategoryForStory('US-A01')).toBe('Admin');
     expect(getCategoryForStory('US-AS01')).toBe('Account Settings');

@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-23T16:01:14.825Z
+Generated: 2026-01-23T16:57:04.453Z
 
 ## Files Without Story Links
 
@@ -54,6 +54,8 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/app/api/vpc/[projectId]/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/auth/callback/route.ts | api_route | Add @story annotation or consider if needed |
 | netlify/functions/__init__.py | api_route | Add @story annotation or consider if needed |
+| netlify/functions/config/agents.yaml | api_route | Add @story annotation or consider if needed |
+| netlify/functions/config/tasks.yaml | api_route | Add @story annotation or consider if needed |
 | netlify/functions/startupai/__init__.py | api_route | Add @story annotation or consider if needed |
 | ../startupai.site/src/app/beta/layout.tsx | component | Add @story annotation or consider if needed |
 | ../startupai.site/src/app/layout.tsx | component | Add @story annotation or consider if needed |
@@ -343,6 +345,12 @@ These files in scanned directories have no `@story` annotation.
 | ../startupai-crew/src/crews/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/desirability/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/desirability/build_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/config/build_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/config/build_tasks.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/config/governance_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/config/governance_tasks.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/config/growth_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/config/growth_tasks.yaml | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/desirability/governance_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/desirability/growth_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/discovery/__init__.py | lib | Add @story annotation or consider if needed |
@@ -353,14 +361,26 @@ These files in scanned directories have no `@story` annotation.
 | ../startupai-crew/src/crews/discovery/wtp_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/feasibility/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/feasibility/build_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/config/build_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/config/build_tasks.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/config/governance_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/feasibility/governance_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/onboarding/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/onboarding/crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/viability/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/config/finance_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/config/finance_tasks.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/config/governance_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/config/governance_tasks.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/config/synthesis_agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/viability/finance_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/viability/governance_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/viability/synthesis_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/config/agents.yaml | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/config/tasks.yaml | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/main.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/schemas.py | lib | Add @story annotation or consider if needed |
@@ -474,4 +494,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 465**
+**Total Orphans: 485**

@@ -34,7 +34,7 @@ export const SCAN_DIRS = [
 /**
  * File extensions to scan
  */
-export const SCAN_EXTENSIONS = ['.ts', '.tsx', '.py'] as const;
+export const SCAN_EXTENSIONS = ['.ts', '.tsx', '.py', '.yaml', '.yml'] as const;
 
 /**
  * Directories to exclude from scanning
@@ -63,13 +63,14 @@ export const STORY_SOURCES = [
   'docs/user-experience/stories/consultant.md',
   'docs/user-experience/stories/trials.md',
   'docs/user-experience/stories/agent-journeys.md',
+  'docs/user-experience/stories/agent-specs.md',
   'docs/user-experience/stories/platform.md',
   'docs/user-experience/stories/admin.md',
 ] as const;
 
 /**
  * Story ID pattern for validation
- * Matches: US-F01, US-C07, US-FT01, US-CT05, US-H01, US-P04, US-AJ01, US-E06, US-A12, etc.
+ * Matches: US-F01, US-C07, US-FT01, US-CT05, US-H01, US-P04, US-AJ01, US-AG01, US-E06, US-A12, etc.
  */
 export const STORY_ID_PATTERN = /^US-[A-Z]{1,3}\d{1,2}$/;
 
@@ -213,6 +214,7 @@ export const STORY_CATEGORIES: Record<string, string> = {
   'US-H': 'HITL Checkpoint',
   'US-P': 'Pivot Flow',
   'US-AJ': 'Agent Journey',
+  'US-AG': 'Agent Specs',
   'US-E': 'Edge Case',
   'US-AU': 'Authentication',
   'US-CP': 'Core Product',

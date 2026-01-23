@@ -1,6 +1,6 @@
 # Story-Code Gap Report
 
-Generated: 2026-01-23T16:01:14.825Z
+Generated: 2026-01-23T16:57:04.453Z
 
 ## Stories Without Implementations
 
@@ -18,6 +18,12 @@ Generated: 2026-01-23T16:01:14.825Z
 | US-A10 | Run Data Integrity Check | Admin |
 | US-A11 | Admin Login and Role Verification | Admin |
 | US-A12 | Manage User Billing Issues | Admin |
+| US-AG01 | Specify Brief Generation Agents and Tasks | Agent Specs |
+| US-AG02 | Specify Discovery Evidence Agents and Tasks | Agent Specs |
+| US-AG03 | Specify Customer Profile Agents and Tasks | Agent Specs |
+| US-AG04 | Specify Value Map Agents and Tasks | Agent Specs |
+| US-AG05 | Specify WTP Agents and Tasks | Agent Specs |
+| US-AG06 | Specify Fit Assessment Agents and Routing | Agent Specs |
 | US-AS01 | Update Profile | Account Settings |
 | US-AS02 | Change Password | Account Settings |
 | US-AS03 | Enable 2FA | Account Settings |
@@ -55,7 +61,7 @@ Generated: 2026-01-23T16:01:14.825Z
 | US-S04 | Request Data Export (GDPR) | Support |
 | US-S05 | Delete Account (GDPR) | Support |
 
-**Total Gaps: 48 / 127**
+**Total Gaps: 54 / 133**
 
 ## Gaps by Category
 
@@ -63,6 +69,7 @@ Generated: 2026-01-23T16:01:14.825Z
 |----------|-------|
 | Account Settings | 5 |
 | Admin | 12 |
+| Agent Specs | 6 |
 | Billing | 10 |
 | Consultant Trial | 6 |
 | Notification | 5 |

@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T16:01:14.825Z",
+    "generated_at": "2026-01-23T16:57:04.453Z",
     "version": "1.0.0",
-    "story_count": 127,
-    "annotated_file_count": 115
+    "story_count": 133,
+    "annotated_file_count": 127
   },
   "stories": {
     "US-F01": {
@@ -864,6 +864,96 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "partial"
+    },
+    "US-AG01": {
+      "title": "Specify Brief Generation Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/onboarding/config/agents.yaml",
+        "../startupai-crew/src/crews/onboarding/config/tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG02": {
+      "title": "Specify Discovery Evidence Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG03": {
+      "title": "Specify Customer Profile Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG04": {
+      "title": "Specify Value Map Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG05": {
+      "title": "Specify WTP Agents and Tasks",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AG06": {
+      "title": "Specify Fit Assessment Agents and Routing",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [
+        "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml"
+      ],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
     },
     "US-H01": {
       "title": "Review Discovery Output (Founder's Brief + VPC)",
@@ -2953,6 +3043,66 @@
         "US-H08",
         "US-H09",
         "US-P04"
+      ]
+    },
+    "../startupai-crew/src/crews/onboarding/config/agents.yaml": {
+      "stories": [
+        "US-AG01"
+      ]
+    },
+    "../startupai-crew/src/crews/onboarding/config/tasks.yaml": {
+      "stories": [
+        "US-AG01"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/agents.yaml": {
+      "stories": [
+        "US-AG02"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/tasks.yaml": {
+      "stories": [
+        "US-AG02"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml": {
+      "stories": [
+        "US-AG03"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml": {
+      "stories": [
+        "US-AG03"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml": {
+      "stories": [
+        "US-AG04"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml": {
+      "stories": [
+        "US-AG04"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml": {
+      "stories": [
+        "US-AG05"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml": {
+      "stories": [
+        "US-AG05"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml": {
+      "stories": [
+        "US-AG06"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml": {
+      "stories": [
+        "US-AG06"
       ]
     },
     "backend/netlify/functions/gate-evaluate.py": {
