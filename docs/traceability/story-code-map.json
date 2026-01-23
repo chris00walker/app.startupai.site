@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T21:31:23.398Z",
+    "generated_at": "2026-01-23T21:42:52.570Z",
     "version": "1.0.0",
     "story_count": 142,
-    "annotated_file_count": 146
+    "annotated_file_count": 160
   },
   "stories": {
     "US-F01": {
@@ -893,12 +893,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/onboarding/config/agents.yaml",
-        "../startupai-crew/src/crews/onboarding/config/tasks.yaml"
+        "../startupai-crew/src/crews/onboarding/config/tasks.yaml",
+        "../startupai-crew/src/crews/onboarding/crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "OnboardingCrew - Phase 0 Brief Generation"
     },
     "US-AG02": {
       "title": "Specify Discovery Evidence Agents and Tasks",
@@ -908,12 +910,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/discovery/config/agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/tasks.yaml"
+        "../startupai-crew/src/crews/discovery/config/tasks.yaml",
+        "../startupai-crew/src/crews/discovery/discovery_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "DiscoveryCrew - Phase 1 Evidence Collection"
     },
     "US-AG03": {
       "title": "Specify Customer Profile Agents and Tasks",
@@ -923,12 +927,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/discovery/config/customer_profile_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml"
+        "../startupai-crew/src/crews/discovery/config/customer_profile_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/customer_profile_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "CustomerProfileCrew - Phase 1 Jobs/Pains/Gains"
     },
     "US-AG04": {
       "title": "Specify Value Map Agents and Tasks",
@@ -938,12 +944,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml"
+        "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/value_design_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "ValueDesignCrew - Phase 1 Value Map"
     },
     "US-AG05": {
       "title": "Specify WTP Agents and Tasks",
@@ -953,12 +961,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/discovery/config/wtp_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml"
+        "../startupai-crew/src/crews/discovery/config/wtp_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/wtp_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "WTPCrew - Phase 1 Willingness to Pay"
     },
     "US-AG06": {
       "title": "Specify Fit Assessment Agents and Routing",
@@ -968,12 +978,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml",
-        "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml"
+        "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml",
+        "../startupai-crew/src/crews/discovery/fit_assessment_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "FitAssessmentCrew - Phase 1 Fit Scoring"
     },
     "US-AG07": {
       "title": "Specify Desirability BuildCrew Agents and Tasks",
@@ -982,13 +994,15 @@
       "pages": [],
       "hooks": [],
       "lib": [
+        "../startupai-crew/src/crews/desirability/build_crew.py",
         "../startupai-crew/src/crews/desirability/config/build_agents.yaml",
         "../startupai-crew/src/crews/desirability/config/build_tasks.yaml"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "BuildCrew - Phase 2 Testable Artifacts"
     },
     "US-AG08": {
       "title": "Specify Desirability GrowthCrew Agents and Tasks",
@@ -998,12 +1012,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/desirability/config/growth_agents.yaml",
-        "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml"
+        "../startupai-crew/src/crews/desirability/config/growth_tasks.yaml",
+        "../startupai-crew/src/crews/desirability/growth_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "GrowthCrew - Phase 2 Ad Campaigns"
     },
     "US-AG09": {
       "title": "Specify Desirability GovernanceCrew Agents and Tasks",
@@ -1013,12 +1029,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/desirability/config/governance_agents.yaml",
-        "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml"
+        "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml",
+        "../startupai-crew/src/crews/desirability/governance_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "GovernanceCrew - Phase 2 Oversight"
     },
     "US-AG10": {
       "title": "Specify Feasibility BuildCrew Agents and Tasks",
@@ -1027,13 +1045,15 @@
       "pages": [],
       "hooks": [],
       "lib": [
+        "../startupai-crew/src/crews/feasibility/build_crew.py",
         "../startupai-crew/src/crews/feasibility/config/build_agents.yaml",
         "../startupai-crew/src/crews/feasibility/config/build_tasks.yaml"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "FeasibilityBuildCrew - Phase 3 Technical Assessment"
     },
     "US-AG11": {
       "title": "Specify Feasibility GovernanceCrew Agents and Tasks",
@@ -1043,12 +1063,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml",
-        "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml"
+        "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml",
+        "../startupai-crew/src/crews/feasibility/governance_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "FeasibilityGovernanceCrew - Phase 3 Gate Validation"
     },
     "US-AG12": {
       "title": "Specify Viability FinanceCrew Agents and Tasks",
@@ -1058,12 +1080,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/viability/config/finance_agents.yaml",
-        "../startupai-crew/src/crews/viability/config/finance_tasks.yaml"
+        "../startupai-crew/src/crews/viability/config/finance_tasks.yaml",
+        "../startupai-crew/src/crews/viability/finance_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "FinanceCrew - Phase 4 Unit Economics"
     },
     "US-AG13": {
       "title": "Specify Viability SynthesisCrew Agents and Tasks",
@@ -1073,12 +1097,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/viability/config/synthesis_agents.yaml",
-        "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml"
+        "../startupai-crew/src/crews/viability/config/synthesis_tasks.yaml",
+        "../startupai-crew/src/crews/viability/synthesis_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "SynthesisCrew - Phase 4 Evidence Synthesis"
     },
     "US-AG14": {
       "title": "Specify Viability GovernanceCrew Agents and Tasks",
@@ -1088,12 +1114,14 @@
       "hooks": [],
       "lib": [
         "../startupai-crew/src/crews/viability/config/governance_agents.yaml",
-        "../startupai-crew/src/crews/viability/config/governance_tasks.yaml"
+        "../startupai-crew/src/crews/viability/config/governance_tasks.yaml",
+        "../startupai-crew/src/crews/viability/governance_crew.py"
       ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial",
+      "notes": "ViabilityGovernanceCrew - Phase 4 Final Governance"
     },
     "US-H01": {
       "title": "Review Discovery Output (Founder's Brief + VPC)",
@@ -3238,12 +3266,22 @@
         "US-AG01"
       ]
     },
+    "../startupai-crew/src/crews/onboarding/crew.py": {
+      "stories": [
+        "US-AG01"
+      ]
+    },
     "../startupai-crew/src/crews/discovery/config/agents.yaml": {
       "stories": [
         "US-AG02"
       ]
     },
     "../startupai-crew/src/crews/discovery/config/tasks.yaml": {
+      "stories": [
+        "US-AG02"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/discovery_crew.py": {
       "stories": [
         "US-AG02"
       ]
@@ -3258,12 +3296,22 @@
         "US-AG03"
       ]
     },
+    "../startupai-crew/src/crews/discovery/customer_profile_crew.py": {
+      "stories": [
+        "US-AG03"
+      ]
+    },
     "../startupai-crew/src/crews/discovery/config/value_design_agents.yaml": {
       "stories": [
         "US-AG04"
       ]
     },
     "../startupai-crew/src/crews/discovery/config/value_design_tasks.yaml": {
+      "stories": [
+        "US-AG04"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/value_design_crew.py": {
       "stories": [
         "US-AG04"
       ]
@@ -3278,6 +3326,11 @@
         "US-AG05"
       ]
     },
+    "../startupai-crew/src/crews/discovery/wtp_crew.py": {
+      "stories": [
+        "US-AG05"
+      ]
+    },
     "../startupai-crew/src/crews/discovery/config/fit_assessment_agents.yaml": {
       "stories": [
         "US-AG06"
@@ -3286,6 +3339,16 @@
     "../startupai-crew/src/crews/discovery/config/fit_assessment_tasks.yaml": {
       "stories": [
         "US-AG06"
+      ]
+    },
+    "../startupai-crew/src/crews/discovery/fit_assessment_crew.py": {
+      "stories": [
+        "US-AG06"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/build_crew.py": {
+      "stories": [
+        "US-AG07"
       ]
     },
     "../startupai-crew/src/crews/desirability/config/build_agents.yaml": {
@@ -3308,6 +3371,11 @@
         "US-AG08"
       ]
     },
+    "../startupai-crew/src/crews/desirability/growth_crew.py": {
+      "stories": [
+        "US-AG08"
+      ]
+    },
     "../startupai-crew/src/crews/desirability/config/governance_agents.yaml": {
       "stories": [
         "US-AG09"
@@ -3316,6 +3384,16 @@
     "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml": {
       "stories": [
         "US-AG09"
+      ]
+    },
+    "../startupai-crew/src/crews/desirability/governance_crew.py": {
+      "stories": [
+        "US-AG09"
+      ]
+    },
+    "../startupai-crew/src/crews/feasibility/build_crew.py": {
+      "stories": [
+        "US-AG10"
       ]
     },
     "../startupai-crew/src/crews/feasibility/config/build_agents.yaml": {
@@ -3338,12 +3416,22 @@
         "US-AG11"
       ]
     },
+    "../startupai-crew/src/crews/feasibility/governance_crew.py": {
+      "stories": [
+        "US-AG11"
+      ]
+    },
     "../startupai-crew/src/crews/viability/config/finance_agents.yaml": {
       "stories": [
         "US-AG12"
       ]
     },
     "../startupai-crew/src/crews/viability/config/finance_tasks.yaml": {
+      "stories": [
+        "US-AG12"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/finance_crew.py": {
       "stories": [
         "US-AG12"
       ]
@@ -3358,12 +3446,22 @@
         "US-AG13"
       ]
     },
+    "../startupai-crew/src/crews/viability/synthesis_crew.py": {
+      "stories": [
+        "US-AG13"
+      ]
+    },
     "../startupai-crew/src/crews/viability/config/governance_agents.yaml": {
       "stories": [
         "US-AG14"
       ]
     },
     "../startupai-crew/src/crews/viability/config/governance_tasks.yaml": {
+      "stories": [
+        "US-AG14"
+      ]
+    },
+    "../startupai-crew/src/crews/viability/governance_crew.py": {
       "stories": [
         "US-AG14"
       ]

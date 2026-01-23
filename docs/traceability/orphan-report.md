@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-23T21:31:23.398Z
+Generated: 2026-01-23T21:42:52.570Z
 
 ## Files Without Story Links
 
@@ -343,24 +343,10 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/hooks/useVPCReport.ts | hook | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/desirability/__init__.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/desirability/build_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/desirability/governance_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/desirability/growth_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/discovery/__init__.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/discovery/customer_profile_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/discovery/discovery_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/discovery/fit_assessment_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/discovery/value_design_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/discovery/wtp_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/feasibility/__init__.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/feasibility/build_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/feasibility/governance_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/onboarding/__init__.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/onboarding/crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/viability/__init__.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/viability/finance_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/viability/governance_crew.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/viability/synthesis_crew.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/config/agents.yaml | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/config/tasks.yaml | lib | Add @story annotation or consider if needed |
@@ -477,4 +463,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 468**
+**Total Orphans: 454**

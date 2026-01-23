@@ -1,6 +1,6 @@
 # Story-Code Gap Report
 
-Generated: 2026-01-23T21:31:23.398Z
+Generated: 2026-01-23T21:42:52.570Z
 
 ## Stories Without Implementations
 
@@ -18,20 +18,6 @@ Generated: 2026-01-23T21:31:23.398Z
 | US-A10 | Run Data Integrity Check | Admin |
 | US-A11 | Admin Login and Role Verification | Admin |
 | US-A12 | Manage User Billing Issues | Admin |
-| US-AG01 | Specify Brief Generation Agents and Tasks | Agent Specs |
-| US-AG02 | Specify Discovery Evidence Agents and Tasks | Agent Specs |
-| US-AG03 | Specify Customer Profile Agents and Tasks | Agent Specs |
-| US-AG04 | Specify Value Map Agents and Tasks | Agent Specs |
-| US-AG05 | Specify WTP Agents and Tasks | Agent Specs |
-| US-AG06 | Specify Fit Assessment Agents and Routing | Agent Specs |
-| US-AG07 | Specify Desirability BuildCrew Agents and Tasks | Agent Specs |
-| US-AG08 | Specify Desirability GrowthCrew Agents and Tasks | Agent Specs |
-| US-AG09 | Specify Desirability GovernanceCrew Agents and Tasks | Agent Specs |
-| US-AG10 | Specify Feasibility BuildCrew Agents and Tasks | Agent Specs |
-| US-AG11 | Specify Feasibility GovernanceCrew Agents and Tasks | Agent Specs |
-| US-AG12 | Specify Viability FinanceCrew Agents and Tasks | Agent Specs |
-| US-AG13 | Specify Viability SynthesisCrew Agents and Tasks | Agent Specs |
-| US-AG14 | Specify Viability GovernanceCrew Agents and Tasks | Agent Specs |
 | US-AS01 | Update Profile | Account Settings |
 | US-AS02 | Change Password | Account Settings |
 | US-AS03 | Enable 2FA | Account Settings |
@@ -69,7 +55,7 @@ Generated: 2026-01-23T21:31:23.398Z
 | US-S04 | Request Data Export (GDPR) | Support |
 | US-S05 | Delete Account (GDPR) | Support |
 
-**Total Gaps: 62 / 142**
+**Total Gaps: 48 / 142**
 
 ## Gaps by Category
 
@@ -77,7 +63,6 @@ Generated: 2026-01-23T21:31:23.398Z
 |----------|-------|
 | Account Settings | 5 |
 | Admin | 12 |
-| Agent Specs | 14 |
 | Billing | 10 |
 | Consultant Trial | 6 |
 | Notification | 5 |

@@ -594,6 +594,66 @@ US-AS05:
   implementation_status: gap
 
 # =============================================================================
+# Agent Specs Stories (US-AG01-AG14) - CrewAI Backend
+# =============================================================================
+
+US-AG01:
+  notes: "OnboardingCrew - Phase 0 Brief Generation"
+  implementation_status: partial
+
+US-AG02:
+  notes: "DiscoveryCrew - Phase 1 Evidence Collection"
+  implementation_status: partial
+
+US-AG03:
+  notes: "CustomerProfileCrew - Phase 1 Jobs/Pains/Gains"
+  implementation_status: partial
+
+US-AG04:
+  notes: "ValueDesignCrew - Phase 1 Value Map"
+  implementation_status: partial
+
+US-AG05:
+  notes: "WTPCrew - Phase 1 Willingness to Pay"
+  implementation_status: partial
+
+US-AG06:
+  notes: "FitAssessmentCrew - Phase 1 Fit Scoring"
+  implementation_status: partial
+
+US-AG07:
+  notes: "BuildCrew - Phase 2 Testable Artifacts"
+  implementation_status: partial
+
+US-AG08:
+  notes: "GrowthCrew - Phase 2 Ad Campaigns"
+  implementation_status: partial
+
+US-AG09:
+  notes: "GovernanceCrew - Phase 2 Oversight"
+  implementation_status: partial
+
+US-AG10:
+  notes: "FeasibilityBuildCrew - Phase 3 Technical Assessment"
+  implementation_status: partial
+
+US-AG11:
+  notes: "FeasibilityGovernanceCrew - Phase 3 Gate Validation"
+  implementation_status: partial
+
+US-AG12:
+  notes: "FinanceCrew - Phase 4 Unit Economics"
+  implementation_status: partial
+
+US-AG13:
+  notes: "SynthesisCrew - Phase 4 Evidence Synthesis"
+  implementation_status: partial
+
+US-AG14:
+  notes: "ViabilityGovernanceCrew - Phase 4 Final Governance"
+  implementation_status: partial
+
+# =============================================================================
 # Marketing Funnel Stories (US-MF01-MF03) - Cross-Repo Gap
 # =============================================================================
 
