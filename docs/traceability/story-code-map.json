@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T03:37:04.316Z",
+    "generated_at": "2026-01-23T04:01:18.722Z",
     "version": "1.0.0",
     "story_count": 90,
-    "annotated_file_count": 48
+    "annotated_file_count": 50
   },
   "stories": {
     "US-F01": {
@@ -1009,7 +1009,10 @@
       "hooks": [],
       "lib": [],
       "e2e_tests": [],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/api/crewai/retry/route.test.ts",
+        "frontend/src/components/validation/__tests__/ValidationProgressTimeline.test.tsx"
+      ],
       "db_tables": [
         "crewai_validation_states"
       ],
@@ -2141,6 +2144,16 @@
       ]
     },
     "frontend/src/app/api/crewai/retry/route.ts": {
+      "stories": [
+        "US-E04"
+      ]
+    },
+    "frontend/src/__tests__/api/crewai/retry/route.test.ts": {
+      "stories": [
+        "US-E04"
+      ]
+    },
+    "frontend/src/components/validation/__tests__/ValidationProgressTimeline.test.tsx": {
       "stories": [
         "US-E04"
       ]
