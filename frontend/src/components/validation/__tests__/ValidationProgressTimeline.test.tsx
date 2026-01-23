@@ -14,6 +14,7 @@ jest.mock('@/hooks/useValidationProgress', () => ({
 
 const mockUseValidationProgress = useValidationProgress as jest.Mock;
 const mockRefetch = jest.fn();
+const mockNow = jest.fn();
 
 const baseRun = {
   id: 'run-local-1',
@@ -42,15 +43,16 @@ describe('ValidationProgressTimeline', () => {
     jest.clearAllMocks();
     mockRefetch.mockResolvedValue(undefined);
     global.fetch = jest.fn() as unknown as typeof fetch;
+    mockNow.mockReturnValue(new Date('2026-01-22T00:00:00Z').getTime());
+    jest.spyOn(Date, 'now').mockImplementation(() => mockNow());
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   it('shows a warning when Phase 1 exceeds 20 minutes', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-01-22T00:30:00Z'));
+    mockNow.mockReturnValue(new Date('2026-01-22T00:29:00Z').getTime());
 
     setMockState({ started_at: '2026-01-22T00:00:00Z' });
 
@@ -61,8 +63,7 @@ describe('ValidationProgressTimeline', () => {
   });
 
   it('shows escalation UI when Phase 1 exceeds 30 minutes', () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-01-22T00:45:00Z'));
+    mockNow.mockReturnValue(new Date('2026-01-22T00:45:00Z').getTime());
 
     setMockState({ started_at: '2026-01-22T00:00:00Z' });
 
@@ -74,8 +75,7 @@ describe('ValidationProgressTimeline', () => {
   });
 
   it('retries the run when user clicks cancel and retry', async () => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-01-22T00:45:00Z'));
+    mockNow.mockReturnValue(new Date('2026-01-22T00:45:00Z').getTime());
 
     setMockState({ started_at: '2026-01-22T00:00:00Z' });
 
