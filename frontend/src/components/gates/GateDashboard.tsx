@@ -3,6 +3,8 @@
  *
  * Comprehensive gate status display for project dashboard.
  * Shows current status, readiness, and actionable feedback.
+ *
+ * @story US-F15
  */
 
 'use client';

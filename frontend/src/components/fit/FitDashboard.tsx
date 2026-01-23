@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Fit dashboard with AI insights by validation axis.
+ * @story US-F16
+ */
+
 import * as React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

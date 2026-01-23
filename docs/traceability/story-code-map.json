@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T14:17:13.535Z",
+    "generated_at": "2026-01-23T15:32:30.355Z",
     "version": "1.0.0",
-    "story_count": 114,
-    "annotated_file_count": 110
+    "story_count": 120,
+    "annotated_file_count": 115
   },
   "stories": {
     "US-F01": {
@@ -173,9 +173,7 @@
       ],
       "pages": [
         "frontend/src/app/project/[id]/analysis/page.tsx",
-        "frontend/src/app/project/[id]/evidence/page.tsx",
         "frontend/src/app/project/[id]/report/page.tsx",
-        "frontend/src/app/project/current/evidence/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
       "hooks": [],
@@ -293,6 +291,87 @@
       ],
       "implementation_status": "complete",
       "notes": "Error handling and retry"
+    },
+    "US-F12": {
+      "title": "Manage Assumption Map",
+      "components": [
+        "frontend/src/components/strategyzer/AssumptionMap.tsx"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/founder-dashboard.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-F13": {
+      "title": "Use Evidence Ledger with Fit Filters",
+      "components": [
+        "frontend/src/components/fit/EvidenceLedger.tsx"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/founder-dashboard.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-F14": {
+      "title": "Explore Evidence Explorer",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/project/[id]/evidence/page.tsx",
+        "frontend/src/app/project/current/evidence/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-F15": {
+      "title": "Review Gate Evaluation Dashboard",
+      "components": [
+        "frontend/src/components/gates/GateDashboard.tsx"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/project/[id]/gate/page.tsx",
+        "frontend/src/app/project/current/gate/page.tsx",
+        "frontend/src/pages/founder-dashboard.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-F16": {
+      "title": "Review AI Insights",
+      "components": [
+        "frontend/src/components/fit/FitDashboard.tsx"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/founder-dashboard.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
     },
     "US-C01": {
       "title": "Complete Practice Setup",
@@ -1644,6 +1723,20 @@
       "db_tables": [],
       "implementation_status": "partial"
     },
+    "US-AU03": {
+      "title": "Log Out of Product App",
+      "components": [
+        "frontend/src/components/layout/AppSidebar.tsx"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
     "US-CP01": {
       "title": "Browse Canvas Gallery",
       "components": [],
@@ -2415,7 +2508,11 @@
         "US-F06",
         "US-F08",
         "US-F09",
-        "US-F10"
+        "US-F10",
+        "US-F12",
+        "US-F13",
+        "US-F15",
+        "US-F16"
       ]
     },
     "frontend/tests/e2e/03-founder-attribution.spec.ts": {
@@ -2551,19 +2648,55 @@
         "US-F10"
       ]
     },
-    "frontend/src/app/project/[id]/evidence/page.tsx": {
-      "stories": [
-        "US-F06"
-      ]
-    },
     "frontend/src/app/project/[id]/report/page.tsx": {
       "stories": [
         "US-F06"
       ]
     },
+    "frontend/src/components/strategyzer/AssumptionMap.tsx": {
+      "stories": [
+        "US-F12"
+      ]
+    },
+    "frontend/src/components/fit/EvidenceLedger.tsx": {
+      "stories": [
+        "US-F13"
+      ]
+    },
+    "frontend/src/app/project/[id]/evidence/page.tsx": {
+      "stories": [
+        "US-F14"
+      ]
+    },
     "frontend/src/app/project/current/evidence/page.tsx": {
       "stories": [
-        "US-F06"
+        "US-F14"
+      ]
+    },
+    "frontend/src/components/gates/GateDashboard.tsx": {
+      "stories": [
+        "US-F15"
+      ]
+    },
+    "frontend/src/app/project/[id]/gate/page.tsx": {
+      "stories": [
+        "US-F15",
+        "US-H06",
+        "US-H07",
+        "US-H08"
+      ]
+    },
+    "frontend/src/app/project/current/gate/page.tsx": {
+      "stories": [
+        "US-F15",
+        "US-H06",
+        "US-H07",
+        "US-H08"
+      ]
+    },
+    "frontend/src/components/fit/FitDashboard.tsx": {
+      "stories": [
+        "US-F16"
       ]
     },
     "frontend/src/app/onboarding/consultant/page.tsx": {
@@ -2705,20 +2838,6 @@
         "US-H08"
       ]
     },
-    "frontend/src/app/project/[id]/gate/page.tsx": {
-      "stories": [
-        "US-H06",
-        "US-H07",
-        "US-H08"
-      ]
-    },
-    "frontend/src/app/project/current/gate/page.tsx": {
-      "stories": [
-        "US-H06",
-        "US-H07",
-        "US-H08"
-      ]
-    },
     "../startupai-crew/src/modal_app/phases/phase_3.py": {
       "stories": [
         "US-H07",
@@ -2824,6 +2943,11 @@
     "frontend/src/app/auth/auth-code-error/page.tsx": {
       "stories": [
         "US-AU02"
+      ]
+    },
+    "frontend/src/components/layout/AppSidebar.tsx": {
+      "stories": [
+        "US-AU03"
       ]
     },
     "frontend/src/pages/canvas.tsx": {

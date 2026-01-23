@@ -318,3 +318,124 @@ last_updated: "2026-01-23"
 **Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 7
 
 ---
+
+### US-F12: Manage Assumption Map
+
+**As a** Founder,
+**I want to** capture and review my key assumptions in an Assumption Map,
+**So that** I can prioritize what to validate first.
+
+**Acceptance Criteria:**
+
+**Given** I am on the Founder dashboard
+**When** I open the Assumption Map tab
+**Then** I should see assumptions grouped by priority and validation status
+
+**Given** I click "Add Assumption"
+**When** I submit a statement with a category and priority
+**Then** the new assumption should appear and be saved for my project
+
+**Given** I filter by category (Desirability, Feasibility, Viability)
+**When** the filter changes
+**Then** the list should show only matching assumptions
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (Strategyzer Assumption Map)
+
+---
+
+### US-F13: Use Evidence Ledger with Fit Filters
+
+**As a** Founder,
+**I want to** review evidence in the Evidence Ledger and filter by fit type,
+**So that** I can focus on the right validation signals.
+
+**Acceptance Criteria:**
+
+**Given** I open the Evidence tab on the Founder dashboard
+**When** the ledger loads
+**Then** I should see evidence items with strength, fit type, and summary details
+
+**Given** I select Product-Customer, Product-Market, or Product-Model Fit
+**When** the filter is applied
+**Then** the ledger should show only evidence for the matching fit type
+
+**Given** I add evidence through the Evidence form
+**When** I submit valid inputs
+**Then** the new evidence should appear in the ledger list
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (Evidence Ledger)
+
+---
+
+### US-F14: Explore Evidence Explorer
+
+**As a** Founder,
+**I want to** explore evidence in a unified Evidence Explorer view,
+**So that** I can trace validation trends over time.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/project/[id]/evidence`
+**When** the page loads
+**Then** I should see summary metrics, filters, and an evidence timeline
+
+**Given** I update evidence filters
+**When** a filter changes
+**Then** the timeline should update to match the active filters
+
+**Given** I select an evidence item
+**When** I click it in the timeline
+**Then** I should see a detail panel with its full context
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (Evidence Explorer)
+
+---
+
+### US-F15: Review Gate Evaluation Dashboard
+
+**As a** Founder,
+**I want to** review gate readiness on a dedicated Gate Evaluation page,
+**So that** I can see whether I'm ready to progress phases.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/project/[id]/gate`
+**When** the page loads
+**Then** I should see gate status, readiness score, evidence count, and experiment count
+
+**Given** the gate is Pending, At Risk, or Failed
+**When** the status is displayed
+**Then** I should see guidance or failure reasons for next steps
+
+**Given** I refresh the evaluation
+**When** the data updates
+**Then** the gate status and readiness should reflect the latest evidence
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (Gate Evaluation)
+
+---
+
+### US-F16: Review AI Insights
+
+**As a** Founder,
+**I want to** review AI-generated insights tied to my validation data,
+**So that** I can decide the next validation actions.
+
+**Acceptance Criteria:**
+
+**Given** I view a fit detail panel on the Founder dashboard
+**When** AI insights are available
+**Then** I should see a list of insight titles with supporting context
+
+**Given** insights are generated from the latest reports
+**When** the data loads
+**Then** the insights should align with my current project evidence
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (AI insights)
+
+---

@@ -1,7 +1,7 @@
 /**
  * Evidence Explorer Redirect
  *
- * @story US-F06
+ * @story US-F14
  */
 
 'use client'

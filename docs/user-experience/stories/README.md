@@ -36,20 +36,20 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-23**: Added Authentication + Core Product tool stories, US-F11, and expanded Marketing Funnel stories; total stories now 114.
+> **Updated 2026-01-23**: Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout); total stories now 120.
 
 ### Stories by Category
 
 | Category | Story IDs | Total | With E2E Tests | Gaps |
 |----------|-----------|-------|----------------|------|
-| Founder | US-F01-F11 | 11 | 10 | 1 |
+| Founder | US-F01-F16 | 16 | 10 | 6 |
 | Consultant | US-C01-C07 | 7 | 7 | 0 |
 | Founder Trial | US-FT01-FT04 | 4 | 4 | 0 |
 | Consultant Trial | US-CT01-CT06 | 6 | 0 | 6 |
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
-| Authentication | US-AU01-AU02 | 2 | 1 | 1 |
+| Authentication | US-AU01-AU03 | 3 | 1 | 2 |
 | Core Product | US-CP01-CP09 | 9 | 0 | 9 |
 | Admin | US-A01-A12 | 12 | 0 | 12 |
 | Support | US-S01-S05 | 5 | 0 | 5 |
@@ -58,7 +58,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
-| **Total** | | **114** | **34** | **80** |
+| **Total** | | **120** | **34** | **86** |
 
 ### E2E Test File Mapping
 
@@ -83,7 +83,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `16-quick-start-founder.spec.ts` | US-F01, US-FT01 |
 | `17-quick-start-consultant.spec.ts` | US-C07 |
 
-### Gap Analysis (80 Stories Need Implementation)
+### Gap Analysis (86 Stories Need Implementation)
 
 Stories with test stubs created but not yet implemented:
 
@@ -105,13 +105,13 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-23**: Added Authentication + Core Product tool stories, US-F11, and expanded Marketing Funnel stories; total stories now 114.
+> **Updated 2026-01-23**: Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout); total stories now 120.
 
 ### Stories by Category
 
 | Category | Total Stories | With E2E Tests | Gaps |
 |----------|---------------|----------------|------|
-| Founder (US-F) | 11 | 10 | 1 |
+| Founder (US-F) | 16 | 10 | 6 |
 | Consultant (US-C) | 7 | 7 | 0 |
 | Founder Trial (US-FT) | 4 | 4 | 0 |
 | Consultant Trial (US-CT) | 6 | 0 | 6 |
@@ -119,7 +119,7 @@ Stories with test stubs created but not yet implemented:
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
 | Edge Case (US-E) | 6 | 0 | 6 |
-| Authentication (US-AU) | 2 | 1 | 1 |
+| Authentication (US-AU) | 3 | 1 | 2 |
 | Core Product (US-CP) | 9 | 0 | 9 |
 | Support (US-S) | 5 | 0 | 5 |
 | Offboarding (US-O) | 5 | 0 | 5 |
@@ -127,7 +127,7 @@ Stories with test stubs created but not yet implemented:
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 15 | 0 | 15 |
-| **Total** | **114** | **34** | **80** |
+| **Total** | **120** | **34** | **86** |
 
 ### HITL Story Priority
 
@@ -180,6 +180,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-23 | **Founder & Auth Expansion:** Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout). Total stories now 120. |
 | 2026-01-23 | **Marketing Funnel Expansion:** Added US-MF04-MF15 and updated story counts to 114. |
 | 2026-01-23 | **Traceability Expansion:** Added US-AU01-AU02 (Authentication), US-CP01-CP09 (Core Product tools), and US-F11 (Manual Project Creation). Total stories now 102. |
 | 2026-01-22 | **Admin Billing:** Added US-A12 for billing management and updated coverage counts. |

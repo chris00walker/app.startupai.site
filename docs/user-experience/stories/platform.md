@@ -1364,6 +1364,27 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 
 ---
 
+### US-AU03: Log Out of Product App
+
+**As any** authenticated user,
+**I want to** log out of the product app,
+**So that** my session ends securely.
+
+**Acceptance Criteria:**
+
+**Given** I am signed in to the product app
+**When** I click "Logout" in the sidebar
+**Then** my session should end and I should be redirected to the login page
+
+**Given** I have logged out
+**When** I attempt to visit a protected page
+**Then** I should be prompted to sign in again
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (authentication)
+
+---
+
 ## Core Product Tool Stories (US-CP)
 
 > **Added (2026-01-23)**: Cross-role tooling surfaces for analytics, canvases, workflows, and exports.

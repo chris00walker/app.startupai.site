@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Shared sidebar navigation for authenticated users.
+ * @story US-AU03
+ */
+
 import * as React from "react"
 import Link from "next/link"
 import {

@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * Evidence Ledger with fit-type filters and evidence entry.
+ * @story US-F13
+ */
+
 import * as React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

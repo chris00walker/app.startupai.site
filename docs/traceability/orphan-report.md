@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-23T14:17:13.535Z
+Generated: 2026-01-23T15:32:30.355Z
 
 ## Files Without Story Links
 
@@ -188,9 +188,7 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/evidence/EvidenceInputForm.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence/index.ts | component | Export file - usually no annotation needed |
 | frontend/src/components/fit/CrewAIEvidenceMetrics.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/fit/EvidenceLedger.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/fit/ExperimentsPage.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/fit/FitDashboard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/fit/InnovationPhysicsSignals.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/Forms/IntakeForm.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/founder/StageSelector.tsx | component | Add @story annotation or consider if needed |
@@ -198,11 +196,9 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/founders/FounderBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/founders/FounderStatusPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/founders/index.ts | component | Export file - usually no annotation needed |
-| frontend/src/components/gates/GateDashboard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/gates/GateReadinessIndicator.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/gates/GateStatusBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/hypothesis/HypothesisManager.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/layout/AppSidebar.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/layout/DashboardLayout.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/onboarding/FoundersBriefReview.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/onboarding/index.ts | component | Export file - usually no annotation needed |
@@ -227,7 +223,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/signals/SignalBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signals/SignalGauge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signup-form.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/strategyzer/AssumptionMap.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/CanvasesGallery.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/EvidenceStrengthIndicator.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/ExperimentCard.tsx | component | Add @story annotation or consider if needed |
@@ -479,4 +474,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 470**
+**Total Orphans: 465**

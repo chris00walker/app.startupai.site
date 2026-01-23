@@ -4,7 +4,7 @@
  * Full gate evaluation dashboard for a project.
  * Shows gate status, readiness, and alerts.
  *
- * @story US-H06, US-H07, US-H08
+ * @story US-H06, US-H07, US-H08, US-F15
  */
 
 'use client';
