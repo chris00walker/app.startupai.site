@@ -1,3 +1,11 @@
+/**
+ * Founder Onboarding Page (Quick Start - ADR-006)
+ *
+ * Landing page for founder onboarding with Quick Start form.
+ *
+ * @story US-F01, US-FT01, US-E02
+ */
+
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -6,10 +14,6 @@ import { createClient } from '@/lib/supabase/server';
 import { QuickStartForm } from '@/components/onboarding/QuickStartForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-
-// ============================================================================
-// Founder Onboarding Page (Quick Start - ADR-006)
-// ============================================================================
 
 export const metadata = {
   title: 'Start Validating | StartupAI',

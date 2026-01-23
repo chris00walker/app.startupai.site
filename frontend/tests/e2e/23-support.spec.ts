@@ -1,4 +1,8 @@
 /**
+ * @story US-S01, US-S02, US-S03, US-S04, US-S05
+ */
+
+/**
  * 23-support.spec.ts
  *
  * Support & GDPR E2E Tests

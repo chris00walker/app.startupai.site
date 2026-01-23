@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 /**
  * Consultant Onboarding Page (ADR-006)
+ * @story US-C01
  *
  * Per ADR-006, the Maya AI conversation has been removed.
  * Consultants are now redirected to their dashboard immediately.

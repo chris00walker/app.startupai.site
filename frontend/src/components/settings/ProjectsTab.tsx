@@ -1,5 +1,13 @@
 'use client';
 
+/**
+ * Projects Settings Tab
+ *
+ * Allows founders to archive and delete their projects.
+ *
+ * @story US-F04, US-F05
+ */
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

@@ -11,6 +11,8 @@
  *
  * Story Reference: docs/user-experience/stories/README.md
  * Spec Reference: docs/specs/pivot-workflows.md
+ *
+ * @story US-P01, US-P02, US-P03, US-P04
  */
 
 import { test, expect, Page } from '@playwright/test';

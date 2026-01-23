@@ -1,5 +1,6 @@
 /**
  * Client Onboarding Wizard (Quick Start - ADR-006)
+ * @story US-C07
  *
  * Consultants use this to start a validation project on behalf of a client.
  * Uses the same Quick Start form but with client_id populated.

@@ -1,4 +1,8 @@
 /**
+ * @story US-CT01, US-CT02, US-CT03, US-CT04, US-CT05, US-CT06
+ */
+
+/**
  * 22-consultant-trial.spec.ts
  *
  * Consultant Trial E2E Tests

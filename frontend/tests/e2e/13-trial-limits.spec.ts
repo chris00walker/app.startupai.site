@@ -9,6 +9,8 @@
  *
  * Story Reference: docs/user-experience/stories/README.md
  * Feature Reference: docs/features/trial-limits-and-upgrade.md
+ *
+ * @story US-FT02, US-FT03, US-FT04
  */
 
 import { test, expect, Page } from '@playwright/test';

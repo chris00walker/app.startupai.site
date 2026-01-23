@@ -9,7 +9,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { VPCReportViewer } from '@/components/vpc';
@@ -26,7 +26,16 @@ export default function ProjectAnalysisPage() {
   const projectId = params?.id as string;
 
   // Check for active validation run
-  const { runId: activeRunId, isLoading: isCheckingRun } = useActiveValidationRun(projectId);
+  const {
+    runId: activeRunId,
+    isLoading: isCheckingRun,
+    refresh: refreshActiveRun,
+  } = useActiveValidationRun(projectId);
+  const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentRunId(activeRunId);
+  }, [activeRunId]);
 
   // Track page view
   useEffect(() => {
@@ -52,7 +61,9 @@ export default function ProjectAnalysisPage() {
   }
 
   // Show progress timeline when validation is running
-  if (activeRunId && !isCheckingRun) {
+  const displayRunId = currentRunId;
+
+  if (displayRunId && !isCheckingRun) {
     return (
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
@@ -74,12 +85,18 @@ export default function ProjectAnalysisPage() {
 
         {/* Progress Timeline */}
         <ValidationProgressTimeline
-          runId={activeRunId}
+          runId={displayRunId}
           variant="inline"
           onHITLRequired={() => router.push('/approvals')}
           onComplete={() => {
             // Refresh the page to show results after completion
+            setCurrentRunId(null);
+            refreshActiveRun();
             router.refresh();
+          }}
+          onRunRestarted={(nextRunId) => {
+            setCurrentRunId(nextRunId);
+            refreshActiveRun();
           }}
         />
       </div>

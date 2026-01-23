@@ -1,4 +1,8 @@
 /**
+ * @story US-AS01, US-AS02, US-AS03, US-AS04, US-AS05
+ */
+
+/**
  * 27-account-settings.spec.ts
  *
  * Account Settings E2E Tests

@@ -2,6 +2,8 @@
  * ApprovalCard Component
  *
  * Compact card for displaying an approval request in a list.
+ *
+ * @story US-E05
  */
 
 'use client';

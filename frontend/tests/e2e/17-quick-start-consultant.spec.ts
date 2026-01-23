@@ -9,6 +9,8 @@
  * 2. Quick Start form with clientId pre-populated
  * 3. Project created under client's account
  * 4. Redirect to consultant's client view
+ *
+ * @story US-C07
  */
 
 import { test, expect } from '@playwright/test';

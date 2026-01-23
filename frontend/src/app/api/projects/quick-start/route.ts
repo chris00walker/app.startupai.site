@@ -18,6 +18,8 @@
  *   - run_id: string
  *   - status: 'phase_1_started'
  *   - redirect_url: string
+ *
+ * @story US-F01, US-F07, US-E03
  */
 
 import { NextRequest, NextResponse } from 'next/server';

@@ -9,6 +9,8 @@
  *
  * Story Reference: docs/user-experience/stories/README.md
  * Feature Reference: docs/features/project-client-management.md
+ *
+ * @story US-F04, US-F05
  */
 
 import { test, expect, Page } from '@playwright/test';

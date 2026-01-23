@@ -1,0 +1,612 @@
+# Story-Code Overrides
+#
+# This file contains manual metadata that code annotations cannot express.
+# ONLY the following fields are allowed:
+#   - db_tables: Database tables this story reads/writes
+#   - notes: Additional context (e.g., ADR references)
+#   - implementation_status: Override auto-detected status
+#
+# DO NOT add code-link fields (components, api_routes, pages, hooks, lib,
+# e2e_tests, unit_tests) - these MUST come from @story annotations in code.
+#
+# Last updated: 2026-01-22
+
+# =============================================================================
+# Founder Stories (US-F01-F10)
+# =============================================================================
+
+US-F01:
+  db_tables:
+    - onboarding_sessions
+    - projects
+    - entrepreneur_briefs
+    - users
+  notes: "Quick Start replaced 7-stage conversation (ADR-006)"
+
+US-F02:
+  db_tables:
+    - projects
+    - crewai_validation_states
+    - value_proposition_canvases
+    - users
+
+US-F03:
+  db_tables:
+    - approval_requests
+    - projects
+    - crewai_validation_states
+  notes: "HITL approval flow - see hitl-approval-ui.md"
+
+US-F04:
+  db_tables:
+    - projects
+    - hypotheses
+    - evidence
+  notes: "Soft delete - sets status to 'archived'"
+
+US-F05:
+  db_tables:
+    - projects
+    - hypotheses
+    - evidence
+    - value_proposition_canvases
+    - business_model_canvases
+    - experiments
+  notes: "Hard delete - permanently removes all related data"
+
+US-F06:
+  db_tables:
+    - value_proposition_canvases
+    - experiments
+    - evidence
+    - crewai_validation_states
+
+US-F07:
+  db_tables:
+    - onboarding_sessions
+    - projects
+  notes: "Optional hints in Quick Start form"
+
+US-F08:
+  db_tables:
+    - crewai_validation_states
+    - projects
+    - public_activity_log
+  notes: "Phase 1 progress indicators"
+
+US-F09:
+  db_tables:
+    - public_activity_log
+    - crewai_validation_states
+  notes: "Activity feed updates"
+
+US-F10:
+  db_tables:
+    - crewai_validation_states
+    - projects
+  notes: "Error handling and retry"
+
+# =============================================================================
+# Consultant Stories (US-C01-C07)
+# =============================================================================
+
+US-C01:
+  db_tables:
+    - users
+    - consultant_profiles
+  notes: "Practice setup - static form (ADR-006)"
+
+US-C02:
+  db_tables:
+    - consultant_invites
+    - consultant_clients
+    - users
+  notes: "Invite system with 30-day token expiry"
+
+US-C03:
+  db_tables:
+    - consultant_clients
+    - projects
+    - crewai_validation_states
+
+US-C04:
+  db_tables:
+    - consultant_clients
+    - projects
+    - value_proposition_canvases
+    - experiments
+    - evidence
+
+US-C05:
+  db_tables:
+    - consultant_clients
+  notes: "Soft delete - sets relationship status to 'archived'"
+
+US-C06:
+  db_tables:
+    - consultant_invites
+  notes: "Max 3 resends per invite"
+
+US-C07:
+  db_tables:
+    - onboarding_sessions
+    - projects
+    - consultant_clients
+    - entrepreneur_briefs
+  notes: "Quick Start for client projects"
+
+# =============================================================================
+# Founder Trial Stories (US-FT01-FT04)
+# =============================================================================
+
+US-FT01:
+  db_tables:
+    - users
+    - onboarding_sessions
+  notes: "Trial signup with founder_trial role"
+
+US-FT02:
+  db_tables:
+    - users
+    - usage_quotas
+    - projects
+
+US-FT03:
+  db_tables:
+    - users
+    - stripe_customers
+  notes: "Stripe checkout integration"
+
+US-FT04:
+  db_tables:
+    - users
+  notes: "Post-upgrade orientation modal"
+
+# =============================================================================
+# Consultant Trial Stories (US-CT01-CT06) - Gap
+# =============================================================================
+
+US-CT01:
+  db_tables:
+    - users
+    - consultant_profiles
+  implementation_status: gap
+
+US-CT02:
+  db_tables:
+    - consultant_clients
+  notes: "Mock clients with sample data"
+  implementation_status: gap
+
+US-CT03:
+  db_tables:
+    - users
+  notes: "Upgrade prompt on real invite attempt"
+  implementation_status: gap
+
+US-CT04:
+  db_tables:
+    - users
+    - usage_quotas
+  implementation_status: gap
+
+US-CT05:
+  db_tables:
+    - users
+    - stripe_customers
+  implementation_status: gap
+
+US-CT06:
+  db_tables:
+    - users
+  implementation_status: gap
+
+# =============================================================================
+# HITL Checkpoint Stories (US-H01-H09)
+# =============================================================================
+
+US-H01:
+  db_tables:
+    - approval_requests
+    - entrepreneur_briefs
+    - value_proposition_canvases
+    - crewai_validation_states
+  notes: "approve_discovery_output checkpoint - Phase 1"
+
+US-H02:
+  db_tables:
+    - approval_requests
+    - experiments
+    - hypotheses
+  notes: "approve_experiment_plan checkpoint - Phase 1"
+
+US-H04:
+  db_tables:
+    - approval_requests
+    - experiments
+  notes: "campaign_launch checkpoint - Phase 2"
+
+US-H05:
+  db_tables:
+    - approval_requests
+    - usage_quotas
+  notes: "spend_increase checkpoint - Phase 2"
+
+US-H06:
+  db_tables:
+    - approval_requests
+    - crewai_validation_states
+  notes: "gate_progression checkpoint - Desirability Gate"
+
+US-H07:
+  db_tables:
+    - approval_requests
+    - crewai_validation_states
+  notes: "gate_progression checkpoint - Feasibility Gate"
+
+US-H08:
+  db_tables:
+    - approval_requests
+    - crewai_validation_states
+  notes: "gate_progression checkpoint - Viability Gate"
+
+US-H09:
+  db_tables:
+    - approval_requests
+    - projects
+    - crewai_validation_states
+  notes: "final_decision checkpoint"
+
+# =============================================================================
+# Pivot Flow Stories (US-P01-P04)
+# =============================================================================
+
+US-P01:
+  db_tables:
+    - approval_requests
+    - projects
+    - crewai_validation_states
+  notes: "Segment pivot - restarts Phase 1"
+
+US-P02:
+  db_tables:
+    - approval_requests
+    - value_proposition_canvases
+    - crewai_validation_states
+  notes: "Value pivot - restarts Desirability testing"
+
+US-P03:
+  db_tables:
+    - approval_requests
+    - crewai_validation_states
+  notes: "Feature downgrade - Feasibility constraint"
+
+US-P04:
+  db_tables:
+    - approval_requests
+    - crewai_validation_states
+  notes: "Strategic pivot - pricing/CAC optimization"
+
+# =============================================================================
+# Edge Case Stories (US-E01-E06) - Gap
+# =============================================================================
+
+US-E01:
+  notes: "localStorage-based draft recovery"
+  implementation_status: partial
+
+US-E02:
+  db_tables:
+    - projects
+  notes: "Concurrent project creation warning"
+  implementation_status: partial
+
+US-E03:
+  notes: "Input validation and sanitization"
+  implementation_status: partial
+
+US-E04:
+  db_tables:
+    - crewai_validation_states
+  notes: "Phase 1 timeout handling"
+  implementation_status: partial
+
+US-E05:
+  db_tables:
+    - approval_requests
+  notes: "HITL checkpoint expiry (30 days)"
+  implementation_status: partial
+
+US-E06:
+  db_tables:
+    - consultant_clients
+  notes: "Client unlink notification"
+  implementation_status: partial
+
+# =============================================================================
+# Admin Stories (US-A01-A12) - Gap
+# =============================================================================
+
+US-A01:
+  db_tables:
+    - users
+    - projects
+  implementation_status: gap
+
+US-A02:
+  db_tables:
+    - users
+    - projects
+    - approval_requests
+  implementation_status: gap
+
+US-A03:
+  db_tables:
+    - users
+    - audit_logs
+  notes: "Read-only impersonation"
+  implementation_status: gap
+
+US-A04:
+  db_tables:
+    - crewai_validation_states
+    - audit_logs
+  implementation_status: gap
+
+US-A05:
+  db_tables:
+    - crewai_validation_states
+  notes: "System health dashboard"
+  implementation_status: gap
+
+US-A06:
+  db_tables:
+    - feature_flags
+    - audit_logs
+  implementation_status: gap
+
+US-A07:
+  db_tables:
+    - audit_logs
+  implementation_status: gap
+
+US-A08:
+  db_tables:
+    - users
+    - audit_logs
+  implementation_status: gap
+
+US-A09:
+  db_tables:
+    - users
+    - projects
+    - audit_logs
+  notes: "GDPR data export"
+  implementation_status: gap
+
+US-A10:
+  db_tables:
+    - users
+    - projects
+  notes: "Data integrity check"
+  implementation_status: gap
+
+US-A11:
+  db_tables:
+    - users
+    - audit_logs
+  notes: "Admin role verification"
+  implementation_status: gap
+
+US-A12:
+  db_tables:
+    - users
+    - stripe_customers
+    - audit_logs
+  notes: "Billing management"
+  implementation_status: gap
+
+# =============================================================================
+# Support Stories (US-S01-S05) - Gap
+# =============================================================================
+
+US-S01:
+  db_tables:
+    - support_tickets
+  implementation_status: gap
+
+US-S02:
+  notes: "Help articles - may use external CMS"
+  implementation_status: gap
+
+US-S03:
+  db_tables:
+    - support_tickets
+  implementation_status: gap
+
+US-S04:
+  db_tables:
+    - users
+    - data_exports
+  notes: "GDPR right of access"
+  implementation_status: gap
+
+US-S05:
+  db_tables:
+    - users
+  notes: "GDPR right to erasure"
+  implementation_status: gap
+
+# =============================================================================
+# Offboarding Stories (US-O01-O05) - Gap
+# =============================================================================
+
+US-O01:
+  db_tables:
+    - users
+    - stripe_subscriptions
+  implementation_status: gap
+
+US-O02:
+  db_tables:
+    - exit_surveys
+  implementation_status: gap
+
+US-O03:
+  db_tables:
+    - users
+  notes: "30-day grace + 60-day retention"
+  implementation_status: gap
+
+US-O04:
+  db_tables:
+    - users
+    - stripe_subscriptions
+  implementation_status: gap
+
+US-O05:
+  notes: "Win-back emails at 7/30/60/90 days"
+  implementation_status: gap
+
+# =============================================================================
+# Billing Stories (US-B01-B10) - Gap
+# =============================================================================
+
+US-B01:
+  db_tables:
+    - stripe_invoices
+  implementation_status: gap
+
+US-B02:
+  db_tables:
+    - stripe_invoices
+  implementation_status: gap
+
+US-B03:
+  db_tables:
+    - stripe_payment_methods
+  implementation_status: gap
+
+US-B04:
+  db_tables:
+    - users
+    - stripe_subscriptions
+  notes: "6-stage dunning timeline"
+  implementation_status: gap
+
+US-B05:
+  db_tables:
+    - stripe_refunds
+  notes: "4-tier refund policy"
+  implementation_status: gap
+
+US-B06:
+  db_tables:
+    - users
+    - stripe_subscriptions
+  implementation_status: gap
+
+US-B07:
+  db_tables:
+    - users
+    - stripe_tax_ids
+  notes: "VIES/HMRC/ABN validation"
+  implementation_status: gap
+
+US-B08:
+  db_tables:
+    - stripe_coupons
+  implementation_status: gap
+
+US-B09:
+  db_tables:
+    - users
+    - stripe_subscriptions
+  implementation_status: gap
+
+US-B10:
+  db_tables:
+    - users
+    - stripe_subscriptions
+  implementation_status: gap
+
+# =============================================================================
+# Notification Stories (US-N01-N05) - Gap
+# =============================================================================
+
+US-N01:
+  db_tables:
+    - notifications
+  implementation_status: gap
+
+US-N02:
+  db_tables:
+    - notifications
+    - email_queue
+  implementation_status: gap
+
+US-N03:
+  db_tables:
+    - notification_preferences
+  implementation_status: gap
+
+US-N04:
+  db_tables:
+    - notifications
+    - approval_requests
+  notes: "6-stage escalation timeline"
+  implementation_status: gap
+
+US-N05:
+  db_tables:
+    - notification_preferences
+  implementation_status: gap
+
+# =============================================================================
+# Account Settings Stories (US-AS01-AS05) - Gap
+# =============================================================================
+
+US-AS01:
+  db_tables:
+    - users
+  implementation_status: gap
+
+US-AS02:
+  db_tables:
+    - users
+  implementation_status: gap
+
+US-AS03:
+  db_tables:
+    - users
+    - user_2fa
+  implementation_status: gap
+
+US-AS04:
+  db_tables:
+    - login_history
+  notes: "Suspicious login detection"
+  implementation_status: gap
+
+US-AS05:
+  db_tables:
+    - user_sessions
+  implementation_status: gap
+
+# =============================================================================
+# Marketing Funnel Stories (US-MF01-MF03) - Cross-Repo Gap
+# =============================================================================
+
+US-MF01:
+  notes: "Implementation in startupai.site (marketing repo)"
+  implementation_status: partial
+
+US-MF02:
+  notes: "Implementation in startupai.site (marketing repo)"
+  implementation_status: partial
+
+US-MF03:
+  db_tables:
+    - users
+  notes: "OAuth signup - implementation in app.startupai.site"
+  implementation_status: partial

@@ -10,6 +10,8 @@
  * 2. Dashboard shows "Phase 1: Researching..." progress
  * 3. Validation with optional hints
  * 4. Error handling for invalid input
+ *
+ * @story US-F01, US-F07, US-FT01
  */
 
 import { test, expect } from '@playwright/test';

@@ -1,4 +1,8 @@
 /**
+ * @story US-A07, US-A09, US-A10, US-A12
+ */
+
+/**
  * 21-admin-audit.spec.ts
  *
  * Admin Audit and Data Operations E2E Tests

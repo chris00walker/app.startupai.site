@@ -3,6 +3,8 @@
  *
  * Tests the complete founder journey from onboarding to analysis results.
  * Flow: Onboarding -> Dashboard -> Trigger Analysis -> View Results
+ *
+ * @story US-F02, US-F06, US-F08, US-F09, US-F10
  */
 
 import { test, expect } from '@playwright/test';

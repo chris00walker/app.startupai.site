@@ -1,3 +1,7 @@
+/**
+ * @story US-FT01
+ */
+
 import { test, expect } from '@playwright/test';
 import { login, FOUNDER_USER } from './helpers/auth';
 import {

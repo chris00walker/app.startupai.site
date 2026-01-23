@@ -3,6 +3,8 @@
  *
  * POST /api/consultant/invites - Create a new client invite
  * GET /api/consultant/invites - List all invites and clients
+ *
+ * @story US-C02
  */
 
 import { NextRequest, NextResponse } from 'next/server';

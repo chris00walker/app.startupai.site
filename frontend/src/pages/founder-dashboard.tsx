@@ -1,5 +1,14 @@
 "use client"
 
+/**
+ * Founder Dashboard Page
+ *
+ * Main dashboard for founders showing fit dashboard, gates,
+ * validation summary, and evidence ledger.
+ *
+ * @story US-F02, US-F06, US-F08, US-F09, US-F10
+ */
+
 import * as React from "react"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"
 import { FitDashboard } from "@/components/fit/FitDashboard"

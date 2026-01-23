@@ -2,6 +2,8 @@
  * Client Consultant Unlink Route
  *
  * POST /api/client/consultant/unlink - Client-initiated unlinking from consultant
+ *
+ * @story US-E06
  */
 
 import { NextRequest, NextResponse } from 'next/server';

@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * Signup Page
+ *
+ * @story US-MF03
+ */
+
 import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"

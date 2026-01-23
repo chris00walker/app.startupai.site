@@ -3,6 +3,8 @@
  *
  * Tests the consultant portfolio view and client drill-down.
  * Flow: Login -> Portfolio Grid -> Client Detail -> Return
+ *
+ * @story US-C03, US-C04
  */
 
 import { test, expect } from '@playwright/test';

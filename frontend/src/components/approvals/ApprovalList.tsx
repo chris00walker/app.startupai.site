@@ -2,6 +2,8 @@
  * ApprovalList Component
  *
  * Renders a list of ApprovalCard components with filtering and sorting.
+ *
+ * @story US-F03, US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
  */
 
 'use client';

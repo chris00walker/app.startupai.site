@@ -1,4 +1,8 @@
 /**
+ * @story US-A04, US-A05, US-A06
+ */
+
+/**
  * 20-admin-operations.spec.ts
  *
  * Admin Operations E2E Tests

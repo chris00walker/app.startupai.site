@@ -1,10 +1,10 @@
 /**
  * Consultant Practice Setup E2E Tests
  *
- * Tests for the first-time Consultant onboarding flow with Maya.
- * Maya guides Consultants through 7 practice-specific stages.
+ * Tests for the first-time Consultant onboarding flow.
+ * Consultants fill out a practice setup form.
  *
- * @see Plan: /home/chris/.claude/plans/precious-kindling-balloon.md
+ * @story US-C01
  */
 
 import { test, expect } from '@playwright/test';

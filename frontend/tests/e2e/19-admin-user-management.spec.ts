@@ -1,4 +1,8 @@
 /**
+ * @story US-A01, US-A02, US-A03, US-A08, US-A11
+ */
+
+/**
  * 19-admin-user-management.spec.ts
  *
  * Admin User Management E2E Tests

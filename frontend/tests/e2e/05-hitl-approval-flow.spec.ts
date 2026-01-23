@@ -3,6 +3,8 @@
  *
  * Tests the Human-in-the-Loop approval workflow.
  * Flow: Approvals Page -> View Pending -> Open Modal -> Make Decision
+ *
+ * @story US-F03, US-C04, US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
  */
 
 import { test, expect } from '@playwright/test';

@@ -4,6 +4,8 @@
  * GET /api/projects/[id] - Get project details and impact counts
  * PATCH /api/projects/[id] - Archive or unarchive project
  * DELETE /api/projects/[id] - Permanently delete project
+ *
+ * @story US-F04, US-F05
  */
 
 import { NextRequest, NextResponse } from 'next/server';

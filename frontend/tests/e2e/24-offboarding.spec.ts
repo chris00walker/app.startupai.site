@@ -1,4 +1,8 @@
 /**
+ * @story US-O01, US-O02, US-O03, US-O04, US-O05
+ */
+
+/**
  * 24-offboarding.spec.ts
  *
  * Offboarding & Churn E2E Tests

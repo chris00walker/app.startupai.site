@@ -189,46 +189,46 @@ export function useActiveValidationRun(projectId: string | null) {
   const [runId, setRunId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function findActiveRun() {
-      if (!projectId) {
-        setRunId(null);
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const supabase = createClient();
-
-        const { data, error } = await supabase
-          .from('validation_runs')
-          .select('run_id')
-          .eq('project_id', projectId)
-          .in('status', ['pending', 'running', 'paused'])
-          .order('started_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (error) {
-          // No active run found is not an error
-          if (error.code === 'PGRST116') {
-            setRunId(null);
-          } else {
-            console.error('[useActiveValidationRun] Error:', error);
-          }
-        } else {
-          setRunId(data?.run_id || null);
-        }
-      } catch (err) {
-        console.error('[useActiveValidationRun] Error:', err);
-      } finally {
-        setIsLoading(false);
-      }
+  const fetchActiveRun = useCallback(async () => {
+    if (!projectId) {
+      setRunId(null);
+      setIsLoading(false);
+      return;
     }
 
-    findActiveRun();
+    try {
+      setIsLoading(true);
+      const supabase = createClient();
+
+      const { data, error } = await supabase
+        .from('validation_runs')
+        .select('run_id')
+        .eq('project_id', projectId)
+        .in('status', ['pending', 'running', 'paused'])
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        // No active run found is not an error
+        if (error.code === 'PGRST116') {
+          setRunId(null);
+        } else {
+          console.error('[useActiveValidationRun] Error:', error);
+        }
+      } else {
+        setRunId(data?.run_id || null);
+      }
+    } catch (err) {
+      console.error('[useActiveValidationRun] Error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }, [projectId]);
 
-  return { runId, isLoading };
+  useEffect(() => {
+    fetchActiveRun();
+  }, [fetchActiveRun]);
+
+  return { runId, isLoading, refresh: fetchActiveRun };
 }

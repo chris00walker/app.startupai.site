@@ -6,7 +6,6 @@
  * Covers user stories:
  * - US-H01: Review Founder's Brief (approve_founders_brief)
  * - US-H02: Approve Experiment Plan (approve_experiment_plan)
- * - US-H03: Approve VPC Completion (approve_vpc_completion)
  * - US-H04: Approve Campaign Launch (campaign_launch)
  * - US-H05: Approve Budget Increase (spend_increase)
  * - US-H06: Review Desirability Gate (gate_progression D)
@@ -16,6 +15,8 @@
  *
  * Spec Reference: docs/specs/hitl-approval-ui.md
  * Story Reference: docs/user-experience/stories/README.md
+ *
+ * @story US-F03, US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
  */
 
 import { test, expect, Page } from '@playwright/test';

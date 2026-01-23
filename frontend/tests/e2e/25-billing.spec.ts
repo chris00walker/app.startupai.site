@@ -1,4 +1,8 @@
 /**
+ * @story US-B01, US-B02, US-B03, US-B04, US-B05, US-B06, US-B07, US-B08, US-B09, US-B10
+ */
+
+/**
  * 25-billing.spec.ts
  *
  * Billing & Payment E2E Tests

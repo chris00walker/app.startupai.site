@@ -1,3 +1,7 @@
+/**
+ * @story US-F02
+ */
+
 import { test, expect } from '@playwright/test';
 import { login, CONSULTANT_USER, FOUNDER_USER } from './helpers/auth';
 import { setupDashboardMocks } from './helpers/api-mocks';

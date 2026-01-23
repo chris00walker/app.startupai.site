@@ -2,6 +2,8 @@
  * Consultant Invite Resend Route
  *
  * POST /api/consultant/invites/[id]/resend - Resend an invite with new token
+ *
+ * @story US-C06
  */
 
 import { NextRequest, NextResponse } from 'next/server';

@@ -6,12 +6,14 @@
  *
  * Pattern follows: components/signals/InnovationPhysicsPanel.tsx
  * Reference: startupai-crew/docs/features/state-persistence.md
+ *
+ * @story US-E04
  */
 
 'use client';
 
 import * as React from 'react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   MessageSquare,
   Search,
@@ -47,6 +49,7 @@ export interface ValidationProgressTimelineProps {
   onHITLRequired?: (checkpoint: string) => void;
   onComplete?: () => void;
   onError?: (error: Error) => void;
+  onRunRestarted?: (runId: string) => void;
   className?: string;
 }
 
@@ -100,16 +103,23 @@ const statusConfig: Record<
   },
 };
 
+const PHASE1_WARNING_MS = 20 * 60 * 1000;
+const PHASE1_ESCALATION_MS = 30 * 60 * 1000;
+
 export function ValidationProgressTimeline({
   runId,
   variant = 'modal',
   onHITLRequired,
   onComplete,
   onError,
+  onRunRestarted,
   className,
 }: ValidationProgressTimelineProps) {
-  const { run, progress, status, currentPhase, isLoading, error } =
+  const { run, progress, status, currentPhase, isLoading, error, refetch } =
     useValidationProgress(runId);
+  const [now, setNow] = useState(() => Date.now());
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
 
   // Calculate current phase progress based on events
   const phaseProgress = useMemo(() => {
@@ -132,6 +142,32 @@ export function ValidationProgressTimeline({
     () => getLatestCrewEvents(progress),
     [progress]
   );
+
+  const phase1StartMs = useMemo(() => {
+    if (currentPhase !== 1) return null;
+    const phaseEvents = progress.filter((event) => event.phase === 1);
+    if (phaseEvents.length > 0) {
+      const firstEvent = phaseEvents[0];
+      const startMs = new Date(firstEvent.created_at).getTime();
+      return Number.isNaN(startMs) ? null : startMs;
+    }
+    if (!run?.started_at) return null;
+    const startMs = new Date(run.started_at).getTime();
+    return Number.isNaN(startMs) ? null : startMs;
+  }, [currentPhase, progress, run?.started_at]);
+
+  const phase1ElapsedMs =
+    phase1StartMs && status === 'running' ? Math.max(0, now - phase1StartMs) : 0;
+  const showPhase1Warning =
+    status === 'running' && currentPhase === 1 && phase1ElapsedMs >= PHASE1_WARNING_MS;
+  const showPhase1Escalation =
+    status === 'running' && currentPhase === 1 && phase1ElapsedMs >= PHASE1_ESCALATION_MS;
+
+  useEffect(() => {
+    if (status !== 'running' || currentPhase !== 1 || !phase1StartMs) return;
+    const interval = window.setInterval(() => setNow(Date.now()), 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [status, currentPhase, phase1StartMs]);
 
   // Handle status changes
   useEffect(() => {
@@ -172,6 +208,43 @@ export function ValidationProgressTimeline({
 
   const statusInfo = statusConfig[status];
   const StatusIcon = statusInfo.icon;
+  const supportMailTo = run
+    ? `mailto:support@startupai.site?subject=Phase%201%20timeout%20(${encodeURIComponent(run.project_id)})&body=${encodeURIComponent(
+        `Project ID: ${run.project_id}\nRun ID: ${run.run_id}`
+      )}`
+    : 'mailto:support@startupai.site';
+
+  const handleRetry = async () => {
+    if (!run) return;
+    setIsRetrying(true);
+    setRetryError(null);
+
+    try {
+      const response = await fetch('/api/crewai/retry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ run_id: run.run_id }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to retry validation run');
+      }
+
+      if (data.run_id) {
+        onRunRestarted?.(data.run_id);
+      }
+
+      await refetch();
+      setNow(Date.now());
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to retry validation run';
+      setRetryError(message);
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   return (
     <Card className={cn(variant === 'modal' ? '' : 'border-2', className)}>
@@ -196,6 +269,35 @@ export function ValidationProgressTimeline({
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {showPhase1Warning && (
+          <Alert variant={showPhase1Escalation ? 'destructive' : 'default'}>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>
+              {showPhase1Escalation ? 'Extended processing time' : 'Taking longer than expected'}
+            </AlertTitle>
+            <AlertDescription>
+              {showPhase1Escalation
+                ? 'Phase 1 is still running. If this continues, contact support or retry the analysis.'
+                : 'Phase 1 is still running. Our team is working on your analysis.'}
+              {showPhase1Escalation && (
+                <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                  <Button asChild size="sm" variant="outline">
+                    <a href={supportMailTo}>Contact Support</a>
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={handleRetry} disabled={isRetrying}>
+                    {isRetrying ? 'Restarting...' : 'Cancel and retry'}
+                  </Button>
+                </div>
+              )}
+              {retryError && (
+                <div className="mt-3 text-sm text-red-600">
+                  {retryError}
+                </div>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Overall Progress */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">

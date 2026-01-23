@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * Portfolio Grid Component
+ *
+ * Displays client projects in a responsive grid layout for consultants.
+ *
+ * @story US-C03, US-C04
+ */
+
 import * as React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

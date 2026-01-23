@@ -2,9 +2,9 @@
  * Consultant Client Onboarding E2E Tests
  *
  * Tests for when a Consultant onboards a Client's project.
- * Alex uses "client mode" prompts ("your client's business idea").
+ * Uses Quick Start form in client mode.
  *
- * @see Plan: /home/chris/.claude/plans/precious-kindling-balloon.md
+ * @story US-C02, US-C07
  */
 
 import { test, expect } from '@playwright/test';

@@ -15,6 +15,8 @@
  * - Optional labels visible in dropdown triggers
  * - Improved expand/collapse affordance
  * - Added example business idea toggle
+ *
+ * @story US-F01, US-F07, US-FT01, US-E01, US-E03
  */
 
 import * as React from 'react';
@@ -23,6 +25,7 @@ import { ChevronDown, Loader2, Rocket, Lightbulb, Sparkles, ArrowRight, HelpCirc
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -109,6 +112,65 @@ const EXAMPLE_IDEA = `A mobile app that helps busy professionals meal plan and g
 const MIN_IDEA_LENGTH = 10;
 const MAX_IDEA_LENGTH = 5000;
 const MAX_CONTEXT_LENGTH = 10000;
+const DRAFT_STORAGE_KEY = 'startupai:quickstart_draft';
+const DRAFT_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const DRAFT_SAVE_DEBOUNCE_MS = 600;
+const DRAFT_PREVIEW_CHARS = 140;
+
+type QuickStartDraft = FormData & { updatedAt: string };
+
+function hasDraftContent(draft: FormData): boolean {
+  return Boolean(
+    draft.rawIdea.trim() ||
+    draft.additionalContext.trim() ||
+    draft.industry ||
+    draft.targetUser ||
+    draft.geography
+  );
+}
+
+function readDraftFromStorage(): QuickStartDraft | null {
+  if (typeof window === 'undefined') return null;
+
+  const stored = localStorage.getItem(DRAFT_STORAGE_KEY);
+  if (!stored) return null;
+
+  try {
+    const draft = JSON.parse(stored) as QuickStartDraft;
+    if (!draft?.updatedAt || !hasDraftContent(draft)) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      return null;
+    }
+
+    const ageMs = Date.now() - new Date(draft.updatedAt).getTime();
+    if (Number.isNaN(ageMs) || ageMs > DRAFT_EXPIRY_MS) {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      return null;
+    }
+
+    return draft;
+  } catch {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    return null;
+  }
+}
+
+function writeDraftToStorage(draft: QuickStartDraft): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+}
+
+function clearDraftFromStorage(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(DRAFT_STORAGE_KEY);
+}
+
+function getDraftPreview(rawIdea: string): string {
+  const trimmed = rawIdea.trim();
+  if (!trimmed) return 'Draft includes saved quick start details.';
+  if (trimmed.length <= DRAFT_PREVIEW_CHARS) return trimmed;
+  return `${trimmed.slice(0, DRAFT_PREVIEW_CHARS)}...`;
+}
 
 // =============================================================================
 // Component
@@ -129,6 +191,37 @@ export function QuickStartForm({ clientId, onSuccess, onError }: QuickStartFormP
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [hintsOpen, setHintsOpen] = React.useState(false);
   const [showExample, setShowExample] = React.useState(false);
+  const [draft, setDraft] = React.useState<QuickStartDraft | null>(null);
+  const [showDraftPrompt, setShowDraftPrompt] = React.useState(false);
+  const draftLoadedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    const storedDraft = readDraftFromStorage();
+    if (storedDraft) {
+      setDraft(storedDraft);
+      setShowDraftPrompt(true);
+    }
+    draftLoadedRef.current = true;
+  }, []);
+
+  React.useEffect(() => {
+    if (!draftLoadedRef.current || showDraftPrompt) return;
+
+    const shouldPersist = hasDraftContent(formData);
+    const timer = window.setTimeout(() => {
+      if (!shouldPersist) {
+        clearDraftFromStorage();
+        return;
+      }
+
+      writeDraftToStorage({
+        ...formData,
+        updatedAt: new Date().toISOString(),
+      });
+    }, DRAFT_SAVE_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [formData, showDraftPrompt]);
 
   // Validation
   const validateForm = (): boolean => {
@@ -185,6 +278,10 @@ export function QuickStartForm({ clientId, onSuccess, onError }: QuickStartFormP
         throw new Error(data.error || 'Failed to start validation');
       }
 
+      clearDraftFromStorage();
+      setDraft(null);
+      setShowDraftPrompt(false);
+
       if (onSuccess) {
         onSuccess(data.project_id, data.run_id);
       } else {
@@ -207,12 +304,52 @@ export function QuickStartForm({ clientId, onSuccess, onError }: QuickStartFormP
     setShowExample(false);
   };
 
+  const handleResumeDraft = () => {
+    if (!draft) return;
+    const { updatedAt, ...draftData } = draft;
+    setFormData(draftData);
+    setShowDraftPrompt(false);
+  };
+
+  const handleStartFresh = () => {
+    clearDraftFromStorage();
+    setDraft(null);
+    setShowDraftPrompt(false);
+    setFormData({
+      rawIdea: '',
+      industry: '',
+      targetUser: '',
+      geography: '',
+      additionalContext: '',
+    });
+  };
+
   const ideaCharCount = formData.rawIdea.length;
   const contextCharCount = formData.additionalContext.length;
   const isValidIdea = formData.rawIdea.trim().length >= MIN_IDEA_LENGTH;
+  const draftPreview = draft ? getDraftPreview(draft.rawIdea) : '';
 
   return (
     <div className="w-full max-w-2xl mx-auto">
+      {showDraftPrompt && draft && (
+        <Alert className="mb-6 border-primary/40 bg-primary/5">
+          <AlertTitle>Resume your draft?</AlertTitle>
+          <AlertDescription>
+            We saved your Quick Start details from the last 24 hours.
+            <div className="mt-2 text-xs text-muted-foreground">
+              {draftPreview}
+            </div>
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <Button size="sm" onClick={handleResumeDraft}>
+                Resume draft
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleStartFresh}>
+                Start fresh
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       {/* Atmospheric Card Container - with visible border and shadow for WCAG 1.4.11 compliance */}
       <Card className="relative overflow-hidden border border-border/60 shadow-xl shadow-black/[0.08] bg-gradient-to-br from-card via-card to-primary/[0.02]">
         {/* Background Pattern */}

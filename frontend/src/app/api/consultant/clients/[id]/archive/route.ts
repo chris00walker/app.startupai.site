@@ -2,6 +2,8 @@
  * Consultant Client Archive Route
  *
  * POST /api/consultant/clients/[id]/archive - Archive a client relationship (consultant-initiated)
+ *
+ * @story US-C05
  */
 
 import { NextRequest, NextResponse } from 'next/server';

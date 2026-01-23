@@ -1,4 +1,8 @@
 /**
+ * @story US-N01, US-N02, US-N03, US-N04, US-N05
+ */
+
+/**
  * 26-notifications.spec.ts
  *
  * Notification System E2E Tests

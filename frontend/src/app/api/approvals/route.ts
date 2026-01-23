@@ -2,6 +2,8 @@
  * Approvals List API
  *
  * GET /api/approvals - List approval requests for current user
+ *
+ * @story US-F03, US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
  */
 
 import { NextRequest, NextResponse } from 'next/server';

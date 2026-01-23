@@ -1,5 +1,14 @@
 "use client"
 
+/**
+ * Consultant Dashboard Page
+ *
+ * Main dashboard for consultants showing portfolio overview,
+ * client cards, and validation metrics.
+ *
+ * @story US-C03, US-C04
+ */
+
 import * as React from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
