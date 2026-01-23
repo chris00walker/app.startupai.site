@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-23T16:57:04.453Z
+Generated: 2026-01-23T17:25:07.509Z
 
 ## Files Without Story Links
 
@@ -200,7 +200,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/founders/index.ts | component | Export file - usually no annotation needed |
 | frontend/src/components/gates/GateReadinessIndicator.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/gates/GateStatusBadge.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/hypothesis/HypothesisManager.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/layout/DashboardLayout.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/onboarding/FoundersBriefReview.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/onboarding/index.ts | component | Export file - usually no annotation needed |
@@ -494,4 +493,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 485**
+**Total Orphans: 484**

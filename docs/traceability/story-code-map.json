@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T16:57:04.453Z",
+    "generated_at": "2026-01-23T17:25:07.509Z",
     "version": "1.0.0",
-    "story_count": 133,
-    "annotated_file_count": 127
+    "story_count": 134,
+    "annotated_file_count": 129
   },
   "stories": {
     "US-F01": {
@@ -307,6 +307,24 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "partial"
+    },
+    "US-F17": {
+      "title": "Manage Hypotheses",
+      "components": [
+        "frontend/src/components/hypothesis/HypothesisManager.tsx"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "28-hypotheses.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "complete"
     },
     "US-F13": {
       "title": "Use Evidence Ledger with Fit Filters",
@@ -2851,6 +2869,16 @@
     "frontend/src/components/strategyzer/AssumptionMap.tsx": {
       "stories": [
         "US-F12"
+      ]
+    },
+    "frontend/src/components/hypothesis/HypothesisManager.tsx": {
+      "stories": [
+        "US-F17"
+      ]
+    },
+    "frontend/tests/e2e/28-hypotheses.spec.ts": {
+      "stories": [
+        "US-F17"
       ]
     },
     "frontend/src/components/fit/EvidenceLedger.tsx": {

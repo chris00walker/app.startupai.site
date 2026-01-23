@@ -42,6 +42,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 | Step 8: View Canvases | US-F06 | `04-founder-analysis-journey.spec.ts` | "should display VPC content in Canvases tab" | Covered |
 | Step 8: AI Attribution | US-F02 | `03-founder-attribution.spec.ts` | "should display founder status panel" | Covered |
 | Step 9: Action Planning | US-F06 | `04-founder-analysis-journey.spec.ts` | "should navigate between dashboard tabs" | Covered |
+| Step 9: Hypotheses Management | US-F17 | `28-hypotheses.spec.ts` | "should create, edit, and delete hypotheses" | Gap |
 | Step 6-7: Progress Indicators | US-F08 | `04-founder-analysis-journey.spec.ts` | "should show phase progress indicators" | Covered |
 | Step 6: Activity Feed | US-F09 | `04-founder-analysis-journey.spec.ts` | "should update activity feed" | Covered |
 | Step 7: Error Handling | US-F10 | `04-founder-analysis-journey.spec.ts` | "should handle phase errors gracefully" | Covered |

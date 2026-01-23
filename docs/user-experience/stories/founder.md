@@ -104,7 +104,7 @@ last_updated: "2026-01-23"
 **When** I toggle "Show archived projects" in Settings
 **Then** I should see the archived project with a "Restore" option
 
-**E2E Test:** Gap - needs test
+**E2E Test:** `28-hypotheses.spec.ts` - "should create, edit, and delete hypotheses"
 **Journey Reference:** [`project-client-management.md`](../../features/project-client-management.md) - Archive Flow
 
 ---
@@ -341,6 +341,39 @@ last_updated: "2026-01-23"
 
 **E2E Test:** Gap - needs test
 **Journey Reference:** N/A (Strategyzer Assumption Map)
+
+---
+
+### US-F17: Manage Hypotheses
+
+**As a** Founder,
+**I want to** create, edit, and delete hypotheses,
+**So that** I can track validation status over time.
+
+**Acceptance Criteria:**
+
+**Given** I am on the Founder dashboard
+**When** I open the Hypotheses tab
+**Then** I should see hypotheses with type, risk level, and validation status
+
+**Given** I want to add a new hypothesis
+**When** I submit a hypothesis statement with a risk level and category
+**Then** the hypothesis should appear in the list with `status=untested` and `evidence=none`
+
+**Given** I select a hypothesis
+**When** I view its details
+**Then** I should see linked evidence and recent updates
+
+**Given** I edit a hypothesis statement, risk level, or status
+**When** I save changes
+**Then** the update should persist and reflect in the hypotheses list
+
+**Given** I choose to delete a hypothesis
+**When** I confirm the deletion
+**Then** the hypothesis should be permanently removed and any linked experiments should become unlinked
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (Hypotheses tab)
 
 ---
 

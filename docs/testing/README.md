@@ -93,7 +93,7 @@ frontend/
 | Category | Target | Current |
 |----------|--------|---------|
 | Unit tests | >70% | ~65% |
-| Story coverage | 100% | 26% (34/133 stories) |
+| Story coverage | 100% | 25% (34/134 stories) |
 | Critical paths | 100% | ~85% |
 
 ## Running Tests

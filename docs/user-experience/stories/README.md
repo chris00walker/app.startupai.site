@@ -36,13 +36,13 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-23**: Added Agent Spec stories (US-AG01-AG06); total stories now 133.
+> **Updated 2026-01-23**: Added US-F17 (Hypotheses) and Agent Spec stories (US-AG01-AG06); total stories now 134.
 
 ### Stories by Category
 
 | Category | Story IDs | Total | With E2E Tests | Gaps |
 |----------|-----------|-------|----------------|------|
-| Founder | US-F01-F16 | 16 | 10 | 6 |
+| Founder | US-F01-F17 | 17 | 10 | 7 |
 | Consultant | US-C01-C07 | 7 | 7 | 0 |
 | Founder Trial | US-FT01-FT04 | 4 | 4 | 0 |
 | Consultant Trial | US-CT01-CT06 | 6 | 0 | 6 |
@@ -60,7 +60,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
-| **Total** | | **133** | **34** | **99** |
+| **Total** | | **134** | **34** | **100** |
 
 ### E2E Test File Mapping
 
@@ -84,8 +84,9 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `15-pivot-workflows.spec.ts` | US-P01-P04 |
 | `16-quick-start-founder.spec.ts` | US-F01, US-FT01 |
 | `17-quick-start-consultant.spec.ts` | US-C07 |
+| `28-hypotheses.spec.ts` | US-F17 |
 
-### Gap Analysis (99 Stories Need Implementation)
+### Gap Analysis (100 Stories Need Implementation)
 
 Stories with test stubs created but not yet implemented:
 
@@ -107,13 +108,13 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-23**: Added Agent Spec stories (US-AG01-AG06); total stories now 133.
+> **Updated 2026-01-23**: Added US-F17 (Hypotheses) and Agent Spec stories (US-AG01-AG06); total stories now 134.
 
 ### Stories by Category
 
 | Category | Total Stories | With E2E Tests | Gaps |
 |----------|---------------|----------------|------|
-| Founder (US-F) | 16 | 10 | 6 |
+| Founder (US-F) | 17 | 10 | 7 |
 | Consultant (US-C) | 7 | 7 | 0 |
 | Founder Trial (US-FT) | 4 | 4 | 0 |
 | Consultant Trial (US-CT) | 6 | 0 | 6 |
@@ -131,7 +132,7 @@ Stories with test stubs created but not yet implemented:
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 15 | 0 | 15 |
-| **Total** | **133** | **34** | **99** |
+| **Total** | **134** | **34** | **100** |
 
 ### HITL Story Priority
 
@@ -186,6 +187,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-23 | **Founder Hypotheses:** Added US-F17 (Hypotheses) and updated story totals to 134. |
 | 2026-01-23 | **Agent Specs:** Added US-AG01-AG06 (agent spec stories) and updated story totals to 133. |
 | 2026-01-23 | **Agent Journeys:** Added US-AJ01-AJ07 (agent journey stories) and updated story totals to 127. |
 | 2026-01-23 | **Founder & Auth Expansion:** Added US-F12-F16 (Assumption Map, Evidence Ledger, Evidence Explorer, Gate Evaluation, AI Insights) and US-AU03 (Logout). Total stories now 120. |
