@@ -1,3 +1,9 @@
+/**
+ * New Client Invite Page
+ *
+ * @story US-C02
+ */
+
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

@@ -6,6 +6,8 @@
  * - Strategyzer Phase (Problem Fit, Solution Fit, Product-Market Fit, Business Model)
  *
  * Surfaces all 65+ CrewAI analysis fields with PDF export capability.
+ *
+ * @story US-F06
  */
 
 'use client'

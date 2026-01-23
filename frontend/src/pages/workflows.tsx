@@ -1,3 +1,9 @@
+/**
+ * AI Workflows Page
+ *
+ * @story US-CP05
+ */
+
 import React, { useEffect, useMemo, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/lib/auth/hooks"

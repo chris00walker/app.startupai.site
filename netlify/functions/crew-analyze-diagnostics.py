@@ -3,6 +3,8 @@
 Diagnostic endpoint for troubleshooting crew-analyze deployment issues.
 """
 
+# @story US-A05
+
 import json
 import os
 import sys

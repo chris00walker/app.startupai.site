@@ -10,6 +10,8 @@ import { Users, ArrowRight } from 'lucide-react';
  *
  * If clientId is provided in URL, shows Quick Start form for that client.
  * Otherwise, shows a list of active clients to choose from.
+ *
+ * @story US-C07
  */
 
 export const metadata = {

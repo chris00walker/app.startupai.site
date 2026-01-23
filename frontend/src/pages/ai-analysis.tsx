@@ -1,3 +1,9 @@
+/**
+ * AI Strategic Analysis Page
+ *
+ * @story US-CP09
+ */
+
 "use client"
 
 import * as React from "react"

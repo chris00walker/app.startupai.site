@@ -3,6 +3,8 @@ Gate Evaluation Netlify Function
 
 Evaluates project gate status based on evidence quality and criteria.
 Exposes the gate scoring logic via API endpoint.
+
+# @story US-H06, US-H07, US-H08
 """
 
 import json

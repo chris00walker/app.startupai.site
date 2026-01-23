@@ -8,6 +8,8 @@
  * - Viability Metrics - Ledger Crew economics
  *
  * This is the complete Strategyzer methodology view for entrepreneurs.
+ *
+ * @story US-CP08
  */
 
 import React, { useMemo } from 'react'

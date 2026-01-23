@@ -1,3 +1,9 @@
+/**
+ * Client Project Creation Page
+ *
+ * @story US-C07
+ */
+
 "use client"
 
 import { useParams } from "next/navigation"

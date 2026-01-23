@@ -1,8 +1,8 @@
 ---
 purpose: "Founder user stories with acceptance criteria and E2E coverage"
 status: "active"
-last_reviewed: "2026-01-22"
-last_updated: "2026-01-22"
+last_reviewed: "2026-01-23"
+last_updated: "2026-01-23"
 ---
 
 # Founder Stories (US-F)
@@ -131,6 +131,31 @@ last_updated: "2026-01-22"
 
 **E2E Test:** Gap - needs test
 **Journey Reference:** [`project-client-management.md`](../../features/project-client-management.md) - Delete Flow
+
+---
+
+### US-F11: Create Project Manually
+
+**As a** Founder,
+**I want to** create a project using the project creation wizard,
+**So that** I can set up a validation workspace without Quick Start.
+
+**Acceptance Criteria:**
+
+**Given** I am logged in as a Founder
+**When** I navigate to `/projects/new`
+**Then** I should see the project creation wizard with required project fields
+
+**Given** I complete the wizard with valid inputs
+**When** I submit the form
+**Then** a new project should be created and I should be redirected to the project view
+
+**Given** I abandon the wizard
+**When** I click "Cancel" or "Back to Dashboard"
+**Then** no project should be created and I should return to the dashboard
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (legacy project wizard)
 
 ---
 

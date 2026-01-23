@@ -5,6 +5,8 @@
  * fit scores, validation outcomes, and next steps.
  *
  * Shows real-time progress when a validation run is active.
+ *
+ * @story US-F06, US-F08, US-F09, US-F10
  */
 
 'use client';

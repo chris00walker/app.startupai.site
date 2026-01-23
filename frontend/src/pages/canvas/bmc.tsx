@@ -1,3 +1,9 @@
+/**
+ * Business Model Canvas Page
+ *
+ * @story US-CP03
+ */
+
 import React from "react"
 import { useRouter } from "next/router"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

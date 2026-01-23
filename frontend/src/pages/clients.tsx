@@ -1,3 +1,9 @@
+/**
+ * Client Portfolio Page
+ *
+ * @story US-C03
+ */
+
 import React, { useMemo, useState } from "react"
 import Link from "next/link"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

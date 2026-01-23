@@ -4,6 +4,8 @@ Netlify Function wrapper for StartupAI CrewAI Backend
 Provides serverless deployment for the 6-agent business analysis
 """
 
+# @story US-CP09
+
 import json
 import os
 import sys

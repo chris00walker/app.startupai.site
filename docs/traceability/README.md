@@ -90,6 +90,14 @@ export async function GET(request: NextRequest) { ... }
 test.describe('Quick Start Form', () => { ... });
 ```
 
+### Python (CrewAI / serverless)
+
+```python
+# @story US-H01, US-H06
+def handle_checkpoint(payload):
+    ...
+```
+
 ### Syntax Rules
 
 - Single tag only: `@story US-F01`
@@ -150,16 +158,19 @@ The generator scans these directories:
 frontend/src/           # All frontend source
 frontend/tests/e2e/     # E2E tests
 backend/netlify/functions/  # Backend functions
+netlify/functions/      # Serverless functions
+../startupai.site/src   # Marketing site (cross-repo)
+../startupai-crew/src   # CrewAI backend (cross-repo)
 ```
 
-Extensions: `.ts`, `.tsx`
+Extensions: `.ts`, `.tsx`, `.py`
 
 ## Verification
 
 ```bash
 # Verify annotations are greppable
-grep -rE "@story\s+US-" frontend/src/ frontend/tests/e2e/ backend/netlify/functions/ \
-  --include="*.ts" --include="*.tsx"
+grep -rE "@story\s+US-" frontend/src/ frontend/tests/e2e/ backend/netlify/functions/ netlify/functions/ ../startupai.site/src/ ../startupai-crew/src/ \
+  --include="*.ts" --include="*.tsx" --include="*.py"
 
 # Verify regeneration is idempotent
 pnpm traceability:generate

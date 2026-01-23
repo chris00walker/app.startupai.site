@@ -1,8 +1,8 @@
 ---
 purpose: "Cross-cutting platform user stories and acceptance criteria"
 status: "active"
-last_reviewed: "2026-01-22"
-last_updated: "2026-01-22"
+last_reviewed: "2026-01-23"
+last_updated: "2026-01-23"
 ---
 
 # HITL Checkpoint Stories (US-H)
@@ -1318,6 +1318,245 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 
 ---
 
+## Authentication Stories (US-AU)
+
+> **Added (2026-01-23)**: Core authentication flows for all product users.
+
+### US-AU01: Log In to Product App
+
+**As any** authenticated user,
+**I want to** sign in to the product app,
+**So that** I can access my dashboard or onboarding flow.
+
+**Acceptance Criteria:**
+
+**Given** I am on `/login`
+**When** I enter valid credentials or use OAuth
+**Then** I should be redirected to onboarding or my dashboard
+
+**Given** I enter invalid credentials
+**When** I submit the form
+**Then** I should see a clear error message
+
+**E2E Test:** `01-login.spec.ts` - "should successfully login as Consultant"
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 4
+
+---
+
+### US-AU02: Handle OAuth Error States
+
+**As any** authenticated user,
+**I want to** see a clear error when OAuth fails,
+**So that** I can retry or return to login.
+
+**Acceptance Criteria:**
+
+**Given** OAuth returns an error code
+**When** I land on `/auth/auth-code-error`
+**Then** I should see the error message and a link to retry login
+
+**Given** I click "Back to Login"
+**When** I return to `/login`
+**Then** I should be able to attempt authentication again
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (error handling)
+
+---
+
+## Core Product Tool Stories (US-CP)
+
+> **Added (2026-01-23)**: Cross-role tooling surfaces for analytics, canvases, workflows, and exports.
+
+### US-CP01: Browse Canvas Gallery
+
+**As any** authenticated user,
+**I want to** browse available validation canvases,
+**So that** I can choose the right framework for my work.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/canvas`
+**When** the page loads
+**Then** I should see available canvases (VPC, BMC, TBI) with quick links
+
+**Given** I select a canvas
+**When** I click "Open"
+**Then** I should be routed to the selected canvas editor
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP02: Edit Value Proposition Canvas
+
+**As any** authenticated user,
+**I want to** edit the Value Proposition Canvas,
+**So that** I can document customer profiles and value maps.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/canvas/vpc`
+**When** the editor loads
+**Then** I should see Customer Profile and Value Map sections
+
+**Given** I update a canvas field
+**When** I save changes
+**Then** the updated content should persist for my project
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP03: Edit Business Model Canvas
+
+**As any** authenticated user,
+**I want to** edit the Business Model Canvas,
+**So that** I can document key model assumptions.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/canvas/bmc`
+**When** the editor loads
+**Then** I should see all nine BMC blocks
+
+**Given** I update a block
+**When** I save changes
+**Then** the updated content should persist for my project
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP04: Edit Testing Business Ideas Canvas
+
+**As any** authenticated user,
+**I want to** edit the Testing Business Ideas canvas,
+**So that** I can capture validation experiments and evidence plans.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/canvas/tbi`
+**When** the editor loads
+**Then** I should see experiment and evidence planning fields
+
+**Given** I update a field
+**When** I save changes
+**Then** the updated content should persist for my project
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP05: Run AI Workflows
+
+**As any** authenticated user,
+**I want to** view and trigger AI workflows,
+**So that** I can start validation runs or automation tasks.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/workflows`
+**When** the page loads
+**Then** I should see a list of workflows with status indicators
+
+**Given** I click "Run" on a workflow
+**When** the action is confirmed
+**Then** I should see the workflow start or show a queued state
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP06: View Analytics Dashboard
+
+**As any** authenticated user,
+**I want to** view analytics metrics,
+**So that** I can monitor activity and progress across projects.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/analytics`
+**When** the page loads
+**Then** I should see key metrics and a last-updated timestamp
+
+**Given** data is unavailable
+**When** the dashboard loads
+**Then** I should see an empty state with guidance
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP07: Export Evidence Pack
+
+**As any** authenticated user,
+**I want to** export an evidence pack,
+**So that** I can share validation results externally.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/export`
+**When** the page loads
+**Then** I should see evidence pack and canvas export options
+
+**Given** I click "Export Pack"
+**When** the export is prepared
+**Then** I should be prompted to download the file
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP08: View Validation Summary
+
+**As any** authenticated user,
+**I want to** view a validation summary,
+**So that** I can assess overall project progress at a glance.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/validation`
+**When** the page loads
+**Then** I should see a summary of validation results and signals
+
+**Given** there is no data
+**When** the page loads
+**Then** I should see an empty state explaining next steps
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (tooling surface)
+
+---
+
+### US-CP09: Ask AI Strategic Analysis
+
+**As any** authenticated user,
+**I want to** ask an AI strategic question,
+**So that** I can receive targeted analysis on my project.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/ai-analysis`
+**When** the page loads
+**Then** I should see a question input and submission controls
+
+**Given** I submit a question
+**When** analysis completes
+**Then** I should see an AI-generated response
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** N/A (legacy analysis page)
+
+---
+
 ## Account Settings Stories (US-AS)
 
 > **Added (2026-01-22)**: New story category for profile and security management.
@@ -1566,5 +1805,233 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 
 **E2E Test:** Gap - marketing site (cross-repo)
 **Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 5
+
+---
+
+### US-MF04: View Product Overview
+
+**As a** Visitor,
+**I want to** explore the product overview,
+**So that** I can understand what StartupAI delivers.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/product`
+**When** the page loads
+**Then** I should see core product capabilities, feature highlights, and a CTA to start
+
+**Given** I scroll the product overview
+**When** I reach the CTA section
+**Then** I should see a link to the product signup flow
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF05: Understand AI Strategy and Process
+
+**As a** Visitor,
+**I want to** understand the AI strategy and validation process,
+**So that** I can evaluate the methodology before signing up.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/ai-strategy` or `/process`
+**When** the page loads
+**Then** I should see the step-by-step process and methodology details
+
+**Given** I finish reviewing the process
+**When** I reach the CTA
+**Then** I should see a link to start the trial
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF06: Review Services
+
+**As a** Visitor,
+**I want to** review consulting services,
+**So that** I can choose the right engagement option.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/services`
+**When** the page loads
+**Then** I should see the list of service offerings with CTAs
+
+**Given** I navigate to a service detail page
+**When** the page loads
+**Then** I should see the service scope, outcomes, and a contact CTA
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`consultant-journey-map.md`](../journeys/consultant/consultant-journey-map.md) - Phase 1
+
+---
+
+### US-MF07: Review Case Studies
+
+**As a** Visitor,
+**I want to** review case studies,
+**So that** I can see real outcomes from StartupAI.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/case-studies`
+**When** the page loads
+**Then** I should see case study summaries with outcomes
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF08: Read Blog Content
+
+**As a** Visitor,
+**I want to** read blog content,
+**So that** I can learn about validation practices.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/blog`
+**When** the page loads
+**Then** I should see a list of blog posts
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF09: Contact StartupAI
+
+**As a** Visitor,
+**I want to** contact StartupAI,
+**So that** I can ask questions or request a consultation.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/contact`
+**When** the page loads
+**Then** I should see a contact form and contact details
+
+**Given** I submit the form with valid details
+**When** the form is accepted
+**Then** I should see a confirmation state
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF10: Request Beta Access
+
+**As a** Visitor,
+**I want to** apply for beta access,
+**So that** I can join the early access program.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/beta`
+**When** the page loads
+**Then** I should see the beta application form
+
+**Given** I submit the form with valid details
+**When** submission succeeds
+**Then** I should see a success message
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 2
+
+---
+
+### US-MF11: View Demo Dashboard
+
+**As a** Visitor,
+**I want to** view a demo dashboard,
+**So that** I can preview the product experience.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/demo/dashboard`
+**When** the page loads
+**Then** I should see a demo experience or walkthrough
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF12: View About Page
+
+**As a** Visitor,
+**I want to** learn about StartupAI,
+**So that** I can assess credibility and mission fit.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/about`
+**When** the page loads
+**Then** I should see company mission, story, and team details
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF13: Preview Upcoming Features
+
+**As a** Visitor,
+**I want to** preview upcoming features,
+**So that** I can understand future capabilities.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/preview`
+**When** the page loads
+**Then** I should see a preview of upcoming features
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 1
+
+---
+
+### US-MF14: Sign In from Marketing Site
+
+**As a** Returning User,
+**I want to** sign in from the marketing site,
+**So that** I can reach the product app quickly.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/login` on the marketing site
+**When** the page loads
+**Then** I should be redirected to the product login page
+
+**Given** authentication succeeds
+**When** I land on `/auth/success`
+**Then** I should see confirmation and a redirect to the app
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 4
+
+---
+
+### US-MF15: Review Design System Preview
+
+**As a** Marketing Designer,
+**I want to** review the design system preview,
+**So that** I can QA visual consistency before publishing.
+
+**Acceptance Criteria:**
+
+**Given** I navigate to `/design-system-test`
+**When** the page loads
+**Then** I should see the UI component preview surface
+
+**E2E Test:** Gap - marketing site (cross-repo)
+**Journey Reference:** N/A (internal QA)
 
 ---

@@ -1,3 +1,9 @@
+/**
+ * Gate Evaluation Redirect
+ *
+ * @story US-H06, US-H07, US-H08
+ */
+
 'use client';
 
 import { useEffect } from 'react';

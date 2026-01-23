@@ -4,6 +4,8 @@ StartupAI CrewAI CLI Entry Point
 Command-line interface for running strategic analysis workflows
 """
 
+# @story US-CP09
+
 import sys
 import os
 import json

@@ -8,6 +8,8 @@ Supports three actions:
 3. Default `analysis` - runs the CrewAI workflow and returns structured deliverables.
 """
 
+# @story US-CP09
+
 from __future__ import annotations
 
 import json

@@ -1,3 +1,9 @@
+/**
+ * Testing Business Ideas Canvas Page
+ *
+ * @story US-CP04
+ */
+
 import React from "react"
 import { useRouter } from "next/router"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

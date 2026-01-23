@@ -1,3 +1,9 @@
+/**
+ * Evidence Explorer Redirect
+ *
+ * @story US-F06
+ */
+
 'use client'
 
 import { useEffect } from 'react'

@@ -1,3 +1,9 @@
+/**
+ * Onboarding Redirect Page
+ *
+ * @story US-F01, US-FT01, US-C07
+ */
+
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 

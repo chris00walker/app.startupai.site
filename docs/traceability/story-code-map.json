@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-23T04:01:18.722Z",
+    "generated_at": "2026-01-23T14:17:13.535Z",
     "version": "1.0.0",
-    "story_count": 90,
-    "annotated_file_count": 50
+    "story_count": 114,
+    "annotated_file_count": 110
   },
   "stories": {
     "US-F01": {
@@ -12,10 +12,13 @@
         "frontend/src/components/onboarding/QuickStartForm.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/projects/quick-start/route.ts"
+        "frontend/src/app/api/projects/quick-start/route.ts",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_0.py"
       ],
       "pages": [
-        "frontend/src/app/onboarding/founder/page.tsx"
+        "frontend/src/app/onboarding/founder/page.tsx",
+        "frontend/src/app/onboarding/page.tsx"
       ],
       "hooks": [],
       "lib": [],
@@ -66,7 +69,8 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
@@ -98,7 +102,9 @@
       "api_routes": [
         "frontend/src/app/api/projects/[id]/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -123,7 +129,9 @@
       "api_routes": [
         "frontend/src/app/api/projects/[id]/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -143,11 +151,31 @@
       "implementation_status": "complete",
       "notes": "Hard delete - permanently removes all related data"
     },
-    "US-F06": {
-      "title": "View AI Analysis Results",
+    "US-F11": {
+      "title": "Create Project Manually",
       "components": [],
       "api_routes": [],
       "pages": [
+        "frontend/src/app/projects/new/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-F06": {
+      "title": "View AI Analysis Results",
+      "components": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
+      ],
+      "pages": [
+        "frontend/src/app/project/[id]/analysis/page.tsx",
+        "frontend/src/app/project/[id]/evidence/page.tsx",
+        "frontend/src/app/project/[id]/report/page.tsx",
+        "frontend/src/app/project/current/evidence/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
       "hooks": [],
@@ -193,8 +221,11 @@
     "US-F08": {
       "title": "View Phase 1 Progress Indicators",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py"
+      ],
       "pages": [
+        "frontend/src/app/project/[id]/analysis/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
       "hooks": [],
@@ -216,8 +247,11 @@
     "US-F09": {
       "title": "View Activity Feed Updates",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py"
+      ],
       "pages": [
+        "frontend/src/app/project/[id]/analysis/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
       "hooks": [],
@@ -238,8 +272,11 @@
     "US-F10": {
       "title": "Handle Phase 1 Errors and Retry",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py"
+      ],
       "pages": [
+        "frontend/src/app/project/[id]/analysis/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
       "hooks": [],
@@ -285,7 +322,9 @@
       "api_routes": [
         "frontend/src/app/api/consultant/invites/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/clients/new.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -309,6 +348,7 @@
       ],
       "api_routes": [],
       "pages": [
+        "frontend/src/pages/clients.tsx",
         "frontend/src/pages/consultant-dashboard.tsx"
       ],
       "hooks": [],
@@ -334,6 +374,7 @@
       "api_routes": [],
       "pages": [
         "frontend/src/app/approvals/page.tsx",
+        "frontend/src/pages/client/[id].tsx",
         "frontend/src/pages/consultant-dashboard.tsx"
       ],
       "hooks": [],
@@ -364,7 +405,9 @@
       "api_routes": [
         "frontend/src/app/api/consultant/clients/[id]/archive/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -387,7 +430,9 @@
       "api_routes": [
         "frontend/src/app/api/consultant/invites/[id]/resend/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -407,8 +452,14 @@
       "components": [
         "frontend/src/components/onboarding/ClientOnboardingWizard.tsx"
       ],
-      "api_routes": [],
-      "pages": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py"
+      ],
+      "pages": [
+        "frontend/src/app/client/[id]/projects/new/page.tsx",
+        "frontend/src/app/consultant/client/new/page.tsx",
+        "frontend/src/app/onboarding/page.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -434,9 +485,13 @@
       "components": [
         "frontend/src/components/onboarding/QuickStartForm.tsx"
       ],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_0.py"
+      ],
       "pages": [
-        "frontend/src/app/onboarding/founder/page.tsx"
+        "frontend/src/app/onboarding/founder/page.tsx",
+        "frontend/src/app/onboarding/page.tsx"
       ],
       "hooks": [],
       "lib": [],
@@ -636,7 +691,9 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
@@ -667,7 +724,9 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
@@ -697,7 +756,9 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
@@ -726,7 +787,9 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
@@ -755,10 +818,15 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "backend/netlify/functions/gate-evaluate.py",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
       ],
       "pages": [
-        "frontend/src/app/approvals/page.tsx"
+        "frontend/src/app/approvals/page.tsx",
+        "frontend/src/app/project/[id]/gate/page.tsx",
+        "frontend/src/app/project/current/gate/page.tsx"
       ],
       "hooks": [],
       "lib": [],
@@ -784,10 +852,15 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "backend/netlify/functions/gate-evaluate.py",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_3.py"
       ],
       "pages": [
-        "frontend/src/app/approvals/page.tsx"
+        "frontend/src/app/approvals/page.tsx",
+        "frontend/src/app/project/[id]/gate/page.tsx",
+        "frontend/src/app/project/current/gate/page.tsx"
       ],
       "hooks": [],
       "lib": [],
@@ -813,10 +886,15 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "backend/netlify/functions/gate-evaluate.py",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
       ],
       "pages": [
-        "frontend/src/app/approvals/page.tsx"
+        "frontend/src/app/approvals/page.tsx",
+        "frontend/src/app/project/[id]/gate/page.tsx",
+        "frontend/src/app/project/current/gate/page.tsx"
       ],
       "hooks": [],
       "lib": [],
@@ -842,7 +920,9 @@
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
-        "frontend/src/app/api/approvals/route.ts"
+        "frontend/src/app/api/approvals/route.ts",
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
@@ -869,7 +949,10 @@
     "US-P01": {
       "title": "Approve Segment Pivot",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -884,13 +967,16 @@
         "projects",
         "crewai_validation_states"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Segment pivot - restarts Phase 1"
     },
     "US-P02": {
       "title": "Approve Value Pivot",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -905,13 +991,16 @@
         "value_proposition_canvases",
         "crewai_validation_states"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Value pivot - restarts Desirability testing"
     },
     "US-P03": {
       "title": "Approve Feature Downgrade",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_3.py"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -925,13 +1014,16 @@
         "approval_requests",
         "crewai_validation_states"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Feature downgrade - Feasibility constraint"
     },
     "US-P04": {
       "title": "Approve Strategic Pivot",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "../startupai-crew/src/modal_app/app.py",
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -945,7 +1037,7 @@
         "approval_requests",
         "crewai_validation_states"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Strategic pivot - pricing/CAC optimization"
     },
     "US-E01": {
@@ -1466,7 +1558,9 @@
       "title": "Manage Notification Preferences",
       "components": [],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -1518,11 +1612,179 @@
       ],
       "implementation_status": "gap"
     },
+    "US-AU01": {
+      "title": "Log In to Product App",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/login/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [
+        {
+          "file": "01-login.spec.ts"
+        }
+      ],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-AU02": {
+      "title": "Handle OAuth Error States",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/auth/auth-code-error/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP01": {
+      "title": "Browse Canvas Gallery",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/canvas.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP02": {
+      "title": "Edit Value Proposition Canvas",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/canvas/vpc.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP03": {
+      "title": "Edit Business Model Canvas",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/canvas/bmc.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP04": {
+      "title": "Edit Testing Business Ideas Canvas",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/canvas/tbi.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP05": {
+      "title": "Run AI Workflows",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/workflows.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP06": {
+      "title": "View Analytics Dashboard",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/analytics.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP07": {
+      "title": "Export Evidence Pack",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/export.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP08": {
+      "title": "View Validation Summary",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/pages/validation/index.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-CP09": {
+      "title": "Ask AI Strategic Analysis",
+      "components": [],
+      "api_routes": [
+        "backend/netlify/functions/crewai-analyze.py",
+        "netlify/functions/crew-analyze-background.py",
+        "netlify/functions/crew-analyze.py",
+        "netlify/functions/crew_runtime.py",
+        "netlify/functions/startupai/crew.py",
+        "netlify/functions/startupai/main.py",
+        "netlify/functions/startupai/tools.py"
+      ],
+      "pages": [
+        "frontend/src/pages/ai-analysis.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
     "US-AS01": {
       "title": "Update Profile",
       "components": [],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -1540,7 +1802,9 @@
       "title": "Change Password",
       "components": [],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -1558,7 +1822,9 @@
       "title": "Enable 2FA",
       "components": [],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -1577,7 +1843,9 @@
       "title": "View Login History",
       "components": [],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -1596,7 +1864,9 @@
       "title": "Manage Connected Devices",
       "components": [],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
       "e2e_tests": [
@@ -1656,6 +1926,181 @@
       ],
       "implementation_status": "partial",
       "notes": "OAuth signup - implementation in app.startupai.site"
+    },
+    "US-MF04": {
+      "title": "View Product Overview",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/product/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF05": {
+      "title": "Understand AI Strategy and Process",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/ai-strategy/page.tsx",
+        "../startupai.site/src/app/process/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF06": {
+      "title": "Review Services",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/services/advisory/page.tsx",
+        "../startupai.site/src/app/services/discovery/page.tsx",
+        "../startupai.site/src/app/services/optimization/page.tsx",
+        "../startupai.site/src/app/services/page.tsx",
+        "../startupai.site/src/app/services/scaling/page.tsx",
+        "../startupai.site/src/app/services/validation/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF07": {
+      "title": "Review Case Studies",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/case-studies/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF08": {
+      "title": "Read Blog Content",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/blog/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF09": {
+      "title": "Contact StartupAI",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/contact/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF10": {
+      "title": "Request Beta Access",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/beta/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF11": {
+      "title": "View Demo Dashboard",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/demo/dashboard/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF12": {
+      "title": "View About Page",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/about/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF13": {
+      "title": "Preview Upcoming Features",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/preview/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF14": {
+      "title": "Sign In from Marketing Site",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/auth/success/page.tsx",
+        "../startupai.site/src/app/login/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-MF15": {
+      "title": "Review Design System Preview",
+      "components": [],
+      "api_routes": [],
+      "pages": [
+        "../startupai.site/src/app/design-system-test/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
     },
     "US-A01": {
       "title": "Search and Find Users",
@@ -1738,7 +2183,10 @@
     "US-A05": {
       "title": "View System Health Dashboard",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "netlify/functions/crew-analyze-diagnostics.py",
+        "../startupai-crew/src/modal_app/app.py"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -1910,11 +2358,48 @@
         "US-E03"
       ]
     },
+    "../startupai-crew/src/modal_app/app.py": {
+      "stories": [
+        "US-F01",
+        "US-F03",
+        "US-F08",
+        "US-F09",
+        "US-F10",
+        "US-C07",
+        "US-FT01",
+        "US-H01",
+        "US-H02",
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-H07",
+        "US-H08",
+        "US-H09",
+        "US-P01",
+        "US-P02",
+        "US-P03",
+        "US-P04",
+        "US-A05"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_0.py": {
+      "stories": [
+        "US-F01",
+        "US-FT01"
+      ]
+    },
     "frontend/src/app/onboarding/founder/page.tsx": {
       "stories": [
         "US-F01",
         "US-FT01",
         "US-E02"
+      ]
+    },
+    "frontend/src/app/onboarding/page.tsx": {
+      "stories": [
+        "US-F01",
+        "US-C07",
+        "US-FT01"
       ]
     },
     "frontend/tests/e2e/16-quick-start-founder.spec.ts": {
@@ -2026,10 +2511,59 @@
         "US-F05"
       ]
     },
+    "frontend/src/pages/settings.tsx": {
+      "stories": [
+        "US-F04",
+        "US-F05",
+        "US-C05",
+        "US-C06",
+        "US-N03",
+        "US-AS01",
+        "US-AS02",
+        "US-AS03",
+        "US-AS04",
+        "US-AS05"
+      ]
+    },
     "frontend/tests/e2e/11-project-lifecycle.spec.ts": {
       "stories": [
         "US-F04",
         "US-F05"
+      ]
+    },
+    "frontend/src/app/projects/new/page.tsx": {
+      "stories": [
+        "US-F11"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_1.py": {
+      "stories": [
+        "US-F06",
+        "US-H01",
+        "US-H02"
+      ]
+    },
+    "frontend/src/app/project/[id]/analysis/page.tsx": {
+      "stories": [
+        "US-F06",
+        "US-F08",
+        "US-F09",
+        "US-F10"
+      ]
+    },
+    "frontend/src/app/project/[id]/evidence/page.tsx": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/app/project/[id]/report/page.tsx": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/app/project/current/evidence/page.tsx": {
+      "stories": [
+        "US-F06"
       ]
     },
     "frontend/src/app/onboarding/consultant/page.tsx": {
@@ -2047,6 +2581,11 @@
         "US-C02"
       ]
     },
+    "frontend/src/pages/clients/new.tsx": {
+      "stories": [
+        "US-C02"
+      ]
+    },
     "frontend/tests/e2e/10-consultant-client-onboarding.spec.ts": {
       "stories": [
         "US-C02",
@@ -2059,6 +2598,11 @@
         "US-C04"
       ]
     },
+    "frontend/src/pages/clients.tsx": {
+      "stories": [
+        "US-C03"
+      ]
+    },
     "frontend/src/pages/consultant-dashboard.tsx": {
       "stories": [
         "US-C03",
@@ -2068,6 +2612,11 @@
     "frontend/tests/e2e/06-consultant-portfolio.spec.ts": {
       "stories": [
         "US-C03",
+        "US-C04"
+      ]
+    },
+    "frontend/src/pages/client/[id].tsx": {
+      "stories": [
         "US-C04"
       ]
     },
@@ -2094,6 +2643,16 @@
       ]
     },
     "frontend/src/components/onboarding/ClientOnboardingWizard.tsx": {
+      "stories": [
+        "US-C07"
+      ]
+    },
+    "frontend/src/app/client/[id]/projects/new/page.tsx": {
+      "stories": [
+        "US-C07"
+      ]
+    },
+    "frontend/src/app/consultant/client/new/page.tsx": {
       "stories": [
         "US-C07"
       ]
@@ -2128,6 +2687,49 @@
         "US-CT04",
         "US-CT05",
         "US-CT06"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_2.py": {
+      "stories": [
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-P01",
+        "US-P02"
+      ]
+    },
+    "backend/netlify/functions/gate-evaluate.py": {
+      "stories": [
+        "US-H06",
+        "US-H07",
+        "US-H08"
+      ]
+    },
+    "frontend/src/app/project/[id]/gate/page.tsx": {
+      "stories": [
+        "US-H06",
+        "US-H07",
+        "US-H08"
+      ]
+    },
+    "frontend/src/app/project/current/gate/page.tsx": {
+      "stories": [
+        "US-H06",
+        "US-H07",
+        "US-H08"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_3.py": {
+      "stories": [
+        "US-H07",
+        "US-P03"
+      ]
+    },
+    "../startupai-crew/src/modal_app/phases/phase_4.py": {
+      "stories": [
+        "US-H08",
+        "US-H09",
+        "US-P04"
       ]
     },
     "frontend/tests/e2e/15-pivot-workflows.spec.ts": {
@@ -2209,6 +2811,101 @@
         "US-N05"
       ]
     },
+    "frontend/src/app/login/page.tsx": {
+      "stories": [
+        "US-AU01"
+      ]
+    },
+    "frontend/tests/e2e/01-login.spec.ts": {
+      "stories": [
+        "US-AU01"
+      ]
+    },
+    "frontend/src/app/auth/auth-code-error/page.tsx": {
+      "stories": [
+        "US-AU02"
+      ]
+    },
+    "frontend/src/pages/canvas.tsx": {
+      "stories": [
+        "US-CP01"
+      ]
+    },
+    "frontend/src/pages/canvas/vpc.tsx": {
+      "stories": [
+        "US-CP02"
+      ]
+    },
+    "frontend/src/pages/canvas/bmc.tsx": {
+      "stories": [
+        "US-CP03"
+      ]
+    },
+    "frontend/src/pages/canvas/tbi.tsx": {
+      "stories": [
+        "US-CP04"
+      ]
+    },
+    "frontend/src/pages/workflows.tsx": {
+      "stories": [
+        "US-CP05"
+      ]
+    },
+    "frontend/src/pages/analytics.tsx": {
+      "stories": [
+        "US-CP06"
+      ]
+    },
+    "frontend/src/pages/export.tsx": {
+      "stories": [
+        "US-CP07"
+      ]
+    },
+    "frontend/src/pages/validation/index.tsx": {
+      "stories": [
+        "US-CP08"
+      ]
+    },
+    "backend/netlify/functions/crewai-analyze.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "netlify/functions/crew-analyze-background.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "netlify/functions/crew-analyze.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "netlify/functions/crew_runtime.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "netlify/functions/startupai/crew.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "netlify/functions/startupai/main.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "netlify/functions/startupai/tools.py": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "frontend/src/pages/ai-analysis.tsx": {
+      "stories": [
+        "US-CP09"
+      ]
+    },
     "frontend/tests/e2e/27-account-settings.spec.ts": {
       "stories": [
         "US-AS01",
@@ -2233,6 +2930,101 @@
         "US-MF03"
       ]
     },
+    "../startupai.site/src/app/product/page.tsx": {
+      "stories": [
+        "US-MF04"
+      ]
+    },
+    "../startupai.site/src/app/ai-strategy/page.tsx": {
+      "stories": [
+        "US-MF05"
+      ]
+    },
+    "../startupai.site/src/app/process/page.tsx": {
+      "stories": [
+        "US-MF05"
+      ]
+    },
+    "../startupai.site/src/app/services/advisory/page.tsx": {
+      "stories": [
+        "US-MF06"
+      ]
+    },
+    "../startupai.site/src/app/services/discovery/page.tsx": {
+      "stories": [
+        "US-MF06"
+      ]
+    },
+    "../startupai.site/src/app/services/optimization/page.tsx": {
+      "stories": [
+        "US-MF06"
+      ]
+    },
+    "../startupai.site/src/app/services/page.tsx": {
+      "stories": [
+        "US-MF06"
+      ]
+    },
+    "../startupai.site/src/app/services/scaling/page.tsx": {
+      "stories": [
+        "US-MF06"
+      ]
+    },
+    "../startupai.site/src/app/services/validation/page.tsx": {
+      "stories": [
+        "US-MF06"
+      ]
+    },
+    "../startupai.site/src/app/case-studies/page.tsx": {
+      "stories": [
+        "US-MF07"
+      ]
+    },
+    "../startupai.site/src/app/blog/page.tsx": {
+      "stories": [
+        "US-MF08"
+      ]
+    },
+    "../startupai.site/src/app/contact/page.tsx": {
+      "stories": [
+        "US-MF09"
+      ]
+    },
+    "../startupai.site/src/app/beta/page.tsx": {
+      "stories": [
+        "US-MF10"
+      ]
+    },
+    "../startupai.site/src/app/demo/dashboard/page.tsx": {
+      "stories": [
+        "US-MF11"
+      ]
+    },
+    "../startupai.site/src/app/about/page.tsx": {
+      "stories": [
+        "US-MF12"
+      ]
+    },
+    "../startupai.site/src/app/preview/page.tsx": {
+      "stories": [
+        "US-MF13"
+      ]
+    },
+    "../startupai.site/src/app/auth/success/page.tsx": {
+      "stories": [
+        "US-MF14"
+      ]
+    },
+    "../startupai.site/src/app/login/page.tsx": {
+      "stories": [
+        "US-MF14"
+      ]
+    },
+    "../startupai.site/src/app/design-system-test/page.tsx": {
+      "stories": [
+        "US-MF15"
+      ]
+    },
     "frontend/tests/e2e/19-admin-user-management.spec.ts": {
       "stories": [
         "US-A01",
@@ -2247,6 +3039,11 @@
         "US-A04",
         "US-A05",
         "US-A06"
+      ]
+    },
+    "netlify/functions/crew-analyze-diagnostics.py": {
+      "stories": [
+        "US-A05"
       ]
     },
     "frontend/tests/e2e/21-admin-audit.spec.ts": {

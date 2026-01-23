@@ -9,6 +9,8 @@ structured payload so downstream systems (Supabase, Netlify Blobs, etc.) can
 persist the results.
 """
 
+# @story US-CP09
+
 from __future__ import annotations
 
 import json

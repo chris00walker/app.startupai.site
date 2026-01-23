@@ -1,3 +1,9 @@
+/**
+ * Evidence Explorer Page
+ *
+ * @story US-F06
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'

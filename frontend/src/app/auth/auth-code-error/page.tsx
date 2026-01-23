@@ -1,3 +1,9 @@
+/**
+ * OAuth Error Page
+ *
+ * @story US-AU02
+ */
+
 'use client'
 
 import { useSearchParams } from 'next/navigation'

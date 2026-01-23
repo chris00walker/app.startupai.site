@@ -1,3 +1,9 @@
+/**
+ * Value Proposition Canvas Page
+ *
+ * @story US-CP02
+ */
+
 import React from "react"
 import { useRouter } from "next/router"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

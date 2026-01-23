@@ -40,6 +40,11 @@ pnpm db:push          # Push schema to Supabase
 pnpm build            # Production build
 ```
 
+## Package Management
+
+Use `pnpm` for installs, upgrades, and scripts. Avoid `npm` for dependency changes.
+When asked to upgrade dependencies, default to `pnpm up -L` unless a task specifies otherwise.
+
 ## Coding Standards
 
 ### TypeScript

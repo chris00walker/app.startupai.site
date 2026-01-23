@@ -1,3 +1,9 @@
+/**
+ * Client Detail Page
+ *
+ * @story US-C04
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

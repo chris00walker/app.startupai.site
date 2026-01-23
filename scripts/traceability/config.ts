@@ -26,13 +26,15 @@ export const SCAN_DIRS = [
   'frontend/src', // All frontend source (components, app, pages, hooks, lib, etc.)
   'frontend/tests/e2e', // E2E tests
   'backend/netlify/functions', // Backend functions
+  'netlify/functions', // Serverless functions
   '../startupai.site/src', // Marketing site (cross-repo)
+  '../startupai-crew/src', // CrewAI backend (cross-repo)
 ] as const;
 
 /**
  * File extensions to scan
  */
-export const SCAN_EXTENSIONS = ['.ts', '.tsx'] as const;
+export const SCAN_EXTENSIONS = ['.ts', '.tsx', '.py'] as const;
 
 /**
  * Directories to exclude from scanning
@@ -42,6 +44,10 @@ export const EXCLUDE_DIRS = [
   '.next',
   'dist',
   'coverage',
+  '__pycache__',
+  '.pytest_cache',
+  '.venv',
+  'venv',
   '__mocks__',
 ] as const;
 
@@ -132,6 +138,9 @@ export const FILE_TYPE_PATTERNS = {
     /^frontend\/src\/app\/api\//,
     /^\.\.\/startupai\.site\/src\/app\/api\//,
     /route\.ts$/,
+    /^backend\/netlify\/functions\//,
+    /^netlify\/functions\//,
+    /^\.\.\/startupai-crew\/src\/modal_app\//,
   ],
   page: [
     /^frontend\/src\/app\/.*\/page\.tsx$/,
@@ -147,6 +156,7 @@ export const FILE_TYPE_PATTERNS = {
   lib: [
     /^frontend\/src\/lib\//,
     /^\.\.\/startupai\.site\/src\/lib\//,
+    /^\.\.\/startupai-crew\/src\//,
   ],
   e2e_test: [
     /^frontend\/tests\/e2e\//,
@@ -202,6 +212,8 @@ export const STORY_CATEGORIES: Record<string, string> = {
   'US-H': 'HITL Checkpoint',
   'US-P': 'Pivot Flow',
   'US-E': 'Edge Case',
+  'US-AU': 'Authentication',
+  'US-CP': 'Core Product',
   'US-A': 'Admin',
   'US-S': 'Support',
   'US-O': 'Offboarding',

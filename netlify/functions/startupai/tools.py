@@ -3,6 +3,8 @@ Custom CrewAI Tools for StartupAI Platform
 Integrates with Supabase, vector search, web search, and report generation
 """
 
+# @story US-CP09
+
 import os
 from typing import Optional, List, Dict, Any
 from crewai.tools import BaseTool

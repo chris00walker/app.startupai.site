@@ -1,3 +1,9 @@
+/**
+ * Analytics Dashboard Page
+ *
+ * @story US-CP06
+ */
+
 import React, { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

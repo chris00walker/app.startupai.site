@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-23T04:01:18.722Z
+Generated: 2026-01-23T14:17:13.535Z
 
 ## Files Without Story Links
 
@@ -8,6 +8,11 @@ These files in scanned directories have no `@story` annotation.
 
 | File | Type | Recommendation |
 |------|------|----------------|
+| ../startupai-crew/src/modal_app/__init__.py | api_route | Add @story annotation or consider if needed |
+| ../startupai-crew/src/modal_app/config.py | api_route | Add @story annotation or consider if needed |
+| ../startupai-crew/src/modal_app/helpers/__init__.py | api_route | Add @story annotation or consider if needed |
+| ../startupai-crew/src/modal_app/helpers/segment_alternatives.py | api_route | Add @story annotation or consider if needed |
+| ../startupai-crew/src/modal_app/phases/__init__.py | api_route | Add @story annotation or consider if needed |
 | ../startupai.site/src/app/api.bak/waitlist/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/agents/status/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/analytics/dashboard/route.ts | api_route | Add @story annotation or consider if needed |
@@ -48,6 +53,8 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/app/api/vpc/[projectId]/initialize/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/vpc/[projectId]/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/auth/callback/route.ts | api_route | Add @story annotation or consider if needed |
+| netlify/functions/__init__.py | api_route | Add @story annotation or consider if needed |
+| netlify/functions/startupai/__init__.py | api_route | Add @story annotation or consider if needed |
 | ../startupai.site/src/app/beta/layout.tsx | component | Add @story annotation or consider if needed |
 | ../startupai.site/src/app/layout.tsx | component | Add @story annotation or consider if needed |
 | ../startupai.site/src/app/pricing/layout.tsx | component | Add @story annotation or consider if needed |
@@ -292,7 +299,7 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/db/schema/value-proposition-canvas.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/seed.ts | component | Add @story annotation or consider if needed |
 | frontend/src/legacy/index_backup.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/middleware.ts | component | Add @story annotation or consider if needed |
+| frontend/src/proxy.ts | component | Add @story annotation or consider if needed |
 | frontend/src/services/api.ts | component | Add @story annotation or consider if needed |
 | frontend/src/setupTests.ts | component | Add @story annotation or consider if needed |
 | frontend/src/tests/mocks/untilAsyncMock.ts | component | Add @story annotation or consider if needed |
@@ -303,7 +310,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/__tests__/e2e/backend-integration.spec.ts | e2e_test | Link to tested story |
 | frontend/src/__tests__/e2e/user-journeys.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/00-smoke.spec.ts | e2e_test | Link to tested story |
-| frontend/tests/e2e/01-login.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/07-adr005-persistence.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/08-ui-indicators.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/18-edge-cases.spec.ts | e2e_test | Link to tested story |
@@ -339,6 +345,46 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/hooks/useValidationProgress.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useVPC.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useVPCReport.ts | hook | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/build_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/governance_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/desirability/growth_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/discovery/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/discovery/customer_profile_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/discovery/discovery_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/discovery/fit_assessment_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/discovery/value_design_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/discovery/wtp_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/build_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/feasibility/governance_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/onboarding/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/onboarding/crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/finance_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/governance_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/crews/viability/synthesis_crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/crew.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/main.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/schemas.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/tools/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/tools/methodology_check.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/intake_crew/tools/web_search.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/schemas/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/advanced_analysis.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/analytics_privacy.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/customer_research.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/landing_page_deploy.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/llm_tools.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/methodology_check.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/shared/tools/web_search.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/state/__init__.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/state/models.py | lib | Add @story annotation or consider if needed |
+| ../startupai-crew/src/state/persistence.py | lib | Add @story annotation or consider if needed |
 | ../startupai.site/src/lib/analytics.ts | lib | Add @story annotation or consider if needed |
 | ../startupai.site/src/lib/api.ts | lib | Add @story annotation or consider if needed |
 | ../startupai.site/src/lib/auth.ts | lib | Add @story annotation or consider if needed |
@@ -365,54 +411,10 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/lib/supabase/server.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/utils.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/viability/benchmarks.ts | lib | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/about/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/ai-strategy/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/auth/success/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/beta/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/blog/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/case-studies/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/contact/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/demo/dashboard/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/design-system-test/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/login/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/preview/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/process/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/product/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/services/advisory/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/services/discovery/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/services/optimization/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/services/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/services/scaling/page.tsx | page | Add @story annotation or consider if needed |
-| ../startupai.site/src/app/services/validation/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/auth/auth-code-error/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/client/[id]/projects/new/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/consultant/client/new/page.tsx | page | Add @story annotation or consider if needed |
 | frontend/src/app/debug-oauth/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/login/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/onboarding/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/project/[id]/analysis/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/project/[id]/evidence/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/project/[id]/gate/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/project/[id]/report/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/project/current/evidence/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/project/current/gate/page.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/app/projects/new/page.tsx | page | Add @story annotation or consider if needed |
 | frontend/src/app/test-auth/page.tsx | page | Add @story annotation or consider if needed |
 | frontend/src/pages/_app.tsx | page | Add @story annotation or consider if needed |
 | frontend/src/pages/_document.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/ai-analysis.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/analytics.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/canvas.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/canvas/bmc.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/canvas/tbi.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/canvas/vpc.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/client/[id].tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/clients.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/clients/new.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/export.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/settings.tsx | page | Add @story annotation or consider if needed |
-| frontend/src/pages/validation/index.tsx | page | Export file - usually no annotation needed |
-| frontend/src/pages/workflows.tsx | page | Add @story annotation or consider if needed |
 | frontend/src/__tests__/accessibility/wcag-compliance.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/api-contracts/endpoint-validation.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/api/auth/logout/route.test.ts | unit_test | Link to tested story |
@@ -477,4 +479,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 468**
+**Total Orphans: 470**

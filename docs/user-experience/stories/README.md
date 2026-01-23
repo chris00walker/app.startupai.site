@@ -1,7 +1,7 @@
 ---
 purpose: "User story guidelines, coverage summaries, and references"
 status: "active"
-last_reviewed: "2026-01-22"
+last_reviewed: "2026-01-23"
 ---
 
 # User Stories
@@ -36,34 +36,36 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-22**: Quality audit remediation + US-A12 billing management; total stories now 90.
+> **Updated 2026-01-23**: Added Authentication + Core Product tool stories, US-F11, and expanded Marketing Funnel stories; total stories now 114.
 
 ### Stories by Category
 
 | Category | Story IDs | Total | With E2E Tests | Gaps |
 |----------|-----------|-------|----------------|------|
-| Founder | US-F01-F10 | 10 | 10 | 0 |
+| Founder | US-F01-F11 | 11 | 10 | 1 |
 | Consultant | US-C01-C07 | 7 | 7 | 0 |
 | Founder Trial | US-FT01-FT04 | 4 | 4 | 0 |
 | Consultant Trial | US-CT01-CT06 | 6 | 0 | 6 |
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
+| Authentication | US-AU01-AU02 | 2 | 1 | 1 |
+| Core Product | US-CP01-CP09 | 9 | 0 | 9 |
 | Admin | US-A01-A12 | 12 | 0 | 12 |
 | Support | US-S01-S05 | 5 | 0 | 5 |
 | Offboarding | US-O01-O05 | 5 | 0 | 5 |
 | Billing | US-B01-B10 | 10 | 0 | 10 |
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
-| Marketing Funnel | US-MF01-MF03 | 3 | 0 | 3 |
-| **Total** | | **90** | **33** | **57** |
+| Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
+| **Total** | | **114** | **34** | **80** |
 
 ### E2E Test File Mapping
 
 | Test File | Stories Covered |
 |-----------|-----------------|
 | `00-smoke.spec.ts` | Infrastructure (no stories) |
-| `01-login.spec.ts` | Authentication (cross-cutting) |
+| `01-login.spec.ts` | US-AU01 |
 | `02-onboarding-flow.spec.ts` | US-F01, US-F08, US-FT01 |
 | `03-founder-attribution.spec.ts` | US-F02 (attribution aspect) |
 | `04-founder-analysis-journey.spec.ts` | US-F02, US-F06 |
@@ -81,7 +83,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `16-quick-start-founder.spec.ts` | US-F01, US-FT01 |
 | `17-quick-start-consultant.spec.ts` | US-C07 |
 
-### Gap Analysis (52 Stories Need Implementation)
+### Gap Analysis (80 Stories Need Implementation)
 
 Stories with test stubs created but not yet implemented:
 
@@ -89,6 +91,9 @@ Stories with test stubs created but not yet implemented:
 |----------|-----------|-----------|----------|
 | Consultant Trial | US-CT01-CT05 | `22-consultant-trial.spec.ts` | High |
 | Edge Cases | US-E01-E06 | `18-edge-cases.spec.ts` | Medium |
+| Authentication | US-AU01-AU02 | `TBD` | Medium |
+| Core Product | US-CP01-CP09 | `TBD` | Medium |
+| Marketing Funnel | US-MF01-MF15 | `TBD` | Medium |
 | Admin | US-A01-A12 | `19-21-admin-*.spec.ts` | High |
 | Support | US-S01-S05 | `23-support.spec.ts` | High |
 | Offboarding | US-O01-O05 | `24-offboarding.spec.ts` | Medium |
@@ -100,13 +105,13 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-22**: Quality audit remediation + US-A12 billing management; total stories now 90.
+> **Updated 2026-01-23**: Added Authentication + Core Product tool stories, US-F11, and expanded Marketing Funnel stories; total stories now 114.
 
 ### Stories by Category
 
 | Category | Total Stories | With E2E Tests | Gaps |
 |----------|---------------|----------------|------|
-| Founder (US-F) | 10 | 10 | 0 |
+| Founder (US-F) | 11 | 10 | 1 |
 | Consultant (US-C) | 7 | 7 | 0 |
 | Founder Trial (US-FT) | 4 | 4 | 0 |
 | Consultant Trial (US-CT) | 6 | 0 | 6 |
@@ -114,13 +119,15 @@ Stories with test stubs created but not yet implemented:
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
 | Edge Case (US-E) | 6 | 0 | 6 |
+| Authentication (US-AU) | 2 | 1 | 1 |
+| Core Product (US-CP) | 9 | 0 | 9 |
 | Support (US-S) | 5 | 0 | 5 |
 | Offboarding (US-O) | 5 | 0 | 5 |
 | Billing (US-B) | 10 | 0 | 10 |
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
-| Marketing Funnel (US-MF) | 3 | 0 | 3 |
-| **Total** | **90** | **33** | **57** |
+| Marketing Funnel (US-MF) | 15 | 0 | 15 |
+| **Total** | **114** | **34** | **80** |
 
 ### HITL Story Priority
 
@@ -173,6 +180,8 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-23 | **Marketing Funnel Expansion:** Added US-MF04-MF15 and updated story counts to 114. |
+| 2026-01-23 | **Traceability Expansion:** Added US-AU01-AU02 (Authentication), US-CP01-CP09 (Core Product tools), and US-F11 (Manual Project Creation). Total stories now 102. |
 | 2026-01-22 | **Admin Billing:** Added US-A12 for billing management and updated coverage counts. |
 | 2026-01-22 | **Quality Audit Remediation:** P0: Fixed US-O03 retention timeline (30+60 days), US-O05 win-back emails (7/30/60/90 days), US-B04 dunning (6 stages), US-B05 refund tiers (4 tiers + US-S05 clarification), US-B07 tax registries (VIES/HMRC/ABN), US-N04 escalation (6 stages). P1: Added US-MF01-03 marketing funnel, US-A11 admin login, US-FT04/CT06 post-upgrade, enhanced US-B03 backup payment. P2: Split US-F08→F08/F09/F10, replaced faceless "User" with "any authenticated user" in US-N/AS/S sections, defined US-AS04 suspicious login criteria. Removed US-H03 reference from journey-test-matrix.md. Total stories now 89. |
 | 2026-01-22 | **Major Expansion:** Added 30 new stories across 5 categories: Support (US-S01-S05), Offboarding (US-O01-O05), Billing (US-B01-B10), Notification (US-N01-N05), Account Settings (US-AS01-AS05). Total stories now 82. |

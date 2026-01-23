@@ -6,6 +6,8 @@
  * and email/password options.
  *
  * Supports auto-triggering OAuth via ?provider=github query parameter.
+ *
+ * @story US-AU01
  */
 
 import Link from 'next/link';

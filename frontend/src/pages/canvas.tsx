@@ -1,3 +1,9 @@
+/**
+ * Canvas Gallery Page
+ *
+ * @story US-CP01
+ */
+
 import React from 'react'
 import { GetServerSideProps } from 'next'
 import { DashboardLayout } from "@/components/layout/DashboardLayout"

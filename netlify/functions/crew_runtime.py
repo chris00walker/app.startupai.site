@@ -6,6 +6,8 @@ generation, and environment loading helpers so both foreground and background
 functions behave consistently.
 """
 
+# @story US-CP09
+
 from __future__ import annotations
 
 import json

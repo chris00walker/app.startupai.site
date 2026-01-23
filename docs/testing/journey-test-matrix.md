@@ -1,7 +1,7 @@
 ---
 purpose: "Matrix mapping journey steps to user stories and E2E tests"
 status: "active"
-last_reviewed: "2026-01-22"
+last_reviewed: "2026-01-23"
 architectural_pivot: "2026-01-20"
 ---
 
@@ -33,7 +33,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 | Journey Step | User Story | E2E Test File | Test Description | Status |
 |--------------|------------|---------------|------------------|--------|
-| Step 1-4: Signup & Auth | N/A (cross-cutting) | `01-login.spec.ts` | Authentication flows | Covered |
+| Step 1-4: Signup & Auth | US-AU01 | `01-login.spec.ts` | Authentication flows | Covered |
 | Step 5: Quick Start Form | US-F01, US-FT01 | `16-quick-start-founder.spec.ts` | "should submit Quick Start form" | Covered |
 | Step 5: Optional Hints | US-F01 | `16-quick-start-founder.spec.ts` | "should expand and use hint fields" | Covered |
 | Step 6: Phase 1 Starts | US-F01 | `16-quick-start-founder.spec.ts` | "should redirect to dashboard after submit" | Covered |
@@ -56,7 +56,7 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 
 | Journey Phase | Journey Step | User Story | E2E Test File | Test Description | Status |
 |---------------|--------------|------------|---------------|------------------|--------|
-| Phase 1 | Step 1-4: Signup & Auth | N/A | `01-login.spec.ts` | "Consultant user can login" | Covered |
+| Phase 1 | Step 1-4: Signup & Auth | US-AU01 | `01-login.spec.ts` | "Consultant user can login" | Covered |
 | Phase 2 | Step 5-7: Practice Setup | US-C01 | `09-consultant-practice-setup.spec.ts` | "should redirect to dashboard" | Covered |
 | Phase 3 | Step 8: Dashboard Intro | US-C03 | `06-consultant-portfolio.spec.ts` | "should navigate to consultant dashboard" | Covered |
 | Phase 3 | Step 9: Create Invite | US-C02 | `10-consultant-client-onboarding.spec.ts` | "should show Add Client option" | Covered |
