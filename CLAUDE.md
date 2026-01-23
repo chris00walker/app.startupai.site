@@ -67,6 +67,63 @@ const projects = await db.select().from(projectsTable).where(eq(projectsTable.us
 - Validate inputs with Zod
 - Use Supabase Service Role only when needed
 
+## Traceability Protocol
+
+**Self-sustaining story-code traceability.** Follow this protocol to maintain bidirectional links between user stories and code.
+
+### Before Implementing Any US-* Story
+
+1. **Look up the story** using `/story-lookup` or:
+   ```bash
+   jq '.stories["US-XXX"]' docs/traceability/story-code-map.json
+   ```
+2. **Read existing files** listed in the lookup
+3. **Check gap report** if exploring a category: `docs/traceability/gap-report.md`
+
+### While Implementing
+
+Add `@story` annotations to every file you create or modify for a story:
+
+```typescript
+/**
+ * Component description
+ * @story US-F01, US-FT01
+ */
+export function MyComponent() { ... }
+```
+
+```python
+# @story US-AD01, US-AD02
+def discovery_task():
+    ...
+```
+
+### After Implementing
+
+1. **Regenerate the map**:
+   ```bash
+   pnpm traceability:generate
+   ```
+2. **Validate annotations**:
+   ```bash
+   pnpm traceability:validate
+   ```
+
+### Key Commands
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm traceability:generate` | Regenerate story-code-map.json |
+| `pnpm traceability:validate` | Check for unknown/missing annotations |
+| `pnpm traceability:gaps` | Show stories without implementations |
+
+### Why This Matters
+
+- **100x lookup speed**: Find all code for a story in <5 seconds
+- **Self-documenting**: Code declares which stories it implements
+- **Gap visibility**: Know what's unimplemented at a glance
+- **Audit trail**: Every file links back to requirements
+
 ## Quality Gates
 - [ ] `NEXT_PUBLIC_ONBOARDING_BYPASS=false` in production
 - [ ] No mock data in components
@@ -110,4 +167,4 @@ Data flow: `Modal → /api/crewai/webhook → Supabase → Components`
 | `docs/work/` | Detailed work files (in-progress, done, backlog) |
 
 ---
-**Last Updated**: 2026-01-20
+**Last Updated**: 2026-01-23
