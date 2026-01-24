@@ -112,8 +112,7 @@ o1_interview_gap_analyzer:
 - Multiple stories comma-separated: `@story US-F01, US-FT01, US-H01`
 - No wildcards (explicit IDs only)
 - Story IDs must exist in `stories/*.md`
-- Agent journey stories use the `US-AJ##` prefix and map to AI flow code
-- Agent spec stories use the `US-AG##` prefix and map to crew configs + tasks
+- Agent stories use prefixes: `US-AB` (Brief), `US-AD` (Discovery), `US-ADB` (Desirability), `US-AFB` (Feasibility), `US-AVB` (Viability), `US-AH` (HITL)
 
 ## Override Rules
 
@@ -124,6 +123,8 @@ The override file (`story-code-overrides.yaml`) can ONLY contain:
 | `db_tables` | Database tables used | `[onboarding_sessions, projects]` |
 | `notes` | Context (ADR refs, etc.) | `"Quick Start replaced 7-stage (ADR-006)"` |
 | `implementation_status` | Override auto-detected | `gap`, `partial`, `complete` |
+| `domain_candidate` | Mark as future domain extraction | `true` |
+| `domain_function` | Future function name | `calculate_fit_score` |
 
 **Forbidden fields** (must come from annotations):
 - `components`, `api_routes`, `pages`, `hooks`, `lib`, `e2e_tests`, `unit_tests`

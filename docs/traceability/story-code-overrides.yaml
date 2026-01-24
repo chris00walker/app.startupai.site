@@ -5,11 +5,13 @@
 #   - db_tables: Database tables this story reads/writes
 #   - notes: Additional context (e.g., ADR references)
 #   - implementation_status: Override auto-detected status
+#   - domain_candidate: boolean - Mark as future hexagonal domain extraction candidate
+#   - domain_function: string - Future function name for domain extraction
 #
 # DO NOT add code-link fields (components, api_routes, pages, hooks, lib,
 # e2e_tests, unit_tests) - these MUST come from @story annotations in code.
 #
-# Last updated: 2026-01-22
+# Last updated: 2026-01-23
 
 # =============================================================================
 # Founder Stories (US-F01-F10)
@@ -666,6 +668,8 @@ US-AD09:
     - validation_runs
   notes: "FIT_SCORE Agent - Calculate Fit Score"
   implementation_status: partial
+  domain_candidate: true
+  domain_function: calculate_fit_score
 
 US-AD10:
   db_tables:

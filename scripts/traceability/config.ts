@@ -275,4 +275,6 @@ export const OVERRIDE_ALLOWED_FIELDS = [
   'db_tables',
   'notes',
   'implementation_status',
+  'domain_candidate', // Mark as future hexagonal domain extraction candidate
+  'domain_function', // Future function name for domain extraction
 ] as const;
