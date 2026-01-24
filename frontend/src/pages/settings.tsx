@@ -327,91 +327,89 @@ export default function SettingsPage() {
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           {/*
-            Responsive strategy:
-            - Mobile (<640px): Icons only with title tooltips
-            - Tablet (640px-1024px): Horizontal scroll with text labels
-            - Desktop (1024px+): Full grid layout
+            Responsive strategy - flex at all breakpoints:
+            - Mobile (<640px): Icons only with title tooltips, equal width
+            - Tablet (640px-1024px): Icons + abbreviated text, equal width
+            - Desktop (1024px+): Full text labels, equal width
           */}
-          <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
-            <TabsList className="inline-flex h-auto min-w-max lg:min-w-full lg:grid lg:w-full lg:grid-cols-7 gap-1 p-1">
+          <TabsList className="flex w-full h-auto gap-1 p-1">
+            <TabsTrigger
+              value="profile"
+              className="flex-1 px-2 py-2 text-xs sm:text-sm"
+              title="Profile"
+            >
+              <User className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+              <span className="hidden sm:inline lg:hidden">Profile</span>
+              <span className="hidden lg:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="notifications"
+              className="flex-1 px-2 py-2 text-xs sm:text-sm"
+              title="Notifications"
+            >
+              <Bell className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+              <span className="hidden sm:inline lg:hidden">Alerts</span>
+              <span className="hidden lg:inline">Notifications</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="security"
+              className="flex-1 px-2 py-2 text-xs sm:text-sm"
+              title="Security"
+            >
+              <Shield className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+              <span className="hidden sm:inline lg:hidden">Security</span>
+              <span className="hidden lg:inline">Security</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="preferences"
+              className="flex-1 px-2 py-2 text-xs sm:text-sm"
+              title="Preferences"
+            >
+              <Palette className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+              <span className="hidden sm:inline lg:hidden">Prefs</span>
+              <span className="hidden lg:inline">Preferences</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="approvals"
+              className="flex-1 px-2 py-2 text-xs sm:text-sm"
+              title="AI Approvals"
+            >
+              <Bot className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+              <span className="hidden sm:inline lg:hidden">AI</span>
+              <span className="hidden lg:inline">AI Approvals</span>
+            </TabsTrigger>
+            {role === 'founder' && (
               <TabsTrigger
-                value="profile"
-                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                title="Profile"
+                value="projects"
+                className="flex-1 px-2 py-2 text-xs sm:text-sm"
+                title="Projects"
               >
-                <User className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                <span className="hidden sm:inline lg:hidden">Profile</span>
-                <span className="hidden lg:inline">Profile</span>
+                <FolderArchive className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Projects</span>
+                <span className="hidden lg:inline">Projects</span>
               </TabsTrigger>
+            )}
+            {role === 'consultant' && (
               <TabsTrigger
-                value="notifications"
-                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                title="Notifications"
+                value="clients"
+                className="flex-1 px-2 py-2 text-xs sm:text-sm"
+                title="Clients"
               >
-                <Bell className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                <span className="hidden sm:inline lg:hidden">Alerts</span>
-                <span className="hidden lg:inline">Notifications</span>
+                <Users className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Clients</span>
+                <span className="hidden lg:inline">Clients</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="security"
-                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                title="Security"
-              >
-                <Shield className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                <span className="hidden sm:inline lg:hidden">Security</span>
-                <span className="hidden lg:inline">Security</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="preferences"
-                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                title="Preferences"
-              >
-                <Palette className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                <span className="hidden sm:inline lg:hidden">Prefs</span>
-                <span className="hidden lg:inline">Preferences</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="approvals"
-                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                title="AI Approvals"
-              >
-                <Bot className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                <span className="hidden sm:inline lg:hidden">AI</span>
-                <span className="hidden lg:inline">AI Approvals</span>
-              </TabsTrigger>
-              {role === 'founder' && (
-                <TabsTrigger
-                  value="projects"
-                  className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                  title="Projects"
-                >
-                  <FolderArchive className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                  <span className="hidden sm:inline lg:hidden">Projects</span>
-                  <span className="hidden lg:inline">Projects</span>
-                </TabsTrigger>
-              )}
-              {role === 'consultant' && (
-                <TabsTrigger
-                  value="clients"
-                  className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                  title="Clients"
-                >
-                  <Users className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                  <span className="hidden sm:inline lg:hidden">Clients</span>
-                  <span className="hidden lg:inline">Clients</span>
-                </TabsTrigger>
-              )}
-              <TabsTrigger
-                value="integrations"
-                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
-                title="Integrations"
-              >
-                <Globe className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
-                <span className="hidden sm:inline lg:hidden">Integrations</span>
-                <span className="hidden lg:inline">Integrations</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+            )}
+            <TabsTrigger
+              value="integrations"
+              className="flex-1 px-2 py-2 text-xs sm:text-sm"
+              title="Integrations"
+            >
+              <Globe className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+              <span className="hidden sm:inline lg:hidden">Integrate</span>
+              <span className="hidden lg:inline">Integrations</span>
+            </TabsTrigger>
+          </TabsList>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-4">
