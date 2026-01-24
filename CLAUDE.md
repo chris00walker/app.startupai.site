@@ -28,6 +28,13 @@ frontend/
 └── styles/        # Tailwind config
 ```
 
+## Critical: CSS Variables
+**The only CSS file that matters:** `frontend/src/styles/globals.css`
+
+- All CSS variables (colors, spacing, sidebar, etc.) go here
+- `frontend/tailwind.css` in root is NOT imported - do not edit it
+- Before editing any CSS variable, verify it exists in `globals.css`
+
 ## Commands
 ```bash
 pnpm dev              # Dev server (port 3000)
