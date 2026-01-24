@@ -303,42 +303,69 @@ export default function SettingsPage() {
     >
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Header */}
-        <div className="flex items-center justify-between space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
+            <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg shrink-0">
               <Settings className="h-6 w-6 text-gray-600" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Manage your account, preferences, and platform configuration
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline">
+          <div className="flex items-center">
+            <Button variant="outline" size="sm" className="sm:size-default">
               <Download className="mr-2 h-4 w-4" />
-              Export Settings
+              <span className="hidden sm:inline">Export Settings</span>
+              <span className="sm:hidden">Export</span>
             </Button>
           </div>
         </div>
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className={`grid w-full ${role === 'founder' || role === 'consultant' ? 'grid-cols-7' : 'grid-cols-6'}`}>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="preferences">Preferences</TabsTrigger>
-            <TabsTrigger value="approvals">AI Approvals</TabsTrigger>
-            {role === 'founder' && (
-              <TabsTrigger value="projects">Projects</TabsTrigger>
-            )}
-            {role === 'consultant' && (
-              <TabsTrigger value="clients">Clients</TabsTrigger>
-            )}
-            <TabsTrigger value="integrations">Integrations</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex h-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 lg:grid-cols-7 gap-1 p-1">
+              <TabsTrigger value="profile" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                <User className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                <Bell className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Notifications</span>
+              </TabsTrigger>
+              <TabsTrigger value="security" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                <Shield className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Security</span>
+              </TabsTrigger>
+              <TabsTrigger value="preferences" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                <Palette className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Preferences</span>
+              </TabsTrigger>
+              <TabsTrigger value="approvals" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                <Bot className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">AI Approvals</span>
+              </TabsTrigger>
+              {role === 'founder' && (
+                <TabsTrigger value="projects" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                  <FolderArchive className="h-4 w-4 sm:hidden" />
+                  <span className="hidden sm:inline">Projects</span>
+                </TabsTrigger>
+              )}
+              {role === 'consultant' && (
+                <TabsTrigger value="clients" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                  <Users className="h-4 w-4 sm:hidden" />
+                  <span className="hidden sm:inline">Clients</span>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="integrations" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
+                <Globe className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">Integrations</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-4">
@@ -353,7 +380,7 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
                     <Input
@@ -577,21 +604,24 @@ export default function SettingsPage() {
                   <Separator />
                   <div className="space-y-2">
                     <Label>API Key</Label>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type={showApiKey ? "text" : "password"}
-                        value={showApiKey ? "sk-1234567890abcdef1234567890abcdef" : "••••••••••••••••••••••••••••••••"}
-                        readOnly
-                        className="font-mono"
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setShowApiKey(!showApiKey)}
-                      >
-                        {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button variant="outline">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex flex-1 items-center gap-2">
+                        <Input
+                          type={showApiKey ? "text" : "password"}
+                          value={showApiKey ? "sk-1234567890abcdef1234567890abcdef" : "••••••••••••••••••••••••••••••••"}
+                          readOnly
+                          className="font-mono text-xs sm:text-sm"
+                        />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="shrink-0"
+                          onClick={() => setShowApiKey(!showApiKey)}
+                        >
+                          {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <Button variant="outline" className="shrink-0">
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Regenerate
                       </Button>
@@ -603,11 +633,11 @@ export default function SettingsPage() {
                   <Separator />
                   <div className="space-y-2">
                     <Label>Password</Label>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <p className="text-sm text-muted-foreground">
                         Last changed: {security.lastPasswordChange}
                       </p>
-                      <Button variant="outline">
+                      <Button variant="outline" className="w-full sm:w-auto">
                         Change Password
                       </Button>
                     </div>

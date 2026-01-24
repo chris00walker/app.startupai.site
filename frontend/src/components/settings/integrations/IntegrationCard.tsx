@@ -148,23 +148,23 @@ export function IntegrationCard({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg hover:border-gray-300 transition-colors">
-      <div className="flex items-center space-x-3">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border rounded-lg hover:border-gray-300 transition-colors">
+      <div className="flex items-center space-x-3 min-w-0">
         {/* Icon */}
         <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          className="w-10 h-10 shrink-0 rounded-lg flex items-center justify-center"
           style={{ backgroundColor: `${config.color}15` }}
         >
           <IconComponent className="h-5 w-5" style={{ color: config.color }} />
         </div>
 
         {/* Info */}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-medium">{config.name}</h4>
             <StatusBadge status={status} />
           </div>
-          <p className="text-sm text-muted-foreground truncate max-w-[200px]">
+          <p className="text-sm text-muted-foreground truncate">
             {integration?.providerAccountName || integration?.providerAccountEmail || config.description}
           </p>
           {integration?.connectedAt && (
@@ -176,7 +176,7 @@ export function IntegrationCard({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-end space-x-2 shrink-0">
         {isConnected && (
           <>
             <Button variant="ghost" size="icon" onClick={onConfigure} title="Configure">
