@@ -326,43 +326,89 @@ export default function SettingsPage() {
 
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex h-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 lg:grid-cols-7 gap-1 p-1">
-              <TabsTrigger value="profile" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                <User className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">Profile</span>
+          {/*
+            Responsive strategy:
+            - Mobile (<640px): Icons only with title tooltips
+            - Tablet (640px-1024px): Horizontal scroll with text labels
+            - Desktop (1024px+): Full grid layout
+          */}
+          <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <TabsList className="inline-flex h-auto min-w-max lg:min-w-full lg:grid lg:w-full lg:grid-cols-7 gap-1 p-1">
+              <TabsTrigger
+                value="profile"
+                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                title="Profile"
+              >
+                <User className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Profile</span>
+                <span className="hidden lg:inline">Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="notifications" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                <Bell className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">Notifications</span>
+              <TabsTrigger
+                value="notifications"
+                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                title="Notifications"
+              >
+                <Bell className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Alerts</span>
+                <span className="hidden lg:inline">Notifications</span>
               </TabsTrigger>
-              <TabsTrigger value="security" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                <Shield className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">Security</span>
+              <TabsTrigger
+                value="security"
+                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                title="Security"
+              >
+                <Shield className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Security</span>
+                <span className="hidden lg:inline">Security</span>
               </TabsTrigger>
-              <TabsTrigger value="preferences" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                <Palette className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">Preferences</span>
+              <TabsTrigger
+                value="preferences"
+                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                title="Preferences"
+              >
+                <Palette className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Prefs</span>
+                <span className="hidden lg:inline">Preferences</span>
               </TabsTrigger>
-              <TabsTrigger value="approvals" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                <Bot className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">AI Approvals</span>
+              <TabsTrigger
+                value="approvals"
+                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                title="AI Approvals"
+              >
+                <Bot className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">AI</span>
+                <span className="hidden lg:inline">AI Approvals</span>
               </TabsTrigger>
               {role === 'founder' && (
-                <TabsTrigger value="projects" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                  <FolderArchive className="h-4 w-4 sm:hidden" />
-                  <span className="hidden sm:inline">Projects</span>
+                <TabsTrigger
+                  value="projects"
+                  className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                  title="Projects"
+                >
+                  <FolderArchive className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                  <span className="hidden sm:inline lg:hidden">Projects</span>
+                  <span className="hidden lg:inline">Projects</span>
                 </TabsTrigger>
               )}
               {role === 'consultant' && (
-                <TabsTrigger value="clients" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                  <Users className="h-4 w-4 sm:hidden" />
-                  <span className="hidden sm:inline">Clients</span>
+                <TabsTrigger
+                  value="clients"
+                  className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                  title="Clients"
+                >
+                  <Users className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                  <span className="hidden sm:inline lg:hidden">Clients</span>
+                  <span className="hidden lg:inline">Clients</span>
                 </TabsTrigger>
               )}
-              <TabsTrigger value="integrations" className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm">
-                <Globe className="h-4 w-4 sm:hidden" />
-                <span className="hidden sm:inline">Integrations</span>
+              <TabsTrigger
+                value="integrations"
+                className="whitespace-nowrap px-3 py-2 text-xs sm:text-sm"
+                title="Integrations"
+              >
+                <Globe className="h-4 w-4 sm:mr-2 lg:mr-0 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Integrations</span>
+                <span className="hidden lg:inline">Integrations</span>
               </TabsTrigger>
             </TabsList>
           </div>
