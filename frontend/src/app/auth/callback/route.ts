@@ -1,7 +1,8 @@
 /**
  * OAuth Callback Route
- * 
+ *
  * Handles OAuth provider callbacks and exchanges code for session.
+ * @story US-FT01, US-F01
  */
 
 import { NextResponse, NextRequest } from 'next/server';
@@ -82,15 +83,16 @@ export async function GET(request: NextRequest) {
     console.log('Session exchange successful!');
     console.log('User:', data?.user?.email);
     
-    // Update user metadata with plan and role selection if provided
+    // Update user metadata with plan, role, and trial_intent selection if provided
     const plan = searchParams.get('plan');
     const role = searchParams.get('role');
+    const trialIntent = searchParams.get('trial_intent');
     const inviteToken = searchParams.get('invite');
 
-    if ((plan || role) && data.session?.user) {
-      console.log('Updating user metadata - plan:', plan, 'role:', role);
+    if ((plan || role || trialIntent) && data.session?.user) {
+      console.log('Updating user metadata - plan:', plan, 'role:', role, 'trial_intent:', trialIntent);
       try {
-        const metadata: Record<string, string> = {};
+        const metadata: Record<string, string | null> = {};
 
         if (plan) {
           metadata.plan_type = plan;
@@ -102,6 +104,11 @@ export async function GET(request: NextRequest) {
         } else if (plan === 'trial') {
           // Default to founder for trial if no role specified
           metadata.role = 'founder';
+        }
+
+        // Store trial_intent for trial users
+        if (trialIntent && plan === 'trial') {
+          metadata.trial_intent = trialIntent;
         }
 
         await supabase.auth.updateUser({

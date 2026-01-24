@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-24T13:08:42.596Z
+Generated: 2026-01-24T23:01:13.488Z
 
 ## Files Without Story Links
 
@@ -43,20 +43,14 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/app/api/integrations/[type]/connect/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/integrations/[type]/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/integrations/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/onboarding/abandon/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/onboarding/brief/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/onboarding/complete/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/onboarding/debug/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/onboarding/pause/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/onboarding/recover/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/onboarding/status/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/projects/create/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/settings/approvals/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/v1/public/activity/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/v1/public/metrics/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/vpc/[projectId]/initialize/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/vpc/[projectId]/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/auth/callback/route.ts | api_route | Add @story annotation or consider if needed |
 | netlify/functions/__init__.py | api_route | Add @story annotation or consider if needed |
 | netlify/functions/config/agents.yaml | api_route | Add @story annotation or consider if needed |
 | netlify/functions/config/tasks.yaml | api_route | Add @story annotation or consider if needed |
@@ -230,7 +224,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/signals/InnovationPhysicsPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signals/SignalBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signals/SignalGauge.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/signup-form.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/CanvasesGallery.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/EvidenceStrengthIndicator.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/ExperimentCard.tsx | component | Add @story annotation or consider if needed |
@@ -299,7 +292,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/db/schema/public-activity-log.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/reports.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/usage-quota.ts | component | Add @story annotation or consider if needed |
-| frontend/src/db/schema/users.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/value-proposition-canvas.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/seed.ts | component | Add @story annotation or consider if needed |
 | frontend/src/legacy/index_backup.tsx | component | Add @story annotation or consider if needed |
@@ -318,6 +310,7 @@ These files in scanned directories have no `@story` annotation.
 | frontend/tests/e2e/07-adr005-persistence.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/08-ui-indicators.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/18-edge-cases.spec.ts | e2e_test | Link to tested story |
+| frontend/tests/e2e/28-integrations.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/global-setup.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/helpers/accessibility.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/helpers/api-mocks.ts | e2e_test | Link to tested story |
@@ -340,7 +333,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/hooks/useHealthCheck.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useIntegrations.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useOnboardingRecovery.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useOnboardingSession.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/usePortfolioActivity.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useProjectReports.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useProjects.ts | hook | Add @story annotation or consider if needed |
@@ -355,7 +347,6 @@ These files in scanned directories have no `@story` annotation.
 | ../startupai-crew/src/crews/desirability/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/discovery/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/feasibility/__init__.py | lib | Add @story annotation or consider if needed |
-| ../startupai-crew/src/crews/onboarding/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/crews/viability/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/__init__.py | lib | Add @story annotation or consider if needed |
 | ../startupai-crew/src/intake_crew/config/agents.yaml | lib | Add @story annotation or consider if needed |
@@ -427,13 +418,8 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/__tests__/api/consultant/onboarding/start/route.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/api/crewai/status/route.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/api/crewai/webhook/route.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/api/onboarding/abandon/route.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/api/onboarding/brief/route.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/api/onboarding/complete/route.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/api/onboarding/pause/route.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/api/onboarding/recover/route.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/api/onboarding/start-adr005.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/api/onboarding/status/route.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/business-requirements/marketing-promise-delivery.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/canvas-tdd-validation.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/components/BusinessModelCanvas.test.tsx | unit_test | Link to tested story |
@@ -449,8 +435,8 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/__tests__/hooks/useCrewAIState.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useFounderStatus.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useGateAlerts.test.ts | unit_test | Link to tested story |
+| frontend/src/__tests__/hooks/useIntegrations.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/hooks/useOnboardingSession.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useProjects.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useValidationProgress.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/integration/ClientDashboard.integration.test.tsx | unit_test | Link to tested story |
@@ -475,4 +461,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 466**
+**Total Orphans: 452**

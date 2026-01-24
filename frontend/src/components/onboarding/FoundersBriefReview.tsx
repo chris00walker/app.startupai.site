@@ -3,7 +3,7 @@
 /**
  * FoundersBriefReview Component
  *
- * Displays the Founder's Brief for HITL approval during the approve_founders_brief checkpoint.
+ * Displays the Founder's Brief for HITL approval during the approve_brief checkpoint (Phase 1 Stage A).
  * Shows 6 sections per master-architecture specification:
  * 1. THE IDEA
  * 2. THE PROBLEM YOU'RE SOLVING
@@ -11,6 +11,9 @@
  * 4. YOUR PROPOSED SOLUTION
  * 5. KEY ASSUMPTIONS WE'LL TEST
  * 6. YOUR SUCCESS CRITERIA
+ *
+ * Note: This component is also reused for approve_discovery_output checkpoint (Phase 1 Stage B)
+ * to show the complete VPC discovery results.
  */
 
 import { useState } from 'react';

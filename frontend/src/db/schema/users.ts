@@ -6,6 +6,7 @@
  *
  * @see docs/user-experience/roles/role-definitions.md - Canonical persona definitions
  * @see docs/user-experience/stories/README.md - User stories with acceptance criteria
+ * @story US-FT01, US-F01
  */
 
 import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
@@ -39,7 +40,12 @@ export const userProfiles = pgTable('user_profiles', {
   trialExpiresAt: timestamp('trial_expires_at', { withTimezone: true }),
   planStatus: text('plan_status').default('active').notNull(),
   role: userRoleEnum('role').default('trial').notNull(),
-  
+
+  // Trial intent - captures founder vs consultant trial path
+  // 'founder_trial' = validating own idea
+  // 'consultant_trial' = exploring AI validation for clients
+  trialIntent: text('trial_intent').default('founder_trial'),
+
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

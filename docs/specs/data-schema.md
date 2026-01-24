@@ -1,8 +1,8 @@
 ---
 purpose: "Private technical source of truth for application data schema"
 status: "active"
-last_reviewed: "2026-01-22"
-last_updated: "2026-01-22"
+last_reviewed: "2026-01-24"
+last_updated: "2026-01-24"
 ---
 
 # Data Schema
@@ -10,7 +10,7 @@ last_updated: "2026-01-22"
 ## Overview
 
 - **Supabase Postgres** is the canonical store
-- **Drizzle ORM schemas** in `frontend/src/db/schema/*.ts` provide type-safe queries (12 schema files)
+- **Drizzle ORM schemas** in `frontend/src/db/schema/*.ts` provide type-safe queries (14 schema files)
 - **Some tables exist only in Supabase** and are accessed via raw Supabase client queries (onboarding_sessions, entrepreneur_briefs, etc.)
 - Schema changes: update Drizzle → `pnpm db:generate` → review SQL → `pnpm db:push`
 

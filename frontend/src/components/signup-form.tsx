@@ -1,3 +1,9 @@
+/**
+ * Signup Form Component
+ *
+ * Handles user registration with plan selection and trial intent routing.
+ * @story US-FT01, US-F01
+ */
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
@@ -6,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { createClient } from "@/lib/supabase/client"
 import { analytics } from "@/lib/analytics"
 
@@ -114,6 +121,7 @@ export function SignupForm({
     }
     return 'founder' // Default to founder if no role specified
   })
+  const [trialIntent, setTrialIntent] = useState<'founder_trial' | 'consultant_trial'>('founder_trial')
 
   useEffect(() => {
     if (selectedPlan) {
@@ -178,8 +186,9 @@ export function SignupForm({
             company,
             plan_choice: plan,
             role: role,
+            trial_intent: plan === 'trial' ? trialIntent : null,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${inviteToken ? `&invite=${inviteToken}` : ''}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${plan === 'trial' ? `&trial_intent=${trialIntent}` : ''}${inviteToken ? `&invite=${inviteToken}` : ''}`,
         },
       })
 
@@ -214,7 +223,7 @@ export function SignupForm({
         provider: 'github',
         options: {
           scopes: 'user:email read:user',
-          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${inviteToken ? `&invite=${inviteToken}` : ''}`,
+          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${plan === 'trial' ? `&trial_intent=${trialIntent}` : ''}${inviteToken ? `&invite=${inviteToken}` : ''}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -288,6 +297,52 @@ export function SignupForm({
             ))}
           </div>
         </fieldset>
+
+        {/* Trial Intent Selection - only shown when trial plan is selected */}
+        {plan === 'trial' && (
+          <fieldset className="grid gap-3">
+            <legend className="text-sm font-medium">How will you use StartupAI?</legend>
+            <RadioGroup
+              value={trialIntent}
+              onValueChange={(value) => setTrialIntent(value as 'founder_trial' | 'consultant_trial')}
+              className="grid gap-3"
+            >
+              <label
+                htmlFor="intent-founder"
+                className={cn(
+                  "flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition",
+                  "hover:border-primary/50",
+                  trialIntent === 'founder_trial' ? "border-primary bg-primary/5" : "border-border"
+                )}
+              >
+                <RadioGroupItem value="founder_trial" id="intent-founder" className="mt-1" />
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold">I'm a Founder</span>
+                  <p className="text-sm text-muted-foreground">
+                    Validate my own business idea with AI-powered evidence gathering
+                  </p>
+                </div>
+              </label>
+              <label
+                htmlFor="intent-consultant"
+                className={cn(
+                  "flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition",
+                  "hover:border-primary/50",
+                  trialIntent === 'consultant_trial' ? "border-primary bg-primary/5" : "border-border"
+                )}
+              >
+                <RadioGroupItem value="consultant_trial" id="intent-consultant" className="mt-1" />
+                <div className="flex flex-col gap-1">
+                  <span className="font-semibold">I'm a Consultant/Advisor</span>
+                  <p className="text-sm text-muted-foreground">
+                    Explore AI validation tools to help my clients
+                  </p>
+                </div>
+              </label>
+            </RadioGroup>
+          </fieldset>
+        )}
+
         <div className="grid gap-3">
           <Label htmlFor="name">Full Name</Label>
           <Input

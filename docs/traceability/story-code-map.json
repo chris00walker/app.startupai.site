@@ -1,18 +1,21 @@
 {
   "metadata": {
-    "generated_at": "2026-01-24T13:08:42.596Z",
+    "generated_at": "2026-01-24T23:01:13.488Z",
     "version": "1.0.0",
     "story_count": 157,
-    "annotated_file_count": 178
+    "annotated_file_count": 183
   },
   "stories": {
     "US-F01": {
       "title": "Complete Quick Start Onboarding",
       "components": [
-        "frontend/src/components/onboarding/QuickStartForm.tsx"
+        "frontend/src/components/onboarding/QuickStartForm.tsx",
+        "frontend/src/components/signup-form.tsx",
+        "frontend/src/db/schema/users.ts"
       ],
       "api_routes": [
         "frontend/src/app/api/projects/quick-start/route.ts",
+        "frontend/src/app/auth/callback/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_0.py"
       ],
@@ -582,9 +585,12 @@
     "US-FT01": {
       "title": "Start Founder Trial Onboarding",
       "components": [
-        "frontend/src/components/onboarding/QuickStartForm.tsx"
+        "frontend/src/components/onboarding/QuickStartForm.tsx",
+        "frontend/src/components/signup-form.tsx",
+        "frontend/src/db/schema/users.ts"
       ],
       "api_routes": [
+        "frontend/src/app/auth/callback/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_0.py"
       ],
@@ -2490,14 +2496,15 @@
       "components": [],
       "api_routes": [
         "../startupai-crew/src/modal_app/app.py",
-        "../startupai-crew/src/modal_app/phases/phase_0.py"
+        "../startupai-crew/src/modal_app/phases/phase_0.py",
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [],
       "hooks": [],
       "lib": [
-        "../startupai-crew/src/crews/onboarding/config/agents.yaml",
-        "../startupai-crew/src/crews/onboarding/config/tasks.yaml",
-        "../startupai-crew/src/crews/onboarding/crew.py"
+        "../startupai-crew/src/crews/discovery/brief_generation_crew.py",
+        "../startupai-crew/src/crews/discovery/config/brief_agents.yaml",
+        "../startupai-crew/src/crews/discovery/config/brief_tasks.yaml"
       ],
       "e2e_tests": [
         {
@@ -3258,11 +3265,29 @@
         "US-E03"
       ]
     },
+    "frontend/src/components/signup-form.tsx": {
+      "stories": [
+        "US-F01",
+        "US-FT01"
+      ]
+    },
+    "frontend/src/db/schema/users.ts": {
+      "stories": [
+        "US-F01",
+        "US-FT01"
+      ]
+    },
     "frontend/src/app/api/projects/quick-start/route.ts": {
       "stories": [
         "US-F01",
         "US-F07",
         "US-E03"
+      ]
+    },
+    "frontend/src/app/auth/callback/route.ts": {
+      "stories": [
+        "US-F01",
+        "US-FT01"
       ]
     },
     "../startupai-crew/src/modal_app/app.py": {
@@ -3455,6 +3480,7 @@
         "US-F06",
         "US-H01",
         "US-H02",
+        "US-AB01",
         "US-AD01",
         "US-AH02"
       ]
@@ -4025,17 +4051,17 @@
         "US-A12"
       ]
     },
-    "../startupai-crew/src/crews/onboarding/config/agents.yaml": {
+    "../startupai-crew/src/crews/discovery/brief_generation_crew.py": {
       "stories": [
         "US-AB01"
       ]
     },
-    "../startupai-crew/src/crews/onboarding/config/tasks.yaml": {
+    "../startupai-crew/src/crews/discovery/config/brief_agents.yaml": {
       "stories": [
         "US-AB01"
       ]
     },
-    "../startupai-crew/src/crews/onboarding/crew.py": {
+    "../startupai-crew/src/crews/discovery/config/brief_tasks.yaml": {
       "stories": [
         "US-AB01"
       ]
