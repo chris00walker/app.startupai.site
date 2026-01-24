@@ -39,6 +39,16 @@
     --onboarding-brand: 220 70% 45%;
     --onboarding-brand-light: 220 70% 96%;
     --onboarding-accent-sharp: 160 84% 39%;
+
+    /* Sidebar Navigation */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 30% 20%;
+    --sidebar-primary: 220 70% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 92%;
+    --sidebar-accent-foreground: 220 30% 15%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 220 70% 45%;
   }
 
   .dark {
@@ -61,6 +71,16 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 94.1%;
+
+    /* Sidebar Navigation */
+    --sidebar-background: 222 30% 10%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 25% 22%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 217 32% 18%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
