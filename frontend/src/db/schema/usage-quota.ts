@@ -15,14 +15,14 @@ export const trialUsageCounters = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  table => ({
-    userActionPeriod: uniqueIndex('trial_usage_user_action_period_idx').on(
+  (table) => [
+    uniqueIndex('trial_usage_user_action_period_idx').on(
       table.userId,
       table.action,
       table.period,
       table.periodStart,
     ),
-  }),
+  ],
 );
 
 export type TrialUsageCounter = typeof trialUsageCounters.$inferSelect;

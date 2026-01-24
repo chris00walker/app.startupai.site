@@ -41,6 +41,7 @@ import {
 } from "lucide-react"
 import { ProjectsTab } from "@/components/settings/ProjectsTab"
 import { ClientsTab } from "@/components/settings/ClientsTab"
+import { IntegrationsTab } from "@/components/settings/IntegrationsTab"
 import { useAuth, useRoleInfo } from "@/lib/auth/hooks"
 import { createClient } from "@/lib/supabase/client"
 import type { ApprovalType } from "@/types/crewai"
@@ -874,64 +875,7 @@ export default function SettingsPage() {
 
           {/* Integrations Tab */}
           <TabsContent value="integrations" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Globe className="h-5 w-5" />
-                  <span>External Integrations</span>
-                </CardTitle>
-                <CardDescription>
-                  Connect with external tools and services
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Database className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Google Sheets</h4>
-                        <p className="text-sm text-muted-foreground">Export canvases to Google Sheets</p>
-                      </div>
-                    </div>
-                    <Button variant="outline">Connect</Button>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Key className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Slack</h4>
-                        <p className="text-sm text-muted-foreground">Workflow notifications in Slack</p>
-                      </div>
-                    </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">
-                      <CheckCircle className="mr-1 h-3 w-3" />
-                      Connected
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <Upload className="h-5 w-5 text-orange-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Zapier</h4>
-                        <p className="text-sm text-muted-foreground">Automate workflows with 5000+ apps</p>
-                      </div>
-                    </div>
-                    <Button variant="outline">Connect</Button>
-                  </div>
-                </div>
-                <Button className="w-full">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Integration Settings
-                </Button>
-              </CardContent>
-            </Card>
+            <IntegrationsTab />
           </TabsContent>
         </Tabs>
       </div>
