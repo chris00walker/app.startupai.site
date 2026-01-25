@@ -3,11 +3,15 @@
  *
  * DELETE: Revoke a specific session by ID
  *
+ * Uses custom user_sessions table to track revoked sessions.
+ * The session token becomes invalid and future requests will fail validation.
+ *
  * @story US-AS05
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logSessionRevocation } from '@/lib/security/audit-log';
 
 export async function DELETE(
   request: NextRequest,
@@ -23,26 +27,57 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get current session to prevent self-revocation
-    const { data: sessionData } = await supabase.auth.getSession();
-    const currentSessionId = sessionData.session?.access_token.slice(-8);
+    // Verify the session belongs to this user and get its status
+    const { data: session, error: fetchError } = await supabase
+      .from('user_sessions')
+      .select('id, is_current, revoked_at')
+      .eq('id', sessionId)
+      .eq('user_id', user.id)
+      .single();
 
-    if (sessionId === currentSessionId) {
+    if (fetchError || !session) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
+    }
+
+    // Prevent revoking current session
+    if (session.is_current) {
       return NextResponse.json(
         { error: 'Cannot revoke current session. Use logout instead.' },
         { status: 400 }
       );
     }
 
-    // Note: Supabase doesn't provide a direct API to revoke individual sessions
-    // by session ID. In production, this would require:
-    // 1. Using the Supabase Admin API to revoke specific refresh tokens
-    // 2. Or maintaining a custom sessions table with revocation capability
-    // For now, we return a message indicating this limitation.
+    // Check if already revoked
+    if (session.revoked_at) {
+      return NextResponse.json(
+        { error: 'Session already revoked' },
+        { status: 400 }
+      );
+    }
+
+    // Mark session as revoked
+    const { error: updateError } = await supabase
+      .from('user_sessions')
+      .update({ revoked_at: new Date().toISOString() })
+      .eq('id', sessionId);
+
+    if (updateError) {
+      console.error('[api/settings/security/sessions/[id]] Error revoking session:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to revoke session' },
+        { status: 500 }
+      );
+    }
+
+    // Log the revocation
+    logSessionRevocation(user.id, sessionId);
 
     return NextResponse.json({
-      success: false,
-      message: 'Individual session revocation requires additional infrastructure. Use "Sign out all other devices" instead.',
+      success: true,
+      message: 'Session revoked successfully',
     });
 
   } catch (error) {

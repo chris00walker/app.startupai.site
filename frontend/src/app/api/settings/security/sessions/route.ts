@@ -46,11 +46,12 @@ export async function GET() {
     const { data: sessionData } = await supabase.auth.getSession();
     const currentAccessToken = sessionData?.session?.access_token;
 
-    // Query user_sessions table
+    // Query user_sessions table (exclude revoked sessions from main list)
     const { data: sessions, error: queryError } = await supabase
       .from('user_sessions')
       .select('*')
       .eq('user_id', user.id)
+      .is('revoked_at', null)
       .order('last_active_at', { ascending: false });
 
     if (queryError) {
@@ -65,7 +66,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch sessions' }, { status: 500 });
     }
 
-    // Mark which session is current (by comparing with stored token or using heuristics)
+    // Process sessions for response
     const processedSessions = (sessions || []).map(session => ({
       id: session.id,
       deviceName: session.device_name || 'Unknown Device',
@@ -184,15 +185,16 @@ export async function DELETE() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Delete all sessions for this user from our tracking table
-    const { error: deleteError } = await supabase
+    // Mark all non-current sessions as revoked (keep for audit trail)
+    const { error: revokeError } = await supabase
       .from('user_sessions')
-      .delete()
+      .update({ revoked_at: new Date().toISOString() })
       .eq('user_id', user.id)
-      .eq('is_current', false);
+      .eq('is_current', false)
+      .is('revoked_at', null);
 
-    if (deleteError) {
-      console.error('[api/settings/security/sessions] Error deleting sessions:', deleteError);
+    if (revokeError) {
+      console.error('[api/settings/security/sessions] Error revoking sessions:', revokeError);
     }
 
     // Log session revocation before signing out (user context will be lost after)

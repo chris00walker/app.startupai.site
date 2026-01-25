@@ -14,8 +14,72 @@ import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
 import { UAParser } from 'ua-parser-js';
 
 /**
+ * Check if a login is suspicious based on user's history
+ * Returns { isSuspicious: boolean, reasons: string[] }
+ */
+async function detectSuspiciousLogin(
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string,
+  currentIp: string,
+  currentDeviceType: string
+): Promise<{ isSuspicious: boolean; reasons: string[] }> {
+  const reasons: string[] = [];
+
+  try {
+    // Get recent successful logins (last 30 days, max 10)
+    const { data: recentLogins, error } = await supabase
+      .from('login_history')
+      .select('ip_address, device_type, created_at')
+      .eq('user_id', userId)
+      .eq('success', true)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error || !recentLogins || recentLogins.length === 0) {
+      // First login or error - not suspicious
+      return { isSuspicious: false, reasons: [] };
+    }
+
+    // Check if IP is new (not in recent logins)
+    const knownIps = new Set(recentLogins.map(l => l.ip_address).filter(Boolean));
+    if (currentIp && currentIp !== 'unknown' && !knownIps.has(currentIp)) {
+      reasons.push(`New IP address: ${currentIp}`);
+    }
+
+    // Check if device type is new
+    const knownDevices = new Set(recentLogins.map(l => l.device_type).filter(Boolean));
+    if (currentDeviceType && !knownDevices.has(currentDeviceType)) {
+      reasons.push(`New device type: ${currentDeviceType}`);
+    }
+
+    // Check for login from different IP within short time window (potential session hijacking)
+    const lastLogin = recentLogins[0];
+    if (lastLogin) {
+      const lastLoginTime = new Date(lastLogin.created_at).getTime();
+      const now = Date.now();
+      const hoursSinceLastLogin = (now - lastLoginTime) / (1000 * 60 * 60);
+
+      // If logging in from different IP within 1 hour, flag as suspicious
+      if (hoursSinceLastLogin < 1 && lastLogin.ip_address !== currentIp && currentIp !== 'unknown') {
+        reasons.push(`Login from different IP within ${Math.round(hoursSinceLastLogin * 60)} minutes`);
+      }
+    }
+
+  } catch (error) {
+    console.error('Error detecting suspicious login:', error);
+    // Don't flag as suspicious on error
+    return { isSuspicious: false, reasons: [] };
+  }
+
+  return { isSuspicious: reasons.length > 0, reasons };
+}
+
+/**
  * Record login event directly to login_history table
+ * Includes suspicious login detection
  * Non-blocking - failures are logged but don't affect auth flow
+ *
+ * @story US-AS04
  */
 async function recordLoginEvent(
   request: NextRequest,
@@ -44,7 +108,30 @@ async function recordLoginEvent(
       deviceType = 'tablet';
     }
 
-    // Insert login record directly
+    // Detect suspicious login patterns
+    const { isSuspicious, reasons } = await detectSuspiciousLogin(
+      supabase,
+      userId,
+      ipAddress,
+      deviceType
+    );
+
+    if (isSuspicious) {
+      console.warn(`Suspicious login detected for user ${userId}:`, reasons);
+
+      // Log to security audit log
+      await supabase.from('security_audit_log').insert({
+        user_id: userId,
+        event_type: 'SUSPICIOUS_ACTIVITY',
+        event_description: `Suspicious login detected: ${reasons.join('; ')}`,
+        severity: 'warning',
+        ip_address: ipAddress,
+        user_agent: userAgent.substring(0, 500),
+        metadata: JSON.stringify({ reasons, loginMethod }),
+      });
+    }
+
+    // Insert login record
     const { error } = await supabase
       .from('login_history')
       .insert({
@@ -56,13 +143,13 @@ async function recordLoginEvent(
         browser: browser.name ? `${browser.name} ${browser.version || ''}`.trim() : null,
         operating_system: os.name ? `${os.name} ${os.version || ''}`.trim() : null,
         success: true,
-        is_suspicious: false,
+        is_suspicious: isSuspicious,
       });
 
     if (error) {
       console.error('Failed to record login event:', error);
     } else {
-      console.log('Login event recorded for user:', userId);
+      console.log(`Login event recorded for user: ${userId}${isSuspicious ? ' (SUSPICIOUS)' : ''}`);
     }
   } catch (error) {
     // Log but don't fail the auth flow

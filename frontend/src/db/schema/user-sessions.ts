@@ -32,6 +32,9 @@ export const userSessions = pgTable('user_sessions', {
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
+
+  // Revocation tracking
+  revokedAt: timestamp('revoked_at', { withTimezone: true }), // When session was revoked (null = active)
 });
 
 export type UserSession = typeof userSessions.$inferSelect;
