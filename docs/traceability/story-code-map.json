@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-25T02:29:14.327Z",
+    "generated_at": "2026-01-25T14:41:32.096Z",
     "version": "1.0.0",
     "story_count": 187,
-    "annotated_file_count": 219
+    "annotated_file_count": 273
   },
   "stories": {
     "US-F01": {
@@ -694,7 +694,7 @@
         "users",
         "consultant_profiles"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-CT02": {
       "title": "Explore Portfolio with Mock Clients",
@@ -712,7 +712,7 @@
       "db_tables": [
         "consultant_clients"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "Mock clients with sample data"
     },
     "US-CT03": {
@@ -731,7 +731,7 @@
       "db_tables": [
         "users"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "Upgrade prompt on real invite attempt"
     },
     "US-CT04": {
@@ -751,7 +751,7 @@
         "users",
         "usage_quotas"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-CT05": {
       "title": "Upgrade to Consultant Plan",
@@ -770,7 +770,7 @@
         "users",
         "stripe_customers"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-CT06": {
       "title": "Experience Post-Upgrade Orientation",
@@ -788,7 +788,7 @@
       "db_tables": [
         "users"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-H01": {
       "title": "Review Discovery Output (Founder's Brief + VPC)",
@@ -1267,7 +1267,7 @@
       "db_tables": [
         "support_tickets"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-S02": {
       "title": "View Help Articles",
@@ -1283,7 +1283,7 @@
       ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "Help articles - may use external CMS"
     },
     "US-S03": {
@@ -1302,7 +1302,7 @@
       "db_tables": [
         "support_tickets"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-S04": {
       "title": "Request Data Export (GDPR)",
@@ -1321,7 +1321,7 @@
         "users",
         "data_exports"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "GDPR right of access"
     },
     "US-S05": {
@@ -1340,7 +1340,7 @@
       "db_tables": [
         "users"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "GDPR right to erasure"
     },
     "US-O01": {
@@ -1360,7 +1360,7 @@
         "users",
         "stripe_subscriptions"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-O02": {
       "title": "Complete Exit Survey",
@@ -1378,7 +1378,7 @@
       "db_tables": [
         "exit_surveys"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-O03": {
       "title": "View Data Retention Notice",
@@ -1396,7 +1396,7 @@
       "db_tables": [
         "users"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "30-day grace + 60-day retention"
     },
     "US-O04": {
@@ -1416,7 +1416,7 @@
         "users",
         "stripe_subscriptions"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-O05": {
       "title": "Win-Back Email Response",
@@ -1432,7 +1432,7 @@
       ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "Win-back emails at 7/30/60/90 days"
     },
     "US-B01": {
@@ -1451,7 +1451,7 @@
       "db_tables": [
         "stripe_invoices"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-B02": {
       "title": "Download Invoice",
@@ -1469,7 +1469,7 @@
       "db_tables": [
         "stripe_invoices"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-B03": {
       "title": "Update Payment Method",
@@ -1487,7 +1487,7 @@
       "db_tables": [
         "stripe_payment_methods"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-B04": {
       "title": "Handle Payment Failure",
@@ -1506,7 +1506,7 @@
         "users",
         "stripe_subscriptions"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "6-stage dunning timeline"
     },
     "US-B05": {
@@ -1525,7 +1525,7 @@
       "db_tables": [
         "stripe_refunds"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "4-tier refund policy"
     },
     "US-B06": {
@@ -1545,7 +1545,7 @@
         "users",
         "stripe_subscriptions"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-B07": {
       "title": "View Tax Invoice (VAT/GST)",
@@ -1564,7 +1564,7 @@
         "users",
         "stripe_tax_ids"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "VIES/HMRC/ABN validation"
     },
     "US-B08": {
@@ -1583,7 +1583,7 @@
       "db_tables": [
         "stripe_coupons"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-B09": {
       "title": "Switch Billing Cycle",
@@ -1602,7 +1602,7 @@
         "users",
         "stripe_subscriptions"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-B10": {
       "title": "Resume After Payment Recovery",
@@ -1621,7 +1621,7 @@
         "users",
         "stripe_subscriptions"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-N01": {
       "title": "Receive In-App Notification",
@@ -1639,7 +1639,7 @@
       "db_tables": [
         "notifications"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-N02": {
       "title": "Receive Email Notification",
@@ -1658,7 +1658,7 @@
         "notifications",
         "email_queue"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-N03": {
       "title": "Manage Notification Preferences",
@@ -1702,7 +1702,7 @@
         "notifications",
         "approval_requests"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "partial",
       "notes": "6-stage escalation timeline"
     },
     "US-N05": {
@@ -1721,7 +1721,7 @@
       "db_tables": [
         "notification_preferences"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-AU01": {
       "title": "Log In to Product App",
@@ -2590,7 +2590,17 @@
       "api_routes": [],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "../startupai-crew/src/tools/__init__.py",
+        "../startupai-crew/src/tools/ads/__init__.py",
+        "../startupai-crew/src/tools/ads/google.py",
+        "../startupai-crew/src/tools/ads/interface.py",
+        "../startupai-crew/src/tools/ads/linkedin.py",
+        "../startupai-crew/src/tools/ads/meta.py",
+        "../startupai-crew/src/tools/ads/pinterest.py",
+        "../startupai-crew/src/tools/ads/tiktok.py",
+        "../startupai-crew/src/tools/ads/x.py"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -2604,7 +2614,17 @@
       "api_routes": [],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "../startupai-crew/src/tools/__init__.py",
+        "../startupai-crew/src/tools/ads/__init__.py",
+        "../startupai-crew/src/tools/ads/google.py",
+        "../startupai-crew/src/tools/ads/interface.py",
+        "../startupai-crew/src/tools/ads/linkedin.py",
+        "../startupai-crew/src/tools/ads/meta.py",
+        "../startupai-crew/src/tools/ads/pinterest.py",
+        "../startupai-crew/src/tools/ads/tiktok.py",
+        "../startupai-crew/src/tools/ads/x.py"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -2619,7 +2639,17 @@
       "api_routes": [],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "../startupai-crew/src/tools/__init__.py",
+        "../startupai-crew/src/tools/ads/__init__.py",
+        "../startupai-crew/src/tools/ads/google.py",
+        "../startupai-crew/src/tools/ads/interface.py",
+        "../startupai-crew/src/tools/ads/linkedin.py",
+        "../startupai-crew/src/tools/ads/meta.py",
+        "../startupai-crew/src/tools/ads/pinterest.py",
+        "../startupai-crew/src/tools/ads/tiktok.py",
+        "../startupai-crew/src/tools/ads/x.py"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -2634,7 +2664,10 @@
       "api_routes": [],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "../startupai-crew/src/tools/__init__.py",
+        "../startupai-crew/src/tools/ads/__init__.py"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -2648,7 +2681,11 @@
       "api_routes": [],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "../startupai-crew/src/tools/__init__.py",
+        "../startupai-crew/src/tools/ads/__init__.py",
+        "../startupai-crew/src/tools/ads/budget.py"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -2730,11 +2767,20 @@
     },
     "US-A01": {
       "title": "Search and Find Users",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
+      "components": [
+        "frontend/src/components/admin/UserSearchForm.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/users/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/api/response.ts",
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "19-admin-user-management.spec.ts"
@@ -2742,18 +2788,26 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
+        "user_profiles",
         "projects"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "User search by email, name, project ID"
     },
     "US-A02": {
       "title": "View User Profile and State",
       "components": [],
-      "api_routes": [],
-      "pages": [],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/[id]/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/users/[id]/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/api/response.ts",
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "19-admin-user-management.spec.ts"
@@ -2761,19 +2815,30 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
+        "user_profiles",
         "projects",
         "approval_requests"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "User profile view with state and history"
     },
     "US-A03": {
       "title": "Impersonate User (Read-Only)",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/admin/ImpersonationBanner.tsx",
+        "frontend/src/contexts/ImpersonationContext.tsx",
+        "frontend/src/db/schema/admin-sessions.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/[id]/impersonate/route.ts"
+      ],
       "pages": [],
-      "hooks": [],
-      "lib": [],
+      "hooks": [
+        "frontend/src/hooks/useImpersonation.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "19-admin-user-management.spec.ts"
@@ -2781,19 +2846,29 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
-        "audit_logs"
+        "user_profiles",
+        "admin_audit_log"
       ],
-      "implementation_status": "gap",
-      "notes": "Read-only impersonation"
+      "implementation_status": "complete",
+      "notes": "Read-only impersonation with audit logging"
     },
     "US-A04": {
       "title": "Retry Failed Workflow",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
+      "components": [
+        "frontend/src/components/admin/WorkflowRetryDialog.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/workflows/[id]/retry/route.ts",
+        "frontend/src/app/api/admin/workflows/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/workflows/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/api/response.ts",
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "20-admin-operations.spec.ts"
@@ -2802,20 +2877,29 @@
       "unit_tests": [],
       "db_tables": [
         "crewai_validation_states",
-        "audit_logs"
+        "admin_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Workflow retry with Modal integration"
     },
     "US-A05": {
       "title": "View System Health Dashboard",
-      "components": [],
+      "components": [
+        "frontend/src/components/admin/SystemHealthCard.tsx"
+      ],
       "api_routes": [
+        "frontend/src/app/api/admin/health/route.ts",
         "netlify/functions/crew-analyze-diagnostics.py",
         "../startupai-crew/src/modal_app/app.py"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/app/admin/health/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/api/response.ts",
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "20-admin-operations.spec.ts"
@@ -2825,16 +2909,28 @@
       "db_tables": [
         "crewai_validation_states"
       ],
-      "implementation_status": "gap",
-      "notes": "System health dashboard"
+      "implementation_status": "complete",
+      "notes": "System health dashboard - Modal, Supabase, workflows"
     },
     "US-A06": {
       "title": "Manage Feature Flags",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
+      "components": [
+        "frontend/src/components/admin/FeatureFlagEditor.tsx",
+        "frontend/src/db/schema/feature-flags.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/features/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/features/page.tsx"
+      ],
+      "hooks": [
+        "frontend/src/hooks/useFeatureFlag.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/api/response.ts",
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "20-admin-operations.spec.ts"
@@ -2843,17 +2939,29 @@
       "unit_tests": [],
       "db_tables": [
         "feature_flags",
-        "audit_logs"
+        "admin_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Feature flag management with rollout percentages"
     },
     "US-A07": {
       "title": "View Audit Logs",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
+      "components": [
+        "frontend/src/components/admin/AuditLogFilters.tsx",
+        "frontend/src/db/schema/admin-audit-log.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/audit/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/audit/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/admin/audit.ts",
+        "frontend/src/lib/api/response.ts",
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "21-admin-audit.spec.ts"
@@ -2861,17 +2969,26 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "audit_logs"
+        "admin_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Audit log viewer with filtering"
     },
     "US-A08": {
       "title": "Change User Role",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
+      "components": [
+        "frontend/src/components/admin/RoleChangeDialog.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/[id]/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/users/[id]/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/types/admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "19-admin-user-management.spec.ts"
@@ -2879,15 +2996,20 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
-        "audit_logs"
+        "user_profiles",
+        "admin_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Role change with audit trail"
     },
     "US-A09": {
       "title": "Export User Data",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/admin/DataExportPanel.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/[id]/export/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -2898,20 +3020,26 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
+        "user_profiles",
         "projects",
-        "audit_logs"
+        "admin_audit_log"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "complete",
       "notes": "GDPR data export"
     },
     "US-A10": {
       "title": "Run Data Integrity Check",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/admin/IntegrityCheckPanel.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/[id]/integrity/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/admin/integrity.ts"
+      ],
       "e2e_tests": [
         {
           "file": "21-admin-audit.spec.ts"
@@ -2919,19 +3047,26 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
+        "user_profiles",
         "projects"
       ],
-      "implementation_status": "gap",
+      "implementation_status": "complete",
       "notes": "Data integrity check"
     },
     "US-A11": {
       "title": "Admin Login and Role Verification",
-      "components": [],
+      "components": [
+        "frontend/src/components/admin/AdminLayout.tsx",
+        "frontend/src/components/admin/AdminNav.tsx"
+      ],
       "api_routes": [],
-      "pages": [],
+      "pages": [
+        "frontend/src/app/admin/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/auth/validate-admin.ts"
+      ],
       "e2e_tests": [
         {
           "file": "19-admin-user-management.spec.ts"
@@ -2939,16 +3074,23 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
-        "audit_logs"
+        "user_profiles",
+        "admin_audit_log"
       ],
-      "implementation_status": "gap",
-      "notes": "Admin role verification"
+      "implementation_status": "complete",
+      "notes": "Admin role verification in layout"
     },
     "US-A12": {
       "title": "Manage User Billing Issues",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/admin/BillingActionsPanel.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/users/[id]/billing/credit/route.ts",
+        "frontend/src/app/api/admin/users/[id]/billing/refund/route.ts",
+        "frontend/src/app/api/admin/users/[id]/billing/retry/route.ts",
+        "frontend/src/app/api/admin/users/[id]/billing/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -2959,12 +3101,12 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
+        "user_profiles",
         "stripe_customers",
-        "audit_logs"
+        "admin_audit_log"
       ],
-      "implementation_status": "gap",
-      "notes": "Billing management"
+      "implementation_status": "complete",
+      "notes": "Billing management panel"
     },
     "US-AM01": {
       "title": "Connect Ad Platform Account",
@@ -3056,7 +3198,9 @@
         "frontend/src/app/admin/ad-platforms/page.tsx"
       ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "../startupai-crew/src/tools/ads/budget.py"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -4876,6 +5020,73 @@
         "US-PR04"
       ]
     },
+    "../startupai-crew/src/tools/__init__.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03",
+        "US-AC04",
+        "US-AC05"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/__init__.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03",
+        "US-AC04",
+        "US-AC05"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/google.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/interface.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/linkedin.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/meta.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/pinterest.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/tiktok.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/x.py": {
+      "stories": [
+        "US-AC01",
+        "US-AC02",
+        "US-AC03"
+      ]
+    },
     "frontend/src/db/schema/ad-performance.ts": {
       "stories": [
         "US-AC03",
@@ -4887,6 +5098,12 @@
       "stories": [
         "US-AC05",
         "US-AM04",
+        "US-AM05"
+      ]
+    },
+    "../startupai-crew/src/tools/ads/budget.py": {
+      "stories": [
+        "US-AC05",
         "US-AM05"
       ]
     },
@@ -4902,6 +5119,43 @@
         "US-BI05"
       ]
     },
+    "frontend/src/components/admin/UserSearchForm.tsx": {
+      "stories": [
+        "US-A01"
+      ]
+    },
+    "frontend/src/app/api/admin/users/route.ts": {
+      "stories": [
+        "US-A01"
+      ]
+    },
+    "frontend/src/app/admin/users/page.tsx": {
+      "stories": [
+        "US-A01"
+      ]
+    },
+    "frontend/src/lib/api/response.ts": {
+      "stories": [
+        "US-A01",
+        "US-A02",
+        "US-A04",
+        "US-A05",
+        "US-A06",
+        "US-A07"
+      ]
+    },
+    "frontend/src/lib/types/admin.ts": {
+      "stories": [
+        "US-A01",
+        "US-A02",
+        "US-A03",
+        "US-A04",
+        "US-A05",
+        "US-A06",
+        "US-A07",
+        "US-A08"
+      ]
+    },
     "frontend/tests/e2e/19-admin-user-management.spec.ts": {
       "stories": [
         "US-A01",
@@ -4911,6 +5165,63 @@
         "US-A11"
       ]
     },
+    "frontend/src/app/api/admin/users/[id]/route.ts": {
+      "stories": [
+        "US-A02",
+        "US-A08"
+      ]
+    },
+    "frontend/src/app/admin/users/[id]/page.tsx": {
+      "stories": [
+        "US-A02",
+        "US-A08"
+      ]
+    },
+    "frontend/src/components/admin/ImpersonationBanner.tsx": {
+      "stories": [
+        "US-A03"
+      ]
+    },
+    "frontend/src/contexts/ImpersonationContext.tsx": {
+      "stories": [
+        "US-A03"
+      ]
+    },
+    "frontend/src/db/schema/admin-sessions.ts": {
+      "stories": [
+        "US-A03"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/impersonate/route.ts": {
+      "stories": [
+        "US-A03"
+      ]
+    },
+    "frontend/src/hooks/useImpersonation.ts": {
+      "stories": [
+        "US-A03"
+      ]
+    },
+    "frontend/src/components/admin/WorkflowRetryDialog.tsx": {
+      "stories": [
+        "US-A04"
+      ]
+    },
+    "frontend/src/app/api/admin/workflows/[id]/retry/route.ts": {
+      "stories": [
+        "US-A04"
+      ]
+    },
+    "frontend/src/app/api/admin/workflows/route.ts": {
+      "stories": [
+        "US-A04"
+      ]
+    },
+    "frontend/src/app/admin/workflows/page.tsx": {
+      "stories": [
+        "US-A04"
+      ]
+    },
     "frontend/tests/e2e/20-admin-operations.spec.ts": {
       "stories": [
         "US-A04",
@@ -4918,9 +5229,74 @@
         "US-A06"
       ]
     },
+    "frontend/src/components/admin/SystemHealthCard.tsx": {
+      "stories": [
+        "US-A05"
+      ]
+    },
+    "frontend/src/app/api/admin/health/route.ts": {
+      "stories": [
+        "US-A05"
+      ]
+    },
     "netlify/functions/crew-analyze-diagnostics.py": {
       "stories": [
         "US-A05"
+      ]
+    },
+    "frontend/src/app/admin/health/page.tsx": {
+      "stories": [
+        "US-A05"
+      ]
+    },
+    "frontend/src/components/admin/FeatureFlagEditor.tsx": {
+      "stories": [
+        "US-A06"
+      ]
+    },
+    "frontend/src/db/schema/feature-flags.ts": {
+      "stories": [
+        "US-A06"
+      ]
+    },
+    "frontend/src/app/api/admin/features/route.ts": {
+      "stories": [
+        "US-A06"
+      ]
+    },
+    "frontend/src/app/admin/features/page.tsx": {
+      "stories": [
+        "US-A06"
+      ]
+    },
+    "frontend/src/hooks/useFeatureFlag.ts": {
+      "stories": [
+        "US-A06"
+      ]
+    },
+    "frontend/src/components/admin/AuditLogFilters.tsx": {
+      "stories": [
+        "US-A07"
+      ]
+    },
+    "frontend/src/db/schema/admin-audit-log.ts": {
+      "stories": [
+        "US-A07"
+      ]
+    },
+    "frontend/src/app/api/admin/audit/route.ts": {
+      "stories": [
+        "US-A07"
+      ]
+    },
+    "frontend/src/app/admin/audit/page.tsx": {
+      "stories": [
+        "US-A07"
+      ]
+    },
+    "frontend/src/lib/admin/audit.ts": {
+      "stories": [
+        "US-A07"
       ]
     },
     "frontend/tests/e2e/21-admin-audit.spec.ts": {
@@ -4928,6 +5304,81 @@
         "US-A07",
         "US-A09",
         "US-A10",
+        "US-A12"
+      ]
+    },
+    "frontend/src/components/admin/RoleChangeDialog.tsx": {
+      "stories": [
+        "US-A08"
+      ]
+    },
+    "frontend/src/components/admin/DataExportPanel.tsx": {
+      "stories": [
+        "US-A09"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/export/route.ts": {
+      "stories": [
+        "US-A09"
+      ]
+    },
+    "frontend/src/components/admin/IntegrityCheckPanel.tsx": {
+      "stories": [
+        "US-A10"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/integrity/route.ts": {
+      "stories": [
+        "US-A10"
+      ]
+    },
+    "frontend/src/lib/admin/integrity.ts": {
+      "stories": [
+        "US-A10"
+      ]
+    },
+    "frontend/src/components/admin/AdminLayout.tsx": {
+      "stories": [
+        "US-A11"
+      ]
+    },
+    "frontend/src/components/admin/AdminNav.tsx": {
+      "stories": [
+        "US-A11"
+      ]
+    },
+    "frontend/src/app/admin/page.tsx": {
+      "stories": [
+        "US-A11"
+      ]
+    },
+    "frontend/src/lib/auth/validate-admin.ts": {
+      "stories": [
+        "US-A11"
+      ]
+    },
+    "frontend/src/components/admin/BillingActionsPanel.tsx": {
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/billing/credit/route.ts": {
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/billing/refund/route.ts": {
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/billing/retry/route.ts": {
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "frontend/src/app/api/admin/users/[id]/billing/route.ts": {
+      "stories": [
         "US-A12"
       ]
     },

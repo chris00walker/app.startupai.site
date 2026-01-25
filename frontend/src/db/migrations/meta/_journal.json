@@ -85,6 +85,13 @@
       "when": 1769306288960,
       "tag": "0011_odd_invisible_woman",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1769346984820,
+      "tag": "0012_living_firelord",
+      "breakpoints": true
     }
   ]
 }

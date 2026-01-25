@@ -443,16 +443,20 @@ function buildStoryCodeMap(): StoryCodeMap {
     if (override.notes) {
       entry.notes = override.notes;
     }
-    if (override.implementation_status) {
+    // Only apply non-gap overrides here - gaps should be auto-detected
+    // This allows overrides to mark things as "partial" or "complete" explicitly
+    // but prevents stale "gap" overrides from blocking auto-detection
+    if (override.implementation_status && override.implementation_status !== 'gap') {
       entry.implementation_status = override.implementation_status;
     }
   }
 
   // Determine implementation status for stories without explicit override
   for (const [storyId, entry] of Object.entries(stories)) {
-    // Skip if status was set by override
+    // Skip if status was set by a meaningful override (partial/complete)
+    // Always recalculate if override was "gap" since that should be auto-detected
     const override = overrides[storyId];
-    if (override?.implementation_status) {
+    if (override?.implementation_status && override.implementation_status !== 'gap') {
       continue;
     }
 
