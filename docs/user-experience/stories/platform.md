@@ -2322,3 +2322,261 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 **Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - AI Approvals
 
 ---
+
+## Ad Campaign Stories (US-AC)
+
+> **Added (2026-01-24)**: System stories for agent-driven ad campaign creation and management.
+
+### US-AC01: Create Ad Campaign for Founder
+
+**As an** AI Agent (Growth Crew),
+**I want to** create a targeted ad campaign using the founder's VPC data,
+**So that** desirability hypotheses can be validated with real market signals.
+
+**Acceptance Criteria:**
+
+**Given** a founder has approved their VPC in Phase 1
+**When** the Growth Crew initiates campaign creation
+**Then** the system should create an ad campaign record with: founder ID, project ID, hypothesis ID, targeting data derived from VPC
+
+**Given** a campaign is created
+**When** the budget is allocated
+**Then** the budget should be deducted from the founder's ad pool
+
+**Given** the founder's ad pool has insufficient balance
+**When** the agent attempts to create a campaign
+**Then** the campaign should fail with "insufficient_budget" status
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../../specs/phase-transitions.md) - Phase 2
+
+---
+
+### US-AC02: Deploy Ad Creative to Platform
+
+**As an** AI Agent (Growth Crew),
+**I want to** submit ad creatives (from template library) to the ad platform,
+**So that** campaigns can go live for validation.
+
+**Acceptance Criteria:**
+
+**Given** a campaign has approved creatives
+**When** the agent triggers deployment
+**Then** the creative should be submitted to the ad platform via API
+
+**Given** deployment succeeds
+**When** the platform returns a campaign ID
+**Then** the ad_campaigns record should be updated with platform_campaign_id
+
+**Given** deployment fails (e.g., policy violation)
+**When** the platform returns an error
+**Then** the campaign status should be "error" with the error message stored
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../../specs/phase-transitions.md) - Phase 2
+
+---
+
+### US-AC03: Monitor Ad Performance
+
+**As an** AI Agent (Growth Crew),
+**I want to** collect impressions, clicks, and conversions from running campaigns,
+**So that** performance data can inform validation decisions.
+
+**Acceptance Criteria:**
+
+**Given** a campaign is active on an ad platform
+**When** the monitoring job runs (every 15 minutes)
+**Then** a performance snapshot should be created with: impressions, clicks, conversions, spend
+
+**Given** performance data is collected
+**When** it is stored
+**Then** derived metrics (CTR, CPC) should be calculated automatically
+
+**Given** a campaign reaches its budget limit
+**When** the agent detects this
+**Then** the campaign status should change to "completed"
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../../specs/phase-transitions.md) - Phase 2
+
+---
+
+### US-AC04: Trigger Pivot Based on Ad Data
+
+**As an** AI Agent (Analyst),
+**I want to** analyze ad performance and recommend pivots,
+**So that** founders can make data-driven decisions about their validation path.
+
+**Acceptance Criteria:**
+
+**Given** a campaign has completed with sufficient data (100+ impressions)
+**When** the agent analyzes results
+**Then** it should calculate: problem resonance, zombie ratio, conversion rate
+
+**Given** the zombie ratio exceeds 70%
+**When** the agent evaluates the data
+**Then** it should recommend a value pivot
+
+**Given** problem resonance is below 30%
+**When** the agent evaluates the data
+**Then** it should recommend a segment pivot
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`phase-transitions.md`](../../specs/phase-transitions.md) - Phase 2 Pivot Flows
+
+---
+
+### US-AC05: Allocate Budget from Subscription
+
+**As the** System,
+**I want to** automatically allocate ad budget from founder subscriptions,
+**So that** founders receive the promised ad spend (~$450-525 total).
+
+**Acceptance Criteria:**
+
+**Given** a founder subscribes to a paid plan
+**When** the subscription is confirmed
+**Then** an ad_budget_pool record should be created with allocated amount
+
+**Given** the subscription renews
+**When** the renewal is processed
+**Then** the founder's ad pool should be topped up
+
+**Given** a campaign spends from the pool
+**When** spend is recorded
+**Then** the pool's total_spent should be updated and available_balance recalculated
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`billing-journey-map.md`](../journeys/platform/billing-journey-map.md) - Ad Budget Allocation
+
+---
+
+## Bi-directional Integration Stories (US-BI)
+
+> **Added (2026-01-24)**: Stories for importing data from and syncing data to external platforms.
+
+### US-BI01: Import Existing Business Data
+
+**As a** Founder,
+**I want to** import my existing business data from Notion, Google Drive, or other sources,
+**So that** I don't have to re-enter information I've already documented.
+
+**Acceptance Criteria:**
+
+**Given** I have connected an external service (e.g., Notion)
+**When** I click "Import Data" in my project
+**Then** I should see a list of importable items from that service
+
+**Given** I select items to import
+**When** I confirm the import
+**Then** the data should be pulled into StartupAI and available for mapping
+
+**Given** the import fails
+**When** I view the error
+**Then** I should see which items failed and why
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-BI02: Sync Project to External Platform
+
+**As a** Founder,
+**I want to** automatically sync my StartupAI project to connected platforms,
+**So that** my validation work is backed up and accessible elsewhere.
+
+**Acceptance Criteria:**
+
+**Given** I have enabled sync for an integration
+**When** I update my project (VPC, BMC, evidence)
+**Then** the changes should be synced to the external platform
+
+**Given** sync is enabled
+**When** I view my project settings
+**Then** I should see: sync status, last sync time, sync target location
+
+**Given** sync fails
+**When** I view the sync status
+**Then** I should see the error and option to retry
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-BI03: Map External Data to StartupAI Schema
+
+**As a** Founder,
+**I want to** map imported fields to VPC/BMC/TBI sections,
+**So that** external data fits into the StartupAI validation framework.
+
+**Acceptance Criteria:**
+
+**Given** I have imported data
+**When** I view the mapping interface
+**Then** I should see: imported fields on the left, StartupAI fields on the right
+
+**Given** I create a field mapping
+**When** I save the mapping
+**Then** the imported data should populate the corresponding StartupAI fields
+
+**Given** a field can't be automatically mapped
+**When** I view the mapping
+**Then** I should see it marked as "Unmapped" with option to manually assign
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-BI04: Select Integrations During Quickstart
+
+**As a** Founder who just completed Quick Start,
+**I want to** optionally connect integrations before starting validation,
+**So that** my existing tools are connected from the beginning.
+
+**Acceptance Criteria:**
+
+**Given** I have just submitted Quick Start
+**When** I land on the integrations page
+**Then** I should see: "Connect Your Tools (Optional)" with categorized integration options
+
+**Given** I select integrations to connect
+**When** I click "Connect" on each
+**Then** I should be guided through the OAuth flow for each selected integration
+
+**Given** I don't want to connect any integrations
+**When** I click "Skip"
+**Then** I should proceed directly to my project dashboard
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 6
+
+---
+
+### US-BI05: Enable/Disable Integrations in Settings
+
+**As any** authenticated user,
+**I want to** manage my active integrations via the Settings tab,
+**So that** I can add or remove connected services at any time.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → Integrations
+**When** I view my integrations
+**Then** I should see: connected integrations with status, available integrations to connect
+
+**Given** I want to enable a new integration
+**When** I click "Connect"
+**Then** I should be guided through the OAuth flow
+
+**Given** I want to disable an integration
+**When** I click "Disconnect"
+**Then** the connection should be revoked and sync should stop
+
+**E2E Test:** `28-integrations.spec.ts` - "should enable and disable integrations"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---

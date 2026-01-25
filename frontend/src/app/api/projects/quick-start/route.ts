@@ -12,6 +12,7 @@
  *   - additional_context?: string (max 10,000 chars)
  *   - client_id?: string (for consultant flow)
  *   - idempotency_key?: string (prevent duplicate submissions)
+ *   - redirect_to_integrations?: boolean (optional, redirect to integration selection)
  *
  * Response:
  *   - project_id: string
@@ -19,7 +20,7 @@
  *   - status: 'phase_1_started'
  *   - redirect_url: string
  *
- * @story US-F01, US-F07, US-E03
+ * @story US-F01, US-F07, US-E03, US-BI04
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -54,6 +55,7 @@ const quickStartRequestSchema = z.object({
     .optional(),
   client_id: z.string().uuid('Invalid client ID').optional(),
   idempotency_key: z.string().optional(),
+  redirect_to_integrations: z.boolean().optional(),
 });
 
 export type QuickStartRequest = z.infer<typeof quickStartRequestSchema>;
@@ -89,11 +91,15 @@ export async function POST(request: NextRequest) {
       cleanupIdempotencyCache();
       const cached = idempotencyCache.get(validatedData.idempotency_key);
       if (cached) {
+        // For cached responses, respect the redirect_to_integrations flag
+        const cachedRedirectUrl = validatedData.redirect_to_integrations
+          ? `/onboarding/integrations?project_id=${cached.project_id}`
+          : `/dashboard/projects/${cached.project_id}`;
         return NextResponse.json({
           project_id: cached.project_id,
           run_id: cached.run_id,
           status: 'phase_1_started',
-          redirect_url: `/dashboard/projects/${cached.project_id}`,
+          redirect_url: cachedRedirectUrl,
           cached: true,
         });
       }
@@ -219,11 +225,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Determine redirect URL based on integration selection preference
+    const redirectUrl = validatedData.redirect_to_integrations
+      ? `/onboarding/integrations?project_id=${project.id}`
+      : `/dashboard/projects/${project.id}`;
+
     return NextResponse.json({
       project_id: project.id,
       run_id: runId,
       status: 'phase_1_started',
-      redirect_url: `/dashboard/projects/${project.id}`,
+      redirect_url: redirectUrl,
     });
 
   } catch (error) {

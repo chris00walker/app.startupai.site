@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-24**: Added Integration, Preferences, and AI Approvals stories; total stories now 170.
+> **Updated 2026-01-24**: Added Ad Management, Ad Campaigns, and Bi-directional Integration stories; total stories now 187.
 
 ### Stories by Category
 
@@ -58,6 +58,8 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Authentication | US-AU01-AU03 | 3 | 1 | 2 |
 | Core Product | US-CP01-CP09 | 9 | 0 | 9 |
 | Admin | US-A01-A12 | 12 | 0 | 12 |
+| Ad Management | US-AM01-AM07 | 7 | 0 | 7 |
+| Ad Campaigns | US-AC01-AC05 | 5 | 0 | 5 |
 | Support | US-S01-S05 | 5 | 0 | 5 |
 | Offboarding | US-O01-O05 | 5 | 0 | 5 |
 | Billing | US-B01-B10 | 10 | 0 | 10 |
@@ -65,9 +67,10 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
 | Integration | US-I01-I06 | 6 | 0 | 6 |
+| Bi-directional Integration | US-BI01-BI05 | 5 | 0 | 5 |
 | Preferences | US-PR01-PR04 | 4 | 0 | 4 |
 | AI Approvals | US-AA01-AA03 | 3 | 0 | 3 |
-| **Total** | | **170** | **34** | **136** |
+| **Total** | | **187** | **34** | **153** |
 
 ### E2E Test File Mapping
 
@@ -121,7 +124,7 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-24**: Added Integration, Preferences, and AI Approvals stories; total stories now 170.
+> **Updated 2026-01-24**: Added Ad Management (US-AM), Ad Campaigns (US-AC), and Bi-directional Integration (US-BI) stories; total stories now 187.
 
 ### Stories by Category
 
@@ -132,6 +135,8 @@ Stories with test stubs created but not yet implemented:
 | Founder Trial (US-FT) | 4 | 4 | 0 |
 | Consultant Trial (US-CT) | 6 | 0 | 6 |
 | Admin (US-A) | 12 | 0 | 12 |
+| Ad Management (US-AM) | 7 | 0 | 7 |
+| Ad Campaigns (US-AC) | 5 | 0 | 5 |
 | HITL Checkpoint (US-H) | 8 | 8 | 0 |
 | Pivot Flow (US-P) | 4 | 4 | 0 |
 | Agent Brief (US-AB) | 3 | 0 | 3 |
@@ -150,9 +155,10 @@ Stories with test stubs created but not yet implemented:
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 15 | 0 | 15 |
 | Integration (US-I) | 6 | 0 | 6 |
+| Bi-directional Integration (US-BI) | 5 | 0 | 5 |
 | Preferences (US-PR) | 4 | 0 | 4 |
 | AI Approvals (US-AA) | 3 | 0 | 3 |
-| **Total** | **170** | **34** | **136** |
+| **Total** | **187** | **34** | **153** |
 
 ### HITL Story Priority
 
@@ -207,7 +213,8 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
-| 2026-01-24 | **Settings Page Stories:** Added Integration (US-I01-I06), Preferences (US-PR01-PR04), and AI Approvals (US-AA01-AA03) stories. Total stories now 170. |
+| 2026-01-24 | **Ad Platform & Integration Stories:** Added Ad Management (US-AM01-AM07), Ad Campaigns (US-AC01-AC05), and Bi-directional Integration (US-BI01-BI05) stories. Total stories now 187. |
+| 2026-01-24 | **Settings Page Stories:** Added Integration (US-I01-I06), Preferences (US-PR01-PR04), and AI Approvals (US-AA01-AA03) stories. |
 | 2026-01-23 | **Agent Story Restructure:** Replaced US-AJ01-07 and US-AG01-14 with new phase-organized stories: US-AB01-03 (Brief), US-AD01-10 (Discovery), US-ADB01-05 (Desirability), US-AFB01-03 (Feasibility), US-AVB01-05 (Viability), US-AH01-10 (HITL). Total stories now 157. |
 | 2026-01-23 | **Founder Hypotheses:** Added US-F17 (Hypotheses) and updated story totals to 134. |
 | 2026-01-23 | **Agent Specs:** Added US-AG01-AG06 (agent spec stories) and updated story totals to 133. |

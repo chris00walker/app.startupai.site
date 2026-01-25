@@ -1,12 +1,26 @@
 /**
  * User Preferences Schema
  *
- * Stores user platform preferences for theme, canvas defaults, and AI settings.
+ * Stores user platform preferences for theme, canvas defaults, AI settings,
+ * and enabled integrations for bi-directional sync.
  *
- * @story US-PR01, US-PR02, US-PR03, US-PR04
+ * @story US-PR01, US-PR02, US-PR03, US-PR04, US-BI04, US-BI05
  */
 
-import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
+
+/**
+ * Type for enabled integrations tracking
+ * Stores which integrations the user has explicitly enabled
+ */
+export type EnabledIntegrationsConfig = {
+  /** Integration types the user has enabled (e.g., 'notion', 'google_drive') */
+  types: string[];
+  /** Whether integration selection was skipped during onboarding */
+  skippedOnboarding: boolean;
+  /** Last time integrations were configured */
+  lastConfiguredAt: string | null;
+};
 
 export const userPreferences = pgTable('user_preferences', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
@@ -23,6 +37,16 @@ export const userPreferences = pgTable('user_preferences', {
 
   // AI assistance level
   aiAssistanceLevel: text('ai_assistance_level').default('balanced').notNull(),
+
+  // Integration preferences (US-BI04, US-BI05)
+  enabledIntegrations: jsonb('enabled_integrations').$type<EnabledIntegrationsConfig>().default({
+    types: [],
+    skippedOnboarding: false,
+    lastConfiguredAt: null,
+  }),
+
+  // Whether to show integration discovery banner on dashboard
+  showIntegrationBanner: boolean('show_integration_banner').default(true),
 
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

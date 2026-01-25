@@ -13,6 +13,10 @@
  * - usage_quota: Usage limits and quotas
  * - crewai_validation_states: CrewAI validation state persistence
  * - business_model_canvas: Editable Business Model Canvas data
+ * - ad_platform_connections: Admin-managed ad platform integrations
+ * - ad_budget_pools: Founder ad budget allocations
+ * - ad_campaigns: Agent-created validation campaigns
+ * - ad_performance_snapshots: Time-series ad performance data
  */
 
 export * from './users';
@@ -34,3 +38,9 @@ export * from './login-history';
 export * from './mfa-recovery-codes';
 export * from './user-sessions';
 export * from './security-audit-log';
+
+// Ad Platform Infrastructure (US-AM, US-AC)
+export * from './ad-platforms';
+export * from './ad-budgets';
+export * from './ad-campaigns';
+export * from './ad-performance';

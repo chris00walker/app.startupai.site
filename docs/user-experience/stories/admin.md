@@ -347,3 +347,184 @@ last_reviewed: "2026-01-22"
 
 **E2E Test:** Gap - needs test
 **Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Phase 6, Step 12
+
+---
+
+## Ad Management Stories (US-AM)
+
+> **Added (2026-01-24)**: New story category for ad platform administration and budget management.
+
+### US-AM01: Connect Ad Platform Account
+
+**As an** Admin,
+**I want to** connect StartupAI's business account to ad platforms (Meta, Google, TikTok, etc.),
+**So that** agents can deploy validation campaigns on behalf of founders.
+
+**Acceptance Criteria:**
+
+**Given** I am logged in as an Admin
+**When** I navigate to `/admin/ad-platforms`
+**Then** I should see a list of supported ad platforms with connection status
+
+**Given** I click "Connect" on an ad platform
+**When** I complete the OAuth flow
+**Then** the platform should show as "Connected" with account details
+
+**Given** a platform connection fails
+**When** I view the error details
+**Then** I should see the failure reason and retry option
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---
+
+### US-AM02: Configure Platform API Credentials
+
+**As an** Admin,
+**I want to** set up API keys, OAuth tokens, and webhook URLs for ad platforms,
+**So that** agents can programmatically manage campaigns.
+
+**Acceptance Criteria:**
+
+**Given** I have connected an ad platform
+**When** I click "Configure Credentials"
+**Then** I should see fields for API key, access token, webhook URL
+
+**Given** I enter credentials
+**When** I click "Validate"
+**Then** the system should test the credentials and show success/failure
+
+**Given** credentials are validated
+**When** I save the configuration
+**Then** the credentials should be encrypted and stored securely
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---
+
+### US-AM03: Set Up Business Manager Access
+
+**As an** Admin,
+**I want to** configure agency-level access (Meta Business Suite, Google Ads Manager),
+**So that** StartupAI can manage ad accounts across multiple founders.
+
+**Acceptance Criteria:**
+
+**Given** I am configuring Meta integration
+**When** I set up Business Manager
+**Then** I should be able to specify the Business Manager ID and permissions
+
+**Given** I am configuring Google Ads integration
+**When** I set up Manager Account (MCC)
+**Then** I should be able to specify the MCC ID and link child accounts
+
+**Given** agency access is configured
+**When** an agent creates a campaign for a founder
+**Then** the campaign should be created under the agency structure
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---
+
+### US-AM04: Monitor Platform-Wide Ad Spend
+
+**As an** Admin,
+**I want to** view aggregate ad spend across all founders,
+**So that** I can track budget utilization and identify anomalies.
+
+**Acceptance Criteria:**
+
+**Given** I am on the admin ad dashboard
+**When** I view the spend summary
+**Then** I should see: total spend (all platforms), spend by platform, spend by founder
+
+**Given** I want to drill down
+**When** I click on a founder's spend
+**Then** I should see their individual campaign breakdown
+
+**Given** spend exceeds a threshold
+**When** the anomaly is detected
+**Then** I should see an alert notification
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---
+
+### US-AM05: Manage Ad Budget Allocation Rules
+
+**As an** Admin,
+**I want to** configure how subscription fees map to ad budgets,
+**So that** founders receive the promised ad spend from their subscription.
+
+**Acceptance Criteria:**
+
+**Given** I am on `/admin/ad-platforms/budget-rules`
+**When** I view the allocation settings
+**Then** I should see: percentage of subscription allocated to ads, per-campaign limits, rollover rules
+
+**Given** I update the allocation percentage
+**When** I save the changes
+**Then** new subscriptions should use the updated allocation
+
+**Given** I set a per-campaign limit (e.g., $50)
+**When** an agent creates a campaign
+**Then** the campaign budget should not exceed the limit
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---
+
+### US-AM06: View Platform Health Dashboard
+
+**As an** Admin,
+**I want to** see API status, rate limits, and credential expiry for all ad platforms,
+**So that** I can proactively address integration issues.
+
+**Acceptance Criteria:**
+
+**Given** I am on the ad platform health dashboard
+**When** I view platform status
+**Then** I should see: API health (green/yellow/red), rate limit usage, credential expiry dates
+
+**Given** a platform API is degraded
+**When** I view the dashboard
+**Then** I should see a yellow/red indicator with details
+
+**Given** credentials are expiring within 7 days
+**When** I view the dashboard
+**Then** I should see an expiry warning
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---
+
+### US-AM07: Handle Platform Integration Errors
+
+**As an** Admin,
+**I want to** receive alerts and resolve integration issues with ad platforms,
+**So that** founder campaigns are not blocked by technical problems.
+
+**Acceptance Criteria:**
+
+**Given** an ad platform integration error occurs
+**When** the error is detected
+**Then** I should receive an alert via email and in-app notification
+
+**Given** I view an integration error
+**When** I click "View Details"
+**Then** I should see: error code, error message, affected campaigns, suggested resolution
+
+**Given** I resolve an integration error
+**When** I click "Retry" or "Mark Resolved"
+**Then** the affected campaigns should resume or the error should be cleared
+
+**E2E Test:** Gap - needs test
+**Journey Reference:** [`admin-journey-map.md`](../journeys/platform/admin-journey-map.md) - Ad Platform Management
+
+---

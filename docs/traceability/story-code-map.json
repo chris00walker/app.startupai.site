@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-25T00:33:28.335Z",
+    "generated_at": "2026-01-25T02:29:14.327Z",
     "version": "1.0.0",
-    "story_count": 170,
-    "annotated_file_count": 202
+    "story_count": 187,
+    "annotated_file_count": 219
   },
   "stories": {
     "US-F01": {
@@ -858,7 +858,8 @@
     "US-H04": {
       "title": "Approve Campaign Launch",
       "components": [
-        "frontend/src/components/approvals/ApprovalList.tsx"
+        "frontend/src/components/approvals/ApprovalList.tsx",
+        "frontend/src/db/schema/ad-campaigns.ts"
       ],
       "api_routes": [
         "frontend/src/app/api/approvals/route.ts",
@@ -2303,6 +2304,7 @@
     "US-I01": {
       "title": "View Available Integrations",
       "components": [
+        "frontend/src/components/onboarding/IntegrationSelector.tsx",
         "frontend/src/components/settings/IntegrationsTab.tsx",
         "frontend/src/components/settings/integrations/IntegrationCard.tsx",
         "frontend/src/db/schema/integrations.ts",
@@ -2580,6 +2582,152 @@
       "db_tables": [],
       "implementation_status": "gap"
     },
+    "US-AC01": {
+      "title": "Create Ad Campaign for Founder",
+      "components": [
+        "frontend/src/db/schema/ad-campaigns.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AC02": {
+      "title": "Deploy Ad Creative to Platform",
+      "components": [
+        "frontend/src/db/schema/ad-campaigns.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AC03": {
+      "title": "Monitor Ad Performance",
+      "components": [
+        "frontend/src/db/schema/ad-campaigns.ts",
+        "frontend/src/db/schema/ad-performance.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AC04": {
+      "title": "Trigger Pivot Based on Ad Data",
+      "components": [
+        "frontend/src/db/schema/ad-campaigns.ts",
+        "frontend/src/db/schema/ad-performance.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AC05": {
+      "title": "Allocate Budget from Subscription",
+      "components": [
+        "frontend/src/db/schema/ad-budgets.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-BI01": {
+      "title": "Import Existing Business Data",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-BI02": {
+      "title": "Sync Project to External Platform",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-BI03": {
+      "title": "Map External Data to StartupAI Schema",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-BI04": {
+      "title": "Select Integrations During Quickstart",
+      "components": [
+        "frontend/src/components/dashboard/IntegrationBanner.tsx",
+        "frontend/src/components/onboarding/IntegrationSelector.tsx",
+        "frontend/src/db/schema/user-preferences.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/projects/quick-start/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/onboarding/integrations/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-BI05": {
+      "title": "Enable/Disable Integrations in Settings",
+      "components": [
+        "frontend/src/components/dashboard/IntegrationBanner.tsx",
+        "frontend/src/components/onboarding/IntegrationSelector.tsx",
+        "frontend/src/db/schema/user-preferences.ts"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/onboarding/integrations/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
     "US-A01": {
       "title": "Search and Find Users",
       "components": [],
@@ -2817,6 +2965,140 @@
       ],
       "implementation_status": "gap",
       "notes": "Billing management"
+    },
+    "US-AM01": {
+      "title": "Connect Ad Platform Account",
+      "components": [
+        "frontend/src/components/admin/PlatformConnectModal.tsx",
+        "frontend/src/db/schema/ad-platforms.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/ad-platforms/[id]/route.ts",
+        "frontend/src/app/api/admin/ad-platforms/[id]/status/route.ts",
+        "frontend/src/app/api/admin/ad-platforms/connect/route.ts",
+        "frontend/src/app/api/admin/ad-platforms/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AM02": {
+      "title": "Configure Platform API Credentials",
+      "components": [
+        "frontend/src/components/admin/PlatformConnectModal.tsx",
+        "frontend/src/db/schema/ad-platforms.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/ad-platforms/[id]/route.ts",
+        "frontend/src/app/api/admin/ad-platforms/connect/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AM03": {
+      "title": "Set Up Business Manager Access",
+      "components": [
+        "frontend/src/components/admin/PlatformConnectModal.tsx",
+        "frontend/src/db/schema/ad-platforms.ts"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AM04": {
+      "title": "Monitor Platform-Wide Ad Spend",
+      "components": [
+        "frontend/src/components/admin/AdAnalytics.tsx",
+        "frontend/src/db/schema/ad-budgets.ts",
+        "frontend/src/db/schema/ad-performance.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/ad-platforms/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AM05": {
+      "title": "Manage Ad Budget Allocation Rules",
+      "components": [
+        "frontend/src/components/admin/BudgetConfig.tsx",
+        "frontend/src/db/schema/ad-budgets.ts"
+      ],
+      "api_routes": [],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AM06": {
+      "title": "View Platform Health Dashboard",
+      "components": [
+        "frontend/src/components/admin/AdPlatformHealth.tsx",
+        "frontend/src/db/schema/ad-platforms.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/ad-platforms/[id]/health/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AM07": {
+      "title": "Handle Platform Integration Errors",
+      "components": [
+        "frontend/src/components/admin/AdPlatformHealth.tsx",
+        "frontend/src/db/schema/ad-platforms.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/admin/ad-platforms/[id]/health/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/admin/ad-platforms/page.tsx"
+      ],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
     },
     "US-AB01": {
       "title": "Generate Founder's Brief from Quick Start Input",
@@ -3608,7 +3890,8 @@
       "stories": [
         "US-F01",
         "US-F07",
-        "US-E03"
+        "US-E03",
+        "US-BI04"
       ]
     },
     "frontend/src/app/auth/callback/route.ts": {
@@ -4004,6 +4287,15 @@
         "US-CT04",
         "US-CT05",
         "US-CT06"
+      ]
+    },
+    "frontend/src/db/schema/ad-campaigns.ts": {
+      "stories": [
+        "US-H04",
+        "US-AC01",
+        "US-AC02",
+        "US-AC03",
+        "US-AC04"
       ]
     },
     "../startupai-crew/src/modal_app/phases/phase_2.py": {
@@ -4442,6 +4734,13 @@
         "US-MF15"
       ]
     },
+    "frontend/src/components/onboarding/IntegrationSelector.tsx": {
+      "stories": [
+        "US-I01",
+        "US-BI04",
+        "US-BI05"
+      ]
+    },
     "frontend/src/components/settings/IntegrationsTab.tsx": {
       "stories": [
         "US-I01",
@@ -4564,7 +4863,9 @@
         "US-PR01",
         "US-PR02",
         "US-PR03",
-        "US-PR04"
+        "US-PR04",
+        "US-BI04",
+        "US-BI05"
       ]
     },
     "frontend/src/app/api/settings/preferences/route.ts": {
@@ -4573,6 +4874,32 @@
         "US-PR02",
         "US-PR03",
         "US-PR04"
+      ]
+    },
+    "frontend/src/db/schema/ad-performance.ts": {
+      "stories": [
+        "US-AC03",
+        "US-AC04",
+        "US-AM04"
+      ]
+    },
+    "frontend/src/db/schema/ad-budgets.ts": {
+      "stories": [
+        "US-AC05",
+        "US-AM04",
+        "US-AM05"
+      ]
+    },
+    "frontend/src/components/dashboard/IntegrationBanner.tsx": {
+      "stories": [
+        "US-BI04",
+        "US-BI05"
+      ]
+    },
+    "frontend/src/app/onboarding/integrations/page.tsx": {
+      "stories": [
+        "US-BI04",
+        "US-BI05"
       ]
     },
     "frontend/tests/e2e/19-admin-user-management.spec.ts": {
@@ -4602,6 +4929,78 @@
         "US-A09",
         "US-A10",
         "US-A12"
+      ]
+    },
+    "frontend/src/components/admin/PlatformConnectModal.tsx": {
+      "stories": [
+        "US-AM01",
+        "US-AM02",
+        "US-AM03"
+      ]
+    },
+    "frontend/src/db/schema/ad-platforms.ts": {
+      "stories": [
+        "US-AM01",
+        "US-AM02",
+        "US-AM03",
+        "US-AM06",
+        "US-AM07"
+      ]
+    },
+    "frontend/src/app/api/admin/ad-platforms/[id]/route.ts": {
+      "stories": [
+        "US-AM01",
+        "US-AM02"
+      ]
+    },
+    "frontend/src/app/api/admin/ad-platforms/[id]/status/route.ts": {
+      "stories": [
+        "US-AM01"
+      ]
+    },
+    "frontend/src/app/api/admin/ad-platforms/connect/route.ts": {
+      "stories": [
+        "US-AM01",
+        "US-AM02"
+      ]
+    },
+    "frontend/src/app/api/admin/ad-platforms/route.ts": {
+      "stories": [
+        "US-AM01",
+        "US-AM04"
+      ]
+    },
+    "frontend/src/app/admin/ad-platforms/page.tsx": {
+      "stories": [
+        "US-AM01",
+        "US-AM02",
+        "US-AM03",
+        "US-AM04",
+        "US-AM05",
+        "US-AM06",
+        "US-AM07"
+      ]
+    },
+    "frontend/src/components/admin/AdAnalytics.tsx": {
+      "stories": [
+        "US-AM04"
+      ]
+    },
+    "frontend/src/components/admin/BudgetConfig.tsx": {
+      "stories": [
+        "US-AM05"
+      ]
+    },
+    "frontend/src/components/admin/AdPlatformHealth.tsx": {
+      "stories": [
+        "US-AM06",
+        "US-AM07"
+      ]
+    },
+    "frontend/src/app/api/admin/ad-platforms/[id]/health/route.ts": {
+      "stories": [
+        "US-AM06",
+        "US-AM07"
       ]
     },
     "../startupai-crew/src/crews/discovery/brief_generation_crew.py": {

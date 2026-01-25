@@ -1,6 +1,6 @@
 # Story-Code Gap Report
 
-Generated: 2026-01-25T00:33:28.335Z
+Generated: 2026-01-25T02:29:14.327Z
 
 ## Stories Without Implementations
 
@@ -31,6 +31,9 @@ Generated: 2026-01-25T00:33:28.335Z
 | US-B08 | Apply Promo Code | Billing |
 | US-B09 | Switch Billing Cycle | Billing |
 | US-B10 | Resume After Payment Recovery | Billing |
+| US-BI01 | Import Existing Business Data | Billing |
+| US-BI02 | Sync Project to External Platform | Billing |
+| US-BI03 | Map External Data to StartupAI Schema | Billing |
 | US-CT01 | Complete Consultant Trial Onboarding | Consultant Trial |
 | US-CT02 | Explore Portfolio with Mock Clients | Consultant Trial |
 | US-CT03 | Attempt Real Client Invite (Upgrade Prompt) | Consultant Trial |
@@ -52,14 +55,14 @@ Generated: 2026-01-25T00:33:28.335Z
 | US-S04 | Request Data Export (GDPR) | Support |
 | US-S05 | Delete Account (GDPR) | Support |
 
-**Total Gaps: 45 / 170**
+**Total Gaps: 48 / 187**
 
 ## Gaps by Category
 
 | Category | Count |
 |----------|-------|
 | Admin | 15 |
-| Billing | 10 |
+| Billing | 13 |
 | Consultant Trial | 6 |
 | Notification | 4 |
 | Offboarding | 5 |
