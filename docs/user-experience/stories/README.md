@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-23**: Restructured agent stories (US-AJ/AG → US-AB/AD/ADB/AFB/AVB/AH); total stories now 157.
+> **Updated 2026-01-24**: Added Integration, Preferences, and AI Approvals stories; total stories now 170.
 
 ### Stories by Category
 
@@ -64,7 +64,10 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Notification | US-N01-N05 | 5 | 0 | 5 |
 | Account Settings | US-AS01-AS05 | 5 | 0 | 5 |
 | Marketing Funnel | US-MF01-MF15 | 15 | 0 | 15 |
-| **Total** | | **157** | **34** | **123** |
+| Integration | US-I01-I06 | 6 | 0 | 6 |
+| Preferences | US-PR01-PR04 | 4 | 0 | 4 |
+| AI Approvals | US-AA01-AA03 | 3 | 0 | 3 |
+| **Total** | | **170** | **34** | **136** |
 
 ### E2E Test File Mapping
 
@@ -118,7 +121,7 @@ Stories with test stubs created but not yet implemented:
 
 ## Updated Coverage Summary
 
-> **Updated 2026-01-23**: Restructured agent stories for JDTD effectiveness; total stories now 157.
+> **Updated 2026-01-24**: Added Integration, Preferences, and AI Approvals stories; total stories now 170.
 
 ### Stories by Category
 
@@ -146,7 +149,10 @@ Stories with test stubs created but not yet implemented:
 | Notification (US-N) | 5 | 0 | 5 |
 | Account Settings (US-AS) | 5 | 0 | 5 |
 | Marketing Funnel (US-MF) | 15 | 0 | 15 |
-| **Total** | **157** | **34** | **123** |
+| Integration (US-I) | 6 | 0 | 6 |
+| Preferences (US-PR) | 4 | 0 | 4 |
+| AI Approvals (US-AA) | 3 | 0 | 3 |
+| **Total** | **170** | **34** | **136** |
 
 ### HITL Story Priority
 
@@ -201,6 +207,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-24 | **Settings Page Stories:** Added Integration (US-I01-I06), Preferences (US-PR01-PR04), and AI Approvals (US-AA01-AA03) stories. Total stories now 170. |
 | 2026-01-23 | **Agent Story Restructure:** Replaced US-AJ01-07 and US-AG01-14 with new phase-organized stories: US-AB01-03 (Brief), US-AD01-10 (Discovery), US-ADB01-05 (Desirability), US-AFB01-03 (Feasibility), US-AVB01-05 (Viability), US-AH01-10 (HITL). Total stories now 157. |
 | 2026-01-23 | **Founder Hypotheses:** Added US-F17 (Hypotheses) and updated story totals to 134. |
 | 2026-01-23 | **Agent Specs:** Added US-AG01-AG06 (agent spec stories) and updated story totals to 133. |

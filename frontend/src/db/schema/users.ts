@@ -46,6 +46,11 @@ export const userProfiles = pgTable('user_profiles', {
   // 'consultant_trial' = exploring AI validation for clients
   trialIntent: text('trial_intent').default('founder_trial'),
 
+  // Extended profile fields (US-AS01)
+  timezone: text('timezone').default('America/New_York'),
+  language: text('language').default('English'),
+  bio: text('bio'),
+
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

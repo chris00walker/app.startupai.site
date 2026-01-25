@@ -37,8 +37,23 @@ import {
   Loader2,
   Bot,
   FolderArchive,
-  Users
+  Users,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Clock,
+  MapPin,
+  LogOut
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { ProjectsTab } from "@/components/settings/ProjectsTab"
 import { ClientsTab } from "@/components/settings/ClientsTab"
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab"
@@ -67,10 +82,39 @@ interface NotificationSettings {
 }
 
 interface SecuritySettings {
-  twoFactorAuth: boolean
+  twoFactorEnabled: boolean
   sessionTimeout: string
   apiKeyVisible: boolean
   lastPasswordChange: string
+}
+
+interface TwoFactorStatus {
+  enabled: boolean
+  factorId?: string
+  enrolledAt?: string
+}
+
+interface LoginHistoryEntry {
+  id: string
+  login_method: string
+  ip_address: string
+  browser: string
+  operating_system: string
+  device_type: string
+  created_at: string
+  success: boolean
+}
+
+interface SessionEntry {
+  id: string
+  deviceName: string
+  browser: string
+  operatingSystem: string
+  deviceType: string
+  ipAddress: string
+  isCurrent: boolean
+  lastActiveAt: string
+  createdAt: string
 }
 
 interface ApprovalSettings {
@@ -124,7 +168,7 @@ export default function SettingsPage() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('full_name, email, company, role')
+        .select('full_name, email, company, role, timezone, language, bio')
         .eq('id', user.id)
         .single()
 
@@ -134,9 +178,9 @@ export default function SettingsPage() {
           email: data.email || user.email || '',
           company: data.company || '',
           role: data.role || '',
-          timezone: "America/New_York",
-          language: "English",
-          bio: ""
+          timezone: data.timezone || 'America/New_York',
+          language: data.language || 'English',
+          bio: data.bio || ''
         })
       }
       setIsLoading(false)
@@ -145,7 +189,7 @@ export default function SettingsPage() {
     fetchUserProfile()
   }, [user])
 
-  // Demo notification settings
+  // Notification settings - loaded from API
   const [notifications, setNotifications] = useState<NotificationSettings>({
     emailNotifications: true,
     pushNotifications: true,
@@ -154,14 +198,129 @@ export default function SettingsPage() {
     systemAlerts: true,
     weeklyReports: false
   })
+  const [notificationsLoading, setNotificationsLoading] = useState(false)
 
-  // Demo security settings
+  // Fetch notification preferences
+  useEffect(() => {
+    async function fetchNotificationPreferences() {
+      if (!user) return
+
+      try {
+        const response = await fetch('/api/settings/notifications')
+        if (response.ok) {
+          const data = await response.json()
+          setNotifications({
+            emailNotifications: data.email_notifications ?? true,
+            pushNotifications: data.push_notifications ?? true,
+            workflowUpdates: data.workflow_updates ?? true,
+            clientUpdates: data.client_updates ?? true,
+            systemAlerts: data.system_alerts ?? true,
+            weeklyReports: data.weekly_reports ?? false,
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching notification preferences:', error)
+      }
+    }
+
+    fetchNotificationPreferences()
+  }, [user])
+
+  // Security settings - loaded from APIs
   const [security, setSecurity] = useState<SecuritySettings>({
-    twoFactorAuth: true,
+    twoFactorEnabled: false,
     sessionTimeout: "24h",
     apiKeyVisible: false,
-    lastPasswordChange: "2024-11-15"
+    lastPasswordChange: "Not available"
   })
+  const [twoFactorStatus, setTwoFactorStatus] = useState<TwoFactorStatus>({ enabled: false })
+  const [loginHistory, setLoginHistory] = useState<LoginHistoryEntry[]>([])
+  const [sessions, setSessions] = useState<SessionEntry[]>([])
+  const [securityLoading, setSecurityLoading] = useState(false)
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+
+  // Platform preferences - loaded from API
+  const [preferences, setPreferences] = useState({
+    theme: 'light',
+    defaultCanvasType: 'vpc',
+    autoSaveInterval: '5min',
+    aiAssistanceLevel: 'balanced',
+  })
+  const [preferencesLoading, setPreferencesLoading] = useState(false)
+
+  // Fetch platform preferences
+  useEffect(() => {
+    async function fetchPlatformPreferences() {
+      if (!user) return
+
+      try {
+        const response = await fetch('/api/settings/preferences')
+        if (response.ok) {
+          const data = await response.json()
+          setPreferences({
+            theme: data.theme || 'light',
+            defaultCanvasType: data.default_canvas_type || 'vpc',
+            autoSaveInterval: data.auto_save_interval || '5min',
+            aiAssistanceLevel: data.ai_assistance_level || 'balanced',
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching platform preferences:', error)
+      }
+    }
+
+    fetchPlatformPreferences()
+  }, [user])
+
+  // Fetch security data (2FA status, login history, sessions)
+  useEffect(() => {
+    async function fetchSecurityData() {
+      if (!user) return
+      setSecurityLoading(true)
+
+      try {
+        // Fetch 2FA status
+        const twoFaResponse = await fetch('/api/settings/security/2fa')
+        if (twoFaResponse.ok) {
+          const twoFaData = await twoFaResponse.json()
+          setTwoFactorStatus({
+            enabled: twoFaData.enabled,
+            factorId: twoFaData.factorId,
+            enrolledAt: twoFaData.enrolledAt,
+          })
+          setSecurity(prev => ({ ...prev, twoFactorEnabled: twoFaData.enabled }))
+        }
+
+        // Fetch login history
+        const historyResponse = await fetch('/api/settings/security/login-history?limit=5')
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json()
+          setLoginHistory(historyData.history || [])
+        }
+
+        // Fetch active sessions
+        const sessionsResponse = await fetch('/api/settings/security/sessions')
+        if (sessionsResponse.ok) {
+          const sessionsData = await sessionsResponse.json()
+          setSessions(sessionsData.sessions || [])
+        }
+      } catch (error) {
+        console.error('Error fetching security data:', error)
+      } finally {
+        setSecurityLoading(false)
+      }
+    }
+
+    fetchSecurityData()
+  }, [user])
 
   // Approval settings
   const [approvalSettings, setApprovalSettings] = useState<ApprovalSettings>({
@@ -185,6 +344,9 @@ export default function SettingsPage() {
       .update({
         full_name: userProfile.name,
         company: userProfile.company,
+        timezone: userProfile.timezone,
+        language: userProfile.language,
+        bio: userProfile.bio,
         // email and role are read-only, managed by auth
       })
       .eq('id', user.id)
@@ -197,14 +359,134 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSaveNotifications = () => {
-    console.log('Saving notifications:', notifications)
-    // TODO: Implement notification settings save
+  const handleSaveNotifications = async () => {
+    if (!user) return
+
+    setNotificationsLoading(true)
+    try {
+      const response = await fetch('/api/settings/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email_notifications: notifications.emailNotifications,
+          push_notifications: notifications.pushNotifications,
+          workflow_updates: notifications.workflowUpdates,
+          client_updates: notifications.clientUpdates,
+          system_alerts: notifications.systemAlerts,
+          weekly_reports: notifications.weeklyReports,
+        })
+      })
+
+      if (response.ok) {
+        alert('Notification settings saved successfully!')
+      } else {
+        const error = await response.json()
+        alert('Error saving notification settings: ' + (error.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error saving notification settings:', error)
+      alert('Error saving notification settings')
+    } finally {
+      setNotificationsLoading(false)
+    }
   }
 
-  const handleSaveSecurity = () => {
-    console.log('Saving security settings:', security)
-    // TODO: Implement security settings save
+  const handleChangePassword = async () => {
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Passwords do not match')
+      return
+    }
+
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters')
+      return
+    }
+
+    setPasswordError('')
+    setSecurityLoading(true)
+
+    try {
+      const response = await fetch('/api/settings/security/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setPasswordError(data.error || 'Failed to change password')
+        return
+      }
+
+      setPasswordSuccess(true)
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      setTimeout(() => {
+        setShowPasswordDialog(false)
+        setPasswordSuccess(false)
+      }, 2000)
+    } catch (error) {
+      setPasswordError('Network error. Please try again.')
+    } finally {
+      setSecurityLoading(false)
+    }
+  }
+
+  const handleRevokeAllSessions = async () => {
+    if (!confirm('This will sign you out from all devices. Continue?')) {
+      return
+    }
+
+    setSecurityLoading(true)
+    try {
+      const response = await fetch('/api/settings/security/sessions', {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        // User will be signed out, redirect to login
+        window.location.href = '/auth/login'
+      } else {
+        alert('Failed to revoke sessions')
+      }
+    } catch (error) {
+      alert('Network error. Please try again.')
+    } finally {
+      setSecurityLoading(false)
+    }
+  }
+
+  const handleSavePreferences = async () => {
+    if (!user) return
+
+    setPreferencesLoading(true)
+    try {
+      const response = await fetch('/api/settings/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          theme: preferences.theme,
+          default_canvas_type: preferences.defaultCanvasType,
+          auto_save_interval: preferences.autoSaveInterval,
+          ai_assistance_level: preferences.aiAssistanceLevel,
+        })
+      })
+
+      if (response.ok) {
+        alert('Preferences saved successfully!')
+      } else {
+        const error = await response.json()
+        alert('Error saving preferences: ' + (error.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error saving preferences:', error)
+      alert('Error saving preferences')
+    } finally {
+      setPreferencesLoading(false)
+    }
   }
 
   // Fetch approval settings
@@ -589,8 +871,12 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
-                <Button onClick={handleSaveNotifications} className="w-full">
-                  <Save className="mr-2 h-4 w-4" />
+                <Button onClick={handleSaveNotifications} disabled={notificationsLoading} className="w-full">
+                  {notificationsLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
                   Save Notification Settings
                 </Button>
               </CardContent>
@@ -599,6 +885,7 @@ export default function SettingsPage() {
 
           {/* Security Tab */}
           <TabsContent value="security" className="space-y-4">
+            {/* Password & 2FA Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -611,86 +898,228 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
+                  {/* Two-Factor Authentication */}
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Two-Factor Authentication</Label>
                       <p className="text-sm text-muted-foreground">Add an extra layer of security to your account</p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      {security.twoFactorAuth && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          <CheckCircle className="mr-1 h-3 w-3" />
-                          Enabled
-                        </Badge>
-                      )}
-                      <Switch
-                        checked={security.twoFactorAuth}
-                        onCheckedChange={(checked) => setSecurity({...security, twoFactorAuth: checked})}
-                      />
-                    </div>
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <Label>Session Timeout</Label>
-                    <Select value={security.sessionTimeout} onValueChange={(value) => setSecurity({...security, sessionTimeout: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1h">1 hour</SelectItem>
-                        <SelectItem value="8h">8 hours</SelectItem>
-                        <SelectItem value="24h">24 hours</SelectItem>
-                        <SelectItem value="7d">7 days</SelectItem>
-                        <SelectItem value="30d">30 days</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <Label>API Key</Label>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <div className="flex flex-1 items-center gap-2">
-                        <Input
-                          type={showApiKey ? "text" : "password"}
-                          value={showApiKey ? "sk-1234567890abcdef1234567890abcdef" : "••••••••••••••••••••••••••••••••"}
-                          readOnly
-                          className="font-mono text-xs sm:text-sm"
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="shrink-0"
-                          onClick={() => setShowApiKey(!showApiKey)}
-                        >
-                          {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {twoFactorStatus.enabled ? (
+                        <>
+                          <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            <CheckCircle className="mr-1 h-3 w-3" />
+                            Enabled
+                          </Badge>
+                          <Button variant="outline" size="sm" onClick={() => setShowTwoFactorDialog(true)}>
+                            Manage
+                          </Button>
+                        </>
+                      ) : (
+                        <Button onClick={() => setShowTwoFactorDialog(true)}>
+                          Enable 2FA
                         </Button>
-                      </div>
-                      <Button variant="outline" className="shrink-0">
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Regenerate
-                      </Button>
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Use this API key to integrate with external systems
-                    </p>
                   </div>
+
                   <Separator />
+
+                  {/* Password Change */}
                   <div className="space-y-2">
                     <Label>Password</Label>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <p className="text-sm text-muted-foreground">
-                        Last changed: {security.lastPasswordChange}
+                        Change your account password
                       </p>
-                      <Button variant="outline" className="w-full sm:w-auto">
-                        Change Password
-                      </Button>
+                      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full sm:w-auto">
+                            <Key className="mr-2 h-4 w-4" />
+                            Change Password
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Change Password</DialogTitle>
+                            <DialogDescription>
+                              Enter your current password and choose a new one.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            {passwordError && (
+                              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                                {passwordError}
+                              </div>
+                            )}
+                            {passwordSuccess && (
+                              <div className="text-sm text-green-600 bg-green-50 p-2 rounded">
+                                Password changed successfully!
+                              </div>
+                            )}
+                            <div className="space-y-2">
+                              <Label htmlFor="currentPassword">Current Password</Label>
+                              <Input
+                                id="currentPassword"
+                                type="password"
+                                value={passwordForm.currentPassword}
+                                onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="newPassword">New Password</Label>
+                              <Input
+                                id="newPassword"
+                                type="password"
+                                value={passwordForm.newPassword}
+                                onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                Must be at least 8 characters with uppercase, number, and special character.
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                              <Input
+                                id="confirmPassword"
+                                type="password"
+                                value={passwordForm.confirmPassword}
+                                onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+                              Cancel
+                            </Button>
+                            <Button onClick={handleChangePassword} disabled={securityLoading}>
+                              {securityLoading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                <Save className="mr-2 h-4 w-4" />
+                              )}
+                              Change Password
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleSaveSecurity} className="w-full">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Security Settings
-                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Active Sessions Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Monitor className="h-5 w-5" />
+                  <span>Active Sessions</span>
+                </CardTitle>
+                <CardDescription>
+                  Devices where you&apos;re currently signed in
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {securityLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : sessions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No active sessions found
+                  </p>
+                ) : (
+                  <>
+                    <div className="space-y-3">
+                      {sessions.map((session) => (
+                        <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            {session.deviceType === 'mobile' ? (
+                              <Smartphone className="h-5 w-5 text-muted-foreground" />
+                            ) : session.deviceType === 'tablet' ? (
+                              <Tablet className="h-5 w-5 text-muted-foreground" />
+                            ) : (
+                              <Monitor className="h-5 w-5 text-muted-foreground" />
+                            )}
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <span className="font-medium text-sm">{session.deviceName}</span>
+                                {session.isCurrent && (
+                                  <Badge variant="secondary" className="text-xs">This device</Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                <span>{new Date(session.lastActiveAt).toLocaleString()}</span>
+                                {session.ipAddress && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{session.ipAddress}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      variant="destructive"
+                      className="w-full"
+                      onClick={handleRevokeAllSessions}
+                      disabled={securityLoading}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out All Devices
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Login History Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5" />
+                  <span>Recent Login History</span>
+                </CardTitle>
+                <CardDescription>
+                  Your recent sign-in activity
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {securityLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                ) : loginHistory.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No login history available
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {loginHistory.map((entry) => (
+                      <div key={entry.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-2 h-2 rounded-full ${entry.success ? 'bg-green-500' : 'bg-red-500'}`} />
+                          <div>
+                            <div className="text-sm font-medium">
+                              {entry.browser || 'Unknown Browser'} on {entry.operating_system || 'Unknown OS'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {entry.ip_address} • {new Date(entry.created_at).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant={entry.login_method === 'password' ? 'outline' : 'secondary'}>
+                          {entry.login_method}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -711,7 +1140,7 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Theme</Label>
-                    <Select defaultValue="light">
+                    <Select value={preferences.theme} onValueChange={(value) => setPreferences({...preferences, theme: value})}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -724,7 +1153,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Default Canvas Type</Label>
-                    <Select defaultValue="vpc">
+                    <Select value={preferences.defaultCanvasType} onValueChange={(value) => setPreferences({...preferences, defaultCanvasType: value})}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -737,7 +1166,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Auto-save Interval</Label>
-                    <Select defaultValue="5min">
+                    <Select value={preferences.autoSaveInterval} onValueChange={(value) => setPreferences({...preferences, autoSaveInterval: value})}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -751,7 +1180,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>AI Assistance Level</Label>
-                    <Select defaultValue="balanced">
+                    <Select value={preferences.aiAssistanceLevel} onValueChange={(value) => setPreferences({...preferences, aiAssistanceLevel: value})}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -763,8 +1192,12 @@ export default function SettingsPage() {
                     </Select>
                   </div>
                 </div>
-                <Button className="w-full">
-                  <Save className="mr-2 h-4 w-4" />
+                <Button onClick={handleSavePreferences} disabled={preferencesLoading} className="w-full">
+                  {preferencesLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
                   Save Preferences
                 </Button>
               </CardContent>

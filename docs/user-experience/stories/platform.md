@@ -2056,3 +2056,269 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 **Journey Reference:** N/A (internal QA)
 
 ---
+
+## Integration Stories (US-I)
+
+> **Added (2026-01-24)**: Stories for third-party integration management in Settings.
+
+### US-I01: View Available Integrations
+
+**As any** authenticated user,
+**I want to** see all available third-party integrations,
+**So that** I can connect services that enhance my workflow.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → Integrations
+**When** I view the integrations list
+**Then** I should see integrations organized by category (Collaboration, Storage, etc.)
+
+**Given** I have connected some integrations
+**When** I view the integrations list
+**Then** connected integrations should show "Connected" status with account info
+
+**E2E Test:** `28-integrations.spec.ts` - "should display integrations list"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-I02: Connect External Service via OAuth
+
+**As any** authenticated user,
+**I want to** connect an external service using OAuth,
+**So that** StartupAI can access my data in that service.
+
+**Acceptance Criteria:**
+
+**Given** I click "Connect" on an integration
+**When** the OAuth popup opens
+**Then** I should be redirected to the provider's authorization page
+
+**Given** I authorize the connection
+**When** the OAuth callback completes
+**Then** the integration should show as "Connected" with my account info
+
+**E2E Test:** `28-integrations.spec.ts` - "should connect via OAuth"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-I03: Disconnect Integration
+
+**As any** authenticated user,
+**I want to** disconnect an integration,
+**So that** I can revoke StartupAI's access to that service.
+
+**Acceptance Criteria:**
+
+**Given** I have a connected integration
+**When** I click "Disconnect"
+**Then** the OAuth tokens should be revoked
+**And** the integration should show as disconnected
+
+**E2E Test:** `28-integrations.spec.ts` - "should disconnect integration"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-I04: Configure Integration Preferences
+
+**As any** authenticated user,
+**I want to** configure settings for a connected integration,
+**So that** I can customize how StartupAI uses that service.
+
+**Acceptance Criteria:**
+
+**Given** I have a connected integration with configurable options
+**When** I click "Configure"
+**Then** I should see a modal with preference fields
+
+**Given** I save configuration changes
+**When** the save completes
+**Then** my preferences should be persisted
+
+**E2E Test:** `28-integrations.spec.ts` - "should configure integration preferences"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-I05: Handle OAuth Connection Errors
+
+**As any** authenticated user,
+**I want to** see clear error messages when OAuth fails,
+**So that** I understand what went wrong and how to fix it.
+
+**Acceptance Criteria:**
+
+**Given** OAuth authorization fails
+**When** I return to the integrations page
+**Then** I should see an error message explaining the failure
+
+**E2E Test:** `28-integrations.spec.ts` - "should handle OAuth errors"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+### US-I06: View Integration Connection Status
+
+**As any** authenticated user,
+**I want to** see the status of my integrations,
+**So that** I know if any connections have expired or have errors.
+
+**Acceptance Criteria:**
+
+**Given** I have connected integrations
+**When** I view the integrations list
+**Then** I should see status badges (active, expired, error)
+
+**Given** an integration token has expired
+**When** I view that integration
+**Then** I should see an "Expired" badge and option to reconnect
+
+**E2E Test:** `28-integrations.spec.ts` - "should display connection status"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Integrations
+
+---
+
+## Platform Preferences Stories (US-PR)
+
+> **Added (2026-01-24)**: Stories for user preferences in Settings → Preferences tab.
+
+### US-PR01: Set Theme Preference
+
+**As any** authenticated user,
+**I want to** choose between light, dark, or system theme,
+**So that** the interface matches my visual preference.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → Preferences
+**When** I select a theme option
+**Then** the UI should update to reflect my choice
+
+**Given** I save my theme preference
+**When** I return to the app later
+**Then** my theme preference should be remembered
+
+**E2E Test:** `29-preferences.spec.ts` - "should save theme preference"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Preferences
+
+---
+
+### US-PR02: Set Default Canvas Type
+
+**As any** authenticated user,
+**I want to** set my default canvas type,
+**So that** new projects start with my preferred canvas.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → Preferences
+**When** I select VPC, BMC, or TBI as default
+**Then** my selection should be saved
+
+**E2E Test:** `29-preferences.spec.ts` - "should save default canvas"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Preferences
+
+---
+
+### US-PR03: Configure Auto-save Interval
+
+**As any** authenticated user,
+**I want to** set how often my work is auto-saved,
+**So that** I can balance data safety with performance.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → Preferences
+**When** I select an auto-save interval (1min, 5min, 10min, disabled)
+**Then** my selection should be saved
+
+**E2E Test:** `29-preferences.spec.ts` - "should save auto-save interval"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Preferences
+
+---
+
+### US-PR04: Set AI Assistance Level
+
+**As any** authenticated user,
+**I want to** control how actively AI assists me,
+**So that** I get the right balance of help and autonomy.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → Preferences
+**When** I select minimal, balanced, or aggressive AI assistance
+**Then** my selection should be saved
+
+**E2E Test:** `29-preferences.spec.ts` - "should save AI assistance level"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - Preferences
+
+---
+
+## AI Approval Settings Stories (US-AA)
+
+> **Added (2026-01-24)**: Stories for AI approval configuration in Settings → AI Approvals tab.
+
+### US-AA01: Configure Auto-approve Types
+
+**As any** authenticated user,
+**I want to** select which approval types can be auto-approved,
+**So that** routine decisions don't require my manual review.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → AI Approvals
+**When** I check/uncheck approval types
+**Then** my selections should be saved
+
+**Given** a checkpoint matches an auto-approve type
+**When** CrewAI creates the checkpoint
+**Then** it should be automatically approved
+
+**E2E Test:** `27-account-settings.spec.ts` - "should configure auto-approve types"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - AI Approvals
+
+---
+
+### US-AA02: Set Auto-approve Spend Threshold
+
+**As any** authenticated user,
+**I want to** set a maximum spend amount for auto-approval,
+**So that** significant budget decisions still require my review.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → AI Approvals
+**When** I set a spend threshold amount
+**Then** my threshold should be saved
+
+**Given** a spend increase exceeds my threshold
+**When** the checkpoint is created
+**Then** it should require manual approval
+
+**E2E Test:** `27-account-settings.spec.ts` - "should set spend threshold"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - AI Approvals
+
+---
+
+### US-AA03: Configure Escalation Contact
+
+**As any** authenticated user,
+**I want to** set an escalation email,
+**So that** urgent approvals reach someone if I'm unavailable.
+
+**Acceptance Criteria:**
+
+**Given** I am on Settings → AI Approvals
+**When** I enter an escalation email
+**Then** the email should be validated and saved
+
+**Given** an approval ages past the escalation threshold
+**When** escalation is triggered
+**Then** the escalation contact should be notified
+
+**E2E Test:** `27-account-settings.spec.ts` - "should configure escalation contact"
+**Journey Reference:** [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) - AI Approvals
+
+---

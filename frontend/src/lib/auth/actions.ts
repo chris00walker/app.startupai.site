@@ -34,6 +34,8 @@ export async function signUp(email: string, password: string, fullName?: string,
 
 /**
  * Sign in with email and password
+ *
+ * @story US-AS04
  */
 export async function signIn(email: string, password: string) {
   const supabase = createClient();
@@ -45,6 +47,24 @@ export async function signIn(email: string, password: string) {
 
   if (error) {
     throw new Error(error.message);
+  }
+
+  // Record login event and register session (non-blocking)
+  try {
+    await Promise.all([
+      fetch('/api/settings/security/login-history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginMethod: 'password' }),
+      }),
+      fetch('/api/settings/security/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ]);
+  } catch {
+    // Don't fail login if recording fails
+    console.warn('Failed to record login event');
   }
 
   return { success: true };

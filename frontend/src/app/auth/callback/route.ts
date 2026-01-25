@@ -2,14 +2,146 @@
  * OAuth Callback Route
  *
  * Handles OAuth provider callbacks and exchanges code for session.
- * @story US-FT01, US-F01
+ * @story US-FT01, US-F01, US-AS04
  */
 
 import { NextResponse, NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { getUserProfile } from '@/db/queries/users';
 import { deriveRole, getRedirectForRole, sanitizePath } from '@/lib/auth/roles';
+
+import { UAParser } from 'ua-parser-js';
+
+/**
+ * Record login event directly to login_history table
+ * Non-blocking - failures are logged but don't affect auth flow
+ */
+async function recordLoginEvent(
+  request: NextRequest,
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string,
+  loginMethod: string
+): Promise<void> {
+  try {
+    const headersList = await headers();
+    const userAgent = headersList.get('user-agent') || '';
+    const forwardedFor = headersList.get('x-forwarded-for');
+    const realIp = headersList.get('x-real-ip');
+    const ipAddress = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
+
+    // Parse user agent for device info
+    const parser = new UAParser(userAgent);
+    const browser = parser.getBrowser();
+    const os = parser.getOS();
+    const device = parser.getDevice();
+
+    // Determine device type
+    let deviceType = 'desktop';
+    if (device.type === 'mobile') {
+      deviceType = 'mobile';
+    } else if (device.type === 'tablet') {
+      deviceType = 'tablet';
+    }
+
+    // Insert login record directly
+    const { error } = await supabase
+      .from('login_history')
+      .insert({
+        user_id: userId,
+        login_method: loginMethod,
+        ip_address: ipAddress,
+        user_agent: userAgent.substring(0, 500),
+        device_type: deviceType,
+        browser: browser.name ? `${browser.name} ${browser.version || ''}`.trim() : null,
+        operating_system: os.name ? `${os.name} ${os.version || ''}`.trim() : null,
+        success: true,
+        is_suspicious: false,
+      });
+
+    if (error) {
+      console.error('Failed to record login event:', error);
+    } else {
+      console.log('Login event recorded for user:', userId);
+    }
+  } catch (error) {
+    // Log but don't fail the auth flow
+    console.error('Failed to record login event:', error);
+  }
+}
+
+import crypto from 'crypto';
+
+/**
+ * Register a new session in user_sessions table
+ * Non-blocking - failures are logged but don't affect auth flow
+ *
+ * @story US-AS05
+ */
+async function registerSession(
+  request: NextRequest,
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string
+): Promise<void> {
+  try {
+    const headersList = await headers();
+    const userAgent = headersList.get('user-agent') || '';
+    const forwardedFor = headersList.get('x-forwarded-for');
+    const realIp = headersList.get('x-real-ip');
+    const ipAddress = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
+
+    // Parse user agent for device info
+    const parser = new UAParser(userAgent);
+    const browser = parser.getBrowser();
+    const os = parser.getOS();
+    const device = parser.getDevice();
+
+    // Determine device type
+    let deviceType = 'desktop';
+    if (device.type === 'mobile') {
+      deviceType = 'mobile';
+    } else if (device.type === 'tablet') {
+      deviceType = 'tablet';
+    }
+
+    const browserName = browser.name ? `${browser.name} ${browser.version || ''}`.trim() : undefined;
+    const osName = os.name ? `${os.name} ${os.version || ''}`.trim() : undefined;
+    const deviceName = browserName && osName ? `${browserName} on ${osName}` : 'Unknown Device';
+
+    // Mark all other sessions as not current
+    await supabase
+      .from('user_sessions')
+      .update({ is_current: false })
+      .eq('user_id', userId);
+
+    // Create new session record
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+
+    const { error } = await supabase
+      .from('user_sessions')
+      .insert({
+        user_id: userId,
+        session_token: sessionToken,
+        ip_address: ipAddress,
+        user_agent: userAgent.substring(0, 500),
+        device_type: deviceType,
+        browser: browserName,
+        operating_system: osName,
+        device_name: deviceName,
+        is_current: true,
+        last_active_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Failed to register session:', error);
+    } else {
+      console.log('Session registered for user:', userId);
+    }
+  } catch (error) {
+    // Log but don't fail the auth flow
+    console.error('Failed to register session:', error);
+  }
+}
 
 export async function GET(request: NextRequest) {
   console.log('=== OAuth Callback Started ===');
@@ -60,6 +192,13 @@ export async function GET(request: NextRequest) {
         `${origin}/auth/auth-code-error?error=${encodeURIComponent(sessionError.message)}`
       );
     }
+
+    // Record login event and register session (non-blocking)
+    if (sessionData?.session?.user?.id) {
+      recordLoginEvent(request, supabase, sessionData.session.user.id, 'oauth_token');
+      registerSession(request, supabase, sessionData.session.user.id);
+    }
+
     const redirectUrl = await resolveRedirect({
       request,
       origin,
@@ -144,7 +283,13 @@ export async function GET(request: NextRequest) {
         // Don't fail the auth flow, just log the error
       }
     }
-    
+
+    // Record login event and register session (non-blocking)
+    if (data.session?.user?.id) {
+      recordLoginEvent(request, supabase, data.session.user.id, 'oauth_code');
+      registerSession(request, supabase, data.session.user.id);
+    }
+
     const redirectUrl = await resolveRedirect({
       request,
       origin,
