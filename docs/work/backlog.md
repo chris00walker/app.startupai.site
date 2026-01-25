@@ -12,6 +12,8 @@ Prioritized by validation impact. Items testing assumptions rank higher.
 
 | Item | Assumption | Phase | Notes |
 |------|------------|-------|-------|
+| **Epic 5: Template Library** | A5 | 2 | Landing pages, ad creatives, surveys for agent workflows |
+| **Epic 6: Agent Tools Integration** | A5 | 2 | Connect ad tools to Phase 2 desirability agents |
 | Landing page A/B test | A5 | 2 | VPD messaging resonance |
 | IH community launch | A8 | 2 | Channel validation |
 | Consultant marketing | A6 | 2-3 | Portfolio value proposition |
