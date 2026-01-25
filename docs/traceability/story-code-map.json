@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-24T23:01:13.488Z",
+    "generated_at": "2026-01-25T00:33:28.335Z",
     "version": "1.0.0",
-    "story_count": 157,
-    "annotated_file_count": 183
+    "story_count": 170,
+    "annotated_file_count": 202
   },
   "stories": {
     "US-F01": {
@@ -1661,8 +1661,12 @@
     },
     "US-N03": {
       "title": "Manage Notification Preferences",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/notification-preferences.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/notifications/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
@@ -1677,7 +1681,8 @@
       "db_tables": [
         "notification_preferences"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Notification preferences API with email, push, workflow toggles"
     },
     "US-N04": {
       "title": "Escalation Alert (Approval Aging)",
@@ -1945,19 +1950,26 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users"
+        "user_profiles"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Profile update with timezone, language, bio fields"
     },
     "US-AS02": {
       "title": "Change Password",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/security-audit-log.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/security/password/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/security/audit-log.ts"
+      ],
       "e2e_tests": [
         {
           "file": "27-account-settings.spec.ts"
@@ -1965,19 +1977,32 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users"
+        "user_profiles",
+        "security_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Password change with rate limiting and audit logging"
     },
     "US-AS03": {
       "title": "Enable 2FA",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/mfa-recovery-codes.ts",
+        "frontend/src/db/schema/security-audit-log.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/security/2fa/enroll/route.ts",
+        "frontend/src/app/api/settings/security/2fa/recover/route.ts",
+        "frontend/src/app/api/settings/security/2fa/route.ts",
+        "frontend/src/app/api/settings/security/2fa/verify/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/security/audit-log.ts",
+        "frontend/src/lib/security/rate-limit.ts"
+      ],
       "e2e_tests": [
         {
           "file": "27-account-settings.spec.ts"
@@ -1985,20 +2010,30 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "users",
-        "user_2fa"
+        "mfa_recovery_codes",
+        "security_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "TOTP 2FA via Supabase MFA APIs with recovery codes"
     },
     "US-AS04": {
       "title": "View Login History",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/login-history.ts",
+        "frontend/src/db/schema/security-audit-log.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/security/login-history/route.ts",
+        "frontend/src/app/auth/callback/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/auth/actions.ts",
+        "frontend/src/lib/security/audit-log.ts"
+      ],
       "e2e_tests": [
         {
           "file": "27-account-settings.spec.ts"
@@ -2006,20 +2041,30 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "login_history"
+        "login_history",
+        "security_audit_log"
       ],
-      "implementation_status": "gap",
-      "notes": "Suspicious login detection"
+      "implementation_status": "complete",
+      "notes": "Login history with suspicious login detection (new IP/device)"
     },
     "US-AS05": {
       "title": "Manage Connected Devices",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/security-audit-log.ts",
+        "frontend/src/db/schema/user-sessions.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/security/sessions/[id]/route.ts",
+        "frontend/src/app/api/settings/security/sessions/route.ts",
+        "frontend/src/app/auth/callback/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/security/audit-log.ts"
+      ],
       "e2e_tests": [
         {
           "file": "27-account-settings.spec.ts"
@@ -2027,9 +2072,11 @@
       ],
       "unit_tests": [],
       "db_tables": [
-        "user_sessions"
+        "user_sessions",
+        "security_audit_log"
       ],
-      "implementation_status": "gap"
+      "implementation_status": "complete",
+      "notes": "Device management with individual session revocation"
     },
     "US-MF01": {
       "title": "View Landing Page Value Proposition",
@@ -2252,6 +2299,286 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "partial"
+    },
+    "US-I01": {
+      "title": "View Available Integrations",
+      "components": [
+        "frontend/src/components/settings/IntegrationsTab.tsx",
+        "frontend/src/components/settings/integrations/IntegrationCard.tsx",
+        "frontend/src/db/schema/integrations.ts",
+        "frontend/src/types/integrations.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/integrations/route.ts"
+      ],
+      "pages": [],
+      "hooks": [
+        "frontend/src/hooks/useIntegrations.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/integrations/config.ts",
+        "frontend/src/lib/integrations/oauth.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-integrations.spec.ts"
+        }
+      ],
+      "unit_tests": [
+        "frontend/src/__tests__/hooks/useIntegrations.test.ts"
+      ],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-I02": {
+      "title": "Connect External Service via OAuth",
+      "components": [
+        "frontend/src/components/settings/IntegrationsTab.tsx",
+        "frontend/src/components/settings/integrations/IntegrationCard.tsx",
+        "frontend/src/db/schema/integrations.ts",
+        "frontend/src/types/integrations.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/integrations/[type]/callback/route.ts",
+        "frontend/src/app/api/integrations/[type]/connect/route.ts"
+      ],
+      "pages": [],
+      "hooks": [
+        "frontend/src/hooks/useIntegrations.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/integrations/config.ts",
+        "frontend/src/lib/integrations/oauth.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-integrations.spec.ts"
+        }
+      ],
+      "unit_tests": [
+        "frontend/src/__tests__/hooks/useIntegrations.test.ts"
+      ],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-I03": {
+      "title": "Disconnect Integration",
+      "components": [
+        "frontend/src/components/settings/IntegrationsTab.tsx",
+        "frontend/src/components/settings/integrations/IntegrationCard.tsx",
+        "frontend/src/db/schema/integrations.ts",
+        "frontend/src/types/integrations.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/integrations/[type]/callback/route.ts",
+        "frontend/src/app/api/integrations/route.ts"
+      ],
+      "pages": [],
+      "hooks": [
+        "frontend/src/hooks/useIntegrations.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/integrations/config.ts",
+        "frontend/src/lib/integrations/oauth.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-integrations.spec.ts"
+        }
+      ],
+      "unit_tests": [
+        "frontend/src/__tests__/hooks/useIntegrations.test.ts"
+      ],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-I04": {
+      "title": "Configure Integration Preferences",
+      "components": [
+        "frontend/src/components/settings/IntegrationsTab.tsx",
+        "frontend/src/components/settings/integrations/IntegrationConfigModal.tsx",
+        "frontend/src/db/schema/integrations.ts",
+        "frontend/src/types/integrations.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/integrations/[type]/route.ts"
+      ],
+      "pages": [],
+      "hooks": [
+        "frontend/src/hooks/useIntegrations.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/integrations/config.ts",
+        "frontend/src/lib/integrations/oauth.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-integrations.spec.ts"
+        }
+      ],
+      "unit_tests": [
+        "frontend/src/__tests__/hooks/useIntegrations.test.ts"
+      ],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-I05": {
+      "title": "Handle OAuth Connection Errors",
+      "components": [
+        "frontend/src/components/settings/IntegrationsTab.tsx",
+        "frontend/src/components/settings/integrations/IntegrationCard.tsx",
+        "frontend/src/db/schema/integrations.ts",
+        "frontend/src/types/integrations.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/integrations/[type]/route.ts"
+      ],
+      "pages": [],
+      "hooks": [
+        "frontend/src/hooks/useIntegrations.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/integrations/config.ts",
+        "frontend/src/lib/integrations/oauth.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-integrations.spec.ts"
+        }
+      ],
+      "unit_tests": [
+        "frontend/src/__tests__/hooks/useIntegrations.test.ts"
+      ],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-I06": {
+      "title": "View Integration Connection Status",
+      "components": [
+        "frontend/src/components/settings/IntegrationsTab.tsx",
+        "frontend/src/components/settings/integrations/IntegrationCard.tsx",
+        "frontend/src/db/schema/integrations.ts",
+        "frontend/src/types/integrations.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [
+        "frontend/src/hooks/useIntegrations.ts"
+      ],
+      "lib": [
+        "frontend/src/lib/integrations/config.ts",
+        "frontend/src/lib/integrations/oauth.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-integrations.spec.ts"
+        }
+      ],
+      "unit_tests": [
+        "frontend/src/__tests__/hooks/useIntegrations.test.ts"
+      ],
+      "db_tables": [],
+      "implementation_status": "complete"
+    },
+    "US-PR01": {
+      "title": "Set Theme Preference",
+      "components": [
+        "frontend/src/db/schema/user-preferences.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/preferences/route.ts"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-PR02": {
+      "title": "Set Default Canvas Type",
+      "components": [
+        "frontend/src/db/schema/user-preferences.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/preferences/route.ts"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-PR03": {
+      "title": "Configure Auto-save Interval",
+      "components": [
+        "frontend/src/db/schema/user-preferences.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/preferences/route.ts"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-PR04": {
+      "title": "Set AI Assistance Level",
+      "components": [
+        "frontend/src/db/schema/user-preferences.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/preferences/route.ts"
+      ],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "partial"
+    },
+    "US-AA01": {
+      "title": "Configure Auto-approve Types",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AA02": {
+      "title": "Set Auto-approve Spend Threshold",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
+    },
+    "US-AA03": {
+      "title": "Configure Escalation Contact",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "gap"
     },
     "US-A01": {
       "title": "Search and Find Users",
@@ -3287,7 +3614,9 @@
     "frontend/src/app/auth/callback/route.ts": {
       "stories": [
         "US-F01",
-        "US-FT01"
+        "US-FT01",
+        "US-AS04",
+        "US-AS05"
       ]
     },
     "../startupai-crew/src/modal_app/app.py": {
@@ -3791,6 +4120,16 @@
         "US-N05"
       ]
     },
+    "frontend/src/db/schema/notification-preferences.ts": {
+      "stories": [
+        "US-N03"
+      ]
+    },
+    "frontend/src/app/api/settings/notifications/route.ts": {
+      "stories": [
+        "US-N03"
+      ]
+    },
     "frontend/src/app/login/page.tsx": {
       "stories": [
         "US-AU01"
@@ -3912,6 +4251,87 @@
         "US-AS05"
       ]
     },
+    "frontend/src/db/schema/security-audit-log.ts": {
+      "stories": [
+        "US-AS02",
+        "US-AS03",
+        "US-AS04",
+        "US-AS05"
+      ]
+    },
+    "frontend/src/app/api/settings/security/password/route.ts": {
+      "stories": [
+        "US-AS02"
+      ]
+    },
+    "frontend/src/lib/security/audit-log.ts": {
+      "stories": [
+        "US-AS02",
+        "US-AS03",
+        "US-AS04",
+        "US-AS05"
+      ]
+    },
+    "frontend/src/db/schema/mfa-recovery-codes.ts": {
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "frontend/src/app/api/settings/security/2fa/enroll/route.ts": {
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "frontend/src/app/api/settings/security/2fa/recover/route.ts": {
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "frontend/src/app/api/settings/security/2fa/route.ts": {
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "frontend/src/app/api/settings/security/2fa/verify/route.ts": {
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "frontend/src/lib/security/rate-limit.ts": {
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "frontend/src/db/schema/login-history.ts": {
+      "stories": [
+        "US-AS04"
+      ]
+    },
+    "frontend/src/app/api/settings/security/login-history/route.ts": {
+      "stories": [
+        "US-AS04"
+      ]
+    },
+    "frontend/src/lib/auth/actions.ts": {
+      "stories": [
+        "US-AS04"
+      ]
+    },
+    "frontend/src/db/schema/user-sessions.ts": {
+      "stories": [
+        "US-AS05"
+      ]
+    },
+    "frontend/src/app/api/settings/security/sessions/[id]/route.ts": {
+      "stories": [
+        "US-AS05"
+      ]
+    },
+    "frontend/src/app/api/settings/security/sessions/route.ts": {
+      "stories": [
+        "US-AS05"
+      ]
+    },
     "../startupai.site/src/app/page.tsx": {
       "stories": [
         "US-MF01"
@@ -4020,6 +4440,139 @@
     "../startupai.site/src/app/design-system-test/page.tsx": {
       "stories": [
         "US-MF15"
+      ]
+    },
+    "frontend/src/components/settings/IntegrationsTab.tsx": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/components/settings/integrations/IntegrationCard.tsx": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/db/schema/integrations.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/types/integrations.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/app/api/integrations/route.ts": {
+      "stories": [
+        "US-I01",
+        "US-I03"
+      ]
+    },
+    "frontend/src/hooks/useIntegrations.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/lib/integrations/config.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/lib/integrations/oauth.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/__tests__/hooks/useIntegrations.test.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/tests/e2e/28-integrations.spec.ts": {
+      "stories": [
+        "US-I01",
+        "US-I02",
+        "US-I03",
+        "US-I04",
+        "US-I05",
+        "US-I06"
+      ]
+    },
+    "frontend/src/app/api/integrations/[type]/callback/route.ts": {
+      "stories": [
+        "US-I02",
+        "US-I03"
+      ]
+    },
+    "frontend/src/app/api/integrations/[type]/connect/route.ts": {
+      "stories": [
+        "US-I02"
+      ]
+    },
+    "frontend/src/components/settings/integrations/IntegrationConfigModal.tsx": {
+      "stories": [
+        "US-I04"
+      ]
+    },
+    "frontend/src/app/api/integrations/[type]/route.ts": {
+      "stories": [
+        "US-I04",
+        "US-I05"
+      ]
+    },
+    "frontend/src/db/schema/user-preferences.ts": {
+      "stories": [
+        "US-PR01",
+        "US-PR02",
+        "US-PR03",
+        "US-PR04"
+      ]
+    },
+    "frontend/src/app/api/settings/preferences/route.ts": {
+      "stories": [
+        "US-PR01",
+        "US-PR02",
+        "US-PR03",
+        "US-PR04"
       ]
     },
     "frontend/tests/e2e/19-admin-user-management.spec.ts": {

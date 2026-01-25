@@ -550,7 +550,8 @@ US-N02:
 US-N03:
   db_tables:
     - notification_preferences
-  implementation_status: gap
+  notes: "Notification preferences API with email, push, workflow toggles"
+  implementation_status: complete
 
 US-N04:
   db_tables:
@@ -565,35 +566,42 @@ US-N05:
   implementation_status: gap
 
 # =============================================================================
-# Account Settings Stories (US-AS01-AS05) - Gap
+# Account Settings Stories (US-AS01-AS05) - Implemented 2026-01-24
 # =============================================================================
 
 US-AS01:
   db_tables:
-    - users
-  implementation_status: gap
+    - user_profiles
+  notes: "Profile update with timezone, language, bio fields"
+  implementation_status: complete
 
 US-AS02:
   db_tables:
-    - users
-  implementation_status: gap
+    - user_profiles
+    - security_audit_log
+  notes: "Password change with rate limiting and audit logging"
+  implementation_status: complete
 
 US-AS03:
   db_tables:
-    - users
-    - user_2fa
-  implementation_status: gap
+    - mfa_recovery_codes
+    - security_audit_log
+  notes: "TOTP 2FA via Supabase MFA APIs with recovery codes"
+  implementation_status: complete
 
 US-AS04:
   db_tables:
     - login_history
-  notes: "Suspicious login detection"
-  implementation_status: gap
+    - security_audit_log
+  notes: "Login history with suspicious login detection (new IP/device)"
+  implementation_status: complete
 
 US-AS05:
   db_tables:
     - user_sessions
-  implementation_status: gap
+    - security_audit_log
+  notes: "Device management with individual session revocation"
+  implementation_status: complete
 
 # =============================================================================
 # Agent Brief Stories (US-AB01-AB03) - Phase 1 Stage A

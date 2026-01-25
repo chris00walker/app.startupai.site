@@ -1,6 +1,6 @@
 # Story-Code Gap Report
 
-Generated: 2026-01-24T23:01:13.488Z
+Generated: 2026-01-25T00:33:28.335Z
 
 ## Stories Without Implementations
 
@@ -18,11 +18,9 @@ Generated: 2026-01-24T23:01:13.488Z
 | US-A10 | Run Data Integrity Check | Admin |
 | US-A11 | Admin Login and Role Verification | Admin |
 | US-A12 | Manage User Billing Issues | Admin |
-| US-AS01 | Update Profile | Account Settings |
-| US-AS02 | Change Password | Account Settings |
-| US-AS03 | Enable 2FA | Account Settings |
-| US-AS04 | View Login History | Account Settings |
-| US-AS05 | Manage Connected Devices | Account Settings |
+| US-AA01 | Configure Auto-approve Types | Admin |
+| US-AA02 | Set Auto-approve Spend Threshold | Admin |
+| US-AA03 | Configure Escalation Contact | Admin |
 | US-B01 | View Billing History | Billing |
 | US-B02 | Download Invoice | Billing |
 | US-B03 | Update Payment Method | Billing |
@@ -41,7 +39,6 @@ Generated: 2026-01-24T23:01:13.488Z
 | US-CT06 | Experience Post-Upgrade Orientation | Consultant Trial |
 | US-N01 | Receive In-App Notification | Notification |
 | US-N02 | Receive Email Notification | Notification |
-| US-N03 | Manage Notification Preferences | Notification |
 | US-N04 | Escalation Alert (Approval Aging) | Notification |
 | US-N05 | Unsubscribe from Emails | Notification |
 | US-O01 | Cancel Subscription | Offboarding |
@@ -55,16 +52,15 @@ Generated: 2026-01-24T23:01:13.488Z
 | US-S04 | Request Data Export (GDPR) | Support |
 | US-S05 | Delete Account (GDPR) | Support |
 
-**Total Gaps: 48 / 157**
+**Total Gaps: 45 / 170**
 
 ## Gaps by Category
 
 | Category | Count |
 |----------|-------|
-| Account Settings | 5 |
-| Admin | 12 |
+| Admin | 15 |
 | Billing | 10 |
 | Consultant Trial | 6 |
-| Notification | 5 |
+| Notification | 4 |
 | Offboarding | 5 |
 | Support | 5 |

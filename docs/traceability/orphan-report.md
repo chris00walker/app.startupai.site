@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-24T23:01:13.488Z
+Generated: 2026-01-25T00:33:28.335Z
 
 ## Files Without Story Links
 
@@ -39,10 +39,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/app/api/crewai/status/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/crewai/webhook/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/health/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/integrations/[type]/callback/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/integrations/[type]/connect/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/integrations/[type]/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/integrations/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/onboarding/brief/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/onboarding/debug/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/projects/create/route.ts | api_route | Add @story annotation or consider if needed |
@@ -217,9 +213,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/reports/sections/GovernanceSection.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/reports/sections/index.ts | component | Export file - usually no annotation needed |
 | frontend/src/components/reports/sections/ViabilitySection.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/settings/integrations/IntegrationCard.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/settings/integrations/IntegrationConfigModal.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/settings/IntegrationsTab.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signals/index.ts | component | Export file - usually no annotation needed |
 | frontend/src/components/signals/InnovationPhysicsPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signals/SignalBadge.tsx | component | Add @story annotation or consider if needed |
@@ -287,7 +280,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/db/schema/experiments.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/hypotheses.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/index.ts | component | Export file - usually no annotation needed |
-| frontend/src/db/schema/integrations.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/projects.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/public-activity-log.ts | component | Add @story annotation or consider if needed |
 | frontend/src/db/schema/reports.ts | component | Add @story annotation or consider if needed |
@@ -301,7 +293,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/tests/mocks/untilAsyncMock.ts | component | Add @story annotation or consider if needed |
 | frontend/src/types/crewai.ts | component | Type definitions - usually no annotation needed |
 | frontend/src/types/evidence-explorer.ts | component | Type definitions - usually no annotation needed |
-| frontend/src/types/integrations.ts | component | Type definitions - usually no annotation needed |
 | frontend/src/types/portfolio.ts | component | Type definitions - usually no annotation needed |
 | frontend/src/types/validation-progress.ts | component | Type definitions - usually no annotation needed |
 | frontend/src/__tests__/e2e/backend-integration.spec.ts | e2e_test | Link to tested story |
@@ -310,7 +301,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/tests/e2e/07-adr005-persistence.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/08-ui-indicators.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/18-edge-cases.spec.ts | e2e_test | Link to tested story |
-| frontend/tests/e2e/28-integrations.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/global-setup.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/helpers/accessibility.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/helpers/api-mocks.ts | e2e_test | Link to tested story |
@@ -331,7 +321,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/hooks/useGateAlerts.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useGateEvaluation.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useHealthCheck.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useIntegrations.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useOnboardingRecovery.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/usePortfolioActivity.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useProjectReports.ts | hook | Add @story annotation or consider if needed |
@@ -378,7 +367,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/lib/analytics.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/analytics/hooks.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/analytics/index.ts | lib | Export file - usually no annotation needed |
-| frontend/src/lib/auth/actions.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/auth/hooks.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/auth/roles.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/auth/trial-guard.ts | lib | Add @story annotation or consider if needed |
@@ -389,8 +377,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/lib/env.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/evidence/transform.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/founders/founder-mapping.ts | lib | Add @story annotation or consider if needed |
-| frontend/src/lib/integrations/config.ts | lib | Add @story annotation or consider if needed |
-| frontend/src/lib/integrations/oauth.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/reports/field-extractors.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/supabase/admin.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/supabase/client.ts | lib | Add @story annotation or consider if needed |
@@ -435,7 +421,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/__tests__/hooks/useCrewAIState.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useFounderStatus.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useGateAlerts.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/hooks/useIntegrations.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useProjects.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useValidationProgress.test.ts | unit_test | Link to tested story |
@@ -461,4 +446,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 452**
+**Total Orphans: 437**
