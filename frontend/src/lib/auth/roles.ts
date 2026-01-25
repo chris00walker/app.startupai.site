@@ -9,7 +9,7 @@ type RedirectOptions = {
 };
 
 const ROLE_REDIRECTS: Record<UserRole, string> = {
-  admin: '/consultant-dashboard',
+  admin: '/admin',
   consultant: '/consultant-dashboard',
   founder: '/founder-dashboard',
   trial: '/onboarding/founder'
