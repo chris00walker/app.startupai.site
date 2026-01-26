@@ -3,6 +3,8 @@
  *
  * GET: Fetch user's approval preferences
  * PUT: Update user's approval preferences
+ *
+ * @story US-AA01, US-AA02, US-AA03
  */
 
 import { NextRequest, NextResponse } from 'next/server';

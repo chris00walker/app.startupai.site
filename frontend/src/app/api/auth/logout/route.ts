@@ -1,3 +1,9 @@
+/**
+ * Logout API
+ *
+ * @story US-AU01
+ */
+
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 

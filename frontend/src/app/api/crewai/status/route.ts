@@ -4,6 +4,8 @@
  * GET /api/crewai/status?run_id=xxx   (Modal - primary)
  *
  * Returns the current status of a validation workflow execution.
+ *
+ * @story US-F08
  */
 
 import { NextRequest, NextResponse } from 'next/server';

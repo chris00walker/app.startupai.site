@@ -1,3 +1,9 @@
+/**
+ * Client Management API
+ *
+ * @story US-C02, US-C03
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'

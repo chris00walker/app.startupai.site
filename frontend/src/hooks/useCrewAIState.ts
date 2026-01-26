@@ -3,6 +3,8 @@
  *
  * React hooks for fetching and managing CrewAI validation state.
  * These hooks integrate with the CrewAI types defined in @/types/crewai.ts
+ *
+ * @story US-F06, US-F08
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react'

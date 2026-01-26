@@ -12,6 +12,8 @@
  * - Initialize from CrewAI data
  * - Reset to original CrewAI data
  * - Source tracking (crewai/manual/hybrid)
+ *
+ * @story US-F12
  */
 
 'use client';

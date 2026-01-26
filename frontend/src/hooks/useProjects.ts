@@ -1,9 +1,11 @@
 /**
  * useProjects Hook
- * 
+ *
  * Hook for fetching and managing user projects with Supabase auth integration
  * Uses Supabase client for browser-compatible queries
  * Returns full PortfolioProject structure from database
+ *
+ * @story US-F02, US-F04
  */
 
 'use client';

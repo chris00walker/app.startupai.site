@@ -5,6 +5,8 @@
  *
  * This does NOT affect the client's data - it only controls visibility
  * in the consultant's portfolio view.
+ *
+ * @story US-C05
  */
 
 import { NextRequest, NextResponse } from 'next/server';

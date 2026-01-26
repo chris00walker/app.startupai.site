@@ -1,8 +1,10 @@
 /**
  * Gate Readiness Indicator Component
- * 
+ *
  * Shows progress toward passing a gate with visual progress bar and percentage.
  * Accessible with ARIA labels and keyboard navigation.
+ *
+ * @story US-F15
  */
 
 'use client';

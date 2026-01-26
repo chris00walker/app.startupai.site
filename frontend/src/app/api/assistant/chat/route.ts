@@ -7,6 +7,8 @@
  * - Context-aware of projects, reports, and user role
  * - Tool calling for CrewAI dispatch, report summaries, project status
  * - Saves conversation history for continuity
+ *
+ * @story US-F16
  */
 
 import { streamText, tool } from 'ai';

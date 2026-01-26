@@ -1,3 +1,11 @@
+/**
+ * EvidenceDetailPanel Component
+ *
+ * Displays detailed evidence information in a slide-out panel.
+ *
+ * @story US-F14
+ */
+
 'use client'
 
 import { cn } from '@/lib/utils'

@@ -10,6 +10,8 @@
  * 3. CrewAI validation state for real metrics (signals, evidence, etc.)
  *
  * Transforms the data into PortfolioProject format for consultant dashboard display.
+ *
+ * @story US-C03, US-C04
  */
 
 'use client';

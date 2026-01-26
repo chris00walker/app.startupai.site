@@ -1,8 +1,10 @@
 /**
  * useGateAlerts Hook
- * 
+ *
  * Monitors gate readiness and triggers alerts when close to passing.
  * Provides notifications when projects reach 90%+ readiness.
+ *
+ * @story US-F15
  */
 
 'use client';

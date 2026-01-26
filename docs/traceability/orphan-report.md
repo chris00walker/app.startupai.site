@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-26T18:08:20.832Z
+Generated: 2026-01-26T18:15:37.794Z
 
 ## Files Without Story Links
 
@@ -11,39 +11,24 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/app/api/agents/status/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/analytics/dashboard/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/analyze/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/approvals/[id]/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/assistant/chat/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/assistant/history/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/auth/logout/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/auth/validate-invite/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/clients/[id]/archive/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/clients/[id]/artefacts/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/clients/[id]/discovery/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/clients/[id]/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/clients/[id]/tasks/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/clients/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/consultant/invites/[id]/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/consultant/onboarding/complete/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/consultant/onboarding/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/consultant/onboarding/start/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/crewai/consultant/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/crewai/results/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/crewai/resume/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/crewai/status/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/crewai/webhook/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/health/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/onboarding/brief/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/onboarding/debug/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/projects/create/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/settings/approvals/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/v1/public/activity/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/v1/public/metrics/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/vpc/[projectId]/initialize/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/vpc/[projectId]/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/components/Agents/AgentStatus.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/analytics/ConsentBanner.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/approvals/ApprovalBadge.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/approvals/ApprovalDetailModal.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/approvals/ApprovalTypeIndicator.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/approvals/EvidenceSummary.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/approvals/FounderAvatar.tsx | component | Add @story annotation or consider if needed |
@@ -52,7 +37,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/auth/LoginForm.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/brief/BriefSummary.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/BMCViabilityOverlay.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/canvas/BusinessModelCanvas.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/CanvasEditor.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/CanvasGallery.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/EditableValuePropositionCanvas.tsx | component | Add @story annotation or consider if needed |
@@ -62,20 +46,16 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/canvas/GuidedValuePropositionCanvas.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/TestingBusinessIdeasCanvas.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/TestingBusinessIdeasTabs.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/canvas/ValuePropositionCanvas.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/vpc/hooks/useVPCConnections.ts | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/vpc/VPCCanvas.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/vpc/VPCFitLines.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/vpc/VPCHoverContext.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/canvas/vpc/VPCSvgBackground.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/ClientForm.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/consultant/ClientValidationCard.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/consultant/InviteClientModal.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/Dashboard/KanbanBoard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/dashboard/MetricsCards.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/Dashboard/MetricsPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/AIEvidenceCard.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/evidence-explorer/EvidenceDetailPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/EvidenceFilters.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/EvidenceSummaryPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/EvidenceTimeline.tsx | component | Add @story annotation or consider if needed |
@@ -89,18 +69,14 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/founders/FounderAvatar.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/founders/FounderBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/founders/FounderStatusPanel.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/gates/GateReadinessIndicator.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/gates/GateStatusBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/layout/DashboardLayout.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/onboarding/FoundersBriefReview.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/onboarding/ProjectCreationWizard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/onboarding/StageReviewModal.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/portfolio/GateAlerts.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/portfolio/GateStageFilter.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/portfolio/PortfolioMetrics.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/portfolio/RiskBudgetWidget.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/portfolio/StageProgressIndicator.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/reports/CrewAIReportViewer.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/reports/export/PDFExporter.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/reports/sections/DesirabilitySection.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/reports/sections/FeasibilitySection.tsx | component | Add @story annotation or consider if needed |
@@ -118,7 +94,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/viability/ViabilityMetricsPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/vpc/VPCFitBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/vpc/VPCReportViewer.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/vpc/VPCSummaryCard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/vpc/VPCWithSignals.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/__tests__/e2e/backend-integration.spec.ts | e2e_test | Link to tested story |
 | frontend/src/__tests__/e2e/user-journeys.spec.ts | e2e_test | Link to tested story |
@@ -127,29 +102,18 @@ These files in scanned directories have no `@story` annotation.
 | frontend/tests/e2e/08-ui-indicators.spec.ts | e2e_test | Link to tested story |
 | frontend/tests/e2e/18-edge-cases.spec.ts | e2e_test | Link to tested story |
 | frontend/src/hooks/use-mobile.tsx | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useApprovals.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useBMC.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useClients.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useClientValidationProgress.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useConsultantClients.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useCrewAIReport.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useCrewAIState.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useFitData.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useFormAccessibility.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useFounderStatus.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useGateAlerts.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useGateEvaluation.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useHealthCheck.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useOnboardingRecovery.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/usePortfolioActivity.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useProjectReports.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useProjects.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useRecentActivity.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useRecommendedActions.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useScreenReaderAnnouncement.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useUnifiedEvidence.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useValidationProgress.ts | hook | Add @story annotation or consider if needed |
-| frontend/src/hooks/useVPC.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/hooks/useVPCReport.ts | hook | Add @story annotation or consider if needed |
 | frontend/src/lib/analytics.ts | lib | Add @story annotation or consider if needed |
 | frontend/src/lib/analytics/hooks.ts | lib | Add @story annotation or consider if needed |
@@ -220,6 +184,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 211**
+**Total Orphans: 175**
 
 *Note: 225 infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*

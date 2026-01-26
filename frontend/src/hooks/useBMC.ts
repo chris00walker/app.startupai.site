@@ -11,6 +11,8 @@
  * - Add/remove items
  * - Reset to original CrewAI data
  * - Track edit source
+ *
+ * @story US-F12
  */
 
 'use client';

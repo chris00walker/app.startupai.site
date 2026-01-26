@@ -8,6 +8,8 @@
  * Preferred path is through /api/approvals/[id] which provides audit trail.
  *
  * This endpoint maintains audit trail by updating any pending approval_request.
+ *
+ * @story US-H01, US-F03
  */
 
 import { NextRequest, NextResponse } from 'next/server';

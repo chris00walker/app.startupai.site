@@ -1,3 +1,11 @@
+/**
+ * ValuePropositionCanvas Component
+ *
+ * Interactive canvas for editing Value Proposition Canvas data.
+ *
+ * @story US-F12
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';

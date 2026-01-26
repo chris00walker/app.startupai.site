@@ -3,6 +3,8 @@
  *
  * Compact dashboard card showing VPC analysis summary with fit scores.
  * Links to full analysis page.
+ *
+ * @story US-F02, US-F12
  */
 
 'use client';

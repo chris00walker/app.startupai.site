@@ -1,3 +1,11 @@
+/**
+ * BusinessModelCanvas Component
+ *
+ * Interactive canvas for editing Business Model Canvas data.
+ *
+ * @story US-F12
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

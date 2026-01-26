@@ -7,6 +7,8 @@
  * - Strategyzer Phase view
  *
  * Includes PDF export and expand/collapse controls.
+ *
+ * @story US-F06, US-F16
  */
 
 'use client'

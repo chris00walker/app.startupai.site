@@ -1,19 +1,21 @@
 {
   "metadata": {
-    "generated_at": "2026-01-26T18:08:20.832Z",
+    "generated_at": "2026-01-26T18:15:37.794Z",
     "version": "1.0.0",
     "story_count": 187,
-    "annotated_file_count": 305
+    "annotated_file_count": 341
   },
   "stories": {
     "US-F01": {
       "title": "Complete Quick Start Onboarding",
       "components": [
+        "frontend/src/components/onboarding/FoundersBriefReview.tsx",
         "frontend/src/components/onboarding/QuickStartForm.tsx",
         "frontend/src/components/signup-form.tsx",
         "frontend/src/db/schema/users.ts"
       ],
       "api_routes": [
+        "frontend/src/app/api/onboarding/brief/route.ts",
         "frontend/src/app/api/projects/quick-start/route.ts",
         "frontend/src/app/auth/callback/route.ts",
         "../startupai-crew/src/modal_app/app.py",
@@ -42,12 +44,17 @@
     },
     "US-F02": {
       "title": "View Founder Dashboard",
-      "components": [],
+      "components": [
+        "frontend/src/components/vpc/VPCSummaryCard.tsx"
+      ],
       "api_routes": [],
       "pages": [
         "frontend/src/pages/founder-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useFounderStatus.ts",
+        "frontend/src/hooks/useProjects.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -73,6 +80,7 @@
       ],
       "api_routes": [
         "frontend/src/app/api/approvals/route.ts",
+        "frontend/src/app/api/crewai/resume/route.ts",
         "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
@@ -108,7 +116,9 @@
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useProjects.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -157,7 +167,9 @@
     "US-F11": {
       "title": "Create Project Manually",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/projects/create/route.ts"
+      ],
       "pages": [
         "frontend/src/app/projects/new/page.tsx"
       ],
@@ -170,8 +182,11 @@
     },
     "US-F06": {
       "title": "View AI Analysis Results",
-      "components": [],
+      "components": [
+        "frontend/src/components/reports/CrewAIReportViewer.tsx"
+      ],
       "api_routes": [
+        "frontend/src/app/api/crewai/webhook/route.ts",
         "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [
@@ -179,7 +194,9 @@
         "frontend/src/app/project/[id]/report/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useCrewAIState.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -223,13 +240,18 @@
       "title": "View Phase 1 Progress Indicators",
       "components": [],
       "api_routes": [
+        "frontend/src/app/api/crewai/status/route.ts",
+        "frontend/src/app/api/crewai/webhook/route.ts",
         "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
         "frontend/src/app/project/[id]/analysis/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useCrewAIState.ts",
+        "frontend/src/hooks/useValidationProgress.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -249,13 +271,16 @@
       "title": "View Activity Feed Updates",
       "components": [],
       "api_routes": [
+        "frontend/src/app/api/crewai/webhook/route.ts",
         "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
         "frontend/src/app/project/[id]/analysis/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useValidationProgress.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -298,13 +323,21 @@
     "US-F12": {
       "title": "Manage Assumption Map",
       "components": [
-        "frontend/src/components/strategyzer/AssumptionMap.tsx"
+        "frontend/src/components/canvas/BusinessModelCanvas.tsx",
+        "frontend/src/components/canvas/ValuePropositionCanvas.tsx",
+        "frontend/src/components/strategyzer/AssumptionMap.tsx",
+        "frontend/src/components/vpc/VPCSummaryCard.tsx"
       ],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/vpc/[projectId]/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/founder-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useBMC.ts",
+        "frontend/src/hooks/useVPC.ts"
+      ],
       "lib": [],
       "e2e_tests": [],
       "unit_tests": [],
@@ -349,7 +382,9 @@
     },
     "US-F14": {
       "title": "Explore Evidence Explorer",
-      "components": [],
+      "components": [
+        "frontend/src/components/evidence-explorer/EvidenceDetailPanel.tsx"
+      ],
       "api_routes": [],
       "pages": [
         "frontend/src/app/project/[id]/evidence/page.tsx",
@@ -365,7 +400,8 @@
     "US-F15": {
       "title": "Review Gate Evaluation Dashboard",
       "components": [
-        "frontend/src/components/gates/GateDashboard.tsx"
+        "frontend/src/components/gates/GateDashboard.tsx",
+        "frontend/src/components/gates/GateReadinessIndicator.tsx"
       ],
       "api_routes": [],
       "pages": [
@@ -373,7 +409,9 @@
         "frontend/src/app/project/current/gate/page.tsx",
         "frontend/src/pages/founder-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useGateAlerts.ts"
+      ],
       "lib": [],
       "e2e_tests": [],
       "unit_tests": [],
@@ -383,9 +421,12 @@
     "US-F16": {
       "title": "Review AI Insights",
       "components": [
-        "frontend/src/components/fit/FitDashboard.tsx"
+        "frontend/src/components/fit/FitDashboard.tsx",
+        "frontend/src/components/reports/CrewAIReportViewer.tsx"
       ],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/assistant/chat/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/founder-dashboard.tsx"
       ],
@@ -399,7 +440,9 @@
     "US-C01": {
       "title": "Complete Practice Setup",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/consultant/onboarding/route.ts"
+      ],
       "pages": [
         "frontend/src/app/onboarding/consultant/page.tsx"
       ],
@@ -420,14 +463,19 @@
     },
     "US-C02": {
       "title": "Invite Client",
-      "components": [],
+      "components": [
+        "frontend/src/components/consultant/InviteClientModal.tsx"
+      ],
       "api_routes": [
+        "frontend/src/app/api/clients/route.ts",
         "frontend/src/app/api/consultant/invites/route.ts"
       ],
       "pages": [
         "frontend/src/pages/clients/new.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useConsultantClients.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -446,14 +494,20 @@
     "US-C03": {
       "title": "View Client Portfolio",
       "components": [
-        "frontend/src/components/portfolio/PortfolioGrid.tsx"
+        "frontend/src/components/consultant/ClientValidationCard.tsx",
+        "frontend/src/components/portfolio/PortfolioGrid.tsx",
+        "frontend/src/components/portfolio/PortfolioMetrics.tsx"
       ],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/clients/route.ts"
+      ],
       "pages": [
         "frontend/src/pages/clients.tsx",
         "frontend/src/pages/consultant-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useClients.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -471,15 +525,20 @@
     "US-C04": {
       "title": "View Client Detail",
       "components": [
+        "frontend/src/components/consultant/ClientValidationCard.tsx",
         "frontend/src/components/portfolio/PortfolioGrid.tsx"
       ],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/clients/[id]/route.ts"
+      ],
       "pages": [
         "frontend/src/app/approvals/page.tsx",
         "frontend/src/pages/client/[id].tsx",
         "frontend/src/pages/consultant-dashboard.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useClients.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -505,12 +564,15 @@
         "frontend/src/components/settings/ClientsTab.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/clients/[id]/archive/route.ts",
         "frontend/src/app/api/consultant/clients/[id]/archive/route.ts"
       ],
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useConsultantClients.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -535,7 +597,9 @@
       "pages": [
         "frontend/src/pages/settings.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useConsultantClients.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -555,6 +619,7 @@
         "frontend/src/components/onboarding/ClientOnboardingWizard.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/projects/create/route.ts",
         "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
@@ -793,17 +858,25 @@
     "US-H01": {
       "title": "Review Discovery Output (Founder's Brief + VPC)",
       "components": [
-        "frontend/src/components/approvals/ApprovalList.tsx"
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
+        "frontend/src/components/approvals/ApprovalList.tsx",
+        "frontend/src/components/onboarding/FoundersBriefReview.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
+        "frontend/src/app/api/crewai/resume/route.ts",
+        "frontend/src/app/api/crewai/webhook/route.ts",
+        "frontend/src/app/api/onboarding/brief/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [
         "frontend/src/app/approvals/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -826,9 +899,11 @@
     "US-H02": {
       "title": "Approve Experiment Plan",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_1.py"
@@ -836,7 +911,9 @@
       "pages": [
         "frontend/src/app/approvals/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -858,10 +935,12 @@
     "US-H04": {
       "title": "Approve Campaign Launch",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx",
         "frontend/src/db/schema/ad-campaigns.ts"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_2.py"
@@ -869,7 +948,9 @@
       "pages": [
         "frontend/src/app/approvals/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -890,9 +971,11 @@
     "US-H05": {
       "title": "Approve Budget Increase",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_2.py"
@@ -900,7 +983,9 @@
       "pages": [
         "frontend/src/app/approvals/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -921,9 +1006,11 @@
     "US-H06": {
       "title": "Review Desirability Gate",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "backend/netlify/functions/gate-evaluate.py",
         "../startupai-crew/src/modal_app/app.py",
@@ -934,7 +1021,9 @@
         "frontend/src/app/project/[id]/gate/page.tsx",
         "frontend/src/app/project/current/gate/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -955,9 +1044,11 @@
     "US-H07": {
       "title": "Review Feasibility Gate",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "backend/netlify/functions/gate-evaluate.py",
         "../startupai-crew/src/modal_app/app.py",
@@ -968,7 +1059,9 @@
         "frontend/src/app/project/[id]/gate/page.tsx",
         "frontend/src/app/project/current/gate/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -989,9 +1082,11 @@
     "US-H08": {
       "title": "Review Viability Gate",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "backend/netlify/functions/gate-evaluate.py",
         "../startupai-crew/src/modal_app/app.py",
@@ -1002,7 +1097,9 @@
         "frontend/src/app/project/[id]/gate/page.tsx",
         "frontend/src/app/project/current/gate/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -1023,9 +1120,11 @@
     "US-H09": {
       "title": "Make Final Validation Decision",
       "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx"
       ],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "frontend/src/app/api/approvals/route.ts",
         "../startupai-crew/src/modal_app/app.py",
         "../startupai-crew/src/modal_app/phases/phase_4.py"
@@ -1033,7 +1132,9 @@
       "pages": [
         "frontend/src/app/approvals/page.tsx"
       ],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useApprovals.ts"
+      ],
       "lib": [],
       "e2e_tests": [
         {
@@ -1153,7 +1254,9 @@
       ],
       "api_routes": [],
       "pages": [],
-      "hooks": [],
+      "hooks": [
+        "frontend/src/hooks/useOnboardingRecovery.ts"
+      ],
       "lib": [],
       "e2e_tests": [],
       "unit_tests": [],
@@ -1726,7 +1829,9 @@
     "US-AU01": {
       "title": "Log In to Product App",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/auth/logout/route.ts"
+      ],
       "pages": [
         "frontend/src/app/login/page.tsx"
       ],
@@ -2550,7 +2655,8 @@
       "title": "Configure Auto-approve Types",
       "components": [],
       "api_routes": [
-        "frontend/src/app/api/approvals/webhook/route.ts"
+        "frontend/src/app/api/approvals/webhook/route.ts",
+        "frontend/src/app/api/settings/approvals/route.ts"
       ],
       "pages": [],
       "hooks": [],
@@ -2564,7 +2670,8 @@
       "title": "Set Auto-approve Spend Threshold",
       "components": [],
       "api_routes": [
-        "frontend/src/app/api/approvals/webhook/route.ts"
+        "frontend/src/app/api/approvals/webhook/route.ts",
+        "frontend/src/app/api/settings/approvals/route.ts"
       ],
       "pages": [],
       "hooks": [],
@@ -2578,7 +2685,8 @@
       "title": "Configure Escalation Contact",
       "components": [],
       "api_routes": [
-        "frontend/src/app/api/cron/escalate-approvals/route.ts"
+        "frontend/src/app/api/cron/escalate-approvals/route.ts",
+        "frontend/src/app/api/settings/approvals/route.ts"
       ],
       "pages": [],
       "hooks": [],
@@ -4070,6 +4178,12 @@
     }
   },
   "files": {
+    "frontend/src/components/onboarding/FoundersBriefReview.tsx": {
+      "stories": [
+        "US-F01",
+        "US-H01"
+      ]
+    },
     "frontend/src/components/onboarding/QuickStartForm.tsx": {
       "stories": [
         "US-F01",
@@ -4089,6 +4203,12 @@
       "stories": [
         "US-F01",
         "US-FT01"
+      ]
+    },
+    "frontend/src/app/api/onboarding/brief/route.ts": {
+      "stories": [
+        "US-F01",
+        "US-H01"
       ]
     },
     "frontend/src/app/api/projects/quick-start/route.ts": {
@@ -4160,6 +4280,12 @@
         "US-FT01"
       ]
     },
+    "frontend/src/components/vpc/VPCSummaryCard.tsx": {
+      "stories": [
+        "US-F02",
+        "US-F12"
+      ]
+    },
     "frontend/src/pages/founder-dashboard.tsx": {
       "stories": [
         "US-F02",
@@ -4172,6 +4298,17 @@
         "US-F13",
         "US-F15",
         "US-F16"
+      ]
+    },
+    "frontend/src/hooks/useFounderStatus.ts": {
+      "stories": [
+        "US-F02"
+      ]
+    },
+    "frontend/src/hooks/useProjects.ts": {
+      "stories": [
+        "US-F02",
+        "US-F04"
       ]
     },
     "frontend/tests/e2e/03-founder-attribution.spec.ts": {
@@ -4212,6 +4349,12 @@
         "US-H07",
         "US-H08",
         "US-H09"
+      ]
+    },
+    "frontend/src/app/api/crewai/resume/route.ts": {
+      "stories": [
+        "US-F03",
+        "US-H01"
       ]
     },
     "frontend/src/app/approvals/page.tsx": {
@@ -4287,9 +4430,29 @@
         "US-F05"
       ]
     },
+    "frontend/src/app/api/projects/create/route.ts": {
+      "stories": [
+        "US-F11",
+        "US-C07"
+      ]
+    },
     "frontend/src/app/projects/new/page.tsx": {
       "stories": [
         "US-F11"
+      ]
+    },
+    "frontend/src/components/reports/CrewAIReportViewer.tsx": {
+      "stories": [
+        "US-F06",
+        "US-F16"
+      ]
+    },
+    "frontend/src/app/api/crewai/webhook/route.ts": {
+      "stories": [
+        "US-F06",
+        "US-F08",
+        "US-F09",
+        "US-H01"
       ]
     },
     "../startupai-crew/src/modal_app/phases/phase_1.py": {
@@ -4315,7 +4478,49 @@
         "US-F06"
       ]
     },
+    "frontend/src/hooks/useCrewAIState.ts": {
+      "stories": [
+        "US-F06",
+        "US-F08"
+      ]
+    },
+    "frontend/src/app/api/crewai/status/route.ts": {
+      "stories": [
+        "US-F08"
+      ]
+    },
+    "frontend/src/hooks/useValidationProgress.ts": {
+      "stories": [
+        "US-F08",
+        "US-F09"
+      ]
+    },
+    "frontend/src/components/canvas/BusinessModelCanvas.tsx": {
+      "stories": [
+        "US-F12"
+      ]
+    },
+    "frontend/src/components/canvas/ValuePropositionCanvas.tsx": {
+      "stories": [
+        "US-F12"
+      ]
+    },
     "frontend/src/components/strategyzer/AssumptionMap.tsx": {
+      "stories": [
+        "US-F12"
+      ]
+    },
+    "frontend/src/app/api/vpc/[projectId]/route.ts": {
+      "stories": [
+        "US-F12"
+      ]
+    },
+    "frontend/src/hooks/useBMC.ts": {
+      "stories": [
+        "US-F12"
+      ]
+    },
+    "frontend/src/hooks/useVPC.ts": {
       "stories": [
         "US-F12"
       ]
@@ -4335,6 +4540,11 @@
         "US-F13"
       ]
     },
+    "frontend/src/components/evidence-explorer/EvidenceDetailPanel.tsx": {
+      "stories": [
+        "US-F14"
+      ]
+    },
     "frontend/src/app/project/[id]/evidence/page.tsx": {
       "stories": [
         "US-F14"
@@ -4346,6 +4556,11 @@
       ]
     },
     "frontend/src/components/gates/GateDashboard.tsx": {
+      "stories": [
+        "US-F15"
+      ]
+    },
+    "frontend/src/components/gates/GateReadinessIndicator.tsx": {
       "stories": [
         "US-F15"
       ]
@@ -4366,9 +4581,24 @@
         "US-H08"
       ]
     },
+    "frontend/src/hooks/useGateAlerts.ts": {
+      "stories": [
+        "US-F15"
+      ]
+    },
     "frontend/src/components/fit/FitDashboard.tsx": {
       "stories": [
         "US-F16"
+      ]
+    },
+    "frontend/src/app/api/assistant/chat/route.ts": {
+      "stories": [
+        "US-F16"
+      ]
+    },
+    "frontend/src/app/api/consultant/onboarding/route.ts": {
+      "stories": [
+        "US-C01"
       ]
     },
     "frontend/src/app/onboarding/consultant/page.tsx": {
@@ -4381,6 +4611,17 @@
         "US-C01"
       ]
     },
+    "frontend/src/components/consultant/InviteClientModal.tsx": {
+      "stories": [
+        "US-C02"
+      ]
+    },
+    "frontend/src/app/api/clients/route.ts": {
+      "stories": [
+        "US-C02",
+        "US-C03"
+      ]
+    },
     "frontend/src/app/api/consultant/invites/route.ts": {
       "stories": [
         "US-C02"
@@ -4391,16 +4632,34 @@
         "US-C02"
       ]
     },
+    "frontend/src/hooks/useConsultantClients.ts": {
+      "stories": [
+        "US-C02",
+        "US-C05",
+        "US-C06"
+      ]
+    },
     "frontend/tests/e2e/10-consultant-client-onboarding.spec.ts": {
       "stories": [
         "US-C02",
         "US-C07"
       ]
     },
+    "frontend/src/components/consultant/ClientValidationCard.tsx": {
+      "stories": [
+        "US-C03",
+        "US-C04"
+      ]
+    },
     "frontend/src/components/portfolio/PortfolioGrid.tsx": {
       "stories": [
         "US-C03",
         "US-C04"
+      ]
+    },
+    "frontend/src/components/portfolio/PortfolioMetrics.tsx": {
+      "stories": [
+        "US-C03"
       ]
     },
     "frontend/src/pages/clients.tsx": {
@@ -4414,9 +4673,20 @@
         "US-C04"
       ]
     },
+    "frontend/src/hooks/useClients.ts": {
+      "stories": [
+        "US-C03",
+        "US-C04"
+      ]
+    },
     "frontend/tests/e2e/06-consultant-portfolio.spec.ts": {
       "stories": [
         "US-C03",
+        "US-C04"
+      ]
+    },
+    "frontend/src/app/api/clients/[id]/route.ts": {
+      "stories": [
         "US-C04"
       ]
     },
@@ -4429,6 +4699,11 @@
       "stories": [
         "US-C05",
         "US-C06"
+      ]
+    },
+    "frontend/src/app/api/clients/[id]/archive/route.ts": {
+      "stories": [
+        "US-C05"
       ]
     },
     "frontend/src/app/api/consultant/clients/[id]/archive/route.ts": {
@@ -4494,6 +4769,42 @@
         "US-CT06"
       ]
     },
+    "frontend/src/components/approvals/ApprovalDetailModal.tsx": {
+      "stories": [
+        "US-H01",
+        "US-H02",
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-H07",
+        "US-H08",
+        "US-H09"
+      ]
+    },
+    "frontend/src/app/api/approvals/[id]/route.ts": {
+      "stories": [
+        "US-H01",
+        "US-H02",
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-H07",
+        "US-H08",
+        "US-H09"
+      ]
+    },
+    "frontend/src/hooks/useApprovals.ts": {
+      "stories": [
+        "US-H01",
+        "US-H02",
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-H07",
+        "US-H08",
+        "US-H09"
+      ]
+    },
     "frontend/src/db/schema/ad-campaigns.ts": {
       "stories": [
         "US-H04",
@@ -4544,6 +4855,11 @@
         "US-P02",
         "US-P03",
         "US-P04"
+      ]
+    },
+    "frontend/src/hooks/useOnboardingRecovery.ts": {
+      "stories": [
+        "US-E01"
       ]
     },
     "frontend/src/components/validation/ValidationProgressTimeline.tsx": {
@@ -4625,6 +4941,11 @@
     "frontend/src/app/api/settings/notifications/route.ts": {
       "stories": [
         "US-N03"
+      ]
+    },
+    "frontend/src/app/api/auth/logout/route.ts": {
+      "stories": [
+        "US-AU01"
       ]
     },
     "frontend/src/app/login/page.tsx": {
@@ -5088,6 +5409,13 @@
       "stories": [
         "US-AA01",
         "US-AA02"
+      ]
+    },
+    "frontend/src/app/api/settings/approvals/route.ts": {
+      "stories": [
+        "US-AA01",
+        "US-AA02",
+        "US-AA03"
       ]
     },
     "frontend/src/app/api/cron/escalate-approvals/route.ts": {

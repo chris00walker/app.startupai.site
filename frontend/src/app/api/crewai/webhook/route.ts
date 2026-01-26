@@ -14,6 +14,8 @@
  *
  * Authentication:
  * - Bearer token (MODAL_AUTH_TOKEN)
+ *
+ * @story US-F06, US-F08, US-F09, US-H01
  */
 
 import { NextRequest, NextResponse } from 'next/server';

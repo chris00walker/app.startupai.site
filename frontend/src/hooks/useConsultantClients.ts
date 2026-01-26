@@ -6,6 +6,8 @@
  *
  * This hook complements useClients which focuses on portfolio project display.
  * useConsultantClients focuses on relationship and invite management.
+ *
+ * @story US-C02, US-C05, US-C06
  */
 
 'use client';

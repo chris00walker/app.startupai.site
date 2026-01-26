@@ -8,6 +8,8 @@
  * - Browser crash recovery
  *
  * @see Plan: /home/chris/.claude/plans/shiny-growing-sprout.md
+ *
+ * @story US-E01
  */
 
 import { useCallback, useEffect, useRef } from 'react';

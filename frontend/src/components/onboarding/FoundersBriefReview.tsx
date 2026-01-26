@@ -14,6 +14,8 @@
  *
  * Note: This component is also reused for approve_discovery_output checkpoint (Phase 1 Stage B)
  * to show the complete VPC discovery results.
+ *
+ * @story US-H01, US-F01
  */
 
 import { useState } from 'react';

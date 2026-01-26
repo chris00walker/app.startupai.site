@@ -1,3 +1,11 @@
+/**
+ * PortfolioMetrics Component
+ *
+ * Displays aggregated metrics for consultant's client portfolio.
+ *
+ * @story US-C03
+ */
+
 "use client"
 
 import * as React from "react"

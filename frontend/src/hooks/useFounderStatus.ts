@@ -3,6 +3,8 @@
  *
  * Polls the /api/agents/status endpoint for real-time founder status.
  * Returns founder data with current status for UI display.
+ *
+ * @story US-F02
  */
 import { useQuery } from '@tanstack/react-query'
 import {

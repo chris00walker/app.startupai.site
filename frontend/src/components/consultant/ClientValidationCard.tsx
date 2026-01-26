@@ -3,6 +3,8 @@
  *
  * Displays validation progress for a consultant's client.
  * Shows current phase, gate status, evidence metrics, and AI recommendations.
+ *
+ * @story US-C03, US-C04
  */
 
 'use client';

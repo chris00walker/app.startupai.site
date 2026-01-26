@@ -1,8 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
-import { createClient as createAdminClient } from '@/lib/supabase/admin';
-
 /**
+ * Onboarding Brief API
+ *
  * GET /api/onboarding/brief
  *
  * Fetches the entrepreneur brief for a given project or session.
@@ -13,7 +11,13 @@ import { createClient as createAdminClient } from '@/lib/supabase/admin';
  * - sessionId: The session ID to fetch the brief for (alternative)
  *
  * Returns the entrepreneur_brief data for display in FoundersBriefReview component.
+ *
+ * @story US-F01, US-H01
  */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient as createServerClient } from '@/lib/supabase/server';
+import { createClient as createAdminClient } from '@/lib/supabase/admin';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

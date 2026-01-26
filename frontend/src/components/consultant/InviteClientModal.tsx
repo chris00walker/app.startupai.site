@@ -1,3 +1,11 @@
+/**
+ * InviteClientModal Component
+ *
+ * Modal for inviting new clients to work with a consultant.
+ *
+ * @story US-C02
+ */
+
 'use client';
 
 import { useState } from 'react';

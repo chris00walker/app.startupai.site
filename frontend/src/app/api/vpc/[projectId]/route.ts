@@ -3,6 +3,8 @@
  *
  * GET /api/vpc/[projectId] - Fetch all VPC segments for a project
  * POST /api/vpc/[projectId] - Create or update a VPC segment (upsert)
+ *
+ * @story US-F12
  */
 
 import { NextRequest, NextResponse } from 'next/server';

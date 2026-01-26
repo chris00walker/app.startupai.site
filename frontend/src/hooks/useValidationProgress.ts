@@ -6,6 +6,8 @@
  *
  * Pattern follows: hooks/useApprovals.ts
  * Reference: startupai-crew/docs/features/state-persistence.md
+ *
+ * @story US-F08, US-F09
  */
 
 'use client';

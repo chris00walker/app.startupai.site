@@ -2,6 +2,8 @@
  * ApprovalDetailModal Component
  *
  * Full decision modal with context, options, and feedback form.
+ *
+ * @story US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
  */
 
 'use client';
