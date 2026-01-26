@@ -51,6 +51,75 @@ export const EXCLUDE_DIRS = [
   '__mocks__',
 ] as const;
 
+/**
+ * Patterns to exclude from orphan report (files that don't need @story annotations)
+ * These are infrastructure files that support multiple stories or are generic utilities
+ */
+export const ORPHAN_EXCLUDE_PATTERNS = [
+  // Task #1: Core exclusion patterns
+  /^frontend\/src\/components\/ui\/[^/]+\.tsx$/, // shadcn/ui primitives (button, card, input, etc.)
+  /^frontend\/src\/components\/ui\/.*\.tsx$/, // nested shadcn components
+  /^\.\.\/startupai-crew\//, // cross-repo files (has own traceability)
+  /^\.\.\/startupai\.site\//, // cross-repo files (has own traceability)
+  /\/types\/.*\.ts$/, // pure type definition files
+  /\/types\.ts$/, // types.ts files
+  /\.d\.ts$/, // TypeScript declaration files
+  /\/index\.ts$/, // barrel export files
+  /setupTests\.ts$/, // test setup infrastructure
+  /global-setup\.ts$/, // test infrastructure
+
+  // Task #2: db/schema infrastructure files
+  /^frontend\/src\/db\/schema\/.*\.ts$/, // database schema files
+  /^frontend\/src\/db\/client\.ts$/, // database client
+  /^frontend\/src\/db\/seed\.ts$/, // database seeding
+
+  // Task #3: Test helper/utility files
+  /^frontend\/tests\/e2e\/helpers\/.*\.ts$/, // E2E test utilities
+  /^frontend\/src\/__tests__\/utils\/.*\.ts$/, // Unit test utilities
+  /^frontend\/src\/tests\/mocks\/.*\.ts$/, // Mock implementations
+
+  // Task #4: lib/supabase infrastructure
+  /^frontend\/src\/lib\/supabase\/.*\.ts$/, // Supabase client setup
+
+  // Task #5: Generic utility files
+  /^frontend\/src\/lib\/utils\.ts$/, // Generic utilities (cn, formatDate, etc.)
+  /^frontend\/src\/lib\/env\.ts$/, // Environment variable access
+  /^frontend\/src\/proxy\.ts$/, // Development proxy
+  /^frontend\/src\/lib\/analytics\/index\.ts$/, // Analytics barrel export
+
+  // Additional infrastructure patterns
+  /\/_app\.tsx$/, // Next.js app wrapper
+  /\/_document\.tsx$/, // Next.js document
+  /\/layout\.tsx$/, // Layout components (generic structure)
+  /\/providers\/.*\.tsx$/, // Provider wrappers
+  /Provider\.tsx$/, // Provider components
+
+  // Additional query/repository infrastructure
+  /^frontend\/src\/db\/queries\/.*\.ts$/, // Database queries (generic data access)
+  /^frontend\/src\/db\/repositories\/.*\.ts$/, // Repository pattern files
+  /^frontend\/src\/services\/api\.ts$/, // Generic API service
+
+  // Legacy/backup files
+  /legacy\/.*\.tsx?$/, // Legacy backup files
+  /\.bak\.[^/]+$/, // Backup files
+
+  // Debug/test pages (not user-facing)
+  /^frontend\/src\/app\/debug-.*\/page\.tsx$/, // Debug pages
+  /^frontend\/src\/app\/test-.*\/page\.tsx$/, // Test pages
+
+  // Netlify functions infrastructure (__init__.py, config files)
+  /^netlify\/functions\/__init__\.py$/, // Python init
+  /^netlify\/functions\/config\/.*\.yaml$/, // Config files
+  /^netlify\/functions\/startupai\/__init__\.py$/, // Python init
+] as const;
+
+/**
+ * Check if a file path should be excluded from the orphan report
+ */
+export function isOrphanExcluded(filePath: string): boolean {
+  return ORPHAN_EXCLUDE_PATTERNS.some((pattern) => pattern.test(filePath));
+}
+
 // =============================================================================
 // Story Source Configuration
 // =============================================================================

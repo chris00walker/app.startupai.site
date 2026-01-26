@@ -32,6 +32,7 @@ import {
   OUTPUT_DIR,
   classifyFileType,
   getCategoryForStory,
+  isOrphanExcluded,
 } from './config';
 import {
   applyAnnotationsToStories,
@@ -578,10 +579,16 @@ function generateOrphanReport(map: StoryCodeMap): string {
     }
   }
 
-  // Find files without annotations
+  // Find files without annotations (excluding infrastructure files)
   const orphans: Array<{ file: string; type: string }> = [];
+  let excludedCount = 0;
   for (const file of allFiles) {
     if (!map.files[file]) {
+      // Skip files that match exclusion patterns (infrastructure, utilities, cross-repo)
+      if (isOrphanExcluded(file)) {
+        excludedCount++;
+        continue;
+      }
       const type = classifyFileType(file);
       orphans.push({ file, type });
     }
@@ -608,6 +615,10 @@ function generateOrphanReport(map: StoryCodeMap): string {
 
   lines.push('');
   lines.push(`**Total Orphans: ${orphans.length}**`);
+  if (excludedCount > 0) {
+    lines.push('');
+    lines.push(`*Note: ${excludedCount} infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*`);
+  }
 
   return lines.join('\n');
 }
