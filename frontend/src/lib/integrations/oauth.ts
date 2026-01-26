@@ -5,7 +5,7 @@
  * Uses JWT-based state tokens for serverless-safe CSRF protection.
  * Implements PKCE for providers that require it (Airtable).
  *
- * @story US-I01, US-I02, US-I03, US-I04, US-I05, US-I06, US-BI01
+ * @story US-I01, US-I02, US-I03, US-I04, US-I05, US-I06, US-BI01, US-INF02
  */
 
 import { SignJWT, jwtVerify } from 'jose';

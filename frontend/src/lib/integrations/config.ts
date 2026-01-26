@@ -4,7 +4,7 @@
  * Static configuration for all supported external integrations.
  * Includes OAuth settings, preference fields, and UI metadata.
  *
- * @story US-I01, US-I02, US-I03, US-I04, US-I05, US-I06
+ * @story US-I01, US-I02, US-I03, US-I04, US-I05, US-I06, US-INF01
  */
 
 import type { IntegrationConfig, IntegrationType, IntegrationCategory } from '@/types/integrations';

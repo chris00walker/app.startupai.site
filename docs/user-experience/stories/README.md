@@ -36,7 +36,7 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ## Coverage Summary
 
-> **Updated 2026-01-24**: Added Ad Management, Ad Campaigns, and Bi-directional Integration stories; total stories now 187.
+> **Updated 2026-01-26**: Added Infrastructure stories (MCP Tools, Asset Templates, Provider APIs, Core Infrastructure); total stories now 252.
 
 ### Stories by Category
 
@@ -48,12 +48,12 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Consultant Trial | US-CT01-CT06 | 6 | 0 | 6 |
 | HITL Checkpoint | US-H01-H02, H04-H09 | 8 | 8 | 0 |
 | Pivot Flow | US-P01-P04 | 4 | 4 | 0 |
-| Agent Brief | US-AB01-AB03 | 3 | 0 | 3 |
-| Agent Discovery | US-AD01-AD10 | 10 | 0 | 10 |
-| Agent Desirability | US-ADB01-ADB05 | 5 | 0 | 5 |
-| Agent Feasibility | US-AFB01-AFB03 | 3 | 0 | 3 |
-| Agent Viability | US-AVB01-AVB05 | 5 | 0 | 5 |
-| Agent HITL | US-AH01-AH10 | 10 | 0 | 10 |
+| Agent Brief | US-AB01-AB03 | 3 | 3 | 0 |
+| Agent Discovery | US-AD01-AD10 | 10 | 10 | 0 |
+| Agent Desirability | US-ADB01-ADB05 | 5 | 5 | 0 |
+| Agent Feasibility | US-AFB01-AFB03 | 3 | 3 | 0 |
+| Agent Viability | US-AVB01-AVB05 | 5 | 5 | 0 |
+| Agent HITL | US-AH01-AH10 | 10 | 10 | 0 |
 | Edge Cases | US-E01-E06 | 6 | 0 | 6 |
 | Authentication | US-AU01-AU03 | 3 | 1 | 2 |
 | Core Product | US-CP01-CP09 | 9 | 0 | 9 |
@@ -69,8 +69,13 @@ This document contains all user stories for the StartupAI platform. Each story i
 | Integration | US-I01-I06 | 6 | 0 | 6 |
 | Bi-directional Integration | US-BI01-BI05 | 5 | 0 | 5 |
 | Preferences | US-PR01-PR04 | 4 | 0 | 4 |
-| AI Approvals | US-AA01-AA03 | 3 | 0 | 3 |
-| **Total** | | **187** | **34** | **153** |
+| AI Approvals | US-AA01-AA03 | 3 | 3 | 0 |
+| **Infrastructure** | | | | |
+| ↳ MCP Tools | US-MT01-MT35 | 35 | 0 | 35 |
+| ↳ Asset Templates | US-AT01-AT10 | 10 | 0 | 10 |
+| ↳ Provider APIs | US-PA01-PA10 | 10 | 0 | 10 |
+| ↳ Core Infrastructure | US-INF01-INF10 | 10 | 0 | 10 |
+| **Total** | | **252** | **73** | **179** |
 
 ### E2E Test File Mapping
 
@@ -202,6 +207,7 @@ Stories with test stubs created but not yet implemented:
 | [`notification-journey-map.md`](../journeys/platform/notification-journey-map.md) | Notification delivery |
 | [`account-settings-journey-map.md`](../journeys/platform/account-settings-journey-map.md) | Profile and security |
 | [`agents/`](agents/) | Agent stories by phase (US-AB, US-AD, US-ADB, US-AFB, US-AVB, US-AH) |
+| [`infrastructure/`](infrastructure/) | Infrastructure stories (US-MT, US-AT, US-PA, US-INF) |
 | [`journey-test-matrix.md`](../../testing/journey-test-matrix.md) | Test coverage matrix |
 | [`agent-journey-test-matrix.md`](../../testing/agent-journey-test-matrix.md) | Agent journey test matrix |
 | [`project-client-management.md`](../../features/project-client-management.md) | Archive/delete feature specs |
@@ -213,6 +219,7 @@ Stories with test stubs created but not yet implemented:
 
 | Date | Change |
 |------|--------|
+| 2026-01-26 | **Infrastructure Stories:** Added 65 infrastructure stories: MCP Tools (US-MT01-MT35), Asset Templates (US-AT01-AT10), Provider APIs (US-PA01-PA10), Core Infrastructure (US-INF01-INF10). Makes architectural work visible in traceability system. Total stories now 252. |
 | 2026-01-24 | **Ad Platform & Integration Stories:** Added Ad Management (US-AM01-AM07), Ad Campaigns (US-AC01-AC05), and Bi-directional Integration (US-BI01-BI05) stories. Total stories now 187. |
 | 2026-01-24 | **Settings Page Stories:** Added Integration (US-I01-I06), Preferences (US-PR01-PR04), and AI Approvals (US-AA01-AA03) stories. |
 | 2026-01-23 | **Agent Story Restructure:** Replaced US-AJ01-07 and US-AG01-14 with new phase-organized stories: US-AB01-03 (Brief), US-AD01-10 (Discovery), US-ADB01-05 (Desirability), US-AFB01-03 (Feasibility), US-AVB01-05 (Viability), US-AH01-10 (HITL). Total stories now 157. |

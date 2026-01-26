@@ -840,3 +840,279 @@ US-MF03:
     - users
   notes: "OAuth signup - implementation in app.startupai.site"
   implementation_status: partial
+
+# =============================================================================
+# Infrastructure: MCP Tools (US-MT01-MT35) - Gap
+# =============================================================================
+
+US-MT01:
+  notes: "SerperDevTool - EXISTS category, ready to import"
+  implementation_status: pending
+
+US-MT02:
+  notes: "ScrapeWebsiteTool - EXISTS category, ready to import"
+  implementation_status: pending
+
+US-MT03:
+  notes: "FileReadTool - EXISTS category"
+  implementation_status: pending
+
+US-MT04:
+  notes: "DirectoryReadTool - EXISTS category"
+  implementation_status: pending
+
+US-MT05:
+  notes: "WebSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT06:
+  notes: "YouTubeSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT07:
+  notes: "PDFSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT08:
+  notes: "CSVSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT09:
+  notes: "JSONSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT10:
+  notes: "XMLSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT11:
+  notes: "TXTSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT12:
+  notes: "DOCXSearchTool - EXISTS category"
+  implementation_status: pending
+
+US-MT13:
+  notes: "CodeInterpreterTool - EXISTS category"
+  implementation_status: pending
+
+US-MT14:
+  notes: "ForumScraperTool (forum_search) - MCP Custom on Modal"
+  implementation_status: pending
+
+US-MT15:
+  notes: "ReviewAnalysisTool (analyze_reviews) - MCP Custom on Modal"
+  implementation_status: pending
+
+US-MT16:
+  notes: "SocialListeningTool (social_listen) - MCP Custom on Modal"
+  implementation_status: pending
+
+US-MT17:
+  notes: "TrendAnalysisTool (analyze_trends) - MCP Custom on Modal"
+  implementation_status: pending
+
+US-MT18:
+  notes: "TranscriptionTool (transcribe_audio) - MCP Custom on Modal"
+  implementation_status: pending
+
+US-MT19:
+  notes: "InsightExtractorTool (extract_insights) - MCP Custom on Modal"
+  implementation_status: pending
+
+US-MT20:
+  notes: "LandingPageGeneratorTool - MCP Custom, uses US-AT01-AT05"
+  implementation_status: pending
+
+US-MT21:
+  notes: "AdCreativeGeneratorTool - MCP Custom, uses US-AT06-AT08"
+  implementation_status: pending
+
+US-MT22:
+  notes: "StateManagerTool (get/update_project_state) - MCP Custom"
+  implementation_status: pending
+
+US-MT23:
+  notes: "HITLRequestTool (create_hitl_request) - MCP Custom"
+  implementation_status: pending
+
+US-MT24:
+  notes: "AdPlatformTool Meta - MCP External (pipeboard-co/meta-ads-mcp)"
+  implementation_status: pending
+
+US-MT25:
+  notes: "AdPlatformTool Google - MCP External (cohnen/google-ads-mcp)"
+  implementation_status: pending
+
+US-MT26:
+  notes: "InterviewSchedulerTool - MCP External (Google Calendar MCP)"
+  implementation_status: pending
+
+US-MT27:
+  notes: "WebFetchTool - MCP External (Official Fetch Server)"
+  implementation_status: pending
+
+US-MT28:
+  notes: "SynthesisEngineTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT29:
+  notes: "FitCalculatorTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT30:
+  notes: "PivotRecommenderTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT31:
+  notes: "EconomicsAnalyzerTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT32:
+  notes: "FeasibilityAssessorTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT33:
+  notes: "BriefCompilerTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT34:
+  notes: "WTPAnalyzerTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+US-MT35:
+  notes: "GovernanceAuditorTool - LLM-Based (Pydantic schema)"
+  implementation_status: pending
+
+# =============================================================================
+# Infrastructure: Asset Templates (US-AT01-AT10) - Gap
+# =============================================================================
+
+US-AT01:
+  notes: "Component Registry System - 15 section types for landing pages"
+  implementation_status: pending
+
+US-AT02:
+  notes: "Hero Section Template - variants: centered, split, video, gradient"
+  implementation_status: pending
+
+US-AT03:
+  notes: "Features Section Template - variants: grid, list, alternating"
+  implementation_status: pending
+
+US-AT04:
+  notes: "Social Proof Section Template - testimonials, logos, stats"
+  implementation_status: pending
+
+US-AT05:
+  notes: "CTA and Pricing Section Templates"
+  implementation_status: pending
+
+US-AT06:
+  notes: "Platform Constraint Library - Meta, Google, LinkedIn, TikTok specs"
+  implementation_status: pending
+
+US-AT07:
+  notes: "Ad Copy Template System - copy formulas with character limits"
+  implementation_status: pending
+
+US-AT08:
+  notes: "Ad Image Specification System - dimensions, safe zones"
+  implementation_status: pending
+
+US-AT09:
+  notes: "Unsplash Integration - free stock images with attribution"
+  implementation_status: pending
+
+US-AT10:
+  notes: "AI Image Generation On-Demand - DALL-E/Midjourney fallback"
+  implementation_status: pending
+
+# =============================================================================
+# Infrastructure: Provider APIs (US-PA01-PA10) - Gap
+# =============================================================================
+
+US-PA01:
+  notes: "Notion API Client - pages, databases, blocks"
+  implementation_status: pending
+
+US-PA02:
+  notes: "Google Drive API Client - files, folders, export (needs US-INF01)"
+  implementation_status: pending
+
+US-PA03:
+  notes: "Airtable API Client - bases, tables, records (needs US-INF02)"
+  implementation_status: pending
+
+US-PA04:
+  notes: "Trello API Client - boards, lists, cards"
+  implementation_status: pending
+
+US-PA05:
+  notes: "Asana API Client - workspaces, projects, tasks"
+  implementation_status: pending
+
+US-PA06:
+  notes: "Monday.com API Client - GraphQL boards, items"
+  implementation_status: pending
+
+US-PA07:
+  notes: "Slack API Client - channels, messages"
+  implementation_status: pending
+
+US-PA08:
+  notes: "HubSpot API Client - contacts, deals"
+  implementation_status: pending
+
+US-PA09:
+  notes: "Salesforce API Client - leads, opportunities"
+  implementation_status: pending
+
+US-PA10:
+  notes: "Zapier Webhook Receiver - catch-all integration"
+  implementation_status: pending
+
+# =============================================================================
+# Infrastructure: Core Infrastructure (US-INF01-INF10) - Gap
+# =============================================================================
+
+US-INF01:
+  notes: "Google Drive OAuth Scope - already drive.readonly in config.ts:139"
+  implementation_status: complete
+
+US-INF02:
+  notes: "Airtable PKCE Flow - implemented in oauth.ts"
+  implementation_status: complete
+
+US-INF03:
+  notes: "Token Refresh Service - implemented in refresh.ts"
+  implementation_status: complete
+
+US-INF04:
+  notes: "Provider Rate Limiter Framework - token bucket per provider"
+  implementation_status: pending
+
+US-INF05:
+  notes: "Exponential Backoff and 429 Handling - retry with jitter"
+  implementation_status: pending
+
+US-INF06:
+  notes: "Email Provider Integration - Resend SDK"
+  implementation_status: pending
+
+US-INF07:
+  notes: "Email Template System - escalation, notifications"
+  implementation_status: pending
+
+US-INF08:
+  notes: "pg_cron Scheduled Jobs - escalation, sync"
+  implementation_status: pending
+
+US-INF09:
+  notes: "FastMCP Server Deployment - Modal serverless"
+  implementation_status: pending
+
+US-INF10:
+  notes: "MCP-CrewAI Integration Layer - mcp-use library"
+  implementation_status: pending

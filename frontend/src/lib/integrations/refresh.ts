@@ -4,7 +4,7 @@
  * Handles OAuth token refresh for external integrations.
  * Implements lazy refresh pattern - tokens are refreshed on-demand before API calls.
  *
- * @story US-BI01, US-BI02
+ * @story US-BI01, US-BI02, US-INF03
  */
 
 import type { IntegrationType } from '@/types/integrations';

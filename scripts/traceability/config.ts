@@ -140,6 +140,11 @@ export const STORY_SOURCES = [
   'docs/user-experience/stories/agents/phase-3-feasibility.md',
   'docs/user-experience/stories/agents/phase-4-viability.md',
   'docs/user-experience/stories/agents/hitl-checkpoints.md',
+  // Infrastructure stories (MCP tools, templates, APIs, core infrastructure)
+  'docs/user-experience/stories/infrastructure/mcp-tools.md',
+  'docs/user-experience/stories/infrastructure/asset-templates.md',
+  'docs/user-experience/stories/infrastructure/provider-apis.md',
+  'docs/user-experience/stories/infrastructure/core-infrastructure.md',
 ] as const;
 
 /**
