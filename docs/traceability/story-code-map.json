@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-26T18:15:37.794Z",
+    "generated_at": "2026-01-26T18:50:00.168Z",
     "version": "1.0.0",
     "story_count": 187,
-    "annotated_file_count": 341
+    "annotated_file_count": 345
   },
   "stories": {
     "US-F01": {
@@ -339,10 +339,14 @@
         "frontend/src/hooks/useVPC.ts"
       ],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "36-assumption-map.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-F17": {
       "title": "Manage Hypotheses",
@@ -375,10 +379,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "37-evidence-features.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-F14": {
       "title": "Explore Evidence Explorer",
@@ -392,10 +400,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "37-evidence-features.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-F15": {
       "title": "Review Gate Evaluation Dashboard",
@@ -413,10 +425,14 @@
         "frontend/src/hooks/useGateAlerts.ts"
       ],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "38-gate-evaluation.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-F16": {
       "title": "Review AI Insights",
@@ -432,10 +448,14 @@
       ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "39-ai-insights.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-C01": {
       "title": "Complete Practice Setup",
@@ -4525,6 +4545,11 @@
         "US-F12"
       ]
     },
+    "frontend/tests/e2e/36-assumption-map.spec.ts": {
+      "stories": [
+        "US-F12"
+      ]
+    },
     "frontend/src/components/hypothesis/HypothesisManager.tsx": {
       "stories": [
         "US-F17"
@@ -4538,6 +4563,12 @@
     "frontend/src/components/fit/EvidenceLedger.tsx": {
       "stories": [
         "US-F13"
+      ]
+    },
+    "frontend/tests/e2e/37-evidence-features.spec.ts": {
+      "stories": [
+        "US-F13",
+        "US-F14"
       ]
     },
     "frontend/src/components/evidence-explorer/EvidenceDetailPanel.tsx": {
@@ -4586,12 +4617,22 @@
         "US-F15"
       ]
     },
+    "frontend/tests/e2e/38-gate-evaluation.spec.ts": {
+      "stories": [
+        "US-F15"
+      ]
+    },
     "frontend/src/components/fit/FitDashboard.tsx": {
       "stories": [
         "US-F16"
       ]
     },
     "frontend/src/app/api/assistant/chat/route.ts": {
+      "stories": [
+        "US-F16"
+      ]
+    },
+    "frontend/tests/e2e/39-ai-insights.spec.ts": {
       "stories": [
         "US-F16"
       ]

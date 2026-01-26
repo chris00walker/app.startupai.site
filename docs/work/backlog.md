@@ -21,7 +21,8 @@ Prioritized by validation impact. Items testing assumptions rank higher.
 | HITL Approval UI data source | A1 | 1 | Trust signal improvement |
 | **Schema migration: Trial split** | - | 0 | `trial` → `founder_trial` + `consultant_trial` in users.ts |
 | **Consultant Trial mock client system** | A6 | 2 | Lets consultants evaluate before paying $149/mo |
-| **Admin user search & impersonation** | - | 1 | Support team can debug user issues without engineering |
+| **US-FT03: Stripe upgrade webhook** | - | 0 | Handle checkout.session.completed, update role (blocked by trial split) |
+| **US-FT04: Post-upgrade orientation** | - | 0 | Welcome modal, email, badge update (blocked by US-FT03) |
 
 ## P2: Platform Quality
 
@@ -29,13 +30,9 @@ Prioritized by validation impact. Items testing assumptions rank higher.
 |------|--------|-------|
 | Documentation refresh | 8h | 71-day staleness gap |
 | Journey-Driven Testing | 2 days | Derive tests from journey maps |
-| PostHog Quick Start + HITL events | 4h | Add events for new Quick Start flow (48 types defined, 100+ calls exist) |
+| PostHog Quick Start + HITL events | 4h | Add events for new Quick Start flow |
 | VPC geometric shapes | 2-3h | Visual polish |
 | HITL comment display | 2-4h | Show human_comment in UI |
-| **Admin UI: Health dashboard** | 1 day | `/admin/health` - Modal/Supabase status, error rate |
-| **Admin UI: Feature flags** | 1 day | `/admin/features` - Enable/disable per user or globally |
-| **Admin UI: Audit logs** | 1 day | `/admin/audit` - All admin actions logged and viewable |
-| **E2E tests: Admin stories (US-A01-A12)** | 2 days | 4 test files created as stubs |
 | **E2E tests: Consultant Trial (US-CT01-CT05)** | 1 day | 1 test file created as stub |
 | **E2E tests: Edge cases (US-E01-E06)** | 1 day | Interrupted Quick Start, timeouts, etc. |
 | **E2E tests: Support (US-S01-S05)** | 1 day | `23-support.spec.ts` stub created |
@@ -48,14 +45,22 @@ Prioritized by validation impact. Items testing assumptions rank higher.
 
 | Item | Effort | Notes |
 |------|--------|-------|
+| **US-F11: Manual project wizard** | 2-4h | Legacy wizard, low priority (Quick Start preferred) |
 | PDF/PowerPoint export | 3-5 days | External sharing |
 | Canvas versioning | 5-7 days | History tracking |
 | Multi-segment VPC comparison | 3-5 days | Side-by-side analysis |
 | Drag-and-drop VPC fit mapping | 8+h | Interactive UX |
 | Internationalisation | TBD | Locale support |
-| **Admin: User data export** | 2 days | GDPR compliance, support debugging |
-| **Admin: Data integrity checks** | 2 days | Automated validation of user data consistency |
-| **Admin: Workflow retry UI** | 1 day | Re-trigger failed CrewAI jobs without engineering |
+
+## Blocked
+
+Items that cannot proceed until external dependencies are resolved.
+
+| Item | Stories | Blocker | Notes |
+|------|---------|---------|-------|
+| **Ad Platform OAuth Integration** | US-AM01, US-AM02, US-AM03 | No Meta/Google/TikTok API accounts | Need business accounts with ad platforms |
+| **Ad Spend Monitoring** | US-AM04, US-AM05 | Blocked by OAuth | Requires connected ad accounts |
+| **Ad Platform Health & Errors** | US-AM06, US-AM07 | Blocked by OAuth | Requires live API connections |
 
 ## Completed (Move to done.md)
 
@@ -63,6 +68,33 @@ Items here have been delivered but not yet moved to done.md:
 
 - ~~Quick Start Architecture~~ → Moved 2026-01-21
 - ~~Two-Pass Architecture~~ → Moved 2026-01-21
+- **Admin Dashboard (Epic 11)** - All 12 stories complete (US-A01-A12)
+  - User search & impersonation (US-A01, US-A03)
+  - Health dashboard (US-A05)
+  - Feature flags (US-A06)
+  - Audit logs (US-A07)
+  - User data export (US-A09)
+  - Data integrity checks (US-A10)
+  - Workflow retry UI (US-A04)
+  - Billing management (US-A12)
+- **E2E tests: Admin stories (US-A01-A12)** - 3 test files with real tests
+- **Core Founder Journey** - 11 stories complete (US-F01-F10, US-F17)
+  - Quick Start onboarding (US-F01)
+  - Dashboard view (US-F02)
+  - HITL checkpoints (US-F03)
+  - Project archive/delete (US-F04, US-F05)
+  - AI analysis results (US-F06)
+  - Quick Start hints (US-F07)
+  - Phase progress (US-F08, US-F09, US-F10)
+  - Hypotheses management (US-F17)
+- **Founder Trial basics** - 2 stories complete (US-FT01, US-FT02)
+- **Extended Founder Features** - 5 stories complete (US-F12-F16) → Added 2026-01-26
+  - Assumption Map with Strategyzer integration (US-F12)
+  - Evidence Ledger with fit type filters (US-F13)
+  - Evidence Explorer with timeline view (US-F14)
+  - Gate Evaluation Dashboard (US-F15)
+  - AI Insights feature (US-F16)
+- **E2E tests: Founder features** - 4 test files (US-F12, US-F13, US-F14, US-F15, US-F16) → Added 2026-01-26
 
 ## Triage Rules
 
@@ -75,4 +107,4 @@ Review weekly. Promote to in-progress.md when starting work.
 
 ---
 
-**Last Updated**: 2026-01-22
+**Last Updated**: 2026-01-26
