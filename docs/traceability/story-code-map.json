@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-25T14:41:32.096Z",
+    "generated_at": "2026-01-26T14:09:54.949Z",
     "version": "1.0.0",
     "story_count": 187,
-    "annotated_file_count": 273
+    "annotated_file_count": 305
   },
   "stories": {
     "US-F01": {
@@ -2549,38 +2549,47 @@
     "US-AA01": {
       "title": "Configure Auto-approve Types",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/webhook/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-AA02": {
       "title": "Set Auto-approve Spend Threshold",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/webhook/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-AA03": {
       "title": "Configure Escalation Contact",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/cron/escalate-approvals/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/email/send.ts",
+        "frontend/src/lib/email/templates/escalation.ts"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "partial"
     },
     "US-AC01": {
       "title": "Create Ad Campaign for Founder",
@@ -2693,39 +2702,91 @@
     },
     "US-BI01": {
       "title": "Import Existing Business Data",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/imports/ImportDialog.tsx",
+        "frontend/src/components/imports/ImportableItemsList.tsx",
+        "frontend/src/components/imports/index.ts",
+        "frontend/src/db/schema/imports.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/imports/[type]/items/route.ts",
+        "frontend/src/app/api/imports/[type]/route.ts",
+        "frontend/src/app/api/integrations/[type]/callback/route.ts",
+        "frontend/src/app/api/integrations/[type]/connect/route.ts",
+        "frontend/src/app/api/integrations/[type]/refresh/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
+      "lib": [
+        "frontend/src/lib/integrations/oauth.ts",
+        "frontend/src/lib/integrations/providers/airtable.ts",
+        "frontend/src/lib/integrations/providers/google-drive.ts",
+        "frontend/src/lib/integrations/providers/index.ts",
+        "frontend/src/lib/integrations/providers/notion.ts",
+        "frontend/src/lib/integrations/providers/types.ts",
+        "frontend/src/lib/integrations/rate-limit.ts",
+        "frontend/src/lib/integrations/refresh.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "28-data-imports.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "complete"
     },
     "US-BI02": {
       "title": "Sync Project to External Platform",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/settings/integrations/SyncStatus.tsx",
+        "frontend/src/db/schema/sync-history.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/cron/sync-projects/route.ts",
+        "frontend/src/app/api/integrations/[type]/refresh/route.ts",
+        "frontend/src/app/api/integrations/[type]/sync/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
-      "e2e_tests": [],
+      "lib": [
+        "frontend/src/lib/integrations/rate-limit.ts",
+        "frontend/src/lib/integrations/refresh.ts"
+      ],
+      "e2e_tests": [
+        {
+          "file": "29-data-sync.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "complete"
     },
     "US-BI03": {
       "title": "Map External Data to StartupAI Schema",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/imports/FieldMappingEditor.tsx",
+        "frontend/src/components/imports/SourceFieldsList.tsx",
+        "frontend/src/components/imports/TargetFieldsList.tsx",
+        "frontend/src/components/imports/index.ts",
+        "frontend/src/db/schema/field-mappings.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/mappings/[id]/apply/route.ts",
+        "frontend/src/app/api/mappings/[id]/route.ts",
+        "frontend/src/app/api/mappings/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "30-field-mappings.spec.ts"
+        }
+      ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "gap"
+      "implementation_status": "complete"
     },
     "US-BI04": {
       "title": "Select Integrations During Quickstart",
@@ -4957,7 +5018,8 @@
         "US-I03",
         "US-I04",
         "US-I05",
-        "US-I06"
+        "US-I06",
+        "US-BI01"
       ]
     },
     "frontend/src/__tests__/hooks/useIntegrations.test.ts": {
@@ -4983,12 +5045,14 @@
     "frontend/src/app/api/integrations/[type]/callback/route.ts": {
       "stories": [
         "US-I02",
-        "US-I03"
+        "US-I03",
+        "US-BI01"
       ]
     },
     "frontend/src/app/api/integrations/[type]/connect/route.ts": {
       "stories": [
-        "US-I02"
+        "US-I02",
+        "US-BI01"
       ]
     },
     "frontend/src/components/settings/integrations/IntegrationConfigModal.tsx": {
@@ -5018,6 +5082,27 @@
         "US-PR02",
         "US-PR03",
         "US-PR04"
+      ]
+    },
+    "frontend/src/app/api/approvals/webhook/route.ts": {
+      "stories": [
+        "US-AA01",
+        "US-AA02"
+      ]
+    },
+    "frontend/src/app/api/cron/escalate-approvals/route.ts": {
+      "stories": [
+        "US-AA03"
+      ]
+    },
+    "frontend/src/lib/email/send.ts": {
+      "stories": [
+        "US-AA03"
+      ]
+    },
+    "frontend/src/lib/email/templates/escalation.ts": {
+      "stories": [
+        "US-AA03"
       ]
     },
     "../startupai-crew/src/tools/__init__.py": {
@@ -5105,6 +5190,150 @@
       "stories": [
         "US-AC05",
         "US-AM05"
+      ]
+    },
+    "frontend/src/components/imports/ImportDialog.tsx": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/components/imports/ImportableItemsList.tsx": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/components/imports/index.ts": {
+      "stories": [
+        "US-BI01",
+        "US-BI03"
+      ]
+    },
+    "frontend/src/db/schema/imports.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/app/api/imports/[type]/items/route.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/app/api/imports/[type]/route.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/app/api/integrations/[type]/refresh/route.ts": {
+      "stories": [
+        "US-BI01",
+        "US-BI02"
+      ]
+    },
+    "frontend/src/lib/integrations/providers/airtable.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/lib/integrations/providers/google-drive.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/lib/integrations/providers/index.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/lib/integrations/providers/notion.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/lib/integrations/providers/types.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/lib/integrations/rate-limit.ts": {
+      "stories": [
+        "US-BI01",
+        "US-BI02"
+      ]
+    },
+    "frontend/src/lib/integrations/refresh.ts": {
+      "stories": [
+        "US-BI01",
+        "US-BI02"
+      ]
+    },
+    "frontend/tests/e2e/28-data-imports.spec.ts": {
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "frontend/src/components/settings/integrations/SyncStatus.tsx": {
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "frontend/src/db/schema/sync-history.ts": {
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "frontend/src/app/api/cron/sync-projects/route.ts": {
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "frontend/src/app/api/integrations/[type]/sync/route.ts": {
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "frontend/tests/e2e/29-data-sync.spec.ts": {
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "frontend/src/components/imports/FieldMappingEditor.tsx": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/src/components/imports/SourceFieldsList.tsx": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/src/components/imports/TargetFieldsList.tsx": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/src/db/schema/field-mappings.ts": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/src/app/api/mappings/[id]/apply/route.ts": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/src/app/api/mappings/[id]/route.ts": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/src/app/api/mappings/route.ts": {
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "frontend/tests/e2e/30-field-mappings.spec.ts": {
+      "stories": [
+        "US-BI03"
       ]
     },
     "frontend/src/components/dashboard/IntegrationBanner.tsx": {

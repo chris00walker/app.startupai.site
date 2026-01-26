@@ -3,11 +3,12 @@
  *
  * GET: Handle OAuth callback from provider
  *      - Verifies state token
+ *      - Reads PKCE code verifier from cookie (if required)
  *      - Exchanges code for tokens
  *      - Stores integration in database
  *      - Closes popup window with postMessage
  *
- * @story US-I02, US-I03
+ * @story US-I02, US-I03, US-BI01
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -17,6 +18,8 @@ import {
   verifyOAuthState,
   exchangeCodeForTokens,
   fetchUserInfo,
+  requiresPKCE,
+  PKCE_VERIFIER_COOKIE_PREFIX,
 } from '@/lib/integrations/oauth';
 import type { IntegrationType } from '@/types/integrations';
 
@@ -145,9 +148,23 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const userId = statePayload.userId;
+    const integrationType = type as IntegrationType;
+
+    // Get PKCE code verifier from cookie if required
+    let codeVerifier: string | undefined;
+    if (requiresPKCE(integrationType)) {
+      const cookieName = `${PKCE_VERIFIER_COOKIE_PREFIX}${type}`;
+      codeVerifier = request.cookies.get(cookieName)?.value;
+      if (!codeVerifier) {
+        return new NextResponse(
+          generatePopupCloseHtml(false, type, 'Missing PKCE code verifier'),
+          { headers: { 'Content-Type': 'text/html' } }
+        );
+      }
+    }
 
     // Exchange code for tokens
-    const tokens = await exchangeCodeForTokens(type as IntegrationType, code);
+    const tokens = await exchangeCodeForTokens(integrationType, code, codeVerifier);
 
     // Calculate token expiry
     let tokenExpiresAt: Date | null = null;
@@ -189,10 +206,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Success!
-    return new NextResponse(generatePopupCloseHtml(true, type), {
+    // Success! Clear PKCE cookie if it exists
+    const response = new NextResponse(generatePopupCloseHtml(true, type), {
       headers: { 'Content-Type': 'text/html' },
     });
+
+    if (codeVerifier) {
+      const cookieName = `${PKCE_VERIFIER_COOKIE_PREFIX}${type}`;
+      response.cookies.delete(cookieName);
+    }
+
+    return response;
   } catch (err) {
     console.error('[oauth/callback] Error:', err);
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';

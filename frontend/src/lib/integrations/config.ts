@@ -136,7 +136,7 @@ export const INTEGRATIONS: IntegrationConfig[] = [
     logo: '/integrations/google-drive.svg',
     fallbackIcon: 'HardDrive',
     color: '#4285F4',
-    oauthScopes: ['https://www.googleapis.com/auth/drive.file'],
+    oauthScopes: ['https://www.googleapis.com/auth/drive.readonly'],
     preferenceFields: [
       {
         key: 'defaultFolder',

@@ -6,7 +6,13 @@
  * Receives HITL (Human-in-the-Loop) approval requests from CrewAI
  * when a task requires human approval before proceeding.
  *
+ * Features:
+ * - Auto-approve by type (US-AA01)
+ * - Auto-approve by spend threshold (US-AA02)
+ *
  * Authentication: Bearer token (MODAL_AUTH_TOKEN)
+ *
+ * @story US-AA01, US-AA02
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -166,6 +172,19 @@ export async function POST(request: NextRequest) {
       if (preferences.auto_approve_types?.includes(payload.approval_type)) {
         shouldAutoApprove = true;
         autoApproveReason = `User preference: auto-approve ${payload.approval_type}`;
+      }
+      // Check spend threshold for spend_increase approvals (US-AA02)
+      // Field is 'increase' per docs/specs/hitl-approval-ui.md:476
+      else if (
+        payload.approval_type === 'spend_increase' &&
+        preferences.max_auto_approve_spend &&
+        preferences.max_auto_approve_spend > 0
+      ) {
+        const increaseAmount = Number(payload.task_output?.increase) || 0;
+        if (increaseAmount > 0 && increaseAmount <= preferences.max_auto_approve_spend) {
+          shouldAutoApprove = true;
+          autoApproveReason = `Spend increase $${increaseAmount} within threshold $${preferences.max_auto_approve_spend}`;
+        }
       }
       // Check if it's auto-approvable and user has low-risk auto-approve enabled
       else if (payload.auto_approvable && preferences.auto_approve_low_risk) {

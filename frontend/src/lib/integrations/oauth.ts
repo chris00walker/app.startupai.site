@@ -3,13 +3,19 @@
  *
  * Handles OAuth 2.0 flows for external integrations.
  * Uses JWT-based state tokens for serverless-safe CSRF protection.
+ * Implements PKCE for providers that require it (Airtable).
  *
- * @story US-I01, US-I02, US-I03, US-I04, US-I05, US-I06
+ * @story US-I01, US-I02, US-I03, US-I04, US-I05, US-I06, US-BI01
  */
 
 import { SignJWT, jwtVerify } from 'jose';
 import type { IntegrationType, OAuthStatePayload } from '@/types/integrations';
 import { getIntegrationConfig } from './config';
+
+/**
+ * PKCE code verifier cookie name prefix
+ */
+export const PKCE_VERIFIER_COOKIE_PREFIX = 'pkce_verifier_';
 
 /**
  * OAuth provider endpoints configuration
@@ -104,6 +110,42 @@ function generateNonce(): string {
 }
 
 /**
+ * Base64url encode a Uint8Array (no padding, URL-safe chars)
+ */
+function base64url(buffer: Uint8Array): string {
+  const base64 = Buffer.from(buffer).toString('base64');
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * Generate PKCE code verifier (43-128 characters, URL-safe)
+ * RFC 7636 recommends 43 characters minimum
+ */
+export function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64url(array); // Results in 43 characters
+}
+
+/**
+ * Generate PKCE code challenge from verifier using SHA-256
+ * Returns base64url-encoded hash
+ */
+export async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return base64url(new Uint8Array(digest));
+}
+
+/**
+ * Check if a provider requires PKCE
+ */
+export function requiresPKCE(integrationType: IntegrationType): boolean {
+  return OAUTH_PROVIDERS[integrationType]?.requiresPKCE === true;
+}
+
+/**
  * Generate a signed OAuth state token
  *
  * The state token is a JWT that contains:
@@ -175,12 +217,21 @@ function getClientCredentials(integrationType: IntegrationType): { clientId: str
 }
 
 /**
+ * OAuth URL result with optional PKCE code verifier
+ */
+export interface OAuthUrlResult {
+  url: string;
+  codeVerifier?: string;
+}
+
+/**
  * Build the OAuth authorization URL for a provider
+ * Returns the URL and code verifier if PKCE is required
  */
 export async function getOAuthUrl(
   integrationType: IntegrationType,
   userId: string
-): Promise<string> {
+): Promise<OAuthUrlResult> {
   const config = getIntegrationConfig(integrationType);
   if (!config) {
     throw new Error(`Unknown integration type: ${integrationType}`);
@@ -218,7 +269,19 @@ export async function getOAuthUrl(
     params.set('scope', config.oauthScopes.join(' '));
   }
 
-  return `${provider.authUrl}?${params.toString()}`;
+  // Handle PKCE for providers that require it
+  let codeVerifier: string | undefined;
+  if (provider.requiresPKCE) {
+    codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+    params.set('code_challenge', codeChallenge);
+    params.set('code_challenge_method', 'S256');
+  }
+
+  return {
+    url: `${provider.authUrl}?${params.toString()}`,
+    codeVerifier,
+  };
 }
 
 /**
@@ -309,10 +372,14 @@ async function exchangeLarkCodeForTokens(code: string): Promise<TokenResponse> {
 
 /**
  * Exchange authorization code for tokens
+ * @param integrationType - The integration type
+ * @param code - The authorization code from OAuth callback
+ * @param codeVerifier - Optional PKCE code verifier (required for PKCE-enabled providers)
  */
 export async function exchangeCodeForTokens(
   integrationType: IntegrationType,
-  code: string
+  code: string,
+  codeVerifier?: string
 ): Promise<TokenResponse> {
   // Lark has a special OAuth flow
   if (integrationType === 'lark') {
@@ -328,6 +395,14 @@ export async function exchangeCodeForTokens(
     redirect_uri: redirectUri,
     grant_type: 'authorization_code',
   });
+
+  // Add PKCE code verifier if provided
+  if (provider.requiresPKCE) {
+    if (!codeVerifier) {
+      throw new Error(`PKCE code verifier required for ${integrationType}`);
+    }
+    params.set('code_verifier', codeVerifier);
+  }
 
   // Some providers want credentials in body, some in header
   if (!provider.usesBasicAuth) {

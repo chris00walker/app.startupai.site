@@ -2,14 +2,15 @@
  * OAuth Connect Initiation Route
  *
  * GET: Redirects user to provider's OAuth authorization page
+ *      Handles PKCE flow by storing code verifier in httpOnly cookie
  *
- * @story US-I02
+ * @story US-I02, US-BI01
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getIntegrationConfig } from '@/lib/integrations/config';
-import { getOAuthUrl } from '@/lib/integrations/oauth';
+import { getOAuthUrl, PKCE_VERIFIER_COOKIE_PREFIX } from '@/lib/integrations/oauth';
 import type { IntegrationType } from '@/types/integrations';
 
 interface RouteParams {
@@ -40,11 +41,26 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.redirect(new URL('/login?returnUrl=' + encodeURIComponent(returnUrl), request.url));
     }
 
-    // Generate OAuth URL with signed state
-    const oauthUrl = await getOAuthUrl(type as IntegrationType, user.id);
+    // Generate OAuth URL with signed state (may include PKCE)
+    const { url: oauthUrl, codeVerifier } = await getOAuthUrl(type as IntegrationType, user.id);
 
-    // Redirect to provider
-    return NextResponse.redirect(oauthUrl);
+    // Create redirect response
+    const response = NextResponse.redirect(oauthUrl);
+
+    // If PKCE is required, store code verifier in httpOnly cookie
+    // The callback route will read this to complete the token exchange
+    if (codeVerifier) {
+      const cookieName = `${PKCE_VERIFIER_COOKIE_PREFIX}${type}`;
+      response.cookies.set(cookieName, codeVerifier, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 600, // 10 minutes (matches state token expiry)
+        path: '/',
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error('[api/integrations/connect] Error:', error);
 

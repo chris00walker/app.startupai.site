@@ -49,3 +49,8 @@ export * from './ad-performance';
 export * from './admin-audit-log';
 export * from './feature-flags';
 export * from './admin-sessions';
+
+// Business Import Infrastructure (US-BI01, US-BI02, US-BI03)
+export * from './imports';
+export * from './field-mappings';
+export * from './sync-history';

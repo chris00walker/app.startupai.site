@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-25T14:41:32.096Z
+Generated: 2026-01-26T14:09:54.949Z
 
 ## Files Without Story Links
 
@@ -18,7 +18,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/app/api/analytics/dashboard/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/analyze/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/approvals/[id]/route.ts | api_route | Add @story annotation or consider if needed |
-| frontend/src/app/api/approvals/webhook/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/assistant/chat/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/assistant/history/route.ts | api_route | Add @story annotation or consider if needed |
 | frontend/src/app/api/auth/logout/route.ts | api_route | Add @story annotation or consider if needed |
@@ -446,4 +445,4 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 437**
+**Total Orphans: 436**
