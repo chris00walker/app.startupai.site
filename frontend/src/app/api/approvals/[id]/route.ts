@@ -4,7 +4,7 @@
  * GET /api/approvals/[id] - Get approval details
  * PATCH /api/approvals/[id] - Approve or reject
  *
- * @story US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
+ * @story US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09, US-AH01, US-AH02, US-AH03, US-AH04, US-AH05, US-AH06, US-AH07, US-AH08, US-AH09, US-AH10
  */
 
 import { NextRequest, NextResponse } from 'next/server';

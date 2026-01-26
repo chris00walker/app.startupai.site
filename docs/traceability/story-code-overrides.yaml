@@ -588,18 +588,15 @@ US-AB01:
     - validation_runs
     - hitl_requests
   notes: "BriefGenerationCrew - Generate Founder's Brief"
-  implementation_status: partial
 
 US-AB02:
   notes: "GV1 Agent - Validate Brief Legitimacy"
-  implementation_status: partial
 
 US-AB03:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "Handle Brief Rejection/Edits at approve_brief checkpoint"
-  implementation_status: partial
 
 # =============================================================================
 # Agent Discovery Stories (US-AD01-AD10) - Phase 1 Stage B
@@ -610,48 +607,39 @@ US-AD01:
     - validation_runs
     - hitl_requests
   notes: "E1 Agent - Design Experiment Plan"
-  implementation_status: partial
 
 US-AD02:
   notes: "D1 Agent - Collect SAY Evidence"
-  implementation_status: partial
 
 US-AD03:
   notes: "D2 Agent - Collect DO Evidence (Indirect)"
-  implementation_status: partial
 
 US-AD04:
   notes: "D3 Agent - Collect DO Evidence (Direct)"
-  implementation_status: partial
 
 US-AD05:
   notes: "D4 Agent - Triangulate Evidence"
-  implementation_status: partial
 
 US-AD06:
   db_tables:
     - validation_runs
   notes: "CustomerProfileCrew - Build Customer Profile"
-  implementation_status: partial
 
 US-AD07:
   db_tables:
     - validation_runs
   notes: "ValueDesignCrew - Build Value Map"
-  implementation_status: partial
 
 US-AD08:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "WTPCrew - Validate WTP, approve_pricing_test checkpoint"
-  implementation_status: partial
 
 US-AD09:
   db_tables:
     - validation_runs
   notes: "FIT_SCORE Agent - Calculate Fit Score"
-  implementation_status: partial
   domain_candidate: true
   domain_function: calculate_fit_score
 
@@ -660,7 +648,6 @@ US-AD10:
     - validation_runs
     - hitl_requests
   notes: "FIT_ROUTE Agent - Route to Phase 2 or iterate"
-  implementation_status: partial
 
 # =============================================================================
 # Agent Desirability Stories (US-ADB01-ADB05) - Phase 2
@@ -668,32 +655,27 @@ US-AD10:
 
 US-ADB01:
   notes: "BuildCrew - Build Landing Page"
-  implementation_status: partial
 
 US-ADB02:
   notes: "F3 Agent - Deploy Test Artifacts to Netlify"
-  implementation_status: partial
 
 US-ADB03:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "GrowthCrew - Create Ad Campaigns, approve_campaign_launch"
-  implementation_status: partial
 
 US-ADB04:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "P3 Agent - Measure Desirability Signal, approve_spend_increase"
-  implementation_status: partial
 
 US-ADB05:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "GovernanceCrew - Evaluate Desirability Gate"
-  implementation_status: partial
 
 # =============================================================================
 # Agent Feasibility Stories (US-AFB01-AFB03) - Phase 3
@@ -701,20 +683,17 @@ US-ADB05:
 
 US-AFB01:
   notes: "F1 Agent - Assess Feature Requirements"
-  implementation_status: partial
 
 US-AFB02:
   db_tables:
     - validation_runs
   notes: "BuildCrew (feasibility) - Evaluate Technical Feasibility"
-  implementation_status: partial
 
 US-AFB03:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "GovernanceCrew - Evaluate Feasibility Gate"
-  implementation_status: partial
 
 # =============================================================================
 # Agent Viability Stories (US-AVB01-AVB05) - Phase 4
@@ -724,105 +703,125 @@ US-AVB01:
   db_tables:
     - validation_runs
   notes: "L1 Agent - Calculate Unit Economics"
-  implementation_status: partial
 
 US-AVB02:
   notes: "L2 Agent - Assess Compliance"
-  implementation_status: partial
 
 US-AVB03:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "L3 Agent - Compile Viability Signal, approve_viability_gate"
-  implementation_status: partial
 
 US-AVB04:
   db_tables:
     - validation_runs
   notes: "C1 Agent - Synthesize Evidence"
-  implementation_status: partial
 
 US-AVB05:
   db_tables:
     - validation_runs
     - hitl_requests
   notes: "C2 Agent - Request Final Decision"
-  implementation_status: partial
 
 # =============================================================================
-# Agent HITL Checkpoint Stories (US-AH01-AH10) - Cross-phase
+# Agent Auto-Approval Stories (US-AA01-AA03) - Complete
+# =============================================================================
+
+US-AA01:
+  db_tables:
+    - approval_requests
+    - user_preferences
+  notes: "Auto-approve by type - webhook logic + settings UI"
+  implementation_status: complete
+
+US-AA02:
+  db_tables:
+    - approval_requests
+    - user_preferences
+  notes: "Auto-approve spend threshold - uses task_output.increase field"
+  implementation_status: complete
+
+US-AA03:
+  db_tables:
+    - approval_requests
+    - user_preferences
+  notes: "Escalation email via pg_cron + Resend SDK"
+  implementation_status: complete
+
+# =============================================================================
+# Agent HITL Checkpoint Stories (US-AH01-AH10) - Complete infrastructure
 # =============================================================================
 
 US-AH01:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_brief checkpoint - Phase 1A"
-  implementation_status: partial
+  notes: "approve_brief checkpoint - Phase 1A - full infrastructure"
+  implementation_status: complete
 
 US-AH02:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_experiment_plan checkpoint - Phase 1B"
-  implementation_status: partial
+  notes: "approve_experiment_plan checkpoint - Phase 1B - full infrastructure"
+  implementation_status: complete
 
 US-AH03:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_pricing_test checkpoint - Phase 1B"
-  implementation_status: partial
+  notes: "approve_pricing_test checkpoint - Phase 1B - full infrastructure"
+  implementation_status: complete
 
 US-AH04:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_discovery_output checkpoint - Phase 1B"
-  implementation_status: partial
+  notes: "approve_discovery_output checkpoint - Phase 1B - full infrastructure"
+  implementation_status: complete
 
 US-AH05:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_campaign_launch checkpoint - Phase 2"
-  implementation_status: partial
+  notes: "approve_campaign_launch checkpoint - Phase 2 - full infrastructure"
+  implementation_status: complete
 
 US-AH06:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_spend_increase checkpoint - Phase 2"
-  implementation_status: partial
+  notes: "approve_spend_increase checkpoint - Phase 2 - full infrastructure"
+  implementation_status: complete
 
 US-AH07:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_desirability_gate checkpoint - Phase 2"
-  implementation_status: partial
+  notes: "approve_desirability_gate checkpoint - Phase 2 - full infrastructure"
+  implementation_status: complete
 
 US-AH08:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_feasibility_gate checkpoint - Phase 3"
-  implementation_status: partial
+  notes: "approve_feasibility_gate checkpoint - Phase 3 - full infrastructure"
+  implementation_status: complete
 
 US-AH09:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "approve_viability_gate checkpoint - Phase 4"
-  implementation_status: partial
+  notes: "approve_viability_gate checkpoint - Phase 4 - full infrastructure"
+  implementation_status: complete
 
 US-AH10:
   db_tables:
     - hitl_requests
     - validation_runs
-  notes: "request_human_decision checkpoint - Phase 4 final"
-  implementation_status: partial
+  notes: "request_human_decision checkpoint - Phase 4 final - full infrastructure"
+  implementation_status: complete
 
 # =============================================================================
 # Marketing Funnel Stories (US-MF01-MF03) - Cross-Repo Gap

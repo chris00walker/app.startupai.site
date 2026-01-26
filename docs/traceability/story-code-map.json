@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-26T18:50:00.168Z",
+    "generated_at": "2026-01-26T20:22:08.326Z",
     "version": "1.0.0",
     "story_count": 187,
-    "annotated_file_count": 345
+    "annotated_file_count": 360
   },
   "stories": {
     "US-F01": {
@@ -703,9 +703,14 @@
     },
     "US-FT02": {
       "title": "View Founder Trial Limits",
-      "components": [],
+      "components": [
+        "frontend/src/components/upgrade/PlanBadge.tsx",
+        "frontend/src/components/upgrade/TrialStatusCard.tsx",
+        "frontend/src/components/upgrade/index.ts"
+      ],
       "api_routes": [
-        "frontend/src/app/api/trial/allow/route.ts"
+        "frontend/src/app/api/trial/allow/route.ts",
+        "frontend/src/app/api/trial/status/route.ts"
       ],
       "pages": [],
       "hooks": [],
@@ -725,14 +730,27 @@
     },
     "US-FT03": {
       "title": "Upgrade to Founder Plan",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
+      "components": [
+        "frontend/src/components/upgrade/index.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/stripe/create-checkout-session/route.ts",
+        "frontend/src/app/api/stripe/webhook/route.ts"
+      ],
+      "pages": [
+        "frontend/src/app/upgrade/cancel/page.tsx",
+        "frontend/src/app/upgrade/success/page.tsx"
+      ],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/stripe/client.ts"
+      ],
       "e2e_tests": [
         {
           "file": "13-trial-limits.spec.ts"
+        },
+        {
+          "file": "40-upgrade-flow.spec.ts"
         }
       ],
       "unit_tests": [],
@@ -740,12 +758,16 @@
         "users",
         "stripe_customers"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Stripe checkout integration"
     },
     "US-FT04": {
       "title": "Experience Post-Upgrade Orientation",
-      "components": [],
+      "components": [
+        "frontend/src/components/upgrade/PlanBadge.tsx",
+        "frontend/src/components/upgrade/UpgradeWelcomeModal.tsx",
+        "frontend/src/components/upgrade/index.ts"
+      ],
       "api_routes": [],
       "pages": [],
       "hooks": [],
@@ -753,22 +775,31 @@
       "e2e_tests": [
         {
           "file": "13-trial-limits.spec.ts"
+        },
+        {
+          "file": "40-upgrade-flow.spec.ts"
         }
       ],
       "unit_tests": [],
       "db_tables": [
         "users"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Post-upgrade orientation modal"
     },
     "US-CT01": {
       "title": "Complete Consultant Trial Onboarding",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/consultant/onboarding/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/mock-data/consultant-trial-clients.ts",
+        "frontend/src/lib/mock-data/create-mock-clients.ts",
+        "frontend/src/lib/mock-data/index.ts"
+      ],
       "e2e_tests": [
         {
           "file": "22-consultant-trial.spec.ts"
@@ -779,7 +810,7 @@
         "users",
         "consultant_profiles"
       ],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CT02": {
       "title": "Explore Portfolio with Mock Clients",
@@ -787,7 +818,11 @@
       "api_routes": [],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/mock-data/consultant-trial-clients.ts",
+        "frontend/src/lib/mock-data/create-mock-clients.ts",
+        "frontend/src/lib/mock-data/index.ts"
+      ],
       "e2e_tests": [
         {
           "file": "22-consultant-trial.spec.ts"
@@ -802,7 +837,9 @@
     },
     "US-CT03": {
       "title": "Attempt Real Client Invite (Upgrade Prompt)",
-      "components": [],
+      "components": [
+        "frontend/src/components/consultant/InviteClientModal.tsx"
+      ],
       "api_routes": [],
       "pages": [],
       "hooks": [],
@@ -816,13 +853,17 @@
       "db_tables": [
         "users"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "Upgrade prompt on real invite attempt"
     },
     "US-CT04": {
       "title": "View Consultant Trial Limits and Status",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/upgrade/TrialStatusCard.tsx"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/trial/status/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -836,7 +877,7 @@
         "users",
         "usage_quotas"
       ],
-      "implementation_status": "partial"
+      "implementation_status": "complete"
     },
     "US-CT05": {
       "title": "Upgrade to Consultant Plan",
@@ -2678,13 +2719,23 @@
         "frontend/src/app/api/approvals/webhook/route.ts",
         "frontend/src/app/api/settings/approvals/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "36-auto-approval.spec.ts"
+        }
+      ],
       "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
+      "db_tables": [
+        "approval_requests",
+        "user_preferences"
+      ],
+      "implementation_status": "complete",
+      "notes": "Auto-approve by type - webhook logic + settings UI"
     },
     "US-AA02": {
       "title": "Set Auto-approve Spend Threshold",
@@ -2693,13 +2744,23 @@
         "frontend/src/app/api/approvals/webhook/route.ts",
         "frontend/src/app/api/settings/approvals/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "36-auto-approval.spec.ts"
+        }
+      ],
       "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
+      "db_tables": [
+        "approval_requests",
+        "user_preferences"
+      ],
+      "implementation_status": "complete",
+      "notes": "Auto-approve spend threshold - uses task_output.increase field"
     },
     "US-AA03": {
       "title": "Configure Escalation Contact",
@@ -2708,16 +2769,26 @@
         "frontend/src/app/api/cron/escalate-approvals/route.ts",
         "frontend/src/app/api/settings/approvals/route.ts"
       ],
-      "pages": [],
+      "pages": [
+        "frontend/src/pages/settings.tsx"
+      ],
       "hooks": [],
       "lib": [
         "frontend/src/lib/email/send.ts",
         "frontend/src/lib/email/templates/escalation.ts"
       ],
-      "e2e_tests": [],
+      "e2e_tests": [
+        {
+          "file": "36-auto-approval.spec.ts"
+        }
+      ],
       "unit_tests": [],
-      "db_tables": [],
-      "implementation_status": "partial"
+      "db_tables": [
+        "approval_requests",
+        "user_preferences"
+      ],
+      "implementation_status": "complete",
+      "notes": "Escalation email via pg_cron + Resend SDK"
     },
     "US-AC01": {
       "title": "Create Ad Campaign for Founder",
@@ -3458,7 +3529,7 @@
         "validation_runs",
         "hitl_requests"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "BriefGenerationCrew - Generate Founder's Brief"
     },
     "US-AB02": {
@@ -3521,7 +3592,7 @@
         "validation_runs",
         "hitl_requests"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "E1 Agent - Design Experiment Plan"
     },
     "US-AD02": {
@@ -3725,7 +3796,7 @@
       ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "BuildCrew - Build Landing Page"
     },
     "US-ADB02": {
@@ -3829,7 +3900,7 @@
       ],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "F1 Agent - Assess Feature Requirements"
     },
     "US-AFB02": {
@@ -3901,7 +3972,7 @@
       "db_tables": [
         "validation_runs"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "L1 Agent - Calculate Unit Economics"
     },
     "US-AVB02": {
@@ -3991,7 +4062,9 @@
     "US-AH01": {
       "title": "Approve Founder's Brief",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -4005,13 +4078,14 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_brief checkpoint - Phase 1A"
+      "implementation_status": "complete",
+      "notes": "approve_brief checkpoint - Phase 1A - full infrastructure"
     },
     "US-AH02": {
       "title": "Approve Experiment Plan",
       "components": [],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [],
@@ -4027,13 +4101,15 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_experiment_plan checkpoint - Phase 1B"
+      "implementation_status": "complete",
+      "notes": "approve_experiment_plan checkpoint - Phase 1B - full infrastructure"
     },
     "US-AH03": {
       "title": "Approve Pricing Test",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -4047,13 +4123,15 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_pricing_test checkpoint - Phase 1B"
+      "implementation_status": "complete",
+      "notes": "approve_pricing_test checkpoint - Phase 1B - full infrastructure"
     },
     "US-AH04": {
       "title": "Approve Discovery Output",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -4067,13 +4145,15 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_discovery_output checkpoint - Phase 1B"
+      "implementation_status": "complete",
+      "notes": "approve_discovery_output checkpoint - Phase 1B - full infrastructure"
     },
     "US-AH05": {
       "title": "Approve Campaign Launch",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -4087,13 +4167,15 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_campaign_launch checkpoint - Phase 2"
+      "implementation_status": "complete",
+      "notes": "approve_campaign_launch checkpoint - Phase 2 - full infrastructure"
     },
     "US-AH06": {
       "title": "Approve Spend Increase",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -4107,13 +4189,14 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_spend_increase checkpoint - Phase 2"
+      "implementation_status": "complete",
+      "notes": "approve_spend_increase checkpoint - Phase 2 - full infrastructure"
     },
     "US-AH07": {
       "title": "Approve Desirability Gate",
       "components": [],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "../startupai-crew/src/modal_app/phases/phase_2.py"
       ],
       "pages": [],
@@ -4129,13 +4212,14 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_desirability_gate checkpoint - Phase 2"
+      "implementation_status": "complete",
+      "notes": "approve_desirability_gate checkpoint - Phase 2 - full infrastructure"
     },
     "US-AH08": {
       "title": "Approve Feasibility Gate",
       "components": [],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "../startupai-crew/src/modal_app/phases/phase_3.py"
       ],
       "pages": [],
@@ -4151,13 +4235,15 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_feasibility_gate checkpoint - Phase 3"
+      "implementation_status": "complete",
+      "notes": "approve_feasibility_gate checkpoint - Phase 3 - full infrastructure"
     },
     "US-AH09": {
       "title": "Approve Viability Gate",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -4171,13 +4257,14 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "approve_viability_gate checkpoint - Phase 4"
+      "implementation_status": "complete",
+      "notes": "approve_viability_gate checkpoint - Phase 4 - full infrastructure"
     },
     "US-AH10": {
       "title": "Request Human Decision",
       "components": [],
       "api_routes": [
+        "frontend/src/app/api/approvals/[id]/route.ts",
         "../startupai-crew/src/modal_app/phases/phase_4.py"
       ],
       "pages": [],
@@ -4193,8 +4280,8 @@
         "hitl_requests",
         "validation_runs"
       ],
-      "implementation_status": "partial",
-      "notes": "request_human_decision checkpoint - Phase 4 final"
+      "implementation_status": "complete",
+      "notes": "request_human_decision checkpoint - Phase 4 final - full infrastructure"
     }
   },
   "files": {
@@ -4441,7 +4528,10 @@
         "US-AS02",
         "US-AS03",
         "US-AS04",
-        "US-AS05"
+        "US-AS05",
+        "US-AA01",
+        "US-AA02",
+        "US-AA03"
       ]
     },
     "frontend/tests/e2e/11-project-lifecycle.spec.ts": {
@@ -4639,7 +4729,8 @@
     },
     "frontend/src/app/api/consultant/onboarding/route.ts": {
       "stories": [
-        "US-C01"
+        "US-C01",
+        "US-CT01"
       ]
     },
     "frontend/src/app/onboarding/consultant/page.tsx": {
@@ -4654,7 +4745,8 @@
     },
     "frontend/src/components/consultant/InviteClientModal.tsx": {
       "stories": [
-        "US-C02"
+        "US-C02",
+        "US-CT03"
       ]
     },
     "frontend/src/app/api/clients/route.ts": {
@@ -4788,9 +4880,34 @@
         "US-FT01"
       ]
     },
+    "frontend/src/components/upgrade/PlanBadge.tsx": {
+      "stories": [
+        "US-FT02",
+        "US-FT04"
+      ]
+    },
+    "frontend/src/components/upgrade/TrialStatusCard.tsx": {
+      "stories": [
+        "US-FT02",
+        "US-CT04"
+      ]
+    },
+    "frontend/src/components/upgrade/index.ts": {
+      "stories": [
+        "US-FT02",
+        "US-FT03",
+        "US-FT04"
+      ]
+    },
     "frontend/src/app/api/trial/allow/route.ts": {
       "stories": [
         "US-FT02"
+      ]
+    },
+    "frontend/src/app/api/trial/status/route.ts": {
+      "stories": [
+        "US-FT02",
+        "US-CT04"
       ]
     },
     "frontend/tests/e2e/13-trial-limits.spec.ts": {
@@ -4798,6 +4915,60 @@
         "US-FT02",
         "US-FT03",
         "US-FT04"
+      ]
+    },
+    "frontend/src/app/api/stripe/create-checkout-session/route.ts": {
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "frontend/src/app/api/stripe/webhook/route.ts": {
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "frontend/src/app/upgrade/cancel/page.tsx": {
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "frontend/src/app/upgrade/success/page.tsx": {
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "frontend/src/lib/stripe/client.ts": {
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "frontend/tests/e2e/40-upgrade-flow.spec.ts": {
+      "stories": [
+        "US-FT03",
+        "US-FT04"
+      ]
+    },
+    "frontend/src/components/upgrade/UpgradeWelcomeModal.tsx": {
+      "stories": [
+        "US-FT04"
+      ]
+    },
+    "frontend/src/lib/mock-data/consultant-trial-clients.ts": {
+      "stories": [
+        "US-CT01",
+        "US-CT02"
+      ]
+    },
+    "frontend/src/lib/mock-data/create-mock-clients.ts": {
+      "stories": [
+        "US-CT01",
+        "US-CT02"
+      ]
+    },
+    "frontend/src/lib/mock-data/index.ts": {
+      "stories": [
+        "US-CT01",
+        "US-CT02"
       ]
     },
     "frontend/tests/e2e/22-consultant-trial.spec.ts": {
@@ -4831,7 +5002,17 @@
         "US-H06",
         "US-H07",
         "US-H08",
-        "US-H09"
+        "US-H09",
+        "US-AH01",
+        "US-AH02",
+        "US-AH03",
+        "US-AH04",
+        "US-AH05",
+        "US-AH06",
+        "US-AH07",
+        "US-AH08",
+        "US-AH09",
+        "US-AH10"
       ]
     },
     "frontend/src/hooks/useApprovals.ts": {
@@ -5453,6 +5634,13 @@
       ]
     },
     "frontend/src/app/api/settings/approvals/route.ts": {
+      "stories": [
+        "US-AA01",
+        "US-AA02",
+        "US-AA03"
+      ]
+    },
+    "frontend/tests/e2e/36-auto-approval.spec.ts": {
       "stories": [
         "US-AA01",
         "US-AA02",
