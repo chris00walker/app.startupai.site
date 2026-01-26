@@ -1,5 +1,5 @@
 ---
-purpose: "User stories for asset template and blueprint pattern implementation"
+purpose: "User stories for asset template pipeline - sourcing, staging, validation, deployment"
 status: "active"
 last_reviewed: "2026-01-26"
 last_updated: "2026-01-26"
@@ -7,362 +7,696 @@ last_updated: "2026-01-26"
 
 # Asset Template User Stories
 
-Stories for implementing the Blueprint Pattern and template systems for asset generation.
+Stories for implementing the full asset pipeline from sourcing through deployment.
 
 ## Design Philosophy
 
 **Assembly, Not Generation**: LLMs generate copy/messaging; templates provide structure/design.
 
-Benefits:
-- Consistent, professional designs
-- Faster generation (no layout decisions)
-- Platform-compliant outputs
-- Predictable quality
+**Sourcing Strategy**: Option B - Purchase premium Tailwind templates (Tailwind UI, ThemeForest)
+- Professional, conversion-tested designs
+- Tailwind-based = easy slot customization
+- One-time cost (~$200-500)
+- Fast to market (1 week vs 4-6 weeks custom)
 
 ---
 
-## Landing Page Blueprint (US-AT01 - US-AT05)
+## Phase 1: Asset Sourcing (US-AT01 - US-AT02)
 
-### US-AT01: Component Registry System
+### US-AT01: Landing Page Template Procurement
 
-**As a** LandingPageGeneratorTool,
-**I want to** access a registry of pre-built page sections,
-**So that** I can assemble landing pages by composition.
+**As a** StartupAI platform operator,
+**I want to** procure a library of premium Tailwind landing page templates,
+**So that** agents have professional, conversion-tested designs to work with.
 
 **Acceptance Criteria:**
 
-**Given** the Component Registry is initialized
-**When** a tool requests available components
-**Then** list of 15 section types with schemas is returned:
-- Hero (headline, subhead, CTA, background)
-- Features (3-6 feature cards with icons)
-- Benefits (problem → solution format)
-- Social Proof (testimonials, logos, stats)
-- Pricing (tier cards, comparison table)
-- FAQ (accordion format)
-- CTA (full-width call-to-action)
-- Footer (links, legal, contact)
-- Header (nav, logo, CTA button)
-- Video (embed with poster)
-- Stats (3-4 key metrics)
-- Team (founders/team photos)
-- Timeline (process/roadmap)
-- Comparison (us vs them table)
-- Form (lead capture)
+**Given** a budget of $300-500 for template procurement
+**When** templates are selected
+**Then** the following requirements are met:
 
-**Schema per component:**
-```typescript
-interface ComponentSpec {
-  type: string;
-  slots: string[];        // Copy slots LLM fills
-  requiredData: string[]; // VPC fields needed
-  variants: string[];     // Design variants
-  responsive: boolean;
-}
+**Template Requirements:**
+| Requirement | Minimum | Target |
+|-------------|---------|--------|
+| Complete landing pages | 5 | 10 |
+| Section components | 15 | 25 |
+| Responsive breakpoints | 3 (mobile, tablet, desktop) | 4 (+large) |
+| Dark mode support | Optional | Yes |
+| Tailwind version | 3.x | 3.4+ |
+
+**Recommended Sources (evaluated in order):**
+1. **Tailwind UI** ($299) - Official, highest quality, React/Vue/HTML
+2. **Cruip** ($149) - Landing-focused, conversion-optimized
+3. **ThemeForest Tailwind** ($49-79 each) - À la carte selection
+
+**Deliverable:** Licensed template files in `startupai-crew/assets/templates/source/`
+
+**License Requirements:**
+- Commercial use permitted
+- Unlimited projects (for founder deployments)
+- No per-seat restrictions
+- Modification allowed
+
+**File:** `startupai-crew/docs/templates/procurement-checklist.md`
+
+---
+
+### US-AT02: Ad Creative Template Procurement
+
+**As a** StartupAI platform operator,
+**I want to** procure ad creative templates for each target platform,
+**So that** agents can generate platform-compliant ad creatives.
+
+**Acceptance Criteria:**
+
+**Given** target platforms (Meta, Google, LinkedIn, TikTok)
+**When** ad templates are selected
+**Then** each platform has minimum viable creative coverage:
+
+**Platform Coverage:**
+| Platform | Static Images | Carousel | Video Specs |
+|----------|---------------|----------|-------------|
+| Meta (FB/IG) | 5 templates | 3 templates | Spec only |
+| Google Display | 5 templates | N/A | N/A |
+| LinkedIn | 3 templates | 2 templates | Spec only |
+| TikTok | 2 templates | N/A | Spec only |
+
+**Template Requirements:**
+- Figma or Canva source files (editable)
+- Correct dimensions per platform
+- Text-safe zones marked
+- Brand color placeholders
+- Image swap areas defined
+
+**Recommended Sources:**
+1. **Canva Pro Templates** ($12.99/mo) - Large library, easy editing
+2. **Envato Elements** ($16.50/mo) - Professional, downloadable
+3. **AdCreative.ai exports** - AI-optimized layouts
+
+**Deliverable:** Template files in `startupai-crew/assets/templates/ads/`
+
+**File:** `startupai-crew/docs/templates/ad-procurement-checklist.md`
+
+---
+
+## Phase 2: Asset Staging (US-AT03 - US-AT05)
+
+### US-AT03: Template Slot Extraction
+
+**As a** template engineer,
+**I want to** convert purchased templates into slot-based components,
+**So that** agents can fill templates without understanding HTML/CSS.
+
+**Acceptance Criteria:**
+
+**Given** a purchased landing page template
+**When** slot extraction is performed
+**Then** each template produces:
+
+```yaml
+# Example: hero-gradient.yaml
+template_id: hero-gradient
+source_file: tailwindui/hero-sections/gradient.html
+category: hero
+
+slots:
+  - name: headline
+    type: text
+    max_chars: 60
+    required: true
+    vpc_source: "value_proposition.primary_gain"
+
+  - name: subheadline
+    type: text
+    max_chars: 150
+    required: true
+    vpc_source: "customer_profile.primary_pain"
+
+  - name: cta_text
+    type: text
+    max_chars: 20
+    required: true
+    default: "Get Started"
+
+  - name: cta_url
+    type: url
+    required: true
+
+  - name: background_image
+    type: image
+    dimensions: "1920x1080"
+    required: false
+    fallback: "gradient"
+
+variants:
+  - dark
+  - light
+
+responsive: true
+conversion_tested: true
 ```
+
+**Slot Types:**
+| Type | Description | Agent Action |
+|------|-------------|--------------|
+| `text` | Plain text copy | Generate from VPC |
+| `rich_text` | Markdown allowed | Generate from VPC |
+| `image` | Image URL | Unsplash query or AI gen |
+| `url` | Link destination | Generate or use default |
+| `icon` | Lucide icon name | Select from allowed set |
+| `color` | Hex or Tailwind class | Use brand or default |
+| `list` | Array of items | Generate N items |
+
+**Deliverable:** Slot definitions in `startupai-crew/assets/templates/registry/`
+
+**File:** `startupai-crew/src/tools/templates/extractor.py`
+
+---
+
+### US-AT04: Template Registry Service
+
+**As a** LandingPageGeneratorTool,
+**I want to** query a template registry by category and requirements,
+**So that** I can select the best template for a given VPC.
+
+**Acceptance Criteria:**
+
+**Given** VPC data and page requirements
+**When** registry is queried
+**Then** matching templates are returned ranked by fit:
+
+**Registry API:**
+```python
+# Query interface
+registry.find_templates(
+    category="landing_page",      # landing_page | ad_creative
+    sections=["hero", "features", "cta"],  # Required sections
+    style="modern",               # modern | minimal | bold | playful
+    industry=None,                # Optional: saas | ecommerce | agency
+    has_social_proof=False,       # Founder has testimonials?
+)
+
+# Returns
+[
+    {
+        "template_id": "startup-starter",
+        "sections": ["hero", "features", "social-proof", "cta", "footer"],
+        "slots_count": 23,
+        "preview_url": "/previews/startup-starter.png",
+        "fit_score": 0.92
+    },
+    ...
+]
+```
+
+**Registry Contents (Minimum Viable):**
+| Category | Template Count | Sections Covered |
+|----------|---------------|------------------|
+| Landing Page (Full) | 5 | All sections |
+| Hero | 4 variants | - |
+| Features | 3 variants | - |
+| Social Proof | 3 variants | - |
+| Pricing | 3 variants | - |
+| CTA | 3 variants | - |
+| FAQ | 2 variants | - |
+| Footer | 2 variants | - |
+
+**Deliverable:** Registry service at `startupai-crew/src/services/template_registry.py`
 
 **File:** `startupai-crew/src/tools/templates/registry.py`
 **Related:** US-MT20
 
 ---
 
-### US-AT02: Hero Section Template
+### US-AT05: Template Preview Environment
 
-**As a** LandingPageGeneratorTool,
-**I want to** use hero section templates,
-**So that** landing pages have compelling above-the-fold content.
+**As a** founder reviewing a generated landing page,
+**I want to** preview the page before deployment,
+**So that** I can approve or request changes.
 
 **Acceptance Criteria:**
 
-**Given** VPC value proposition data
-**When** hero component is assembled
-**Then** headline is derived from primary gain creator
-**And** subheadline addresses primary pain point
-**And** CTA text is action-oriented
-**And** background supports visual hierarchy
+**Given** a template with slots filled by agents
+**When** preview is requested
+**Then** a preview URL is generated within 10 seconds
 
-**Variants:**
-- `hero-centered`: Centered text, full-width background
-- `hero-split`: Image right, text left
-- `hero-video`: Background video with overlay
-- `hero-gradient`: Gradient background, no image
+**Preview Infrastructure:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PREVIEW FLOW                             │
+└─────────────────────────────────────────────────────────────┘
 
-**Slots:**
-- `headline` (max 10 words)
-- `subheadline` (max 25 words)
-- `cta_text` (max 4 words)
-- `cta_url`
-- `background_image` (Unsplash query or URL)
+Agent fills slots → POST /api/preview/generate
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │  Render     │  Inject slots into template
+                    │  Engine     │  Generate static HTML
+                    └─────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │  Netlify    │  Deploy to preview subdomain
+                    │  Deploy     │  preview-{id}.startupai.site
+                    └─────────────┘
+                           │
+                           ▼
+                    Return preview URL + screenshot
+```
 
-**File:** `startupai-crew/src/tools/templates/components/hero.py`
+**Preview Features:**
+- Unique URL per preview (expires 24h)
+- Mobile/tablet/desktop toggle
+- Screenshot generation for HITL UI
+- Edit slots and re-preview
+
+**Deliverable:** Preview API at `app.startupai.site/api/preview/`
+
+**File:** `frontend/src/app/api/preview/generate/route.ts`
 
 ---
 
-### US-AT03: Features Section Template
+## Phase 3: Asset Validation (US-AT06 - US-AT07)
 
-**As a** LandingPageGeneratorTool,
-**I want to** use features section templates,
-**So that** landing pages highlight key capabilities.
+### US-AT06: Landing Page Quality Gate
+
+**As a** StartupAI platform,
+**I want to** validate landing pages before production deployment,
+**So that** only high-quality pages reach real users.
 
 **Acceptance Criteria:**
 
-**Given** VPC products_and_services data
-**When** features component is assembled
-**Then** 3-6 feature cards are generated
-**And** each card has icon, title, description
-**And** layout adapts to feature count
+**Given** a rendered landing page preview
+**When** quality gate runs
+**Then** all checks must pass before deployment:
 
-**Variants:**
-- `features-grid`: 2x3 or 3x2 card grid
-- `features-list`: Vertical list with icons
-- `features-alternating`: Icon alternates left/right
+**Automated Checks:**
+| Check | Tool | Threshold | Blocking |
+|-------|------|-----------|----------|
+| Mobile responsive | Playwright viewport tests | 100% elements visible | Yes |
+| Load time | Lighthouse | < 3 seconds | Yes |
+| Performance score | Lighthouse | > 70 | Yes |
+| Accessibility | axe-core | No critical errors | Yes |
+| Links valid | Link checker | 100% resolve | Yes |
+| Images load | Image checker | 100% load | Yes |
+| Form works | Form submit test | Captures email | Yes |
+| Tracking pixel | Script check | Meta/Google present | No |
 
-**Slots per feature:**
-- `icon` (Lucide icon name)
-- `title` (max 5 words)
-- `description` (max 20 words)
+**Visual Checks (HITL):**
+| Check | Reviewer | Criteria |
+|-------|----------|----------|
+| Brand alignment | Founder | Colors/tone match vision |
+| Copy accuracy | Founder | VPC properly reflected |
+| Trust signals | Founder | Looks professional |
+| CTA clarity | Founder | Action is obvious |
 
-**File:** `startupai-crew/src/tools/templates/components/features.py`
+**Quality Gate Flow:**
+```
+Preview Generated → Automated Checks (2 min)
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+         PASS │                    FAIL │
+              │                         │
+              ▼                         ▼
+    HITL Review (Founder)        Auto-fix or
+              │                  Regenerate
+              │
+    ┌─────────┴─────────┐
+    │                   │
+ APPROVE            REQUEST EDIT
+    │                   │
+    ▼                   ▼
+ Deploy to         Edit slots,
+ Production        re-preview
+```
+
+**Deliverable:** Quality gate service at `frontend/src/lib/quality-gate/`
+
+**File:** `frontend/src/lib/quality-gate/landing-page.ts`
 
 ---
 
-### US-AT04: Social Proof Section Template
+### US-AT07: Ad Creative Compliance Validator
 
-**As a** LandingPageGeneratorTool,
-**I want to** use social proof templates,
-**So that** landing pages build credibility.
-
-**Acceptance Criteria:**
-
-**Given** testimonials or credibility data (if available)
-**When** social proof component is assembled
-**Then** appropriate variant is selected based on available data
-
-**Variants:**
-- `proof-testimonials`: Quote cards with photos
-- `proof-logos`: Logo bar of trusted brands
-- `proof-stats`: 3-4 impressive metrics
-- `proof-combined`: Mix of above
-
-**Slots:**
-- `testimonials[].quote` (max 50 words)
-- `testimonials[].author`
-- `testimonials[].role`
-- `testimonials[].photo_url`
-- `logos[].name`
-- `logos[].url`
-- `stats[].value`
-- `stats[].label`
-
-**Placeholder Strategy:** If no real testimonials, use "Join X early adopters" format
-
-**File:** `startupai-crew/src/tools/templates/components/social-proof.py`
-
----
-
-### US-AT05: CTA and Pricing Section Templates
-
-**As a** LandingPageGeneratorTool,
-**I want to** use CTA and pricing templates,
-**So that** landing pages drive conversions.
+**As a** StartupAI platform,
+**I want to** validate ad creatives against platform policies,
+**So that** ads don't get rejected and waste founder's budget.
 
 **Acceptance Criteria:**
 
-**Given** desired action and pricing model (if applicable)
-**When** CTA/pricing component is assembled
-**Then** compelling call-to-action is generated
-**And** pricing tiers are clearly displayed (if applicable)
+**Given** generated ad creatives for a platform
+**When** compliance check runs
+**Then** policy violations are flagged before submission:
 
-**CTA Variants:**
-- `cta-simple`: Headline + button
-- `cta-form`: Inline email capture
-- `cta-urgency`: With countdown or limited spots
-
-**Pricing Variants:**
-- `pricing-tiers`: 2-4 tier cards
-- `pricing-comparison`: Feature comparison table
-- `pricing-simple`: Single price point
-
-**CTA Slots:**
-- `headline` (max 8 words)
-- `button_text` (max 4 words)
-- `button_url`
-- `urgency_text` (optional, max 10 words)
-
-**Pricing Slots:**
-- `tiers[].name`
-- `tiers[].price`
-- `tiers[].period` (monthly/yearly/once)
-- `tiers[].features[]`
-- `tiers[].cta_text`
-- `tiers[].highlighted` (boolean)
-
-**File:** `startupai-crew/src/tools/templates/components/cta.py`, `pricing.py`
-
----
-
-## Ad Creative Templates (US-AT06 - US-AT08)
-
-### US-AT06: Platform Constraint Library
-
-**As an** AdCreativeGeneratorTool,
-**I want to** load platform-specific constraints,
-**So that** generated ads comply with platform requirements.
-
-**Acceptance Criteria:**
-
-**Given** a target platform (meta, google, linkedin, tiktok)
-**When** constraint library is loaded
-**Then** all format specifications are available:
+**Platform Policies Checked:**
 
 **Meta (Facebook/Instagram):**
-- Primary text: 125 chars (optimal), 500 max
-- Headline: 27 chars (optimal), 40 max
-- Description: 27 chars
-- Image: 1080x1080 (feed), 1080x1920 (stories)
-- Video: 15-60 sec, <4GB
+| Policy | Check | Auto-fixable |
+|--------|-------|--------------|
+| Text in image < 20% | OCR + area calc | No (flag only) |
+| No prohibited content | Keyword filter | No |
+| Correct dimensions | Size check | Yes (resize) |
+| Landing page match | URL domain check | No |
 
 **Google Ads:**
-- Headlines: 30 chars each, 3-15 headlines
-- Descriptions: 90 chars each, 2-4 descriptions
-- Display: 300x250, 336x280, 728x90, 300x600
-- Responsive: multiple assets combined
+| Policy | Check | Auto-fixable |
+|--------|-------|--------------|
+| No excessive caps | Regex | Yes |
+| No exclamation abuse | Regex | Yes |
+| Character limits | Length check | Yes (truncate) |
+| No click-bait | Keyword filter | No |
 
 **LinkedIn:**
-- Intro text: 150 chars (optimal), 600 max
-- Headline: 70 chars max
-- Image: 1200x627
-- Carousel: 2-10 cards
+| Policy | Check | Auto-fixable |
+|--------|-------|--------------|
+| Professional tone | Sentiment check | No |
+| Correct dimensions | Size check | Yes |
+| No personal data requests | Keyword filter | No |
 
-**TikTok:**
-- Text: 100 chars max
-- Video: 9:16, 5-60 sec
-- Hashtags: 3-5 recommended
+**Compliance Report:**
+```yaml
+ad_set_id: "as_123"
+platform: "meta"
+status: "passed"  # passed | warnings | failed
+checks:
+  - name: "image_text_ratio"
+    status: "passed"
+    value: 0.12
+    threshold: 0.20
+  - name: "prohibited_content"
+    status: "passed"
+  - name: "dimensions"
+    status: "auto_fixed"
+    original: "1200x800"
+    fixed: "1080x1080"
+warnings: []
+blockers: []
+```
 
-**File:** `startupai-crew/src/tools/templates/ad-constraints.yaml`
+**Deliverable:** Compliance validator at `startupai-crew/src/tools/validators/`
+
+**File:** `startupai-crew/src/tools/validators/ad_compliance.py`
 **Related:** US-MT21
 
 ---
 
-### US-AT07: Ad Copy Template System
+## Phase 4: Asset Deployment (US-AT08 - US-AT10)
 
-**As an** AdCreativeGeneratorTool,
-**I want to** use copy templates with character limits,
-**So that** generated ads fit platform requirements.
+### US-AT08: Landing Page Deployment Automation
 
-**Acceptance Criteria:**
-
-**Given** VPC data and target platform
-**When** ad copy is generated
-**Then** copy fits within character limits
-**And** multiple variants are generated for A/B testing
-**And** copy follows platform best practices
-
-**Copy Formulas:**
-- `problem-agitate-solve`: Pain → Amplify → Solution
-- `benefit-proof-cta`: Benefit → Evidence → Action
-- `question-answer`: Question hook → Answer with CTA
-- `social-proof`: Testimonial/stat → CTA
-- `urgency`: Limited time/spots → CTA
-
-**Slots per variant:**
-- `primary_text` (within platform limit)
-- `headline` (within platform limit)
-- `description` (within platform limit)
-- `cta_type` (learn_more, sign_up, shop_now, etc.)
-
-**Output:** 3-5 copy variants per ad set
-
-**File:** `startupai-crew/src/tools/templates/ad-copy.py`
-
----
-
-### US-AT08: Ad Image Specification System
-
-**As an** AdCreativeGeneratorTool,
-**I want to** specify image requirements per platform,
-**So that** creative assets are properly sized.
+**As a** StartupAI platform,
+**I want to** deploy approved landing pages to Netlify automatically,
+**So that** founders get live URLs without manual intervention.
 
 **Acceptance Criteria:**
 
-**Given** target platform and ad format
-**When** image spec is generated
-**Then** dimensions, aspect ratio, and format are specified
-**And** text overlay limits are enforced (Meta 20% rule)
-**And** safe zones are defined
+**Given** a landing page that passed quality gate and HITL approval
+**When** deployment is triggered
+**Then** page is live within 60 seconds with:
 
-**Image Spec Output:**
-```typescript
-interface ImageSpec {
-  width: number;
-  height: number;
-  aspectRatio: string;
-  format: 'jpg' | 'png' | 'gif';
-  maxFileSize: string;
-  textOverlayLimit: number;  // percentage
-  safeZone: { top: number; bottom: number; left: number; right: number };
-  unsplashQuery: string;     // suggested search
-  aiPrompt?: string;         // for AI generation
+**Deployment Checklist:**
+| Item | Implementation | Automated |
+|------|----------------|-----------|
+| Unique subdomain | `{project-slug}.validate.startupai.site` | Yes |
+| SSL certificate | Netlify auto-provision | Yes |
+| Meta pixel installed | Injected at build | Yes |
+| Google Analytics | Injected at build | Yes |
+| Form backend connected | Netlify Forms or Supabase | Yes |
+| Favicon | From brand or default | Yes |
+| OG meta tags | Generated from VPC | Yes |
+| robots.txt | noindex (validation only) | Yes |
+
+**Deployment API:**
+```python
+# Deploy to production
+deploy_result = netlify.deploy_site(
+    site_name=f"{project_slug}-validate",
+    html_content=rendered_html,
+    assets=image_urls,
+    functions={
+        "form-handler": form_handler_code
+    },
+    env_vars={
+        "META_PIXEL_ID": founder.meta_pixel_id,
+        "GA_TRACKING_ID": founder.ga_tracking_id,
+    }
+)
+
+# Returns
+{
+    "url": "https://acme-validate.startupai.site",
+    "deploy_id": "d_abc123",
+    "ssl_status": "provisioned",
+    "form_endpoint": "/api/form-submit"
 }
 ```
 
-**File:** `startupai-crew/src/tools/templates/ad-images.py`
+**Netlify Integration:**
+- API: Netlify API with StartupAI account
+- Sites: One Netlify site per project
+- Builds: Direct HTML deploy (no build step)
+- Forms: Netlify Forms for email capture
+- Cost: Free tier (100 form submissions/mo per site)
+
+**Deliverable:** Deployment service at `startupai-crew/src/services/netlify_deploy.py`
+
+**File:** `startupai-crew/src/services/netlify_deploy.py`
+**Related:** US-MT20
 
 ---
 
-## Image Resolution System (US-AT09 - US-AT10)
+### US-AT09: Ad Platform Submission Automation
 
-### US-AT09: Unsplash Integration
-
-**As a** template system,
-**I want to** source images from Unsplash,
-**So that** landing pages and ads have professional stock photos for free.
+**As a** StartupAI platform,
+**I want to** submit approved ad creatives to ad platforms via API,
+**So that** founders' campaigns launch without manual uploads.
 
 **Acceptance Criteria:**
 
-**Given** a search query derived from VPC data
-**When** Unsplash API is called
-**Then** relevant, high-quality images are returned
-**And** proper attribution is included
-**And** images are cached for reuse
+**Given** ad creatives that passed compliance validation and HITL approval
+**When** submission is triggered
+**Then** ads are submitted to the target platform:
 
-**Integration:**
-- API: Unsplash API (50 requests/hour free)
-- Search: Keyword-based from VPC context
-- Selection: Top 3 results by relevance
-- Caching: Store URLs in project state
+**Platform API Integration:**
+| Platform | API | Automation Level | Manual Steps |
+|----------|-----|------------------|--------------|
+| Meta | Marketing API | Full | None (if Business verified) |
+| Google | Google Ads API | Full | None |
+| LinkedIn | Marketing API | Full | None |
+| TikTok | Marketing API | Partial | Review queue (24-48h) |
+
+**Submission Flow:**
+```
+Approved Creatives → Platform API
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │  Campaign   │  Create campaign if not exists
+                   │  Manager    │  Create ad set with targeting
+                   └─────────────┘  Create ad with creatives
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │  Budget     │  Set daily/lifetime budget
+                   │  Manager    │  Set bid strategy
+                   └─────────────┘  Set schedule
+                          │
+                          ▼
+                   ┌─────────────┐
+                   │  Submit     │  Submit for platform review
+                   │  & Monitor  │  Poll for approval status
+                   └─────────────┘
+                          │
+                          ▼
+                   Return: campaign_id, ad_ids, review_status
+```
+
+**Budget Controls (Critical):**
+```yaml
+safety_limits:
+  max_daily_spend: $50          # Hard cap per campaign
+  max_lifetime_spend: $500      # Hard cap per project
+  require_approval_above: $100  # HITL required
+  auto_pause_on_cpa_above: 2x   # Pause if CPA > 2x target
+```
+
+**Deliverable:** Platform submission services at `startupai-crew/src/services/ad_platforms/`
+
+**File:** `startupai-crew/src/services/ad_platforms/meta.py`, `google.py`, `linkedin.py`
+**Related:** US-MT21
+
+---
+
+### US-AT10: Conversion Tracking & Evidence Collection
+
+**As a** StartupAI platform,
+**I want to** collect conversion data from deployed landing pages and ads,
+**So that** desirability evidence is captured automatically.
+
+**Acceptance Criteria:**
+
+**Given** a live landing page and running ad campaigns
+**When** users interact (click, signup, bounce)
+**Then** events are captured and stored as evidence:
+
+**Events Captured:**
+| Event | Source | Evidence Type |
+|-------|--------|---------------|
+| Page view | Meta Pixel, GA | Awareness |
+| Time on page | GA | Engagement |
+| Scroll depth | GA | Engagement |
+| CTA click | GA Events | Intent |
+| Form submission | Netlify Forms | Conversion |
+| Form abandonment | GA | Friction signal |
+| Ad click | Platform API | Awareness |
+| Ad impression | Platform API | Reach |
+| Cost per click | Platform API | Economics |
+| Cost per conversion | Platform API | Economics |
+
+**Evidence Storage:**
+```typescript
+interface DesirabilityEvidence {
+  project_id: string;
+  campaign_id: string;
+  landing_page_url: string;
+
+  // Traffic metrics
+  impressions: number;
+  clicks: number;
+  ctr: number;
+
+  // Landing page metrics
+  page_views: number;
+  unique_visitors: number;
+  avg_time_on_page: number;
+  bounce_rate: number;
+
+  // Conversion metrics
+  form_submissions: number;
+  conversion_rate: number;
+  cost_per_acquisition: number;
+
+  // Calculated scores
+  desirability_score: number;  // 0-100
+  confidence_level: string;    // low | medium | high
+
+  // Time period
+  collected_at: timestamp;
+  period_start: timestamp;
+  period_end: timestamp;
+}
+```
+
+**Automated Insights:**
+- Daily summary email to founder
+- Anomaly detection (sudden drop/spike)
+- Auto-pause recommendation if metrics poor
+- Proceed recommendation if metrics strong
+
+**Deliverable:** Evidence collector at `startupai-crew/src/services/evidence_collector.py`
+
+**File:** `startupai-crew/src/services/evidence_collector.py`
+**Related:** US-MT22 (EvidenceRecorderTool)
+
+---
+
+## Supporting Systems (US-AT11 - US-AT12)
+
+### US-AT11: Unsplash Image Integration
+
+**As a** template system,
+**I want to** source images from Unsplash based on VPC context,
+**So that** landing pages have professional stock photos at no cost.
+
+**Acceptance Criteria:**
+
+**Given** VPC data (customer profile, value proposition)
+**When** image is needed for a template slot
+**Then** relevant Unsplash images are suggested:
+
+**Integration Details:**
+| Aspect | Implementation |
+|--------|----------------|
+| API | Unsplash API (free tier: 50 req/hr) |
+| Search | Keywords from VPC + template context |
+| Selection | Top 3 by relevance, auto-select #1 |
+| Caching | Store URLs in project state |
+| Attribution | Required, auto-injected in footer |
+| Fallback | Gradient backgrounds if no match |
+
+**Search Query Construction:**
+```python
+def build_unsplash_query(vpc: VPC, slot: ImageSlot) -> str:
+    # Combine VPC context with slot requirements
+    industry = vpc.customer_profile.industry  # "fintech"
+    mood = slot.mood  # "professional"
+    subject = slot.subject_hint  # "person working"
+
+    return f"{industry} {mood} {subject}"
+    # → "fintech professional person working"
+```
 
 **File:** `startupai-crew/src/tools/images/unsplash.py`
 **Cost:** FREE (with attribution)
 
 ---
 
-### US-AT10: AI Image Generation On-Demand
+### US-AT12: AI Image Generation On-Demand
 
 **As a** template system,
-**I want to** generate custom images via AI,
-**So that** unique visuals can be created when stock photos are insufficient.
+**I want to** generate custom images via AI when stock photos are insufficient,
+**So that** unique visuals can be created for specific needs.
 
 **Acceptance Criteria:**
 
-**Given** an image generation request
-**When** AI generation is triggered
-**Then** prompt is constructed from VPC context
-**And** image is generated via DALL-E or Midjourney API
-**And** result is stored for reuse
+**Given** a slot requiring an image where Unsplash returns low-relevance results
+**When** founder approves AI generation (HITL)
+**Then** custom image is generated:
 
 **Trigger Conditions:**
-- User explicitly requests custom image
-- Stock photos score low relevance
-- Brand-specific imagery needed
+- Unsplash relevance score < 0.5
+- Founder explicitly requests custom image
+- Slot requires brand-specific imagery
 
-**Prompt Construction:**
-- Style: Modern, professional, tech-forward
-- Subject: Derived from VPC customer profile
-- Composition: Based on component requirements
-- Negative: No text, no logos, no faces (optional)
+**Generation Pipeline:**
+```
+VPC + Slot Context → Prompt Builder → DALL-E 3 API
+                                           │
+                                           ▼
+                                    Image Generated
+                                           │
+                                           ▼
+                                    Store in Supabase Storage
+                                           │
+                                           ▼
+                                    Return public URL
+```
 
-**File:** `startupai-crew/src/tools/images/ai-generation.py`
+**Prompt Template:**
+```python
+PROMPT_TEMPLATE = """
+Create a {style} image for a {industry} landing page.
+The image should convey: {value_proposition}
+Target audience: {customer_segment}
+Mood: {mood}
+Composition: {composition}
+
+Requirements:
+- No text or logos
+- Professional quality
+- {aspect_ratio} aspect ratio
+- Modern, clean aesthetic
+"""
+```
+
+**Cost Control:**
+- HITL approval required for each generation
+- Max 3 generations per project
+- Cost: ~$0.04/image (DALL-E 3)
+- Running total shown to founder
+
+**File:** `startupai-crew/src/tools/images/ai_generation.py`
 **Cost:** ~$0.04/image (DALL-E 3)
 
 ---
@@ -370,25 +704,65 @@ interface ImageSpec {
 ## Implementation Dependencies
 
 ```
-US-AT01 (Registry)
-    ├── US-AT02 (Hero)
-    ├── US-AT03 (Features)
-    ├── US-AT04 (Social Proof)
-    └── US-AT05 (CTA/Pricing)
-            │
-            └── US-MT20 (LandingPageGeneratorTool)
-
-US-AT06 (Constraints)
-    ├── US-AT07 (Ad Copy)
-    └── US-AT08 (Ad Images)
-            │
-            └── US-MT21 (AdCreativeGeneratorTool)
-
-US-AT09 (Unsplash)
-US-AT10 (AI Images)
+PHASE 1: SOURCING
+─────────────────
+US-AT01 (LP Template Procurement)
+US-AT02 (Ad Template Procurement)
     │
-    └── US-MT20, US-MT21 (Image sourcing)
+    ▼
+
+PHASE 2: STAGING
+─────────────────
+US-AT03 (Slot Extraction) ←── depends on AT01, AT02
+US-AT04 (Template Registry) ←── depends on AT03
+US-AT05 (Preview Environment) ←── depends on AT04
+    │
+    ▼
+
+PHASE 3: VALIDATION
+─────────────────
+US-AT06 (LP Quality Gate) ←── depends on AT05
+US-AT07 (Ad Compliance) ←── depends on AT02
+    │
+    ▼
+
+PHASE 4: DEPLOYMENT
+─────────────────
+US-AT08 (LP Deployment) ←── depends on AT06
+US-AT09 (Ad Submission) ←── depends on AT07
+US-AT10 (Evidence Collection) ←── depends on AT08, AT09
+    │
+    ▼
+
+SUPPORTING
+─────────────────
+US-AT11 (Unsplash) ←── used by AT03, AT05
+US-AT12 (AI Images) ←── used by AT03, AT05 (fallback)
+    │
+    ▼
+
+TOOLS (from mcp-tools.md)
+─────────────────
+US-MT20 (LandingPageGeneratorTool) ←── uses AT03, AT04, AT08
+US-MT21 (AdCreativeGeneratorTool) ←── uses AT03, AT07, AT09
+US-MT22 (EvidenceRecorderTool) ←── uses AT10
 ```
+
+---
+
+## Cost Summary
+
+| Item | Type | Cost | Notes |
+|------|------|------|-------|
+| Tailwind UI templates | One-time | $299 | Or Cruip $149 |
+| Canva Pro (ad templates) | Monthly | $12.99/mo | Cancel after setup |
+| Netlify hosting | Per project | Free | 100 form submissions |
+| Unsplash images | Per image | Free | With attribution |
+| DALL-E 3 generation | Per image | $0.04 | Max 3 per project |
+| Meta ads | Per campaign | Founder budget | $50/day cap default |
+| Google ads | Per campaign | Founder budget | $50/day cap default |
+
+**Total StartupAI infrastructure cost:** ~$350 one-time + $0.04 per AI image
 
 ---
 
@@ -396,9 +770,10 @@ US-AT10 (AI Images)
 
 | Document | Relationship |
 |----------|--------------|
-| [tool-specifications.md](../../../../../startupai-crew/docs/master-architecture/reference/tool-specifications.md) | US-MT20, US-MT21 specs |
+| [tool-specifications.md](../../../../../startupai-crew/docs/master-architecture/reference/tool-specifications.md) | US-MT20, US-MT21, US-MT22 specs |
 | [mcp-tools.md](./mcp-tools.md) | Tool stories that use templates |
 | [phase-2-desirability.md](../agents/phase-2-desirability.md) | Agents that generate assets |
+| [approval-workflows.md](../../../../../startupai-crew/docs/master-architecture/reference/approval-workflows.md) | HITL checkpoints for asset approval |
 
 ---
 

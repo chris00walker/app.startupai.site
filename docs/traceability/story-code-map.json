@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generated_at": "2026-01-26T20:59:19.738Z",
+    "generated_at": "2026-01-26T21:24:40.428Z",
     "version": "1.0.0",
-    "story_count": 252,
+    "story_count": 254,
     "annotated_file_count": 360
   },
   "stories": {
@@ -4541,7 +4541,7 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "LandingPageGeneratorTool - MCP Custom, uses US-AT01-AT05"
+      "notes": "LandingPageGeneratorTool - MCP Custom, uses US-AT03, US-AT04, US-AT08"
     },
     "US-MT21": {
       "title": "AdCreativeGeneratorTool",
@@ -4554,7 +4554,7 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "AdCreativeGeneratorTool - MCP Custom, uses US-AT06-AT08"
+      "notes": "AdCreativeGeneratorTool - MCP Custom, uses US-AT03, US-AT07, US-AT09"
     },
     "US-MT22": {
       "title": "StateManagerTool (get_project_state)",
@@ -4739,7 +4739,7 @@
       "notes": "GovernanceAuditorTool - LLM-Based (Pydantic schema)"
     },
     "US-AT01": {
-      "title": "Component Registry System",
+      "title": "Landing Page Template Procurement",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4749,10 +4749,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Component Registry System - 15 section types for landing pages"
+      "notes": "Landing Page Template Procurement - Tailwind UI/Cruip (~$300)"
     },
     "US-AT02": {
-      "title": "Hero Section Template",
+      "title": "Ad Creative Template Procurement",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4762,10 +4762,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Hero Section Template - variants: centered, split, video, gradient"
+      "notes": "Ad Creative Template Procurement - Canva Pro/Envato"
     },
     "US-AT03": {
-      "title": "Features Section Template",
+      "title": "Template Slot Extraction",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4775,10 +4775,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Features Section Template - variants: grid, list, alternating"
+      "notes": "Template Slot Extraction - convert templates to slot-based system"
     },
     "US-AT04": {
-      "title": "Social Proof Section Template",
+      "title": "Template Registry Service",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4788,10 +4788,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Social Proof Section Template - testimonials, logos, stats"
+      "notes": "Template Registry Service - query by category, requirements, style"
     },
     "US-AT05": {
-      "title": "CTA and Pricing Section Templates",
+      "title": "Template Preview Environment",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4801,10 +4801,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "CTA and Pricing Section Templates"
+      "notes": "Template Preview Environment - preview URLs, screenshot generation"
     },
     "US-AT06": {
-      "title": "Platform Constraint Library",
+      "title": "Landing Page Quality Gate",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4814,10 +4814,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Platform Constraint Library - Meta, Google, LinkedIn, TikTok specs"
+      "notes": "Landing Page Quality Gate - Lighthouse, responsive, accessibility"
     },
     "US-AT07": {
-      "title": "Ad Copy Template System",
+      "title": "Ad Creative Compliance Validator",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4827,10 +4827,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Ad Copy Template System - copy formulas with character limits"
+      "notes": "Ad Creative Compliance Validator - platform policy checks"
     },
     "US-AT08": {
-      "title": "Ad Image Specification System",
+      "title": "Landing Page Deployment Automation",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4840,10 +4840,10 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Ad Image Specification System - dimensions, safe zones"
+      "notes": "Landing Page Deployment Automation - Netlify API, SSL, tracking"
     },
     "US-AT09": {
-      "title": "Unsplash Integration",
+      "title": "Ad Platform Submission Automation",
       "components": [],
       "api_routes": [],
       "pages": [],
@@ -4853,9 +4853,35 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "Unsplash Integration - free stock images with attribution"
+      "notes": "Ad Platform Submission Automation - Meta/Google/LinkedIn APIs"
     },
     "US-AT10": {
+      "title": "Conversion Tracking & Evidence Collection",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Conversion Tracking & Evidence Collection - page + ad metrics"
+    },
+    "US-AT11": {
+      "title": "Unsplash Image Integration",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Unsplash Image Integration - free stock images with attribution"
+    },
+    "US-AT12": {
       "title": "AI Image Generation On-Demand",
       "components": [],
       "api_routes": [],
@@ -4866,7 +4892,7 @@
       "unit_tests": [],
       "db_tables": [],
       "implementation_status": "pending",
-      "notes": "AI Image Generation On-Demand - DALL-E/Midjourney fallback"
+      "notes": "AI Image Generation On-Demand - DALL-E fallback (~$0.04/image)"
     },
     "US-PA01": {
       "title": "Notion API Client",

@@ -922,11 +922,11 @@ US-MT19:
   implementation_status: pending
 
 US-MT20:
-  notes: "LandingPageGeneratorTool - MCP Custom, uses US-AT01-AT05"
+  notes: "LandingPageGeneratorTool - MCP Custom, uses US-AT03, US-AT04, US-AT08"
   implementation_status: pending
 
 US-MT21:
-  notes: "AdCreativeGeneratorTool - MCP Custom, uses US-AT06-AT08"
+  notes: "AdCreativeGeneratorTool - MCP Custom, uses US-AT03, US-AT07, US-AT09"
   implementation_status: pending
 
 US-MT22:
@@ -986,47 +986,60 @@ US-MT35:
   implementation_status: pending
 
 # =============================================================================
-# Infrastructure: Asset Templates (US-AT01-AT10) - Gap
+# Infrastructure: Asset Templates (US-AT01-AT12) - Full Pipeline
 # =============================================================================
 
+# Phase 1: Sourcing
 US-AT01:
-  notes: "Component Registry System - 15 section types for landing pages"
+  notes: "Landing Page Template Procurement - Tailwind UI/Cruip (~$300)"
   implementation_status: pending
 
 US-AT02:
-  notes: "Hero Section Template - variants: centered, split, video, gradient"
+  notes: "Ad Creative Template Procurement - Canva Pro/Envato"
   implementation_status: pending
 
+# Phase 2: Staging
 US-AT03:
-  notes: "Features Section Template - variants: grid, list, alternating"
+  notes: "Template Slot Extraction - convert templates to slot-based system"
   implementation_status: pending
 
 US-AT04:
-  notes: "Social Proof Section Template - testimonials, logos, stats"
+  notes: "Template Registry Service - query by category, requirements, style"
   implementation_status: pending
 
 US-AT05:
-  notes: "CTA and Pricing Section Templates"
+  notes: "Template Preview Environment - preview URLs, screenshot generation"
   implementation_status: pending
 
+# Phase 3: Validation
 US-AT06:
-  notes: "Platform Constraint Library - Meta, Google, LinkedIn, TikTok specs"
+  notes: "Landing Page Quality Gate - Lighthouse, responsive, accessibility"
   implementation_status: pending
 
 US-AT07:
-  notes: "Ad Copy Template System - copy formulas with character limits"
+  notes: "Ad Creative Compliance Validator - platform policy checks"
   implementation_status: pending
 
+# Phase 4: Deployment
 US-AT08:
-  notes: "Ad Image Specification System - dimensions, safe zones"
+  notes: "Landing Page Deployment Automation - Netlify API, SSL, tracking"
   implementation_status: pending
 
 US-AT09:
-  notes: "Unsplash Integration - free stock images with attribution"
+  notes: "Ad Platform Submission Automation - Meta/Google/LinkedIn APIs"
   implementation_status: pending
 
 US-AT10:
-  notes: "AI Image Generation On-Demand - DALL-E/Midjourney fallback"
+  notes: "Conversion Tracking & Evidence Collection - page + ad metrics"
+  implementation_status: pending
+
+# Supporting Systems
+US-AT11:
+  notes: "Unsplash Image Integration - free stock images with attribution"
+  implementation_status: pending
+
+US-AT12:
+  notes: "AI Image Generation On-Demand - DALL-E fallback (~$0.04/image)"
   implementation_status: pending
 
 # =============================================================================
