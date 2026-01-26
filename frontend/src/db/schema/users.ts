@@ -15,13 +15,14 @@ import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
  * User role enum - canonical definition for the application.
  *
  * - `admin`: Internal system administrator (full access)
- * - `founder`: Entrepreneur validating business idea
- * - `consultant`: Advisor managing founder clients
- * - `trial`: Free trial user with limited access
+ * - `founder`: Entrepreneur with paid Founder plan
+ * - `consultant`: Advisor managing founder clients with paid Consultant plan
+ * - `founder_trial`: Founder evaluating platform before subscribing
+ * - `consultant_trial`: Consultant evaluating platform before subscribing
  *
  * @see docs/user-experience/roles/role-definitions.md for complete role definitions
  */
-export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant', 'trial']);
+export const userRoleEnum = pgEnum('user_role', ['admin', 'founder', 'consultant', 'founder_trial', 'consultant_trial']);
 
 export const userProfiles = pgTable('user_profiles', {
   // Primary key references auth.users(id) from Supabase Auth
@@ -39,17 +40,21 @@ export const userProfiles = pgTable('user_profiles', {
   subscriptionStatus: text('subscription_status').default('trial'),
   trialExpiresAt: timestamp('trial_expires_at', { withTimezone: true }),
   planStatus: text('plan_status').default('active').notNull(),
-  role: userRoleEnum('role').default('trial').notNull(),
+  role: userRoleEnum('role').default('founder_trial').notNull(),
 
-  // Trial intent - captures founder vs consultant trial path
-  // 'founder_trial' = validating own idea
-  // 'consultant_trial' = exploring AI validation for clients
-  trialIntent: text('trial_intent').default('founder_trial'),
+  // Note: trialIntent is deprecated - role now directly indicates trial type
+  // Kept for backwards compatibility during migration
+  trialIntent: text('trial_intent'),
 
   // Extended profile fields (US-AS01)
   timezone: text('timezone').default('America/New_York'),
   language: text('language').default('English'),
   bio: text('bio'),
+
+  // Stripe integration (US-FT03)
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  planStartedAt: timestamp('plan_started_at', { withTimezone: true }),
 
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

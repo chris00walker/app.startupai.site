@@ -52,7 +52,7 @@ export function resolveTrialRole({
   const readonlyMode = isTrialReadonly(planStatus);
   return {
     role,
-    isTrial: role === 'trial',
+    isTrial: role === 'founder_trial' || role === 'consultant_trial',
     readonlyMode,
   };
 }

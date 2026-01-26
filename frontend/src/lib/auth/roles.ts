@@ -12,7 +12,8 @@ const ROLE_REDIRECTS: Record<UserRole, string> = {
   admin: '/admin',
   consultant: '/consultant-dashboard',
   founder: '/founder-dashboard',
-  trial: '/onboarding/founder'
+  founder_trial: '/onboarding/founder',
+  consultant_trial: '/onboarding/consultant'
 };
 
 export function getRedirectForRole({ role, planStatus, next }: RedirectOptions): string {
@@ -21,10 +22,11 @@ export function getRedirectForRole({ role, planStatus, next }: RedirectOptions):
     return safeNext;
   }
 
-  const resolvedRole: UserRole = (role ?? 'trial') as UserRole;
+  const resolvedRole: UserRole = (role ?? 'founder_trial') as UserRole;
 
-  if (resolvedRole === 'trial' && isTrialReadonly(planStatus)) {
-    return ROLE_REDIRECTS.trial;
+  // Trial users get redirected to onboarding
+  if ((resolvedRole === 'founder_trial' || resolvedRole === 'consultant_trial') && isTrialReadonly(planStatus)) {
+    return ROLE_REDIRECTS[resolvedRole];
   }
 
   return ROLE_REDIRECTS[resolvedRole] ?? '/dashboard';
@@ -35,11 +37,11 @@ export function isTrialReadonly(planStatus?: PlanStatus | null): boolean {
 }
 
 export function canAccessFounderExperience(role?: UserRole | null): boolean {
-  return role === 'founder' || role === 'admin';
+  return role === 'founder' || role === 'founder_trial' || role === 'admin';
 }
 
 export function canAccessConsultantExperience(role?: UserRole | null): boolean {
-  return role === 'consultant' || role === 'admin';
+  return role === 'consultant' || role === 'consultant_trial' || role === 'admin';
 }
 
 export function deriveRole({
@@ -49,11 +51,11 @@ export function deriveRole({
   profileRole?: string | null;
   appRole?: string | null;
 }): UserRole {
-  const candidate = (profileRole ?? appRole ?? 'trial') as UserRole;
-  if (['admin', 'founder', 'consultant', 'trial'].includes(candidate)) {
+  const candidate = (profileRole ?? appRole ?? 'founder_trial') as UserRole;
+  if (['admin', 'founder', 'consultant', 'founder_trial', 'consultant_trial'].includes(candidate)) {
     return candidate;
   }
-  return 'trial';
+  return 'founder_trial';
 }
 
 export function sanitizePath(path?: string | null): string | null {

@@ -185,7 +185,7 @@ export function useRoleInfo() {
     canAccessConsultant: canConsultant,
     canAccessFounder: canFounder,
     trialReadonly,
-    isTrial: state.role === 'trial',
+    isTrial: state.role === 'founder_trial' || state.role === 'consultant_trial',
   };
 }
 

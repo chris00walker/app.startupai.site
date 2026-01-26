@@ -19,6 +19,7 @@ import {
 import { useRoleInfo } from "@/lib/auth/hooks"
 import { FounderStatusPanel } from "@/components/founders"
 import { ApprovalBadge } from "@/components/approvals"
+import { UpgradeWelcomeModal, PlanBadge } from "@/components/upgrade"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -34,7 +35,7 @@ export function DashboardLayout({ children, breadcrumbs = [], userType = "consul
 
   const resolvedUserType: "consultant" | "founder" = roleInfo.loading
     ? userType
-    : roleInfo.role === "founder" || roleInfo.role === "trial"
+    : roleInfo.role === "founder" || roleInfo.role === "founder_trial"
       ? "founder"
       : "consultant"
 
@@ -78,6 +79,7 @@ export function DashboardLayout({ children, breadcrumbs = [], userType = "consul
             </Breadcrumb>
           )}
           <div className="ml-auto flex items-center gap-2">
+            <PlanBadge variant="compact" />
             <ApprovalBadge />
             <FounderStatusPanel variant="header" />
           </div>
@@ -86,6 +88,7 @@ export function DashboardLayout({ children, breadcrumbs = [], userType = "consul
           {children}
         </div>
       </SidebarInset>
+      <UpgradeWelcomeModal />
     </SidebarProvider>
   )
 }

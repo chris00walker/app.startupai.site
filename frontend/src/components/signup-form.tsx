@@ -188,7 +188,7 @@ export function SignupForm({
             role: role,
             trial_intent: plan === 'trial' ? trialIntent : null,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${plan === 'trial' ? `&trial_intent=${trialIntent}` : ''}${inviteToken ? `&invite=${inviteToken}` : ''}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${plan === 'trial' ? trialIntent : role}${inviteToken ? `&invite=${inviteToken}` : ''}`,
         },
       })
 
@@ -223,7 +223,7 @@ export function SignupForm({
         provider: 'github',
         options: {
           scopes: 'user:email read:user',
-          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${role}${plan === 'trial' ? `&trial_intent=${trialIntent}` : ''}${inviteToken ? `&invite=${inviteToken}` : ''}`,
+          redirectTo: `${window.location.origin}/auth/callback?plan=${plan}&role=${plan === 'trial' ? trialIntent : role}${inviteToken ? `&invite=${inviteToken}` : ''}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

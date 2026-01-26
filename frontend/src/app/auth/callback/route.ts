@@ -328,11 +328,11 @@ export async function GET(request: NextRequest) {
         if (role) {
           metadata.role = role;
         } else if (plan === 'trial') {
-          // Default to founder for trial if no role specified
-          metadata.role = 'founder';
+          // Default to founder_trial for trial if no role specified
+          metadata.role = 'founder_trial';
         }
 
-        // Store trial_intent for trial users
+        // Store trial_intent for backwards compatibility (deprecated)
         if (trialIntent && plan === 'trial') {
           metadata.trial_intent = trialIntent;
         }
@@ -418,7 +418,7 @@ async function resolveRedirect({
 
   if (!userId) {
     console.warn('resolveRedirect: Missing user ID, using default role redirect');
-    const defaultPath = getRedirectForRole({ role: 'trial', planStatus: null });
+    const defaultPath = getRedirectForRole({ role: 'founder_trial', planStatus: null });
     return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
@@ -428,7 +428,7 @@ async function resolveRedirect({
     user = data.user;
   } catch (error) {
     console.warn('Failed to get user from Supabase:', error);
-    const defaultPath = getRedirectForRole({ role: 'trial', planStatus: null });
+    const defaultPath = getRedirectForRole({ role: 'founder_trial', planStatus: null });
     return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
@@ -437,7 +437,7 @@ async function resolveRedirect({
     profile = await getUserProfile(userId);
   } catch (error) {
     console.warn('Failed to get user profile:', error);
-    const defaultPath = getRedirectForRole({ role: 'trial', planStatus: null });
+    const defaultPath = getRedirectForRole({ role: 'founder_trial', planStatus: null });
     return buildRedirectUrl({ request, origin, path: defaultPath });
   }
 
