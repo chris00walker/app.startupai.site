@@ -16,7 +16,7 @@
    - Why AI tools (assessQuality, advanceStage, completeOnboarding) aren't being called
    - Data flow diagrams and failure cascade analysis
 
-2. **[ONBOARDING_TO_CREWAI_ARCHITECTURE.md](./ONBOARDING_TO_CREWAI_ARCHITECTURE.md)** - Implementation plan to fix broken workflow
+2. **[onboarding-crewai-architecture.md](./onboarding-crewai-architecture.md)** - Implementation plan to fix broken workflow
    - Phase 1: Fix AI tool-calling
    - Phase 2: Add CrewAI integration
    - Phase 3: Fix frontend UX
