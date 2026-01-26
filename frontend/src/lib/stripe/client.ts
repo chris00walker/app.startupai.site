@@ -7,14 +7,31 @@
 
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('[stripe] STRIPE_SECRET_KEY not configured');
-}
+// Lazy-initialized Stripe client to prevent build-time failures
+let _stripe: Stripe | null = null;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-12-15.clover',
-  typescript: true,
-});
+/**
+ * Get the Stripe client instance (lazy initialization)
+ * Throws an error if STRIPE_SECRET_KEY is not configured
+ */
+export function getStripe(): Stripe {
+  if (_stripe) {
+    return _stripe;
+  }
+
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
+    console.error('[stripe] STRIPE_SECRET_KEY not configured');
+    throw new Error('Stripe is not configured. Missing STRIPE_SECRET_KEY.');
+  }
+
+  _stripe = new Stripe(stripeKey, {
+    apiVersion: '2025-12-15.clover',
+    typescript: true,
+  });
+
+  return _stripe;
+}
 
 /**
  * Price IDs for different plans

@@ -58,6 +58,7 @@ Items that cannot proceed until external dependencies are resolved.
 
 | Item | Stories | Blocker | Notes |
 |------|---------|---------|-------|
+| **Stripe env vars in Netlify** | US-FT03 | No Stripe account | Add `STRIPE_SECRET_KEY` to Netlify after account setup |
 | **Ad Platform OAuth Integration** | US-AM01, US-AM02, US-AM03 | No Meta/Google/TikTok API accounts | Need business accounts with ad platforms |
 | **Ad Spend Monitoring** | US-AM04, US-AM05 | Blocked by OAuth | Requires connected ad accounts |
 | **Ad Platform Health & Errors** | US-AM06, US-AM07 | Blocked by OAuth | Requires live API connections |

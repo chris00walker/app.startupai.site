@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
-import { stripe, getPriceId, type PlanType, type BillingPeriod } from '@/lib/stripe/client';
+import { getStripe, getPriceId, type PlanType, type BillingPeriod } from '@/lib/stripe/client';
 import {
   unauthorizedResponse,
   handleApiError,
@@ -69,6 +69,9 @@ export async function POST(request: NextRequest) {
 
     // Create or retrieve Stripe customer
     let customerId = profile?.stripe_customer_id;
+
+    // Get Stripe client (lazy initialization)
+    const stripe = getStripe();
 
     if (!customerId) {
       const customer = await stripe.customers.create({
