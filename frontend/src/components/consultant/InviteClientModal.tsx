@@ -2,8 +2,9 @@
  * InviteClientModal Component
  *
  * Modal for inviting new clients to work with a consultant.
+ * Shows upgrade prompt for trial users attempting to invite real clients.
  *
- * @story US-C02
+ * @story US-C02, US-CT03
  */
 
 'use client';
@@ -20,8 +21,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Mail, User, CheckCircle2, Copy, ExternalLink } from 'lucide-react';
+import { Loader2, Mail, User, CheckCircle2, Copy, ExternalLink, Crown, Lock, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 // ============================================================================
 // Types
@@ -42,9 +44,11 @@ export interface InviteClientModalProps {
     };
     error?: string;
   }>;
+  /** If true, show upgrade prompt instead of sending invite (US-CT03) */
+  isTrial?: boolean;
 }
 
-type ModalState = 'form' | 'success';
+type ModalState = 'form' | 'success' | 'upgrade';
 
 // ============================================================================
 // Helper Functions
@@ -62,6 +66,7 @@ export function InviteClientModal({
   isOpen,
   onClose,
   onInvite,
+  isTrial = false,
 }: InviteClientModalProps) {
   const [state, setState] = useState<ModalState>('form');
   const [email, setEmail] = useState('');
@@ -93,6 +98,12 @@ export function InviteClientModal({
 
     if (!isValidEmail(email.trim())) {
       setError('Please enter a valid email address');
+      return;
+    }
+
+    // US-CT03: Trial users see upgrade prompt instead of sending invite
+    if (isTrial) {
+      setState('upgrade');
       return;
     }
 
@@ -220,7 +231,7 @@ export function InviteClientModal({
               </DialogFooter>
             </form>
           </>
-        ) : (
+        ) : state === 'success' ? (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -295,7 +306,97 @@ export function InviteClientModal({
               )}
             </DialogFooter>
           </>
-        )}
+        ) : state === 'upgrade' ? (
+          /* US-CT03: Upgrade prompt for trial users */
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500" />
+                Upgrade to Invite Real Clients
+              </DialogTitle>
+              <DialogDescription>
+                Your trial includes 2 mock clients to explore the platform.
+                Upgrade to invite and work with real clients.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 mt-4">
+              {/* Feature comparison */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg border bg-muted/30">
+                  <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    Trial
+                  </h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <span className="text-amber-500">●</span>
+                      2 mock clients
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-500">✕</span>
+                      Real client invites
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-500">✕</span>
+                      White-label
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-500">✕</span>
+                      Priority processing
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-4 rounded-lg border-2 border-primary bg-primary/5">
+                  <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Consultant
+                  </h4>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Unlimited clients
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Real client invites
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      White-label
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Priority processing
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div className="text-center p-4 rounded-lg bg-gradient-to-r from-primary/10 to-purple-500/10 border">
+                <p className="text-2xl font-bold">$149<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                <p className="text-sm text-muted-foreground mt-1">Cancel anytime</p>
+              </div>
+            </div>
+
+            <DialogFooter className="pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setState('form')}
+              >
+                Back
+              </Button>
+              <Button asChild>
+                <Link href="/pricing?plan=consultant">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade Now
+                </Link>
+              </Button>
+            </DialogFooter>
+          </>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

@@ -1,11 +1,12 @@
 /**
  * Consultant Onboarding API
  *
- * @story US-C01
+ * @story US-C01, US-CT01
  */
 
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { createMockClientsForTrial } from '@/lib/mock-data';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,24 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       console.error('[ConsultantOnboarding] Failed to update user profile:', updateError);
       // Don't fail the request if this update fails
+    }
+
+    // Check if this is a trial user - if so, create mock clients (US-CT01)
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (userProfile?.role === 'consultant_trial') {
+      console.log('[ConsultantOnboarding] Creating mock clients for trial consultant');
+      const mockResult = await createMockClientsForTrial(userId);
+      if (!mockResult.success) {
+        console.error('[ConsultantOnboarding] Failed to create mock clients:', mockResult.error);
+        // Don't fail the request - mock clients are non-critical
+      } else {
+        console.log(`[ConsultantOnboarding] Created ${mockResult.mockClientIds.length} mock clients`);
+      }
     }
 
     // TODO: In Phase 3, trigger CrewAI consultant workflow here

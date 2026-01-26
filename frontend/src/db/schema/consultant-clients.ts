@@ -5,7 +5,7 @@
  * including invite status, tokens, and archival state.
  */
 
-import { pgTable, text, timestamp, uuid, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, index, uniqueIndex, boolean } from 'drizzle-orm/pg-core';
 import { userProfiles } from './users';
 
 export const consultantClientsStatusEnum = ['invited', 'active', 'archived'] as const;
@@ -43,6 +43,9 @@ export const consultantClients = pgTable(
     linkedAt: timestamp('linked_at', { withTimezone: true }),
     archivedAt: timestamp('archived_at', { withTimezone: true }),
     archivedBy: text('archived_by'),
+
+    // Mock client flag for trial users (US-CT01)
+    isMock: boolean('is_mock').default(false),
 
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

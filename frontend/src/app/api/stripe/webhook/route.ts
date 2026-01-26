@@ -15,6 +15,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe, deriveUpgradeRole } from '@/lib/stripe/client';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { handleMockClientsOnUpgrade } from '@/lib/mock-data';
 import type Stripe from 'stripe';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -76,6 +77,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   console.log(`[stripe/webhook] User ${userId} upgraded to ${newRole} plan`);
+
+  // US-CT05: Archive mock clients when consultant trial upgrades
+  if (currentRole === 'consultant_trial' && newRole === 'consultant') {
+    try {
+      await handleMockClientsOnUpgrade(userId, true);
+      console.log(`[stripe/webhook] Archived mock clients for consultant ${userId}`);
+    } catch (err) {
+      // Don't fail webhook if mock client handling fails
+      console.warn('[stripe/webhook] Failed to archive mock clients:', err);
+    }
+  }
 
   // Log the upgrade event
   try {

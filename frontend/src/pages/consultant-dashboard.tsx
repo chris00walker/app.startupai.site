@@ -22,9 +22,10 @@ import { GateAlerts } from "@/components/portfolio/GateAlerts"
 import { useProjects } from "@/hooks/useProjects"
 import { useClients } from "@/hooks/useClients"
 import { useConsultantClients } from "@/hooks/useConsultantClients"
-import { useAuth } from "@/lib/auth/hooks"
+import { useAuth, useRoleInfo } from "@/lib/auth/hooks"
 import { usePortfolioActivity } from "@/hooks/usePortfolioActivity"
 import { InviteClientModal } from "@/components/consultant/InviteClientModal"
+import { TrialStatusCard } from "@/components/upgrade/TrialStatusCard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -314,6 +315,7 @@ function PendingInvitesSection({
 
 function Dashboard() {
   const { user } = useAuth()
+  const roleInfo = useRoleInfo()
   const [userRole, setUserRole] = React.useState<string | null>(null)
   const [showInviteModal, setShowInviteModal] = React.useState(false)
 
@@ -507,6 +509,9 @@ function Dashboard() {
               <PortfolioOverview projects={allProjects} />
             </div>
             <div className="space-y-6">
+              {/* Trial Status Card - shown for trial users */}
+              <TrialStatusCard />
+
               {/* Pending Invites Section */}
               {isConsultant && (
                 <PendingInvitesSection
@@ -573,6 +578,7 @@ function Dashboard() {
             isOpen={showInviteModal}
             onClose={() => setShowInviteModal(false)}
             onInvite={createInvite}
+            isTrial={roleInfo.isTrial}
           />
       </div>
     </DashboardLayout>
