@@ -216,6 +216,14 @@ AI: [Reads story-code-map.json]
 - Update `story-code-overrides.yaml` when db schema changes
 - Regenerate after adding annotations: `pnpm traceability:generate`
 
+## Subsystems
+
+The traceability system includes additional validation tools:
+
+| Subsystem | Purpose | Skill |
+|-----------|---------|-------|
+| [Schema Drift](./schema-drift/README.md) | Detect drift between Drizzle TypeScript and production Supabase | `/schema-drift` |
+
 ## Related Docs
 
 - [User Stories](../user-experience/stories/README.md)

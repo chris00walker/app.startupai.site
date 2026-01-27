@@ -163,14 +163,14 @@ describe('FounderDashboard Button Routing', () => {
       });
     });
 
-    it('should render "Start with Alex" as primary CTA', async () => {
+    it('should render "Start Validating Your Idea" as primary CTA', async () => {
       render(<FounderDashboard />);
 
       await waitFor(() => {
         expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
       });
 
-      const primaryButton = screen.getByRole('button', { name: /start with alex/i });
+      const primaryButton = screen.getByRole('button', { name: /start validating your idea/i });
       expect(primaryButton).toBeInTheDocument();
     });
 
@@ -181,41 +181,19 @@ describe('FounderDashboard Button Routing', () => {
         expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
       });
 
-      const primaryLink = screen.getByRole('link', { name: /start with alex/i });
+      const primaryLink = screen.getByRole('link', { name: /start validating your idea/i });
       expect(primaryLink).toHaveAttribute('href', '/onboarding/founder');
     });
 
-    it('should render "Quick Create" as secondary option', async () => {
+    it('should show Rocket icon for primary button', async () => {
       render(<FounderDashboard />);
 
       await waitFor(() => {
         expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
       });
 
-      const secondaryButton = screen.getByRole('button', { name: /quick create/i });
-      expect(secondaryButton).toBeInTheDocument();
-    });
-
-    it('should link secondary option to /projects/new', async () => {
-      render(<FounderDashboard />);
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
-      });
-
-      const quickCreateLink = screen.getByRole('link', { name: /quick create/i });
-      expect(quickCreateLink).toHaveAttribute('href', '/projects/new');
-    });
-
-    it('should show MessageSquare icon for Alex button', async () => {
-      render(<FounderDashboard />);
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('dashboard-loading')).not.toBeInTheDocument();
-      });
-
-      // The button should contain the MessageSquare icon
-      const primaryButton = screen.getByRole('button', { name: /start with alex/i });
+      // The button should contain the Rocket icon
+      const primaryButton = screen.getByRole('button', { name: /start validating your idea/i });
       expect(primaryButton.querySelector('svg')).toBeInTheDocument();
     });
   });

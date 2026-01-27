@@ -547,7 +547,8 @@ describe('useRoleInfo', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.role).toBe('trial');
+    // Default role when none specified is 'founder_trial'
+    expect(result.current.role).toBe('founder_trial');
   });
 
   it('should include userId', async () => {

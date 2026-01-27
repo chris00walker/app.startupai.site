@@ -50,6 +50,9 @@ const mockClientIdeation: ClientValidationProgress = {
   createdAt: '2026-01-10T00:00:00Z',
 };
 
+// Use a date 3 days ago to ensure "Xd ago" format (within 7-day threshold)
+const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+
 const mockClientFailed: ClientValidationProgress = {
   clientId: 'client-789',
   clientName: 'Bob Wilson',
@@ -65,7 +68,7 @@ const mockClientFailed: ClientValidationProgress = {
   reportId: 'report-789',
   reportOutcome: 'Market validation inconclusive',
   pivotRecommendation: 'Pivot recommended',
-  lastActivity: '2026-01-15T08:00:00Z',
+  lastActivity: threeDaysAgo,
   createdAt: '2026-01-05T00:00:00Z',
 };
 

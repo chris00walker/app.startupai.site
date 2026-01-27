@@ -156,13 +156,21 @@ describe('POST /api/consultant/onboarding', () => {
         onboarding_completed: true,
       };
 
-      mockSingle.mockResolvedValue({
-        data: mockProfile,
-        error: null,
-      });
+      // Mock both the profile insert and user_profiles role check
+      mockSingle
+        .mockResolvedValueOnce({
+          data: mockProfile,
+          error: null,
+        })
+        .mockResolvedValueOnce({
+          data: { role: 'consultant' }, // Not a trial user, so no mock clients created
+          error: null,
+        });
 
-      // Mock user_profiles update
-      mockEq.mockResolvedValue({ error: null });
+      // Mock user_profiles update - use mockReturnValue to preserve chain
+      mockUpdate.mockReturnValue({
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      });
 
       const response = await POST(
         createMockRequest({

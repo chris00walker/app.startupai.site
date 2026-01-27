@@ -75,37 +75,26 @@ describe('GET /api/auth/logout', () => {
   });
 
   describe('redirect', () => {
-    it('should redirect to marketing site URL from environment', async () => {
-      process.env.NEXT_PUBLIC_MARKETING_URL = 'https://startupai.site';
+    it('should redirect to login page on same origin', async () => {
       mockSignOut.mockResolvedValue({ error: null });
 
       const response = await GET(createMockRequest());
 
       expect(response.status).toBe(307);
-      expect(response.headers.get('Location')).toBe('https://startupai.site');
-    });
-
-    it('should redirect to localhost:3000 when env not set', async () => {
-      delete process.env.NEXT_PUBLIC_MARKETING_URL;
-      mockSignOut.mockResolvedValue({ error: null });
-
-      const response = await GET(createMockRequest());
-
-      expect(response.status).toBe(307);
-      expect(response.headers.get('Location')).toBe('http://localhost:3000');
+      // Route redirects to /login on the request origin
+      expect(response.headers.get('Location')).toBe('http://localhost:3000/login');
     });
   });
 
   describe('sign out errors', () => {
     it('should still redirect even if signOut returns error', async () => {
-      process.env.NEXT_PUBLIC_MARKETING_URL = 'https://startupai.site';
       mockSignOut.mockResolvedValue({ error: new Error('Sign out failed') });
 
       const response = await GET(createMockRequest());
 
       // Should still redirect (the route doesn't check for signOut errors)
       expect(response.status).toBe(307);
-      expect(response.headers.get('Location')).toBe('https://startupai.site');
+      expect(response.headers.get('Location')).toBe('http://localhost:3000/login');
     });
   });
 });
