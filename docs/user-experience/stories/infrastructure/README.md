@@ -25,10 +25,11 @@ These stories ensure architectural work is visible in the traceability system al
 | Prefix | Category | Count | File |
 |--------|----------|-------|------|
 | `US-MT` | MCP Tools | 35 | [mcp-tools.md](./mcp-tools.md) |
-| `US-AT` | Asset Templates | 10 | [asset-templates.md](./asset-templates.md) |
+| `US-AT` | Asset Templates | 12 | [asset-templates.md](./asset-templates.md) |
 | `US-PA` | Provider APIs | 10 | [provider-apis.md](./provider-apis.md) |
 | `US-INF` | Core Infrastructure | 10 | [core-infrastructure.md](./core-infrastructure.md) |
-| **Total** | | **65** | |
+| `US-AP` | Ad Platforms | 8 | [ad-platforms.md](./ad-platforms.md) |
+| **Total** | | **75** | |
 
 ---
 
@@ -37,9 +38,10 @@ These stories ensure architectural work is visible in the traceability system al
 | File | Stories | Purpose |
 |------|---------|---------|
 | [mcp-tools.md](./mcp-tools.md) | US-MT01-MT35 | All 35 MCP tools (EXISTS, Custom, External, LLM-Based) |
-| [asset-templates.md](./asset-templates.md) | US-AT01-AT10 | Blueprint Pattern for landing pages, ad creatives |
+| [asset-templates.md](./asset-templates.md) | US-AT01-AT12 | Blueprint Pattern for landing pages (full pipeline) |
 | [provider-apis.md](./provider-apis.md) | US-PA01-PA10 | API clients for 10 integration providers |
 | [core-infrastructure.md](./core-infrastructure.md) | US-INF01-INF10 | OAuth fixes, token refresh, email, MCP server |
+| [ad-platforms.md](./ad-platforms.md) | US-AP01-AP08 | Meta/Google/LinkedIn ad integration with HITL |
 
 ---
 
@@ -164,6 +166,7 @@ These stories ensure architectural work is visible in the traceability system al
 | `US-AT` | `38-asset-templates.spec.ts` | `startupai-crew/tests/templates/` |
 | `US-PA` | `39-provider-apis.spec.ts` | `frontend/tests/integrations/` |
 | `US-INF` | `40-infrastructure.spec.ts` | Various |
+| `US-AP` | `41-ad-platforms.spec.ts` | `startupai-crew/tests/ads/` |
 
 ---
 

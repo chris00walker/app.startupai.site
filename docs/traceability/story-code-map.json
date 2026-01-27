@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generated_at": "2026-01-26T21:24:40.428Z",
+    "generated_at": "2026-01-27T00:13:20.644Z",
     "version": "1.0.0",
-    "story_count": 254,
+    "story_count": 262,
     "annotated_file_count": 360
   },
   "stories": {
@@ -5159,6 +5159,110 @@
       "db_tables": [],
       "implementation_status": "pending",
       "notes": "MCP-CrewAI Integration Layer - mcp-use library"
+    },
+    "US-AP01": {
+      "title": "Copy Bank Generator",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Copy Bank Generator - pre-compute ad copy at VPC creation, zero inference for ads"
+    },
+    "US-AP02": {
+      "title": "Tiered Image Selection Flow",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Tiered Image Selection Flow - Unsplash → Refinement → Reference → AI Generation"
+    },
+    "US-AP03": {
+      "title": "Meta Flexible Ads Integration",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Meta Flexible Ads Integration - PAUSED campaign, asset_feed_spec, Advantage+ Creative"
+    },
+    "US-AP04": {
+      "title": "Ad Review Status Poller",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Ad Review Status Poller - poll effective_status every 5 min (no webhooks available)"
+    },
+    "US-AP05": {
+      "title": "HITL Ad Preview UI",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "HITL Ad Preview UI - embed Meta previews, edit copy/images/budget, approve/reject"
+    },
+    "US-AP06": {
+      "title": "Ad Performance Evidence Collection",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Ad Performance Evidence Collection - poll insights API, calculate desirability score"
+    },
+    "US-AP07": {
+      "title": "Google Responsive Display Ads (P1)",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "Google Responsive Display Ads - P1 priority, similar pattern to Meta"
+    },
+    "US-AP08": {
+      "title": "LinkedIn Marketing Ads (P2)",
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "db_tables": [],
+      "implementation_status": "pending",
+      "notes": "LinkedIn Marketing Ads - P2 priority for B2B validation"
     }
   },
   "files": {

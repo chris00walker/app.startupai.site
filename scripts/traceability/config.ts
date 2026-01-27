@@ -145,6 +145,7 @@ export const STORY_SOURCES = [
   'docs/user-experience/stories/infrastructure/asset-templates.md',
   'docs/user-experience/stories/infrastructure/provider-apis.md',
   'docs/user-experience/stories/infrastructure/core-infrastructure.md',
+  'docs/user-experience/stories/infrastructure/ad-platforms.md',
 ] as const;
 
 /**
@@ -309,6 +310,12 @@ export const STORY_CATEGORIES: Record<string, string> = {
   'US-AFB': 'Agent Feasibility',
   'US-AVB': 'Agent Viability',
   'US-AH': 'Agent HITL',
+  // Infrastructure stories
+  'US-MT': 'MCP Tool',
+  'US-AT': 'Asset Template',
+  'US-PA': 'Provider API',
+  'US-INF': 'Infrastructure',
+  'US-AP': 'Ad Platform',
 };
 
 /**

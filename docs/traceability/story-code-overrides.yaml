@@ -1129,3 +1129,44 @@ US-INF09:
 US-INF10:
   notes: "MCP-CrewAI Integration Layer - mcp-use library"
   implementation_status: pending
+
+# =============================================================================
+# Infrastructure: Ad Platforms (US-AP01-AP08) - New
+# =============================================================================
+
+# Phase 1: Asset Preparation
+US-AP01:
+  notes: "Copy Bank Generator - pre-compute ad copy at VPC creation, zero inference for ads"
+  implementation_status: pending
+
+US-AP02:
+  notes: "Tiered Image Selection Flow - Unsplash → Refinement → Reference → AI Generation"
+  implementation_status: pending
+
+# Phase 2: Platform Integration
+US-AP03:
+  notes: "Meta Flexible Ads Integration - PAUSED campaign, asset_feed_spec, Advantage+ Creative"
+  implementation_status: pending
+
+US-AP04:
+  notes: "Ad Review Status Poller - poll effective_status every 5 min (no webhooks available)"
+  implementation_status: pending
+
+# Phase 3: HITL Approval
+US-AP05:
+  notes: "HITL Ad Preview UI - embed Meta previews, edit copy/images/budget, approve/reject"
+  implementation_status: pending
+
+# Phase 4: Evidence Collection
+US-AP06:
+  notes: "Ad Performance Evidence Collection - poll insights API, calculate desirability score"
+  implementation_status: pending
+
+# Phase 5: Future Platforms
+US-AP07:
+  notes: "Google Responsive Display Ads - P1 priority, similar pattern to Meta"
+  implementation_status: pending
+
+US-AP08:
+  notes: "LinkedIn Marketing Ads - P2 priority for B2B validation"
+  implementation_status: pending
