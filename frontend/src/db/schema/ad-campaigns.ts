@@ -4,7 +4,7 @@
  * Stores ad campaigns created by AI agents for validation testing.
  * Links to projects, hypotheses, and budget pools.
  *
- * @story US-AC01, US-AC02, US-AC03, US-AC04, US-H04
+ * @story US-AC01, US-AC02, US-AC03, US-AC04, US-H04, US-AP02
  */
 
 import { pgEnum, pgTable, text, timestamp, uuid, numeric, jsonb } from 'drizzle-orm/pg-core';
@@ -40,7 +40,20 @@ export const campaignTypeEnum = pgEnum('campaign_type', [
 ]);
 
 /**
+ * Selected image data from ImageSelectionFlow (US-AP02)
+ */
+export type SelectedImage = {
+  id: string;
+  url: string;
+  thumbUrl?: string;
+  source: 'unsplash' | 'generated';
+  photographer?: string;
+  photographerUrl?: string;
+};
+
+/**
  * Creative data structure for ad campaigns.
+ * @story US-AP02
  */
 export type CampaignCreativeData = {
   templateId?: string;
@@ -55,6 +68,9 @@ export type CampaignCreativeData = {
     headline: string;
     description: string;
   }>;
+  // US-AP02: Multiple selected images for Meta Flexible Ads
+  selectedImages?: SelectedImage[];
+  imageSelectionTier?: 1 | 2 | 3 | 4;
 };
 
 /**

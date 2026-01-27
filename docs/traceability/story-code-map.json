@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T00:31:05.467Z",
+    "generated_at": "2026-01-27T01:10:31.016Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 362
+    "annotated_file_count": 366
   },
   "stories": {
     "US-F01": {
@@ -5180,8 +5180,15 @@
     },
     "US-AP02": {
       "title": "Tiered Image Selection Flow",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/components/ads/ImageSelectionFlow.tsx",
+        "frontend/src/components/ads/index.ts",
+        "frontend/src/db/schema/ad-campaigns.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/ads/images/generate/route.ts",
+        "frontend/src/app/api/ads/images/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -6020,7 +6027,8 @@
         "US-AC01",
         "US-AC02",
         "US-AC03",
-        "US-AC04"
+        "US-AC04",
+        "US-AP02"
       ]
     },
     "../startupai-crew/src/modal_app/phases/phase_2.py": {
@@ -7508,6 +7516,26 @@
     "frontend/src/app/api/copy-bank/[projectId]/route.ts": {
       "stories": [
         "US-AP01"
+      ]
+    },
+    "frontend/src/components/ads/ImageSelectionFlow.tsx": {
+      "stories": [
+        "US-AP02"
+      ]
+    },
+    "frontend/src/components/ads/index.ts": {
+      "stories": [
+        "US-AP02"
+      ]
+    },
+    "frontend/src/app/api/ads/images/generate/route.ts": {
+      "stories": [
+        "US-AP02"
+      ]
+    },
+    "frontend/src/app/api/ads/images/route.ts": {
+      "stories": [
+        "US-AP02"
       ]
     }
   }
