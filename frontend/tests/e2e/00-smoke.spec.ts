@@ -10,7 +10,7 @@ test.describe('Smoke', () => {
 
   test('login page renders core controls', async ({ page }) => {
     await page.goto('/login');
-    await expect(page.getByText('Welcome to StartupAI')).toBeVisible();
+    await expect(page.getByText('Welcome back')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Sign in with GitHub' })).toBeVisible();
   });
 

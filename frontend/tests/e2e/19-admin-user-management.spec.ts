@@ -41,15 +41,19 @@ async function loginAsAdmin(page: Page): Promise<void> {
   const emailInput = page.locator('input[type="email"], input[name="email"]');
   const passwordInput = page.locator('input[type="password"], input[name="password"]');
 
-  if ((await emailInput.isVisible()) && (await passwordInput.isVisible())) {
-    await emailInput.fill(ADMIN_USER.email);
-    await passwordInput.fill(ADMIN_USER.password);
+  // Login form MUST be visible - use strict assertions
+  await expect(emailInput).toBeVisible({ timeout: 10000 });
+  await expect(passwordInput).toBeVisible({ timeout: 5000 });
 
-    const submitButton = page.getByRole('button', { name: /sign in|log in|submit/i });
-    await submitButton.click();
+  await emailInput.fill(ADMIN_USER.email);
+  await passwordInput.fill(ADMIN_USER.password);
 
-    await page.waitForLoadState('networkidle');
-  }
+  // Use exact match to avoid matching "Sign in with GitHub" button
+  const submitButton = page.getByRole('button', { name: 'Sign in', exact: true });
+  await expect(submitButton).toBeVisible({ timeout: 5000 });
+  await submitButton.click();
+
+  await page.waitForLoadState('networkidle');
 }
 
 /**
