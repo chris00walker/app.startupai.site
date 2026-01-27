@@ -10,6 +10,14 @@ import {
 } from '@/components/ui/tooltip'
 import { type EvidenceStrength, evidenceStrengthConfig } from './types'
 
+// Defensive fallback for unknown evidence strength values
+const defaultEvidenceConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800', description: 'Unknown evidence level' }
+
+const getEvidenceConfig = (strength: string | undefined | null) => {
+  if (!strength) return defaultEvidenceConfig
+  return evidenceStrengthConfig[strength as keyof typeof evidenceStrengthConfig] || defaultEvidenceConfig
+}
+
 interface EvidenceStrengthIndicatorProps {
   strength: EvidenceStrength
   showLabel?: boolean
@@ -31,7 +39,7 @@ export function EvidenceStrengthIndicator({
   size = 'md',
   className
 }: EvidenceStrengthIndicatorProps) {
-  const config = evidenceStrengthConfig[strength]
+  const config = getEvidenceConfig(strength)
 
   const sizeClasses = {
     sm: 'h-3 w-3',
@@ -115,7 +123,7 @@ export function EvidenceStrengthBadge({
   showIcon = true,
   className
 }: EvidenceStrengthBadgeProps) {
-  const config = evidenceStrengthConfig[strength]
+  const config = getEvidenceConfig(strength)
 
   return (
     <span

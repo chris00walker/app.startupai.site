@@ -128,7 +128,8 @@ export function ExperimentCardForm({
   // Auto-suggest evidence strength based on test method
   const handleMethodChange = (method: ExperimentMethod) => {
     updateField('testMethod', method)
-    const suggestedStrength = experimentMethodConfig[method].evidenceStrength as EvidenceLevel
+    const methodConfig = experimentMethodConfig[method]
+    const suggestedStrength = (methodConfig?.evidenceStrength || 'weak') as EvidenceLevel
     updateField('evidenceStrength', suggestedStrength)
   }
 
@@ -283,7 +284,7 @@ export function ExperimentCardForm({
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Based on test method: {experimentMethodConfig[formData.testMethod].label}
+              Based on test method: {experimentMethodConfig[formData.testMethod]?.label || formData.testMethod || 'Unknown'}
             </p>
           </div>
 
