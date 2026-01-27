@@ -50,7 +50,6 @@ import {
   Clock,
   Plus,
   Rocket,
-  Brain,
   LayoutGrid,
   Users,
   BookOpen,
@@ -486,14 +485,8 @@ export default function FounderDashboard() {
           </TabsList>
 
           <div className="flex gap-2">
-            <Link href="/ai-analysis" onClick={() => trackEvent('button_clicked', { button_name: 'ai_analysis', location: 'founder_dashboard', category: 'ui_interaction' })}>
-              <Button data-testid="ai-analysis-button">
-                <Brain className="h-4 w-4 mr-2" />
-                AI Strategic Analysis
-              </Button>
-            </Link>
             <Link href="/onboarding/founder" onClick={() => trackEvent('button_clicked', { button_name: 'new_project', location: 'founder_dashboard', category: 'ui_interaction' })}>
-              <Button variant="outline">
+              <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 New Project
               </Button>

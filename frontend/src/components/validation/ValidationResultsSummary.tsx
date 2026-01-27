@@ -136,14 +136,14 @@ export function ValidationResultsSummary({ projectId }: ValidationResultsSummary
         <CardContent>
           <div className="text-center py-6">
             <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Run Your First Analysis</h3>
+            <h3 className="text-lg font-semibold mb-2">No Validation Results Yet</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Get AI-powered insights into your business idea with strategic analysis.
+              Start a new project to get AI-powered validation insights.
             </p>
-            <Link href="/ai-analysis">
+            <Link href="/onboarding/founder">
               <Button>
-                <Brain className="h-4 w-4 mr-2" />
-                Start AI Analysis
+                <Target className="h-4 w-4 mr-2" />
+                Start New Project
               </Button>
             </Link>
           </div>
@@ -172,12 +172,6 @@ export function ValidationResultsSummary({ projectId }: ValidationResultsSummary
             <Button variant="ghost" size="sm" onClick={() => refetch()}>
               <RefreshCw className="h-4 w-4" />
             </Button>
-            <Link href="/ai-analysis">
-              <Button variant="outline" size="sm">
-                <Brain className="h-4 w-4 mr-2" />
-                New Analysis
-              </Button>
-            </Link>
           </div>
         </div>
       </CardHeader>

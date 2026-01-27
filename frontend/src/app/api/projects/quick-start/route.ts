@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         project_id: project.id,
         user_id: targetUserId,
         kickoff_id: runId,
-        phase: 'research',  // Phase 1 in Quick Start model
+        phase: 'ideation',  // Initial phase while Phase 1 (VPC Discovery) runs
         current_risk_axis: 'desirability',
         business_idea: validatedData.raw_idea,
         entrepreneur_input: validatedData.raw_idea,

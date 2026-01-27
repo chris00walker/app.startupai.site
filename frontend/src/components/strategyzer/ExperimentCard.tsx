@@ -51,6 +51,22 @@ const statusConfig = {
   cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800', icon: XCircle }
 } as const
 
+// Defensive fallbacks for unknown values (prevents crashes from invalid DB data)
+const defaultOutcomeConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800', description: 'Unknown outcome' }
+const defaultStatusConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800', icon: Clock }
+
+// Helper to safely get outcome config
+const getOutcomeConfig = (outcome: string | undefined | null) => {
+  if (!outcome) return null
+  return outcomeConfig[outcome as keyof typeof outcomeConfig] || defaultOutcomeConfig
+}
+
+// Helper to safely get status config
+const getStatusConfig = (status: string | undefined | null) => {
+  if (!status) return defaultStatusConfig
+  return statusConfig[status as keyof typeof statusConfig] || defaultStatusConfig
+}
+
 export function ExperimentCard({
   experiment,
   onEdit,
@@ -59,7 +75,8 @@ export function ExperimentCard({
   onRecordResults,
   compact = false
 }: ExperimentCardProps) {
-  const StatusIcon = statusConfig[experiment.status].icon
+  const statusInfo = getStatusConfig(experiment.status)
+  const StatusIcon = statusInfo.icon
   const methodInfo = experimentMethodConfig[experiment.method] || { label: experiment.method || 'Unknown' }
 
   if (compact) {
@@ -69,9 +86,9 @@ export function ExperimentCard({
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <Badge className={statusConfig[experiment.status].color}>
+                <Badge className={statusInfo.color}>
                   <StatusIcon className="h-3 w-3 mr-1" />
-                  {statusConfig[experiment.status].label}
+                  {statusInfo.label}
                 </Badge>
                 <Badge variant="outline">{methodInfo.label}</Badge>
               </div>
@@ -108,9 +125,9 @@ export function ExperimentCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge className={statusConfig[experiment.status].color}>
+            <Badge className={statusInfo.color}>
               <StatusIcon className="h-3 w-3 mr-1" />
-              {statusConfig[experiment.status].label}
+              {statusInfo.label}
             </Badge>
             <Badge variant="outline">
               <Beaker className="h-3 w-3 mr-1" />
@@ -163,14 +180,14 @@ export function ExperimentCard({
         </div>
 
         {/* Expected Outcome */}
-        {experiment.expected_outcome && (
+        {experiment.expected_outcome && getOutcomeConfig(experiment.expected_outcome) && (
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-1">EXPECTED OUTCOME</p>
-            <Badge className={outcomeConfig[experiment.expected_outcome].color}>
-              {outcomeConfig[experiment.expected_outcome].label}
+            <Badge className={getOutcomeConfig(experiment.expected_outcome)!.color}>
+              {getOutcomeConfig(experiment.expected_outcome)!.label}
             </Badge>
             <span className="text-xs text-muted-foreground ml-2">
-              {outcomeConfig[experiment.expected_outcome].description}
+              {getOutcomeConfig(experiment.expected_outcome)!.description}
             </span>
           </div>
         )}
@@ -195,12 +212,12 @@ export function ExperimentCard({
         </div>
 
         {/* Results Section (if completed) */}
-        {experiment.status === 'completed' && experiment.actual_outcome && (
+        {experiment.status === 'completed' && experiment.actual_outcome && getOutcomeConfig(experiment.actual_outcome) && (
           <div className="pt-3 border-t bg-muted/30 -mx-6 -mb-6 px-6 pb-4 rounded-b-lg">
             <p className="text-xs font-medium text-muted-foreground mb-2">RESULTS</p>
             <div className="flex items-center gap-3">
-              <Badge className={outcomeConfig[experiment.actual_outcome].color}>
-                {outcomeConfig[experiment.actual_outcome].label}
+              <Badge className={getOutcomeConfig(experiment.actual_outcome)!.color}>
+                {getOutcomeConfig(experiment.actual_outcome)!.label}
               </Badge>
               {experiment.actual_metric_value && (
                 <span className="text-sm">
@@ -208,11 +225,11 @@ export function ExperimentCard({
                 </span>
               )}
             </div>
-            {experiment.expected_outcome && experiment.actual_outcome !== experiment.expected_outcome && (
+            {experiment.expected_outcome && experiment.actual_outcome !== experiment.expected_outcome && getOutcomeConfig(experiment.expected_outcome) && (
               <div className="flex items-center gap-2 mt-2 text-xs text-amber-600">
                 <AlertTriangle className="h-3 w-3" />
                 <span>
-                  Outcome differs from expected ({outcomeConfig[experiment.expected_outcome].label})
+                  Outcome differs from expected ({getOutcomeConfig(experiment.expected_outcome)!.label})
                 </span>
               </div>
             )}

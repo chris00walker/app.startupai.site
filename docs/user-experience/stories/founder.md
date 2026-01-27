@@ -18,7 +18,7 @@ last_updated: "2026-01-23"
 **Acceptance Criteria:**
 
 **Given** I am logged in as a Founder or Trial user
-**When** I navigate to `/onboarding/quick-start`
+**When** I navigate to `/onboarding/founder`
 **Then** I should see the Quick Start form with business idea input
 
 **Given** I have entered my business idea (min 10 characters)
