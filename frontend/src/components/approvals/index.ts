@@ -11,3 +11,4 @@ export { ApprovalList } from './ApprovalList';
 export { ApprovalTypeIndicator } from './ApprovalTypeIndicator';
 export { EvidenceSummary } from './EvidenceSummary';
 export { FounderAvatar, FounderAvatarWithLabel } from './FounderAvatar';
+export { AdCreativeApproval } from './AdCreativeApproval';
