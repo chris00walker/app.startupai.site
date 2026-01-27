@@ -68,7 +68,8 @@
       "WebFetch(domain:developers.facebook.com)",
       "WebFetch(domain:admanage.ai)",
       "WebFetch(domain:interestexplorer.io)",
-      "WebFetch(domain:bir.ch)"
+      "WebFetch(domain:bir.ch)",
+      "Skill(schema-drift)"
     ],
     "deny": [
       "Bash(rm:*)",

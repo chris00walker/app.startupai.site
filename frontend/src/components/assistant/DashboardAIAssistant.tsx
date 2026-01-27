@@ -180,37 +180,92 @@ export function DashboardAIAssistant({
         throw new Error(`API error: ${response.status}`);
       }
 
-      // Handle streaming response
+      // Handle streaming response (Vercel AI SDK UI stream format)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = '';
+      let buffer = '';
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          accumulatedText += chunk;
+          buffer += decoder.decode(value, { stream: true });
 
-          // Update AI message in real-time
+          // Parse SSE events (lines starting with "data: ")
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = line.slice(6); // Remove "data: " prefix
+
+            if (data === '[DONE]') continue;
+
+            try {
+              const event = JSON.parse(data);
+
+              // Extract text from text-delta events
+              if (event.type === 'text-delta' && event.textDelta) {
+                accumulatedText += event.textDelta;
+
+                // Update AI message in real-time
+                setMessages((prev) => {
+                  const lastMessage = prev[prev.length - 1];
+                  if (lastMessage?.role === 'assistant') {
+                    return [
+                      ...prev.slice(0, -1),
+                      { ...lastMessage, content: accumulatedText },
+                    ];
+                  } else {
+                    return [
+                      ...prev,
+                      {
+                        role: 'assistant',
+                        content: accumulatedText,
+                        timestamp: new Date().toISOString(),
+                      },
+                    ];
+                  }
+                });
+              }
+
+              // Handle tool calls - show status message
+              if (event.type === 'tool-input-start') {
+                const toolMessage = `🔧 Checking ${event.toolName}...`;
+                setMessages((prev) => {
+                  const lastMessage = prev[prev.length - 1];
+                  if (lastMessage?.role === 'assistant') {
+                    return prev;
+                  }
+                  return [
+                    ...prev,
+                    {
+                      role: 'assistant',
+                      content: toolMessage,
+                      timestamp: new Date().toISOString(),
+                    },
+                  ];
+                });
+              }
+            } catch {
+              // Ignore parse errors for malformed JSON
+            }
+          }
+        }
+
+        // If no text was accumulated but we had tool calls, the model may not have responded
+        if (!accumulatedText) {
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
-            if (lastMessage?.role === 'assistant') {
+            if (lastMessage?.role === 'assistant' && lastMessage.content.startsWith('🔧')) {
               return [
                 ...prev.slice(0, -1),
-                { ...lastMessage, content: accumulatedText },
-              ];
-            } else {
-              return [
-                ...prev,
-                {
-                  role: 'assistant',
-                  content: accumulatedText,
-                  timestamp: new Date().toISOString(),
-                },
+                { ...lastMessage, content: "I checked the project status but couldn't find the project. Could you make sure you have an active project selected?" },
               ];
             }
+            return prev;
           });
         }
       }

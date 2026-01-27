@@ -190,13 +190,27 @@ export function VPCReportViewer({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed rounded-lg">
-              <LayoutGrid className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Analysis Available</h3>
-              <p className="text-sm text-muted-foreground max-w-md">
-                Run a CrewAI strategic analysis to generate your Value Proposition Canvas
-                with customer profiles, value maps, and fit scoring.
+            <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed rounded-lg bg-muted/30">
+              <div className="animate-pulse mb-4">
+                <Loader2 className="h-12 w-12 text-primary/40 animate-spin" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Analysis Processing</h3>
+              <p className="text-sm text-muted-foreground max-w-md mb-4">
+                Your business idea has been submitted. Our AI is researching the market,
+                analyzing competitors, and generating your Value Proposition Canvas.
               </p>
+              <div className="text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md">
+                This typically takes 2-5 minutes. Results will appear automatically.
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={refetch}
+                className="mt-4"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Check for results
+              </Button>
             </div>
           </CardContent>
         </Card>

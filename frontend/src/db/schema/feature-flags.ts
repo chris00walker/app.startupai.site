@@ -91,4 +91,11 @@ export const DEFAULT_FEATURE_FLAGS = [
     enabledGlobally: true,
     percentageRollout: 100,
   },
+  {
+    key: 'dashboard_ai_assistant',
+    name: 'Dashboard AI Assistant',
+    description: 'Floating AI chatbot on founder/consultant dashboards (US-F16)',
+    enabledGlobally: false,
+    percentageRollout: 0,
+  },
 ] as const;

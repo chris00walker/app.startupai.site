@@ -216,6 +216,10 @@ export async function POST(request: NextRequest) {
       // Non-fatal - continue
     }
 
+    // Note: validation_runs table doesn't exist yet - progress tracking requires
+    // the table to be created. For now, Modal webhook will handle progress updates
+    // when the infrastructure is ready.
+
     // Cache for idempotency
     if (validatedData.idempotency_key) {
       idempotencyCache.set(validatedData.idempotency_key, {

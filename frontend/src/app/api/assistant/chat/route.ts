@@ -12,7 +12,7 @@
  */
 
 import { streamText, tool } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
@@ -23,15 +23,13 @@ import { createClient as createAdminClient } from '@/lib/supabase/admin';
 // ============================================================================
 
 function getAIModel() {
-  // Use OpenAI with explicit baseURL to bypass Netlify AI Gateway
-  const openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: 'https://api.openai.com/v1',
+  const openrouter = createOpenRouter({
+    apiKey: process.env.OPENROUTER_API_KEY,
   });
 
-  const model = process.env.OPENAI_MODEL_DEFAULT || 'gpt-4o-mini';
-  console.log('[api/assistant/chat] Using OpenAI model:', model);
-  return openai(model);
+  const model = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
+  console.log('[api/assistant/chat] Using OpenRouter model:', model);
+  return openrouter(model);
 }
 
 // ============================================================================
@@ -275,7 +273,7 @@ export async function POST(req: NextRequest) {
           .single();
 
         if (project) {
-          contextMessage = `\n\n[Current Project Context: ${project.name}, Stage: ${project.stage}, Status: ${project.status}]`;
+          contextMessage = `\n\n[Current Project Context: ID="${projectId}", Name="${project.name}", Stage: ${project.stage}, Status: ${project.status}. IMPORTANT: When using tools that require projectId, always use the exact ID "${projectId}".]`;
         }
       } catch (error) {
         console.error('[AssistantChat] Failed to fetch project context:', error);

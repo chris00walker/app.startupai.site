@@ -158,7 +158,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               onClick={handleGitHubSignIn}
               variant="default"
               size="lg"
-              className="w-full h-12 text-base font-medium"
+              className="w-full h-12 text-base font-medium transition-all hover:shadow-lg active:scale-[0.98] active:shadow-md"
               disabled={isDisabled}
               aria-label="Sign in with GitHub"
             >
@@ -273,7 +273,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                   type="submit"
                   variant="secondary"
                   size="lg"
-                  className="w-full h-11 text-base font-medium mt-1"
+                  className="w-full h-11 text-base font-medium mt-1 transition-all hover:shadow-md hover:bg-secondary/70 active:scale-[0.98] active:shadow-sm"
                   disabled={isDisabled}
                 >
                   {isLoading ? (

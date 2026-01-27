@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useProjects } from "@/hooks/useProjects"
 import { useAuth } from "@/lib/auth/hooks"
+import { useFeatureFlag } from "@/hooks/useFeatureFlag"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { VPCSummaryCard } from "@/components/vpc"
@@ -356,6 +357,7 @@ export default function FounderDashboard() {
   const { projects, isLoading, error } = useProjects()
   const { user } = useAuth()
   const router = useRouter()
+  const { isEnabled: isAIAssistantEnabled } = useFeatureFlag('dashboard_ai_assistant')
 
   // Get current project (first project for now, can be enhanced later)
   const currentProject = projects.length > 0 ? projects[0] : null
@@ -594,8 +596,8 @@ export default function FounderDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* Dashboard AI Assistant - Floating Panel */}
-      {user && (
+      {/* Dashboard AI Assistant - Floating Panel (controlled by feature flag) */}
+      {user && isAIAssistantEnabled && (
         <DashboardAIAssistant
           userId={user.id}
           userRole="founder"
