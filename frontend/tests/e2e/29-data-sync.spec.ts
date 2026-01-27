@@ -12,76 +12,58 @@ test.describe('US-BI02: Data Sync', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to settings integrations tab
     await page.goto('/settings');
-    await page.getByRole('tab', { name: /integrations/i }).click();
+    const integrationsTab = page.getByRole('tab', { name: /integrations/i });
+    await expect(integrationsTab).toBeVisible({ timeout: 10000 });
+    await integrationsTab.click();
   });
 
   test('should display sync status for connected integrations', async ({ page }) => {
-    // Look for sync status component
+    // Look for sync status component - MUST exist if integrations are connected
     const syncStatus = page.locator('[data-testid="sync-status"]');
-
-    // If there are connected integrations, sync status should be visible
-    if ((await syncStatus.count()) > 0) {
-      await expect(syncStatus.first()).toBeVisible();
-    }
+    await expect(syncStatus.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('should show sync now button', async ({ page }) => {
-    // Find sync now button
+    // Find sync now button - MUST exist
     const syncButton = page.getByRole('button', { name: /sync now/i }).first();
-
-    if (await syncButton.isVisible()) {
-      await expect(syncButton).toBeEnabled();
-    }
+    await expect(syncButton).toBeVisible({ timeout: 10000 });
+    await expect(syncButton).toBeEnabled();
   });
 
   test('should have auto-sync toggle', async ({ page }) => {
-    // Look for auto-sync switch
+    // Look for auto-sync switch - MUST exist
     const autoSyncSwitch = page.getByLabel(/auto-sync/i);
-
-    if (await autoSyncSwitch.isVisible()) {
-      await expect(autoSyncSwitch).toBeVisible();
-    }
+    await expect(autoSyncSwitch).toBeVisible({ timeout: 10000 });
   });
 
   test('should display last sync time', async ({ page }) => {
-    // Check for sync timestamp
+    // Check for sync timestamp - MUST exist
     const syncTime = page.getByText(/last synced|never synced/i);
-
-    if (await syncTime.isVisible()) {
-      await expect(syncTime).toBeVisible();
-    }
+    await expect(syncTime).toBeVisible({ timeout: 10000 });
   });
 
   test('should show sync history', async ({ page }) => {
-    // Look for recent syncs section
+    // Look for recent syncs section - MUST exist
     const recentSyncs = page.getByText(/recent syncs/i);
-
-    // This is optional - only visible if there's sync history
-    if (await recentSyncs.isVisible()) {
-      await expect(recentSyncs).toBeVisible();
-    }
+    await expect(recentSyncs).toBeVisible({ timeout: 10000 });
   });
 
   test('should indicate sync status with badge', async ({ page }) => {
     // Look for status badge (Synced, Failed, Pending, etc.)
     const statusBadge = page.locator('[data-testid="sync-status-badge"]');
+    await expect(statusBadge.first()).toBeVisible({ timeout: 10000 });
 
-    if ((await statusBadge.count()) > 0) {
-      const badgeText = await statusBadge.first().textContent();
-      expect(['Synced', 'Failed', 'Pending', 'Syncing', 'Never synced']).toContain(
-        badgeText?.trim()
-      );
-    }
+    const badgeText = await statusBadge.first().textContent();
+    expect(['Synced', 'Failed', 'Pending', 'Syncing', 'Never synced']).toContain(badgeText?.trim());
   });
 
   test('should provide link to synced resource', async ({ page }) => {
     // Look for "View" link to external resource
     const viewLink = page.getByRole('link', { name: /view/i });
+    await expect(viewLink).toBeVisible({ timeout: 10000 });
 
-    if (await viewLink.isVisible()) {
-      const href = await viewLink.getAttribute('href');
-      expect(href).toBeTruthy();
-    }
+    const href = await viewLink.getAttribute('href');
+    expect(href).toBeTruthy();
   });
 
   test('should show error message on sync failure', async ({ page }) => {
@@ -128,50 +110,51 @@ test.describe('US-BI02: Sync API', () => {
 test.describe('US-BI02: Auto-Sync Preferences', () => {
   test('should toggle auto-sync preference', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('tab', { name: /integrations/i }).click();
+    const integrationsTab = page.getByRole('tab', { name: /integrations/i });
+    await expect(integrationsTab).toBeVisible({ timeout: 10000 });
+    await integrationsTab.click();
 
     const autoSyncSwitch = page.getByLabel(/auto-sync/i).first();
+    await expect(autoSyncSwitch).toBeVisible({ timeout: 10000 });
 
-    if (await autoSyncSwitch.isVisible()) {
-      const initialState = await autoSyncSwitch.isChecked();
+    const initialState = await autoSyncSwitch.isChecked();
 
-      // Toggle the switch
-      await autoSyncSwitch.click();
+    // Toggle the switch
+    await autoSyncSwitch.click();
 
-      // State should change
-      const newState = await autoSyncSwitch.isChecked();
-      expect(newState).not.toBe(initialState);
+    // State should change
+    const newState = await autoSyncSwitch.isChecked();
+    expect(newState).not.toBe(initialState);
 
-      // Toggle back
-      await autoSyncSwitch.click();
-      expect(await autoSyncSwitch.isChecked()).toBe(initialState);
-    }
+    // Toggle back
+    await autoSyncSwitch.click();
+    expect(await autoSyncSwitch.isChecked()).toBe(initialState);
   });
 
   test('should persist auto-sync preference', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('tab', { name: /integrations/i }).click();
+    const integrationsTab = page.getByRole('tab', { name: /integrations/i });
+    await expect(integrationsTab).toBeVisible({ timeout: 10000 });
+    await integrationsTab.click();
 
     const autoSyncSwitch = page.getByLabel(/auto-sync/i).first();
+    await expect(autoSyncSwitch).toBeVisible({ timeout: 10000 });
 
-    if (await autoSyncSwitch.isVisible()) {
-      const initialState = await autoSyncSwitch.isChecked();
+    const initialState = await autoSyncSwitch.isChecked();
 
-      // Toggle the switch
-      await autoSyncSwitch.click();
+    // Toggle the switch
+    await autoSyncSwitch.click();
 
-      // Reload page
-      await page.reload();
-      await page.getByRole('tab', { name: /integrations/i }).click();
+    // Reload page
+    await page.reload();
+    await page.getByRole('tab', { name: /integrations/i }).click();
 
-      // State should be persisted
-      const newSwitch = page.getByLabel(/auto-sync/i).first();
-      if (await newSwitch.isVisible()) {
-        expect(await newSwitch.isChecked()).not.toBe(initialState);
+    // State should be persisted
+    const newSwitch = page.getByLabel(/auto-sync/i).first();
+    await expect(newSwitch).toBeVisible({ timeout: 10000 });
+    expect(await newSwitch.isChecked()).not.toBe(initialState);
 
-        // Restore original state
-        await newSwitch.click();
-      }
-    }
+    // Restore original state
+    await newSwitch.click();
   });
 });

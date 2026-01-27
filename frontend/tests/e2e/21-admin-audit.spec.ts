@@ -33,7 +33,7 @@ const ADMIN_USER = {
 };
 
 /**
- * Login as admin user
+ * Login as admin user - uses strict assertions
  */
 async function loginAsAdmin(page: Page): Promise<void> {
   await page.goto('/login');
@@ -41,38 +41,46 @@ async function loginAsAdmin(page: Page): Promise<void> {
   const emailInput = page.locator('input[type="email"], input[name="email"]');
   const passwordInput = page.locator('input[type="password"], input[name="password"]');
 
-  if ((await emailInput.isVisible()) && (await passwordInput.isVisible())) {
-    await emailInput.fill(ADMIN_USER.email);
-    await passwordInput.fill(ADMIN_USER.password);
+  // Login form MUST be visible
+  await expect(emailInput).toBeVisible({ timeout: 10000 });
+  await expect(passwordInput).toBeVisible({ timeout: 5000 });
 
-    const submitButton = page.getByRole('button', { name: /sign in|log in|submit/i });
-    await submitButton.click();
+  await emailInput.fill(ADMIN_USER.email);
+  await passwordInput.fill(ADMIN_USER.password);
 
-    await page.waitForLoadState('networkidle');
-  }
+  const submitButton = page.getByRole('button', { name: /sign in|log in|submit/i });
+  await expect(submitButton).toBeVisible({ timeout: 5000 });
+  await submitButton.click();
+
+  await page.waitForLoadState('networkidle');
 }
 
 /**
- * Navigate to a user profile's admin actions tab
+ * Navigate to a user profile's admin actions tab - uses strict assertions
  */
-async function navigateToUserAdminActions(page: Page): Promise<boolean> {
+async function navigateToUserAdminActions(page: Page): Promise<void> {
   await page.goto('/admin/users');
   await page.waitForLoadState('networkidle');
 
   const searchInput = page.getByPlaceholder(/search.*email/i);
+  await expect(searchInput).toBeVisible({ timeout: 10000 });
   await searchInput.fill('@');
-  await page.getByRole('button', { name: /search/i }).click();
+
+  const searchButton = page.getByRole('button', { name: /search/i });
+  await expect(searchButton).toBeVisible({ timeout: 5000 });
+  await searchButton.click();
   await page.waitForLoadState('networkidle');
 
+  // User list MUST have results
   const userLink = page.locator('a[href*="/admin/users/"]').first();
-  if (await userLink.isVisible()) {
-    await userLink.click();
-    await page.waitForLoadState('networkidle');
+  await expect(userLink).toBeVisible({ timeout: 10000 });
+  await userLink.click();
+  await page.waitForLoadState('networkidle');
 
-    await page.getByRole('tab', { name: /admin actions/i }).click();
-    return true;
-  }
-  return false;
+  // Admin actions tab MUST exist
+  const adminActionsTab = page.getByRole('tab', { name: /admin actions/i });
+  await expect(adminActionsTab).toBeVisible({ timeout: 5000 });
+  await adminActionsTab.click();
 }
 
 // =============================================================================
@@ -108,17 +116,16 @@ test.describe('US-A07: View Audit Logs', () => {
   });
 
   test('should filter by action type', async ({ page }) => {
+    // Filter select MUST exist
     const actionTypeSelect = page.locator('select, [role="combobox"]').first();
-    if (await actionTypeSelect.isVisible()) {
-      await actionTypeSelect.click();
-      // Should show action type options
-      const option = page.getByRole('option').first();
-      if (await option.isVisible()) {
-        await option.click();
-        await page.waitForLoadState('networkidle');
-        // Page should update after filter
-      }
-    }
+    await expect(actionTypeSelect).toBeVisible({ timeout: 10000 });
+    await actionTypeSelect.click();
+
+    // Options MUST appear
+    const option = page.getByRole('option').first();
+    await expect(option).toBeVisible({ timeout: 5000 });
+    await option.click();
+    await page.waitForLoadState('networkidle');
   });
 });
 
@@ -132,28 +139,22 @@ test.describe('US-A09: Export User Data', () => {
   });
 
   test('should display export data option on user profile', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Verify export data section exists
-      await expect(page.getByText(/export user data/i)).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Verify export data section exists
+    await expect(page.getByText(/export user data/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should display export type selector', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Export panel should have type selector
-      const exportSelect = page.locator('[data-testid="export-type"], select').first();
-      await expect(exportSelect).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Export panel should have type selector
+    const exportSelect = page.locator('[data-testid="export-type"], select').first();
+    await expect(exportSelect).toBeVisible({ timeout: 10000 });
   });
 
   test('should have export button', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Export button should be present
-      await expect(page.getByRole('button', { name: /export/i })).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Export button should be present
+    await expect(page.getByRole('button', { name: /export/i })).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -167,34 +168,30 @@ test.describe('US-A10: Run Data Integrity Check', () => {
   });
 
   test('should display integrity check option on user profile', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Verify integrity check section exists
-      await expect(page.getByText(/data integrity check/i)).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Verify integrity check section exists
+    await expect(page.getByText(/data integrity check/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should have run check button', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Run check button should be present
-      await expect(page.getByRole('button', { name: /run check/i })).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Run check button should be present
+    await expect(page.getByRole('button', { name: /run check/i })).toBeVisible({ timeout: 10000 });
   });
 
   test('should show results after running check', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      const runButton = page.getByRole('button', { name: /run check/i });
-      await runButton.click();
+    await navigateToUserAdminActions(page);
 
-      // Wait for check to complete
-      await page.waitForLoadState('networkidle');
+    const runButton = page.getByRole('button', { name: /run check/i });
+    await expect(runButton).toBeVisible({ timeout: 10000 });
+    await runButton.click();
 
-      // Should show either passed or issues found
-      const result = page.locator('[data-testid="integrity-result"], .text-green-500, .text-yellow-500');
-      await expect(result).toBeVisible({ timeout: 10000 });
-    }
+    // Wait for check to complete
+    await page.waitForLoadState('networkidle');
+
+    // Should show either passed or issues found
+    const result = page.locator('[data-testid="integrity-result"], .text-green-500, .text-yellow-500');
+    await expect(result).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -208,60 +205,54 @@ test.describe('US-A12: Billing Management', () => {
   });
 
   test('should display billing section on user profile', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Verify billing section exists
-      await expect(page.getByText(/billing.*subscription/i)).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Verify billing section exists
+    await expect(page.getByText(/billing.*subscription/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should display subscription tier info', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Subscription tier should be displayed
-      await expect(page.getByText(/tier/i)).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Subscription tier should be displayed
+    await expect(page.getByText(/tier/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should have apply credit button', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // Apply credit button should be present
-      await expect(page.getByRole('button', { name: /apply credit/i })).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // Apply credit button should be present
+    await expect(page.getByRole('button', { name: /apply credit/i })).toBeVisible({ timeout: 10000 });
   });
 
   test('should show credit dialog on button click', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      await page.getByRole('button', { name: /apply credit/i }).click();
+    await navigateToUserAdminActions(page);
 
-      // Dialog should appear
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await expect(page.getByText(/credit type/i)).toBeVisible();
-    }
+    const applyCreditButton = page.getByRole('button', { name: /apply credit/i });
+    await expect(applyCreditButton).toBeVisible({ timeout: 10000 });
+    await applyCreditButton.click();
+
+    // Dialog should appear
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/credit type/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('should require reason for applying credit', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      await page.getByRole('button', { name: /apply credit/i }).click();
+    await navigateToUserAdminActions(page);
 
-      // Reason field should be required
-      await expect(page.getByText(/reason/i)).toBeVisible();
+    const applyCreditButton = page.getByRole('button', { name: /apply credit/i });
+    await expect(applyCreditButton).toBeVisible({ timeout: 10000 });
+    await applyCreditButton.click();
 
-      // Apply button should be disabled without reason
-      const applyButton = page.getByRole('button', { name: /apply credit/i }).last();
-      await expect(applyButton).toBeDisabled();
-    }
+    // Reason field should be required
+    await expect(page.getByText(/reason/i)).toBeVisible({ timeout: 5000 });
+
+    // Apply button should be disabled without reason
+    const applyButton = page.getByRole('button', { name: /apply credit/i }).last();
+    await expect(applyButton).toBeDisabled();
   });
 
   test('should show stripe pending notice for monetary credits', async ({ page }) => {
-    const found = await navigateToUserAdminActions(page);
-    if (found) {
-      // The billing panel should indicate Stripe is pending
-      const stripePending = page.getByText(/stripe pending/i);
-      await expect(stripePending).toBeVisible();
-    }
+    await navigateToUserAdminActions(page);
+    // The billing panel should indicate Stripe is pending
+    const stripePending = page.getByText(/stripe pending/i);
+    await expect(stripePending).toBeVisible({ timeout: 10000 });
   });
 });

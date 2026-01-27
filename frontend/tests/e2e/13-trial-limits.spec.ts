@@ -30,24 +30,26 @@ const TRIAL_USER = {
 };
 
 /**
- * Login as trial user
+ * Login as trial user - uses strict assertions
  */
 async function loginAsTrialUser(page: Page): Promise<void> {
   await page.goto('/login');
 
-  // Fill login form
+  // Fill login form - MUST be visible
   const emailInput = page.locator('input[type="email"], input[name="email"]');
   const passwordInput = page.locator('input[type="password"], input[name="password"]');
 
-  if ((await emailInput.isVisible()) && (await passwordInput.isVisible())) {
-    await emailInput.fill(TRIAL_USER.email);
-    await passwordInput.fill(TRIAL_USER.password);
+  await expect(emailInput).toBeVisible({ timeout: 10000 });
+  await expect(passwordInput).toBeVisible({ timeout: 5000 });
 
-    const submitButton = page.getByRole('button', { name: /sign in|log in|submit/i });
-    await submitButton.click();
+  await emailInput.fill(TRIAL_USER.email);
+  await passwordInput.fill(TRIAL_USER.password);
 
-    await page.waitForLoadState('networkidle');
-  }
+  const submitButton = page.getByRole('button', { name: /sign in|log in|submit/i });
+  await expect(submitButton).toBeVisible({ timeout: 5000 });
+  await submitButton.click();
+
+  await page.waitForLoadState('networkidle');
 }
 
 /**
@@ -189,12 +191,7 @@ test.describe('US-FT02: View Trial Limits', () => {
     const trialBadge = page.locator(
       '[data-testid="trial-badge"], .trial-badge, span:has-text("Trial")'
     );
-
-    // Check for trial indicator
-    const headerContent = await page.locator('header, nav').textContent();
-    const hasTrial =
-      headerContent?.toLowerCase().includes('trial') ||
-      headerContent?.toLowerCase().includes('days');
+    await expect(trialBadge).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-badge-header.png',
@@ -213,9 +210,11 @@ test.describe('US-FT02: View Trial Limits', () => {
     const trialCard = page.locator(
       '[data-testid="trial-status-card"], [data-testid="trial-limits"], .trial-status'
     );
+    await expect(trialCard).toBeVisible({ timeout: 10000 });
 
     // Look for limit indicators
     const limitIndicators = page.getByText(/\d.*of.*\d|remaining|limit/i);
+    await expect(limitIndicators).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-status-card.png',
@@ -231,10 +230,7 @@ test.describe('US-FT02: View Trial Limits', () => {
 
     // Then: I should see remaining project allowance
     const projectLimit = page.getByText(/1.*of.*1|project.*limit|no.*project.*remaining/i);
-
-    if (await projectLimit.isVisible()) {
-      await expect(projectLimit).toBeVisible();
-    }
+    await expect(projectLimit).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-project-limit.png',
@@ -251,9 +247,7 @@ test.describe('US-FT02: View Trial Limits', () => {
     const lockedSection = page.locator(
       '[data-testid="locked-features"], .locked-features, section:has-text("locked")'
     );
-
-    // Or individual locked feature indicators
-    const lockIcons = page.locator('[data-testid="feature-locked"], .feature-lock, .lock-icon');
+    await expect(lockedSection).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-locked-features.png',
@@ -270,16 +264,13 @@ test.describe('US-FT02: View Trial Limits', () => {
     const dfvSection = page.locator(
       '[data-testid="dfv-signals"], [data-testid="innovation-physics"]'
     );
+    await expect(dfvSection).toBeVisible({ timeout: 10000 });
 
-    if (await dfvSection.isVisible()) {
-      // Then: Content should be blurred or locked
-      const blurredContent = dfvSection.locator('.blur, .locked, [data-locked="true"]');
-      const upgradeOverlay = dfvSection.getByText(/upgrade|unlock/i);
-
-      // Either blurred or has upgrade overlay
-      const isLocked =
-        (await blurredContent.isVisible()) || (await upgradeOverlay.isVisible());
-    }
+    // Then: Content should be blurred or locked
+    const blurredOrLocked = dfvSection.locator(
+      '.blur, .locked, [data-locked="true"], :has-text("upgrade"), :has-text("unlock")'
+    );
+    await expect(blurredOrLocked).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-blurred-dfv.png',
@@ -297,23 +288,14 @@ test.describe('US-FT02: View Trial Limits', () => {
 
     // When: I attempt to create another project
     const newProjectButton = page.getByRole('button', { name: /new.*project|create.*project/i });
-    const addButton = page.getByRole('link', { name: /add|new|create/i });
-
-    if (await newProjectButton.isVisible()) {
-      await newProjectButton.click();
-    } else if (await addButton.isVisible()) {
-      await addButton.click();
-    }
+    await expect(newProjectButton).toBeVisible({ timeout: 10000 });
+    await newProjectButton.click();
 
     // Then: I should see an upgrade prompt
     const upgradePrompt = page.locator(
-      '[data-testid="upgrade-modal"], [role="dialog"]:has-text("upgrade")'
+      '[data-testid="upgrade-modal"], [role="dialog"]:has-text("upgrade"), :has-text("limit reached")'
     );
-    const upgradeMessage = page.getByText(/upgrade.*to.*create|limit.*reached/i);
-
-    if ((await upgradePrompt.isVisible()) || (await upgradeMessage.isVisible())) {
-      await expect(upgradePrompt.or(upgradeMessage)).toBeVisible();
-    }
+    await expect(upgradePrompt).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-limit-upgrade-prompt.png',
@@ -328,10 +310,7 @@ test.describe('US-FT02: View Trial Limits', () => {
 
     // Then: Should show expiration warning
     const expirationWarning = page.getByText(/7.*day|expires.*soon|trial.*ending/i);
-
-    if (await expirationWarning.isVisible()) {
-      await expect(expirationWarning).toBeVisible();
-    }
+    await expect(expirationWarning).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-expiration-warning.png',
@@ -346,6 +325,7 @@ test.describe('US-FT02: View Trial Limits', () => {
 
     // Then: Should indicate Phase 0 only access
     const phaseRestriction = page.getByText(/phase.*0.*only|founder.*brief.*only|limited.*phase/i);
+    await expect(phaseRestriction).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-phase-restriction.png',
@@ -368,7 +348,7 @@ test.describe('US-FT03: Upgrade to Founder', () => {
     const upgradeButton = page.getByRole('button', { name: /upgrade/i });
     const upgradeLink = page.getByRole('link', { name: /upgrade/i });
 
-    await expect(upgradeButton.or(upgradeLink)).toBeVisible();
+    await expect(upgradeButton.or(upgradeLink)).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-upgrade-cta.png',
@@ -385,18 +365,19 @@ test.describe('US-FT03: Upgrade to Founder', () => {
     // When: I click upgrade
     const upgradeButton = page.getByRole('button', { name: /upgrade/i }).first();
     const upgradeLink = page.getByRole('link', { name: /upgrade/i }).first();
+    const upgradeCTA = upgradeButton.or(upgradeLink);
 
-    if (await upgradeButton.isVisible()) {
-      await upgradeButton.click();
-    } else if (await upgradeLink.isVisible()) {
-      await upgradeLink.click();
-    }
+    await expect(upgradeCTA).toBeVisible({ timeout: 10000 });
+    await upgradeCTA.click();
 
     await page.waitForLoadState('networkidle');
 
     // Then: Should see upgrade page or modal
-    const upgradePage = page.url().includes('upgrade') || page.url().includes('pricing');
+    const isUpgradePage = page.url().includes('upgrade') || page.url().includes('pricing');
     const upgradeModal = page.locator('[data-testid="upgrade-modal"], [role="dialog"]');
+
+    // Either URL changed or modal appeared
+    expect(isUpgradePage || (await upgradeModal.isVisible())).toBeTruthy();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-upgrade-page.png',
@@ -411,7 +392,10 @@ test.describe('US-FT03: Upgrade to Founder', () => {
 
     // Then: Should see plan comparison
     const founderPlan = page.getByText(/founder.*plan|\$99/i);
+    await expect(founderPlan).toBeVisible({ timeout: 10000 });
+
     const planFeatures = page.getByText(/full.*validation|d-f-v|all.*phase/i);
+    await expect(planFeatures).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-plan-comparison.png',
@@ -429,17 +413,16 @@ test.describe('US-FT03: Upgrade to Founder', () => {
     const selectPlanButton = page.getByRole('button', {
       name: /start.*founder|select.*founder|upgrade.*now/i,
     });
+    await expect(selectPlanButton).toBeVisible({ timeout: 10000 });
 
-    if (await selectPlanButton.isVisible()) {
-      // Intercept navigation to Stripe
-      const [request] = await Promise.all([
-        page.waitForRequest('**/api/stripe/create-checkout-session'),
-        selectPlanButton.click(),
-      ]);
+    // Intercept navigation to Stripe
+    const [request] = await Promise.all([
+      page.waitForRequest('**/api/stripe/create-checkout-session'),
+      selectPlanButton.click(),
+    ]);
 
-      // Then: Should call checkout API
-      expect(request.url()).toContain('stripe');
-    }
+    // Then: Should call checkout API
+    expect(request.url()).toContain('stripe');
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-stripe-checkout.png',
@@ -459,7 +442,7 @@ test.describe('US-FT03: Upgrade to Founder', () => {
 
     const ctaCount = await upgradeCTAs.count();
 
-    // Should have multiple entry points
+    // Should have at least one upgrade entry point
     expect(ctaCount).toBeGreaterThanOrEqual(1);
 
     await page.screenshot({
@@ -486,7 +469,7 @@ test.describe('Trial Expiration', () => {
     );
     const expiredMessage = page.getByText(/trial.*expired|trial.*ended/i);
 
-    await expect(expiredModal.or(expiredMessage)).toBeVisible();
+    await expect(expiredModal.or(expiredMessage)).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-expired-modal.png',
@@ -499,8 +482,9 @@ test.describe('Trial Expiration', () => {
     await page.goto('/founder-dashboard');
     await page.waitForLoadState('networkidle');
 
-    // Then: Should not be able to access features
+    // Then: Should not be able to access features - restricted message shown
     const restrictedMessage = page.getByText(/upgrade.*continue|restricted|access.*denied/i);
+    await expect(restrictedMessage).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-restricted-access.png',
@@ -517,9 +501,7 @@ test.describe('Trial Expiration', () => {
     const downloadOption = page.getByRole('button', { name: /download.*data|export/i });
     const downloadLink = page.getByRole('link', { name: /download.*data|export/i });
 
-    if ((await downloadOption.isVisible()) || (await downloadLink.isVisible())) {
-      await expect(downloadOption.or(downloadLink)).toBeVisible();
-    }
+    await expect(downloadOption.or(downloadLink)).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-data-download.png',
@@ -534,10 +516,7 @@ test.describe('Trial Expiration', () => {
 
     // Then: Should mention data preservation period
     const preservationMessage = page.getByText(/90.*day|data.*preserved|data.*saved/i);
-
-    if (await preservationMessage.isVisible()) {
-      await expect(preservationMessage).toBeVisible();
-    }
+    await expect(preservationMessage).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-data-preservation.png',
@@ -572,9 +551,11 @@ test.describe('Post-Upgrade Experience', () => {
 
     // Then: No locked features should be visible
     const lockedIndicators = page.locator('[data-locked="true"], .locked, .trial-limit');
+    await expect(lockedIndicators).not.toBeVisible({ timeout: 5000 });
 
     // Trial-specific elements should not be visible
     const trialBadge = page.locator('[data-testid="trial-badge"]');
+    await expect(trialBadge).not.toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/upgraded-all-unlocked.png',
@@ -590,6 +571,8 @@ test.describe('Post-Upgrade Experience', () => {
     // Then: Should see welcome/success message
     const welcomeMessage = page.getByText(/welcome.*founder|upgrade.*success|thank.*you/i);
     const successToast = page.locator('[data-testid="toast"]:has-text("success")');
+
+    await expect(welcomeMessage.or(successToast)).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/upgraded-welcome.png',
@@ -618,7 +601,7 @@ test.describe('Trial Limits Error Handling', () => {
 
     // Then: Should show error state or fallback gracefully
     // Should not crash the page
-    await expect(page.locator('body')).toBeVisible();
+    await expect(page.locator('body')).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-api-error.png',
@@ -642,12 +625,11 @@ test.describe('Trial Limits Error Handling', () => {
     await page.waitForLoadState('networkidle');
 
     const selectPlanButton = page.getByRole('button', { name: /start|select|upgrade/i });
-    if (await selectPlanButton.isVisible()) {
-      await selectPlanButton.click();
+    await expect(selectPlanButton).toBeVisible({ timeout: 10000 });
+    await selectPlanButton.click();
 
-      // Then: Should show error message
-      await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: Should show error message
+    await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/trial-checkout-error.png',

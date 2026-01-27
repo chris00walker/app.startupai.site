@@ -28,11 +28,10 @@ test.describe('US-F16: AI Insights', () => {
     await page.goto('/founder-dashboard');
     await expect(page.locator('[data-testid="dashboard"]')).toBeVisible(TIMEOUT);
 
-    // Click the Fit tab (or overview/project tab)
+    // Click the Fit tab (or overview/project tab) - MUST exist
     const fitTab = page.getByRole('tab', { name: /fit|overview|project/i });
-    if (await fitTab.isVisible()) {
-      await fitTab.click();
-    }
+    await expect(fitTab).toBeVisible(TIMEOUT);
+    await fitTab.click();
 
     // Verify project overview with fit cards
     await expect(page.getByRole('heading', { name: /project overview/i })).toBeVisible(TIMEOUT);
@@ -54,95 +53,84 @@ test.describe('US-F16: AI Insights', () => {
     await page.goto(FIT_URL);
     await expect(page.getByRole('heading', { name: /project overview/i })).toBeVisible(TIMEOUT);
 
-    // Find a "View Details" button on any fit card
+    // Find a "View Details" button on any fit card - MUST exist
     const viewDetailsButton = page.getByRole('button', { name: /view details/i }).first();
+    await expect(viewDetailsButton).toBeVisible(TIMEOUT);
+    await viewDetailsButton.click();
 
-    if (await viewDetailsButton.isVisible()) {
-      await viewDetailsButton.click();
+    // Detail dialog should open
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible(TIMEOUT);
 
-      // Detail dialog should open
-      const dialog = page.getByRole('dialog');
-      await expect(dialog).toBeVisible(TIMEOUT);
+    // Should show analysis title
+    await expect(dialog.getByText(/analysis/i)).toBeVisible();
 
-      // Should show analysis title
-      await expect(dialog.getByText(/analysis/i)).toBeVisible();
-
-      // Should have AI Insights section
-      const aiInsightsSection = dialog.getByRole('heading', { name: /ai insights/i });
-      await expect(aiInsightsSection).toBeVisible(TIMEOUT);
-    }
+    // Should have AI Insights section
+    const aiInsightsSection = dialog.getByRole('heading', { name: /ai insights/i });
+    await expect(aiInsightsSection).toBeVisible(TIMEOUT);
   });
 
   test('should display AI insight titles with supporting context', async ({ page }) => {
     await page.goto(FIT_URL);
     await expect(page.getByRole('heading', { name: /project overview/i })).toBeVisible(TIMEOUT);
 
-    // Open first fit detail panel
+    // Open first fit detail panel - MUST exist
     const viewDetailsButton = page.getByRole('button', { name: /view details/i }).first();
+    await expect(viewDetailsButton).toBeVisible(TIMEOUT);
+    await viewDetailsButton.click();
 
-    if (await viewDetailsButton.isVisible()) {
-      await viewDetailsButton.click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible(TIMEOUT);
 
-      const dialog = page.getByRole('dialog');
-      await expect(dialog).toBeVisible(TIMEOUT);
+    // Look for insight cards within the AI Insights section
+    const insightCards = dialog.locator('[class*="card"]').filter({ hasText: /insight|trend|validation/i });
 
-      // Look for insight cards within the AI Insights section
-      const insightCards = dialog.locator('[class*="card"]').filter({ hasText: /insight|trend|validation/i });
+    // Insights MUST exist with title and description
+    await expect(insightCards.first()).toBeVisible(TIMEOUT);
+    const firstInsight = insightCards.first();
+    const title = firstInsight.locator('h4, [class*="font-medium"]').first();
+    const description = firstInsight.locator('p, [class*="muted-foreground"]').first();
 
-      // If insights exist, verify they have both title and description
-      const insightCount = await insightCards.count();
-      if (insightCount > 0) {
-        // First insight should have a title (h4 or font-medium)
-        const firstInsight = insightCards.first();
-        const title = firstInsight.locator('h4, [class*="font-medium"]').first();
-        const description = firstInsight.locator('p, [class*="muted-foreground"]').first();
-
-        await expect(title).toBeVisible();
-        await expect(description).toBeVisible();
-      }
-    }
+    await expect(title).toBeVisible();
+    await expect(description).toBeVisible();
   });
 
   test('should display key assumptions in fit detail panel', async ({ page }) => {
     await page.goto(FIT_URL);
     await expect(page.getByRole('heading', { name: /project overview/i })).toBeVisible(TIMEOUT);
 
-    // Open first fit detail panel
+    // Open first fit detail panel - MUST exist
     const viewDetailsButton = page.getByRole('button', { name: /view details/i }).first();
+    await expect(viewDetailsButton).toBeVisible(TIMEOUT);
+    await viewDetailsButton.click();
 
-    if (await viewDetailsButton.isVisible()) {
-      await viewDetailsButton.click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible(TIMEOUT);
 
-      const dialog = page.getByRole('dialog');
-      await expect(dialog).toBeVisible(TIMEOUT);
-
-      // Should have Key Assumptions section
-      const assumptionsSection = dialog.getByRole('heading', { name: /key assumptions/i });
-      await expect(assumptionsSection).toBeVisible(TIMEOUT);
-    }
+    // Should have Key Assumptions section
+    const assumptionsSection = dialog.getByRole('heading', { name: /key assumptions/i });
+    await expect(assumptionsSection).toBeVisible(TIMEOUT);
   });
 
   test('should display evidence summary in fit detail panel', async ({ page }) => {
     await page.goto(FIT_URL);
     await expect(page.getByRole('heading', { name: /project overview/i })).toBeVisible(TIMEOUT);
 
-    // Open first fit detail panel
+    // Open first fit detail panel - MUST exist
     const viewDetailsButton = page.getByRole('button', { name: /view details/i }).first();
+    await expect(viewDetailsButton).toBeVisible(TIMEOUT);
+    await viewDetailsButton.click();
 
-    if (await viewDetailsButton.isVisible()) {
-      await viewDetailsButton.click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible(TIMEOUT);
 
-      const dialog = page.getByRole('dialog');
-      await expect(dialog).toBeVisible(TIMEOUT);
+    // Should have Evidence Summary section
+    const evidenceSection = dialog.getByRole('heading', { name: /evidence summary/i });
+    await expect(evidenceSection).toBeVisible(TIMEOUT);
 
-      // Should have Evidence Summary section
-      const evidenceSection = dialog.getByRole('heading', { name: /evidence summary/i });
-      await expect(evidenceSection).toBeVisible(TIMEOUT);
-
-      // Should show supporting and contradicting evidence counts
-      await expect(dialog.getByText(/supporting evidence/i)).toBeVisible();
-      await expect(dialog.getByText(/contradictions/i)).toBeVisible();
-    }
+    // Should show supporting and contradicting evidence counts
+    await expect(dialog.getByText(/supporting evidence/i)).toBeVisible();
+    await expect(dialog.getByText(/contradictions/i)).toBeVisible();
   });
 
   test('should show score and confidence for each fit dimension', async ({ page }) => {

@@ -111,42 +111,37 @@ test.describe('US-BI03: Mapping Persistence', () => {
     await page.goto('/settings');
     await page.getByRole('tab', { name: /integrations/i }).click();
 
-    // Each saved mapping should display name and integration type
+    // Mapping card MUST exist to test its contents
     const mappingCard = page.locator('[data-testid="mapping-card"]').first();
+    await expect(mappingCard).toBeVisible({ timeout: 10000 });
 
-    if ((await mappingCard.count()) > 0) {
-      // Should show mapping name
-      const name = mappingCard.locator('[data-testid="mapping-name"]');
-      await expect(name).toBeVisible();
+    // Should show mapping name
+    const name = mappingCard.locator('[data-testid="mapping-name"]');
+    await expect(name).toBeVisible({ timeout: 5000 });
 
-      // Should show integration type badge
-      const typeBadge = mappingCard.locator('[data-testid="mapping-type"]');
-      await expect(typeBadge).toBeVisible();
-    }
+    // Should show integration type badge
+    const typeBadge = mappingCard.locator('[data-testid="mapping-type"]');
+    await expect(typeBadge).toBeVisible({ timeout: 5000 });
   });
 
   test('should allow setting default mapping', async ({ page }) => {
     await page.goto('/settings');
     await page.getByRole('tab', { name: /integrations/i }).click();
 
-    // Look for "set as default" action
+    // Set as default button MUST exist
     const setDefaultButton = page.getByRole('button', { name: /set as default/i }).first();
-
-    if (await setDefaultButton.isVisible()) {
-      await expect(setDefaultButton).toBeEnabled();
-    }
+    await expect(setDefaultButton).toBeVisible({ timeout: 10000 });
+    await expect(setDefaultButton).toBeEnabled();
   });
 
   test('should allow deleting a mapping', async ({ page }) => {
     await page.goto('/settings');
     await page.getByRole('tab', { name: /integrations/i }).click();
 
-    // Look for delete action
+    // Delete button MUST exist
     const deleteButton = page.getByRole('button', { name: /delete/i }).first();
-
-    if (await deleteButton.isVisible()) {
-      await expect(deleteButton).toBeEnabled();
-    }
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await expect(deleteButton).toBeEnabled();
   });
 });
 
@@ -186,13 +181,12 @@ test.describe('US-BI03: Field Mapping UI', () => {
     await page.goto('/settings');
     await page.getByRole('tab', { name: /integrations/i }).click();
 
-    // Look for mapping count indicator
+    // Mapping count indicator MUST exist
     const countBadge = page.locator('[data-testid="mapping-count"]');
+    await expect(countBadge).toBeVisible({ timeout: 10000 });
 
-    if ((await countBadge.count()) > 0) {
-      const text = await countBadge.textContent();
-      expect(text).toMatch(/\d+/); // Should contain a number
-    }
+    const text = await countBadge.textContent();
+    expect(text).toMatch(/\d+/); // Should contain a number
   });
 });
 
@@ -212,18 +206,15 @@ test.describe('US-BI03: Apply Mapping', () => {
     await page.goto('/settings');
     await page.getByRole('tab', { name: /integrations/i }).click();
 
-    // Look for apply confirmation dialog
+    // Apply mapping button MUST exist and be enabled
     const applyButton = page.getByRole('button', { name: /apply mapping/i }).first();
+    await expect(applyButton).toBeVisible({ timeout: 10000 });
+    await expect(applyButton).toBeEnabled();
+    await applyButton.click();
 
-    if (await applyButton.isVisible() && await applyButton.isEnabled()) {
-      await applyButton.click();
-
-      // Should show confirmation or progress
-      const dialog = page.getByRole('dialog');
-      if (await dialog.isVisible()) {
-        await expect(dialog).toBeVisible();
-      }
-    }
+    // Should show confirmation dialog
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
   });
 
   test('should show results after applying', async ({ page }) => {

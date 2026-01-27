@@ -30,16 +30,16 @@ async function navigateToConsultantDashboard(page: Page): Promise<void> {
 
 /**
  * Navigate to Settings → Clients tab
+ * Uses strict assertions - FAILS if clients tab doesn't exist
  */
 async function navigateToClientsSettings(page: Page): Promise<void> {
   await page.goto('/settings');
   await page.waitForLoadState('networkidle');
 
   const clientsTab = page.getByRole('tab', { name: /clients/i });
-  if (await clientsTab.isVisible()) {
-    await clientsTab.click();
-    await page.waitForLoadState('networkidle');
-  }
+  await expect(clientsTab).toBeVisible({ timeout: 10000 });
+  await clientsTab.click();
+  await page.waitForLoadState('networkidle');
 }
 
 /**
@@ -205,18 +205,15 @@ test.describe('US-C05: Archive Client', () => {
     // When: I navigate to Settings → Clients tab
     await navigateToClientsSettings(page);
 
-    // Then: I should see a client selector
+    // Then: I should see a client list with at least one client
     const clientList = page.locator(
       '[data-testid="client-list"], [data-testid="client-selector"], table'
     );
+    await expect(clientList).toBeVisible({ timeout: 10000 });
 
-    // Check for client management UI
-    const settingsContent = await page.textContent('main');
-    expect(
-      settingsContent?.toLowerCase().includes('client') ||
-        (await clientList.isVisible()) ||
-        (await page.getByText(/acme corp/i).isVisible())
-    ).toBeTruthy();
+    // Verify Acme Corp (our test client) is displayed
+    const acmeClient = page.getByText(/acme corp/i);
+    await expect(acmeClient).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-settings-tab.png',
@@ -230,10 +227,8 @@ test.describe('US-C05: Archive Client', () => {
 
     // Then: I should see an archive button for active clients
     const archiveButton = page.getByRole('button', { name: /archive/i });
-
-    if (await archiveButton.isVisible()) {
-      await expect(archiveButton).toBeEnabled();
-    }
+    await expect(archiveButton).toBeVisible({ timeout: 10000 });
+    await expect(archiveButton).toBeEnabled();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-archive-button.png',
@@ -248,24 +243,21 @@ test.describe('US-C05: Archive Client', () => {
 
     // Given: I have selected a client
     const clientRow = page.getByText(/acme corp/i);
-    if (await clientRow.isVisible()) {
-      await clientRow.click();
-    }
+    await expect(clientRow).toBeVisible({ timeout: 10000 });
+    await clientRow.click();
 
     // When: I click "Archive Client"
     const archiveButton = page.getByRole('button', { name: /archive/i });
-    if (await archiveButton.isVisible()) {
-      await archiveButton.click();
+    await expect(archiveButton).toBeVisible({ timeout: 5000 });
+    await archiveButton.click();
 
-      // Handle confirmation dialog if present
-      const confirmButton = page.getByRole('button', { name: /confirm|yes|archive/i });
-      if (await confirmButton.isVisible()) {
-        await confirmButton.click();
-      }
+    // Handle confirmation dialog
+    const confirmButton = page.getByRole('button', { name: /confirm|yes|archive/i });
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
 
-      // Then: The client should be archived
-      await expect(page.getByText(/archived|success/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: The client should be archived - success message shown
+    await expect(page.getByText(/archived|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-archived-success.png',
@@ -274,16 +266,16 @@ test.describe('US-C05: Archive Client', () => {
   });
 
   test('should hide archived clients from portfolio by default', async ({ page }) => {
-    // Given: I have archived a client
+    // Given: I have an archived client in my list
     await mockClients(page, TEST_CLIENTS);
 
     // When: I view my portfolio
     await navigateToConsultantDashboard(page);
 
-    // Then: The archived client should be hidden
+    // Then: The archived client "Old Client" should NOT be visible
     const oldClient = page.getByText(/old client/i);
+    await expect(oldClient).not.toBeVisible({ timeout: 5000 });
 
-    // Archived clients should not be visible by default in portfolio
     await page.screenshot({
       path: 'tests/e2e/screenshots/portfolio-no-archived.png',
       fullPage: true,
@@ -294,24 +286,22 @@ test.describe('US-C05: Archive Client', () => {
     await mockClients(page, TEST_CLIENTS);
     await navigateToClientsSettings(page);
 
-    // Given: I have archived a client
+    // Given: I have archived clients
     // When: I toggle "Show archived clients" in Settings
     const showArchivedToggle = page.locator(
       '[data-testid="show-archived-toggle"], input[name="showArchived"], label:has-text("archived")'
     );
+    await expect(showArchivedToggle).toBeVisible({ timeout: 10000 });
+    await showArchivedToggle.click();
 
-    if (await showArchivedToggle.isVisible()) {
-      await showArchivedToggle.click();
+    // Then: I should see the archived client with a "Restore" option
+    await page.waitForLoadState('networkidle');
 
-      // Then: I should see the archived client with a "Restore" option
-      await page.waitForLoadState('networkidle');
+    const archivedClient = page.getByText(/old client/i);
+    await expect(archivedClient).toBeVisible({ timeout: 5000 });
 
-      const archivedClient = page.getByText(/old client/i);
-      if (await archivedClient.isVisible()) {
-        const restoreButton = page.getByRole('button', { name: /restore/i });
-        await expect(restoreButton).toBeVisible();
-      }
-    }
+    const restoreButton = page.getByRole('button', { name: /restore/i });
+    await expect(restoreButton).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-show-archived.png',
@@ -328,20 +318,17 @@ test.describe('US-C05: Archive Client', () => {
     const showArchivedToggle = page.locator(
       '[data-testid="show-archived-toggle"], input[name="showArchived"]'
     );
+    await expect(showArchivedToggle).toBeVisible({ timeout: 10000 });
+    await showArchivedToggle.click();
+    await page.waitForLoadState('networkidle');
 
-    if (await showArchivedToggle.isVisible()) {
-      await showArchivedToggle.click();
-      await page.waitForLoadState('networkidle');
+    // When: I click "Restore" on an archived client
+    const restoreButton = page.getByRole('button', { name: /restore/i });
+    await expect(restoreButton).toBeVisible({ timeout: 5000 });
+    await restoreButton.click();
 
-      // When: I click "Restore" on an archived client
-      const restoreButton = page.getByRole('button', { name: /restore/i });
-      if (await restoreButton.isVisible()) {
-        await restoreButton.click();
-
-        // Then: The client should be restored
-        await expect(page.getByText(/restored|success/i)).toBeVisible({ timeout: 5000 });
-      }
-    }
+    // Then: The client should be restored - success message shown
+    await expect(page.getByText(/restored|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-restored.png',
@@ -353,22 +340,17 @@ test.describe('US-C05: Archive Client', () => {
     await mockClients(page, TEST_CLIENTS);
     await navigateToClientsSettings(page);
 
-    // When: I archive a client
-    // Then: Their data should be unchanged (verified by checking they can be restored)
-
-    // The key assertion is that archived clients retain their data
-    // and can be accessed again after restore
+    // When: I view archived clients
     const showArchivedToggle = page.locator('[data-testid="show-archived-toggle"]');
-    if (await showArchivedToggle.isVisible()) {
-      await showArchivedToggle.click();
+    await expect(showArchivedToggle).toBeVisible({ timeout: 10000 });
+    await showArchivedToggle.click();
 
-      // Archived client should still have their details available
-      const archivedClient = page.getByText(/old client/i);
-      if (await archivedClient.isVisible()) {
-        // Email should still be associated
-        await expect(page.getByText(/old@client.com/i)).toBeVisible();
-      }
-    }
+    // Then: Archived client should still have their details available
+    const archivedClient = page.getByText(/old client/i);
+    await expect(archivedClient).toBeVisible({ timeout: 5000 });
+
+    // Email should still be associated
+    await expect(page.getByText(/old@client.com/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-data-preserved.png',
@@ -394,12 +376,12 @@ test.describe('US-C06: Resend Client Invite', () => {
     // When: I view the invite in my client list
     await navigateToClientsSettings(page);
 
-    // Then: I should see a "Resend" button
+    // Then: I should see a "Resend" button for pending client
     const pendingClient = page.getByText(/beta startup/i);
-    if (await pendingClient.isVisible()) {
-      const resendButton = page.getByRole('button', { name: /resend/i });
-      await expect(resendButton).toBeVisible();
-    }
+    await expect(pendingClient).toBeVisible({ timeout: 10000 });
+
+    const resendButton = page.getByRole('button', { name: /resend/i });
+    await expect(resendButton).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-resend-button.png',
@@ -415,10 +397,7 @@ test.describe('US-C06: Resend Client Invite', () => {
     const pendingBadge = page.locator(
       '[data-testid="status-pending"], .badge:has-text("pending"), span:has-text("Pending")'
     );
-
-    if (await pendingBadge.isVisible()) {
-      await expect(pendingBadge).toBeVisible();
-    }
+    await expect(pendingBadge).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-pending-status.png',
@@ -433,16 +412,15 @@ test.describe('US-C06: Resend Client Invite', () => {
 
     // Given: I have a pending client
     const pendingClient = page.getByText(/beta startup/i);
-    if (await pendingClient.isVisible()) {
-      // When: I click "Resend"
-      const resendButton = page.getByRole('button', { name: /resend/i });
-      if (await resendButton.isVisible()) {
-        await resendButton.click();
+    await expect(pendingClient).toBeVisible({ timeout: 10000 });
 
-        // Then: A new email should be sent
-        await expect(page.getByText(/sent|resent|success/i)).toBeVisible({ timeout: 5000 });
-      }
-    }
+    // When: I click "Resend"
+    const resendButton = page.getByRole('button', { name: /resend/i });
+    await expect(resendButton).toBeVisible({ timeout: 5000 });
+    await resendButton.click();
+
+    // Then: A new email should be sent - success message shown
+    await expect(page.getByText(/sent|resent|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-resend-success.png',
@@ -455,10 +433,11 @@ test.describe('US-C06: Resend Client Invite', () => {
     await navigateToClientsSettings(page);
 
     // Then: Should show how many times invite has been resent
-    const resendCount = page.locator('[data-testid="resend-count"], span:has-text("resent")');
-
-    // Or show remaining resends
-    const remainingResends = page.getByText(/\d.*resend.*remaining|\d.*of.*3/i);
+    // Either as explicit count or remaining resends
+    const resendInfo = page.locator(
+      '[data-testid="resend-count"], span:has-text("resent"), span:has-text("remaining")'
+    );
+    await expect(resendInfo).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-resend-count.png',
@@ -473,23 +452,14 @@ test.describe('US-C06: Resend Client Invite', () => {
 
     // When: I view the client with max resends
     const maxResendClient = page.getByText(/max resend client/i);
-    if (await maxResendClient.isVisible()) {
-      // Then: Resend button should be disabled or show limit message
-      const resendButton = page
-        .locator('[data-testid="client-row"]:has-text("Max Resend")')
-        .getByRole('button', { name: /resend/i });
+    await expect(maxResendClient).toBeVisible({ timeout: 10000 });
 
-      if (await resendButton.isVisible()) {
-        // Button should be disabled
-        await expect(resendButton).toBeDisabled();
-      }
-
-      // Or show limit reached message
-      const limitMessage = page.getByText(/limit.*reached|maximum.*resend|no more resend/i);
-      if (await limitMessage.isVisible()) {
-        await expect(limitMessage).toBeVisible();
-      }
-    }
+    // Then: Resend button should be disabled
+    const resendButton = page
+      .locator('[data-testid="client-row"]:has-text("Max Resend")')
+      .getByRole('button', { name: /resend/i });
+    await expect(resendButton).toBeVisible({ timeout: 5000 });
+    await expect(resendButton).toBeDisabled();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-resend-limit.png',
@@ -497,19 +467,37 @@ test.describe('US-C06: Resend Client Invite', () => {
     });
   });
 
-  test('should handle resend limit error', async ({ page }) => {
+  test('should show limit reached message for max resend clients', async ({ page }) => {
+    await mockClients(page, TEST_CLIENTS);
+    await navigateToClientsSettings(page);
+
+    // When: I view the client with max resends
+    const maxResendClient = page.getByText(/max resend client/i);
+    await expect(maxResendClient).toBeVisible({ timeout: 10000 });
+
+    // Then: Show limit reached message
+    const limitMessage = page.getByText(/limit.*reached|maximum.*resend|no more resend/i);
+    await expect(limitMessage).toBeVisible({ timeout: 5000 });
+
+    await page.screenshot({
+      path: 'tests/e2e/screenshots/client-resend-limit-message.png',
+      fullPage: true,
+    });
+  });
+
+  test('should handle resend limit error from API', async ({ page }) => {
     await mockClients(page, TEST_CLIENTS);
     await mockResendInvite(page, false, true);
     await navigateToClientsSettings(page);
 
-    // When: I try to resend when limit is reached
+    // When: I try to resend and API returns 429
     const resendButton = page.getByRole('button', { name: /resend/i }).first();
-    if (await resendButton.isVisible() && (await resendButton.isEnabled())) {
-      await resendButton.click();
+    await expect(resendButton).toBeVisible({ timeout: 10000 });
+    await expect(resendButton).toBeEnabled();
+    await resendButton.click();
 
-      // Then: Should show limit error
-      await expect(page.getByText(/limit|maximum|3 resends/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: Should show limit error message
+    await expect(page.getByText(/limit|maximum|3 resends/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-resend-limit-error.png',
@@ -523,10 +511,7 @@ test.describe('US-C06: Resend Client Invite', () => {
 
     // Then: Should show when invite expires (30 days from sent)
     const expiryInfo = page.getByText(/expires|expiry|valid.*until|days.*left/i);
-
-    if (await expiryInfo.isVisible()) {
-      await expect(expiryInfo).toBeVisible();
-    }
+    await expect(expiryInfo).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-invite-expiry.png',
@@ -552,17 +537,15 @@ test.describe('Client Lifecycle Error Handling', () => {
 
     // When: Archive fails
     const archiveButton = page.getByRole('button', { name: /archive/i });
-    if (await archiveButton.isVisible()) {
-      await archiveButton.click();
+    await expect(archiveButton).toBeVisible({ timeout: 10000 });
+    await archiveButton.click();
 
-      const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
-      if (await confirmButton.isVisible()) {
-        await confirmButton.click();
-      }
+    const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
 
-      // Then: Error message should be shown
-      await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: Error message should be shown
+    await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-archive-error.png',
@@ -577,12 +560,11 @@ test.describe('Client Lifecycle Error Handling', () => {
 
     // When: Resend fails
     const resendButton = page.getByRole('button', { name: /resend/i }).first();
-    if (await resendButton.isVisible()) {
-      await resendButton.click();
+    await expect(resendButton).toBeVisible({ timeout: 10000 });
+    await resendButton.click();
 
-      // Then: Error message should be shown
-      await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: Error message should be shown
+    await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-resend-error.png',
@@ -596,7 +578,9 @@ test.describe('Client Lifecycle Error Handling', () => {
     await navigateToClientsSettings(page);
 
     // Then: Should show empty state
-    await expect(page.getByText(/no client|add.*client|invite.*first/i)).toBeVisible();
+    await expect(page.getByText(/no client|add.*client|invite.*first/i)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/client-empty-state.png',
@@ -624,17 +608,20 @@ test.describe('Client Lifecycle Portfolio Integration', () => {
 
     // Note active clients count
     const activeClients = page.locator('[data-testid="client-card"]');
+    const initialCount = await activeClients.count();
 
     // Archive a client
     await navigateToClientsSettings(page);
     const archiveButton = page.getByRole('button', { name: /archive/i });
-    if (await archiveButton.isVisible()) {
-      await archiveButton.click();
-      const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
-      if (await confirmButton.isVisible()) {
-        await confirmButton.click();
-      }
-    }
+    await expect(archiveButton).toBeVisible({ timeout: 10000 });
+    await archiveButton.click();
+
+    const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
+
+    // Wait for archive to complete
+    await expect(page.getByText(/archived|success/i)).toBeVisible({ timeout: 5000 });
 
     // Return to portfolio - archived client should be hidden
     await navigateToConsultantDashboard(page);
@@ -653,14 +640,15 @@ test.describe('Client Lifecycle Portfolio Integration', () => {
     await navigateToClientsSettings(page);
 
     const showArchivedToggle = page.locator('[data-testid="show-archived-toggle"]');
-    if (await showArchivedToggle.isVisible()) {
-      await showArchivedToggle.click();
+    await expect(showArchivedToggle).toBeVisible({ timeout: 10000 });
+    await showArchivedToggle.click();
 
-      const restoreButton = page.getByRole('button', { name: /restore/i });
-      if (await restoreButton.isVisible()) {
-        await restoreButton.click();
-      }
-    }
+    const restoreButton = page.getByRole('button', { name: /restore/i });
+    await expect(restoreButton).toBeVisible({ timeout: 5000 });
+    await restoreButton.click();
+
+    // Wait for restore to complete
+    await expect(page.getByText(/restored|success/i)).toBeVisible({ timeout: 5000 });
 
     // Return to portfolio - restored client should appear
     await navigateToConsultantDashboard(page);

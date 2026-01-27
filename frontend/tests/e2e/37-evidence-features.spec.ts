@@ -84,12 +84,11 @@ test.describe('US-F13: Evidence Ledger with Fit Filters', () => {
     await dialog.locator('input[name="title"], input#title').fill(uniqueTitle);
     await dialog.locator('textarea[name="summary"], textarea#summary').fill('This is test evidence summary');
 
-    // Select category if dropdown exists
+    // Category dropdown MUST exist
     const categorySelect = dialog.locator('[id*="category"]').first();
-    if (await categorySelect.isVisible()) {
-      await categorySelect.click();
-      await page.getByRole('option', { name: /interview/i }).click();
-    }
+    await expect(categorySelect).toBeVisible({ timeout: 5000 });
+    await categorySelect.click();
+    await page.getByRole('option', { name: /interview/i }).click();
 
     // Submit the form
     const submitButton = dialog.getByRole('button', { name: /add|submit|save|create/i });
@@ -141,66 +140,53 @@ test.describe('US-F14: Evidence Explorer', () => {
 
   test('should display evidence explorer page with summary metrics and timeline', async ({ page }) => {
     // Navigate to a project's evidence explorer
-    // First get the project ID from the dashboard
     await page.goto('/founder-dashboard');
     await expect(page.locator('[data-testid="dashboard"]')).toBeVisible(TIMEOUT);
 
     // Navigate to project's evidence explorer via URL pattern
     await page.goto('/project/current/evidence');
 
-    // If redirected or page loads, verify evidence explorer content
-    // The page should show either evidence explorer or redirect to a project
+    // Evidence explorer title MUST be visible
     const title = page.getByRole('heading', { name: /evidence explorer/i });
-    const hasExplorer = await title.isVisible().catch(() => false);
+    await expect(title).toBeVisible(TIMEOUT);
 
-    if (hasExplorer) {
-      // Verify summary metrics area exists
-      await expect(page.getByText(/total evidence/i).first()).toBeVisible(TIMEOUT);
+    // Verify summary metrics area exists
+    await expect(page.getByText(/total evidence/i).first()).toBeVisible(TIMEOUT);
 
-      // Verify filters exist
-      await expect(page.getByText(/all sources|all strengths/i).first()).toBeVisible();
-    } else {
-      // If no project, page may show error or redirect - this is expected behavior
-      test.info().annotations.push({ type: 'info', description: 'No project available for evidence explorer test' });
-    }
+    // Verify filters exist
+    await expect(page.getByText(/all sources|all strengths/i).first()).toBeVisible(TIMEOUT);
   });
 
   test('should filter evidence and update timeline', async ({ page }) => {
     await page.goto('/project/current/evidence');
 
+    // Evidence explorer MUST be visible
     const explorer = page.getByRole('heading', { name: /evidence explorer/i });
-    const hasExplorer = await explorer.isVisible().catch(() => false);
+    await expect(explorer).toBeVisible(TIMEOUT);
 
-    if (hasExplorer) {
-      // Find dimension tabs (All, Desirability, Feasibility, Viability)
-      const desirabilityTab = page.getByRole('tab', { name: /desirability/i });
+    // Find dimension tabs (All, Desirability, Feasibility, Viability)
+    const desirabilityTab = page.getByRole('tab', { name: /desirability/i });
+    await expect(desirabilityTab).toBeVisible(TIMEOUT);
+    await desirabilityTab.click();
 
-      if (await desirabilityTab.isVisible()) {
-        await desirabilityTab.click();
-
-        // Verify tab is now selected
-        await expect(desirabilityTab).toHaveAttribute('data-state', 'active');
-      }
-    }
+    // Verify tab is now selected
+    await expect(desirabilityTab).toHaveAttribute('data-state', 'active');
   });
 
   test('should show detail panel when clicking evidence item', async ({ page }) => {
     await page.goto('/project/current/evidence');
 
+    // Evidence explorer MUST be visible
     const explorer = page.getByRole('heading', { name: /evidence explorer/i });
-    const hasExplorer = await explorer.isVisible().catch(() => false);
+    await expect(explorer).toBeVisible(TIMEOUT);
 
-    if (hasExplorer) {
-      // Look for any evidence card in the timeline
-      const evidenceCard = page.locator('[class*="card"]').filter({ hasText: /evidence|analysis/i }).first();
+    // Look for any evidence card in the timeline - MUST exist
+    const evidenceCard = page.locator('[class*="card"]').filter({ hasText: /evidence|analysis/i }).first();
+    await expect(evidenceCard).toBeVisible(TIMEOUT);
+    await evidenceCard.click();
 
-      if (await evidenceCard.isVisible().catch(() => false)) {
-        await evidenceCard.click();
-
-        // Detail panel (sheet) should open
-        const sheet = page.locator('[role="dialog"], [class*="sheet"]');
-        await expect(sheet).toBeVisible(TIMEOUT);
-      }
-    }
+    // Detail panel (sheet) should open
+    const sheet = page.locator('[role="dialog"], [class*="sheet"]');
+    await expect(sheet).toBeVisible(TIMEOUT);
   });
 });

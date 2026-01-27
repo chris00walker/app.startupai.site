@@ -35,10 +35,9 @@ async function navigateToProjectsTab(page: Page): Promise<void> {
   await navigateToSettings(page);
 
   const projectsTab = page.getByRole('tab', { name: /projects/i });
-  if (await projectsTab.isVisible()) {
-    await projectsTab.click();
-    await page.waitForLoadState('networkidle');
-  }
+  await expect(projectsTab).toBeVisible({ timeout: 10000 });
+  await projectsTab.click();
+  await page.waitForLoadState('networkidle');
 }
 
 /**
@@ -183,7 +182,7 @@ test.describe('US-F04: Archive Project', () => {
     // When: I navigate to Settings → Projects tab
     await navigateToProjectsTab(page);
 
-    // Then: I should see a project selector
+    // Then: I should see a project selector or project list
     const projectSelector = page.locator(
       '[data-testid="project-selector"], select[name="project"], [data-testid="project-list"]'
     );
@@ -206,12 +205,10 @@ test.describe('US-F04: Archive Project', () => {
     await mockProjects(page, TEST_PROJECTS);
     await navigateToProjectsTab(page);
 
-    // Then: I should see an archive button
+    // Then: I should see an archive button - MUST be visible after mock
     const archiveButton = page.getByRole('button', { name: /archive/i });
-
-    if (await archiveButton.isVisible()) {
-      await expect(archiveButton).toBeEnabled();
-    }
+    await expect(archiveButton).toBeVisible({ timeout: 10000 });
+    await expect(archiveButton).toBeEnabled();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-archive-button.png',
@@ -224,26 +221,23 @@ test.describe('US-F04: Archive Project', () => {
     await mockArchiveProject(page, true);
     await navigateToProjectsTab(page);
 
-    // Given: I have selected a project
+    // Given: I have selected a project - MUST be visible
     const projectItem = page.getByText(/startupai validation/i);
-    if (await projectItem.isVisible()) {
-      await projectItem.click();
-    }
+    await expect(projectItem).toBeVisible({ timeout: 10000 });
+    await projectItem.click();
 
-    // When: I click "Archive Project"
+    // When: I click "Archive Project" - MUST be visible
     const archiveButton = page.getByRole('button', { name: /archive/i });
-    if (await archiveButton.isVisible()) {
-      await archiveButton.click();
+    await expect(archiveButton).toBeVisible();
+    await archiveButton.click();
 
-      // Handle confirmation dialog if present
-      const confirmButton = page.getByRole('button', { name: /confirm|yes|archive/i });
-      if (await confirmButton.isVisible()) {
-        await confirmButton.click();
-      }
+    // Handle confirmation dialog - MUST appear
+    const confirmButton = page.getByRole('button', { name: /confirm|yes|archive/i });
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
 
-      // Then: The project status should change to archived
-      await expect(page.getByText(/archived|success/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: The project status should change to archived
+    await expect(page.getByText(/archived|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-archived-success.png',
@@ -260,11 +254,9 @@ test.describe('US-F04: Archive Project', () => {
     await page.waitForLoadState('networkidle');
 
     // Then: The archived project should be hidden
-    // Active projects should be visible, archived should not
     const oldIdea = page.getByText(/old idea/i);
+    await expect(oldIdea).not.toBeVisible();
 
-    // Archived project should not be visible by default
-    // (This depends on the actual implementation)
     await page.screenshot({
       path: 'tests/e2e/screenshots/dashboard-no-archived.png',
       fullPage: true,
@@ -276,23 +268,21 @@ test.describe('US-F04: Archive Project', () => {
     await navigateToProjectsTab(page);
 
     // Given: I have archived a project
-    // When: I toggle "Show archived projects" in Settings
+    // When: I toggle "Show archived projects" in Settings - MUST be visible
     const showArchivedToggle = page.locator(
       '[data-testid="show-archived-toggle"], input[name="showArchived"], label:has-text("archived")'
     );
+    await expect(showArchivedToggle).toBeVisible({ timeout: 10000 });
+    await showArchivedToggle.click();
 
-    if (await showArchivedToggle.isVisible()) {
-      await showArchivedToggle.click();
+    // Then: I should see the archived project with a "Restore" option
+    await page.waitForLoadState('networkidle');
 
-      // Then: I should see the archived project with a "Restore" option
-      await page.waitForLoadState('networkidle');
+    const archivedProject = page.getByText(/old idea/i);
+    await expect(archivedProject).toBeVisible({ timeout: 5000 });
 
-      const archivedProject = page.getByText(/old idea/i);
-      if (await archivedProject.isVisible()) {
-        const restoreButton = page.getByRole('button', { name: /restore/i });
-        await expect(restoreButton).toBeVisible();
-      }
-    }
+    const restoreButton = page.getByRole('button', { name: /restore/i });
+    await expect(restoreButton).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-show-archived.png',
@@ -305,24 +295,21 @@ test.describe('US-F04: Archive Project', () => {
     await mockRestoreProject(page, true);
     await navigateToProjectsTab(page);
 
-    // Given: I am viewing archived projects
+    // Given: I am viewing archived projects - toggle MUST be visible
     const showArchivedToggle = page.locator(
       '[data-testid="show-archived-toggle"], input[name="showArchived"]'
     );
+    await expect(showArchivedToggle).toBeVisible({ timeout: 10000 });
+    await showArchivedToggle.click();
+    await page.waitForLoadState('networkidle');
 
-    if (await showArchivedToggle.isVisible()) {
-      await showArchivedToggle.click();
-      await page.waitForLoadState('networkidle');
+    // When: I click "Restore" on an archived project - MUST be visible
+    const restoreButton = page.getByRole('button', { name: /restore/i });
+    await expect(restoreButton).toBeVisible({ timeout: 5000 });
+    await restoreButton.click();
 
-      // When: I click "Restore" on an archived project
-      const restoreButton = page.getByRole('button', { name: /restore/i });
-      if (await restoreButton.isVisible()) {
-        await restoreButton.click();
-
-        // Then: The project should be restored
-        await expect(page.getByText(/restored|success/i)).toBeVisible({ timeout: 5000 });
-      }
-    }
+    // Then: The project should be restored
+    await expect(page.getByText(/restored|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-restored.png',
@@ -348,13 +335,13 @@ test.describe('US-F05: Delete Project Permanently', () => {
     // When: I navigate to Settings → Projects tab → Danger Zone
     await navigateToProjectsTab(page);
 
-    // Then: I should see a Danger Zone section
+    // Then: I should see a Danger Zone section or delete-related content
     const dangerZone = page.locator(
       '[data-testid="danger-zone"], .danger-zone, h3:has-text("Danger")'
     );
-
-    // Look for delete-related content
     const deleteSection = page.getByText(/delete|permanently|danger/i);
+
+    await expect(dangerZone.or(deleteSection)).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-danger-zone.png',
@@ -366,21 +353,19 @@ test.describe('US-F05: Delete Project Permanently', () => {
     await mockProjects(page, TEST_PROJECTS);
     await navigateToProjectsTab(page);
 
-    // When: I click on delete button
+    // When: I click on delete button - MUST be visible
     const deleteButton = page.getByRole('button', { name: /delete.*project|delete.*forever/i });
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await deleteButton.click();
 
-    if (await deleteButton.isVisible()) {
-      await deleteButton.click();
+    // Then: I should see an impact summary in modal
+    const modal = page.locator('[role="dialog"], [data-testid="delete-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Then: I should see an impact summary
-      const modal = page.locator('[role="dialog"], [data-testid="delete-modal"]');
-      if (await modal.isVisible()) {
-        // Should show what will be deleted
-        await expect(
-          modal.getByText(/hypothes|evidence|data|will be deleted|cannot be undone/i)
-        ).toBeVisible();
-      }
-    }
+    // Should show what will be deleted
+    await expect(
+      modal.getByText(/hypothes|evidence|data|will be deleted|cannot be undone/i)
+    ).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-delete-impact.png',
@@ -392,35 +377,29 @@ test.describe('US-F05: Delete Project Permanently', () => {
     await mockProjects(page, TEST_PROJECTS);
     await navigateToProjectsTab(page);
 
-    // Given: I click "Delete Project Forever"
+    // Given: I click "Delete Project Forever" - MUST be visible
     const deleteButton = page.getByRole('button', { name: /delete/i });
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await deleteButton.click();
 
-    if (await deleteButton.isVisible()) {
-      await deleteButton.click();
+    // When: I see the confirmation dialog - MUST appear
+    const modal = page.locator('[role="dialog"], [data-testid="delete-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // When: I see the confirmation dialog
-      const modal = page.locator('[role="dialog"], [data-testid="delete-modal"]');
-      if (await modal.isVisible()) {
-        // Then: I should need to type the project name to confirm
-        const confirmInput = modal.locator(
-          'input[type="text"], input[name="confirmName"], [data-testid="confirm-input"]'
-        );
+    // Then: I should need to type the project name to confirm
+    const confirmInput = modal.locator(
+      'input[type="text"], input[name="confirmName"], [data-testid="confirm-input"]'
+    );
+    await expect(confirmInput).toBeVisible();
 
-        if (await confirmInput.isVisible()) {
-          // Type incorrect name first
-          await confirmInput.fill('wrong name');
+    // Type incorrect name first
+    await confirmInput.fill('wrong name');
 
-          // Confirm button should be disabled
-          const confirmDeleteButton = modal.getByRole('button', {
-            name: /confirm.*delete|delete.*forever/i,
-          });
-
-          // Check if button is disabled when name doesn't match
-          const isDisabled = await confirmDeleteButton.isDisabled();
-          // This assertion depends on implementation
-        }
-      }
-    }
+    // Confirm button should be disabled when name doesn't match
+    const confirmDeleteButton = modal.getByRole('button', {
+      name: /confirm.*delete|delete.*forever/i,
+    });
+    await expect(confirmDeleteButton).toBeDisabled();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-delete-confirm.png',
@@ -433,30 +412,28 @@ test.describe('US-F05: Delete Project Permanently', () => {
     await mockDeleteProject(page, true);
     await navigateToProjectsTab(page);
 
-    // Given: I click "Delete Project Forever"
+    // Given: I click "Delete Project Forever" - MUST be visible
     const deleteButton = page.getByRole('button', { name: /delete/i });
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await deleteButton.click();
 
-    if (await deleteButton.isVisible()) {
-      await deleteButton.click();
+    // Modal MUST appear
+    const modal = page.locator('[role="dialog"], [data-testid="delete-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      const modal = page.locator('[role="dialog"], [data-testid="delete-modal"]');
-      if (await modal.isVisible()) {
-        // When: I type the project name to confirm
-        const confirmInput = modal.locator('input[type="text"]');
-        if (await confirmInput.isVisible()) {
-          await confirmInput.fill('StartupAI Validation');
-        }
+    // When: I type the project name to confirm
+    const confirmInput = modal.locator('input[type="text"]');
+    await expect(confirmInput).toBeVisible();
+    await confirmInput.fill('StartupAI Validation');
 
-        // And click confirm
-        const confirmDeleteButton = modal.getByRole('button', { name: /confirm|delete/i });
-        if (await confirmDeleteButton.isVisible() && (await confirmDeleteButton.isEnabled())) {
-          await confirmDeleteButton.click();
+    // And click confirm - button should now be enabled
+    const confirmDeleteButton = modal.getByRole('button', { name: /confirm|delete/i });
+    await expect(confirmDeleteButton).toBeVisible();
+    await expect(confirmDeleteButton).toBeEnabled();
+    await confirmDeleteButton.click();
 
-          // Then: The project should be permanently deleted
-          await expect(page.getByText(/deleted|removed|success/i)).toBeVisible({ timeout: 5000 });
-        }
-      }
-    }
+    // Then: The project should be permanently deleted
+    await expect(page.getByText(/deleted|removed|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-deleted.png',
@@ -476,6 +453,7 @@ test.describe('US-F05: Delete Project Permanently', () => {
       '[data-testid="show-archived-toggle"], input[name="showArchived"]'
     );
 
+    // Toggle may or may not be visible depending on implementation
     if (await showArchivedToggle.isVisible()) {
       await showArchivedToggle.click();
     }
@@ -505,19 +483,17 @@ test.describe('Project Lifecycle Error Handling', () => {
     await mockArchiveProject(page, false);
     await navigateToProjectsTab(page);
 
-    // When: Archive fails
+    // When: Archive fails - archive button MUST be visible
     const archiveButton = page.getByRole('button', { name: /archive/i });
-    if (await archiveButton.isVisible()) {
-      await archiveButton.click();
+    await expect(archiveButton).toBeVisible({ timeout: 10000 });
+    await archiveButton.click();
 
-      const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
-      if (await confirmButton.isVisible()) {
-        await confirmButton.click();
-      }
+    const confirmButton = page.getByRole('button', { name: /confirm|yes/i });
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
 
-      // Then: Error message should be shown
-      await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
-    }
+    // Then: Error message should be shown
+    await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-archive-error.png',
@@ -530,27 +506,24 @@ test.describe('Project Lifecycle Error Handling', () => {
     await mockDeleteProject(page, false);
     await navigateToProjectsTab(page);
 
-    // When: Delete fails
+    // When: Delete fails - delete button MUST be visible
     const deleteButton = page.getByRole('button', { name: /delete/i });
-    if (await deleteButton.isVisible()) {
-      await deleteButton.click();
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await deleteButton.click();
 
-      const modal = page.locator('[role="dialog"]');
-      if (await modal.isVisible()) {
-        const confirmInput = modal.locator('input[type="text"]');
-        if (await confirmInput.isVisible()) {
-          await confirmInput.fill('StartupAI Validation');
-        }
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-        const confirmDeleteButton = modal.getByRole('button', { name: /confirm|delete/i });
-        if (await confirmDeleteButton.isVisible()) {
-          await confirmDeleteButton.click();
+    const confirmInput = modal.locator('input[type="text"]');
+    await expect(confirmInput).toBeVisible();
+    await confirmInput.fill('StartupAI Validation');
 
-          // Then: Error message should be shown
-          await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
-        }
-      }
-    }
+    const confirmDeleteButton = modal.getByRole('button', { name: /confirm|delete/i });
+    await expect(confirmDeleteButton).toBeVisible();
+    await confirmDeleteButton.click();
+
+    // Then: Error message should be shown
+    await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-delete-error.png',
@@ -564,22 +537,18 @@ test.describe('Project Lifecycle Error Handling', () => {
 
     // When: Delete dialog is open but name not entered
     const deleteButton = page.getByRole('button', { name: /delete/i });
-    if (await deleteButton.isVisible()) {
-      await deleteButton.click();
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    await deleteButton.click();
 
-      const modal = page.locator('[role="dialog"]');
-      if (await modal.isVisible()) {
-        // Then: Confirm button should be disabled
-        const confirmDeleteButton = modal.getByRole('button', {
-          name: /confirm.*delete|delete.*forever/i,
-        });
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-        if (await confirmDeleteButton.isVisible()) {
-          // Button should be disabled without proper confirmation
-          await expect(confirmDeleteButton).toBeDisabled();
-        }
-      }
-    }
+    // Then: Confirm button should be disabled without proper confirmation
+    const confirmDeleteButton = modal.getByRole('button', {
+      name: /confirm.*delete|delete.*forever/i,
+    });
+    await expect(confirmDeleteButton).toBeVisible();
+    await expect(confirmDeleteButton).toBeDisabled();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/project-delete-disabled.png',

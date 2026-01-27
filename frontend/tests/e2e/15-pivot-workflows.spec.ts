@@ -275,15 +275,13 @@ test.describe('US-P01: Approve Segment Pivot', () => {
     await navigateToApprovals(page);
 
     // When: I view the approval queue
-    // Then: I see segment pivot notification
+    // Then: I see segment pivot notification - MUST be visible after mock
     const pivotCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /segment.*pivot/i,
     });
 
-    if (await pivotCard.isVisible()) {
-      await expect(pivotCard).toBeVisible();
-      await expect(pivotCard.getByText(/23%|resonance/i)).toBeVisible();
-    }
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await expect(pivotCard.getByText(/23%|resonance/i)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-segment-notification.png',
@@ -296,17 +294,15 @@ test.describe('US-P01: Approve Segment Pivot', () => {
     await mockPivotOptions(page, 'segment');
     await navigateToApprovals(page);
 
-    // When: I click on the pivot card
+    // When: I click on the pivot card - MUST be visible after mock
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see alternative segment options
-      const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
-      if (await modal.isVisible()) {
-        await expect(modal.getByText(/scale-up|corporate|accelerator/i)).toBeVisible();
-      }
-    }
+    // Then: I see alternative segment options
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/scale-up|corporate|accelerator/i)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-segment-alternatives.png',
@@ -320,24 +316,26 @@ test.describe('US-P01: Approve Segment Pivot', () => {
     await mockPivotDecision(page, true);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // When: I select an alternative segment
-      const segmentOption = page.getByText(/scale-up founder/i);
-      if (await segmentOption.isVisible()) {
-        await segmentOption.click();
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-        const confirmButton = page.getByRole('button', { name: /confirm|select|apply/i });
-        if (await confirmButton.isVisible()) {
-          await confirmButton.click();
+    // When: I select an alternative segment
+    const segmentOption = page.getByText(/scale-up founder/i);
+    await expect(segmentOption).toBeVisible();
+    await segmentOption.click();
 
-          // Then: Pivot is submitted
-          await expect(page.getByText(/success|submitted/i)).toBeVisible({ timeout: 5000 });
-        }
-      }
-    }
+    const confirmButton = page.getByRole('button', { name: /confirm|select|apply/i });
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+
+    // Then: Pivot is submitted
+    await expect(page.getByText(/success|submitted/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-segment-selected.png',
@@ -350,22 +348,23 @@ test.describe('US-P01: Approve Segment Pivot', () => {
     await mockPivotOptions(page, 'segment');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // When: I select custom segment option
-      const customOption = page.getByText(/custom.*segment|define.*own/i);
-      if (await customOption.isVisible()) {
-        await customOption.click();
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-        // Then: I can define custom segment
-        const customInput = page.locator('textarea, input[name="customSegment"]');
-        if (await customInput.isVisible()) {
-          await expect(customInput).toBeVisible();
-        }
-      }
-    }
+    // When: I select custom segment option
+    const customOption = page.getByText(/custom.*segment|define.*own/i);
+    await expect(customOption).toBeVisible();
+    await customOption.click();
+
+    // Then: I can define custom segment
+    const customInput = page.locator('textarea, input[name="customSegment"]');
+    await expect(customInput).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-segment-custom.png',
@@ -378,16 +377,18 @@ test.describe('US-P01: Approve Segment Pivot', () => {
     await mockPivotOptions(page, 'segment', 2, 3);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see pivot progress indicator
-      const pivotProgress = page.getByText(/2.*of.*3|pivot.*remaining/i);
-      if (await pivotProgress.isVisible()) {
-        await expect(pivotProgress).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: I see pivot progress indicator
+    const pivotProgress = page.getByText(/2.*of.*3|pivot.*remaining/i);
+    await expect(pivotProgress).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-segment-count.png',
@@ -401,17 +402,22 @@ test.describe('US-P01: Approve Segment Pivot', () => {
     await mockPivotOptions(page, 'segment', 3, 3);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: Only override or kill options available
-      const limitMessage = page.getByText(/limit.*reached|no.*more.*pivot/i);
-      const overrideOption = page.getByText(/override.*proceed|continue.*anyway/i);
-      const killOption = page.getByText(/kill.*project|end.*validation/i);
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // At least one should be visible
-    }
+    // Then: Limit message or override/kill options should be visible
+    const limitMessage = page.getByText(/limit.*reached|no.*more.*pivot/i);
+    const overrideOption = page.getByText(/override.*proceed|continue.*anyway/i);
+    const killOption = page.getByText(/kill.*project|end.*validation/i);
+
+    // At least one restriction indicator should be visible
+    await expect(limitMessage.or(overrideOption).or(killOption)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-segment-limit.png',
@@ -440,14 +446,12 @@ test.describe('US-P02: Approve Value Pivot', () => {
 
     await navigateToApprovals(page);
 
-    // Then: I see value pivot notification
+    // Then: I see value pivot notification - MUST be visible after mock
     const pivotCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /value.*pivot|zombie/i,
     });
 
-    if (await pivotCard.isVisible()) {
-      await expect(pivotCard).toBeVisible();
-    }
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-value-notification.png',
@@ -460,16 +464,15 @@ test.describe('US-P02: Approve Value Pivot', () => {
     await mockPivotOptions(page, 'value', 0, 2);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see alternative value propositions
-      const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
-      if (await modal.isVisible()) {
-        await expect(modal.getByText(/speed.*focus|confidence.*focus/i)).toBeVisible();
-      }
-    }
+    // Then: I see alternative value propositions
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/speed.*focus|confidence.*focus/i)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-value-alternatives.png',
@@ -482,16 +485,18 @@ test.describe('US-P02: Approve Value Pivot', () => {
     await mockPivotOptions(page, 'value');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see iterate option
-      const iterateOption = page.getByText(/iterate|refine.*current|a\/b.*test/i);
-      if (await iterateOption.isVisible()) {
-        await expect(iterateOption).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: I see iterate option
+    const iterateOption = page.getByText(/iterate|refine.*current|a\/b.*test/i);
+    await expect(iterateOption).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-value-iterate.png',
@@ -520,14 +525,12 @@ test.describe('US-P03: Approve Feature Downgrade', () => {
 
     await navigateToApprovals(page);
 
-    // Then: I see feature downgrade notification
+    // Then: I see feature downgrade notification - MUST be visible after mock
     const pivotCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /feature.*downgrade|feasibility/i,
     });
 
-    if (await pivotCard.isVisible()) {
-      await expect(pivotCard).toBeVisible();
-    }
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-feature-notification.png',
@@ -540,17 +543,16 @@ test.describe('US-P03: Approve Feature Downgrade', () => {
     await mockPivotOptions(page, 'feature', 0, 1);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see downgrade options with value preserved %
-      const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
-      if (await modal.isVisible()) {
-        await expect(modal.getByText(/remove.*collaboration|single.*user/i)).toBeVisible();
-        await expect(modal.getByText(/85%|70%|value.*preserved/i)).toBeVisible();
-      }
-    }
+    // Then: I see downgrade options with value preserved %
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/remove.*collaboration|single.*user/i)).toBeVisible();
+    await expect(modal.getByText(/85%|70%|value.*preserved/i)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-feature-options.png',
@@ -563,16 +565,18 @@ test.describe('US-P03: Approve Feature Downgrade', () => {
     await mockPivotOptions(page, 'feature');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see retest requirement warning
-      const retestWarning = page.getByText(/retest|return.*phase.*2|desirability/i);
-      if (await retestWarning.isVisible()) {
-        await expect(retestWarning).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: I see retest requirement warning
+    const retestWarning = page.getByText(/retest|return.*phase.*2|desirability/i);
+    await expect(retestWarning).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-feature-retest.png',
@@ -585,16 +589,18 @@ test.describe('US-P03: Approve Feature Downgrade', () => {
     await mockPivotOptions(page, 'feature');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see proceed with constraints option
-      const proceedOption = page.getByText(/proceed.*constraint|accept.*timeline|continue.*full/i);
-      if (await proceedOption.isVisible()) {
-        await expect(proceedOption).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: I see proceed with constraints option
+    const proceedOption = page.getByText(/proceed.*constraint|accept.*timeline|continue.*full/i);
+    await expect(proceedOption).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-feature-proceed.png',
@@ -626,14 +632,12 @@ test.describe('US-P04: Approve Strategic Pivot', () => {
 
     await navigateToApprovals(page);
 
-    // Then: I see strategic pivot notification
+    // Then: I see strategic pivot notification - MUST be visible after mock
     const pivotCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /strategic.*pivot|viability|economics/i,
     });
 
-    if (await pivotCard.isVisible()) {
-      await expect(pivotCard).toBeVisible();
-    }
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-strategic-notification.png',
@@ -652,16 +656,15 @@ test.describe('US-P04: Approve Strategic Pivot', () => {
     });
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see unit economics breakdown
-      const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
-      if (await modal.isVisible()) {
-        await expect(modal.getByText(/ltv|cac|ratio|payback/i)).toBeVisible();
-      }
-    }
+    // Then: I see unit economics breakdown
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/ltv|cac|ratio|payback/i)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-strategic-economics.png',
@@ -674,16 +677,15 @@ test.describe('US-P04: Approve Strategic Pivot', () => {
     await mockPivotOptions(page, 'strategic', 0, 2);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: I see price and cost pivot options
-      const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
-      if (await modal.isVisible()) {
-        await expect(modal.getByText(/price.*pivot|cost.*pivot|combined/i)).toBeVisible();
-      }
-    }
+    // Then: I see price and cost pivot options
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/price.*pivot|cost.*pivot|combined/i)).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-strategic-options.png',
@@ -696,16 +698,18 @@ test.describe('US-P04: Approve Strategic Pivot', () => {
     await mockPivotOptions(page, 'strategic');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: Each option shows impact projection
-      const impactText = page.getByText(/3\.0x.*ratio|\$1,800|\$400/i);
-      if (await impactText.isVisible()) {
-        await expect(impactText).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: Each option shows impact projection
+    const impactText = page.getByText(/3\.0x.*ratio|\$1,800|\$400/i);
+    await expect(impactText).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-strategic-impact.png',
@@ -734,18 +738,18 @@ test.describe('Pivot UI Common Patterns', () => {
     });
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: Evidence summary is visible
-      const evidencePanel = page.locator('[data-testid="evidence-panel"]');
-      const sampleSize = page.getByText(/500|sample.*size/i);
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      if (await evidencePanel.isVisible()) {
-        await expect(evidencePanel).toBeVisible();
-      }
-    }
+    // Then: Evidence summary is visible
+    const evidencePanel = page.locator('[data-testid="evidence-panel"]');
+    await expect(evidencePanel).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-evidence-panel.png',
@@ -758,16 +762,18 @@ test.describe('Pivot UI Common Patterns', () => {
     await mockPivotOptions(page, 'segment');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: Override option exists
-      const overrideOption = page.getByText(/override|ignore.*pivot|force.*proceed/i);
-      if (await overrideOption.isVisible()) {
-        await expect(overrideOption).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: Override option exists
+    const overrideOption = page.getByText(/override|ignore.*pivot|force.*proceed/i);
+    await expect(overrideOption).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-override-option.png',
@@ -780,16 +786,18 @@ test.describe('Pivot UI Common Patterns', () => {
     await mockPivotOptions(page, 'segment');
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: Kill option exists
-      const killOption = page.getByText(/kill.*project|end.*validation|terminate/i);
-      if (await killOption.isVisible()) {
-        await expect(killOption).toBeVisible();
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: Kill option exists
+    const killOption = page.getByText(/kill.*project|end.*validation|terminate/i);
+    await expect(killOption).toBeVisible();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-kill-option.png',
@@ -803,18 +811,21 @@ test.describe('Pivot UI Common Patterns', () => {
     await mockPivotDecision(page, true);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      // Then: Comment field is available
-      const commentField = page.locator(
-        'textarea[name="comment"], [data-testid="pivot-comment"]'
-      );
-      if (await commentField.isVisible()) {
-        await commentField.fill('Selecting scale-up founders based on higher budget availability.');
-      }
-    }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Then: Comment field is available
+    const commentField = page.locator(
+      'textarea[name="comment"], [data-testid="pivot-comment"]'
+    );
+    await expect(commentField).toBeVisible();
+    await commentField.fill('Selecting scale-up founders based on higher budget availability.');
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-comment.png',
@@ -839,23 +850,27 @@ test.describe('Pivot Workflow Error Handling', () => {
     await mockPivotDecision(page, false);
     await navigateToApprovals(page);
 
+    // Click pivot card - MUST be visible
     const pivotCard = page.locator('[data-testid="approval-card"]').first();
-    if (await pivotCard.isVisible()) {
-      await pivotCard.click();
+    await expect(pivotCard).toBeVisible({ timeout: 10000 });
+    await pivotCard.click();
 
-      const option = page.getByText(/scale-up/i);
-      if (await option.isVisible()) {
-        await option.click();
-      }
+    // Wait for modal
+    const modal = page.locator('[data-testid="approval-modal"], [role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      const confirmButton = page.getByRole('button', { name: /confirm|submit/i });
-      if (await confirmButton.isVisible()) {
-        await confirmButton.click();
+    // Select an option
+    const option = page.getByText(/scale-up/i);
+    await expect(option).toBeVisible();
+    await option.click();
 
-        // Then: Error message shown
-        await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
-      }
-    }
+    // Submit
+    const confirmButton = page.getByRole('button', { name: /confirm|submit/i });
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+
+    // Then: Error message shown
+    await expect(page.getByText(/error|failed|try again/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/pivot-submission-error.png',

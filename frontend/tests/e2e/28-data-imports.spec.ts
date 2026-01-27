@@ -12,99 +12,85 @@ test.describe('US-BI01: Data Imports', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to settings integrations tab
     await page.goto('/settings');
-    await page.getByRole('tab', { name: /integrations/i }).click();
+    const integrationsTab = page.getByRole('tab', { name: /integrations/i });
+    await expect(integrationsTab).toBeVisible({ timeout: 10000 });
+    await integrationsTab.click();
   });
 
   test('should display connected integrations', async ({ page }) => {
     // Check integrations list is visible
-    await expect(page.getByText(/connected integrations/i)).toBeVisible();
+    await expect(page.getByText(/connected integrations/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('should show import button for connected integration', async ({ page }) => {
     // Look for import action on a connected integration
     const integrationCard = page.locator('[data-testid="integration-card"]').first();
+    await expect(integrationCard).toBeVisible({ timeout: 10000 });
 
-    // If integration is connected, import button should be available
+    // If integration is connected, import button should be available and enabled
     const importButton = integrationCard.getByRole('button', { name: /import/i });
-    if (await importButton.isVisible()) {
-      await expect(importButton).toBeEnabled();
-    }
+    await expect(importButton).toBeVisible({ timeout: 5000 });
+    await expect(importButton).toBeEnabled();
   });
 
   test('should open import dialog when clicking import', async ({ page }) => {
     // Find and click import button
     const importButton = page.getByRole('button', { name: /import/i }).first();
+    await expect(importButton).toBeVisible({ timeout: 10000 });
+    await importButton.click();
 
-    if (await importButton.isVisible()) {
-      await importButton.click();
-
-      // Dialog should open
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await expect(page.getByText(/import from/i)).toBeVisible();
-    }
+    // Dialog should open
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/import from/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('should display importable items in dialog', async ({ page }) => {
     // This test requires a connected integration with items
     const importButton = page.getByRole('button', { name: /import/i }).first();
+    await expect(importButton).toBeVisible({ timeout: 10000 });
+    await importButton.click();
 
-    if (await importButton.isVisible()) {
-      await importButton.click();
+    // Either items list or "no items" message should be visible
+    const itemsList = page.locator('[data-testid="importable-items-list"]');
+    const noItemsMessage = page.getByText(/no importable items/i);
 
-      // Wait for items to load
-      await page.waitForSelector('[data-testid="importable-items-list"]', {
-        timeout: 10000,
-      }).catch(() => {
-        // Items might not load if no integration is connected
-      });
-
-      // Either items or "no items" message should be visible
-      const hasItems = await page.locator('[data-testid="import-item"]').count() > 0;
-      const hasNoItems = await page.getByText(/no importable items/i).isVisible();
-
-      expect(hasItems || hasNoItems).toBeTruthy();
-    }
+    await expect(itemsList.or(noItemsMessage)).toBeVisible({ timeout: 10000 });
   });
 
   test('should allow selecting items for import', async ({ page }) => {
     const importButton = page.getByRole('button', { name: /import/i }).first();
+    await expect(importButton).toBeVisible({ timeout: 10000 });
+    await importButton.click();
 
-    if (await importButton.isVisible()) {
-      await importButton.click();
+    // Wait for items to load
+    const items = page.locator('[data-testid="import-item"]');
+    await expect(items.first()).toBeVisible({ timeout: 10000 });
 
-      // Wait for items to load
-      const items = page.locator('[data-testid="import-item"]');
+    // Click first item to select
+    await items.first().click();
 
-      if ((await items.count()) > 0) {
-        // Click first item to select
-        await items.first().click();
-
-        // Selection badge should appear
-        await expect(page.getByText(/1 selected/i)).toBeVisible();
-      }
-    }
+    // Selection badge should appear
+    await expect(page.getByText(/1 selected/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('should have select all functionality', async ({ page }) => {
     const importButton = page.getByRole('button', { name: /import/i }).first();
+    await expect(importButton).toBeVisible({ timeout: 10000 });
+    await importButton.click();
 
-    if (await importButton.isVisible()) {
-      await importButton.click();
+    // Look for select all checkbox
+    const selectAll = page.getByLabel(/select all/i);
+    await expect(selectAll).toBeVisible({ timeout: 10000 });
+    await selectAll.click();
 
-      // Look for select all checkbox
-      const selectAll = page.getByLabel(/select all/i);
+    // All items should be selected
+    const items = page.locator('[data-testid="import-item"]');
+    const itemCount = await items.count();
 
-      if (await selectAll.isVisible()) {
-        await selectAll.click();
-
-        // All items should be selected
-        const items = page.locator('[data-testid="import-item"]');
-        const itemCount = await items.count();
-
-        if (itemCount > 0) {
-          await expect(page.getByText(new RegExp(`${itemCount} selected`, 'i'))).toBeVisible();
-        }
-      }
+    if (itemCount > 0) {
+      await expect(page.getByText(new RegExp(`${itemCount} selected`, 'i'))).toBeVisible({
+        timeout: 5000,
+      });
     }
   });
 
@@ -112,31 +98,27 @@ test.describe('US-BI01: Data Imports', () => {
     // This test requires actual import action
     // For now, just verify the UI structure exists
     const importButton = page.getByRole('button', { name: /import/i }).first();
+    await expect(importButton).toBeVisible({ timeout: 10000 });
+    await importButton.click();
 
-    if (await importButton.isVisible()) {
-      await importButton.click();
-
-      // Dialog should have import action button
-      const dialogImportButton = page.getByRole('dialog').getByRole('button', { name: /import/i });
-      await expect(dialogImportButton).toBeVisible();
-    }
+    // Dialog should have import action button
+    const dialogImportButton = page.getByRole('dialog').getByRole('button', { name: /import/i });
+    await expect(dialogImportButton).toBeVisible({ timeout: 5000 });
   });
 
   test('should close dialog on cancel', async ({ page }) => {
     const importButton = page.getByRole('button', { name: /import/i }).first();
+    await expect(importButton).toBeVisible({ timeout: 10000 });
+    await importButton.click();
 
-    if (await importButton.isVisible()) {
-      await importButton.click();
+    // Wait for dialog
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 
-      // Wait for dialog
-      await expect(page.getByRole('dialog')).toBeVisible();
+    // Click cancel
+    await page.getByRole('button', { name: /cancel/i }).click();
 
-      // Click cancel
-      await page.getByRole('button', { name: /cancel/i }).click();
-
-      // Dialog should close
-      await expect(page.getByRole('dialog')).not.toBeVisible();
-    }
+    // Dialog should close
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 });
   });
 });
 

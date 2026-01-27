@@ -63,18 +63,15 @@ test.describe('Journey 1: Founder Analysis Flow', () => {
 
     // Click AI Strategic Analysis button (using data-testid for reliability)
     const analysisButton = page.locator('[data-testid="ai-analysis-button"], button:has-text("AI Strategic Analysis")').first();
+    await expect(analysisButton).toBeVisible({ timeout: 15000 });
     await analysisButton.click();
 
     // Wait for AI analysis page
     await page.waitForURL('**/ai-analysis**', { timeout: 15000 });
 
-    // Check for strategic question input
+    // Strategic question input MUST exist
     const questionInput = page.locator('textarea[id="question"], textarea[placeholder*="question" i]');
-    const hasInput = await questionInput.isVisible({ timeout: 5000 }).catch(() => false);
-
-    if (hasInput) {
-      console.log('AI Analysis page loaded with question input');
-    }
+    await expect(questionInput).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'test-results/journey1-ai-analysis-page.png',

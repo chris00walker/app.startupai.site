@@ -98,18 +98,16 @@ const CHECKPOINT_TYPES: Record<string, HITLCheckpoint> = {
 
 /**
  * Navigate to the approvals page and wait for content to load
+ * Uses strict assertions - FAILS if approvals are not accessible
  */
 async function navigateToApprovals(page: Page): Promise<void> {
   await page.goto('/dashboard');
   await page.waitForLoadState('networkidle');
 
-  // Click on approvals tab or navigate directly
+  // Click on approvals tab/link - MUST exist
   const approvalsLink = page.getByRole('link', { name: /approvals/i });
-  if (await approvalsLink.isVisible()) {
-    await approvalsLink.click();
-  } else {
-    await page.goto('/dashboard/approvals');
-  }
+  await expect(approvalsLink).toBeVisible({ timeout: 10000 });
+  await approvalsLink.click();
 
   await page.waitForLoadState('networkidle');
 }
@@ -202,7 +200,7 @@ test.describe('Phase 0: Onboarding HITL Checkpoints', () => {
     const briefCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /founder.*brief/i,
     });
-    await expect(briefCard).toBeVisible();
+    await expect(briefCard).toBeVisible({ timeout: 10000 });
 
     // Take screenshot for visual verification
     await page.screenshot({
@@ -225,16 +223,17 @@ test.describe('Phase 0: Onboarding HITL Checkpoints', () => {
 
     // When: I click on the Founder's Brief approval
     const briefCard = page.locator('[data-testid="approval-card"]').first();
+    await expect(briefCard).toBeVisible({ timeout: 10000 });
     await briefCard.click();
 
     // Then: I see the brief content in the modal
     const modal = page.locator('[data-testid="approval-modal"]');
-    await expect(modal).toBeVisible();
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
     // Verify key brief fields are displayed
-    await expect(modal.getByText(/problem.*hypothesis/i)).toBeVisible();
-    await expect(modal.getByText(/customer.*hypothesis/i)).toBeVisible();
-    await expect(modal.getByText(/solution.*hypothesis/i)).toBeVisible();
+    await expect(modal.getByText(/problem.*hypothesis/i)).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/customer.*hypothesis/i)).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/solution.*hypothesis/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-founders-brief-modal.png',
@@ -250,14 +249,15 @@ test.describe('Phase 0: Onboarding HITL Checkpoints', () => {
 
     // When: I approve the brief
     const briefCard = page.locator('[data-testid="approval-card"]').first();
+    await expect(briefCard).toBeVisible({ timeout: 10000 });
     await briefCard.click();
 
     const approveButton = page.getByRole('button', { name: /approve/i });
-    await expect(approveButton).toBeVisible();
+    await expect(approveButton).toBeVisible({ timeout: 5000 });
     await approveButton.click();
 
     // Then: The approval is submitted successfully
-    await expect(page.getByText(/success|approved/i)).toBeVisible();
+    await expect(page.getByText(/success|approved/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('US-H01: should allow requesting revisions', async ({ page }) => {
@@ -267,16 +267,16 @@ test.describe('Phase 0: Onboarding HITL Checkpoints', () => {
 
     // When: I request revisions
     const briefCard = page.locator('[data-testid="approval-card"]').first();
+    await expect(briefCard).toBeVisible({ timeout: 10000 });
     await briefCard.click();
 
     const reviseButton = page.getByRole('button', { name: /revise|request.*change/i });
-    if (await reviseButton.isVisible()) {
-      await reviseButton.click();
+    await expect(reviseButton).toBeVisible({ timeout: 5000 });
+    await reviseButton.click();
 
-      // Then: I can provide revision notes
-      const notesInput = page.locator('textarea[name="notes"], [data-testid="revision-notes"]');
-      await expect(notesInput).toBeVisible();
-    }
+    // Then: I can provide revision notes
+    const notesInput = page.locator('textarea[name="notes"], [data-testid="revision-notes"]');
+    await expect(notesInput).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -315,12 +315,11 @@ test.describe('Phase 1: VPC Discovery HITL Checkpoints', () => {
     const planCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /experiment.*plan/i,
     });
+    await expect(planCard).toBeVisible({ timeout: 10000 });
+    await planCard.click();
 
-    // The card may or may not exist depending on project state
-    if (await planCard.isVisible()) {
-      await planCard.click();
-      await expect(page.locator('[data-testid="approval-modal"]')).toBeVisible();
-    }
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-experiment-plan.png',
@@ -352,15 +351,14 @@ test.describe('Phase 1: VPC Discovery HITL Checkpoints', () => {
     const vpcCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /vpc|value.*proposition/i,
     });
+    await expect(vpcCard).toBeVisible({ timeout: 10000 });
+    await vpcCard.click();
 
-    if (await vpcCard.isVisible()) {
-      await vpcCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Verify fit score is displayed
-      await expect(modal.getByText(/fit.*score|score.*\d+/i)).toBeVisible();
-    }
+    // Verify fit score is displayed
+    await expect(modal.getByText(/fit.*score|score.*\d+/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-vpc-completion.png',
@@ -400,15 +398,14 @@ test.describe('Phase 2: Desirability HITL Checkpoints', () => {
     const campaignCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /campaign.*launch/i,
     });
+    await expect(campaignCard).toBeVisible({ timeout: 10000 });
+    await campaignCard.click();
 
-    if (await campaignCard.isVisible()) {
-      await campaignCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Verify campaign details are shown
-      await expect(modal.getByText(/budget|spend/i)).toBeVisible();
-    }
+    // Verify campaign details are shown
+    await expect(modal.getByText(/budget|spend/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-campaign-launch.png',
@@ -436,12 +433,11 @@ test.describe('Phase 2: Desirability HITL Checkpoints', () => {
     const budgetCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /budget|spend.*increase/i,
     });
+    await expect(budgetCard).toBeVisible({ timeout: 10000 });
+    await budgetCard.click();
 
-    if (await budgetCard.isVisible()) {
-      await budgetCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
-    }
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-budget-increase.png',
@@ -469,15 +465,16 @@ test.describe('Phase 2: Desirability HITL Checkpoints', () => {
     const gateCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /desirability|gate/i,
     });
+    await expect(gateCard).toBeVisible({ timeout: 10000 });
+    await gateCard.click();
 
-    if (await gateCard.isVisible()) {
-      await gateCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Verify D-F-V signal indicator
-      await expect(modal.locator('[data-testid="signal-indicator"], .signal-badge')).toBeVisible();
-    }
+    // Verify D-F-V signal indicator
+    await expect(modal.locator('[data-testid="signal-indicator"], .signal-badge')).toBeVisible({
+      timeout: 5000,
+    });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-desirability-gate.png',
@@ -507,9 +504,7 @@ test.describe('Phase 3: Feasibility HITL Checkpoints', () => {
           timeline_months: 6,
           tech_stack: ['Next.js', 'Supabase', 'Modal'],
         },
-        risk_factors: [
-          { risk: 'AI model costs', severity: 'medium', mitigation: 'Usage caps' },
-        ],
+        risk_factors: [{ risk: 'AI model costs', severity: 'medium', mitigation: 'Usage caps' }],
       },
       recommendation: 'proceed',
       signal: 'GREEN',
@@ -521,15 +516,14 @@ test.describe('Phase 3: Feasibility HITL Checkpoints', () => {
     const gateCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /feasibility|gate/i,
     });
+    await expect(gateCard).toBeVisible({ timeout: 10000 });
+    await gateCard.click();
 
-    if (await gateCard.isVisible()) {
-      await gateCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Verify feasibility signal is shown
-      await expect(modal.getByText(/green|orange|red/i)).toBeVisible();
-    }
+    // Verify feasibility signal is shown
+    await expect(modal.getByText(/green|orange|red/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-feasibility-gate.png',
@@ -554,18 +548,17 @@ test.describe('Phase 3: Feasibility HITL Checkpoints', () => {
     const gateCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /feasibility/i,
     });
+    await expect(gateCard).toBeVisible({ timeout: 10000 });
+    await gateCard.click();
 
-    if (await gateCard.isVisible()) {
-      await gateCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // When: I view an ORANGE feasibility result
-      // Then: I see downgrade options
-      const downgradeOption = modal.getByRole('button', { name: /downgrade|reduce.*scope/i });
-      if (await downgradeOption.isVisible()) {
-        await expect(downgradeOption).toBeEnabled();
-      }
-    }
+    // When: I view an ORANGE feasibility result
+    // Then: I see downgrade options
+    const downgradeOption = modal.getByRole('button', { name: /downgrade|reduce.*scope/i });
+    await expect(downgradeOption).toBeVisible({ timeout: 5000 });
+    await expect(downgradeOption).toBeEnabled();
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-feasibility-orange.png',
@@ -611,15 +604,14 @@ test.describe('Phase 4: Viability HITL Checkpoints', () => {
     const gateCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /viability|gate/i,
     });
+    await expect(gateCard).toBeVisible({ timeout: 10000 });
+    await gateCard.click();
 
-    if (await gateCard.isVisible()) {
-      await gateCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Verify unit economics are displayed
-      await expect(modal.getByText(/ltv|cac|ratio/i)).toBeVisible();
-    }
+    // Verify unit economics are displayed
+    await expect(modal.getByText(/ltv|cac|ratio/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-viability-gate.png',
@@ -651,17 +643,16 @@ test.describe('Phase 4: Viability HITL Checkpoints', () => {
     const finalCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /final.*decision|validation.*complete/i,
     });
+    await expect(finalCard).toBeVisible({ timeout: 10000 });
+    await finalCard.click();
 
-    if (await finalCard.isVisible()) {
-      await finalCard.click();
-      const modal = page.locator('[data-testid="approval-modal"]');
-      await expect(modal).toBeVisible();
+    const modal = page.locator('[data-testid="approval-modal"]');
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-      // Verify all three signals are shown
-      await expect(modal.getByText(/desirability/i)).toBeVisible();
-      await expect(modal.getByText(/feasibility/i)).toBeVisible();
-      await expect(modal.getByText(/viability/i)).toBeVisible();
-    }
+    // Verify all three signals are shown
+    await expect(modal.getByText(/desirability/i)).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/feasibility/i)).toBeVisible({ timeout: 5000 });
+    await expect(modal.getByText(/viability/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-final-decision.png',
@@ -685,19 +676,16 @@ test.describe('Phase 4: Viability HITL Checkpoints', () => {
     const finalCard = page.locator('[data-testid="approval-card"]').filter({
       hasText: /final|decision/i,
     });
+    await expect(finalCard).toBeVisible({ timeout: 10000 });
+    await finalCard.click();
 
-    if (await finalCard.isVisible()) {
-      await finalCard.click();
+    // When: I make the final decision
+    const validateButton = page.getByRole('button', { name: /validate|approve|confirm/i });
+    await expect(validateButton).toBeVisible({ timeout: 5000 });
+    await validateButton.click();
 
-      // When: I make the final decision
-      const validateButton = page.getByRole('button', { name: /validate|approve|confirm/i });
-      if (await validateButton.isVisible()) {
-        await validateButton.click();
-
-        // Then: The project is marked as validated
-        await expect(page.getByText(/validated|complete|success/i)).toBeVisible();
-      }
-    }
+    // Then: The project is marked as validated
+    await expect(page.getByText(/validated|complete|success/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-final-validated.png',
@@ -717,13 +705,14 @@ test.describe('HITL Approval Flow Mechanics', () => {
   });
 
   test('should display approval stats summary', async ({ page }) => {
+    // Mock approvals to ensure stats are populated
+    await mockHITLRequest(page, CHECKPOINT_TYPES.approve_founders_brief);
     await navigateToApprovals(page);
 
     // Then: I see approval statistics
     const statsSection = page.locator('[data-testid="approval-stats"]');
-    if (await statsSection.isVisible()) {
-      await expect(statsSection.getByText(/pending|approved|total/i)).toBeVisible();
-    }
+    await expect(statsSection).toBeVisible({ timeout: 10000 });
+    await expect(statsSection.getByText(/pending|approved|total/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-approval-stats.png',
@@ -732,16 +721,16 @@ test.describe('HITL Approval Flow Mechanics', () => {
   });
 
   test('should filter approvals by status', async ({ page }) => {
+    await mockHITLRequest(page, CHECKPOINT_TYPES.approve_founders_brief);
     await navigateToApprovals(page);
 
     // When: I filter by pending status
     const filterDropdown = page.locator('[data-testid="status-filter"], select[name="status"]');
-    if (await filterDropdown.isVisible()) {
-      await filterDropdown.selectOption('pending');
+    await expect(filterDropdown).toBeVisible({ timeout: 10000 });
+    await filterDropdown.selectOption('pending');
 
-      // Then: Only pending approvals are shown
-      await page.waitForLoadState('networkidle');
-    }
+    // Then: Only pending approvals are shown
+    await page.waitForLoadState('networkidle');
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-filtered-pending.png',
@@ -750,16 +739,16 @@ test.describe('HITL Approval Flow Mechanics', () => {
   });
 
   test('should show approval history', async ({ page }) => {
+    await mockHITLRequest(page, CHECKPOINT_TYPES.approve_founders_brief);
     await navigateToApprovals(page);
 
     // When: I view completed approvals
     const historyTab = page.getByRole('tab', { name: /history|completed/i });
-    if (await historyTab.isVisible()) {
-      await historyTab.click();
+    await expect(historyTab).toBeVisible({ timeout: 10000 });
+    await historyTab.click();
 
-      // Then: I see past approval decisions
-      await page.waitForLoadState('networkidle');
-    }
+    // Then: I see past approval decisions
+    await page.waitForLoadState('networkidle');
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-approval-history.png',
@@ -774,22 +763,20 @@ test.describe('HITL Approval Flow Mechanics', () => {
     await navigateToApprovals(page);
 
     const card = page.locator('[data-testid="approval-card"]').first();
-    if (await card.isVisible()) {
-      await card.click();
+    await expect(card).toBeVisible({ timeout: 10000 });
+    await card.click();
 
-      // When: I add a comment before approving
-      const commentInput = page.locator(
-        'textarea[name="comment"], [data-testid="approval-comment"]'
-      );
-      if (await commentInput.isVisible()) {
-        await commentInput.fill('Looks good, approved with confidence.');
-      }
+    // When: I add a comment before approving
+    const commentInput = page.locator('textarea[name="comment"], [data-testid="approval-comment"]');
+    await expect(commentInput).toBeVisible({ timeout: 5000 });
+    await commentInput.fill('Looks good, approved with confidence.');
 
-      const approveButton = page.getByRole('button', { name: /approve/i });
-      if (await approveButton.isVisible()) {
-        await approveButton.click();
-      }
-    }
+    const approveButton = page.getByRole('button', { name: /approve/i });
+    await expect(approveButton).toBeVisible({ timeout: 5000 });
+    await approveButton.click();
+
+    // Then: Approval is submitted with comment
+    await expect(page.getByText(/success|approved/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-approval-with-comment.png',
@@ -821,7 +808,9 @@ test.describe('HITL Error Handling', () => {
     await navigateToApprovals(page);
 
     // Then: I see an empty state message
-    await expect(page.getByText(/no.*pending|nothing.*review|all.*caught.*up/i)).toBeVisible();
+    await expect(page.getByText(/no.*pending|nothing.*review|all.*caught.*up/i)).toBeVisible({
+      timeout: 10000,
+    });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-empty-state.png',
@@ -842,7 +831,7 @@ test.describe('HITL Error Handling', () => {
     await navigateToApprovals(page);
 
     // Then: I see an error message
-    await expect(page.getByText(/error|failed|try.*again/i)).toBeVisible();
+    await expect(page.getByText(/error|failed|try.*again/i)).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-error-state.png',
@@ -868,17 +857,15 @@ test.describe('HITL Error Handling', () => {
     await navigateToApprovals(page);
 
     const card = page.locator('[data-testid="approval-card"]').first();
-    if (await card.isVisible()) {
-      await card.click();
+    await expect(card).toBeVisible({ timeout: 10000 });
+    await card.click();
 
-      const approveButton = page.getByRole('button', { name: /approve/i });
-      if (await approveButton.isVisible()) {
-        await approveButton.click();
+    const approveButton = page.getByRole('button', { name: /approve/i });
+    await expect(approveButton).toBeVisible({ timeout: 5000 });
+    await approveButton.click();
 
-        // Then: I see appropriate feedback
-        await expect(page.getByText(/already|processed|conflict/i)).toBeVisible();
-      }
-    }
+    // Then: I see appropriate feedback
+    await expect(page.getByText(/already|processed|conflict/i)).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({
       path: 'tests/e2e/screenshots/hitl-conflict-error.png',

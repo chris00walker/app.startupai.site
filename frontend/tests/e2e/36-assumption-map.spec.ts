@@ -127,23 +127,24 @@ test.describe('US-F12: Manage Assumption Map', () => {
     await expect(page.getByText(`Desirability test ${uniqueId}`)).toBeVisible(TIMEOUT);
     await expect(page.getByText(`Feasibility test ${uniqueId}`)).toBeVisible(TIMEOUT);
 
-    // Filter by Feasibility category
+    // Filter by Feasibility category - try dropdown first, then buttons
     const categoryFilter = page.locator('select, [role="combobox"]').filter({ hasText: /all/i }).first();
+    const feasibilityFilterButton = page.getByRole('button', { name: /feasibility/i }).first();
+
+    // One of the filter options MUST exist
+    await expect(categoryFilter.or(feasibilityFilterButton)).toBeVisible(TIMEOUT);
+
+    // Use whichever filter is available
     if (await categoryFilter.isVisible()) {
       await categoryFilter.click();
       await page.getByRole('option', { name: /feasibility/i }).click();
-
-      // Only Feasibility should be visible
-      await expect(page.getByText(`Feasibility test ${uniqueId}`)).toBeVisible(TIMEOUT);
-      await expect(page.getByText(`Desirability test ${uniqueId}`)).not.toBeVisible();
     } else {
-      // Alternative: use filter buttons if present
-      const feasibilityFilter = page.getByRole('button', { name: /feasibility/i }).first();
-      if (await feasibilityFilter.isVisible()) {
-        await feasibilityFilter.click();
-        await expect(page.getByText(`Feasibility test ${uniqueId}`)).toBeVisible(TIMEOUT);
-      }
+      await feasibilityFilterButton.click();
     }
+
+    // Only Feasibility should be visible
+    await expect(page.getByText(`Feasibility test ${uniqueId}`)).toBeVisible(TIMEOUT);
+    await expect(page.getByText(`Desirability test ${uniqueId}`)).not.toBeVisible();
   });
 
   test('should display analytics view with metrics', async ({ page }) => {
