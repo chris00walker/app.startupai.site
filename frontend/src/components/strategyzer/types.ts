@@ -5,6 +5,8 @@
  * transformation functions for the Supabase database layer.
  *
  * Source of truth: /frontend/src/types/crewai.ts (mirrors startupai-crew)
+ *
+ * @story US-F06
  */
 
 import type {

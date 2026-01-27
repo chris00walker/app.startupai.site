@@ -1,3 +1,11 @@
+/**
+ * ExperimentCardForm Component
+ *
+ * Dialog form for creating and editing Strategyzer experiment cards
+ * with validation, linked assumption selection, and cost tracking.
+ *
+ * @story US-F06
+ */
 "use client"
 
 import React, { useState } from 'react'

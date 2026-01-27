@@ -1,3 +1,13 @@
+/**
+ * EvidenceStrengthIndicator Components
+ *
+ * Visual indicators for evidence strength based on CrewAI's 3-value system:
+ * - Strong (>60%): Green filled circle - behavioral commitment demonstrated
+ * - Weak (30-60%): Yellow half-filled circle - verbal interest only
+ * - None (<30%): Gray empty circle - insufficient evidence
+ *
+ * @story US-F06
+ */
 "use client"
 
 import React from 'react'

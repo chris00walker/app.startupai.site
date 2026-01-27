@@ -1,3 +1,11 @@
+/**
+ * ExperimentCardsGrid Component
+ *
+ * Grid view for managing Strategyzer experiment cards with CRUD operations,
+ * filtering by status and method, and analytics summary.
+ *
+ * @story US-F06
+ */
 "use client"
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'

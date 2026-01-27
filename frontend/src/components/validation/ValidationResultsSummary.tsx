@@ -3,6 +3,8 @@
  *
  * Displays a summary of the latest AI validation report for a project.
  * Shows validation outcome, evidence summary, pivot recommendations, and next steps.
+ *
+ * @story US-F06
  */
 
 'use client';

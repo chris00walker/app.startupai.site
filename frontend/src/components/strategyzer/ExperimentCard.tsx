@@ -1,3 +1,11 @@
+/**
+ * ExperimentCard Component
+ *
+ * Displays individual experiment card with status, method, hypothesis,
+ * metrics, and action dropdown for status transitions.
+ *
+ * @story US-F06
+ */
 "use client"
 
 import React from 'react'

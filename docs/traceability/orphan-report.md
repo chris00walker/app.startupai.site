@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-27T02:13:39.486Z
+Generated: 2026-01-27T21:17:38.923Z
 
 ## Files Without Story Links
 
@@ -86,11 +86,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/signals/SignalBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/signals/SignalGauge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/strategyzer/CanvasesGallery.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/strategyzer/EvidenceStrengthIndicator.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/strategyzer/ExperimentCard.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/strategyzer/ExperimentCardForm.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/strategyzer/ExperimentCardsGrid.tsx | component | Add @story annotation or consider if needed |
-| frontend/src/components/validation/ValidationResultsSummary.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/viability/ViabilityMetricsPanel.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/vpc/VPCFitBadge.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/vpc/VPCReportViewer.tsx | component | Add @story annotation or consider if needed |
@@ -184,6 +179,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 175**
+**Total Orphans: 170**
 
-*Note: 225 infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*
+*Note: 224 infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*

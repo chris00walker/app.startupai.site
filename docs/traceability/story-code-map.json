@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T02:13:39.486Z",
+    "generated_at": "2026-01-27T21:17:38.923Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 393
+    "annotated_file_count": 399
   },
   "stories": {
     "US-F01": {
@@ -183,7 +183,13 @@
     "US-F06": {
       "title": "View AI Analysis Results",
       "components": [
-        "frontend/src/components/reports/CrewAIReportViewer.tsx"
+        "frontend/src/components/reports/CrewAIReportViewer.tsx",
+        "frontend/src/components/strategyzer/EvidenceStrengthIndicator.tsx",
+        "frontend/src/components/strategyzer/ExperimentCard.tsx",
+        "frontend/src/components/strategyzer/ExperimentCardForm.tsx",
+        "frontend/src/components/strategyzer/ExperimentCardsGrid.tsx",
+        "frontend/src/components/strategyzer/types.ts",
+        "frontend/src/components/validation/ValidationResultsSummary.tsx"
       ],
       "api_routes": [
         "frontend/src/app/api/crewai/webhook/route.ts",
@@ -5591,6 +5597,36 @@
       "stories": [
         "US-F06",
         "US-F16"
+      ]
+    },
+    "frontend/src/components/strategyzer/EvidenceStrengthIndicator.tsx": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/components/strategyzer/ExperimentCard.tsx": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/components/strategyzer/ExperimentCardForm.tsx": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/components/strategyzer/ExperimentCardsGrid.tsx": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/components/strategyzer/types.ts": {
+      "stories": [
+        "US-F06"
+      ]
+    },
+    "frontend/src/components/validation/ValidationResultsSummary.tsx": {
+      "stories": [
+        "US-F06"
       ]
     },
     "frontend/src/app/api/crewai/webhook/route.ts": {
