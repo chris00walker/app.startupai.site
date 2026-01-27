@@ -41,6 +41,9 @@ const phaseConfig: Record<Phase, { label: string; color: string; bgColor: string
   killed: { label: 'Killed', color: 'text-red-600', bgColor: 'bg-red-100' },
 }
 
+// Fallback for unexpected values (defensive - should not happen with proper data)
+const defaultPhaseConfig = { label: 'Unknown', color: 'text-gray-500', bgColor: 'bg-gray-50' }
+
 const healthConfig = {
   healthy: { label: 'Healthy', color: 'text-green-600', bgColor: 'bg-green-100', icon: CheckCircle },
   warning: { label: 'Warning', color: 'text-yellow-600', bgColor: 'bg-yellow-100', icon: AlertTriangle },
@@ -279,7 +282,7 @@ interface PhaseBadgeProps {
 }
 
 function PhaseBadge({ phase, size = 'md' }: PhaseBadgeProps) {
-  const config = phaseConfig[phase]
+  const config = phaseConfig[phase] || defaultPhaseConfig
   return (
     <Badge
       variant="outline"
