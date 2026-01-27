@@ -126,6 +126,17 @@ test.describe('Quick Start - Founder Flow', () => {
     // Verify we're on project analysis
     expect(currentUrl.includes('/project/') && currentUrl.endsWith('/analysis')).toBe(true);
 
+    // CRITICAL: Verify the page shows progress tracking, not "No Analysis Available"
+    // This catches the bug where validation_runs record isn't created
+    const progressIndicator = page.locator(
+      'text=/Analysis Processing|Phase 1|VPC Discovery|Researching/i'
+    );
+    const noAnalysisError = page.locator('text=/No Analysis Available/i');
+
+    // Should show progress, not error
+    await expect(progressIndicator).toBeVisible({ timeout: 10000 });
+    await expect(noAnalysisError).not.toBeVisible();
+
     await page.screenshot({ path: 'test-results/quick-start-submitted.png', fullPage: true });
   });
 
