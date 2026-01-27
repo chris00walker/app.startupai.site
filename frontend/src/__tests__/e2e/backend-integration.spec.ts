@@ -340,7 +340,7 @@ test.describe('Backend Integration Tests', () => {
     });
     
     test('should preserve next parameter during auth flow', async ({ page }) => {
-      const nextPath = '/dashboard/projects/123';
+      const nextPath = '/project/123/analysis';
       await page.goto(`/auth/callback?code=mock-code&next=${encodeURIComponent(nextPath)}`);
       
       await page.waitForLoadState('networkidle');

@@ -34,7 +34,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await expect(ideaTextarea).toBeVisible();
 
     // Check for submit button
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
     await expect(submitButton).toBeVisible();
 
     // Submit button should be disabled initially (no idea entered)
@@ -47,7 +47,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await page.goto('/onboarding/founder');
 
     const ideaTextarea = page.locator('textarea#rawIdea, textarea[placeholder*="business idea" i]');
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
 
     // Enter a business idea
     await ideaTextarea.fill('A mobile app for tracking personal carbon footprint');
@@ -60,7 +60,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await page.goto('/onboarding/founder');
 
     const ideaTextarea = page.locator('textarea#rawIdea, textarea[placeholder*="business idea" i]');
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
 
     // Enter a too-short idea
     await ideaTextarea.fill('short');
@@ -93,7 +93,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await page.screenshot({ path: 'test-results/quick-start-hints-expanded.png', fullPage: true });
   });
 
-  test('should submit Quick Start and redirect to dashboard', async ({ page }) => {
+  test('should submit Quick Start and redirect to project analysis', async ({ page }) => {
     // Enable mock mode for testing
     await page.addInitScript(() => {
       (window as { MODAL_USE_MOCK?: boolean }).MODAL_USE_MOCK = true;
@@ -102,7 +102,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await page.goto('/onboarding/founder');
 
     const ideaTextarea = page.locator('textarea#rawIdea, textarea[placeholder*="business idea" i]');
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
 
     // Enter a valid business idea
     const businessIdea = 'A SaaS platform that helps small restaurants manage their inventory and reduce food waste using AI-powered demand forecasting';
@@ -111,23 +111,20 @@ test.describe('Quick Start - Founder Flow', () => {
     // Submit the form
     await submitButton.click();
 
-    // Wait for redirect to dashboard or project page
-    // The API should redirect to /dashboard/projects/{project_id}
+    // Wait for redirect to project analysis page
+    // The API should redirect to /project/{project_id}/analysis
     await page.waitForURL(
       (url) =>
-        url.pathname.includes('/dashboard') ||
-        url.pathname.includes('/projects'),
+        url.pathname.includes('/project/') &&
+        url.pathname.endsWith('/analysis'),
       { timeout: 15000 }
     );
 
     const currentUrl = page.url();
     console.log(`Redirected to: ${currentUrl}`);
 
-    // Verify we're on a valid post-submission page
-    expect(
-      currentUrl.includes('/dashboard') ||
-      currentUrl.includes('/projects')
-    ).toBe(true);
+    // Verify we're on project analysis
+    expect(currentUrl.includes('/project/') && currentUrl.endsWith('/analysis')).toBe(true);
 
     await page.screenshot({ path: 'test-results/quick-start-submitted.png', fullPage: true });
   });
@@ -136,7 +133,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await page.goto('/onboarding/founder');
 
     const ideaTextarea = page.locator('textarea#rawIdea, textarea[placeholder*="business idea" i]');
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
 
     // Enter a valid business idea
     await ideaTextarea.fill('A marketplace connecting local farmers with urban restaurants for fresh produce delivery');
@@ -176,14 +173,14 @@ test.describe('Quick Start - Founder Flow', () => {
     await page.locator('[data-slot="select-item"]:has-text("Consumers")').click();
 
     // Submit
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
     await submitButton.click();
 
     // Wait for redirect
     await page.waitForURL(
       (url) =>
-        url.pathname.includes('/dashboard') ||
-        url.pathname.includes('/projects'),
+        url.pathname.includes('/project/') &&
+        url.pathname.endsWith('/analysis'),
       { timeout: 15000 }
     );
 
@@ -214,7 +211,7 @@ test.describe('Quick Start - Founder Flow', () => {
     await ideaTextarea.fill(shortIdea);
 
     // Try to submit
-    const submitButton = page.locator('button[type="submit"]:has-text("Start Validation")');
+    const submitButton = page.locator('button[type="submit"]');
     await submitButton.click({ force: true });
 
     // Wait for validation error

@@ -92,9 +92,9 @@ export async function POST(request: NextRequest) {
       const cached = idempotencyCache.get(validatedData.idempotency_key);
       if (cached) {
         // For cached responses, respect the redirect_to_integrations flag
-        const cachedRedirectUrl = validatedData.redirect_to_integrations
-          ? `/onboarding/integrations?project_id=${cached.project_id}`
-          : `/dashboard/projects/${cached.project_id}`;
+      const cachedRedirectUrl = validatedData.redirect_to_integrations
+        ? `/onboarding/integrations?project_id=${cached.project_id}`
+        : `/project/${cached.project_id}/analysis`;
         return NextResponse.json({
           project_id: cached.project_id,
           run_id: cached.run_id,
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
     // Determine redirect URL based on integration selection preference
     const redirectUrl = validatedData.redirect_to_integrations
       ? `/onboarding/integrations?project_id=${project.id}`
-      : `/dashboard/projects/${project.id}`;
+      : `/project/${project.id}/analysis`;
 
     return NextResponse.json({
       project_id: project.id,

@@ -285,7 +285,7 @@ export function QuickStartForm({ clientId, onSuccess, onError }: QuickStartFormP
       if (onSuccess) {
         onSuccess(data.project_id, data.run_id);
       } else {
-        router.push(data.redirect_url || `/dashboard/projects/${data.project_id}`);
+        router.push(data.redirect_url || `/project/${data.project_id}/analysis`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';

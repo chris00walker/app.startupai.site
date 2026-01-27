@@ -20,13 +20,13 @@ function IntegrationPageContent() {
   const searchParams = useSearchParams();
 
   const projectId = searchParams?.get('project_id') ?? null;
-  const returnTo = searchParams?.get('return_to') ?? '/dashboard';
+  const returnTo = searchParams?.get('return_to') ?? '/founder-dashboard';
 
   const handleComplete = (selectedTypes: IntegrationType[]) => {
     // If user selected integrations, they've already been connected via OAuth
     // Navigate to the appropriate destination
     if (projectId) {
-      router.push(`/dashboard/projects/${projectId}`);
+      router.push(`/project/${projectId}/analysis`);
     } else {
       router.push(returnTo);
     }
