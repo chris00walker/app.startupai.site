@@ -7,6 +7,7 @@
 - **CLI Tools**: See `~/.claude/CLAUDE.md`
 - **Master Architecture**: [`startupai-crew/docs/master-architecture/`](../startupai-crew/docs/master-architecture/)
 - **Testing**: TDD with JDTD methodology - see [`docs/testing/tdd-workflow.md`](docs/testing/tdd-workflow.md)
+- **E2E Anti-Patterns**: 8 patterns to avoid - see [`frontend/tests/e2e/TESTING-GUIDELINES.md`](frontend/tests/e2e/TESTING-GUIDELINES.md)
 
 ## Architecture
 ```

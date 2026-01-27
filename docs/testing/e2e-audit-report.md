@@ -311,6 +311,7 @@ Tests now verify the **actual user experience** for test users (who have no proj
 | Category | Status | Findings | Severity |
 |----------|--------|----------|----------|
 | Permissive patterns | ✅ FIXED | 168 → 0 | CRITICAL → RESOLVED |
+| **Incomplete assertions** | ⚠️ FOUND | 1+ instance | CRITICAL |
 | Skipped tests | ⚠️ DOCUMENTED | 308 tests | MEDIUM (intentional) |
 | Hardcoded timeouts | ⚠️ LOW PRIORITY | 7 instances | LOW |
 | Stale/generic selectors | ✅ NONE | 0 instances | N/A |
@@ -319,6 +320,32 @@ Tests now verify the **actual user experience** for test users (who have no proj
 | Order-dependent tests | ✅ NONE | 0 serial dependencies | N/A |
 | Missing error assertions | ⚠️ ACCEPTABLE | 9 error checks exist | LOW |
 | Missing negative testing | ⚠️ ACCEPTABLE | 17 negative tests exist | LOW |
+
+### Incomplete Assertions (NEW - January 2026)
+
+**Discovery:** Quick Start E2E test passed despite `validation_runs` not being created, causing "No Analysis Available" in production.
+
+**The Problem:** Tests verify actions (navigation, form submit) but not the resulting state:
+
+```typescript
+// BAD: Only checks URL was reached
+await submitButton.click();
+await page.waitForURL(/\/project\/.*\/analysis/);
+expect(page.url()).toContain('/analysis');
+// Test passes even if page shows "No Analysis Available"!
+
+// GOOD: Verify the outcome on the destination page
+await submitButton.click();
+await page.waitForURL(/\/project\/.*\/analysis/);
+await expect(page.locator('text=/Analysis Processing|Phase 1/i')).toBeVisible();
+await expect(page.locator('text=/No Analysis Available/i')).not.toBeVisible();
+```
+
+**Fix Applied:** `16-quick-start-founder.spec.ts` now verifies the analysis page shows progress, not error state.
+
+**Audit Needed:** All tests with navigation should verify destination page content.
+
+---
 
 ### Hardcoded Timeouts (7 instances)
 
