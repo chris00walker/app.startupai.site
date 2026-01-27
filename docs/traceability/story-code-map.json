@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T01:58:29.794Z",
+    "generated_at": "2026-01-27T02:13:39.486Z",
     "version": "1.0.0",
     "story_count": 262,
     "annotated_file_count": 393
@@ -3052,7 +3052,7 @@
         "projects"
       ],
       "implementation_status": "complete",
-      "notes": "User search by email, name, project ID"
+      "notes": "User search by email, name, project ID. Requires admin RLS policy on user_profiles."
     },
     "US-A02": {
       "title": "View User Profile and State",

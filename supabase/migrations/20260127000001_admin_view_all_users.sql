@@ -2,6 +2,8 @@
 -- Fixes: Admin Dashboard user search returning 0 results
 -- The user_profiles table only had "Users can view own profile" policy,
 -- which blocked admins from searching/viewing other users.
+--
+-- @story US-A01, US-A02, US-A08
 
 -- Policy: Admins can view all user profiles
 DROP POLICY IF EXISTS "Admins can view all user profiles" ON user_profiles;

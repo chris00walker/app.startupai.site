@@ -327,7 +327,9 @@ US-A01:
   db_tables:
     - user_profiles
     - projects
-  notes: "User search by email, name, project ID"
+  migrations:
+    - supabase/migrations/20260127000001_admin_view_all_users.sql
+  notes: "User search by email, name, project ID. Requires admin RLS policy on user_profiles."
   implementation_status: complete
 
 US-A02:

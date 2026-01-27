@@ -78,33 +78,54 @@ test.describe('US-A01: Search and Find Users', () => {
     await expect(page.getByPlaceholder(/search.*email/i)).toBeVisible();
   });
 
-  test('should search users by email', async ({ page }) => {
+  test('should search users by email and return results', async ({ page }) => {
+    // Search for the admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('test@');
+    await searchInput.fill('admin');
 
     // Click search button
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
-    // Should display results or no results message
-    const resultsOrEmpty = page.locator('[data-testid="user-results"], [data-testid="no-results"]');
-    await expect(resultsOrEmpty).toBeVisible({ timeout: 5000 });
+    // MUST return at least 1 result - the admin user we're logged in as
+    // This verifies RLS policy allows admin to see user profiles
+    const resultsTable = page.locator('table tbody tr');
+    await expect(resultsTable).toHaveCount({ min: 1 }, { timeout: 10000 });
+
+    // Verify the results header shows count > 0
+    await expect(page.getByText(/Results \(\d+ user/)).toBeVisible();
   });
 
   test('should display user role and status in results', async ({ page }) => {
-    // Perform a search
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
+    await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
-    // If results exist, they should show role badges
-    const userCard = page.locator('[data-testid="user-card"]').first();
-    if (await userCard.isVisible()) {
-      // User cards should have role indicator
-      const roleBadge = userCard.locator('[class*="badge"], [data-testid="role-badge"]');
-      await expect(roleBadge).toBeVisible();
-    }
+    // Results table MUST have rows - fail if no results
+    const tableRows = page.locator('table tbody tr');
+    await expect(tableRows).toHaveCount({ min: 1 }, { timeout: 10000 });
+
+    // First row should have role badge
+    const firstRow = tableRows.first();
+    const roleBadge = firstRow.locator('[class*="badge"]');
+    await expect(roleBadge).toBeVisible();
+
+    // Should show "Admin" badge for admin user
+    await expect(firstRow.getByText(/admin/i)).toBeVisible();
+  });
+
+  test('should show "No users found" only when search has no matches', async ({ page }) => {
+    // Search for a non-existent user
+    const searchInput = page.getByPlaceholder(/search.*email/i);
+    await searchInput.fill('nonexistent-user-xyz-12345@fakeemail.invalid');
+
+    await page.getByRole('button', { name: /search/i }).click();
+    await page.waitForLoadState('networkidle');
+
+    // Should show no results message
+    await expect(page.getByText(/no users found/i)).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -119,43 +140,43 @@ test.describe('US-A02: View User Profile and State', () => {
   });
 
   test('should display user profile details on click', async ({ page }) => {
-    // Search for a user
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
+    await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
-    // Click on first user result if available
+    // MUST find user link - fail if search returns no results
     const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
+    await expect(userLink).toBeVisible({ timeout: 10000 });
 
-      // Verify profile page elements
-      await expect(page.getByText(/basic information/i)).toBeVisible();
-      await expect(page.getByText(/subscription/i)).toBeVisible();
-    }
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
+
+    // Verify profile page elements
+    await expect(page.getByText(/basic information/i)).toBeVisible();
+    await expect(page.getByText(/subscription/i)).toBeVisible();
   });
 
   test('should display tabs for profile, projects, activity, and actions', async ({ page }) => {
-    // Navigate to a user profile directly (using a known path pattern)
-    await page.goto('/admin/users');
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
+    await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
+    // MUST find user link - fail if search returns no results
     const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
+    await expect(userLink).toBeVisible({ timeout: 10000 });
 
-      // Verify tabs are present
-      await expect(page.getByRole('tab', { name: /profile/i })).toBeVisible();
-      await expect(page.getByRole('tab', { name: /projects/i })).toBeVisible();
-      await expect(page.getByRole('tab', { name: /activity/i })).toBeVisible();
-      await expect(page.getByRole('tab', { name: /admin actions/i })).toBeVisible();
-    }
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
+
+    // Verify tabs are present
+    await expect(page.getByRole('tab', { name: /profile/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /projects/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /activity/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /admin actions/i })).toBeVisible();
   });
 });
 
@@ -170,46 +191,46 @@ test.describe('US-A03: Impersonate User (Read-Only)', () => {
   });
 
   test('should show impersonation button on user profile', async ({ page }) => {
-    // Navigate to a user profile
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
-    await page.getByRole('button', { name: /search/i }).click();
-    await page.waitForLoadState('networkidle');
-
-    const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
-
-      // Go to admin actions tab
-      await page.getByRole('tab', { name: /admin actions/i }).click();
-
-      // Verify impersonation option exists
-      await expect(page.getByText(/impersonate user/i)).toBeVisible();
-    }
-  });
-
-  test('should not allow impersonating admin users', async ({ page }) => {
-    // Navigate to an admin user profile and verify button is disabled
-    // This requires navigating to an admin user
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
     await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
+    // MUST find user link - fail if search returns no results
     const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
+    await expect(userLink).toBeVisible({ timeout: 10000 });
 
-      await page.getByRole('tab', { name: /admin actions/i }).click();
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
 
-      // The impersonate button for admins should be disabled or show "Cannot Impersonate Admin"
-      const impersonateBtn = page.getByRole('button', { name: /cannot impersonate|view as user/i });
-      if (await impersonateBtn.isVisible()) {
-        await expect(impersonateBtn).toBeDisabled();
-      }
-    }
+    // Go to admin actions tab
+    await page.getByRole('tab', { name: /admin actions/i }).click();
+
+    // Verify impersonation option exists
+    await expect(page.getByText(/impersonate user/i)).toBeVisible();
+  });
+
+  test('should not allow impersonating admin users', async ({ page }) => {
+    // Search for admin user
+    const searchInput = page.getByPlaceholder(/search.*email/i);
+    await searchInput.fill('admin');
+    await page.getByRole('button', { name: /search/i }).click();
+    await page.waitForLoadState('networkidle');
+
+    // MUST find user link - fail if search returns no results
+    const userLink = page.locator('a[href*="/admin/users/"]').first();
+    await expect(userLink).toBeVisible({ timeout: 10000 });
+
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('tab', { name: /admin actions/i }).click();
+
+    // The impersonate button for admins should be disabled or show "Cannot Impersonate Admin"
+    const impersonateBtn = page.getByRole('button', { name: /cannot impersonate|view as user/i });
+    await expect(impersonateBtn).toBeVisible();
+    await expect(impersonateBtn).toBeDisabled();
   });
 });
 
@@ -224,62 +245,68 @@ test.describe('US-A08: Change User Role', () => {
   });
 
   test('should display change role button on user profile', async ({ page }) => {
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
+    await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
+    // MUST find user link - fail if search returns no results
     const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
+    await expect(userLink).toBeVisible({ timeout: 10000 });
 
-      await page.getByRole('tab', { name: /admin actions/i }).click();
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
 
-      // Verify change role button exists
-      await expect(page.getByRole('button', { name: /change role/i })).toBeVisible();
-    }
+    await page.getByRole('tab', { name: /admin actions/i }).click();
+
+    // Verify change role button exists
+    await expect(page.getByRole('button', { name: /change role/i })).toBeVisible();
   });
 
   test('should show confirmation dialog before role change', async ({ page }) => {
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
+    await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
+    // MUST find user link - fail if search returns no results
     const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
+    await expect(userLink).toBeVisible({ timeout: 10000 });
 
-      await page.getByRole('tab', { name: /admin actions/i }).click();
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
 
-      // Click change role button
-      await page.getByRole('button', { name: /change role/i }).click();
+    await page.getByRole('tab', { name: /admin actions/i }).click();
 
-      // Dialog should appear with role selector and reason field
-      await expect(page.getByRole('dialog')).toBeVisible();
-      await expect(page.getByText(/reason for change/i)).toBeVisible();
-    }
+    // Click change role button
+    await page.getByRole('button', { name: /change role/i }).click();
+
+    // Dialog should appear with role selector and reason field
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByText(/reason for change/i)).toBeVisible();
   });
 
   test('should require reason for role change', async ({ page }) => {
+    // Search for admin user (known to exist)
     const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('@');
+    await searchInput.fill('admin');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
+    // MUST find user link - fail if search returns no results
     const userLink = page.locator('a[href*="/admin/users/"]').first();
-    if (await userLink.isVisible()) {
-      await userLink.click();
-      await page.waitForLoadState('networkidle');
+    await expect(userLink).toBeVisible({ timeout: 10000 });
 
-      await page.getByRole('tab', { name: /admin actions/i }).click();
-      await page.getByRole('button', { name: /change role/i }).click();
+    await userLink.click();
+    await page.waitForLoadState('networkidle');
 
-      // Confirm button should be disabled without reason
-      const confirmBtn = page.getByRole('button', { name: /confirm change/i });
-      await expect(confirmBtn).toBeDisabled();
-    }
+    await page.getByRole('tab', { name: /admin actions/i }).click();
+    await page.getByRole('button', { name: /change role/i }).click();
+
+    // Confirm button should be disabled without reason
+    const confirmBtn = page.getByRole('button', { name: /confirm change/i });
+    await expect(confirmBtn).toBeDisabled();
   });
 });
