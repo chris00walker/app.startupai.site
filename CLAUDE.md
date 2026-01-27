@@ -128,6 +128,28 @@ def discovery_task():
 - **Gap visibility**: Know what's unimplemented at a glance
 - **Audit trail**: Every file links back to requirements
 
+## Schema Validation
+
+**Policy**: All tables queried in code MUST have Drizzle schemas.
+
+### Validation Commands
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `pnpm schema:fk` | Check FK type consistency | Before any commit with schema changes |
+| `pnpm schema:fk:ci` | Same, exits with error if mismatches | CI/quality-gate |
+| `pnpm schema:coverage` | Find tables missing Drizzle schemas | Debugging runtime errors |
+| `/schema-drift` | Compare Drizzle vs production Supabase | Before deploying schema changes |
+
+### Why This Matters
+
+The original "invalid input syntax for type uuid" bug was caused by:
+- `validation_progress.run_id` was UUID
+- `validation_runs.run_id` was TEXT
+- FK type mismatch caused runtime query failures
+
+The `pnpm schema:fk` check catches this pattern before it reaches production.
+
 ## Quality Gates
 - [ ] `NEXT_PUBLIC_ONBOARDING_BYPASS=false` in production
 - [ ] No mock data in components
@@ -135,6 +157,7 @@ def discovery_task():
 - [ ] No hardcoded secrets
 - [ ] TypeScript and ESLint errors resolved
 - [ ] Test coverage >70%
+- [ ] `pnpm schema:fk:ci` passes (no FK type mismatches)
 
 ## Integration Rules
 
@@ -171,4 +194,4 @@ Data flow: `Modal → /api/crewai/webhook → Supabase → Components`
 | `docs/work/` | Detailed work files (in-progress, done, backlog) |
 
 ---
-**Last Updated**: 2026-01-23
+**Last Updated**: 2026-01-27

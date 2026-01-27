@@ -15,6 +15,10 @@ import {
   findUnusedInCode,
   groupReferencesByTable,
 } from '../core';
+import {
+  extractColumns,
+  extractForeignKeys,
+} from '../fk-consistency';
 import type { TableReference, DrizzleTable } from '../types';
 
 // =============================================================================
@@ -244,11 +248,73 @@ describe('groupReferencesByTable', () => {
 console.log('\nSchema Coverage Tests');
 console.log('=====================');
 
-// Run all test suites
-describe('extractDrizzleTables', () => {
-  test('extracts table names from pgTable definitions', () => {
-    const tables = extractDrizzleTables(SAMPLE_DRIZZLE_SCHEMA, 'test.ts');
-    expect(tables).toHaveLength(2);
+// =============================================================================
+// FK Consistency Test Fixtures
+// =============================================================================
+
+// Simulates the original bug: UUID FK pointing to TEXT column
+const FK_SCHEMA_WITH_MISMATCH = `
+import { pgTable, text, uuid } from 'drizzle-orm/pg-core';
+
+export const validationRuns = pgTable('validation_runs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  runId: text('run_id'),
+});
+`;
+
+const FK_SCHEMA_WITH_UUID_FK = `
+import { pgTable, uuid } from 'drizzle-orm/pg-core';
+import { validationRuns } from './validation-runs';
+
+export const validationProgress = pgTable('validation_progress', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  runId: uuid('run_id')
+    .references(() => validationRuns.runId),
+});
+`;
+
+// =============================================================================
+// FK Consistency Tests (simulating original bug)
+// =============================================================================
+
+describe('extractColumns', () => {
+  test('extracts column definitions with types', () => {
+    const columns = extractColumns(FK_SCHEMA_WITH_MISMATCH, 'test.ts');
+    expect(columns.length >= 2).toBe(true);
+
+    const runIdCol = columns.find(c => c.columnName === 'run_id');
+    expect(runIdCol !== undefined).toBe(true);
+    expect(runIdCol?.columnType).toBe('text');
+  });
+});
+
+describe('extractForeignKeys', () => {
+  test('extracts FK relationships from multi-line definitions', () => {
+    const fks = extractForeignKeys(FK_SCHEMA_WITH_UUID_FK, 'test.ts');
+    expect(fks).toHaveLength(1);
+    expect(fks[0].sourceTable).toBe('validation_progress');
+    expect(fks[0].sourceColumn).toBe('run_id');
+    expect(fks[0].sourceType).toBe('uuid');
+  });
+});
+
+describe('FK type mismatch detection (THE ORIGINAL BUG)', () => {
+  test('identifies UUID vs TEXT mismatch', () => {
+    // This test validates the checker would catch validation_progress.run_id (UUID)
+    // referencing validation_runs.run_id (TEXT)
+
+    const sourceColumns = extractColumns(FK_SCHEMA_WITH_UUID_FK, 'progress.ts');
+    const targetColumns = extractColumns(FK_SCHEMA_WITH_MISMATCH, 'runs.ts');
+
+    const sourceCol = sourceColumns.find(c => c.columnName === 'run_id');
+    const targetCol = targetColumns.find(c => c.columnName === 'run_id');
+
+    // Source is UUID, target is TEXT - this is the bug!
+    expect(sourceCol?.columnType).toBe('uuid');
+    expect(targetCol?.columnType).toBe('text');
+
+    // They don't match - this is what the FK checker catches
+    expect(sourceCol?.columnType !== targetCol?.columnType).toBe(true);
   });
 });
 

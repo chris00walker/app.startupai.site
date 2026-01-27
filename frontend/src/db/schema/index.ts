@@ -17,6 +17,8 @@
  * - ad_budget_pools: Founder ad budget allocations
  * - ad_campaigns: Agent-created validation campaigns
  * - ad_performance_snapshots: Time-series ad performance data
+ * - validation_runs: CrewAI validation run tracking
+ * - validation_progress: Append-only progress events for validation runs
  */
 
 export * from './users';
@@ -56,3 +58,7 @@ export * from './admin-sessions';
 export * from './imports';
 export * from './field-mappings';
 export * from './sync-history';
+
+// Validation Progress Infrastructure (US-F08, US-F09, US-E04)
+export * from './validation-runs';
+export * from './validation-progress';

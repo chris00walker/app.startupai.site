@@ -26,7 +26,9 @@
     "traceability:test": "pnpm exec tsx scripts/traceability/__tests__/run.ts",
     "schema:coverage": "pnpm exec tsx scripts/schema-coverage/analyze.ts",
     "schema:coverage:test": "pnpm exec tsx scripts/schema-coverage/__tests__/run.ts",
-    "schema:coverage:ci": "pnpm exec tsx scripts/schema-coverage/analyze.ts --ci"
+    "schema:coverage:ci": "pnpm exec tsx scripts/schema-coverage/analyze.ts --ci",
+    "schema:fk": "pnpm exec tsx scripts/schema-coverage/check-fk.ts",
+    "schema:fk:ci": "pnpm exec tsx scripts/schema-coverage/check-fk.ts --ci"
   },
   "keywords": [
     "nextjs",

@@ -65,9 +65,13 @@ export default defineConfig({
     bypassCSP: false,
   },
   
-  // Development server - disabled, rely on manually started servers
-  // Both backend (localhost:3000) and frontend (localhost:3001) must be running
-  webServer: undefined,
+  // Development server - auto-starts Next.js for E2E tests
+  webServer: {
+    command: 'pnpm dev',
+    port,
+    reuseExistingServer: !process.env.CI, // Reuse if already running locally
+    timeout: 120_000, // 2 min for Next.js to start
+  },
 
   // Browser testing - using Playwright's bundled Chromium (Chrome-equivalent)
   // Note: Windows Chrome can't be controlled from WSL due to pipe communication issues

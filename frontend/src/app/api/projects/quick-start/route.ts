@@ -167,7 +167,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Kick off Modal validation (or mock)
+    // Always use valid UUID for run_id (not pending-xxx which breaks UUID columns)
+    // Track Modal failure state separately via modalKickoffSucceeded flag
     let runId: string;
+    let modalKickoffSucceeded = false;
+
     const kickoffRequest: QuickStartKickoffRequest = {
       raw_idea: validatedData.raw_idea,
       project_id: project.id,
@@ -182,6 +186,7 @@ export async function POST(request: NextRequest) {
       // Use mock for development/testing
       const mockResponse = await mockQuickStartKickoff(kickoffRequest);
       runId = mockResponse.run_id;
+      modalKickoffSucceeded = true;
       console.log('[Quick Start] Using mock Modal kickoff:', runId);
     } else {
       // Use real Modal API
@@ -189,11 +194,14 @@ export async function POST(request: NextRequest) {
         const modalClient = createModalClient();
         const kickoffResponse = await modalClient.kickoff(kickoffRequest);
         runId = kickoffResponse.run_id;
+        modalKickoffSucceeded = true;
         console.log('[Quick Start] Modal kickoff successful:', runId);
       } catch (modalError) {
         console.error('[Quick Start] Modal kickoff failed:', modalError);
         // Don't fail the request - project is created, Modal can be retried
-        runId = `pending-${crypto.randomUUID()}`;
+        // Use valid UUID (not pending-xxx) to avoid type errors in validation_progress
+        runId = crypto.randomUUID();
+        modalKickoffSucceeded = false;
       }
     }
 
@@ -223,7 +231,7 @@ export async function POST(request: NextRequest) {
         project_id: project.id,
         user_id: targetUserId,
         run_id: runId,
-        status: runId.startsWith('pending-') ? 'pending' : 'running',
+        status: modalKickoffSucceeded ? 'running' : 'pending',
         current_phase: 1,
         phase_name: 'VPC Discovery',
         started_at: new Date().toISOString(),

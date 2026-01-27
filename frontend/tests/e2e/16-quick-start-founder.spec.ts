@@ -128,9 +128,10 @@ test.describe('Quick Start - Founder Flow', () => {
 
     // CRITICAL: Verify the page shows progress tracking, not "No Analysis Available"
     // This catches the bug where validation_runs record isn't created
+    // Use .first() because the regex may match multiple elements (heading + phase label)
     const progressIndicator = page.locator(
-      'text=/Analysis Processing|Phase 1|VPC Discovery|Researching/i'
-    );
+      'text=/Analysis Processing|Phase 1|VPC Discovery|Researching|Validation in Progress/i'
+    ).first();
     const noAnalysisError = page.locator('text=/No Analysis Available/i');
 
     // Should show progress, not error
