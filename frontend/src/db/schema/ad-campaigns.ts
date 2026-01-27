@@ -4,7 +4,7 @@
  * Stores ad campaigns created by AI agents for validation testing.
  * Links to projects, hypotheses, and budget pools.
  *
- * @story US-AC01, US-AC02, US-AC03, US-AC04, US-H04, US-AP02
+ * @story US-AC01, US-AC02, US-AC03, US-AC04, US-H04, US-AP02, US-AP03
  */
 
 import { pgEnum, pgTable, text, timestamp, uuid, numeric, jsonb } from 'drizzle-orm/pg-core';

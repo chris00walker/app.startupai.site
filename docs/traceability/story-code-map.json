@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T01:10:31.016Z",
+    "generated_at": "2026-01-27T01:16:42.889Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 366
+    "annotated_file_count": 371
   },
   "stories": {
     "US-F01": {
@@ -5200,11 +5200,20 @@
     },
     "US-AP03": {
       "title": "Meta Flexible Ads Integration",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/ad-campaigns.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/ads/campaigns/meta/activate/route.ts",
+        "frontend/src/app/api/ads/campaigns/meta/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/ads/meta/client.ts",
+        "frontend/src/lib/ads/meta/index.ts",
+        "frontend/src/lib/ads/meta/types.ts"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -6028,7 +6037,8 @@
         "US-AC02",
         "US-AC03",
         "US-AC04",
-        "US-AP02"
+        "US-AP02",
+        "US-AP03"
       ]
     },
     "../startupai-crew/src/modal_app/phases/phase_2.py": {
@@ -7536,6 +7546,31 @@
     "frontend/src/app/api/ads/images/route.ts": {
       "stories": [
         "US-AP02"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/meta/activate/route.ts": {
+      "stories": [
+        "US-AP03"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/meta/route.ts": {
+      "stories": [
+        "US-AP03"
+      ]
+    },
+    "frontend/src/lib/ads/meta/client.ts": {
+      "stories": [
+        "US-AP03"
+      ]
+    },
+    "frontend/src/lib/ads/meta/index.ts": {
+      "stories": [
+        "US-AP03"
+      ]
+    },
+    "frontend/src/lib/ads/meta/types.ts": {
+      "stories": [
+        "US-AP03"
       ]
     }
   }
