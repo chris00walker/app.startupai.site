@@ -58,12 +58,12 @@ async function FounderOnboardingPage() {
         Skip to main content
       </a>
 
-      {/* Back to home link (consistent with login) */}
+      {/* Back link - goes to dashboard if user has projects, otherwise marketing site */}
       <div className="relative z-10 p-6 lg:p-8">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={marketingUrl}>
+          <Link href={hasExistingProjects ? '/dashboard' : marketingUrl}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
+            {hasExistingProjects ? 'Back to Dashboard' : 'Back to home'}
           </Link>
         </Button>
       </div>
