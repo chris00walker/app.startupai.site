@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T01:16:42.889Z",
+    "generated_at": "2026-01-27T01:22:03.858Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 371
+    "annotated_file_count": 375
   },
   "stories": {
     "US-F01": {
@@ -5223,10 +5223,16 @@
     "US-AP04": {
       "title": "Ad Review Status Poller",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/ads/campaigns/[id]/poll-status/route.ts",
+        "frontend/src/app/api/cron/poll-ad-reviews/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/ads/polling/ad-review-poller.ts",
+        "frontend/src/lib/ads/polling/index.ts"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -7571,6 +7577,26 @@
     "frontend/src/lib/ads/meta/types.ts": {
       "stories": [
         "US-AP03"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/[id]/poll-status/route.ts": {
+      "stories": [
+        "US-AP04"
+      ]
+    },
+    "frontend/src/app/api/cron/poll-ad-reviews/route.ts": {
+      "stories": [
+        "US-AP04"
+      ]
+    },
+    "frontend/src/lib/ads/polling/ad-review-poller.ts": {
+      "stories": [
+        "US-AP04"
+      ]
+    },
+    "frontend/src/lib/ads/polling/index.ts": {
+      "stories": [
+        "US-AP04"
       ]
     }
   }
