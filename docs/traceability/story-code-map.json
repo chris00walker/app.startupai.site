@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T01:26:43.470Z",
+    "generated_at": "2026-01-27T01:41:31.985Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 377
+    "annotated_file_count": 381
   },
   "stories": {
     "US-F01": {
@@ -5258,11 +5258,19 @@
     },
     "US-AP06": {
       "title": "Ad Performance Evidence Collection",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/ad-metrics.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/ads/campaigns/[id]/metrics/route.ts",
+        "frontend/src/app/api/cron/collect-ad-metrics/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/ads/meta/index.ts",
+        "frontend/src/lib/ads/meta/insights.ts"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -7575,7 +7583,8 @@
     },
     "frontend/src/lib/ads/meta/index.ts": {
       "stories": [
-        "US-AP03"
+        "US-AP03",
+        "US-AP06"
       ]
     },
     "frontend/src/lib/ads/meta/types.ts": {
@@ -7611,6 +7620,26 @@
     "frontend/src/app/api/approvals/ad-creative/route.ts": {
       "stories": [
         "US-AP05"
+      ]
+    },
+    "frontend/src/db/schema/ad-metrics.ts": {
+      "stories": [
+        "US-AP06"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/[id]/metrics/route.ts": {
+      "stories": [
+        "US-AP06"
+      ]
+    },
+    "frontend/src/app/api/cron/collect-ad-metrics/route.ts": {
+      "stories": [
+        "US-AP06"
+      ]
+    },
+    "frontend/src/lib/ads/meta/insights.ts": {
+      "stories": [
+        "US-AP06"
       ]
     }
   }

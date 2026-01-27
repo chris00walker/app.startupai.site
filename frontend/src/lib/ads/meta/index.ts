@@ -1,10 +1,16 @@
 /**
  * Meta Marketing API Module
  *
- * @story US-AP03
+ * @story US-AP03, US-AP06
  */
 
 export { MetaAdsClient, MetaApiError, createMetaAdsClient } from './client';
+export {
+  MetaInsightsClient,
+  MetaInsightsError,
+  createMetaInsightsClient,
+  INSIGHTS_FIELDS,
+} from './insights';
 export type {
   MetaCampaign,
   MetaAdSet,
@@ -25,3 +31,10 @@ export type {
   EffectiveStatus,
   BUDGET_LIMITS,
 } from './types';
+export type {
+  ParsedInsight,
+  InsightsQueryParams,
+  DatePreset,
+  MetaInsightRow,
+  MetaAction,
+} from './insights';

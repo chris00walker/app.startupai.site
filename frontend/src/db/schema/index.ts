@@ -44,6 +44,7 @@ export * from './ad-platforms';
 export * from './ad-budgets';
 export * from './ad-campaigns';
 export * from './ad-performance';
+export * from './ad-metrics';
 export * from './copy-banks';
 
 // Admin Dashboard Infrastructure (US-A01-A12)
