@@ -216,9 +216,28 @@ export async function POST(request: NextRequest) {
       // Non-fatal - continue
     }
 
-    // Note: validation_runs table doesn't exist yet - progress tracking requires
-    // the table to be created. For now, Modal webhook will handle progress updates
-    // when the infrastructure is ready.
+    // Create validation_runs record for progress tracking
+    const { error: runError } = await supabase
+      .from('validation_runs')
+      .insert({
+        project_id: project.id,
+        user_id: targetUserId,
+        run_id: runId,
+        status: runId.startsWith('pending-') ? 'pending' : 'running',
+        current_phase: 1,
+        phase_name: 'VPC Discovery',
+        started_at: new Date().toISOString(),
+        inputs: {
+          raw_idea: validatedData.raw_idea,
+          hints: validatedData.hints || {},
+          additional_context: validatedData.additional_context || null,
+        },
+      });
+
+    if (runError) {
+      console.warn('[Quick Start] Failed to create validation_runs:', runError);
+      // Non-fatal - progress tracking won't work but project is created
+    }
 
     // Cache for idempotency
     if (validatedData.idempotency_key) {
