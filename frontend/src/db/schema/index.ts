@@ -39,11 +39,12 @@ export * from './mfa-recovery-codes';
 export * from './user-sessions';
 export * from './security-audit-log';
 
-// Ad Platform Infrastructure (US-AM, US-AC)
+// Ad Platform Infrastructure (US-AM, US-AC, US-AP)
 export * from './ad-platforms';
 export * from './ad-budgets';
 export * from './ad-campaigns';
 export * from './ad-performance';
+export * from './copy-banks';
 
 // Admin Dashboard Infrastructure (US-A01-A12)
 export * from './admin-audit-log';

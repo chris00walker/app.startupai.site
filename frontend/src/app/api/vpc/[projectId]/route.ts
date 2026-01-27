@@ -4,7 +4,7 @@
  * GET /api/vpc/[projectId] - Fetch all VPC segments for a project
  * POST /api/vpc/[projectId] - Create or update a VPC segment (upsert)
  *
- * @story US-F12
+ * @story US-F12, US-AP01
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -286,15 +286,52 @@ export async function POST(
       result = inserted;
     }
 
+    // Trigger Copy Bank generation asynchronously (fire-and-forget)
+    // This generates ad copy variants for Phase 2 Desirability testing
+    triggerCopyBankGeneration(projectId, data.segmentKey, request.headers.get('cookie') || '');
+
     return NextResponse.json({
       success: true,
       data: {
         segment: result,
         action: existing ? 'updated' : 'created',
+        copyBankTriggered: true,
       },
     });
   } catch (error) {
     console.error('Error in POST /api/vpc/[projectId]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+// ============================================================================
+// COPY BANK TRIGGER (US-AP01)
+// ============================================================================
+
+/**
+ * Trigger Copy Bank generation after VPC creation/update.
+ * Fire-and-forget - does not block the VPC save response.
+ */
+function triggerCopyBankGeneration(projectId: string, segmentKey: string, cookies: string): void {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  // Fire-and-forget fetch - don't await
+  fetch(`${baseUrl}/api/copy-bank/${projectId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: cookies,
+    },
+    body: JSON.stringify({ segmentKey }),
+  })
+    .then((res) => {
+      if (res.ok) {
+        console.log(`[VPC] Copy Bank generation triggered for project ${projectId}`);
+      } else {
+        console.warn(`[VPC] Copy Bank generation failed for project ${projectId}: ${res.status}`);
+      }
+    })
+    .catch((err) => {
+      console.error(`[VPC] Copy Bank generation error for project ${projectId}:`, err);
+    });
 }

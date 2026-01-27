@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T00:13:20.644Z",
+    "generated_at": "2026-01-27T00:31:05.467Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 360
+    "annotated_file_count": 362
   },
   "stories": {
     "US-F01": {
@@ -5162,8 +5162,13 @@
     },
     "US-AP01": {
       "title": "Copy Bank Generator",
-      "components": [],
-      "api_routes": [],
+      "components": [
+        "frontend/src/db/schema/copy-banks.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/copy-bank/[projectId]/route.ts",
+        "frontend/src/app/api/vpc/[projectId]/route.ts"
+      ],
       "pages": [],
       "hooks": [],
       "lib": [],
@@ -5603,7 +5608,8 @@
     },
     "frontend/src/app/api/vpc/[projectId]/route.ts": {
       "stories": [
-        "US-F12"
+        "US-F12",
+        "US-AP01"
       ]
     },
     "frontend/src/hooks/useBMC.ts": {
@@ -7492,6 +7498,16 @@
         "US-AH08",
         "US-AH09",
         "US-AH10"
+      ]
+    },
+    "frontend/src/db/schema/copy-banks.ts": {
+      "stories": [
+        "US-AP01"
+      ]
+    },
+    "frontend/src/app/api/copy-bank/[projectId]/route.ts": {
+      "stories": [
+        "US-AP01"
       ]
     }
   }
