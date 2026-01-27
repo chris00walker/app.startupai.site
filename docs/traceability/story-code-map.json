@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T01:48:32.391Z",
+    "generated_at": "2026-01-27T01:58:29.794Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 387
+    "annotated_file_count": 393
   },
   "stories": {
     "US-F01": {
@@ -5274,7 +5274,7 @@
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "pending",
+      "implementation_status": "complete",
       "notes": "Ad Performance Evidence Collection - poll insights API, calculate desirability score"
     },
     "US-AP07": {
@@ -5295,21 +5295,29 @@
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "pending",
-      "notes": "Google Responsive Display Ads - P1 priority, similar pattern to Meta"
+      "implementation_status": "complete",
+      "notes": "Google Responsive Display Ads - Responsive Display campaigns with automated assets"
     },
     "US-AP08": {
       "title": "LinkedIn Marketing Ads (P2)",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/ads/campaigns/linkedin/activate/route.ts",
+        "frontend/src/app/api/ads/campaigns/linkedin/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/ads/linkedin/analytics.ts",
+        "frontend/src/lib/ads/linkedin/client.ts",
+        "frontend/src/lib/ads/linkedin/index.ts",
+        "frontend/src/lib/ads/linkedin/types.ts"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
-      "implementation_status": "pending",
-      "notes": "LinkedIn Marketing Ads - P2 priority for B2B validation"
+      "implementation_status": "complete",
+      "notes": "LinkedIn Marketing Ads - B2B Sponsored Content with professional targeting"
     }
   },
   "files": {
@@ -7678,6 +7686,36 @@
     "frontend/src/lib/ads/google/types.ts": {
       "stories": [
         "US-AP07"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/linkedin/activate/route.ts": {
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/linkedin/route.ts": {
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "frontend/src/lib/ads/linkedin/analytics.ts": {
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "frontend/src/lib/ads/linkedin/client.ts": {
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "frontend/src/lib/ads/linkedin/index.ts": {
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "frontend/src/lib/ads/linkedin/types.ts": {
+      "stories": [
+        "US-AP08"
       ]
     }
   }

@@ -1160,13 +1160,13 @@ US-AP05:
 # Phase 4: Evidence Collection
 US-AP06:
   notes: "Ad Performance Evidence Collection - poll insights API, calculate desirability score"
-  implementation_status: pending
+  implementation_status: complete
 
 # Phase 5: Future Platforms
 US-AP07:
-  notes: "Google Responsive Display Ads - P1 priority, similar pattern to Meta"
-  implementation_status: pending
+  notes: "Google Responsive Display Ads - Responsive Display campaigns with automated assets"
+  implementation_status: complete
 
 US-AP08:
-  notes: "LinkedIn Marketing Ads - P2 priority for B2B validation"
-  implementation_status: pending
+  notes: "LinkedIn Marketing Ads - B2B Sponsored Content with professional targeting"
+  implementation_status: complete
