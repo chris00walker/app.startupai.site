@@ -71,6 +71,33 @@ const statusConfig = {
   invalidated: { label: 'Invalidated', color: 'bg-red-100 text-red-800', icon: XCircle }
 }
 
+// Defensive fallbacks for unknown values (prevents crashes from invalid DB data)
+const defaultTypeConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800', icon: Target, description: 'Unknown type' }
+const defaultImportanceConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800' }
+const defaultEvidenceConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800' }
+const defaultStatusConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800', icon: Clock }
+
+// Helper functions for safe config access
+const getTypeConfig = (type: string | undefined | null) => {
+  if (!type) return defaultTypeConfig
+  return typeConfig[type as keyof typeof typeConfig] || defaultTypeConfig
+}
+
+const getImportanceConfig = (importance: string | undefined | null) => {
+  if (!importance) return defaultImportanceConfig
+  return importanceConfig[importance as keyof typeof importanceConfig] || defaultImportanceConfig
+}
+
+const getEvidenceConfig = (evidence: string | undefined | null) => {
+  if (!evidence) return defaultEvidenceConfig
+  return evidenceConfig[evidence as keyof typeof evidenceConfig] || defaultEvidenceConfig
+}
+
+const getStatusConfigSafe = (status: string | undefined | null) => {
+  if (!status) return defaultStatusConfig
+  return statusConfig[status as keyof typeof statusConfig] || defaultStatusConfig
+}
+
 type DbHypothesis = {
   id: string
   project_id: string
@@ -450,9 +477,10 @@ export default function HypothesisManager() {
           ) : (
             <div className="grid gap-4">
               {filteredHypotheses.map((hypothesis) => {
-                const typeInfo = typeConfig[hypothesis.type]
-                const StatusIcon = statusConfig[hypothesis.status].icon
-                
+                const typeInfo = getTypeConfig(hypothesis.type)
+                const statusInfo = getStatusConfigSafe(hypothesis.status)
+                const StatusIcon = statusInfo.icon
+
                 return (
                   <Card key={hypothesis.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
@@ -463,15 +491,15 @@ export default function HypothesisManager() {
                               <typeInfo.icon className="h-3 w-3 mr-1" />
                               {typeInfo.label}
                             </Badge>
-                            <Badge className={importanceConfig[hypothesis.importance].color}>
-                              {importanceConfig[hypothesis.importance].label}
+                            <Badge className={getImportanceConfig(hypothesis.importance).color}>
+                              {getImportanceConfig(hypothesis.importance).label}
                             </Badge>
-                            <Badge className={evidenceConfig[hypothesis.evidence].color}>
-                              {evidenceConfig[hypothesis.evidence].label}
+                            <Badge className={getEvidenceConfig(hypothesis.evidence).color}>
+                              {getEvidenceConfig(hypothesis.evidence).label}
                             </Badge>
-                            <Badge className={statusConfig[hypothesis.status].color}>
+                            <Badge className={statusInfo.color}>
                               <StatusIcon className="h-3 w-3 mr-1" />
-                              {statusConfig[hypothesis.status].label}
+                              {statusInfo.label}
                             </Badge>
                           </div>
                           <p className="text-sm leading-relaxed">{hypothesis.statement}</p>
@@ -800,8 +828,8 @@ export default function HypothesisManager() {
             <div className="my-4 p-3 bg-muted rounded-lg text-sm">
               <p className="font-medium mb-1">"{deleteHypothesis.statement}"</p>
               <p className="text-muted-foreground text-xs">
-                Type: {typeConfig[deleteHypothesis.type].label} |
-                Status: {statusConfig[deleteHypothesis.status].label}
+                Type: {getTypeConfig(deleteHypothesis.type).label} |
+                Status: {getStatusConfigSafe(deleteHypothesis.status).label}
               </p>
             </div>
           )}

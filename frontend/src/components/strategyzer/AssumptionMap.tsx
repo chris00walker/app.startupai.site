@@ -68,6 +68,31 @@ const statusIcons = {
   invalidated: XCircle
 } as const
 
+// Defensive fallbacks for unknown values (prevents crashes from invalid DB data)
+const defaultCategoryConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800', icon: Target }
+const defaultStatusConfig = { label: 'Unknown', color: 'bg-gray-100 text-gray-800' }
+
+// Helper functions for safe config access
+const getCategoryConfig = (category: string | undefined | null) => {
+  if (!category) return defaultCategoryConfig
+  return categoryConfig[category as keyof typeof categoryConfig] || defaultCategoryConfig
+}
+
+const getStatusConfig = (status: string | undefined | null) => {
+  if (!status) return defaultStatusConfig
+  return statusConfig[status as keyof typeof statusConfig] || defaultStatusConfig
+}
+
+const getCategoryIcon = (category: string | undefined | null) => {
+  if (!category) return Target
+  return categoryIcons[category as keyof typeof categoryIcons] || Target
+}
+
+const getStatusIcon = (status: string | undefined | null) => {
+  if (!status) return Clock
+  return statusIcons[status as keyof typeof statusIcons] || Clock
+}
+
 export function AssumptionMap({ projectId: propProjectId }: AssumptionMapProps) {
   const supabase = useMemo(() => createClient(), [])
   const { projects, isLoading: projectsLoading, error: projectsError } = useProjects()
@@ -584,8 +609,8 @@ function QuadrantCard({
                   {quadrant === 'validated' && (
                     <CheckCircle className="h-3 w-3 text-green-600" />
                   )}
-                  <Badge className={categoryConfig[assumption.category].color} variant="outline">
-                    {categoryConfig[assumption.category].label}
+                  <Badge className={getCategoryConfig(assumption.category).color} variant="outline">
+                    {getCategoryConfig(assumption.category).label}
                   </Badge>
                   <span className="text-muted-foreground">P{assumption.priority}</span>
                   {/* Evidence strength indicator */}
@@ -618,9 +643,9 @@ function QuadrantCard({
 }
 
 function AssumptionCard({ assumption }: { assumption: Assumption }) {
-  const categoryInfo = categoryConfig[assumption.category]
-  const CategoryIcon = categoryIcons[assumption.category]
-  const StatusIcon = statusIcons[assumption.status]
+  const categoryInfo = getCategoryConfig(assumption.category)
+  const CategoryIcon = getCategoryIcon(assumption.category)
+  const StatusIcon = getStatusIcon(assumption.status)
 
   // Count of test results
   const testCount = assumption.test_results?.length || 0
@@ -651,9 +676,9 @@ function AssumptionCard({ assumption }: { assumption: Assumption }) {
                     : 'No Evidence'}
                 </span>
               </div>
-              <Badge className={statusConfig[assumption.status].color}>
+              <Badge className={getStatusConfig(assumption.status).color}>
                 <StatusIcon className="h-3 w-3 mr-1" />
-                {statusConfig[assumption.status].label}
+                {getStatusConfig(assumption.status).label}
               </Badge>
               {/* Test results count badge */}
               {testCount > 0 && (
