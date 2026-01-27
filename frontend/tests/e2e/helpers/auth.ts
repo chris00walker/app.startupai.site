@@ -193,3 +193,4 @@ export async function waitForAuthenticatedPage(page: Page): Promise<void> {
   );
   await expect(authenticatedContent.first()).toBeVisible({ timeout: ELEMENT_VISIBILITY_TIMEOUT });
 }
+
