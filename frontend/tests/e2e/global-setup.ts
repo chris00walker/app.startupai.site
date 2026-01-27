@@ -17,6 +17,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env.local') });
 const TEST_USER_EMAILS = [
   'chris00walker@gmail.com', // CONSULTANT_USER
   'chris00walker@proton.me', // FOUNDER_USER
+  'admin@startupai.test',    // ADMIN_USER
 ];
 
 async function globalSetup(): Promise<void> {

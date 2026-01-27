@@ -17,19 +17,11 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import { ADMIN_USER } from './helpers/auth';
 
 // =============================================================================
 // Test Helpers
 // =============================================================================
-
-/**
- * Admin user credentials
- */
-const ADMIN_USER = {
-  email: 'admin@startupai.com',
-  password: 'AdminTest123!',
-  type: 'admin' as const,
-};
 
 /**
  * Login as admin user - uses strict assertions
@@ -46,7 +38,8 @@ async function loginAsAdmin(page: Page): Promise<void> {
   await emailInput.fill(ADMIN_USER.email);
   await passwordInput.fill(ADMIN_USER.password);
 
-  const submitButton = page.getByRole('button', { name: /sign in|log in|submit/i });
+  // Use exact match to avoid matching "Sign in with GitHub" button
+  const submitButton = page.getByRole('button', { name: 'Sign in', exact: true });
   await expect(submitButton).toBeVisible({ timeout: 5000 });
   await submitButton.click();
 

@@ -18,19 +18,11 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import { ADMIN_USER } from './helpers/auth';
 
 // =============================================================================
 // Test Helpers
 // =============================================================================
-
-/**
- * Admin user credentials
- */
-const ADMIN_USER = {
-  email: 'admin@startupai.com',
-  password: 'AdminTest123!',
-  type: 'admin' as const,
-};
 
 /**
  * Login as admin user
@@ -78,14 +70,14 @@ test.describe('US-A01: Search and Find Users', () => {
     // Verify the search page loads with heading
     await expect(page.getByRole('heading', { name: /user management/i })).toBeVisible();
 
-    // Verify search input is present
-    await expect(page.getByPlaceholder(/search.*email/i)).toBeVisible();
+    // Verify search form is present with Email field (placeholder: user@example.com)
+    await expect(page.getByPlaceholder('user@example.com')).toBeVisible();
   });
 
   test('should search users by email and return results', async ({ page }) => {
-    // Search for the admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    // Search for the admin user (known to exist) using Email field
+    const emailInput = page.getByPlaceholder('user@example.com');
+    await emailInput.fill('admin@startupai.test');
 
     // Click search button
     await page.getByRole('button', { name: /search/i }).click();
@@ -94,22 +86,22 @@ test.describe('US-A01: Search and Find Users', () => {
     // MUST return at least 1 result - the admin user we're logged in as
     // This verifies RLS policy allows admin to see user profiles
     const resultsTable = page.locator('table tbody tr');
-    await expect(resultsTable).toHaveCount({ min: 1 }, { timeout: 10000 });
+    await expect(resultsTable.first()).toBeVisible({ timeout: 10000 });
 
-    // Verify the results header shows count > 0
-    await expect(page.getByText(/Results \(\d+ user/)).toBeVisible();
+    // Verify the results show admin user (use .first() as email may appear in multiple places)
+    await expect(page.getByText('admin@startupai.test').first()).toBeVisible();
   });
 
   test('should display user role and status in results', async ({ page }) => {
-    // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    // Search for admin user (known to exist) using Email field
+    const emailInput = page.getByPlaceholder('user@example.com');
+    await emailInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
     // Results table MUST have rows - fail if no results
     const tableRows = page.locator('table tbody tr');
-    await expect(tableRows).toHaveCount({ min: 1 }, { timeout: 10000 });
+    await expect(tableRows.first()).toBeVisible({ timeout: 10000 });
 
     // First row should have role badge
     const firstRow = tableRows.first();
@@ -121,9 +113,9 @@ test.describe('US-A01: Search and Find Users', () => {
   });
 
   test('should show "No users found" only when search has no matches', async ({ page }) => {
-    // Search for a non-existent user
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('nonexistent-user-xyz-12345@fakeemail.invalid');
+    // Search for a non-existent user using Email field
+    const emailInput = page.getByPlaceholder('user@example.com');
+    await emailInput.fill('nonexistent-user-xyz-12345@fakeemail.invalid');
 
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
@@ -144,9 +136,9 @@ test.describe('US-A02: View User Profile and State', () => {
   });
 
   test('should display user profile details on click', async ({ page }) => {
-    // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    // Search for admin user (known to exist) using Email field
+    const emailInput = page.getByPlaceholder('user@example.com');
+    await emailInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
@@ -163,9 +155,9 @@ test.describe('US-A02: View User Profile and State', () => {
   });
 
   test('should display tabs for profile, projects, activity, and actions', async ({ page }) => {
-    // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    // Search for admin user (known to exist) using Email field
+    const emailInput = page.getByPlaceholder('user@example.com');
+    await emailInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
@@ -196,8 +188,8 @@ test.describe('US-A03: Impersonate User (Read-Only)', () => {
 
   test('should show impersonation button on user profile', async ({ page }) => {
     // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    const searchInput = page.getByPlaceholder('user@example.com');
+    await searchInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
@@ -217,8 +209,8 @@ test.describe('US-A03: Impersonate User (Read-Only)', () => {
 
   test('should not allow impersonating admin users', async ({ page }) => {
     // Search for admin user
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    const searchInput = page.getByPlaceholder('user@example.com');
+    await searchInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
@@ -250,8 +242,8 @@ test.describe('US-A08: Change User Role', () => {
 
   test('should display change role button on user profile', async ({ page }) => {
     // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    const searchInput = page.getByPlaceholder('user@example.com');
+    await searchInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
@@ -270,8 +262,8 @@ test.describe('US-A08: Change User Role', () => {
 
   test('should show confirmation dialog before role change', async ({ page }) => {
     // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    const searchInput = page.getByPlaceholder('user@example.com');
+    await searchInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 
@@ -294,8 +286,8 @@ test.describe('US-A08: Change User Role', () => {
 
   test('should require reason for role change', async ({ page }) => {
     // Search for admin user (known to exist)
-    const searchInput = page.getByPlaceholder(/search.*email/i);
-    await searchInput.fill('admin');
+    const searchInput = page.getByPlaceholder('user@example.com');
+    await searchInput.fill('admin@startupai.test');
     await page.getByRole('button', { name: /search/i }).click();
     await page.waitForLoadState('networkidle');
 

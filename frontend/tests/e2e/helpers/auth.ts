@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 
-export type UserType = 'consultant' | 'founder';
+export type UserType = 'consultant' | 'founder' | 'admin';
 
 export interface TestUser {
   email: string;
@@ -23,6 +23,16 @@ export const FOUNDER_USER: TestUser = {
   email: 'chris00walker@proton.me',
   password: 'W7txYdr7bV0Tc30U0bv&',
   type: 'founder',
+};
+
+/**
+ * Admin test user - must be created in Supabase with role='admin'
+ * See scripts/create-admin-test-user.ts for setup
+ */
+export const ADMIN_USER: TestUser = {
+  email: 'admin@startupai.test',
+  password: 'AdminTest123!',
+  type: 'admin',
 };
 
 // Default to consultant for backward compatibility

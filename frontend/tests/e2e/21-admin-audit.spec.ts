@@ -18,19 +18,11 @@
  */
 
 import { test, expect, Page } from '@playwright/test';
+import { ADMIN_USER } from './helpers/auth';
 
 // =============================================================================
 // Test Helpers
 // =============================================================================
-
-/**
- * Admin user credentials
- */
-const ADMIN_USER = {
-  email: 'admin@startupai.com',
-  password: 'AdminTest123!',
-  type: 'admin' as const,
-};
 
 /**
  * Login as admin user - uses strict assertions
