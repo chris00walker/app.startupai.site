@@ -61,7 +61,14 @@
       "Skill(tool-status)",
       "WebFetch(domain:developers.openai.com)",
       "mcp__shadcn__get_audit_checklist",
-      "WebFetch(domain:developers.figma.com)"
+      "WebFetch(domain:developers.figma.com)",
+      "Skill(doc-maintain)",
+      "Skill(hitl-flow)",
+      "WebFetch(domain:developers.google.com)",
+      "WebFetch(domain:developers.facebook.com)",
+      "WebFetch(domain:admanage.ai)",
+      "WebFetch(domain:interestexplorer.io)",
+      "WebFetch(domain:bir.ch)"
     ],
     "deny": [
       "Bash(rm:*)",
