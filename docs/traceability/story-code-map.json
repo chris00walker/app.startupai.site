@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T01:41:31.985Z",
+    "generated_at": "2026-01-27T01:48:32.391Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 381
+    "annotated_file_count": 387
   },
   "stories": {
     "US-F01": {
@@ -5280,10 +5280,18 @@
     "US-AP07": {
       "title": "Google Responsive Display Ads (P1)",
       "components": [],
-      "api_routes": [],
+      "api_routes": [
+        "frontend/src/app/api/ads/campaigns/google/activate/route.ts",
+        "frontend/src/app/api/ads/campaigns/google/route.ts"
+      ],
       "pages": [],
       "hooks": [],
-      "lib": [],
+      "lib": [
+        "frontend/src/lib/ads/google/client.ts",
+        "frontend/src/lib/ads/google/index.ts",
+        "frontend/src/lib/ads/google/insights.ts",
+        "frontend/src/lib/ads/google/types.ts"
+      ],
       "e2e_tests": [],
       "unit_tests": [],
       "db_tables": [],
@@ -7640,6 +7648,36 @@
     "frontend/src/lib/ads/meta/insights.ts": {
       "stories": [
         "US-AP06"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/google/activate/route.ts": {
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "frontend/src/app/api/ads/campaigns/google/route.ts": {
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "frontend/src/lib/ads/google/client.ts": {
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "frontend/src/lib/ads/google/index.ts": {
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "frontend/src/lib/ads/google/insights.ts": {
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "frontend/src/lib/ads/google/types.ts": {
+      "stories": [
+        "US-AP07"
       ]
     }
   }
