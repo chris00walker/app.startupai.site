@@ -23,7 +23,10 @@
     "traceability:generate": "pnpm exec tsx scripts/traceability/generate-story-map.ts",
     "traceability:validate": "pnpm exec tsx scripts/traceability/validate.ts",
     "traceability:gaps": "pnpm exec tsx scripts/traceability/generate-story-map.ts --report gaps",
-    "traceability:test": "pnpm exec tsx scripts/traceability/__tests__/run.ts"
+    "traceability:test": "pnpm exec tsx scripts/traceability/__tests__/run.ts",
+    "schema:coverage": "pnpm exec tsx scripts/schema-coverage/analyze.ts",
+    "schema:coverage:test": "pnpm exec tsx scripts/schema-coverage/__tests__/run.ts",
+    "schema:coverage:ci": "pnpm exec tsx scripts/schema-coverage/analyze.ts --ci"
   },
   "keywords": [
     "nextjs",
