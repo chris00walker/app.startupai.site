@@ -1,0 +1,3570 @@
+{
+  "metadata": {
+    "generated_at": "2026-01-28T21:45:44.247Z",
+    "version": "1.0.0",
+    "route_count": 103,
+    "caller_count": 86,
+    "skipped_count": 21,
+    "orphan_count": 0,
+    "external_inventories": [
+      {
+        "repo": "startupai-crew",
+        "route_count": 15,
+        "status": "loaded"
+      },
+      {
+        "repo": "startupai.site",
+        "route_count": 3,
+        "status": "loaded"
+      }
+    ]
+  },
+  "routes": {
+    "/api/admin/ad-platforms/[id]/health": {
+      "path": "/api/admin/ad-platforms/[id]/health",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/ad-platforms/[id]/health/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/admin/ad-platforms/page.tsx",
+          "line": 179,
+          "context": "try {\n      const response = await fetch(`/api/admin/ad-platforms/${connectionId}/health`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "ad_platform_connections"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AM06",
+        "US-AM07"
+      ]
+    },
+    "/api/admin/ad-platforms/[id]": {
+      "path": "/api/admin/ad-platforms/[id]",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/ad-platforms/[id]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/BudgetConfig.tsx",
+          "line": 70,
+          "context": "try {\n      const response = await fetch('/api/admin/ad-platforms/budget-config', {\n        method: 'PUT',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/app/admin/ad-platforms/page.tsx",
+          "line": 163,
+          "context": "try {\n      const response = await fetch(`/api/admin/ad-platforms/${deletingPlatform.id}`, {\n        method: 'DELETE',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "ad_platform_connections",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AM01",
+        "US-AM02"
+      ]
+    },
+    "/api/admin/ad-platforms/[id]/status": {
+      "path": "/api/admin/ad-platforms/[id]/status",
+      "methods": [
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/ad-platforms/[id]/status/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/admin/ad-platforms/page.tsx",
+          "line": 144,
+          "context": "try {\n      const response = await fetch(`/api/admin/ad-platforms/${connection.id}/status`, {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "ad_platform_connections"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AM01"
+      ]
+    },
+    "/api/admin/ad-platforms/connect": {
+      "path": "/api/admin/ad-platforms/connect",
+      "methods": [
+        "POST",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/ad-platforms/connect/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/PlatformConnectModal.tsx",
+          "line": 181,
+          "context": "try {\n      const response = await fetch('/api/admin/ad-platforms/connect', {\n        method: editingPlatform ? 'PUT' : 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "ad_platform_connections"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AM01",
+        "US-AM02"
+      ]
+    },
+    "/api/admin/ad-platforms": {
+      "path": "/api/admin/ad-platforms",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/ad-platforms/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/admin/ad-platforms/page.tsx",
+          "line": 118,
+          "context": "try {\n      const response = await fetch('/api/admin/ad-platforms');\n      if (!response.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "ad_platform_connections",
+          "ad_budget_pools",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AM01",
+        "US-AM04"
+      ]
+    },
+    "/api/admin/audit": {
+      "path": "/api/admin/audit",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/audit/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "admin_audit_log",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A07"
+      ]
+    },
+    "/api/admin/features": {
+      "path": "/api/admin/features",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/features/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/FeatureFlagEditor.tsx",
+          "line": 65,
+          "context": "try {\n      const response = await fetch('/api/admin/features', {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useFeatureFlag.ts",
+          "line": 142,
+          "context": "try {\n        const response = await fetch('/api/admin/features');\n        if (!response.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useFeatureFlag.ts",
+          "line": 216,
+          "context": "try {\n      const response = await fetch('/api/admin/features');\n      if (!response.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/app/admin/features/page.tsx",
+          "line": 31,
+          "context": "try {\n      const response = await fetch('/api/admin/features');\n      const data = await response.json();",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "feature_flags"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A06"
+      ]
+    },
+    "/api/admin/health": {
+      "path": "/api/admin/health",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/health/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/admin/health/page.tsx",
+          "line": 41,
+          "context": "try {\n      const response = await fetch('/api/admin/health');\n      const data = await response.json();",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/app/admin/page.tsx",
+          "line": 98,
+          "context": "// System health from API\n          fetch('/api/admin/health')\n            .then((res) => (res.ok ? res.json() : null))",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "crewai_validation_states",
+          "approval_requests",
+          "security_audit_log"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A05"
+      ]
+    },
+    "/api/admin/users/[id]/billing/credit": {
+      "path": "/api/admin/users/[id]/billing/credit",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/billing/credit/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/BillingActionsPanel.tsx",
+          "line": 104,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}/billing/credit`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "/api/admin/users/[id]/billing/refund": {
+      "path": "/api/admin/users/[id]/billing/refund",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/billing/refund/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "/api/admin/users/[id]/billing/retry": {
+      "path": "/api/admin/users/[id]/billing/retry",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/billing/retry/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/BillingActionsPanel.tsx",
+          "line": 135,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}/billing/retry`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "/api/admin/users/[id]/billing": {
+      "path": "/api/admin/users/[id]/billing",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/billing/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/BillingActionsPanel.tsx",
+          "line": 80,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}/billing`);\n      const data = await response.json();",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A12"
+      ]
+    },
+    "/api/admin/users/[id]/export": {
+      "path": "/api/admin/users/[id]/export",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/export/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/DataExportPanel.tsx",
+          "line": 40,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}/export`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "projects",
+          "hypotheses",
+          "evidence",
+          "crewai_validation_states",
+          "security_audit_log"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A09"
+      ]
+    },
+    "/api/admin/users/[id]/impersonate": {
+      "path": "/api/admin/users/[id]/impersonate",
+      "methods": [
+        "POST",
+        "DELETE",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/impersonate/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/admin/users/[id]/page.tsx",
+          "line": 95,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}/impersonate`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "admin_sessions"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A03"
+      ]
+    },
+    "/api/admin/users/[id]/integrity": {
+      "path": "/api/admin/users/[id]/integrity",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/integrity/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/IntegrityCheckPanel.tsx",
+          "line": 83,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}/integrity`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A10"
+      ]
+    },
+    "/api/admin/users/[id]": {
+      "path": "/api/admin/users/[id]",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/[id]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/RoleChangeDialog.tsx",
+          "line": 71,
+          "context": "try {\n      const response = await fetch(`/api/admin/users/${userId}`, {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/app/admin/users/[id]/page.tsx",
+          "line": 67,
+          "context": "try {\n        const response = await fetch(`/api/admin/users/${userId}`);\n        const data = await response.json();",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "projects",
+          "security_audit_log"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A02",
+        "US-A08"
+      ]
+    },
+    "/api/admin/users": {
+      "path": "/api/admin/users",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/users/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "projects"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A01"
+      ]
+    },
+    "/api/admin/workflows/[id]/retry": {
+      "path": "/api/admin/workflows/[id]/retry",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/workflows/[id]/retry/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/admin/WorkflowRetryDialog.tsx",
+          "line": 63,
+          "context": "try {\n      const response = await fetch(`/api/admin/workflows/${workflow.runId}/retry`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "validation_runs",
+          "crewai_validation_states"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A04"
+      ]
+    },
+    "/api/admin/workflows": {
+      "path": "/api/admin/workflows",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/admin/workflows/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/admin/workflows/page.tsx",
+          "line": 46,
+          "context": "try {\n      const response = await fetch('/api/admin/workflows?limit=50');\n      const data = await response.json();",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "crewai_validation_states",
+          "user_profiles",
+          "projects"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A04"
+      ]
+    },
+    "/api/ads/campaigns/[id]/metrics": {
+      "path": "/api/ads/campaigns/[id]/metrics",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/[id]/metrics/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_performance_metrics",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP06"
+      ]
+    },
+    "/api/ads/campaigns/[id]/poll-status": {
+      "path": "/api/ads/campaigns/[id]/poll-status",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/[id]/poll-status/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/approvals/AdCreativeApproval.tsx",
+          "line": 242,
+          "context": "setIsPolling(true);\n      const response = await fetch(`/api/ads/campaigns/${data.campaign.id}/poll-status`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP04"
+      ]
+    },
+    "/api/ads/campaigns/google/activate": {
+      "path": "/api/ads/campaigns/google/activate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/google/activate/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "/api/ads/campaigns/google": {
+      "path": "/api/ads/campaigns/google",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/google/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "projects",
+          "copy_banks",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP07"
+      ]
+    },
+    "/api/ads/campaigns/linkedin/activate": {
+      "path": "/api/ads/campaigns/linkedin/activate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/linkedin/activate/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "/api/ads/campaigns/linkedin": {
+      "path": "/api/ads/campaigns/linkedin",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/linkedin/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "projects",
+          "copy_banks",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP08"
+      ]
+    },
+    "/api/ads/campaigns/meta/activate": {
+      "path": "/api/ads/campaigns/meta/activate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/meta/activate/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP03"
+      ]
+    },
+    "/api/ads/campaigns/meta": {
+      "path": "/api/ads/campaigns/meta",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/campaigns/meta/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "projects",
+          "copy_banks",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP03"
+      ]
+    },
+    "/api/ads/images/generate": {
+      "path": "/api/ads/images/generate",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/images/generate/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/ads/ImageSelectionFlow.tsx",
+          "line": 173,
+          "context": "try {\n      const response = await fetch('/api/ads/images/generate', {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP02"
+      ]
+    },
+    "/api/ads/images": {
+      "path": "/api/ads/images",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/ads/images/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/ads/ImageSelectionFlow.tsx",
+          "line": 142,
+          "context": "try {\n      const response = await fetch('/api/ads/images', {\n        method: 'POST',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/components/ads/ImageSelectionFlow.tsx",
+          "line": 120,
+          "context": "try {\n      const response = await fetch(`/api/ads/images?projectId=${projectId}`);\n      const data = await response.json();",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "copy_banks"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP02"
+      ]
+    },
+    "/api/agents/status": {
+      "path": "/api/agents/status",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/agents/status/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/Agents/AgentStatus.tsx",
+          "line": 95,
+          "context": "queryFn: async () => {\n      const response = await fetch('/api/agents/status');\n      if (!response.ok) throw new Error('Failed to fetch agent status');",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useFounderStatus.ts",
+          "line": 74,
+          "context": "queryFn: async () => {\n      const response = await fetch('/api/agents/status')\n      if (!response.ok) throw new Error('Failed to fetch founder status')",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "reports"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [
+        {
+          "file": "frontend/tests/e2e/helpers/api-mocks.ts",
+          "line": 79,
+          "pattern": "**/api/agents/status",
+          "is_wildcard": false
+        }
+      ],
+      "stories": [
+        "US-F02"
+      ]
+    },
+    "/api/analytics/dashboard": {
+      "path": "/api/analytics/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/analytics/dashboard/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/analytics.tsx",
+          "line": 69,
+          "context": "queryFn: async () => {\n      const response = await fetch(\"/api/analytics/dashboard\")\n      if (!response.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "crewai_validation_states",
+          "hypotheses",
+          "evidence",
+          "clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-CP06"
+      ]
+    },
+    "/api/analyze": {
+      "path": "/api/analyze",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/analyze/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/onboarding/ProjectCreationWizard.tsx",
+          "line": 172,
+          "context": "const response = await fetch('/api/analyze', {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "reports",
+          "evidence",
+          "projects",
+          "entrepreneur_briefs",
+          "user_profiles",
+          "onboarding_sessions",
+          "validation_runs"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "/api/approvals/[id]": {
+      "path": "/api/approvals/[id]",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/approvals/[id]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useApprovals.ts",
+          "line": 120,
+          "context": "try {\n      const response = await fetch(`/api/approvals/${id}`, {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useApprovals.ts",
+          "line": 147,
+          "context": "try {\n      const response = await fetch(`/api/approvals/${id}`, {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useApprovals.ts",
+          "line": 206,
+          "context": "const response = await fetch(`/api/approvals/${id}`);",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "approval_requests",
+          "user_profiles",
+          "approval_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-H01",
+        "US-H02",
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-H07",
+        "US-H08",
+        "US-H09",
+        "US-AH01",
+        "US-AH02",
+        "US-AH03",
+        "US-AH04",
+        "US-AH05",
+        "US-AH06",
+        "US-AH07",
+        "US-AH08",
+        "US-AH09",
+        "US-AH10"
+      ]
+    },
+    "/api/approvals/ad-creative": {
+      "path": "/api/approvals/ad-creative",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/approvals/ad-creative/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/approvals/AdCreativeApproval.tsx",
+          "line": 222,
+          "context": "const response = await fetch(`/api/approvals/ad-creative?campaignId=${campaignId}`);\n      if (!response.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/components/approvals/AdCreativeApproval.tsx",
+          "line": 267,
+          "context": "// Save copy state changes first\n      await fetch(`/api/approvals/ad-creative`, {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "ad_campaigns",
+          "copy_banks",
+          "approval_requests"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP05"
+      ]
+    },
+    "/api/approvals": {
+      "path": "/api/approvals",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/approvals/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useApprovals.ts",
+          "line": 55,
+          "context": "const response = await fetch(`/api/approvals?status=${status}`);",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "approval_requests",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F03",
+        "US-H01",
+        "US-H02",
+        "US-H04",
+        "US-H05",
+        "US-H06",
+        "US-H07",
+        "US-H08",
+        "US-H09"
+      ]
+    },
+    "/api/approvals/webhook": {
+      "path": "/api/approvals/webhook",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/approvals/webhook/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "approval_requests",
+          "approval_preferences",
+          "approval_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AA01",
+        "US-AA02"
+      ]
+    },
+    "/api/assistant/chat": {
+      "path": "/api/assistant/chat",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/assistant/chat/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/assistant/DashboardAIAssistant.tsx",
+          "line": 164,
+          "context": "try {\n      const response = await fetch('/api/assistant/chat', {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "reports",
+          "projects",
+          "evidence",
+          "entrepreneur_briefs",
+          "assistant_conversations"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F16"
+      ]
+    },
+    "/api/assistant/history": {
+      "path": "/api/assistant/history",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/assistant/history/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/assistant/DashboardAIAssistant.tsx",
+          "line": 105,
+          "context": "const response = await fetch(`/api/assistant/history?${params}`);\n      if (response.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "assistant_conversations"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-CP09"
+      ]
+    },
+    "/api/auth/logout": {
+      "path": "/api/auth/logout",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/auth/logout/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AU01"
+      ]
+    },
+    "/api/auth/validate-invite": {
+      "path": "/api/auth/validate-invite",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/auth/validate-invite/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/app/signup/page.tsx",
+          "line": 66,
+          "context": "try {\n      const response = await fetch(`/api/auth/validate-invite?token=${encodeURIComponent(token)}`)\n      const data = await response.json()",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_clients",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C02"
+      ]
+    },
+    "/api/client/consultant/unlink": {
+      "path": "/api/client/consultant/unlink",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/client/consultant/unlink/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_clients",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-E06"
+      ]
+    },
+    "/api/clients/[id]/archive": {
+      "path": "/api/clients/[id]/archive",
+      "methods": [
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/clients/[id]/archive/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useClients.ts",
+          "line": 389,
+          "context": "const archiveClient = async (clientId: string): Promise<void> => {\n    const response = await fetch(`/api/clients/${clientId}/archive`, {\n      method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useClients.ts",
+          "line": 407,
+          "context": "const unarchiveClient = async (clientId: string): Promise<void> => {\n    const response = await fetch(`/api/clients/${clientId}/archive`, {\n      method: 'PATCH',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "archived_clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C05"
+      ]
+    },
+    "/api/clients/[id]/artefacts": {
+      "path": "/api/clients/[id]/artefacts",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/clients/[id]/artefacts/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/client/[id].tsx",
+          "line": 88,
+          "context": "queryFn: async () => {\n      const response = await api.get(`/clients/${id}/artefacts`);\n      return response?.data?.artefacts ?? [];",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C04"
+      ]
+    },
+    "/api/clients/[id]/discovery": {
+      "path": "/api/clients/[id]/discovery",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/clients/[id]/discovery/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/legacy/forms/IntakeForm.tsx",
+          "line": 22,
+          "context": "mutationFn: (payload: IntakeData) =>\n      api.post(`/clients/${clientId}/discovery`, payload),\n    onSuccess: () => alert('Discovery workflow triggered'),",
+          "call_style": "api_wrapper"
+        },
+        {
+          "file": "frontend/src/pages/clients/new.tsx",
+          "line": 41,
+          "context": "// Fire and forget - don't await this call\n        api.post(`/clients/${clientId}/discovery`, {}).catch(error => {\n          console.warn('Discovery workflow failed to start (client still created):', ",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C04"
+      ]
+    },
+    "/api/clients/[id]": {
+      "path": "/api/clients/[id]",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/clients/[id]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/client/[id].tsx",
+          "line": 77,
+          "context": "queryFn: async () => {\n      const response = await api.get(`/clients/${id}`);\n      return response?.data?.client ?? null;",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C04"
+      ]
+    },
+    "/api/clients/[id]/tasks": {
+      "path": "/api/clients/[id]/tasks",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/clients/[id]/tasks/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/Dashboard/KanbanBoard.tsx",
+          "line": 45,
+          "context": "queryFn: async () => {\n      const response = await api.get(`/clients/${clientId}/tasks`);\n      return response?.data?.tasks ?? [];",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C04"
+      ]
+    },
+    "/api/clients": {
+      "path": "/api/clients",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/clients/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/clients/new.tsx",
+          "line": 27,
+          "context": "setWorkflowStatus({ stage: 'creating', message: 'Creating client profile...' });\n      const response = await api.post('/clients', clientData);\n      return response.data;",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C02",
+        "US-C03"
+      ]
+    },
+    "/api/consultant/clients/[id]/archive": {
+      "path": "/api/consultant/clients/[id]/archive",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/clients/[id]/archive/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useConsultantClients.ts",
+          "line": 263,
+          "context": "try {\n        const response = await fetch(`/api/consultant/clients/${relationshipId}/archive`, {\n          method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_clients",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [
+        {
+          "file": "frontend/tests/e2e/12-client-lifecycle.spec.ts",
+          "line": 76,
+          "pattern": "**/api/consultant/clients/*/archive",
+          "is_wildcard": false
+        }
+      ],
+      "stories": [
+        "US-C05"
+      ]
+    },
+    "/api/consultant/invites/[id]/resend": {
+      "path": "/api/consultant/invites/[id]/resend",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/invites/[id]/resend/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useConsultantClients.ts",
+          "line": 201,
+          "context": "try {\n        const response = await fetch(`/api/consultant/invites/${inviteId}/resend`, {\n          method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C06"
+      ]
+    },
+    "/api/consultant/invites/[id]": {
+      "path": "/api/consultant/invites/[id]",
+      "methods": [
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/invites/[id]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useConsultantClients.ts",
+          "line": 232,
+          "context": "try {\n        const response = await fetch(`/api/consultant/invites/${inviteId}`, {\n          method: 'DELETE',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C02"
+      ]
+    },
+    "/api/consultant/invites": {
+      "path": "/api/consultant/invites",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/invites/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useConsultantClients.ts",
+          "line": 132,
+          "context": "const response = await fetch('/api/consultant/invites');\n      const data = await response.json();",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useConsultantClients.ts",
+          "line": 168,
+          "context": "try {\n        const response = await fetch('/api/consultant/invites', {\n          method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "consultant_clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C02"
+      ]
+    },
+    "/api/consultant/onboarding/complete": {
+      "path": "/api/consultant/onboarding/complete",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/onboarding/complete/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_onboarding_sessions",
+          "user_profiles",
+          "consultant_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C01"
+      ]
+    },
+    "/api/consultant/onboarding": {
+      "path": "/api/consultant/onboarding",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/onboarding/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_profiles",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C01",
+        "US-CT01"
+      ]
+    },
+    "/api/consultant/onboarding/start": {
+      "path": "/api/consultant/onboarding/start",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/consultant/onboarding/start/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_onboarding_sessions"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-C01"
+      ]
+    },
+    "/api/copy-bank/[projectId]": {
+      "path": "/api/copy-bank/[projectId]",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/copy-bank/[projectId]/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "copy_banks",
+          "value_proposition_canvas"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP01"
+      ]
+    },
+    "/api/crewai/consultant": {
+      "path": "/api/crewai/consultant",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/crewai/consultant/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": []
+    },
+    "/api/crewai/results": {
+      "path": "/api/crewai/results",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/crewai/results/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "reports",
+          "evidence",
+          "entrepreneur_briefs"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": []
+    },
+    "/api/crewai/resume": {
+      "path": "/api/crewai/resume",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/crewai/resume/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "approval_requests",
+          "approval_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-H01",
+        "US-F03"
+      ]
+    },
+    "/api/crewai/retry": {
+      "path": "/api/crewai/retry",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/crewai/retry/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/validation/ValidationProgressTimeline.tsx",
+          "line": 223,
+          "context": "try {\n      const response = await fetch('/api/crewai/retry', {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "validation_runs"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-E04"
+      ]
+    },
+    "/api/crewai/status": {
+      "path": "/api/crewai/status",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/crewai/status/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "validation_runs",
+          "approval_requests"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F08"
+      ]
+    },
+    "/api/crewai/webhook": {
+      "path": "/api/crewai/webhook",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/crewai/webhook/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "reports",
+          "evidence",
+          "entrepreneur_briefs",
+          "crewai_validation_states",
+          "public_activity_log",
+          "consultant_profiles",
+          "validation_runs",
+          "validation_progress",
+          "founders_briefs",
+          "approval_requests"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F06",
+        "US-F08",
+        "US-F09",
+        "US-H01"
+      ]
+    },
+    "/api/cron/collect-ad-metrics": {
+      "path": "/api/cron/collect-ad-metrics",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/cron/collect-ad-metrics/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_performance_metrics",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP06"
+      ]
+    },
+    "/api/cron/escalate-approvals": {
+      "path": "/api/cron/escalate-approvals",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/cron/escalate-approvals/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "approval_requests",
+          "approval_preferences",
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AA03"
+      ]
+    },
+    "/api/cron/poll-ad-reviews": {
+      "path": "/api/cron/poll-ad-reviews",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/cron/poll-ad-reviews/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "ad_platform_connections",
+          "ad_campaigns"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AP04"
+      ]
+    },
+    "/api/cron/sync-projects": {
+      "path": "/api/cron/sync-projects",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/cron/sync-projects/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_integrations",
+          "projects",
+          "sync_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "/api/health": {
+      "path": "/api/health",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/health/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useHealthCheck.ts",
+          "line": 22,
+          "context": "queryFn: async () => {\n      const response = await fetch('/api/health')\n      if (!response.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-A05"
+      ]
+    },
+    "/api/imports/[type]/items": {
+      "path": "/api/imports/[type]/items",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/imports/[type]/items/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/imports/ImportDialog.tsx",
+          "line": 65,
+          "context": "try {\n      const response = await fetch(`/api/imports/${integrationType}/items`);\n      const data = await response.json();",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "/api/imports/[type]": {
+      "path": "/api/imports/[type]",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/imports/[type]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/imports/ImportDialog.tsx",
+          "line": 99,
+          "context": "const response = await fetch(`/api/imports/${integrationType}`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "import_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI01"
+      ]
+    },
+    "/api/integrations/[type]/callback": {
+      "path": "/api/integrations/[type]/callback",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/integrations/[type]/callback/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_integrations"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-I02",
+        "US-I03",
+        "US-BI01"
+      ]
+    },
+    "/api/integrations/[type]/connect": {
+      "path": "/api/integrations/[type]/connect",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/integrations/[type]/connect/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-I02",
+        "US-BI01"
+      ]
+    },
+    "/api/integrations/[type]/refresh": {
+      "path": "/api/integrations/[type]/refresh",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/integrations/[type]/refresh/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_integrations"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI01",
+        "US-BI02"
+      ]
+    },
+    "/api/integrations/[type]": {
+      "path": "/api/integrations/[type]",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/integrations/[type]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useIntegrations.ts",
+          "line": 158,
+          "context": "async (type: IntegrationType) => {\n      const response = await fetch(`/api/integrations/${type}`, {\n        method: 'DELETE',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useIntegrations.ts",
+          "line": 178,
+          "context": "async (type: IntegrationType, preferences: Record<string, unknown>) => {\n      const response = await fetch(`/api/integrations/${type}`, {\n        method: 'PATCH',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_integrations",
+          "user_integration_preferences"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 225,
+          "pattern": "/api/integrations/slack",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 339,
+          "pattern": "/api/integrations/github",
+          "is_wildcard": false
+        }
+      ],
+      "stories": [
+        "US-I04",
+        "US-I05"
+      ]
+    },
+    "/api/integrations/[type]/sync": {
+      "path": "/api/integrations/[type]/sync",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/integrations/[type]/sync/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/settings/integrations/SyncStatus.tsx",
+          "line": 91,
+          "context": "try {\n      const response = await fetch(\n        `/api/integrations/${integrationType}/sync?projectId=${projectId}&limit=5`",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/components/settings/integrations/SyncStatus.tsx",
+          "line": 118,
+          "context": "try {\n      const response = await fetch(`/api/integrations/${integrationType}/sync`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "entrepreneur_briefs",
+          "sync_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI02"
+      ]
+    },
+    "/api/integrations": {
+      "path": "/api/integrations",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/integrations/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useIntegrations.ts",
+          "line": 59,
+          "context": "setIsLoading(true);\n      const response = await fetch('/api/integrations');",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_integrations",
+          "user_integration_preferences"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 76,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 108,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 138,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 167,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 204,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 254,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 282,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 316,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 365,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 394,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 422,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 456,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/28-integrations.spec.ts",
+          "line": 472,
+          "pattern": "/api/integrations",
+          "is_wildcard": false
+        }
+      ],
+      "stories": [
+        "US-I01",
+        "US-I03"
+      ]
+    },
+    "/api/mappings/[id]/apply": {
+      "path": "/api/mappings/[id]/apply",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/mappings/[id]/apply/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "field_mappings",
+          "import_history",
+          "projects",
+          "entrepreneur_briefs",
+          "evidence"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "/api/mappings/[id]": {
+      "path": "/api/mappings/[id]",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/mappings/[id]/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "field_mappings"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "/api/mappings": {
+      "path": "/api/mappings",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/mappings/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "field_mappings"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-BI03"
+      ]
+    },
+    "/api/onboarding/brief": {
+      "path": "/api/onboarding/brief",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/onboarding/brief/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "entrepreneur_briefs"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F01",
+        "US-H01"
+      ]
+    },
+    "/api/onboarding/debug": {
+      "path": "/api/onboarding/debug",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/onboarding/debug/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "onboarding_sessions"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": []
+    },
+    "/api/projects/[id]": {
+      "path": "/api/projects/[id]",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/projects/[id]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/settings/ProjectsTab.tsx",
+          "line": 65,
+          "context": "try {\n      const response = await fetch(`/api/projects/${projectId}`);\n      if (response.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useProjects.ts",
+          "line": 168,
+          "context": "const archiveProject = async (projectId: string): Promise<void> => {\n    const response = await fetch(`/api/projects/${projectId}`, {\n      method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useProjects.ts",
+          "line": 186,
+          "context": "const unarchiveProject = async (projectId: string): Promise<void> => {\n    const response = await fetch(`/api/projects/${projectId}`, {\n      method: 'PATCH',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useProjects.ts",
+          "line": 205,
+          "context": "const deleteProject = async (projectId: string): Promise<void> => {\n    const response = await fetch(`/api/projects/${projectId}`, {\n      method: 'DELETE',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "hypotheses",
+          "evidence",
+          "experiments",
+          "reports"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [
+        {
+          "file": "frontend/tests/e2e/11-project-lifecycle.spec.ts",
+          "line": 122,
+          "pattern": "**/api/projects/*",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/client-dashboard.spec.ts",
+          "line": 45,
+          "pattern": "**/api/projects/${project.id}*",
+          "is_wildcard": false
+        }
+      ],
+      "stories": [
+        "US-F04",
+        "US-F05"
+      ]
+    },
+    "/api/projects/create": {
+      "path": "/api/projects/create",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/projects/create/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/onboarding/ProjectCreationWizard.tsx",
+          "line": 119,
+          "context": "const response = await fetch('/api/projects/create', {\n      method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "hypotheses"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F11",
+        "US-C07"
+      ]
+    },
+    "/api/projects/quick-start": {
+      "path": "/api/projects/quick-start",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/projects/quick-start/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/onboarding/QuickStartForm.tsx",
+          "line": 263,
+          "context": "const response = await fetch('/api/projects/quick-start', {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "consultant_clients",
+          "projects",
+          "crewai_validation_states",
+          "validation_runs"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F01",
+        "US-F07",
+        "US-E03",
+        "US-BI04"
+      ]
+    },
+    "/api/settings/approvals": {
+      "path": "/api/settings/approvals",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/approvals/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 499,
+          "context": "setApprovalSettingsLoading(true)\n        const response = await fetch('/api/settings/approvals')",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 527,
+          "context": "try {\n      const response = await fetch('/api/settings/approvals', {\n        method: 'PUT',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "approval_preferences"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AA01",
+        "US-AA02",
+        "US-AA03"
+      ]
+    },
+    "/api/settings/gate-policies/[gate]": {
+      "path": "/api/settings/gate-policies/[gate]",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/gate-policies/[gate]/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "gate_policies"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "/api/settings/gate-policies": {
+      "path": "/api/settings/gate-policies",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/gate-policies/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useGatePolicies.ts",
+          "line": 68,
+          "context": "const response = await fetch('/api/settings/gate-policies');",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "gate_policies"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "/api/settings/notifications": {
+      "path": "/api/settings/notifications",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/notifications/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 209,
+          "context": "try {\n        const response = await fetch('/api/settings/notifications')\n        if (response.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 367,
+          "context": "try {\n      const response = await fetch('/api/settings/notifications', {\n        method: 'PUT',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "notification_preferences"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-N03"
+      ]
+    },
+    "/api/settings/preferences": {
+      "path": "/api/settings/preferences",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/preferences/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 265,
+          "context": "try {\n        const response = await fetch('/api/settings/preferences')\n        if (response.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 467,
+          "context": "try {\n      const response = await fetch('/api/settings/preferences', {\n        method: 'PUT',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_preferences"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-PR01",
+        "US-PR02",
+        "US-PR03",
+        "US-PR04"
+      ]
+    },
+    "/api/settings/security/2fa/enroll": {
+      "path": "/api/settings/security/2fa/enroll",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/2fa/enroll/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "mfa_recovery_codes"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "/api/settings/security/2fa/recover": {
+      "path": "/api/settings/security/2fa/recover",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/2fa/recover/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "mfa_recovery_codes"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "/api/settings/security/2fa": {
+      "path": "/api/settings/security/2fa",
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/2fa/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 291,
+          "context": "// Fetch 2FA status\n        const twoFaResponse = await fetch('/api/settings/security/2fa')\n        if (twoFaResponse.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "/api/settings/security/2fa/verify": {
+      "path": "/api/settings/security/2fa/verify",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/2fa/verify/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS03"
+      ]
+    },
+    "/api/settings/security/login-history": {
+      "path": "/api/settings/security/login-history",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/login-history/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/lib/auth/actions.ts",
+          "line": 55,
+          "context": "await Promise.all([\n      fetch('/api/settings/security/login-history', {\n        method: 'POST',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 303,
+          "context": "// Fetch login history\n        const historyResponse = await fetch('/api/settings/security/login-history?limit=5')\n        if (historyResponse.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "login_history"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS04"
+      ]
+    },
+    "/api/settings/security/password": {
+      "path": "/api/settings/security/password",
+      "methods": [
+        "PUT"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/password/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 409,
+          "context": "try {\n      const response = await fetch('/api/settings/security/password', {\n        method: 'PUT',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS02"
+      ]
+    },
+    "/api/settings/security/sessions/[id]": {
+      "path": "/api/settings/security/sessions/[id]",
+      "methods": [
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/sessions/[id]/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_sessions"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS05"
+      ]
+    },
+    "/api/settings/security/sessions": {
+      "path": "/api/settings/security/sessions",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/settings/security/sessions/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/lib/auth/actions.ts",
+          "line": 60,
+          "context": "}),\n      fetch('/api/settings/security/sessions', {\n        method: 'POST',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 310,
+          "context": "// Fetch active sessions\n        const sessionsResponse = await fetch('/api/settings/security/sessions')\n        if (sessionsResponse.ok) {",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/pages/settings.tsx",
+          "line": 445,
+          "context": "try {\n      const response = await fetch('/api/settings/security/sessions', {\n        method: 'DELETE',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_sessions"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-AS05"
+      ]
+    },
+    "/api/stripe/create-checkout-session": {
+      "path": "/api/stripe/create-checkout-session",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/stripe/create-checkout-session/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [
+        {
+          "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+          "line": 123,
+          "pattern": "**/api/stripe/create-checkout-session",
+          "is_wildcard": false
+        },
+        {
+          "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+          "line": 616,
+          "pattern": "**/api/stripe/create-checkout-session",
+          "is_wildcard": false
+        }
+      ],
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "/api/stripe/webhook": {
+      "path": "/api/stripe/webhook",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/stripe/webhook/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "analytics_events"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-FT03"
+      ]
+    },
+    "/api/trial/allow": {
+      "path": "/api/trial/allow",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/trial/allow/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-FT02"
+      ]
+    },
+    "/api/trial/status": {
+      "path": "/api/trial/status",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/trial/status/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/upgrade/TrialStatusCard.tsx",
+          "line": 93,
+          "context": "try {\n        const response = await fetch('/api/trial/status');\n        if (!response.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "user_profiles",
+          "consultant_clients"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-CT04",
+        "US-FT02"
+      ]
+    },
+    "/api/v1/public/activity": {
+      "path": "/api/v1/public/activity",
+      "methods": [
+        "GET",
+        "OPTIONS"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/v1/public/activity/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "public_activity_log"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": []
+    },
+    "/api/v1/public/metrics": {
+      "path": "/api/v1/public/metrics",
+      "methods": [
+        "GET",
+        "OPTIONS"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/v1/public/metrics/route.ts",
+      "callers": [],
+      "outbound": {
+        "supabase_tables": [
+          "crewai_validation_states",
+          "projects",
+          "hypotheses",
+          "evidence",
+          "public_activity_log"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": []
+    },
+    "/api/vpc/[projectId]/initialize": {
+      "path": "/api/vpc/[projectId]/initialize",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/vpc/[projectId]/initialize/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useVPC.ts",
+          "line": 194,
+          "context": "const response = await fetch(`/api/vpc/${projectId}/initialize`, {\n          method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "crewai_validation_states",
+          "value_proposition_canvas"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-CP02"
+      ]
+    },
+    "/api/vpc/[projectId]": {
+      "path": "/api/vpc/[projectId]",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "source_file": "frontend/src/app/api/vpc/[projectId]/route.ts",
+      "callers": [
+        {
+          "file": "frontend/src/components/canvas/GuidedValuePropositionCanvas.tsx",
+          "line": 294,
+          "context": "try {\n        const response = await fetch(`/api/vpc/${projectId}`, {\n          method: 'POST',",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useVPC.ts",
+          "line": 160,
+          "context": "const response = await fetch(`/api/vpc/${projectId}`);\n      const data = await response.json();",
+          "call_style": "fetch"
+        },
+        {
+          "file": "frontend/src/hooks/useVPC.ts",
+          "line": 234,
+          "context": "const response = await fetch(`/api/vpc/${projectId}`, {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "outbound": {
+        "supabase_tables": [
+          "projects",
+          "value_proposition_canvas"
+        ],
+        "modal_endpoints": [],
+        "api_routes": []
+      },
+      "e2e_coverage": [],
+      "stories": [
+        "US-F12",
+        "US-AP01"
+      ]
+    }
+  },
+  "netlify_functions": {},
+  "orphans": [
+    {
+      "route": "/api/metrics/tasks",
+      "callers": [
+        {
+          "file": "frontend/src/components/Dashboard/MetricsPanel.tsx",
+          "line": 15,
+          "context": "queryFn: async () => {\n      const response = await api.get('/metrics/tasks');\n      return response?.data?.counts ?? ({} as Record<Status, number>);",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/metrics/tasks/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/crewai/analyze",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useCrewAIState.ts",
+          "line": 430,
+          "context": "// Call our API route to start the analysis\n      const response = await fetch('/api/crewai/analyze', {\n        method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/crewai/analyze/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/crewai/status/[param]",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useCrewAIState.ts",
+          "line": 465,
+          "context": "try {\n        const response = await fetch(`/api/crewai/status/${id}`)\n        if (!response.ok) {",
+          "call_style": "fetch"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/crewai/status/[param]/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/chat/save",
+      "callers": [
+        {
+          "file": "frontend/src/hooks/useOnboardingRecovery.ts",
+          "line": 168,
+          "context": "try {\n        const response = await fetch('/api/chat/save', {\n          method: 'POST',",
+          "call_style": "fetch"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/chat/save/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/clients/[param]/[param]",
+      "callers": [
+        {
+          "file": "frontend/src/pages/client/[id].tsx",
+          "line": 138,
+          "context": "mutationFn: async (workflowType: string) => {\n      return api.post(`/clients/${id}/${workflowType}`, {});\n    },",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/clients/[param]/[param]/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/client/[param]",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 57,
+          "context": "canvas: {\n    getByClient: (clientId: string) => api.get(`/canvas/client/${clientId}`),\n    getById: (canvasId: string) => api.get(`/canvas/${canvasId}`),",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/client/[param]/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/[param]",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 58,
+          "context": "getByClient: (clientId: string) => api.get(`/canvas/client/${clientId}`),\n    getById: (canvasId: string) => api.get(`/canvas/${canvasId}`),\n    generateValueProposition: (data: { clientId: string; ti",
+          "call_style": "api_wrapper"
+        },
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 68,
+          "context": "api.post(`/canvas/${canvasId}/export`, { format, theme }),\n    updateCanvas: (canvasId: string, data: any) => api.put(`/canvas/${canvasId}`, data),\n    deleteCanvas: (canvasId: string) => api.delete(`",
+          "call_style": "api_wrapper"
+        },
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 69,
+          "context": "updateCanvas: (canvasId: string, data: any) => api.put(`/canvas/${canvasId}`, data),\n    deleteCanvas: (canvasId: string) => api.delete(`/canvas/${canvasId}`),\n    getStatistics: () => api.get('/canva",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/[param]/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/generate/value-proposition",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 60,
+          "context": "generateValueProposition: (data: { clientId: string; title?: string; description?: string }) => \n      api.post('/canvas/generate/value-proposition', data),\n    generateBusinessModel: (data: { clientI",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/generate/value-proposition/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/generate/business-model",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 62,
+          "context": "generateBusinessModel: (data: { clientId: string; title?: string; description?: string }) => \n      api.post('/canvas/generate/business-model', data),\n    generateCompleteFramework: (data: { clientId:",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/generate/business-model/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/workflow/complete-framework",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 64,
+          "context": "generateCompleteFramework: (data: { clientId: string; autoExport?: boolean }) => \n      api.post('/canvas/workflow/complete-framework', data),\n    getWorkflowStatus: (clientId: string) => api.get(`/ca",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/workflow/complete-framework/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/workflow/status/[param]",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 65,
+          "context": "api.post('/canvas/workflow/complete-framework', data),\n    getWorkflowStatus: (clientId: string) => api.get(`/canvas/workflow/status/${clientId}`),\n    exportCanvas: (canvasId: string, format: string ",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/workflow/status/[param]/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/[param]/export",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 67,
+          "context": "exportCanvas: (canvasId: string, format: string = 'svg', theme: string = 'professional') => \n      api.post(`/canvas/${canvasId}/export`, { format, theme }),\n    updateCanvas: (canvasId: string, data:",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/[param]/export/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    },
+    {
+      "route": "/api/canvas/stats/overview",
+      "callers": [
+        {
+          "file": "frontend/src/services/api.ts",
+          "line": 70,
+          "context": "deleteCanvas: (canvasId: string) => api.delete(`/canvas/${canvasId}`),\n    getStatistics: () => api.get('/canvas/stats/overview')\n  }",
+          "call_style": "api_wrapper"
+        }
+      ],
+      "classification": "unknown",
+      "recommendation": "Create route at frontend/src/app/api/canvas/stats/overview/route.ts or remove fetch call if feature not ready.",
+      "excluded": true
+    }
+  ],
+  "skipped_calls": [
+    {
+      "file": "frontend/src/hooks/useGatePolicies.ts",
+      "line": 98,
+      "raw": "/api/settings/gate-policies/${gate.toLowerCase()}",
+      "reason": "runtime_function"
+    },
+    {
+      "file": "frontend/src/hooks/useGatePolicies.ts",
+      "line": 122,
+      "raw": "/api/settings/gate-policies/${gate.toLowerCase()}",
+      "reason": "runtime_function"
+    },
+    {
+      "file": "frontend/src/hooks/useGatePolicies.ts",
+      "line": 175,
+      "raw": "/api/settings/gate-policies/${gate.toLowerCase()}",
+      "reason": "runtime_function"
+    },
+    {
+      "file": "frontend/src/lib/integrations/providers/airtable.ts",
+      "line": 26,
+      "raw": "${AIRTABLE_API_URL}/meta/bases",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/lib/integrations/providers/airtable.ts",
+      "line": 64,
+      "raw": "${AIRTABLE_API_URL}/meta/bases/${baseId}/tables",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/lib/integrations/providers/airtable.ts",
+      "line": 148,
+      "raw": "${AIRTABLE_API_URL}/meta/bases/${baseId}/tables",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/lib/integrations/providers/google-drive.ts",
+      "line": 63,
+      "raw": "${DRIVE_API_URL}${endpoint}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/lib/integrations/providers/google-drive.ts",
+      "line": 225,
+      "raw": "${DRIVE_API_URL}/files/${fileId}?alt=media",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/lib/integrations/providers/notion.ts",
+      "line": 29,
+      "raw": "${NOTION_API_URL}${endpoint}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/app/admin/audit/page.tsx",
+      "line": 73,
+      "raw": "/api/admin/audit?${params.toString()}",
+      "reason": "runtime_function"
+    },
+    {
+      "file": "frontend/src/app/admin/users/page.tsx",
+      "line": 56,
+      "raw": "/api/admin/users?${params.toString()}",
+      "reason": "runtime_function"
+    },
+    {
+      "file": "frontend/src/app/api/admin/health/route.ts",
+      "line": 25,
+      "raw": "${MODAL_ENDPOINT}/health",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/app/api/assistant/chat/route.ts",
+      "line": 324,
+      "raw": "${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/analyze",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/app/api/cron/sync-projects/route.ts",
+      "line": 120,
+      "raw": "${baseUrl}/api/integrations/${integrationType}/sync",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/app/api/integrations/[type]/sync/route.ts",
+      "line": 40,
+      "raw": "${baseUrl}/pages/${targetId}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/app/api/integrations/[type]/sync/route.ts",
+      "line": 140,
+      "raw": "${baseUrl}/files",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/app/api/vpc/[projectId]/route.ts",
+      "line": 319,
+      "raw": "${baseUrl}/api/copy-bank/${projectId}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/services/api.ts",
+      "line": 29,
+      "raw": "${API_BASE_URL}${endpoint}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/services/api.ts",
+      "line": 34,
+      "raw": "${API_BASE_URL}${endpoint}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/services/api.ts",
+      "line": 42,
+      "raw": "${API_BASE_URL}${endpoint}",
+      "reason": "variable_prefix"
+    },
+    {
+      "file": "frontend/src/services/api.ts",
+      "line": 50,
+      "raw": "${API_BASE_URL}${endpoint}",
+      "reason": "variable_prefix"
+    }
+  ],
+  "e2e_gaps": {
+    "specific": [
+      {
+        "file": "frontend/tests/e2e/11-project-lifecycle.spec.ts",
+        "line": 55,
+        "pattern": "**/api/projects*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/11-project-lifecycle.spec.ts",
+        "line": 72,
+        "pattern": "**/api/projects/*/archive",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/11-project-lifecycle.spec.ts",
+        "line": 97,
+        "pattern": "**/api/projects/*/restore",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/12-client-lifecycle.spec.ts",
+        "line": 59,
+        "pattern": "**/api/consultant/clients*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/12-client-lifecycle.spec.ts",
+        "line": 101,
+        "pattern": "**/api/consultant/clients/*/restore",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/12-client-lifecycle.spec.ts",
+        "line": 126,
+        "pattern": "**/api/consultant/clients/*/resend-invite",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+        "line": 76,
+        "pattern": "**/api/user/trial-status",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+        "line": 97,
+        "pattern": "**/api/user/profile*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+        "line": 150,
+        "pattern": "**/api/projects*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+        "line": 535,
+        "pattern": "**/api/user/profile*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/13-trial-limits.spec.ts",
+        "line": 591,
+        "pattern": "**/api/user/trial-status",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/14-hitl-extended.spec.ts",
+        "line": 123,
+        "pattern": "**/api/approvals*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/14-hitl-extended.spec.ts",
+        "line": 157,
+        "pattern": "**/api/hitl/approve",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/14-hitl-extended.spec.ts",
+        "line": 800,
+        "pattern": "**/api/approvals*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/14-hitl-extended.spec.ts",
+        "line": 823,
+        "pattern": "**/api/approvals*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/14-hitl-extended.spec.ts",
+        "line": 846,
+        "pattern": "**/api/hitl/approve",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/15-pivot-workflows.spec.ts",
+        "line": 90,
+        "pattern": "**/api/approvals*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/15-pivot-workflows.spec.ts",
+        "line": 211,
+        "pattern": "**/api/hitl/pivot-options*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/15-pivot-workflows.spec.ts",
+        "line": 229,
+        "pattern": "**/api/hitl/pivot-decision",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/15-pivot-workflows.spec.ts",
+        "line": 882,
+        "pattern": "**/api/approvals*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/22-consultant-trial.spec.ts",
+        "line": 69,
+        "pattern": "**/api/user/trial-status",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/22-consultant-trial.spec.ts",
+        "line": 87,
+        "pattern": "**/api/consultant/clients",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/23-support.spec.ts",
+        "line": 59,
+        "pattern": "**/api/help/articles**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/23-support.spec.ts",
+        "line": 78,
+        "pattern": "**/api/support/tickets**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/24-offboarding.spec.ts",
+        "line": 59,
+        "pattern": "**/api/subscription**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/24-offboarding.spec.ts",
+        "line": 77,
+        "pattern": "**/api/subscription**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/25-billing.spec.ts",
+        "line": 64,
+        "pattern": "**/api/billing/history**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/25-billing.spec.ts",
+        "line": 96,
+        "pattern": "**/api/subscription**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/25-billing.spec.ts",
+        "line": 114,
+        "pattern": "**/api/subscription**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/26-notifications.spec.ts",
+        "line": 59,
+        "pattern": "**/api/notifications**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/26-notifications.spec.ts",
+        "line": 100,
+        "pattern": "**/api/notifications/preferences**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/27-account-settings.spec.ts",
+        "line": 59,
+        "pattern": "**/api/user/profile**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/27-account-settings.spec.ts",
+        "line": 86,
+        "pattern": "**/api/user/login-history**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/27-account-settings.spec.ts",
+        "line": 118,
+        "pattern": "**/api/user/2fa**",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/client-dashboard.spec.ts",
+        "line": 71,
+        "pattern": "**/api/projects/${projectId}/validation*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/client-dashboard.spec.ts",
+        "line": 98,
+        "pattern": "**/api/projects/${projectId}/evidence*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/tests/e2e/helpers/api-mocks.ts",
+        "line": 46,
+        "pattern": "**/.netlify/functions/gate-evaluate",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/src/__tests__/e2e/backend-integration.spec.ts",
+        "line": 273,
+        "pattern": "**/rest/v1/projects*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/src/__tests__/e2e/backend-integration.spec.ts",
+        "line": 406,
+        "pattern": "**/.netlify/functions/*",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/src/__tests__/e2e/backend-integration.spec.ts",
+        "line": 422,
+        "pattern": "**/.netlify/functions/crew-analyze",
+        "is_wildcard": false
+      },
+      {
+        "file": "frontend/src/__tests__/e2e/user-journeys.spec.ts",
+        "line": 234,
+        "pattern": "**/api/tasks**",
+        "is_wildcard": false
+      }
+    ],
+    "wildcards": [
+      "**/api/projects/**",
+      "**/api/crewai/**",
+      "**/api/**"
+    ]
+  }
+}

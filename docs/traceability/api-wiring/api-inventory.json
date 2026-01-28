@@ -1,0 +1,871 @@
+{
+  "schema_version": "1.0",
+  "repo": "app.startupai.site",
+  "generated_at": "2026-01-28T21:44:11.489Z",
+  "routes": [
+    {
+      "path": "/api/admin/ad-platforms",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Admin Ad Platforms API Route"
+    },
+    {
+      "path": "/api/admin/ad-platforms/[id]",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Admin Ad Platform Connection API Route (by ID)"
+    },
+    {
+      "path": "/api/admin/ad-platforms/[id]/health",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Admin Ad Platform Health Check API Route"
+    },
+    {
+      "path": "/api/admin/ad-platforms/[id]/status",
+      "methods": [
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Admin Ad Platform Status API Route"
+    },
+    {
+      "path": "/api/admin/ad-platforms/connect",
+      "methods": [
+        "POST",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Admin Ad Platform Connect API Route"
+    },
+    {
+      "path": "/api/admin/audit",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin Audit Logs API Route"
+    },
+    {
+      "path": "/api/admin/features",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Admin Feature Flags API Route"
+    },
+    {
+      "path": "/api/admin/health",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin System Health API Route"
+    },
+    {
+      "path": "/api/admin/users",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin Users API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Profile API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/billing",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Billing API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/billing/credit",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Billing Credit API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/billing/refund",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Billing Refund API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/billing/retry",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Billing Retry API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/export",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Data Export API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/impersonate",
+      "methods": [
+        "POST",
+        "DELETE",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Impersonation API Route"
+    },
+    {
+      "path": "/api/admin/users/[id]/integrity",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin User Data Integrity Check API Route"
+    },
+    {
+      "path": "/api/admin/workflows",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Admin Failed Workflows API Route"
+    },
+    {
+      "path": "/api/admin/workflows/[id]/retry",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Admin Workflow Retry API Route"
+    },
+    {
+      "path": "/api/ads/campaigns/[id]/metrics",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Ad Campaign Metrics API"
+    },
+    {
+      "path": "/api/ads/campaigns/[id]/poll-status",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Ad Campaign Poll Status API"
+    },
+    {
+      "path": "/api/ads/campaigns/google",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Google Ads Campaign API"
+    },
+    {
+      "path": "/api/ads/campaigns/google/activate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Google Ads Campaign Activation API"
+    },
+    {
+      "path": "/api/ads/campaigns/linkedin",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "LinkedIn Ads Campaign API"
+    },
+    {
+      "path": "/api/ads/campaigns/linkedin/activate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "LinkedIn Ads Campaign Activation API"
+    },
+    {
+      "path": "/api/ads/campaigns/meta",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Meta Ad Campaign API"
+    },
+    {
+      "path": "/api/ads/campaigns/meta/activate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Meta Campaign Activation API"
+    },
+    {
+      "path": "/api/ads/images",
+      "methods": [
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Ad Images API Routes"
+    },
+    {
+      "path": "/api/ads/images/generate",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "AI Image Generation API (Tier 4)"
+    },
+    {
+      "path": "/api/agents/status",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/analytics/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/analyze",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/approvals",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Approvals List API"
+    },
+    {
+      "path": "/api/approvals/[id]",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Approval Request API"
+    },
+    {
+      "path": "/api/approvals/ad-creative",
+      "methods": [
+        "GET",
+        "POST",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Ad Creative Approval API"
+    },
+    {
+      "path": "/api/approvals/webhook",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Approval Webhook Receiver"
+    },
+    {
+      "path": "/api/assistant/chat",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "AI Assistant Chat Endpoint"
+    },
+    {
+      "path": "/api/assistant/history",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "AI Assistant History Endpoint"
+    },
+    {
+      "path": "/api/auth/logout",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Logout API"
+    },
+    {
+      "path": "/api/auth/validate-invite",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Validate Invite Token Route"
+    },
+    {
+      "path": "/api/client/consultant/unlink",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Client Consultant Unlink Route"
+    },
+    {
+      "path": "/api/clients",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Client Management API"
+    },
+    {
+      "path": "/api/clients/[id]",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Client Detail API"
+    },
+    {
+      "path": "/api/clients/[id]/archive",
+      "methods": [
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Client Archive API"
+    },
+    {
+      "path": "/api/clients/[id]/artefacts",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/clients/[id]/discovery",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/clients/[id]/tasks",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/consultant/clients/[id]/archive",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Client Archive Route"
+    },
+    {
+      "path": "/api/consultant/invites",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Invites API Routes"
+    },
+    {
+      "path": "/api/consultant/invites/[id]",
+      "methods": [
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Invite Management Routes"
+    },
+    {
+      "path": "/api/consultant/invites/[id]/resend",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Invite Resend Route"
+    },
+    {
+      "path": "/api/consultant/onboarding",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Onboarding API"
+    },
+    {
+      "path": "/api/consultant/onboarding/complete",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/consultant/onboarding/start",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/copy-bank/[projectId]",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Copy Bank API Routes"
+    },
+    {
+      "path": "/api/crewai/consultant",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Consultant Onboarding Results Webhook (LEGACY)"
+    },
+    {
+      "path": "/api/crewai/results",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Results Webhook Endpoint (LEGACY)"
+    },
+    {
+      "path": "/api/crewai/resume",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Resume Endpoint"
+    },
+    {
+      "path": "/api/crewai/retry",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Validation Retry"
+    },
+    {
+      "path": "/api/crewai/status",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Status Polling Endpoint"
+    },
+    {
+      "path": "/api/crewai/webhook",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "CrewAI Webhook Endpoint"
+    },
+    {
+      "path": "/api/cron/collect-ad-metrics",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Ad Metrics Collection Cron Job"
+    },
+    {
+      "path": "/api/cron/escalate-approvals",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Escalate Approvals Cron Endpoint"
+    },
+    {
+      "path": "/api/cron/poll-ad-reviews",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Ad Review Polling Cron Job"
+    },
+    {
+      "path": "/api/cron/sync-projects",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Auto-Sync Projects Cron Job"
+    },
+    {
+      "path": "/api/health",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/imports/[type]",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Execute Import API"
+    },
+    {
+      "path": "/api/imports/[type]/items",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "List Importable Items API"
+    },
+    {
+      "path": "/api/integrations",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Integrations List API Route"
+    },
+    {
+      "path": "/api/integrations/[type]",
+      "methods": [
+        "PATCH",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Integration CRUD API Route"
+    },
+    {
+      "path": "/api/integrations/[type]/callback",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "OAuth Callback Route"
+    },
+    {
+      "path": "/api/integrations/[type]/connect",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "OAuth Connect Initiation Route"
+    },
+    {
+      "path": "/api/integrations/[type]/refresh",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Token Refresh API Route"
+    },
+    {
+      "path": "/api/integrations/[type]/sync",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Sync API"
+    },
+    {
+      "path": "/api/mappings",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Field Mappings API"
+    },
+    {
+      "path": "/api/mappings/[id]",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Individual Field Mapping API"
+    },
+    {
+      "path": "/api/mappings/[id]/apply",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Apply Field Mapping API"
+    },
+    {
+      "path": "/api/onboarding/brief",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Onboarding Brief API"
+    },
+    {
+      "path": "/api/onboarding/debug",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "GET /api/onboarding/debug?sessionId=xxx"
+    },
+    {
+      "path": "/api/projects/[id]",
+      "methods": [
+        "GET",
+        "PATCH",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Project API"
+    },
+    {
+      "path": "/api/projects/create",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Project Creation API"
+    },
+    {
+      "path": "/api/projects/quick-start",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Quick Start API Endpoint (ADR-006)"
+    },
+    {
+      "path": "/api/settings/approvals",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Approval Preferences API Route"
+    },
+    {
+      "path": "/api/settings/gate-policies",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Gate Policies API - List all policies"
+    },
+    {
+      "path": "/api/settings/gate-policies/[gate]",
+      "methods": [
+        "GET",
+        "PUT",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Gate Policies API - Individual gate operations"
+    },
+    {
+      "path": "/api/settings/notifications",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Notification Preferences API Route"
+    },
+    {
+      "path": "/api/settings/preferences",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "User Preferences API Route"
+    },
+    {
+      "path": "/api/settings/security/2fa",
+      "methods": [
+        "GET",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "2FA Status API Route"
+    },
+    {
+      "path": "/api/settings/security/2fa/enroll",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "2FA Enrollment API Route"
+    },
+    {
+      "path": "/api/settings/security/2fa/recover",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "2FA Recovery API Route"
+    },
+    {
+      "path": "/api/settings/security/2fa/verify",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "2FA Verification API Route"
+    },
+    {
+      "path": "/api/settings/security/login-history",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Login History API Route"
+    },
+    {
+      "path": "/api/settings/security/password",
+      "methods": [
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Password Change API Route"
+    },
+    {
+      "path": "/api/settings/security/sessions",
+      "methods": [
+        "GET",
+        "POST",
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Session Management API Route"
+    },
+    {
+      "path": "/api/settings/security/sessions/[id]",
+      "methods": [
+        "DELETE"
+      ],
+      "type": "nextjs",
+      "description": "Individual Session Management API Route"
+    },
+    {
+      "path": "/api/stripe/create-checkout-session",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Stripe Checkout Session API Route"
+    },
+    {
+      "path": "/api/stripe/webhook",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Stripe Webhook Endpoint"
+    },
+    {
+      "path": "/api/trial/allow",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs"
+    },
+    {
+      "path": "/api/trial/status",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Trial Status API"
+    },
+    {
+      "path": "/api/v1/public/activity",
+      "methods": [
+        "GET",
+        "OPTIONS"
+      ],
+      "type": "nextjs",
+      "description": "Public Activity Feed API"
+    },
+    {
+      "path": "/api/v1/public/metrics",
+      "methods": [
+        "GET",
+        "OPTIONS"
+      ],
+      "type": "nextjs",
+      "description": "Public Metrics API"
+    },
+    {
+      "path": "/api/vpc/[projectId]",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "VPC API Routes"
+    },
+    {
+      "path": "/api/vpc/[projectId]/initialize",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "VPC Initialize API Route"
+    }
+  ]
+}

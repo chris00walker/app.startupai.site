@@ -18,6 +18,25 @@ pnpm traceability:gaps
 pnpm traceability:test
 ```
 
+## API Wiring Validation
+
+The API wiring system validates API callers against route inventories across the ecosystem.
+See `docs/traceability/api-wiring/README.md` for full details.
+
+```bash
+# Generate this repo's API inventory
+pnpm api-inventory:generate
+
+# Generate wiring map (callers -> routes)
+pnpm api-wiring:generate
+
+# Validate wiring (single-repo)
+pnpm api-wiring:ci
+
+# Validate wiring (ecosystem)
+pnpm api-wiring:ci:ecosystem
+```
+
 ## The 100x Factor
 
 **Before:** Finding code for US-F01 requires reading 4 docs and grepping manually (5-10 minutes).
@@ -37,8 +56,8 @@ Story Definitions          Code Annotations          Manual Overrides
 │  1. Parse story definitions → empty entries for all stories   │
 │  2. Parse journey-test-matrix.md → baseline test mappings     │
 │  3. Parse feature-inventory.md → baseline code hints          │
-│  4. Parse code annotations → overwrites baselines (authoritative)
-│  5. Merge overrides → adds db_tables, notes (additive)        │
+│  4. Parse code annotations → populate annotated links (authoritative)
+│  5. Merge overrides → adds db_tables, notes, domain hints      │
 │  6. Write story-code-map.json                                 │
 └──────────────────────────────────────────────────────────────┘
                               │
@@ -55,8 +74,19 @@ Story Definitions          Code Annotations          Manual Overrides
 |------|---------|-----------|
 | `story-code-map.json` | The master index | **No** (generated) |
 | `story-code-overrides.yaml` | Manual metadata (db_tables, notes) | Yes |
-| `gap-report.md` | Stories without implementations | No (generated) |
-| `orphan-report.md` | Files without story links | No (generated) |
+| `gap-report.md` | Stories without **annotated** implementations | No (generated) |
+| `orphan-report.md` | Files without **@story annotations** | No (generated) |
+
+## Provenance & Status
+
+The map now separates **evidence** from **hints**:
+
+- `links.annotated` → files proven by `@story` tags (authoritative)
+- `links.baseline` → files hinted by journey-test-matrix or feature-inventory
+
+Status fields:
+- `implementation_status` → computed from **annotated** links only
+- `implementation_status_inferred` → computed from annotated + baseline links
 
 ## Code Annotations
 
@@ -129,6 +159,8 @@ The override file (`story-code-overrides.yaml`) can ONLY contain:
 **Forbidden fields** (must come from annotations):
 - `components`, `api_routes`, `pages`, `hooks`, `lib`, `e2e_tests`, `unit_tests`
 
+Unknown fields are ignored and reported during validation.
+
 ## Lookup Examples
 
 ### Forward Lookup (Story → Files)
@@ -144,8 +176,29 @@ jq '.stories["US-F01"]' docs/traceability/story-code-map.json
   "api_routes": ["frontend/src/app/api/onboarding/start/route.ts"],
   "pages": ["frontend/src/app/onboarding/founder/page.tsx"],
   "e2e_tests": [{"file": "16-quick-start-founder.spec.ts"}],
+  "links": {
+    "annotated": {
+      "components": ["frontend/src/components/onboarding/QuickStartForm.tsx"],
+      "api_routes": ["frontend/src/app/api/onboarding/start/route.ts"],
+      "pages": ["frontend/src/app/onboarding/founder/page.tsx"],
+      "e2e_tests": [{"file": "16-quick-start-founder.spec.ts"}],
+      "hooks": [],
+      "lib": [],
+      "unit_tests": []
+    },
+    "baseline": {
+      "components": [],
+      "api_routes": [],
+      "pages": [],
+      "e2e_tests": [],
+      "hooks": [],
+      "lib": [],
+      "unit_tests": []
+    }
+  },
   "db_tables": ["onboarding_sessions", "projects", "entrepreneur_briefs"],
-  "implementation_status": "complete"
+  "implementation_status": "complete",
+  "implementation_status_inferred": "complete"
 }
 ```
 
@@ -222,6 +275,7 @@ The traceability system includes additional validation tools:
 
 | Subsystem | Purpose | Skill/Command |
 |-----------|---------|---------------|
+| [API Wiring](./api-wiring/README.md) | Validate API calls against route inventory across repos | `pnpm api-wiring:ci`, `pnpm api-wiring:generate` |
 | [Schema Drift](./schema-drift/README.md) | Detect drift between Drizzle TypeScript and production Supabase columns | `/schema-drift` |
 | [Schema Coverage](./schema-coverage.md) | Find tables referenced in code but missing from Drizzle schema | `/schema-coverage`, `pnpm schema:coverage` |
 | FK Consistency | Validate foreign key type consistency across Drizzle schemas | `pnpm schema:fk`, `pnpm schema:fk:ci` |

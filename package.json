@@ -16,7 +16,10 @@
     "lint:md": "markdownlint docs",
     "lint:md:fix": "markdownlint docs --fix",
     "docs:validate": "pnpm run lint:md",
-    "quality-gate": "pnpm type-check && pnpm test && pnpm build && pnpm schema:fk:ci && pnpm traceability:validate",
+    "preapi-wiring:ci": "pnpm api-inventory:generate",
+    "prebuild": "pnpm api-inventory:generate",
+    "quality-gate": "pnpm type-check && pnpm test && pnpm build && pnpm schema:fk:ci && pnpm traceability:validate && pnpm api-wiring:ci",
+    "quality-gate:ecosystem": "pnpm quality-gate && pnpm api-wiring:ci:ecosystem",
     "db:generate": "pnpm exec drizzle-kit generate --config=drizzle.config.ts",
     "db:push": "pnpm exec drizzle-kit push --config=drizzle.config.ts",
     "db:migrate": "pnpm exec drizzle-kit migrate --config=drizzle.config.ts",
@@ -32,7 +35,13 @@
     "schema:fk": "pnpm exec tsx scripts/schema-coverage/check-fk.ts",
     "schema:fk:ci": "pnpm exec tsx scripts/schema-coverage/check-fk.ts --ci",
     "schema:expected": "pnpm exec tsx scripts/schema-drift/analyze.ts",
-    "schema:test": "pnpm exec tsx scripts/schema-drift/__tests__/run.ts"
+    "schema:test": "pnpm exec tsx scripts/schema-drift/__tests__/run.ts",
+    "api-inventory:generate": "pnpm exec tsx scripts/api-wiring/generate-inventory.ts",
+    "api-wiring:generate": "pnpm exec tsx scripts/api-wiring/analyze.ts",
+    "api-wiring:validate": "pnpm exec tsx scripts/api-wiring/validate.ts",
+    "api-wiring:ci": "pnpm exec tsx scripts/api-wiring/validate.ts --ci",
+    "api-wiring:ci:ecosystem": "pnpm exec tsx scripts/api-wiring/validate.ts --ci --ecosystem",
+    "api-wiring:test": "pnpm exec tsx scripts/api-wiring/__tests__/run.ts"
   },
   "keywords": [
     "nextjs",
