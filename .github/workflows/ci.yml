@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Global queue - all CI runs wait (no concurrent runs on test Supabase)
+# Static group ensures ALL runs wait, not just same-branch runs
+concurrency:
+  group: integration-tests
+  cancel-in-progress: false  # Never cancel - ensures teardown always runs
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      # Dedicated TEST Supabase project - NOT staging/prod
+      TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      TEST_SUPABASE_SERVICE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+      # Standard env vars for app
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Type check
+        run: pnpm type-check
+        working-directory: frontend
+
+      - name: Unit tests
+        run: pnpm test:unit --coverage
+        working-directory: frontend
+
+      - name: Integration tests
+        run: pnpm test:integration
+        working-directory: frontend
+        # Tests skip gracefully if TEST_SUPABASE not configured (see globalSetup.ts)
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: E2E tests
+        run: pnpm test:e2e
+        working-directory: frontend
+        env:
+          # E2E tests need the standard Supabase env vars
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: |
+            frontend/coverage/
+            frontend/test-results/
+          retention-days: 7

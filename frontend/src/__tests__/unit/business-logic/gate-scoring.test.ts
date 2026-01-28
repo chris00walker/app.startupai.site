@@ -1,11 +1,15 @@
 /**
- * Gate Scoring Integration Tests
- * 
- * Tests the integration between frontend UI and gate scoring logic.
- * Verifies that gate status updates correctly based on evidence quality.
+ * Gate Scoring Unit Tests
+ *
+ * Tests business logic for gate scoring and progression.
+ * This is a UNIT test - no database or external dependencies.
+ *
+ * Relocated from: integration/gate-scoring.integration.test.ts
+ * Reason: This test contains no actual integration (no DB, no API calls).
+ * It tests pure business logic with mock data.
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 // Mock project data types
 interface Evidence {
@@ -24,7 +28,7 @@ interface Project {
   evidence_count: number;
 }
 
-describe('Gate Scoring Integration', () => {
+describe('Gate Scoring Business Logic', () => {
   // ==========================================================================
   // Gate Status Calculation
   // ==========================================================================
@@ -132,7 +136,7 @@ describe('Gate Scoring Integration', () => {
 
     it('should have correct stage sequence', () => {
       const stages = ['DESIRABILITY', 'FEASIBILITY', 'VIABILITY', 'SCALE'];
-      
+
       expect(stages.indexOf('FEASIBILITY')).toBeGreaterThan(stages.indexOf('DESIRABILITY'));
       expect(stages.indexOf('VIABILITY')).toBeGreaterThan(stages.indexOf('FEASIBILITY'));
       expect(stages.indexOf('SCALE')).toBeGreaterThan(stages.indexOf('VIABILITY'));
@@ -218,7 +222,7 @@ describe('Gate Scoring Integration', () => {
 
       const project = {
         experiments_count: 3,      // 60% of requirement
-        evidence_quality: 0.65,    // 93% of requirement  
+        evidence_quality: 0.65,    // 93% of requirement
         evidence_count: 7,         // 70% of requirement
       };
 

@@ -8,10 +8,16 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env.local') });
 /**
  * Playwright Global Setup
  *
- * Resets onboarding state for test users before E2E test runs.
- * This ensures onboarding tests can access /onboarding instead of
- * being redirected to dashboard due to prior completed sessions.
+ * 1. Cleans up stale test data (test-* prefix) from previous runs
+ * 2. Resets onboarding state for test users before E2E test runs
+ *
+ * This ensures:
+ * - Onboarding tests can access /onboarding instead of being redirected
+ * - Test data from aborted E2E runs doesn't accumulate
  */
+
+// Prefix for all test data - matches Jest integration tests
+const TEST_PREFIX = 'test-';
 
 // Test user emails - must match helpers/auth.ts
 const TEST_USER_EMAILS = [
@@ -19,6 +25,33 @@ const TEST_USER_EMAILS = [
   'chris00walker@proton.me', // FOUNDER_USER
   'admin@startupai.test',    // ADMIN_USER
 ];
+
+/**
+ * Clean up stale test data from previous E2E runs.
+ * Uses test-* naming convention to identify test data.
+ *
+ * Note: E2E tests use real test accounts (chris00walker@gmail.com, etc.)
+ * which are NOT cleaned up. Only test-prefixed projects/reports/evidence.
+ */
+async function cleanupTestData(
+  supabase: ReturnType<typeof createClient>
+): Promise<void> {
+  console.log('[E2E Setup] Cleaning up stale test data...');
+
+  // Delete projects - ON DELETE CASCADE handles all children automatically
+  // (hypotheses, experiments, evidence, reports, crewai_validation_states, etc.)
+  // Don't delete user_profiles - E2E uses real test accounts
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .ilike('name', `${TEST_PREFIX}%`);
+
+  if (error) {
+    console.warn('[E2E Setup] projects cleanup error:', error.message);
+  } else {
+    console.log('[E2E Setup] Deleted stale test projects (+ cascaded children)');
+  }
+}
 
 async function globalSetup(): Promise<void> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -35,6 +68,12 @@ async function globalSetup(): Promise<void> {
     return;
   }
 
+  // Safety check: prevent accidentally hitting production
+  if (supabaseUrl.includes('prod') || supabaseUrl.includes('production')) {
+    console.error('[E2E Setup] SUPABASE URL appears to be production. Skipping setup.');
+    return;
+  }
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
@@ -43,6 +82,9 @@ async function globalSetup(): Promise<void> {
   });
 
   try {
+    // First, clean up any stale test data from previous runs
+    await cleanupTestData(supabase);
+
     // Get test user IDs from auth.users
     const { data: usersData, error: listError } =
       await supabase.auth.admin.listUsers();

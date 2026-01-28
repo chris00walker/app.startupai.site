@@ -4,6 +4,10 @@ import 'whatwg-fetch'
 // Ensure API requests use relative paths in tests
 process.env.NEXT_PUBLIC_API_URL = ''
 
+// Mock MODAL_AUTH_TOKEN for webhook contract tests
+// Tests should use 'Bearer test-webhook-token' in Authorization header
+process.env.MODAL_AUTH_TOKEN = 'test-webhook-token'
+
 // Mock window.alert to prevent JSDOM errors
 global.alert = jest.fn()
 

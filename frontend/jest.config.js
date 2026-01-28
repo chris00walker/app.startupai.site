@@ -7,6 +7,12 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
+  // Global setup - runs once BEFORE all tests (pre-cleans orphan data)
+  globalSetup: '<rootDir>/src/__tests__/globalSetup.ts',
+
+  // Global teardown - runs once AFTER all tests complete
+  globalTeardown: '<rootDir>/src/__tests__/globalTeardown.ts',
+
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/src/__tests__/e2e/', '<rootDir>/src/pages/test.tsx'],
