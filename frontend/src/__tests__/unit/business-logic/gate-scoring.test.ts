@@ -9,7 +9,7 @@
  * It tests pure business logic with mock data.
  */
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it } from '@jest/globals';
 
 // Mock project data types
 interface Evidence {

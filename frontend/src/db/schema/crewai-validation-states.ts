@@ -8,7 +8,17 @@
  * Maps to: src/startupai/flows/state_schemas.py in startupai-crew
  */
 
-import { pgTable, text, timestamp, uuid, integer, numeric, boolean, jsonb } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  integer,
+  numeric,
+  boolean,
+  jsonb,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
 import { projects } from './projects';
 import { userProfiles } from './users';
 
@@ -38,7 +48,9 @@ import type {
   ViabilityMetrics,
 } from '@/types/crewai';
 
-export const crewaiValidationStates = pgTable('crewai_validation_states', {
+export const crewaiValidationStates = pgTable(
+  'crewai_validation_states',
+  {
   // Primary key
   id: uuid('id').defaultRandom().primaryKey().notNull(),
 
@@ -185,7 +197,11 @@ export const crewaiValidationStates = pgTable('crewai_validation_states', {
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+  },
+  (table) => ({
+    projectIdUnique: uniqueIndex('crewai_validation_states_project_id_unique').on(table.projectId),
+  })
+);
 
 // Export inferred types
 export type CrewAIValidationState = typeof crewaiValidationStates.$inferSelect;

@@ -8,7 +8,7 @@
  * Reason: This test validates framework utilities, not integration between systems.
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, beforeEach } from '@jest/globals';
 import {
   SuccessMetricsValidator,
   UserSimulator,

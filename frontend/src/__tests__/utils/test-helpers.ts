@@ -446,16 +446,6 @@ export const customMatchers = {
   }
 };
 
-// Extend Jest with custom matchers
-declare global {
-  namespace jest {
-    interface Matchers<R> {
-      toBeWithinRange(min: number, max: number): R;
-      toMeetSuccessMetric(target: number): R;
-    }
-  }
-}
-
 // Authentication and User Simulation
 export class UserSimulator {
   static async authenticateAndNavigate(tier: string): Promise<{ url: string; status: number; content: string }> {

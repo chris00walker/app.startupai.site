@@ -17,7 +17,7 @@
  * Run with: pnpm test:integration
  */
 
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { describe, it, beforeAll } from '@jest/globals';
 import { SupabaseClient } from '@supabase/supabase-js';
 import {
   createTestAdminClient,
