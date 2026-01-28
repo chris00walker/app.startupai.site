@@ -220,9 +220,11 @@ AI: [Reads story-code-map.json]
 
 The traceability system includes additional validation tools:
 
-| Subsystem | Purpose | Skill |
-|-----------|---------|-------|
-| [Schema Drift](./schema-drift/README.md) | Detect drift between Drizzle TypeScript and production Supabase | `/schema-drift` |
+| Subsystem | Purpose | Skill/Command |
+|-----------|---------|---------------|
+| [Schema Drift](./schema-drift/README.md) | Detect drift between Drizzle TypeScript and production Supabase columns | `/schema-drift` |
+| [Schema Coverage](./schema-coverage.md) | Find tables referenced in code but missing from Drizzle schema | `/schema-coverage`, `pnpm schema:coverage` |
+| FK Consistency | Validate foreign key type consistency across Drizzle schemas | `pnpm schema:fk`, `pnpm schema:fk:ci` |
 
 ## Related Docs
 

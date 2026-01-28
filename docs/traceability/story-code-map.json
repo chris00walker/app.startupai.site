@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-27T21:17:38.923Z",
+    "generated_at": "2026-01-28T15:45:28.519Z",
     "version": "1.0.0",
     "story_count": 262,
-    "annotated_file_count": 399
+    "annotated_file_count": 427
   },
   "stories": {
     "US-F01": {
@@ -12,6 +12,10 @@
         "frontend/src/components/onboarding/FoundersBriefReview.tsx",
         "frontend/src/components/onboarding/QuickStartForm.tsx",
         "frontend/src/components/signup-form.tsx",
+        "frontend/src/db/schema/approval-preferences.ts",
+        "frontend/src/db/schema/entrepreneur-briefs.ts",
+        "frontend/src/db/schema/founders-briefs.ts",
+        "frontend/src/db/schema/onboarding-sessions.ts",
         "frontend/src/db/schema/users.ts"
       ],
       "api_routes": [
@@ -45,7 +49,9 @@
     "US-F02": {
       "title": "View Founder Dashboard",
       "components": [
-        "frontend/src/components/vpc/VPCSummaryCard.tsx"
+        "frontend/src/components/vpc/VPCSummaryCard.tsx",
+        "frontend/src/db/schema/approval-preferences.ts",
+        "frontend/src/db/schema/founders-briefs.ts"
       ],
       "api_routes": [],
       "pages": [
@@ -94,9 +100,14 @@
         },
         {
           "file": "14-hitl-extended.spec.ts"
+        },
+        {
+          "file": "client-dashboard.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/integration/components/client-dashboard.test.tsx"
+      ],
       "db_tables": [
         "approval_requests",
         "projects",
@@ -123,9 +134,14 @@
       "e2e_tests": [
         {
           "file": "11-project-lifecycle.spec.ts"
+        },
+        {
+          "file": "client-dashboard.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/integration/components/client-dashboard.test.tsx"
+      ],
       "db_tables": [
         "projects",
         "hypotheses",
@@ -193,6 +209,7 @@
       ],
       "api_routes": [
         "frontend/src/app/api/crewai/webhook/route.ts",
+        "frontend/src/app/api/crewai/webhook/schemas.ts",
         "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
       "pages": [
@@ -244,10 +261,17 @@
     },
     "US-F08": {
       "title": "View Phase 1 Progress Indicators",
-      "components": [],
+      "components": [
+        "frontend/src/db/schema/approval-history.ts",
+        "frontend/src/db/schema/approval-requests.ts",
+        "frontend/src/db/schema/hitl-requests.ts",
+        "frontend/src/db/schema/validation-progress.ts",
+        "frontend/src/db/schema/validation-runs.ts"
+      ],
       "api_routes": [
         "frontend/src/app/api/crewai/status/route.ts",
         "frontend/src/app/api/crewai/webhook/route.ts",
+        "frontend/src/app/api/crewai/webhook/schemas.ts",
         "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
@@ -275,9 +299,16 @@
     },
     "US-F09": {
       "title": "View Activity Feed Updates",
-      "components": [],
+      "components": [
+        "frontend/src/db/schema/approval-history.ts",
+        "frontend/src/db/schema/approval-requests.ts",
+        "frontend/src/db/schema/hitl-requests.ts",
+        "frontend/src/db/schema/validation-progress.ts",
+        "frontend/src/db/schema/validation-runs.ts"
+      ],
       "api_routes": [
         "frontend/src/app/api/crewai/webhook/route.ts",
+        "frontend/src/app/api/crewai/webhook/schemas.ts",
         "../startupai-crew/src/modal_app/app.py"
       ],
       "pages": [
@@ -678,6 +709,8 @@
       "components": [
         "frontend/src/components/onboarding/QuickStartForm.tsx",
         "frontend/src/components/signup-form.tsx",
+        "frontend/src/db/schema/entrepreneur-briefs.ts",
+        "frontend/src/db/schema/onboarding-sessions.ts",
         "frontend/src/db/schema/users.ts"
       ],
       "api_routes": [
@@ -795,7 +828,10 @@
     },
     "US-CT01": {
       "title": "Complete Consultant Trial Onboarding",
-      "components": [],
+      "components": [
+        "frontend/src/db/schema/consultant-onboarding-sessions.ts",
+        "frontend/src/db/schema/consultant-profiles.ts"
+      ],
       "api_routes": [
         "frontend/src/app/api/consultant/onboarding/route.ts"
       ],
@@ -1368,7 +1404,8 @@
     "US-E04": {
       "title": "Handle Phase 1 Timeout",
       "components": [
-        "frontend/src/components/validation/ValidationProgressTimeline.tsx"
+        "frontend/src/components/validation/ValidationProgressTimeline.tsx",
+        "frontend/src/db/schema/validation-progress.ts"
       ],
       "api_routes": [
         "frontend/src/app/api/crewai/retry/route.ts"
@@ -3577,7 +3614,9 @@
     },
     "US-AD01": {
       "title": "Design Experiment Plan",
-      "components": [],
+      "components": [
+        "frontend/src/db/schema/landing-page-variants.ts"
+      ],
       "api_routes": [
         "../startupai-crew/src/modal_app/phases/phase_1.py"
       ],
@@ -3764,22 +3803,42 @@
     },
     "US-AD10": {
       "title": "Complete Discovery Output",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
+      "components": [
+        "frontend/src/components/settings/gate-policies/GatePolicyCard.tsx",
+        "frontend/src/components/settings/gate-policies/GatePolicyForm.tsx",
+        "frontend/src/components/settings/gate-policies/index.ts",
+        "frontend/src/db/schema/gate-policies.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/gate-policies/[gate]/route.ts",
+        "frontend/src/app/api/settings/gate-policies/route.ts",
+        "../startupai-crew/src/modal_app/phases/phase_1.py"
+      ],
+      "pages": [
+        "frontend/src/app/settings/validation/page.tsx"
+      ],
+      "hooks": [
+        "frontend/src/hooks/useGatePolicies.ts"
+      ],
+      "lib": [
+        "../startupai-crew/src/shared/__init__.py",
+        "../startupai-crew/src/shared/gate_policies.py"
+      ],
       "e2e_tests": [
         {
           "file": "31-agent-vpc-discovery.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/api/settings/gate-policies/gate.route.test.ts",
+        "frontend/src/__tests__/api/settings/gate-policies/route.test.ts",
+        "frontend/src/__tests__/hooks/useGatePolicies.test.ts"
+      ],
       "db_tables": [
         "validation_runs",
         "hitl_requests"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "FIT_ROUTE Agent - Route to Phase 2 or iterate"
     },
     "US-ADB01": {
@@ -3868,26 +3927,45 @@
     },
     "US-ADB05": {
       "title": "Evaluate Desirability Gate",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
+      "components": [
+        "frontend/src/components/settings/gate-policies/GatePolicyCard.tsx",
+        "frontend/src/components/settings/gate-policies/GatePolicyForm.tsx",
+        "frontend/src/components/settings/gate-policies/index.ts",
+        "frontend/src/db/schema/gate-policies.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/gate-policies/[gate]/route.ts",
+        "frontend/src/app/api/settings/gate-policies/route.ts",
+        "../startupai-crew/src/modal_app/phases/phase_2.py"
+      ],
+      "pages": [
+        "frontend/src/app/settings/validation/page.tsx"
+      ],
+      "hooks": [
+        "frontend/src/hooks/useGatePolicies.ts"
+      ],
       "lib": [
         "../startupai-crew/src/crews/desirability/config/governance_agents.yaml",
         "../startupai-crew/src/crews/desirability/config/governance_tasks.yaml",
-        "../startupai-crew/src/crews/desirability/governance_crew.py"
+        "../startupai-crew/src/crews/desirability/governance_crew.py",
+        "../startupai-crew/src/shared/__init__.py",
+        "../startupai-crew/src/shared/gate_policies.py"
       ],
       "e2e_tests": [
         {
           "file": "32-agent-desirability.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/api/settings/gate-policies/gate.route.test.ts",
+        "frontend/src/__tests__/api/settings/gate-policies/route.test.ts",
+        "frontend/src/__tests__/hooks/useGatePolicies.test.ts"
+      ],
       "db_tables": [
         "validation_runs",
         "hitl_requests"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "GovernanceCrew - Evaluate Desirability Gate"
     },
     "US-AFB01": {
@@ -3934,26 +4012,45 @@
     },
     "US-AFB03": {
       "title": "Evaluate Feasibility Gate",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
+      "components": [
+        "frontend/src/components/settings/gate-policies/GatePolicyCard.tsx",
+        "frontend/src/components/settings/gate-policies/GatePolicyForm.tsx",
+        "frontend/src/components/settings/gate-policies/index.ts",
+        "frontend/src/db/schema/gate-policies.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/gate-policies/[gate]/route.ts",
+        "frontend/src/app/api/settings/gate-policies/route.ts",
+        "../startupai-crew/src/modal_app/phases/phase_3.py"
+      ],
+      "pages": [
+        "frontend/src/app/settings/validation/page.tsx"
+      ],
+      "hooks": [
+        "frontend/src/hooks/useGatePolicies.ts"
+      ],
       "lib": [
         "../startupai-crew/src/crews/feasibility/config/governance_agents.yaml",
         "../startupai-crew/src/crews/feasibility/config/governance_tasks.yaml",
-        "../startupai-crew/src/crews/feasibility/governance_crew.py"
+        "../startupai-crew/src/crews/feasibility/governance_crew.py",
+        "../startupai-crew/src/shared/__init__.py",
+        "../startupai-crew/src/shared/gate_policies.py"
       ],
       "e2e_tests": [
         {
           "file": "33-agent-feasibility.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/api/settings/gate-policies/gate.route.test.ts",
+        "frontend/src/__tests__/api/settings/gate-policies/route.test.ts",
+        "frontend/src/__tests__/hooks/useGatePolicies.test.ts"
+      ],
       "db_tables": [
         "validation_runs",
         "hitl_requests"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "GovernanceCrew - Evaluate Feasibility Gate"
     },
     "US-AVB01": {
@@ -4000,22 +4097,42 @@
     },
     "US-AVB03": {
       "title": "Compile Viability Signal",
-      "components": [],
-      "api_routes": [],
-      "pages": [],
-      "hooks": [],
-      "lib": [],
+      "components": [
+        "frontend/src/components/settings/gate-policies/GatePolicyCard.tsx",
+        "frontend/src/components/settings/gate-policies/GatePolicyForm.tsx",
+        "frontend/src/components/settings/gate-policies/index.ts",
+        "frontend/src/db/schema/gate-policies.ts"
+      ],
+      "api_routes": [
+        "frontend/src/app/api/settings/gate-policies/[gate]/route.ts",
+        "frontend/src/app/api/settings/gate-policies/route.ts",
+        "../startupai-crew/src/modal_app/phases/phase_4.py"
+      ],
+      "pages": [
+        "frontend/src/app/settings/validation/page.tsx"
+      ],
+      "hooks": [
+        "frontend/src/hooks/useGatePolicies.ts"
+      ],
+      "lib": [
+        "../startupai-crew/src/shared/__init__.py",
+        "../startupai-crew/src/shared/gate_policies.py"
+      ],
       "e2e_tests": [
         {
           "file": "34-agent-viability.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/api/settings/gate-policies/gate.route.test.ts",
+        "frontend/src/__tests__/api/settings/gate-policies/route.test.ts",
+        "frontend/src/__tests__/hooks/useGatePolicies.test.ts"
+      ],
       "db_tables": [
         "validation_runs",
         "hitl_requests"
       ],
-      "implementation_status": "partial",
+      "implementation_status": "complete",
       "notes": "L3 Agent - Compile Viability Signal, approve_viability_gate"
     },
     "US-AVB04": {
@@ -5348,6 +5465,30 @@
         "US-FT01"
       ]
     },
+    "frontend/src/db/schema/approval-preferences.ts": {
+      "stories": [
+        "US-F01",
+        "US-F02"
+      ]
+    },
+    "frontend/src/db/schema/entrepreneur-briefs.ts": {
+      "stories": [
+        "US-F01",
+        "US-FT01"
+      ]
+    },
+    "frontend/src/db/schema/founders-briefs.ts": {
+      "stories": [
+        "US-F01",
+        "US-F02"
+      ]
+    },
+    "frontend/src/db/schema/onboarding-sessions.ts": {
+      "stories": [
+        "US-F01",
+        "US-FT01"
+      ]
+    },
     "frontend/src/db/schema/users.ts": {
       "stories": [
         "US-F01",
@@ -5520,6 +5661,12 @@
         "US-H09"
       ]
     },
+    "frontend/src/__tests__/integration/components/client-dashboard.test.tsx": {
+      "stories": [
+        "US-F03",
+        "US-F04"
+      ]
+    },
     "frontend/tests/e2e/05-hitl-approval-flow.spec.ts": {
       "stories": [
         "US-F03",
@@ -5545,6 +5692,12 @@
         "US-H07",
         "US-H08",
         "US-H09"
+      ]
+    },
+    "frontend/tests/e2e/client-dashboard.spec.ts": {
+      "stories": [
+        "US-F03",
+        "US-F04"
       ]
     },
     "frontend/src/components/settings/ProjectsTab.tsx": {
@@ -5637,6 +5790,13 @@
         "US-H01"
       ]
     },
+    "frontend/src/app/api/crewai/webhook/schemas.ts": {
+      "stories": [
+        "US-F06",
+        "US-F08",
+        "US-F09"
+      ]
+    },
     "../startupai-crew/src/modal_app/phases/phase_1.py": {
       "stories": [
         "US-F06",
@@ -5644,6 +5804,7 @@
         "US-H02",
         "US-AB01",
         "US-AD01",
+        "US-AD10",
         "US-AH02"
       ]
     },
@@ -5664,6 +5825,37 @@
       "stories": [
         "US-F06",
         "US-F08"
+      ]
+    },
+    "frontend/src/db/schema/approval-history.ts": {
+      "stories": [
+        "US-F08",
+        "US-F09"
+      ]
+    },
+    "frontend/src/db/schema/approval-requests.ts": {
+      "stories": [
+        "US-F08",
+        "US-F09"
+      ]
+    },
+    "frontend/src/db/schema/hitl-requests.ts": {
+      "stories": [
+        "US-F08",
+        "US-F09"
+      ]
+    },
+    "frontend/src/db/schema/validation-progress.ts": {
+      "stories": [
+        "US-F08",
+        "US-F09",
+        "US-E04"
+      ]
+    },
+    "frontend/src/db/schema/validation-runs.ts": {
+      "stories": [
+        "US-F08",
+        "US-F09"
       ]
     },
     "frontend/src/app/api/crewai/status/route.ts": {
@@ -6026,6 +6218,16 @@
         "US-FT04"
       ]
     },
+    "frontend/src/db/schema/consultant-onboarding-sessions.ts": {
+      "stories": [
+        "US-CT01"
+      ]
+    },
+    "frontend/src/db/schema/consultant-profiles.ts": {
+      "stories": [
+        "US-CT01"
+      ]
+    },
     "frontend/src/lib/mock-data/consultant-trial-clients.ts": {
       "stories": [
         "US-CT01",
@@ -6119,6 +6321,7 @@
         "US-P01",
         "US-P02",
         "US-ADB01",
+        "US-ADB05",
         "US-AH07"
       ]
     },
@@ -6134,6 +6337,7 @@
         "US-H07",
         "US-P03",
         "US-AFB01",
+        "US-AFB03",
         "US-AH08"
       ]
     },
@@ -6143,6 +6347,7 @@
         "US-H09",
         "US-P04",
         "US-AVB01",
+        "US-AVB03",
         "US-AH10"
       ]
     },
@@ -7340,6 +7545,11 @@
         "US-AB03"
       ]
     },
+    "frontend/src/db/schema/landing-page-variants.ts": {
+      "stories": [
+        "US-AD01"
+      ]
+    },
     "../startupai-crew/src/crews/discovery/config/agents.yaml": {
       "stories": [
         "US-AD01"
@@ -7427,6 +7637,110 @@
     "../startupai-crew/src/crews/discovery/fit_assessment_crew.py": {
       "stories": [
         "US-AD09"
+      ]
+    },
+    "frontend/src/components/settings/gate-policies/GatePolicyCard.tsx": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/components/settings/gate-policies/GatePolicyForm.tsx": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/components/settings/gate-policies/index.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/db/schema/gate-policies.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/app/api/settings/gate-policies/[gate]/route.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/app/api/settings/gate-policies/route.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/app/settings/validation/page.tsx": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/hooks/useGatePolicies.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "../startupai-crew/src/shared/__init__.py": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "../startupai-crew/src/shared/gate_policies.py": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/__tests__/api/settings/gate-policies/gate.route.test.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/__tests__/api/settings/gate-policies/route.test.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
+      ]
+    },
+    "frontend/src/__tests__/hooks/useGatePolicies.test.ts": {
+      "stories": [
+        "US-AD10",
+        "US-ADB05",
+        "US-AFB03",
+        "US-AVB03"
       ]
     },
     "../startupai-crew/src/crews/desirability/build_crew.py": {

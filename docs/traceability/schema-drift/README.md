@@ -211,5 +211,6 @@ If `mcp__supabase__execute_sql` fails:
 ## Related Documentation
 
 - [Traceability System](../README.md) - Story-to-code mapping
-- [State Schemas](../../specs/state-schemas.md) - Schema specification
-- [Database Architecture](../../specs/database.md) - Overall DB design
+- [Data Schema](../../specs/data-schema.md) - Local schema specification
+- [State Schemas](../../../../startupai-crew/docs/master-architecture/reference/state-schemas.md) - Master architecture state schemas
+- [Supabase Config](../../specs/supabase.md) - Supabase configuration

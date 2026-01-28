@@ -1,6 +1,6 @@
 # Orphan Files Report
 
-Generated: 2026-01-27T21:17:38.923Z
+Generated: 2026-01-28T15:45:28.519Z
 
 ## Files Without Story Links
 
@@ -55,6 +55,7 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/Dashboard/KanbanBoard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/dashboard/MetricsCards.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/Dashboard/MetricsPanel.tsx | component | Add @story annotation or consider if needed |
+| frontend/src/components/dev/ClickToComponent.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/AIEvidenceCard.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/EvidenceFilters.tsx | component | Add @story annotation or consider if needed |
 | frontend/src/components/evidence-explorer/EvidenceSummaryPanel.tsx | component | Add @story annotation or consider if needed |
@@ -150,6 +151,8 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/__tests__/components/OnboardingWizardV2-state.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/components/TestingBusinessIdeasCanvas.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/components/ValuePropositionCanvas.test.tsx | unit_test | Link to tested story |
+| frontend/src/__tests__/globalSetup.ts | unit_test | Link to tested story |
+| frontend/src/__tests__/globalTeardown.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useApprovals.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useClients.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useConsultantClients.test.ts | unit_test | Link to tested story |
@@ -159,16 +162,16 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/__tests__/hooks/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useProjects.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/hooks/useValidationProgress.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/integration/ClientDashboard.integration.test.tsx | unit_test | Link to tested story |
-| frontend/src/__tests__/integration/gate-scoring.integration.test.ts | unit_test | Link to tested story |
-| frontend/src/__tests__/integration/specification-validation.test.tsx | unit_test | Link to tested story |
-| frontend/src/__tests__/integration/webhook-to-dashboard.integration.test.ts | unit_test | Link to tested story |
+| frontend/src/__tests__/integration/contracts/webhook-validation.test.ts | unit_test | Link to tested story |
+| frontend/src/__tests__/integration/flows/webhook-to-dashboard.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/lib/auth/hooks.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/lib/crewai/client.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/lib/founders/founder-mapping.test.ts | unit_test | Link to tested story |
 | frontend/src/__tests__/pages/founder-dashboard.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/production/deployment-validation.test.tsx | unit_test | Link to tested story |
 | frontend/src/__tests__/trial-guard.test.ts | unit_test | Link to tested story |
+| frontend/src/__tests__/unit/business-logic/gate-scoring.test.ts | unit_test | Link to tested story |
+| frontend/src/__tests__/unit/framework/test-helpers.test.ts | unit_test | Link to tested story |
 | frontend/src/components/consultant/__tests__/ClientValidationCard.test.tsx | unit_test | Link to tested story |
 | frontend/src/components/consultant/__tests__/InviteClientModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/components/Forms/__tests__/IntakeForm.test.tsx | unit_test | Link to tested story |
@@ -179,6 +182,6 @@ These files in scanned directories have no `@story` annotation.
 | frontend/src/components/onboarding/__tests__/StageReviewModal.test.tsx | unit_test | Link to tested story |
 | frontend/src/hooks/__tests__/useOnboardingRecovery.test.ts | unit_test | Link to tested story |
 
-**Total Orphans: 170**
+**Total Orphans: 173**
 
-*Note: 224 infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*
+*Note: 226 infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*

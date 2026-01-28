@@ -33,8 +33,12 @@
     "lint:a11y": "eslint --config eslint.config.a11y.mjs src/",
     "test:generate-token": "tsx scripts/generate-test-token.ts",
     "env:check": "node -e \"console.log('Environment:', process.env.NODE_ENV || 'development'); console.log('Marketing URL:', process.env.NEXT_PUBLIC_MARKETING_URL); console.log('App URL:', process.env.NEXT_PUBLIC_APP_URL); console.log('Site URL:', process.env.NEXT_PUBLIC_SITE_URL);\"",
+    "quality-gate": "pnpm -C .. quality-gate",
+    "schema:fk": "pnpm -C .. schema:fk",
+    "schema:fk:ci": "pnpm -C .. schema:fk:ci",
     "schema:expected": "pnpm exec tsx ../scripts/schema-drift/analyze.ts",
-    "schema:test": "pnpm exec tsx ../scripts/schema-drift/__tests__/run.ts"
+    "schema:test": "pnpm exec tsx ../scripts/schema-drift/__tests__/run.ts",
+    "traceability:validate": "pnpm -C .. traceability:validate"
   },
   "keywords": [],
   "author": "",
