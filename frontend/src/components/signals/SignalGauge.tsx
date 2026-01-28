@@ -1,3 +1,6 @@
+/**
+ * @story US-F02, US-F06, US-CP08
+ */
 'use client'
 
 import { useMemo } from 'react'

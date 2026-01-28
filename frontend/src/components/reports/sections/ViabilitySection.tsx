@@ -1,4 +1,7 @@
 /**
+ * @story US-F06, US-F16
+ */
+/**
  * Viability Section
  *
  * Displays all viability-related fields from CrewAI analysis:

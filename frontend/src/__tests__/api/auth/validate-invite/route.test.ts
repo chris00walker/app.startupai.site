@@ -3,7 +3,8 @@
  *
  * GET - Validate an invite token before signup
  * POST - Link account after signup
- */
+ * @story US-C02
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

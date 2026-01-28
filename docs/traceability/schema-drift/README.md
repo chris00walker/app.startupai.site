@@ -140,6 +140,8 @@ budget: numeric('budget', { precision: 10, scale: 2 })
 
 This avoids maintaining a list of all Drizzle column types.
 
+It also supports multi-line column definitions where the type call is on the next line.
+
 ## Comparison with /schema-check
 
 | Skill | Compares | Purpose |

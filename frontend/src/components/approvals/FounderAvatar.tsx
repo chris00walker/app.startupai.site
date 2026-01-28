@@ -3,6 +3,8 @@
  *
  * Displays an AI Founder character avatar with tooltip showing name and specialty.
  * Falls back to an icon-based avatar if the image is not available.
+ *
+ * @story US-F03
  */
 
 'use client';

@@ -94,6 +94,27 @@ export const ORPHAN_EXCLUDE_PATTERNS = [
   /\/providers\/.*\.tsx$/, // Provider wrappers
   /Provider\.tsx$/, // Provider components
 
+  // Accessibility + device helpers (cross-cutting UI infrastructure)
+  /^frontend\/src\/hooks\/use-mobile\.tsx$/, // Responsive utility hook
+  /^frontend\/src\/hooks\/useFormAccessibility\.ts$/, // Accessibility attributes helper
+  /^frontend\/src\/hooks\/useScreenReaderAnnouncement\.ts$/, // Screen reader announcements
+
+  // Analytics infrastructure (cross-cutting)
+  /^frontend\/src\/lib\/analytics\.ts$/, // Analytics core helpers
+  /^frontend\/src\/lib\/analytics\/hooks\.ts$/, // Analytics hooks
+
+  // CrewAI infra client (used across many flows)
+  /^frontend\/src\/lib\/crewai\/modal-client\.ts$/, // Modal API client
+
+  // Dev-only components
+  /^frontend\/src\/components\/dev\/.*\.tsx$/, // Dev tooling UI
+
+  // Shared layout wrappers (cross-cutting)
+  /^frontend\/src\/components\/layout\/.*\.tsx$/, // App layouts
+
+  // Analytics UI (consent banners, etc.)
+  /^frontend\/src\/components\/analytics\/.*\.tsx$/, // Analytics UX components
+
   // Additional query/repository infrastructure
   /^frontend\/src\/db\/queries\/.*\.ts$/, // Database queries (generic data access)
   /^frontend\/src\/db\/repositories\/.*\.ts$/, // Repository pattern files
@@ -103,9 +124,35 @@ export const ORPHAN_EXCLUDE_PATTERNS = [
   /legacy\/.*\.tsx?$/, // Legacy backup files
   /\.bak\.[^/]+$/, // Backup files
 
+  // Legacy ADR-005 onboarding/chat tests (deprecated 7-stage flow)
+  /^frontend\/src\/__tests__\/api\/chat\/.*\.test\.ts$/, // ADR-005 chat API tests
+  /^frontend\/src\/__tests__\/api\/onboarding\/start-adr005\.test\.ts$/, // ADR-005 onboarding start tests
+  /^frontend\/src\/__tests__\/api-contracts\/.*\.test\.tsx?$/, // ADR-005 onboarding contract tests
+  /^frontend\/src\/__tests__\/components\/OnboardingWizardV2-state\.test\.ts$/, // ADR-005 onboarding wizard state tests
+  /^frontend\/src\/components\/onboarding\/__tests__\/redirect-logic\.test\.ts$/, // ADR-005 onboarding redirect logic
+
   // Debug/test pages (not user-facing)
   /^frontend\/src\/app\/debug-.*\/page\.tsx$/, // Debug pages
   /^frontend\/src\/app\/test-.*\/page\.tsx$/, // Test pages
+
+  // Legacy/infra test suites not tied to a single story
+  /^frontend\/src\/__tests__\/e2e\/.*\.spec\.ts$/, // Legacy Playwright suites (migrated to frontend/tests/e2e)
+  /^frontend\/src\/__tests__\/accessibility\/.*\.test\.tsx?$/, // Cross-cutting accessibility audits
+  /^frontend\/src\/__tests__\/business-requirements\/.*\.test\.tsx?$/, // Business requirement audits
+  /^frontend\/src\/__tests__\/production\/.*\.test\.tsx?$/, // Deployment validation (environment checks)
+  /^frontend\/src\/__tests__\/unit\/framework\/.*\.test\.ts$/, // Test framework validation
+  /^frontend\/src\/__tests__\/globalSetup\.ts$/, // Jest global setup
+  /^frontend\/src\/__tests__\/globalTeardown\.ts$/, // Jest global teardown
+
+  // Debug-only API endpoints
+  /^frontend\/src\/app\/api\/onboarding\/debug\/route\.ts$/, // Onboarding debug endpoint
+
+  // Legacy CrewAI webhooks (deprecated but kept for backwards compatibility)
+  /^frontend\/src\/app\/api\/crewai\/consultant\/route\.ts$/, // Legacy consultant onboarding webhook
+  /^frontend\/src\/app\/api\/crewai\/results\/route\.ts$/, // Legacy founder validation webhook
+
+  // Public marketing APIs (no direct product user story)
+  /^frontend\/src\/app\/api\/v1\/public\/.*\/route\.ts$/, // Public marketing endpoints
 
   // Netlify functions infrastructure (__init__.py, config files)
   /^netlify\/functions\/__init__\.py$/, // Python init
@@ -152,13 +199,13 @@ export const STORY_SOURCES = [
  * Story ID pattern for validation
  * Matches: US-F01, US-C07, US-FT01, US-CT05, US-H01, US-P04, US-AJ01, US-AG01, US-E06, US-A12, etc.
  */
-export const STORY_ID_PATTERN = /^US-[A-Z]{1,3}\d{1,2}$/;
+export const STORY_ID_PATTERN = /^US-[A-Z]{1,3}\d{1,3}$/;
 
 /**
  * Annotation pattern for parsing @story tags
  * Matches: @story US-F01, US-FT01 or @story US-H01
  */
-export const ANNOTATION_PATTERN = /@story\s+(US-[A-Z]{1,3}\d{1,2}(?:\s*,\s*US-[A-Z]{1,3}\d{1,2})*)/g;
+export const ANNOTATION_PATTERN = /@story\s+(US-[A-Z]{1,3}\d{1,3}(?:\s*,\s*US-[A-Z]{1,3}\d{1,3})*)/g;
 
 // =============================================================================
 // Baseline Source Configuration

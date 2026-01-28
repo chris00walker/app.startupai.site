@@ -2,7 +2,8 @@
  * ClientValidationCard Component Tests
  *
  * Tests for the consultant client validation progress card and grid.
- */
+ * @story US-C03, US-C04
+*/
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClientValidationCard, ClientValidationGrid } from '../ClientValidationCard';

@@ -1,6 +1,8 @@
 /**
  * Consultant Invite Management Routes
  *
+ * @story US-C02
+ *
  * DELETE /api/consultant/invites/[id] - Revoke a pending invite
  */
 

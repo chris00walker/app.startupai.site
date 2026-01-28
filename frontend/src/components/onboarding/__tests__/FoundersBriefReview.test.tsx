@@ -3,7 +3,8 @@
  *
  * Tests for the HITL brief review component that displays the Founder's Brief
  * for approval during the approve_founders_brief checkpoint.
- */
+ * @story US-H01, US-F01
+*/
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FoundersBriefReview, type EntrepreneurBrief } from '../FoundersBriefReview';

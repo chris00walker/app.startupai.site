@@ -13,6 +13,7 @@
  * @story US-A06
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
 import {
   parseDrizzleSchema,
@@ -29,7 +30,11 @@ import type { CoverageReport } from './types';
 
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const SCHEMA_DIR = path.join(PROJECT_ROOT, 'frontend/src/db/schema');
-const CODE_DIR = path.join(PROJECT_ROOT, 'frontend/src');
+const CODE_DIRS = [
+  path.join(PROJECT_ROOT, 'frontend/src'),
+  path.join(PROJECT_ROOT, 'backend/netlify/functions'),
+  path.join(PROJECT_ROOT, 'netlify/functions'),
+];
 
 // Directories to exclude from scanning
 const EXCLUDE_PATTERNS = [
@@ -56,7 +61,13 @@ function runAnalysis(): CoverageReport {
   console.error(`[schema-coverage] Found ${drizzleTables.length} tables in Drizzle schema`);
 
   console.error('[schema-coverage] Scanning code for table references...');
-  const codeReferences = scanCodeForReferences(CODE_DIR, EXCLUDE_PATTERNS);
+  const codeReferences = [];
+  for (const dir of CODE_DIRS) {
+    if (!fs.existsSync(dir)) {
+      continue;
+    }
+    codeReferences.push(...scanCodeForReferences(dir, EXCLUDE_PATTERNS));
+  }
   console.error(`[schema-coverage] Found ${codeReferences.length} table references in code`);
 
   const groupedReferences = groupReferencesByTable(codeReferences);

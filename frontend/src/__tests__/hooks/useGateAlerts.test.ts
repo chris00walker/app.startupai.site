@@ -3,7 +3,8 @@
  *
  * Tests for the useGateAlerts hook that monitors gate readiness
  * and triggers alerts when projects reach high readiness scores.
- */
+ * @story US-F15
+*/
 
 import { renderHook, act } from '@testing-library/react';
 import { useGateAlerts } from '@/hooks/useGateAlerts';

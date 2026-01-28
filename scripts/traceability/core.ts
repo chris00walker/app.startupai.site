@@ -84,6 +84,53 @@ function clearEntryType(entry: StoryEntry, fileType: ParsedAnnotation['file_type
   }
 }
 
+function addAnnotationLink(entry: StoryEntry, annotation: ParsedAnnotation) {
+  if (!entry.links?.annotated) {
+    return;
+  }
+
+  switch (annotation.file_type) {
+    case 'component':
+      if (!entry.links.annotated.components.includes(annotation.file)) {
+        entry.links.annotated.components.push(annotation.file);
+      }
+      break;
+    case 'api_route':
+      if (!entry.links.annotated.api_routes.includes(annotation.file)) {
+        entry.links.annotated.api_routes.push(annotation.file);
+      }
+      break;
+    case 'page':
+      if (!entry.links.annotated.pages.includes(annotation.file)) {
+        entry.links.annotated.pages.push(annotation.file);
+      }
+      break;
+    case 'hook':
+      if (!entry.links.annotated.hooks.includes(annotation.file)) {
+        entry.links.annotated.hooks.push(annotation.file);
+      }
+      break;
+    case 'lib':
+      if (!entry.links.annotated.lib.includes(annotation.file)) {
+        entry.links.annotated.lib.push(annotation.file);
+      }
+      break;
+    case 'e2e_test': {
+      const fileName = annotation.file.split('/').pop() || annotation.file;
+      const testRef: E2ETestReference = { file: fileName };
+      if (!entry.links.annotated.e2e_tests.some((t) => t.file === testRef.file)) {
+        entry.links.annotated.e2e_tests.push(testRef);
+      }
+      break;
+    }
+    case 'unit_test':
+      if (!entry.links.annotated.unit_tests.includes(annotation.file)) {
+        entry.links.annotated.unit_tests.push(annotation.file);
+      }
+      break;
+  }
+}
+
 export function applyAnnotationsToStories(
   stories: Record<string, StoryEntry>,
   annotations: ParsedAnnotation[],
@@ -106,6 +153,8 @@ export function applyAnnotationsToStories(
       if (!entry) {
         continue;
       }
+
+      addAnnotationLink(entry, annotation);
 
       if (!clearedTypes[storyId]) {
         clearedTypes[storyId] = new Set();
@@ -313,6 +362,7 @@ export function validateOverridesData(
       continue;
     }
 
+    const overrideKeys = Object.keys(override);
     const hasForbidden = OVERRIDE_FORBIDDEN_FIELDS.some((field) => field in override);
     if (hasForbidden) {
       for (const field of OVERRIDE_FORBIDDEN_FIELDS) {
@@ -324,6 +374,17 @@ export function validateOverridesData(
       }
       rejected.push(storyId);
       continue;
+    }
+
+    const unknownFields = overrideKeys.filter(
+      (field) => !OVERRIDE_ALLOWED_FIELDS.includes(field as typeof OVERRIDE_ALLOWED_FIELDS[number])
+    );
+    if (unknownFields.length > 0) {
+      warnings.push(
+        `Override for ${storyId} contains unknown field(s): ${unknownFields.join(
+          ', '
+        )} - ignored`
+      );
     }
 
     const entry: StoryOverride = {};

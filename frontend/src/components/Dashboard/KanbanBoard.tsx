@@ -1,3 +1,6 @@
+/**
+ * @story US-C04
+ */
 // TODO: implement Dashboard/KanbanBoard UI component
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';

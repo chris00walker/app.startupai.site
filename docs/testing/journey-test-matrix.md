@@ -291,8 +291,8 @@ This matrix maps each journey step to its corresponding user story and E2E test,
 | `04-founder-analysis-journey.spec.ts` | 14 | US-F02, US-F06 | Dashboard & analysis |
 | `05-hitl-approval-flow.spec.ts` | 13 | US-F03, US-C04 | Approval workflows |
 | `06-consultant-portfolio.spec.ts` | 15 | US-C03, US-C04 | Portfolio management |
-| `07-adr005-persistence.spec.ts` | 14 | - | Session persistence (legacy, may be removed) |
-| `08-ui-indicators.spec.ts` | 8 | - | Progress indicators (legacy, may be removed) |
+| `legacy/07-adr005-persistence.spec.ts` | 14 | - | Session persistence (legacy, archived) |
+| `legacy/08-ui-indicators.spec.ts` | 8 | - | Progress indicators (legacy, archived) |
 | `09-consultant-practice-setup.spec.ts` | 4 | US-C01 | Consultant setup |
 | `10-consultant-client-onboarding.spec.ts` | 6 | US-C02 | Client onboarding (invites) |
 | `11-project-lifecycle.spec.ts` | 16 | US-F04, US-F05 | Project archive & delete |

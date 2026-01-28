@@ -1,3 +1,6 @@
+/**
+ * @story US-C01
+ */
 export interface FounderValidationInputs {
   flow_type: 'founder_validation';
   project_id: string;

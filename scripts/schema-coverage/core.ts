@@ -102,31 +102,27 @@ export function extractTableReferences(content: string, filePath: string): Table
   const references: TableReference[] = [];
   const lines = content.split('\n');
 
-  // Pattern: .from('table_name') or .from("table_name")
-  const FROM_PATTERN = /\.from\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+  // Pattern: .from('table_name') or .from("table_name") with optional generics
+  const FROM_PATTERN = /\.from\s*(?:<[^>]+>)?\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+  let match;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    let match;
+  while ((match = FROM_PATTERN.exec(content)) !== null) {
+    const tableName = match[1];
 
-    // Reset regex state for each line
-    FROM_PATTERN.lastIndex = 0;
-
-    while ((match = FROM_PATTERN.exec(line)) !== null) {
-      const tableName = match[1];
-
-      // Skip if it looks like a template literal or variable
-      if (tableName.includes('$') || tableName.includes('{')) {
-        continue;
-      }
-
-      references.push({
-        tableName,
-        filePath,
-        lineNumber: i + 1,
-        context: line.trim(),
-      });
+    // Skip if it looks like a template literal or variable
+    if (tableName.includes('$') || tableName.includes('{')) {
+      continue;
     }
+
+    const lineNumber = content.slice(0, match.index).split('\n').length;
+    const context = lines[lineNumber - 1]?.trim() ?? '';
+
+    references.push({
+      tableName,
+      filePath,
+      lineNumber,
+      context,
+    });
   }
 
   return references;

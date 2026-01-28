@@ -1,3 +1,6 @@
+/**
+ * @story US-F02
+ */
 'use client'
 
 import { useState } from 'react'

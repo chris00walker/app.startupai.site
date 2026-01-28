@@ -4,7 +4,8 @@
  * Tests for the useClients hook that manages consultant client data from Supabase.
  * This hook fetches user_profiles with consultant_id set and transforms them
  * into PortfolioProject format.
- */
+ * @story US-C03, US-C04
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useClients } from '@/hooks/useClients';

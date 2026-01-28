@@ -15,8 +15,22 @@ const customJestConfig = {
 
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/src/__tests__/e2e/', '<rootDir>/src/pages/test.tsx'],
-  modulePathIgnorePatterns: ['<rootDir>/.netlify/', '<rootDir>/../.netlify/'],
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/src/__tests__/e2e/',
+    '<rootDir>/src/pages/test.tsx',
+    '<rootDir>/src/components/legacy/',
+  ],
+  modulePathIgnorePatterns: [
+    '<rootDir>/.netlify/',
+    '<rootDir>/../.netlify/',
+    '<rootDir>/.next/standalone/',
+    '<rootDir>/src/components/legacy/',
+  ],
+  watchPathIgnorePatterns: [
+    '<rootDir>/.next/standalone/',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^until-async$': '<rootDir>/src/tests/mocks/untilAsyncMock.ts',
@@ -33,7 +47,8 @@ const customJestConfig = {
     '!src/**/*.d.ts',
     '!src/__tests__/**',
     '!src/pages/_app.tsx',
-    '!src/pages/_document.tsx'
+    '!src/pages/_document.tsx',
+    '!src/components/legacy/**'
   ],
   coverageThreshold: {
     global: {

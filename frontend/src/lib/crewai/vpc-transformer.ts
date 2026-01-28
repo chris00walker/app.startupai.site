@@ -2,6 +2,7 @@
  * VPC Transformer
  *
  * Transforms CrewAI Value Proposition Canvas data to UI component format.
+ * @story US-F06
  * IMPORTANT: Preserves all rich data from the CrewAI backend including:
  * - CustomerJob dimensions (functional, emotional, social, importance)
  * - Pain/Gain intensity and importance mappings

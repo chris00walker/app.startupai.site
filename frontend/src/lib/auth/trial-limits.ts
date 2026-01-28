@@ -1,3 +1,6 @@
+/**
+ * @story US-FT02, US-CT04
+ */
 import { BYPASS_LIMITS } from '@/lib/env';
 import type { UserRole } from '@/db/schema';
 import { deriveRole, isTrialReadonly } from './roles';

@@ -20,14 +20,16 @@ import {
   SCAN_EXTENSIONS,
   EXCLUDE_DIRS,
   STORY_SOURCES,
+  JOURNEY_TEST_MATRIX_PATH,
+  FEATURE_INVENTORY_PATH,
   ANNOTATION_PATTERN,
   STORY_ID_PATTERN,
   STORY_CODE_MAP_PATH,
   OVERRIDES_PATH,
+  OVERRIDE_ALLOWED_FIELDS,
   OVERRIDE_FORBIDDEN_FIELDS,
-  classifyFileType,
 } from './config';
-import type { ValidationResult, ValidationIssue, StoryCodeMap } from './schema';
+import type { ValidationResult, ValidationIssue } from './schema';
 
 // =============================================================================
 // Validators
@@ -94,11 +96,38 @@ function findFiles(dir: string): string[] {
   return files;
 }
 
+function warnMissingScanDirs(): void {
+  const missing: string[] = [];
+  for (const dir of SCAN_DIRS) {
+    const fullPath = path.join(PROJECT_ROOT, dir);
+    if (!fs.existsSync(fullPath)) {
+      missing.push(dir);
+    }
+  }
+  if (missing.length > 0) {
+    console.warn('\nWarning: Scan directories not found (skipped):');
+    for (const dir of missing) {
+      console.warn(`  - ${dir}`);
+    }
+  }
+}
+
 /**
  * Validate annotations in source files
  */
-function validateAnnotations(validStoryIds: Set<string>): ValidationIssue[] {
+function validateAnnotations(validStoryIds: Set<string>): {
+  issues: ValidationIssue[];
+  annotatedFiles: Set<string>;
+  annotatedStoryIds: Set<string>;
+  unknownStoryIds: Set<string>;
+  latestAnnotatedMtime: number;
+} {
   const issues: ValidationIssue[] = [];
+  const annotatedFiles = new Set<string>();
+  const annotatedStoryIds = new Set<string>();
+  const unknownStoryIds = new Set<string>();
+  let latestAnnotatedMtime = 0;
+
   const pattern = new RegExp(ANNOTATION_PATTERN.source, 'g');
 
   for (const dir of SCAN_DIRS) {
@@ -108,6 +137,7 @@ function validateAnnotations(validStoryIds: Set<string>): ValidationIssue[] {
       const fullPath = path.join(PROJECT_ROOT, file);
       const content = fs.readFileSync(fullPath, 'utf-8');
       const lines = content.split('\n');
+      let hasAnnotation = false;
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -115,6 +145,7 @@ function validateAnnotations(validStoryIds: Set<string>): ValidationIssue[] {
 
         let match;
         while ((match = pattern.exec(line)) !== null) {
+          hasAnnotation = true;
           const storyIds = match[1].split(/\s*,\s*/).map((id) => id.trim());
 
           for (const storyId of storyIds) {
@@ -127,6 +158,7 @@ function validateAnnotations(validStoryIds: Set<string>): ValidationIssue[] {
                 story_id: storyId,
               });
             } else if (!validStoryIds.has(storyId)) {
+              unknownStoryIds.add(storyId);
               issues.push({
                 type: 'warning',
                 message: `Unknown story ID: ${storyId} (not found in story definitions)`,
@@ -134,14 +166,24 @@ function validateAnnotations(validStoryIds: Set<string>): ValidationIssue[] {
                 line: i + 1,
                 story_id: storyId,
               });
+            } else {
+              annotatedStoryIds.add(storyId);
             }
           }
+        }
+      }
+
+      if (hasAnnotation) {
+        annotatedFiles.add(file);
+        const stats = fs.statSync(fullPath);
+        if (stats.mtimeMs > latestAnnotatedMtime) {
+          latestAnnotatedMtime = stats.mtimeMs;
         }
       }
     }
   }
 
-  return issues;
+  return { issues, annotatedFiles, annotatedStoryIds, unknownStoryIds, latestAnnotatedMtime };
 }
 
 /**
@@ -192,6 +234,8 @@ function validateOverrides(validStoryIds: Set<string>): ValidationIssue[] {
       continue;
     }
 
+    const keys = Object.keys(override);
+
     // Check for forbidden fields
     for (const field of OVERRIDE_FORBIDDEN_FIELDS) {
       if (field in override) {
@@ -203,6 +247,19 @@ function validateOverrides(validStoryIds: Set<string>): ValidationIssue[] {
         });
       }
     }
+
+    // Check for unknown fields
+    const unknown = keys.filter(
+      (field) => !OVERRIDE_ALLOWED_FIELDS.includes(field as (typeof OVERRIDE_ALLOWED_FIELDS)[number])
+    );
+    if (unknown.length > 0) {
+      issues.push({
+        type: 'warning',
+        message: `Override for ${storyId} contains unknown field(s): ${unknown.join(', ')} - ignored`,
+        file: OVERRIDES_PATH,
+        story_id: storyId,
+      });
+    }
   }
 
   return issues;
@@ -211,7 +268,7 @@ function validateOverrides(validStoryIds: Set<string>): ValidationIssue[] {
 /**
  * Check if story-code-map exists and is recent
  */
-function validateMapFreshness(): ValidationIssue[] {
+function validateMapFreshness(latestInputMtime: number): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const fullPath = path.join(PROJECT_ROOT, STORY_CODE_MAP_PATH);
 
@@ -224,66 +281,14 @@ function validateMapFreshness(): ValidationIssue[] {
   }
 
   const stats = fs.statSync(fullPath);
-  const mapAge = Date.now() - stats.mtimeMs;
-  const oneHour = 60 * 60 * 1000;
-
-  // Check if map is older than 1 hour (just a soft warning)
-  if (mapAge > oneHour) {
+  if (stats.mtimeMs < latestInputMtime) {
     issues.push({
       type: 'warning',
-      message: `Story-code-map is older than 1 hour. Consider regenerating.`,
+      message: `Story-code-map is older than its inputs. Consider regenerating.`,
     });
   }
 
   return issues;
-}
-
-/**
- * Compute statistics
- */
-function computeStats(validStoryIds: Set<string>): ValidationResult['stats'] {
-  const annotatedStories = new Set<string>();
-  const annotatedFiles = new Set<string>();
-  const unknownIds = new Set<string>();
-
-  const pattern = new RegExp(ANNOTATION_PATTERN.source, 'g');
-
-  for (const dir of SCAN_DIRS) {
-    const files = findFiles(dir);
-
-    for (const file of files) {
-      const fullPath = path.join(PROJECT_ROOT, file);
-      const content = fs.readFileSync(fullPath, 'utf-8');
-
-      pattern.lastIndex = 0;
-      let match;
-      let hasAnnotation = false;
-
-      while ((match = pattern.exec(content)) !== null) {
-        hasAnnotation = true;
-        const storyIds = match[1].split(/\s*,\s*/).map((id) => id.trim());
-
-        for (const storyId of storyIds) {
-          if (validStoryIds.has(storyId)) {
-            annotatedStories.add(storyId);
-          } else {
-            unknownIds.add(storyId);
-          }
-        }
-      }
-
-      if (hasAnnotation) {
-        annotatedFiles.add(file);
-      }
-    }
-  }
-
-  return {
-    stories_with_annotations: annotatedStories.size,
-    stories_without_annotations: validStoryIds.size - annotatedStories.size,
-    files_with_annotations: annotatedFiles.size,
-    unknown_story_ids: unknownIds.size,
-  };
 }
 
 // =============================================================================
@@ -306,7 +311,9 @@ async function main() {
   const issues: ValidationIssue[] = [];
 
   console.log('Validating annotations...');
-  const annotationIssues = validateAnnotations(validStoryIds);
+  warnMissingScanDirs();
+  const annotationResult = validateAnnotations(validStoryIds);
+  const annotationIssues = annotationResult.issues;
   issues.push(...annotationIssues);
   console.log(`  Found ${annotationIssues.length} issues`);
 
@@ -316,13 +323,38 @@ async function main() {
   console.log(`  Found ${overrideIssues.length} issues`);
 
   console.log('Checking map freshness...');
-  const freshnessIssues = validateMapFreshness();
+  const inputFiles = [
+    ...STORY_SOURCES,
+    JOURNEY_TEST_MATRIX_PATH,
+    FEATURE_INVENTORY_PATH,
+    OVERRIDES_PATH,
+  ]
+    .map((p) => path.join(PROJECT_ROOT, p))
+    .filter((p) => fs.existsSync(p));
+
+  let latestInputMtime = 0;
+  for (const file of inputFiles) {
+    const stats = fs.statSync(file);
+    if (stats.mtimeMs > latestInputMtime) {
+      latestInputMtime = stats.mtimeMs;
+    }
+  }
+  if (annotationResult.latestAnnotatedMtime > latestInputMtime) {
+    latestInputMtime = annotationResult.latestAnnotatedMtime;
+  }
+
+  const freshnessIssues = validateMapFreshness(latestInputMtime);
   issues.push(...freshnessIssues);
   console.log(`  Found ${freshnessIssues.length} issues`);
 
   // Compute stats
   console.log('Computing statistics...');
-  const stats = computeStats(validStoryIds);
+  const stats: ValidationResult['stats'] = {
+    stories_with_annotations: annotationResult.annotatedStoryIds.size,
+    stories_without_annotations: validStoryIds.size - annotationResult.annotatedStoryIds.size,
+    files_with_annotations: annotationResult.annotatedFiles.size,
+    unknown_story_ids: annotationResult.unknownStoryIds.size,
+  };
 
   // Build result
   const errors = issues.filter((i) => i.type === 'error');

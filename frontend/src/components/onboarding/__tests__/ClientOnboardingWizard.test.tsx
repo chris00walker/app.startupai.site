@@ -3,7 +3,8 @@
  *
  * Tests for the client onboarding wrapper that enables consultants
  * to start validation projects for their clients.
- */
+ * @story US-C07
+*/
 
 import { render, screen } from '@testing-library/react';
 import { ClientOnboardingWizard } from '../ClientOnboardingWizard';

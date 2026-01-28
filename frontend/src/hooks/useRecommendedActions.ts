@@ -1,4 +1,7 @@
 /**
+ * @story US-F16
+ */
+/**
  * useRecommendedActions Hook
  *
  * Analyzes current project state and generates AI-suggested next actions

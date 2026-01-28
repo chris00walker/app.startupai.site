@@ -3,7 +3,8 @@
  * 
  * Simplified test suite to validate our Test-Driven Development implementation
  * for ShadCN-based canvas components following the MCP server patterns
- */
+ * @story US-CP01, US-CP02, US-CP03, US-CP04, US-F12
+*/
 
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'

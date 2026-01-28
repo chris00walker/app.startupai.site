@@ -2,7 +2,8 @@
  * Tests for /api/consultant/onboarding route
  *
  * POST - Creates consultant profile from onboarding data
- */
+ * @story US-C01, US-CT01
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

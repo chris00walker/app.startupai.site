@@ -1,4 +1,7 @@
 /**
+ * @story US-F06, US-F16
+ */
+/**
  * PDF Exporter Component
  *
  * Uses react-to-print to generate PDF exports of the report.

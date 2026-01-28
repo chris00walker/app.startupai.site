@@ -15,7 +15,8 @@
  *   - No per-file afterAll cleanup needed
  *
  * Run with: pnpm test:integration
- */
+ * @story US-F06
+*/
 
 import { describe, it, beforeAll } from '@jest/globals';
 import { SupabaseClient } from '@supabase/supabase-js';

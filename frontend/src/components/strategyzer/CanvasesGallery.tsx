@@ -1,3 +1,6 @@
+/**
+ * @story US-CP01
+ */
 "use client"
 
 import React, { useState } from 'react'

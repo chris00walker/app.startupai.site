@@ -2,7 +2,8 @@
  * Tests for /api/onboarding/brief route
  *
  * GET - Fetches the entrepreneur brief for a project or session
- */
+ * @story US-F01, US-H01
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

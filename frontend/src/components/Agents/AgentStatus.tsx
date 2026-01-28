@@ -1,4 +1,7 @@
 /**
+ * @story US-F02
+ */
+/**
  * AgentStatus Component
  *
  * Displays real-time status of the 6 AI Founders in the StartupAI system.

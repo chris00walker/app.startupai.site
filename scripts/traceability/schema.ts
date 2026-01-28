@@ -27,6 +27,19 @@ export interface E2ETestReference {
 }
 
 /**
+ * Common link set structure (used for annotated and baseline links)
+ */
+export interface StoryLinkSet {
+  components: string[];
+  api_routes: string[];
+  pages: string[];
+  hooks: string[];
+  lib: string[];
+  e2e_tests: E2ETestReference[];
+  unit_tests: string[];
+}
+
+/**
  * Story entry in the story-code-map
  */
 export interface StoryEntry {
@@ -54,14 +67,31 @@ export interface StoryEntry {
   /** Unit test files covering this story */
   unit_tests: string[];
 
+  /**
+   * Link provenance (optional, for traceability accuracy)
+   * - annotated: files linked via @story tags
+   * - baseline: files linked via journey-test-matrix / feature-inventory
+   */
+  links?: {
+    annotated: StoryLinkSet;
+    baseline: StoryLinkSet;
+  };
+
   /** Database tables this story reads/writes */
   db_tables: string[];
 
   /** Implementation status */
   implementation_status: ImplementationStatus;
 
+  /** Implementation status inferred from annotations + baselines */
+  implementation_status_inferred?: ImplementationStatus;
+
   /** Optional notes (from overrides) */
   notes?: string;
+
+  /** Optional domain extraction hints */
+  domain_candidate?: boolean;
+  domain_function?: string;
 }
 
 // =============================================================================
@@ -120,6 +150,10 @@ export interface StoryOverride {
 
   /** Override implementation status */
   implementation_status?: ImplementationStatus;
+
+  /** Domain extraction metadata */
+  domain_candidate?: boolean;
+  domain_function?: string;
 }
 
 /**

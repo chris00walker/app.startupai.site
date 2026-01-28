@@ -1,3 +1,6 @@
+/**
+ * @story US-A05, US-AU01, US-MF03
+ */
 import { test, expect } from '@playwright/test';
 
 test.describe('Smoke', () => {

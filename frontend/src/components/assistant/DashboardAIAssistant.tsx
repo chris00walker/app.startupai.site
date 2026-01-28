@@ -1,4 +1,7 @@
 /**
+ * @story US-CP09
+ */
+/**
  * DashboardAIAssistant - Persistent AI Assistant for Ongoing Strategic Support
  *
  * This component provides a conversational AI interface in the founder/consultant

@@ -1,6 +1,7 @@
 /**
  * Tests for CrewAI status polling endpoint
- */
+ * @story US-F08
+*/
 
 // Mock NextResponse.json since it doesn't work in Jest's Node.js environment
 jest.mock('next/server', () => {

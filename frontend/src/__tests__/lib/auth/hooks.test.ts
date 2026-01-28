@@ -6,7 +6,8 @@
  * - useSession: Current session state
  * - useAuth: Combined auth state
  * - useRoleInfo: Role-based permissions
- */
+ * @story US-AU01, US-AU02
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useUser, useSession, useAuth, useRoleInfo } from '@/lib/auth/hooks';
@@ -35,6 +36,21 @@ const mockGetUser = jest.fn();
 const mockGetSession = jest.fn();
 const mockOnAuthStateChange = jest.fn();
 const mockFrom = jest.fn();
+const originalConsoleError = console.error;
+
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation((...args) => {
+    const message = String(args[0] ?? '');
+    if (message.includes('not wrapped in act')) {
+      return;
+    }
+    originalConsoleError(...args);
+  });
+});
+
+afterAll(() => {
+  (console.error as jest.Mock).mockRestore();
+});
 
 jest.mock('@/lib/supabase/client', () => ({
   createClient: () => ({

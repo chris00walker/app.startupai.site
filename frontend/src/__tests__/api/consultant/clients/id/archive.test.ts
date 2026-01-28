@@ -2,7 +2,8 @@
  * Tests for /api/consultant/clients/[id]/archive route
  *
  * POST - Archive a client relationship
- */
+ * @story US-C05
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

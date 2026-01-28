@@ -3,6 +3,8 @@
  *
  * Retrieves conversation history for the dashboard AI assistant.
  * Returns recent conversations scoped by user, role, and optionally project/client.
+ *
+ * @story US-CP09
  */
 
 import { NextRequest, NextResponse } from 'next/server';

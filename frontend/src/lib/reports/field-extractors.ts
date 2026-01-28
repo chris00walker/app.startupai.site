@@ -3,6 +3,7 @@
  *
  * Maps 65+ StartupValidationState fields into organized report sections
  * for dual D-F-V and Strategyzer Phase views.
+ * @story US-F06, US-F16
  */
 
 import type {

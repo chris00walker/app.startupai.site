@@ -1,6 +1,9 @@
 /**
+ * @story US-AU01, US-AU02
+ */
+/**
  * Authentication Hooks (Client-Side)
- * 
+ *
  * React hooks for authentication state in Client Components.
  */
 
@@ -188,4 +191,3 @@ export function useRoleInfo() {
     isTrial: state.role === 'founder_trial' || state.role === 'consultant_trial',
   };
 }
-

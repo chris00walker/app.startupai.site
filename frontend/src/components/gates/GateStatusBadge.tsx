@@ -1,4 +1,7 @@
 /**
+ * @story US-F15
+ */
+/**
  * Gate Status Badge Component
  *
  * Displays the current gate status (Passed/Failed/Pending/At Risk) with appropriate styling.

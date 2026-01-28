@@ -1,4 +1,7 @@
 /**
+ * @story US-F06, US-F16
+ */
+/**
  * useCrewAIReport Hook
  *
  * Fetches CrewAI validation state and transforms it into organized report sections

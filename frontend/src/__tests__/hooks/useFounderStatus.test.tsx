@@ -3,7 +3,8 @@
  *
  * Tests for the useFounderStatus hook that polls for AI founder status
  * using React Query.
- */
+ * @story US-F02
+*/
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

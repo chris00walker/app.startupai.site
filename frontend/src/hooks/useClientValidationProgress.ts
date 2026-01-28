@@ -1,4 +1,7 @@
 /**
+ * @story US-C03
+ */
+/**
  * useClientValidationProgress Hook
  *
  * Fetches validation progress for all clients of a consultant.

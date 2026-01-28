@@ -112,7 +112,9 @@ async function getUser(userId: string) {
 
 async function getProjects() {
   const supabase = createClient();
-  return supabase.from('projects').select('*');
+  return supabase
+    .from<Database['public']['Tables']['projects']['Row']>('projects')
+    .select('*');
 }
 
 async function getMissingTable() {
@@ -178,6 +180,19 @@ describe('extractTableReferences', () => {
     const refs = extractTableReferences(code, 'test.ts');
     expect(refs).toHaveLength(1);
     expect(refs[0].tableName).toBe('some_table');
+  });
+
+  test('handles generics and multiline calls', () => {
+    const code = `
+const query = supabase
+  .from<Database['public']['Tables']['accounts']['Row']>(
+    'accounts'
+  )
+  .select('*');
+`;
+    const refs = extractTableReferences(code, 'test.ts');
+    expect(refs).toHaveLength(1);
+    expect(refs[0].tableName).toBe('accounts');
   });
 });
 
@@ -273,6 +288,16 @@ export const validationProgress = pgTable('validation_progress', {
 });
 `;
 
+const FK_SCHEMA_MULTILINE_COLUMN = `
+import { pgTable, text } from 'drizzle-orm/pg-core';
+
+export const notesTable = pgTable('notes', {
+  id:
+    text('id')
+      .notNull(),
+});
+`;
+
 // =============================================================================
 // FK Consistency Tests (simulating original bug)
 // =============================================================================
@@ -285,6 +310,13 @@ describe('extractColumns', () => {
     const runIdCol = columns.find(c => c.columnName === 'run_id');
     expect(runIdCol !== undefined).toBe(true);
     expect(runIdCol?.columnType).toBe('text');
+  });
+
+  test('handles multi-line column definitions', () => {
+    const columns = extractColumns(FK_SCHEMA_MULTILINE_COLUMN, 'test.ts');
+    const idCol = columns.find(c => c.columnName === 'id');
+    expect(idCol !== undefined).toBe(true);
+    expect(idCol?.columnType).toBe('text');
   });
 });
 

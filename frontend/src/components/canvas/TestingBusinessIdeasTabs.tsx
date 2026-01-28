@@ -1,3 +1,6 @@
+/**
+ * @story US-CP04
+ */
 "use client"
 
 import * as React from "react"

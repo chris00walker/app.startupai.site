@@ -1,3 +1,7 @@
+/**
+ * @story US-FT02, US-CT04
+ */
+
 import { assertTrialAllowance } from '@/lib/auth/trial-guard';
 
 const mockGetUserProfile = jest.fn();

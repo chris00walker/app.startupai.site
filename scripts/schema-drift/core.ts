@@ -32,7 +32,7 @@ const TABLE_PATTERN = /export\s+const\s+(\w+)\s*=\s*pgTable\s*\(\s*['"]([^'"]+)[
  *
  * Captures: (1) TypeScript property name, (2) Database column name
  */
-const COLUMN_PATTERN = /^\s+(\w+)\s*:\s*\w+\s*\(\s*['"]([^'"]+)['"]/gm;
+const COLUMN_PATTERN = /^\s+(\w+)\s*:\s*(?:\n\s*)*\w+\s*\(\s*['"]([^'"]+)['"]/gm;
 
 /**
  * Pattern to find export statements in index.ts.

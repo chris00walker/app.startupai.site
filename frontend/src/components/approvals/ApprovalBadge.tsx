@@ -3,6 +3,8 @@
  *
  * Navigation badge showing pending approval count with urgency indicator.
  * Uses Supabase Realtime for live updates.
+ *
+ * @story US-F03
  */
 
 'use client';

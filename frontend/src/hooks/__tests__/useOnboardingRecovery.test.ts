@@ -3,7 +3,8 @@
  *
  * Part of ADR-005 Split API Architecture:
  * Tests localStorage fallback and recovery logic
- */
+ * @story US-E01
+*/
 
 // Jest globals are available automatically
 import { renderHook, act } from '@testing-library/react';

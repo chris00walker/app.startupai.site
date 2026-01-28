@@ -1,3 +1,6 @@
+/**
+ * @story US-AU01, US-FT01, US-CT01
+ */
 import type { UserRole } from '@/db/schema';
 
 type PlanStatus = 'active' | 'trialing' | 'paused' | 'canceled' | string;

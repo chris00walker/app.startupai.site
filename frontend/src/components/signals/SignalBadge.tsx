@@ -1,3 +1,6 @@
+/**
+ * @story US-F02, US-F06
+ */
 'use client'
 
 import {

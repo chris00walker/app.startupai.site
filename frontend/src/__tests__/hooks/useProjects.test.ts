@@ -3,7 +3,8 @@
  *
  * Tests for the useProjects and useActiveProjects hooks that manage
  * founder project data from Supabase.
- */
+ * @story US-F02, US-F04
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useProjects, useActiveProjects } from '@/hooks/useProjects';

@@ -118,23 +118,38 @@ export function extractColumns(content: string, filePath: string): ColumnDefinit
       }
 
       // Match column definitions
-      // Pattern: propertyName: type('column_name')
-      // Examples:
-      //   id: uuid('id').defaultRandom().primaryKey()
-      //   userId: uuid('user_id').references(() => users.id)
-      //   runId: text('run_id')
-      const columnPattern = /^\s+(\w+)\s*:\s*(\w+)\s*\(\s*['"]([^'"]+)['"]/;
-      const columnMatch = line.match(columnPattern);
+      // Pattern: propertyName: ... type('column_name') ...
+      // Supports multi-line type calls.
+      const columnStartPattern = /^\s+(\w+)\s*:\s*(.*)$/;
+      const typePattern = /(\w+)\s*\(\s*['"]([^'"]+)['"]/;
+      const columnMatch = line.match(columnStartPattern);
 
       if (columnMatch && currentTableName) {
-        columns.push({
-          tableName: currentTableName,
-          propertyName: columnMatch[1],
-          columnType: columnMatch[2],
-          columnName: columnMatch[3],
-          sourceFile: filePath,
-          lineNumber: i + 1,
-        });
+        const propertyName = columnMatch[1];
+        let combined = columnMatch[2] || '';
+        let lookahead = i;
+
+        // Look ahead until we find a type call or end of column definition
+        while (!typePattern.test(combined) && lookahead + 1 < lines.length) {
+          const nextLine = lines[lookahead + 1];
+          combined += ' ' + nextLine.trim();
+          lookahead++;
+          if (nextLine.trim().endsWith(',')) {
+            break;
+          }
+        }
+
+        const typeMatch = combined.match(typePattern);
+        if (typeMatch) {
+          columns.push({
+            tableName: currentTableName,
+            propertyName,
+            columnType: typeMatch[1],
+            columnName: typeMatch[2],
+            sourceFile: filePath,
+            lineNumber: i + 1,
+          });
+        }
       }
     }
   }
@@ -191,18 +206,34 @@ export function extractForeignKeys(content: string, filePath: string): ForeignKe
         continue;
       }
 
-      // Match column definition start
-      // Pattern: propertyName: type('column_name')
-      const columnStartPattern = /^\s+(\w+)\s*:\s*(\w+)\s*\(\s*['"]([^'"]+)['"]/;
+      // Match column definition start (supports multi-line type call)
+      const columnStartPattern = /^\s+(\w+)\s*:\s*(.*)$/;
+      const typePattern = /(\w+)\s*\(\s*['"]([^'"]+)['"]/;
       const columnMatch = line.match(columnStartPattern);
 
       if (columnMatch) {
-        currentColumnDef = {
-          propertyName: columnMatch[1],
-          columnType: columnMatch[2],
-          columnName: columnMatch[3],
-          startLine: i + 1,
-        };
+        const propertyName = columnMatch[1];
+        let combined = columnMatch[2] || '';
+        let lookahead = i;
+
+        while (!typePattern.test(combined) && lookahead + 1 < lines.length) {
+          const nextLine = lines[lookahead + 1];
+          combined += ' ' + nextLine.trim();
+          lookahead++;
+          if (nextLine.trim().endsWith(',')) {
+            break;
+          }
+        }
+
+        const typeMatch = combined.match(typePattern);
+        if (typeMatch) {
+          currentColumnDef = {
+            propertyName,
+            columnType: typeMatch[1],
+            columnName: typeMatch[2],
+            startLine: i + 1,
+          };
+        }
       }
 
       // Match FK reference (may be on same line or continuation line)

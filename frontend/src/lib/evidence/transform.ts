@@ -3,6 +3,7 @@
  *
  * Functions to transform evidence from different sources into a unified format
  * for the Evidence Explorer.
+ * @story US-F14
  */
 
 import type { Evidence } from '@/db/schema/evidence'
@@ -17,7 +18,18 @@ import type {
   EvidenceFilters,
 } from '@/types/evidence-explorer'
 import { signalToStrength, signalToNumeric, getSignalDisplayInfo } from '@/types/evidence-explorer'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
+
+/**
+ * Safely parse a date value, returning current date as fallback for invalid values
+ */
+function safeParseDate(value: string | Date | null | undefined): Date {
+  if (!value) {
+    return new Date()
+  }
+  const date = value instanceof Date ? value : new Date(value)
+  return isValid(date) ? date : new Date()
+}
 
 // =======================================================================================
 // USER EVIDENCE TRANSFORMATION
@@ -33,7 +45,7 @@ export function transformUserEvidence(evidence: Evidence): UserEvidenceItem {
     source: 'user',
     id: evidence.id,
     data: evidence,
-    timestamp: new Date(evidence.createdAt),
+    timestamp: safeParseDate(evidence.createdAt),
     dimension,
     title: evidence.title || 'Untitled Evidence',
     strength: evidence.strength || 'medium',
@@ -68,7 +80,7 @@ function fitTypeToDimension(fitType: string | null | undefined): EvidenceDimensi
  */
 export function transformAIValidationState(state: CrewAIValidationState): AIEvidenceItem[] {
   const items: AIEvidenceItem[] = []
-  const timestamp = new Date(state.updatedAt)
+  const timestamp = safeParseDate(state.updatedAt)
 
   // Desirability Evidence
   if (state.desirabilityEvidence && state.desirabilitySignal !== 'no_signal') {

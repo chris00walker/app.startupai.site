@@ -1,4 +1,7 @@
 /**
+ * @story US-F06
+ */
+/**
  * VPCReportViewer Component
  *
  * Full display of CrewAI VPC analysis with segment selection,

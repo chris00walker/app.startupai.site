@@ -27,6 +27,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v2
         with:
@@ -45,6 +47,13 @@ jobs:
       - name: Type check
         run: pnpm type-check
         working-directory: frontend
+
+      - name: Lint changed files (PR only)
+        if: github.event_name == 'pull_request'
+        run: pnpm -C .. lint:changed
+        working-directory: frontend
+        env:
+          LINT_CHANGED_BASE: origin/${{ github.base_ref }}
 
       - name: Unit tests
         run: pnpm test:unit --coverage

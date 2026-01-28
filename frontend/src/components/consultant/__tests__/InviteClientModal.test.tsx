@@ -3,12 +3,23 @@
  *
  * Tests for the invite client modal component used by consultants
  * to send invitations to new clients.
- */
+ * @story US-C02, US-CT03
+*/
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InviteClientModal } from '../InviteClientModal';
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
 
 // Mock clipboard API
 const mockWriteText = jest.fn();
@@ -78,22 +89,27 @@ describe('InviteClientModal', () => {
 
     it('accepts valid email without name', async () => {
       const user = userEvent.setup();
-      const onInvite = jest.fn().mockResolvedValue({
-        success: true,
-        invite: {
-          id: '123',
-          email: 'client@example.com',
-          name: null,
-          inviteToken: 'token123',
-          inviteUrl: 'http://localhost:3000/signup?invite=token123',
-          expiresAt: new Date().toISOString(),
-        },
-      });
+      const deferred = createDeferred<any>();
+      const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
       render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
 
       await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
       await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      await act(async () => {
+        deferred.resolve({
+          success: true,
+          invite: {
+            id: '123',
+            email: 'client@example.com',
+            name: null,
+            inviteToken: 'token123',
+            inviteUrl: 'http://localhost:3000/signup?invite=token123',
+            expiresAt: new Date().toISOString(),
+          },
+        });
+      });
 
       await waitFor(() => {
         expect(onInvite).toHaveBeenCalledWith({
@@ -105,23 +121,28 @@ describe('InviteClientModal', () => {
 
     it('includes name when provided', async () => {
       const user = userEvent.setup();
-      const onInvite = jest.fn().mockResolvedValue({
-        success: true,
-        invite: {
-          id: '123',
-          email: 'client@example.com',
-          name: 'John Doe',
-          inviteToken: 'token123',
-          inviteUrl: 'http://localhost:3000/signup?invite=token123',
-          expiresAt: new Date().toISOString(),
-        },
-      });
+      const deferred = createDeferred<any>();
+      const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
       render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
 
       await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
       await user.type(screen.getByLabelText(/client name/i), 'John Doe');
       await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      await act(async () => {
+        deferred.resolve({
+          success: true,
+          invite: {
+            id: '123',
+            email: 'client@example.com',
+            name: 'John Doe',
+            inviteToken: 'token123',
+            inviteUrl: 'http://localhost:3000/signup?invite=token123',
+            expiresAt: new Date().toISOString(),
+          },
+        });
+      });
 
       await waitFor(() => {
         expect(onInvite).toHaveBeenCalledWith({
@@ -149,27 +170,34 @@ describe('InviteClientModal', () => {
 
       expect(screen.getByText('Sending...')).toBeInTheDocument();
 
-      resolveInvite!({ success: true, invite: {} });
+      await act(async () => {
+        resolveInvite!({ success: true, invite: {} });
+      });
     });
 
     it('shows success state after successful invite', async () => {
       const user = userEvent.setup();
-      const onInvite = jest.fn().mockResolvedValue({
-        success: true,
-        invite: {
-          id: '123',
-          email: 'client@example.com',
-          name: null,
-          inviteToken: 'token123',
-          inviteUrl: 'http://localhost:3000/signup?invite=token123',
-          expiresAt: new Date().toISOString(),
-        },
-      });
+      const deferred = createDeferred<any>();
+      const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
       render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
 
       await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
       await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      await act(async () => {
+        deferred.resolve({
+          success: true,
+          invite: {
+            id: '123',
+            email: 'client@example.com',
+            name: null,
+            inviteToken: 'token123',
+            inviteUrl: 'http://localhost:3000/signup?invite=token123',
+            expiresAt: new Date().toISOString(),
+          },
+        });
+      });
 
       await waitFor(() => {
         expect(screen.getByText('Invitation Sent')).toBeInTheDocument();
@@ -180,15 +208,20 @@ describe('InviteClientModal', () => {
 
     it('shows error message when invite fails', async () => {
       const user = userEvent.setup();
-      const onInvite = jest.fn().mockResolvedValue({
-        success: false,
-        error: 'This email is already linked to another consultant',
-      });
+      const deferred = createDeferred<any>();
+      const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
       render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
 
       await user.type(screen.getByLabelText(/email address/i), 'existing@example.com');
       await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      await act(async () => {
+        deferred.resolve({
+          success: false,
+          error: 'This email is already linked to another consultant',
+        });
+      });
 
       await waitFor(() => {
         expect(screen.getByText('This email is already linked to another consultant')).toBeInTheDocument();
@@ -203,22 +236,27 @@ describe('InviteClientModal', () => {
     it('displays the invite URL', async () => {
       const user = userEvent.setup();
       const inviteUrl = 'http://localhost:3000/signup?invite=token123';
-      const onInvite = jest.fn().mockResolvedValue({
-        success: true,
-        invite: {
-          id: '123',
-          email: 'client@example.com',
-          name: null,
-          inviteToken: 'token123',
-          inviteUrl,
-          expiresAt: new Date().toISOString(),
-        },
-      });
+      const deferred = createDeferred<any>();
+      const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
       render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
 
       await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
       await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      await act(async () => {
+        deferred.resolve({
+          success: true,
+          invite: {
+            id: '123',
+            email: 'client@example.com',
+            name: null,
+            inviteToken: 'token123',
+            inviteUrl,
+            expiresAt: new Date().toISOString(),
+          },
+        });
+      });
 
       await waitFor(() => {
         expect(screen.getByDisplayValue(inviteUrl)).toBeInTheDocument();
@@ -228,22 +266,27 @@ describe('InviteClientModal', () => {
     it('displays invite URL that can be copied', async () => {
       const user = userEvent.setup();
       const inviteUrl = 'http://localhost:3000/signup?invite=token123';
-      const onInvite = jest.fn().mockResolvedValue({
-        success: true,
-        invite: {
-          id: '123',
-          email: 'client@example.com',
-          name: null,
-          inviteToken: 'token123',
-          inviteUrl,
-          expiresAt: new Date().toISOString(),
-        },
-      });
+      const deferred = createDeferred<any>();
+      const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
       render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
 
       await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
       await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      await act(async () => {
+        deferred.resolve({
+          success: true,
+          invite: {
+            id: '123',
+            email: 'client@example.com',
+            name: null,
+            inviteToken: 'token123',
+            inviteUrl,
+            expiresAt: new Date().toISOString(),
+          },
+        });
+      });
 
       await waitFor(() => {
         expect(screen.getByText('Invitation Sent')).toBeInTheDocument();

@@ -2,7 +2,8 @@
  * Tests for /api/auth/logout route
  *
  * GET - Signs out user and redirects to marketing site
- */
+ * @story US-AU03
+*/
 
 // Mock NextResponse
 jest.mock('next/server', () => {

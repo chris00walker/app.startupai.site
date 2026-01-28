@@ -1,3 +1,6 @@
+/**
+ * @story US-CP02
+ */
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';

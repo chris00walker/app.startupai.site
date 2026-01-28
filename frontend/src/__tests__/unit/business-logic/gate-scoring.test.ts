@@ -7,7 +7,8 @@
  * Relocated from: integration/gate-scoring.integration.test.ts
  * Reason: This test contains no actual integration (no DB, no API calls).
  * It tests pure business logic with mock data.
- */
+ * @story US-F15
+*/
 
 import { describe, it } from '@jest/globals';
 

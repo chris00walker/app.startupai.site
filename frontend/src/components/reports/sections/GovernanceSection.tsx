@@ -1,4 +1,7 @@
 /**
+ * @story US-F06, US-F16
+ */
+/**
  * Governance Section
  *
  * Displays governance and QA fields from CrewAI analysis:

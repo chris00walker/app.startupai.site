@@ -1,6 +1,8 @@
 /**
  * VPC Initialize API Route
  *
+ * @story US-CP02
+ *
  * POST /api/vpc/[projectId]/initialize
  *
  * Copies VPC data from crewai_validation_states to the editable

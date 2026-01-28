@@ -24,6 +24,7 @@ export default defineConfig({
   testIgnore: [
     '**/*.test.*',
     '**/node_modules/**',
+    '**/legacy/**',
   ],
 
   // Timeouts

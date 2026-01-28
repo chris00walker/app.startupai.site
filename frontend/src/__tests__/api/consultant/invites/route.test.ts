@@ -3,7 +3,8 @@
  *
  * POST - Create a new client invite
  * GET - List all invites and linked clients
- */
+ * @story US-C02
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

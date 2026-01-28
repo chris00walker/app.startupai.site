@@ -4,6 +4,7 @@
  * Centralized definitions and mapping functions for the 6 AI Founders
  * in the StartupAI system. Maps crews, data types, and source strings
  * to their responsible founder.
+ * @story US-F02
  */
 import {
   Brain,

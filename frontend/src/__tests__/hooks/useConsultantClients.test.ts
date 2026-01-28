@@ -3,7 +3,8 @@
  *
  * Tests for the consultant clients management hook that handles
  * invites, clients, and archiving functionality.
- */
+ * @story US-C02, US-C05, US-C06
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useConsultantClients } from '@/hooks/useConsultantClients';

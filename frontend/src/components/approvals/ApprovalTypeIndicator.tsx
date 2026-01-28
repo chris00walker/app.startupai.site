@@ -2,6 +2,8 @@
  * ApprovalTypeIndicator Component
  *
  * Displays a badge for the approval type with icon and color coding.
+ *
+ * @story US-F03
  */
 
 'use client';

@@ -2,6 +2,8 @@
  * EvidenceSummary Component
  *
  * Displays the evidence summary and D-F-V signals for an approval request.
+ *
+ * @story US-F03
  */
 
 'use client';

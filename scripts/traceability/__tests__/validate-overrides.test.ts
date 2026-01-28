@@ -19,6 +19,21 @@ describe('validateOverridesData', () => {
     expect(warnings.length).toBeTruthy();
   });
 
+  test('warns on unknown fields and ignores them', () => {
+    const data = {
+      'US-F03': {
+        db_tables: ['projects'],
+        migrations: ['supabase/migrations/001.sql'],
+      },
+    };
+
+    const { overrides, warnings, rejected } = validateOverridesData(data);
+    expect(Object.keys(overrides)).toHaveLength(1);
+    expect(overrides['US-F03']).toBeTruthy();
+    expect(rejected).toHaveLength(0);
+    expect(warnings.length).toBeTruthy();
+  });
+
   test('allows domain_candidate and domain_function fields', () => {
     const data = {
       'US-AD09': {

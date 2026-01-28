@@ -174,6 +174,20 @@ describe('extractColumns', () => {
     expect(columns).toContain('updated_at');
     expect(columns).toHaveLength(2);
   });
+
+  test('handles multi-line column definitions', () => {
+    const content = `
+  description:
+    text('description')
+      .notNull(),
+  notes:
+    jsonb('notes'),
+`;
+    const columns = extractColumns(content);
+    expect(columns).toContain('description');
+    expect(columns).toContain('notes');
+    expect(columns).toHaveLength(2);
+  });
 });
 
 describe('parseSchemaFile', () => {

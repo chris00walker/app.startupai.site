@@ -8,7 +8,8 @@
  *
  * Note: Full persistence tests require integration testing with Supabase.
  * These unit tests focus on the API contract layer.
- */
+ * @story US-F06, US-F08, US-F09, US-H01
+*/
 
 import { NextRequest, NextResponse } from 'next/server';
 

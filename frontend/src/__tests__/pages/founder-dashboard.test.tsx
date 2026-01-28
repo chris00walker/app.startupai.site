@@ -3,7 +3,8 @@
  *
  * Tests that the "Create Your First Project" and "New Project" buttons
  * route correctly to Alex's onboarding instead of the quick wizard.
- */
+ * @story US-F02
+*/
 
 import { render, screen, waitFor } from '@testing-library/react';
 
@@ -52,6 +53,10 @@ jest.mock('@/hooks/useRecentActivity', () => ({
 
 jest.mock('@/hooks/useRecommendedActions', () => ({
   useRecommendedActions: () => mockUseRecommendedActions(),
+}));
+
+jest.mock('@/hooks/useFeatureFlag', () => ({
+  useFeatureFlag: () => ({ isEnabled: false, isLoading: false, error: null }),
 }));
 
 // Mock analytics

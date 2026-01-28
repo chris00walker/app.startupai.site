@@ -1,4 +1,7 @@
 /**
+ * @story US-F15
+ */
+/**
  * useGateEvaluation Hook
  * 
  * Hook for evaluating and monitoring gate status with real-time updates.

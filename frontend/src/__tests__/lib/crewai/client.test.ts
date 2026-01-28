@@ -1,6 +1,7 @@
 /**
  * Unit tests for founder validation input builder
- */
+ * @story US-C01
+*/
 
 import { buildFounderValidationInputs } from '@/lib/crewai/founder-validation';
 

@@ -3,6 +3,8 @@
  *
  * Edge Case & Error Recovery E2E Tests
  *
+ * @story US-E01, US-E02, US-E03, US-E04, US-E05, US-E06
+ *
  * Covers user stories:
  * - US-E01: Recover from Interrupted Quick Start
  * - US-E02: Handle Concurrent Project Creation

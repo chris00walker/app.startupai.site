@@ -122,6 +122,12 @@ pnpm schema:coverage
 # Full analysis requires /schema-coverage skill (includes Supabase check)
 ```
 
+**Scan scope (local):**
+- `frontend/src` (TypeScript/TSX)
+- `backend/netlify/functions` and `netlify/functions` if TypeScript files are present
+
+**Reference detection:** `.from('table')` calls (supports generics and multiline).
+
 ## Related Skills
 
 | Skill | Purpose |

@@ -1,6 +1,8 @@
 /**
  * Validate Invite Token Route
  *
+ * @story US-C02
+ *
  * GET /api/auth/validate-invite?token=XXX - Validate an invite token before signup
  * POST /api/auth/validate-invite - Link account after signup
  */

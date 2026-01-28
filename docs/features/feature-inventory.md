@@ -85,7 +85,7 @@ Legend:
 - active: `GET /api/assistant/history` - AI assistant conversation history (`frontend/src/app/api/assistant/history/route.ts`)
 - active: `POST /api/analyze` - trigger CrewAI/Modal analysis and persist results (`frontend/src/app/api/analyze/route.ts`)
 - active: `GET /api/crewai/status` - poll CrewAI/Modal workflow status (`frontend/src/app/api/crewai/status/route.ts`)
-- active: `GET /api/crewai/results` - fetch CrewAI analysis outputs (`frontend/src/app/api/crewai/results/route.ts`)
+- legacy: `POST /api/crewai/results` - legacy founder validation webhook (deprecated; use `/api/crewai/webhook` with `flow_type: "founder_validation"`) (`frontend/src/app/api/crewai/results/route.ts`)
 - active: `POST /api/crewai/resume` - resume paused workflow (`frontend/src/app/api/crewai/resume/route.ts`)
 - active: `POST /api/crewai/webhook` - CrewAI workflow results webhook (`frontend/src/app/api/crewai/webhook/route.ts`)
 - legacy: `POST /api/crewai/consultant` - consultant onboarding webhook (deprecated) (`frontend/src/app/api/crewai/consultant/route.ts`)

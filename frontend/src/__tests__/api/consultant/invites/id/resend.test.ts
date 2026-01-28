@@ -2,7 +2,8 @@
  * Tests for /api/consultant/invites/[id]/resend route
  *
  * POST - Resend an invite with a new token
- */
+ * @story US-C06
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

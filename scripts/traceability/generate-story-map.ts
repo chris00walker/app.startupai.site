@@ -44,6 +44,7 @@ import {
 import type {
   StoryCodeMap,
   StoryEntry,
+  StoryLinkSet,
   StoryDefinition,
   StoryOverrides,
   ParsedAnnotation,
@@ -235,6 +236,64 @@ function loadFeatureInventory(): Record<string, string[]> {
 // Map Builder
 // =============================================================================
 
+function createEmptyLinkSet(): StoryLinkSet {
+  return {
+    components: [],
+    api_routes: [],
+    pages: [],
+    hooks: [],
+    lib: [],
+    e2e_tests: [],
+    unit_tests: [],
+  };
+}
+
+function mergeLinkSets(a: StoryLinkSet, b: StoryLinkSet): StoryLinkSet {
+  const uniq = <T>(items: T[]) => Array.from(new Set(items));
+  return {
+    components: uniq([...a.components, ...b.components]),
+    api_routes: uniq([...a.api_routes, ...b.api_routes]),
+    pages: uniq([...a.pages, ...b.pages]),
+    hooks: uniq([...a.hooks, ...b.hooks]),
+    lib: uniq([...a.lib, ...b.lib]),
+    e2e_tests: uniq([
+      ...a.e2e_tests.map((t) => JSON.stringify(t)),
+      ...b.e2e_tests.map((t) => JSON.stringify(t)),
+    ]).map((t) => JSON.parse(t)),
+    unit_tests: uniq([...a.unit_tests, ...b.unit_tests]),
+  };
+}
+
+function computeImplementationStatus(links: StoryLinkSet): 'complete' | 'partial' | 'gap' {
+  const hasCode =
+    links.components.length > 0 ||
+    links.api_routes.length > 0 ||
+    links.pages.length > 0 ||
+    links.hooks.length > 0 ||
+    links.lib.length > 0;
+  const hasTests = links.e2e_tests.length > 0 || links.unit_tests.length > 0;
+
+  if (hasCode && hasTests) return 'complete';
+  if (hasCode || hasTests) return 'partial';
+  return 'gap';
+}
+
+function warnMissingScanDirs(): void {
+  const missing: string[] = [];
+  for (const dir of SCAN_DIRS) {
+    const fullPath = path.join(PROJECT_ROOT, dir);
+    if (!fs.existsSync(fullPath)) {
+      missing.push(dir);
+    }
+  }
+  if (missing.length > 0) {
+    console.warn('\nWarning: Scan directories not found (skipped):');
+    for (const dir of missing) {
+      console.warn(`  - ${dir}`);
+    }
+  }
+}
+
 /**
  * Create empty story entry
  */
@@ -248,8 +307,13 @@ function createEmptyStoryEntry(title: string): StoryEntry {
     lib: [],
     e2e_tests: [],
     unit_tests: [],
+    links: {
+      annotated: createEmptyLinkSet(),
+      baseline: createEmptyLinkSet(),
+    },
     db_tables: [],
     implementation_status: 'gap',
+    implementation_status_inferred: 'gap',
   };
 }
 
@@ -289,7 +353,11 @@ function buildFilesIndex(stories: Record<string, StoryEntry>): Record<string, { 
 /**
  * Build the story-code map
  */
-function buildStoryCodeMap(): StoryCodeMap {
+function buildStoryCodeMap(): {
+  map: StoryCodeMap;
+  annotatedFiles: Set<string>;
+  baselineFiles: Set<string>;
+} {
   console.log('Parsing story definitions...');
   const storyDefs = parseStoryDefinitions();
   console.log(`  Found ${storyDefs.size} stories`);
@@ -303,6 +371,7 @@ function buildStoryCodeMap(): StoryCodeMap {
   console.log(`  Found ${Object.keys(baselineFeatures).length} story file hints`);
 
   console.log('Scanning code for annotations...');
+  warnMissingScanDirs();
   const annotations = scanAllAnnotations();
   console.log(`  Found ${annotations.length} annotations`);
 
@@ -345,6 +414,15 @@ function buildStoryCodeMap(): StoryCodeMap {
       if (!exists) {
         entry.e2e_tests.push(test);
       }
+
+      if (entry.links?.baseline) {
+        const baselineExists = entry.links.baseline.e2e_tests.some(
+          (t) => t.file === test.file && t.test_name === test.test_name
+        );
+        if (!baselineExists) {
+          entry.links.baseline.e2e_tests.push(test);
+        }
+      }
     }
   }
 
@@ -366,27 +444,51 @@ function buildStoryCodeMap(): StoryCodeMap {
       switch (classifyFileType(file)) {
         case 'component':
           if (!entry.components.includes(file)) entry.components.push(file);
+          if (entry.links?.baseline && !entry.links.baseline.components.includes(file)) {
+            entry.links.baseline.components.push(file);
+          }
           break;
         case 'api_route':
           if (!entry.api_routes.includes(file)) entry.api_routes.push(file);
+          if (entry.links?.baseline && !entry.links.baseline.api_routes.includes(file)) {
+            entry.links.baseline.api_routes.push(file);
+          }
           break;
         case 'page':
           if (!entry.pages.includes(file)) entry.pages.push(file);
+          if (entry.links?.baseline && !entry.links.baseline.pages.includes(file)) {
+            entry.links.baseline.pages.push(file);
+          }
           break;
         case 'hook':
           if (!entry.hooks.includes(file)) entry.hooks.push(file);
+          if (entry.links?.baseline && !entry.links.baseline.hooks.includes(file)) {
+            entry.links.baseline.hooks.push(file);
+          }
           break;
         case 'lib':
           if (!entry.lib.includes(file)) entry.lib.push(file);
+          if (entry.links?.baseline && !entry.links.baseline.lib.includes(file)) {
+            entry.links.baseline.lib.push(file);
+          }
           break;
         case 'unit_test':
           if (!entry.unit_tests.includes(file)) entry.unit_tests.push(file);
+          if (entry.links?.baseline && !entry.links.baseline.unit_tests.includes(file)) {
+            entry.links.baseline.unit_tests.push(file);
+          }
           break;
         case 'e2e_test': {
           const fileName = file.split('/').pop() || file;
           const testRef: E2ETestReference = { file: fileName };
           if (!entry.e2e_tests.some((t) => t.file === testRef.file)) {
             entry.e2e_tests.push(testRef);
+          }
+          if (entry.links?.baseline) {
+            const baselineExists = entry.links.baseline.e2e_tests.some((t) => t.file === testRef.file);
+            if (!baselineExists) {
+              entry.links.baseline.e2e_tests.push(testRef);
+            }
           }
           break;
         }
@@ -444,6 +546,12 @@ function buildStoryCodeMap(): StoryCodeMap {
     if (override.notes) {
       entry.notes = override.notes;
     }
+    if (override.domain_candidate !== undefined) {
+      entry.domain_candidate = override.domain_candidate;
+    }
+    if (override.domain_function) {
+      entry.domain_function = override.domain_function;
+    }
     // Only apply non-gap overrides here - gaps should be auto-detected
     // This allows overrides to mark things as "partial" or "complete" explicitly
     // but prevents stale "gap" overrides from blocking auto-detection
@@ -454,6 +562,12 @@ function buildStoryCodeMap(): StoryCodeMap {
 
   // Determine implementation status for stories without explicit override
   for (const [storyId, entry] of Object.entries(stories)) {
+    const annotatedLinks = entry.links?.annotated ?? createEmptyLinkSet();
+    const baselineLinks = entry.links?.baseline ?? createEmptyLinkSet();
+    const inferredLinks = mergeLinkSets(annotatedLinks, baselineLinks);
+
+    entry.implementation_status_inferred = computeImplementationStatus(inferredLinks);
+
     // Skip if status was set by a meaningful override (partial/complete)
     // Always recalculate if override was "gap" since that should be auto-detected
     const override = overrides[storyId];
@@ -461,22 +575,8 @@ function buildStoryCodeMap(): StoryCodeMap {
       continue;
     }
 
-    // Calculate status based on code links
-    const hasCode =
-      entry.components.length > 0 ||
-      entry.api_routes.length > 0 ||
-      entry.pages.length > 0;
-    const hasTests = entry.e2e_tests.length > 0 || entry.unit_tests.length > 0;
-
-    if (hasCode && hasTests) {
-      entry.implementation_status = 'complete';
-    } else if (hasCode) {
-      entry.implementation_status = 'partial';
-    } else if (hasTests) {
-      entry.implementation_status = 'partial';
-    } else {
-      entry.implementation_status = 'gap';
-    }
+    // Calculate status based on annotated links only
+    entry.implementation_status = computeImplementationStatus(annotatedLinks);
   }
 
   const files = buildFilesIndex(stories);
@@ -492,7 +592,25 @@ function buildStoryCodeMap(): StoryCodeMap {
     files,
   };
 
-  return map;
+  const baselineFiles = new Set<string>();
+  for (const entry of Object.values(stories)) {
+    const baseline = entry.links?.baseline;
+    if (!baseline) continue;
+    baseline.components.forEach((f) => baselineFiles.add(f));
+    baseline.api_routes.forEach((f) => baselineFiles.add(f));
+    baseline.pages.forEach((f) => baselineFiles.add(f));
+    baseline.hooks.forEach((f) => baselineFiles.add(f));
+    baseline.lib.forEach((f) => baselineFiles.add(f));
+    baseline.unit_tests.forEach((f) => baselineFiles.add(f));
+    baseline.e2e_tests.forEach((t) => {
+      const testPath = t.file.includes('/')
+        ? t.file
+        : path.posix.join('frontend/tests/e2e', t.file);
+      baselineFiles.add(testPath);
+    });
+  }
+
+  return { map, annotatedFiles, baselineFiles };
 }
 
 // =============================================================================
@@ -556,7 +674,11 @@ function generateGapReport(map: StoryCodeMap): string {
 /**
  * Generate orphan report
  */
-function generateOrphanReport(map: StoryCodeMap): string {
+function generateOrphanReport(
+  map: StoryCodeMap,
+  annotatedFiles: Set<string>,
+  baselineFiles: Set<string>
+): string {
   const lines: string[] = [
     '# Orphan Files Report',
     '',
@@ -582,8 +704,9 @@ function generateOrphanReport(map: StoryCodeMap): string {
   // Find files without annotations (excluding infrastructure files)
   const orphans: Array<{ file: string; type: string }> = [];
   let excludedCount = 0;
+  let baselineOnlyCount = 0;
   for (const file of allFiles) {
-    if (!map.files[file]) {
+    if (!annotatedFiles.has(file)) {
       // Skip files that match exclusion patterns (infrastructure, utilities, cross-repo)
       if (isOrphanExcluded(file)) {
         excludedCount++;
@@ -591,6 +714,9 @@ function generateOrphanReport(map: StoryCodeMap): string {
       }
       const type = classifyFileType(file);
       orphans.push({ file, type });
+      if (baselineFiles.has(file)) {
+        baselineOnlyCount++;
+      }
     }
   }
 
@@ -602,8 +728,13 @@ function generateOrphanReport(map: StoryCodeMap): string {
 
   for (const { file, type } of orphans) {
     let recommendation = 'Add @story annotation or consider if needed';
+    if (baselineFiles.has(file)) {
+      recommendation = 'Baseline-linked only (add @story to confirm)';
+    }
     if (type === 'unit_test' || type === 'e2e_test') {
-      recommendation = 'Link to tested story';
+      recommendation = baselineFiles.has(file)
+        ? 'Baseline-linked only (add @story to confirm)'
+        : 'Link to tested story';
     } else if (file.includes('index.ts')) {
       recommendation = 'Export file - usually no annotation needed';
     } else if (file.includes('types') || file.includes('.d.ts')) {
@@ -615,6 +746,8 @@ function generateOrphanReport(map: StoryCodeMap): string {
 
   lines.push('');
   lines.push(`**Total Orphans: ${orphans.length}**`);
+  lines.push(`**Baseline-linked only: ${baselineOnlyCount}**`);
+  lines.push(`**Unlinked: ${orphans.length - baselineOnlyCount}**`);
   if (excludedCount > 0) {
     lines.push('');
     lines.push(`*Note: ${excludedCount} infrastructure files excluded (shadcn/ui, cross-repo, types, utilities)*`);
@@ -644,11 +777,11 @@ async function main() {
   }
 
   // Build the map
-  const map = buildStoryCodeMap();
+  const { map, annotatedFiles, baselineFiles } = buildStoryCodeMap();
 
   // Generate reports
   const gapReport = generateGapReport(map);
-  const orphanReport = generateOrphanReport(map);
+  const orphanReport = generateOrphanReport(map, annotatedFiles, baselineFiles);
 
   // Handle report-only mode
   if (reportOnly) {

@@ -2,7 +2,8 @@
  * ProjectCreationWizard Component Tests
  *
  * Tests for the 4-step project creation wizard with AI insights generation.
- */
+ * @story US-F11
+*/
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ProjectCreationWizard } from '../ProjectCreationWizard';

@@ -1,4 +1,7 @@
 /**
+ * @story US-F06, US-F16
+ */
+/**
  * Feasibility Section
  *
  * Displays all feasibility-related fields from CrewAI analysis:

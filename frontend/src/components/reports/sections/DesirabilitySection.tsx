@@ -1,4 +1,7 @@
 /**
+ * @story US-F06, US-F16
+ */
+/**
  * Desirability Section
  *
  * Displays all desirability-related fields from CrewAI analysis:

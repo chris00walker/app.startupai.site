@@ -3,7 +3,8 @@
  *
  * GET - Get current consultant relationship status
  * POST - Client-initiated unlinking from consultant
- */
+ * @story US-E06
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

@@ -2,7 +2,8 @@
  * Tests for /api/consultant/onboarding/start route
  *
  * POST - Starts or resumes consultant onboarding session
- */
+ * @story US-C01
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

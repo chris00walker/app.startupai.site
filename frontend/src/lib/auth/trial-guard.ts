@@ -1,3 +1,6 @@
+/**
+ * @story US-FT02, US-CT04
+ */
 import { getUserProfile } from '@/db/queries/users';
 import { findTrialUsageCounter, upsertTrialUsageCounter } from '@/db/repositories/trialUsage';
 import { evaluateTrialAllowance, getPeriodStart, getTrialActionConfig, resolveTrialRole } from './trial-limits';

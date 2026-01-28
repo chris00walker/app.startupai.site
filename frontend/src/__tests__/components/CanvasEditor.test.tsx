@@ -1,3 +1,7 @@
+/**
+ * @story US-CP02, US-CP03, US-CP04
+ */
+
 import React from 'react'
 import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'

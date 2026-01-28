@@ -2,7 +2,8 @@
  * Tests for /api/consultant/onboarding/complete route
  *
  * POST - Completes consultant onboarding and creates profile
- */
+ * @story US-C01
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

@@ -1,4 +1,7 @@
 /**
+ * @story US-CP02
+ */
+/**
  * Editable Value Proposition Canvas
  *
  * Inline-editable version of the VPC based on EnhancedValuePropositionCanvas design.

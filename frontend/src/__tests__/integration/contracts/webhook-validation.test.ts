@@ -13,7 +13,8 @@
  *
  * Note: Full HTTP handler testing (auth, response codes) is covered by
  * src/__tests__/api/crewai/webhook/route.test.ts.
- */
+ * @story US-F06, US-F08, US-F09, US-H01
+*/
 
 // Import PRODUCTION schemas - no duplication, no drift
 import {

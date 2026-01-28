@@ -1,4 +1,7 @@
 /**
+ * @story US-CP02
+ */
+/**
  * Enhanced Value Proposition Canvas
  *
  * Displays the canonical Strategyzer VPC format with all CrewAI data:

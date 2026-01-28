@@ -115,6 +115,7 @@ describe('STORY_ID_PATTERN', () => {
     expect(STORY_ID_PATTERN.test('US-AS01')).toBe(true);
     expect(STORY_ID_PATTERN.test('US-MF03')).toBe(true);
     expect(STORY_ID_PATTERN.test('US-AG01')).toBe(true);
+    expect(STORY_ID_PATTERN.test('US-F101')).toBe(true);
   });
 
   test('rejects invalid story IDs', () => {

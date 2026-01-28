@@ -3,7 +3,8 @@
  *
  * Tests for the useValidationProgress and useActiveValidationRun hooks
  * that subscribe to validation progress updates via Supabase Realtime.
- */
+ * @story US-F08, US-F09
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useValidationProgress, useActiveValidationRun } from '@/hooks/useValidationProgress';

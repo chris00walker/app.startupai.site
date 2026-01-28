@@ -7,7 +7,8 @@
  * - useVPCData: VPC visualization data hook
  * - useCrewAIKickoff: Analysis kickoff hook
  * - Helper functions: getOverallHealth, getRecommendedAction
- */
+ * @story US-F06, US-F08
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import {

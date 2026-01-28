@@ -4,5 +4,4 @@ export { ClientOnboardingWizard } from './ClientOnboardingWizard';
 
 // Shared UI components
 export { FoundersBriefReview } from './FoundersBriefReview';
-export { StageReviewModal } from './StageReviewModal';
 export { ProjectCreationWizard } from './ProjectCreationWizard';

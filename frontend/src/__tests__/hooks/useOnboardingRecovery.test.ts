@@ -8,7 +8,8 @@
  * - Duplicate detection and version tracking
  *
  * @see Plan: /home/chris/.claude/plans/shiny-growing-sprout.md
- */
+ * @story US-E01
+*/
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useOnboardingRecovery } from '@/hooks/useOnboardingRecovery';

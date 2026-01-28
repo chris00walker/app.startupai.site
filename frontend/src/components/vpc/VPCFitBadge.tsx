@@ -1,4 +1,7 @@
 /**
+ * @story US-F06
+ */
+/**
  * VPCFitBadge Component
  *
  * Displays a fit score badge for desirability, feasibility, or viability.

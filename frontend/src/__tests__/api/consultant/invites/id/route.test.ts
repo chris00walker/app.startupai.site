@@ -2,7 +2,8 @@
  * Tests for /api/consultant/invites/[id] routes
  *
  * DELETE - Revoke a pending invite
- */
+ * @story US-C02
+*/
 
 // Mock NextResponse.json
 jest.mock('next/server', () => ({

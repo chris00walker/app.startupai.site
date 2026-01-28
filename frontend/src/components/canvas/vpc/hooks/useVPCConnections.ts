@@ -1,4 +1,7 @@
 /**
+ * @story US-CP02
+ */
+/**
  * useVPCConnections Hook
  *
  * Computes connections between customer needs and value propositions:

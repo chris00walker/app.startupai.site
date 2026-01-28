@@ -3,6 +3,7 @@
  *
  * Provides context-aware thresholds for unit economics based on business model type.
  * Used by ViabilityMetricsPanel to show "vs. typical SaaS B2B" comparisons.
+ * @story US-CP08
  *
  * Source: Industry benchmarks from SaaS Capital, OpenView, a16z, and Testing Business Ideas.
  */

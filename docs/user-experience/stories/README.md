@@ -79,6 +79,8 @@ This document contains all user stories for the StartupAI platform. Each story i
 
 ### E2E Test File Mapping
 
+> **Note:** Legacy onboarding specs are archived under `tests/e2e/legacy/` and excluded from Playwright runs.
+
 | Test File | Stories Covered |
 |-----------|-----------------|
 | `00-smoke.spec.ts` | Infrastructure (no stories) |
@@ -88,8 +90,6 @@ This document contains all user stories for the StartupAI platform. Each story i
 | `04-founder-analysis-journey.spec.ts` | US-F02, US-F06 |
 | `05-hitl-approval-flow.spec.ts` | US-F03, US-H01-H09 |
 | `06-consultant-portfolio.spec.ts` | US-C03, US-C04 |
-| `07-adr005-persistence.spec.ts` | US-F07 |
-| `08-ui-indicators.spec.ts` | US-F01 (UI indicators) |
 | `09-consultant-practice-setup.spec.ts` | US-C01 |
 | `10-consultant-client-onboarding.spec.ts` | US-C02, US-C07 |
 | `11-project-lifecycle.spec.ts` | US-F04, US-F05 |

@@ -3,7 +3,8 @@
  *
  * Tests for the useApprovals and useApproval hooks that manage
  * approval requests from CrewAI validation processes.
- */
+ * @story US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
+*/
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useApprovals, useApproval } from '@/hooks/useApprovals';

@@ -1,3 +1,6 @@
+/**
+ * @story US-CP03
+ */
 "use client"
 
 /**

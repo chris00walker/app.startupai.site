@@ -1,4 +1,7 @@
 /**
+ * @story US-F06
+ */
+/**
  * useVPCReport Hook
  *
  * Fetches and transforms CrewAI Value Proposition Canvas data for UI display.
