@@ -19,6 +19,7 @@
  * - ad_performance_snapshots: Time-series ad performance data
  * - validation_runs: CrewAI validation run tracking
  * - validation_progress: Append-only progress events for validation runs
+ * - founders_briefs: AI-compiled founder briefs for HITL approval
  */
 
 export * from './users';
@@ -62,3 +63,6 @@ export * from './sync-history';
 // Validation Progress Infrastructure (US-F08, US-F09, US-E04)
 export * from './validation-runs';
 export * from './validation-progress';
+
+// HITL Approval Infrastructure (US-F01, US-F02)
+export * from './founders-briefs';

@@ -439,4 +439,295 @@ describe('Webhook Contract Validation (Shared Schemas)', () => {
       }
     });
   });
+
+  // =========================================================================
+  // BOUNDARY TESTS - Numeric Values
+  // =========================================================================
+
+  describe('Numeric Boundary Validation', () => {
+    describe('Progress Update Boundaries', () => {
+      it('should accept progress_pct at 0 boundary', () => {
+        const payload = {
+          ...buildValidProgressPayload(),
+          progress: { crew: 'Test', task: 'Test', progress_pct: 0 },
+        };
+        const result = progressUpdateSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+
+      it('should accept progress_pct at 100 boundary', () => {
+        const payload = {
+          ...buildValidProgressPayload(),
+          progress: { crew: 'Test', task: 'Test', progress_pct: 100 },
+        };
+        const result = progressUpdateSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+
+      it('should accept current_phase at 0', () => {
+        const payload = { ...buildValidProgressPayload(), current_phase: 0 };
+        const result = progressUpdateSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+
+      it('should accept large current_phase values', () => {
+        const payload = { ...buildValidProgressPayload(), current_phase: 999 };
+        const result = progressUpdateSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+    });
+
+    describe('Founder Validation Evidence Boundaries', () => {
+      it('should accept problem_resonance at 0.0 boundary', () => {
+        const payload = {
+          ...buildValidFounderPayload(),
+          evidence: {
+            desirability: { problem_resonance: 0.0 },
+            feasibility: null,
+            viability: null,
+          },
+        };
+        const result = founderValidationSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+
+      it('should accept problem_resonance at 1.0 boundary', () => {
+        const payload = {
+          ...buildValidFounderPayload(),
+          evidence: {
+            desirability: { problem_resonance: 1.0 },
+            feasibility: null,
+            viability: null,
+          },
+        };
+        const result = founderValidationSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+
+      it('should accept ltv_cac_ratio at 0', () => {
+        const payload = {
+          ...buildValidFounderPayload(),
+          evidence: {
+            desirability: null,
+            feasibility: null,
+            viability: { ltv_cac_ratio: 0 },
+          },
+        };
+        const result = founderValidationSchema.safeParse(payload);
+        expect(result.success).toBe(true);
+      });
+    });
+  });
+
+  // =========================================================================
+  // BOUNDARY TESTS - Malformed UUIDs
+  // =========================================================================
+
+  describe('Malformed UUID Validation', () => {
+    it('should reject empty string project_id', () => {
+      const payload = { ...buildValidFounderPayload(), project_id: '' };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject UUID without hyphens', () => {
+      const payload = {
+        ...buildValidFounderPayload(),
+        project_id: '123e4567e89b12d3a456426614174000',
+      };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject truncated UUID (35 chars)', () => {
+      const payload = {
+        ...buildValidFounderPayload(),
+        project_id: '123e4567-e89b-12d3-a456-42661417400',
+      };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject null user_id', () => {
+      const payload = { ...buildValidFounderPayload(), user_id: null as unknown as string };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject empty string consultant_id', () => {
+      const payload = { ...buildValidConsultantPayload(), consultant_id: '' };
+      const result = consultantOnboardingSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject empty string HITL project_id', () => {
+      const payload = { ...buildValidHITLPayload(), project_id: '' };
+      const result = hitlCheckpointSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // BOUNDARY TESTS - Array Element Types
+  // =========================================================================
+
+  describe('Array Element Type Validation', () => {
+    it('should reject non-string elements in next_steps', () => {
+      const payload = {
+        ...buildValidFounderPayload(),
+        validation_report: {
+          ...buildValidFounderPayload().validation_report,
+          next_steps: ['Valid step', 123, 'Another step'] as unknown as string[],
+        },
+      };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject HITL options with missing required label', () => {
+      const payload = {
+        ...buildValidHITLPayload(),
+        options: [
+          { id: 'valid', label: 'Valid', description: 'Test' },
+          { id: 'missing-label' } as { id: string; label: string; description?: string },
+        ],
+      };
+      const result = hitlCheckpointSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject HITL options with missing required id', () => {
+      const payload = {
+        ...buildValidHITLPayload(),
+        options: [{ label: 'Missing ID' } as { id: string; label: string }],
+      };
+      const result = hitlCheckpointSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject non-string elements in consultant strengths', () => {
+      const payload = {
+        ...buildValidConsultantPayload(),
+        practice_analysis: {
+          ...buildValidConsultantPayload().practice_analysis,
+          strengths: ['Strategy', 123, 'Leadership'] as unknown as string[],
+        },
+      };
+      const result = consultantOnboardingSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // BOUNDARY TESTS - Default Value Application
+  // =========================================================================
+
+  describe('Default Value Application', () => {
+    it('should apply default empty array for next_steps when omitted', () => {
+      const payload = {
+        ...buildValidFounderPayload(),
+        validation_report: {
+          id: createTestId(),
+          business_idea: 'Test idea',
+          validation_outcome: null,
+          evidence_summary: null,
+          pivot_recommendation: null,
+          // next_steps intentionally omitted
+        },
+      };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.validation_report.next_steps).toEqual([]);
+      }
+    });
+
+    it('should apply default empty arrays for evidence arrays', () => {
+      const payload = {
+        ...buildValidFounderPayload(),
+        evidence: {
+          desirability: { problem_resonance: 0.5 },
+          feasibility: null,
+          viability: null,
+        },
+      };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.evidence.desirability?.key_learnings).toEqual([]);
+        expect(result.data.evidence.desirability?.tested_segments).toEqual([]);
+        expect(result.data.evidence.desirability?.experiments).toEqual([]);
+      }
+    });
+
+    it('should apply default empty object for value_proposition_canvas', () => {
+      const payload = {
+        flow_type: 'founder_validation' as const,
+        project_id: createTestId(),
+        user_id: createTestId(),
+        run_id: createTestId(),
+        validation_report: {
+          id: createTestId(),
+          business_idea: 'Test idea',
+          validation_outcome: null,
+          evidence_summary: null,
+          pivot_recommendation: null,
+          next_steps: [],
+        },
+        evidence: {
+          desirability: null,
+          feasibility: null,
+          viability: null,
+        },
+        qa_report: null,
+        // value_proposition_canvas intentionally omitted
+      };
+      const result = founderValidationSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.value_proposition_canvas).toEqual({});
+      }
+    });
+
+    it('should apply default empty string for consultant positioning', () => {
+      const payload = {
+        ...buildValidConsultantPayload(),
+        practice_analysis: {
+          strengths: ['Test'],
+          gaps: ['Test'],
+          opportunities: ['Test'],
+          client_profile: 'Test',
+          // positioning intentionally omitted
+        },
+      };
+      const result = consultantOnboardingSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.practice_analysis.positioning).toBe('');
+      }
+    });
+
+    it('should apply default empty arrays for all consultant optional arrays', () => {
+      const payload = {
+        flow_type: 'consultant_onboarding' as const,
+        consultant_id: createTestId(),
+        practice_analysis: {
+          strengths: [],
+          gaps: [],
+          positioning: '',
+          opportunities: [],
+          client_profile: '',
+        },
+        // All optional arrays intentionally omitted
+      };
+      const result = consultantOnboardingSchema.safeParse(payload);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.recommendations).toEqual([]);
+        expect(result.data.onboarding_tips).toEqual([]);
+        expect(result.data.suggested_templates).toEqual([]);
+        expect(result.data.suggested_workflows).toEqual([]);
+      }
+    });
+  });
 });

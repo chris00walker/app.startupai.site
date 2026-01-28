@@ -92,6 +92,13 @@
       "when": 1769346984820,
       "tag": "0012_living_firelord",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1769568588105,
+      "tag": "0013_daily_deathbird",
+      "breakpoints": true
     }
   ]
 }
