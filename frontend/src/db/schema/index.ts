@@ -23,6 +23,8 @@
  * - hitl_requests: Human-in-the-Loop approval requests
  * - approval_requests: HITL checkpoint approval requests
  * - approval_history: Approval audit trail
+ * - approval_preferences: User auto-approval settings
+ * - gate_policies: Configurable phase gate criteria
  * - onboarding_sessions: Founder onboarding conversation state
  * - entrepreneur_briefs: Legacy onboarding output format
  * - landing_page_variants: A/B test landing pages
@@ -32,12 +34,10 @@
  * - archived_clients: Consultant-archived client relationships
  *
  * Tables in Production WITHOUT Drizzle Schemas (kept for future use):
- * - beta_applications: Marketing beta signup forms
- * - contact_submissions: Lead capture from marketing site
+ * - beta_applications: Marketing beta signup forms (owned by startupai.site)
+ * - contact_submissions: Lead capture from marketing site (owned by startupai.site)
  * - validation_events: Event sourcing for validation state changes
- * - flow_executions: CrewAI flow execution tracking
- * - gate_policies: Future phase gate configuration
- * - approval_preferences: User approval preferences (future)
+ * - flow_executions: CrewAI flow execution tracking (superseded by validation_runs)
  */
 
 export * from './users';
@@ -82,11 +82,15 @@ export * from './sync-history';
 export * from './validation-runs';
 export * from './validation-progress';
 
+// Phase Gate Infrastructure (US-AD10, US-ADB05, US-AFB03, US-AVB03)
+export * from './gate-policies';
+
 // HITL Approval Infrastructure (US-F01, US-F02)
 export * from './founders-briefs';
 export * from './hitl-requests';
 export * from './approval-requests';
 export * from './approval-history';
+export * from './approval-preferences';
 
 // Onboarding Infrastructure (US-FT01, US-F01)
 export * from './onboarding-sessions';
