@@ -27,23 +27,30 @@ export type QAIssue = {
   severity: 'critical' | 'warning' | 'info';
 };
 
+// Type for success target metrics
+export type SuccessTargetMetrics = {
+  [key: string]: number | string;
+};
+
 // Status enum types
 // NOTE: Using 'pending' (not 'pending_approval') to match webhook behavior (route.ts:994)
 export type FoundersBriefStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 export type QACheckStatus = 'pass' | 'fail' | 'pending';
+export type ValidationStatus = 'HYPOTHESIS - NOT VALIDATED' | 'VALIDATED' | 'INVALIDATED';
+export type TimeCommitment = 'exploring' | 'part_time' | 'full_time';
 
 export const foundersBriefs = pgTable('founders_briefs', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
 
-  // Foreign key to projects (UNIQUE - one brief per project)
+  // Session and relationship references
+  sessionId: text('session_id'),
+  entrepreneurBriefId: uuid('entrepreneur_brief_id'),
+  userId: uuid('user_id')
+    .references(() => userProfiles.id, { onDelete: 'cascade' }),
   projectId: uuid('project_id')
     .references(() => projects.id, { onDelete: 'cascade' })
     .unique(),
-
-  // Session reference (for linking back to onboarding)
-  sessionId: text('session_id'),
-  userId: uuid('user_id')
-    .references(() => userProfiles.id, { onDelete: 'cascade' }),
+  version: integer('version').default(1),
 
   // ============= THE IDEA =============
   ideaOneLiner: text('idea_one_liner'),
@@ -55,10 +62,12 @@ export const foundersBriefs = pgTable('founders_briefs', {
   problemStatement: text('problem_statement'),
   problemWhoHasThis: text('problem_who_has_this'),
   problemFrequency: text('problem_frequency'),
-  // NOTE: Spec says JSONB but webhook treats as scalar string
   problemCurrentAlternatives: text('problem_current_alternatives'),
   problemWhyAlternativesFail: text('problem_why_alternatives_fail'),
   problemEvidence: text('problem_evidence'),
+  problemValidationStatus: text('problem_validation_status')
+    .$type<ValidationStatus>()
+    .default('HYPOTHESIS - NOT VALIDATED'),
 
   // ============= CUSTOMER HYPOTHESIS =============
   customerPrimarySegment: text('customer_primary_segment'),
@@ -66,20 +75,35 @@ export const foundersBriefs = pgTable('founders_briefs', {
   customerCharacteristics: jsonb('customer_characteristics').$type<string[]>().default([]),
   customerWhereToFind: text('customer_where_to_find'),
   customerEstimatedSize: text('customer_estimated_size'),
+  customerValidationStatus: text('customer_validation_status')
+    .$type<ValidationStatus>()
+    .default('HYPOTHESIS - NOT VALIDATED'),
 
   // ============= SOLUTION HYPOTHESIS =============
   solutionProposed: text('solution_proposed'),
   solutionKeyFeatures: jsonb('solution_key_features').$type<string[]>().default([]),
   solutionDifferentiation: text('solution_differentiation'),
   solutionUnfairAdvantage: text('solution_unfair_advantage'),
+  solutionValidationStatus: text('solution_validation_status')
+    .$type<ValidationStatus>()
+    .default('HYPOTHESIS - NOT VALIDATED'),
 
   // ============= KEY ASSUMPTIONS =============
   keyAssumptions: jsonb('key_assumptions').$type<KeyAssumption[]>().default([]),
 
   // ============= SUCCESS CRITERIA =============
-  problemResonanceTarget: numeric('problem_resonance_target', { precision: 3, scale: 2 }).default('0.50'),
-  zombieRatioMax: numeric('zombie_ratio_max', { precision: 3, scale: 2 }).default('0.30'),
-  fitScoreTarget: integer('fit_score_target').default(70),
+  successMinimumViableSignal: text('success_minimum_viable_signal'),
+  successDealBreakers: jsonb('success_deal_breakers').$type<string[]>().default([]),
+  successTargetMetrics: jsonb('success_target_metrics').$type<SuccessTargetMetrics>().default({}),
+  successProblemResonanceTarget: numeric('success_problem_resonance_target', { precision: 3, scale: 2 }).default('0.50'),
+  successZombieRatioMax: numeric('success_zombie_ratio_max', { precision: 3, scale: 2 }).default('0.30'),
+  successFitScoreTarget: integer('success_fit_score_target').default(70),
+
+  // ============= FOUNDER CONTEXT =============
+  founderBackground: text('founder_background'),
+  founderMotivation: text('founder_motivation'),
+  founderTimeCommitment: text('founder_time_commitment').$type<TimeCommitment>().default('exploring'),
+  founderResourcesAvailable: text('founder_resources_available'),
 
   // ============= QA STATUS =============
   qaLegitimacyCheck: text('qa_legitimacy_check').$type<QACheckStatus>().default('pending'),
@@ -99,6 +123,7 @@ export const foundersBriefs = pgTable('founders_briefs', {
   approvalStatus: text('approval_status').$type<FoundersBriefStatus>().default('pending'),
   approvedAt: timestamp('approved_at', { withTimezone: true }),
   approvedBy: uuid('approved_by').references(() => userProfiles.id),
+  rejectionReason: text('rejection_reason'),
 
   // ============= TIMESTAMPS =============
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
