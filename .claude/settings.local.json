@@ -69,7 +69,9 @@
       "WebFetch(domain:admanage.ai)",
       "WebFetch(domain:interestexplorer.io)",
       "WebFetch(domain:bir.ch)",
-      "Skill(schema-drift)"
+      "Skill(schema-drift)",
+      "WebFetch(domain:gist.github.com)",
+      "mcp__supabase__get_project"
     ],
     "deny": [
       "Bash(rm:*)",

@@ -247,3 +247,6 @@ frontend/debug-*.mjs
 # Claude Code local settings
 .claude/settings.local.json
 CLAUDE.md
+
+# Generated schema reports
+frontend/docs/status/
