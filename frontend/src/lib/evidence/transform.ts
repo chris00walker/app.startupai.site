@@ -277,11 +277,11 @@ export function calculateEvidenceSummary(evidence: UnifiedEvidenceItem[]): Evide
 export function generateTrendData(aiStates: CrewAIValidationState[]): TrendDataPoint[] {
   // Sort by timestamp ascending for trend display
   const sortedStates = [...aiStates].sort(
-    (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+    (a, b) => safeParseDate(a.updatedAt).getTime() - safeParseDate(b.updatedAt).getTime()
   )
 
   return sortedStates.map((state) => ({
-    date: format(new Date(state.updatedAt), 'MMM dd'),
+    date: format(safeParseDate(state.updatedAt), 'MMM dd'),
     desirability: signalToNumeric(state.desirabilitySignal),
     feasibility: signalToNumeric(state.feasibilitySignal),
     viability: signalToNumeric(state.viabilitySignal),
