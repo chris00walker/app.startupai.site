@@ -69,11 +69,11 @@ export default function EvidenceExplorerPage({ params }: PageProps) {
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link
-              href={`/project/${projectId}`}
+              href="/founder-dashboard"
               className="flex items-center gap-1 hover:text-foreground"
             >
               <ArrowLeft className="h-3 w-3" />
-              Back to project
+              Back to dashboard
             </Link>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Evidence Explorer</h1>

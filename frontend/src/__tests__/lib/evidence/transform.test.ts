@@ -1,6 +1,10 @@
 /**
  * @story US-F14
  * Tests for evidence transform utilities - specifically date handling edge cases
+ *
+ * These tests verify that the transform functions handle null/undefined dates
+ * gracefully, even though TypeScript types say dates are non-null.
+ * This is defensive testing for runtime data that may not match types.
  */
 
 import {
@@ -9,26 +13,63 @@ import {
   generateTrendData,
   mergeEvidenceSources,
 } from '@/lib/evidence/transform'
-import type { Evidence } from '@/db/schema/evidence'
-import type { CrewAIValidationState } from '@/db/schema/crewai-validation-states'
+import { type Evidence } from '@/db/schema/evidence'
+import { type CrewAIValidationState } from '@/db/schema/crewai-validation-states'
+
+// Helper to create minimal AI validation state for testing
+// Uses type assertion via unknown because we're testing edge cases where runtime data
+// doesn't match TypeScript types (e.g., null dates from database)
+function createTestAIState(overrides: Partial<Record<string, unknown>> = {}): CrewAIValidationState {
+  return {
+    id: 'state-1',
+    projectId: 'proj-1',
+    userId: 'user-1',
+    iteration: 1,
+    phase: 'ideation',
+    desirabilitySignal: 'strong_positive',
+    feasibilitySignal: 'unknown',
+    viabilitySignal: 'unknown',
+    createdAt: new Date('2024-01-01T00:00:00Z'),
+    updatedAt: new Date('2024-01-01T00:00:00Z'),
+    ...overrides,
+  } as unknown as CrewAIValidationState
+}
+
+// Helper to create minimal Evidence for testing
+function createTestEvidence(overrides: Partial<Record<string, unknown>> = {}): Evidence {
+  return {
+    id: 'ev-1',
+    projectId: 'proj-1',
+    title: 'Test Evidence',
+    content: 'Content',
+    summary: null,
+    fitType: 'Desirability',
+    strength: 'medium',
+    isContradiction: false,
+    category: 'Research',
+    createdAt: new Date('2024-01-01T00:00:00Z'),
+    updatedAt: new Date('2024-01-01T00:00:00Z'),
+    sourceType: null,
+    sourceUrl: null,
+    tags: null,
+    embedding: null,
+    fullText: null,
+    author: null,
+    source: null,
+    occurredOn: null,
+    linkedAssumptions: null,
+    ...overrides,
+  } as unknown as Evidence
+}
 
 describe('Evidence Transform - Date Handling', () => {
   describe('generateTrendData', () => {
     it('should NOT throw RangeError when updatedAt is null', () => {
-      const statesWithNullDates: CrewAIValidationState[] = [
-        {
-          id: 'state-1',
-          projectId: 'proj-1',
-          iteration: 1,
-          updatedAt: null as unknown as string, // Simulating null from database
-          createdAt: '2024-01-01T00:00:00Z',
-          desirabilitySignal: 'strong_positive',
-          desirabilityEvidence: 'Some evidence',
-          feasibilitySignal: 'unknown',
-          feasibilityEvidence: null,
-          viabilitySignal: 'unknown',
-          viabilityEvidence: null,
-        },
+      const statesWithNullDates = [
+        createTestAIState({
+          updatedAt: null, // Simulating null from database
+          desirabilityEvidence: { signals: [] },
+        }),
       ]
 
       // This was throwing: RangeError: Invalid time value
@@ -36,40 +77,22 @@ describe('Evidence Transform - Date Handling', () => {
     })
 
     it('should NOT throw RangeError when updatedAt is undefined', () => {
-      const statesWithUndefinedDates: CrewAIValidationState[] = [
-        {
-          id: 'state-1',
-          projectId: 'proj-1',
-          iteration: 1,
-          updatedAt: undefined as unknown as string,
-          createdAt: '2024-01-01T00:00:00Z',
-          desirabilitySignal: 'weak_positive',
-          desirabilityEvidence: 'Evidence text',
-          feasibilitySignal: 'unknown',
-          feasibilityEvidence: null,
-          viabilitySignal: 'unknown',
-          viabilityEvidence: null,
-        },
+      const statesWithUndefinedDates = [
+        createTestAIState({
+          updatedAt: undefined,
+          desirabilityEvidence: { signals: [] },
+        }),
       ]
 
       expect(() => generateTrendData(statesWithUndefinedDates)).not.toThrow()
     })
 
     it('should return valid trend data with fallback dates', () => {
-      const statesWithNullDates: CrewAIValidationState[] = [
-        {
-          id: 'state-1',
-          projectId: 'proj-1',
-          iteration: 1,
-          updatedAt: null as unknown as string,
-          createdAt: '2024-01-01T00:00:00Z',
-          desirabilitySignal: 'strong_positive',
-          desirabilityEvidence: 'Evidence',
-          feasibilitySignal: 'unknown',
-          feasibilityEvidence: null,
-          viabilitySignal: 'unknown',
-          viabilityEvidence: null,
-        },
+      const statesWithNullDates = [
+        createTestAIState({
+          updatedAt: null,
+          desirabilityEvidence: { signals: [] },
+        }),
       ]
 
       const result = generateTrendData(statesWithNullDates)
@@ -81,33 +104,18 @@ describe('Evidence Transform - Date Handling', () => {
     })
 
     it('should handle mixed valid and invalid dates', () => {
-      const mixedStates: CrewAIValidationState[] = [
-        {
+      const mixedStates = [
+        createTestAIState({
           id: 'state-1',
-          projectId: 'proj-1',
-          iteration: 1,
-          updatedAt: '2024-06-15T10:00:00Z', // Valid
-          createdAt: '2024-06-15T10:00:00Z',
-          desirabilitySignal: 'strong_positive',
-          desirabilityEvidence: 'Evidence 1',
-          feasibilitySignal: 'unknown',
-          feasibilityEvidence: null,
-          viabilitySignal: 'unknown',
-          viabilityEvidence: null,
-        },
-        {
+          updatedAt: new Date('2024-06-15T10:00:00Z'), // Valid
+          desirabilityEvidence: { signals: [] },
+        }),
+        createTestAIState({
           id: 'state-2',
-          projectId: 'proj-1',
           iteration: 2,
-          updatedAt: null as unknown as string, // Invalid
-          createdAt: '2024-06-16T10:00:00Z',
-          desirabilitySignal: 'weak_positive',
-          desirabilityEvidence: 'Evidence 2',
-          feasibilitySignal: 'unknown',
-          feasibilityEvidence: null,
-          viabilitySignal: 'unknown',
-          viabilityEvidence: null,
-        },
+          updatedAt: null, // Invalid
+          desirabilityEvidence: { signals: [] },
+        }),
       ]
 
       expect(() => generateTrendData(mixedStates)).not.toThrow()
@@ -118,37 +126,19 @@ describe('Evidence Transform - Date Handling', () => {
 
   describe('transformAIValidationState', () => {
     it('should NOT throw when updatedAt is null', () => {
-      const stateWithNullDate: CrewAIValidationState = {
-        id: 'state-1',
-        projectId: 'proj-1',
-        iteration: 1,
-        updatedAt: null as unknown as string,
-        createdAt: '2024-01-01T00:00:00Z',
-        desirabilitySignal: 'strong_positive',
-        desirabilityEvidence: 'Some evidence',
-        feasibilitySignal: 'unknown',
-        feasibilityEvidence: null,
-        viabilitySignal: 'unknown',
-        viabilityEvidence: null,
-      }
+      const stateWithNullDate = createTestAIState({
+        updatedAt: null,
+        desirabilityEvidence: { signals: [] },
+      })
 
       expect(() => transformAIValidationState(stateWithNullDate)).not.toThrow()
     })
 
     it('should return items with valid timestamps when input date is null', () => {
-      const stateWithNullDate: CrewAIValidationState = {
-        id: 'state-1',
-        projectId: 'proj-1',
-        iteration: 1,
-        updatedAt: null as unknown as string,
-        createdAt: '2024-01-01T00:00:00Z',
-        desirabilitySignal: 'strong_positive',
-        desirabilityEvidence: 'Some evidence',
-        feasibilitySignal: 'unknown',
-        feasibilityEvidence: null,
-        viabilitySignal: 'unknown',
-        viabilityEvidence: null,
-      }
+      const stateWithNullDate = createTestAIState({
+        updatedAt: null,
+        desirabilityEvidence: { signals: [] },
+      })
 
       const result = transformAIValidationState(stateWithNullDate)
 
@@ -162,45 +152,17 @@ describe('Evidence Transform - Date Handling', () => {
 
   describe('transformUserEvidence', () => {
     it('should NOT throw when createdAt is null', () => {
-      const evidenceWithNullDate: Evidence = {
-        id: 'ev-1',
-        projectId: 'proj-1',
-        title: 'Test Evidence',
-        content: 'Content',
-        summary: null,
-        fitType: 'Desirability',
-        strength: 'medium',
-        isContradiction: false,
-        category: 'Research',
-        createdAt: null as unknown as Date,
-        updatedAt: null as unknown as Date,
-        userId: 'user-1',
-        sourceType: null,
-        sourceUrl: null,
-        tags: null,
-      }
+      const evidenceWithNullDate = createTestEvidence({
+        createdAt: null,
+      })
 
       expect(() => transformUserEvidence(evidenceWithNullDate)).not.toThrow()
     })
 
     it('should return valid timestamp when createdAt is null', () => {
-      const evidenceWithNullDate: Evidence = {
-        id: 'ev-1',
-        projectId: 'proj-1',
-        title: 'Test Evidence',
-        content: 'Content',
-        summary: null,
-        fitType: 'Desirability',
-        strength: 'medium',
-        isContradiction: false,
-        category: 'Research',
-        createdAt: null as unknown as Date,
-        updatedAt: null as unknown as Date,
-        userId: 'user-1',
-        sourceType: null,
-        sourceUrl: null,
-        tags: null,
-      }
+      const evidenceWithNullDate = createTestEvidence({
+        createdAt: null,
+      })
 
       const result = transformUserEvidence(evidenceWithNullDate)
 
@@ -211,40 +173,17 @@ describe('Evidence Transform - Date Handling', () => {
 
   describe('mergeEvidenceSources', () => {
     it('should NOT throw when mixing evidence with null dates', () => {
-      const userEvidence: Evidence[] = [
-        {
-          id: 'ev-1',
-          projectId: 'proj-1',
-          title: 'User Evidence',
-          content: 'Content',
-          summary: null,
-          fitType: 'Desirability',
-          strength: 'medium',
-          isContradiction: false,
-          category: 'Research',
-          createdAt: null as unknown as Date,
-          updatedAt: null as unknown as Date,
-          userId: 'user-1',
-          sourceType: null,
-          sourceUrl: null,
-          tags: null,
-        },
+      const userEvidence = [
+        createTestEvidence({
+          createdAt: null,
+        }),
       ]
 
-      const aiStates: CrewAIValidationState[] = [
-        {
-          id: 'state-1',
-          projectId: 'proj-1',
-          iteration: 1,
-          updatedAt: null as unknown as string,
-          createdAt: '2024-01-01T00:00:00Z',
-          desirabilitySignal: 'strong_positive',
-          desirabilityEvidence: 'AI Evidence',
-          feasibilitySignal: 'unknown',
-          feasibilityEvidence: null,
-          viabilitySignal: 'unknown',
-          viabilityEvidence: null,
-        },
+      const aiStates = [
+        createTestAIState({
+          updatedAt: null,
+          desirabilityEvidence: { signals: [] },
+        }),
       ]
 
       expect(() => mergeEvidenceSources(userEvidence, aiStates)).not.toThrow()
