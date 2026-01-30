@@ -1,62 +1,148 @@
 # StartupAI Product App Work Tracker
 
-**Last updated**: 2026-01-26
-**Current Status**: ~85% Complete (Phase Alpha). All P0 blockers resolved.
+**Status**: ~85% Complete (Phase Alpha) | **Last Updated**: 2026-01-29
 
-## Current Focus
+---
 
-| Metric | Status |
-|--------|--------|
-| Platform | Production on Netlify |
+## Maintenance Rules
+
+> **This file is the SINGLE SOURCE OF TRUTH for work status.**
+>
+> 1. **Update cadence**: Review every Friday EOD or when sprint changes
+> 2. **WIP limit**: Max 5 items in "Current Sprint"
+> 3. **Promotion**: Move items from Backlog → Current Sprint when WIP allows
+> 4. **Completion**: Move finished items to "Recently Completed", then to done.md after 2 weeks
+> 5. **No duplication**: Items appear in ONE section only (never in both backlog and current sprint)
+
+---
+
+## Platform Status
+
+| Metric | Value |
+|--------|-------|
+| Deployment | Production on Netlify |
 | Database | Supabase operational |
-| Traceability | 187 stories, 0 gaps |
-| E2E Tests | 27 spec files |
+| Stories | 187 total, 0 gaps |
+| E2E Tests | 47 spec files |
+| Unit Tests | 66 test files |
 
-## In Progress
+---
 
-| Item | Owner | Status | Notes |
-|------|-------|--------|-------|
-| Apply pending migrations | @supabase | Ready | - |
-| PostHog Quick Start events | @frontend | Ready | A2 |
-| PostHog HITL approval events | @frontend | Ready | A1 |
-| WTP pricing survey | @product | Ready | A4 |
+## Current Sprint (WIP: 4/5)
 
-## Recently Completed
+| Item | Owner | Status | Assumption | Notes |
+|------|-------|--------|------------|-------|
+| Apply pending migrations | @supabase | Ready | - | - |
+| PostHog Quick Start events | @frontend | Ready | A2 | Quick Start flow tracking |
+| PostHog HITL approval events | @frontend | Ready | A1 | Trust signal measurement |
+| WTP pricing survey | @product | Ready | A4 | Willingness-to-pay research |
 
-### January 2026
-- Admin Dashboard (Epic 11)
-- Ad Platform & Integration infrastructure (Epics 1-3, 9)
-- Account Settings + Notifications
-- Quick Start Architecture (ADR-006)
-- Two-Pass Architecture (ADR-004)
-- Project Archive/Delete
-- Client Archive
+---
 
-## Backlog Highlights
+## Next Up (Pull when WIP allows)
+
+1. Field-level edit tracking (A3) - Brief accuracy measurement
+2. Documentation refresh - 71-day staleness gap
+3. Journey-Driven Testing - Derive tests from journey maps
+4. Phase 2 Desirability experiments
+
+---
+
+## Recently Completed (Jan 2026)
+
+| Item | Date | Notes |
+|------|------|-------|
+| Quick Start Architecture (ADR-006) | 2026-01-19 | Replaced 7-stage AI with 30-sec form |
+| Two-Pass Architecture (ADR-004) | 2026-01-16 | Deterministic backend assessment |
+| Project Archive/Delete | 2026-01-14 | Founder project management |
+| Client Archive | 2026-01-14 | Consultant portfolio management |
+| Admin Dashboard (Epic 11) | 2026-01-26 | All 12 stories complete (US-A01-A12) |
+| Extended Founder Features | 2026-01-26 | US-F12-F16 complete |
+| Core Founder Journey | 2026-01-26 | 11 stories complete (US-F01-F10, US-F17) |
+
+---
+
+## Backlog
 
 ### P1: Validation-Critical
-- Epic 5: Template Library
-- Epic 6: Agent Tools Integration
-- Landing page A/B test
-- Field-level edit tracking
-- Consultant Trial mock client system
+
+| Item | Assumption | Phase | Notes |
+|------|------------|-------|-------|
+| **Epic 5: Template Library** | A5 | 2 | Landing pages, ad creatives, surveys |
+| **Epic 6: Agent Tools Integration** | A5 | 2 | Connect ad tools to Phase 2 agents |
+| Landing page A/B test | A5 | 2 | VPD messaging resonance |
+| IH community launch | A8 | 2 | Channel validation |
+| Consultant marketing | A6 | 2-3 | Portfolio value proposition |
+| HITL Approval UI data source | A1 | 1 | Trust signal improvement |
+| Schema migration: Trial split | - | 0 | `trial` → `founder_trial` + `consultant_trial` |
+| Consultant Trial mock client | A6 | 2 | Evaluate before paying $149/mo |
+| US-FT03: Stripe upgrade webhook | - | 0 | Blocked by trial split |
+| US-FT04: Post-upgrade orientation | - | 0 | Blocked by US-FT03 |
 
 ### P2: Platform Quality
-- Documentation refresh
-- Journey-Driven Testing
-- E2E tests for Admin, Billing, Support
 
-See [backlog.md](backlog.md) for full prioritized list.
+| Item | Effort | Notes |
+|------|--------|-------|
+| Documentation refresh | 8h | 71-day staleness gap |
+| Journey-Driven Testing | 2 days | Derive tests from journey maps |
+| VPC geometric shapes | 2-3h | Visual polish |
+| HITL comment display | 2-4h | Show human_comment in UI |
+| E2E tests: Consultant Trial | 1 day | US-CT01-CT05 |
+| E2E tests: Edge cases | 1 day | US-E01-E06 |
+| E2E tests: Support | 1 day | US-S01-S05 |
+| E2E tests: Offboarding | 1 day | US-O01-O05 |
+| E2E tests: Billing | 2 days | US-B01-B10 |
+| E2E tests: Notifications | 1 day | US-N01-N05 |
+| E2E tests: Account Settings | 1 day | US-AS01-AS05 |
 
-## Detailed Documentation
+### P3: Future Enhancements
 
-| Document | Purpose |
-|----------|---------|
-| [in-progress.md](in-progress.md) | Active sprint items, WIP limit |
-| [done.md](done.md) | Complete delivery history |
-| [backlog.md](backlog.md) | Hypothesis-driven backlog |
-| [roadmap.md](roadmap.md) | Strategic timeline |
-| [cross-repo-blockers.md](cross-repo-blockers.md) | Ecosystem dependencies |
+| Item | Effort | Notes |
+|------|--------|-------|
+| US-F11: Manual project wizard | 2-4h | Legacy, Quick Start preferred |
+| PDF/PowerPoint export | 3-5 days | External sharing |
+| Canvas versioning | 5-7 days | History tracking |
+| Multi-segment VPC comparison | 3-5 days | Side-by-side analysis |
+| Drag-and-drop VPC fit mapping | 8+h | Interactive UX |
+| Internationalisation | TBD | Locale support |
+
+### Blocked (External Dependencies)
+
+| Item | Blocker | Notes |
+|------|---------|-------|
+| Stripe env vars in Netlify | No Stripe account | Add keys after account setup |
+| Ad Platform OAuth | No Meta/Google/TikTok accounts | Need business accounts |
+| Ad Spend Monitoring | Blocked by OAuth | Requires connected accounts |
+| Ad Platform Health | Blocked by OAuth | Requires live API connections |
+
+---
+
+## Assumption Reference
+
+| ID | Assumption | Phase | Status |
+|----|------------|-------|--------|
+| A1 | Founders trust AI recommendations | 0-1 | Testing |
+| A2 | Quick Start converts to engagement | 0 | Testing |
+| A3 | AI extracts accurate business context | 0-1 | Testing |
+| A4 | WTP for validation platform | 2-4 | Untested |
+| A5 | VPD methodology resonates | 2 | Untested |
+| A6 | Consultants see portfolio value | 2-3 | Untested |
+| A7 | "AI Founders" messaging attracts | 2 | Untested |
+| A8 | IH community is right channel | 2 | Untested |
+
+---
+
+## Related Documents
+
+| Document | Purpose | Update Frequency |
+|----------|---------|------------------|
+| [done.md](done.md) | Complete delivery history | When items move from "Recently Completed" |
+| [roadmap.md](roadmap.md) | Validation phase progress | Monthly |
+| [cross-repo-blockers.md](cross-repo-blockers.md) | Ecosystem dependencies | As needed |
+
+**Archived** (read-only, replaced by this file):
+- `in-progress.md` → Merged into Current Sprint section
+- `backlog.md` → Merged into Backlog section
 
 ---
 

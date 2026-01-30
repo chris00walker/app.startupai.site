@@ -44,6 +44,11 @@ pnpm db:push          # Push schema to Supabase
 pnpm build            # Production build
 ```
 
+## ExecPlans
+- Use an ExecPlan (see `.agent/PLANS.md`) for complex features, cross-layer integrations, or significant refactors.
+- ExecPlans are living documents; update them as decisions change.
+- Execute milestone by milestone without asking for "next steps" between milestones unless blocked or scope changes.
+
 ## Package Management
 
 Use `pnpm` for installs, upgrades, and scripts. Avoid `npm` for dependency changes.

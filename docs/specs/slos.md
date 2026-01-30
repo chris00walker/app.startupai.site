@@ -17,6 +17,18 @@ last_reviewed: "2026-01-19"
 | Dashboard SSR | p95 < 400ms | TTFB for `/projects/*`, `/project/*` | Planned - not yet instrumented |
 | Core Web Vitals | LCP < 2.2s, INP < 200ms, CLS < 0.1 | Lighthouse CI | Planned - not yet instrumented |
 
+## VPD Phase SLOs (Initial Targets)
+
+Phase-level SLOs define timeliness and completeness expectations for the validation pipeline. These are **initial targets** and remain **planned** until instrumentation is wired to `validation_runs` timestamps and CrewAI event tracking.
+
+| Phase | Target | Measurement | Status |
+| --- | --- | --- | --- |
+| Phase 0 Onboarding | Brief draft p95 < 3 min | Kickoff → `entrepreneur_briefs` persisted | Planned - not yet instrumented |
+| Phase 1 VPC Discovery | VPC draft p95 < 6 min; ≥5 hypotheses | Kickoff → VPC + hypotheses saved | Planned - not yet instrumented |
+| Phase 2 Desirability | Test-card pack p95 < 10 min; deploy success > 95% | Kickoff → test cards + deploy result | Planned - not yet instrumented |
+| Phase 3 Feasibility | Feasibility report p95 < 12 min; risk register present | Kickoff → feasibility report persisted | Planned - not yet instrumented |
+| Phase 4 Viability | Viability brief p95 < 12 min; unit economics summary present | Kickoff → viability brief persisted | Planned - not yet instrumented |
+
 ## Instrumentation Status
 
 ### Implemented

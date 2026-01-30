@@ -1,12 +1,55 @@
 ---
-purpose: "Private technical source of truth for recently delivered work"
+purpose: "Archive of completed work - source of truth for delivery history"
 status: "active"
-last_reviewed: "2026-01-22"
+last_reviewed: "2026-01-29"
 ---
 
-# Recently Delivered
+# Completed Work
+
+> **Note**: Active work tracking has moved to [WORK.md](WORK.md). This file is the archive for completed items.
+
+---
 
 ## January 2026
+
+### Work Management Consolidation (Jan 29)
+| Item | Status | Notes |
+|------|--------|-------|
+| docs/work consolidation | Done | WORK.md is now single source of truth |
+| in-progress.md archived | Done | Merged into WORK.md "Current Sprint" |
+| backlog.md archived | Done | Merged into WORK.md "Backlog" |
+
+**Problem Solved**: Multiple work tracking files with overlapping content and contradictory statuses.
+
+---
+
+### Admin Dashboard & Founder Features (Jan 26)
+| Item | Status | Notes |
+|------|--------|-------|
+| Admin Dashboard (Epic 11) | Done | All 12 stories complete (US-A01-A12) |
+| Extended Founder Features | Done | US-F12-F16 complete |
+| Core Founder Journey | Done | 11 stories (US-F01-F10, US-F17) |
+| E2E tests: Admin stories | Done | 3 test files with real tests |
+| E2E tests: Founder features | Done | 4 test files |
+
+**Admin Dashboard Epic 11 (US-A01-A12)**:
+- User search & impersonation (US-A01, US-A03)
+- Health dashboard (US-A05)
+- Feature flags (US-A06)
+- Audit logs (US-A07)
+- User data export (US-A09)
+- Data integrity checks (US-A10)
+- Workflow retry UI (US-A04)
+- Billing management (US-A12)
+
+**Extended Founder Features (US-F12-F16)**:
+- Assumption Map with Strategyzer integration (US-F12)
+- Evidence Ledger with fit type filters (US-F13)
+- Evidence Explorer with timeline view (US-F14)
+- Gate Evaluation Dashboard (US-F15)
+- AI Insights feature (US-F16)
+
+---
 
 ### User Journey Documentation Complete (Jan 22)
 | Item | Status | Notes |

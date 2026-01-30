@@ -7,7 +7,6 @@
  */
 
 import type { Evidence } from '@/db/schema/evidence'
-import type { CrewAIValidationState } from '@/db/schema/crewai-validation-states'
 import type {
   UnifiedEvidenceItem,
   UserEvidenceItem,
@@ -16,6 +15,7 @@ import type {
   EvidenceSummary,
   TrendDataPoint,
   EvidenceFilters,
+  CrewAIValidationEvidenceState,
 } from '@/types/evidence-explorer'
 import { signalToStrength, signalToNumeric, getSignalDisplayInfo } from '@/types/evidence-explorer'
 import { format, isValid } from 'date-fns'
@@ -78,7 +78,7 @@ function fitTypeToDimension(fitType: string | null | undefined): EvidenceDimensi
  * Transform CrewAI validation state to AI evidence items
  * Each state can produce up to 3 evidence items (one per dimension)
  */
-export function transformAIValidationState(state: CrewAIValidationState): AIEvidenceItem[] {
+export function transformAIValidationState(state: CrewAIValidationEvidenceState): AIEvidenceItem[] {
   const items: AIEvidenceItem[] = []
   const timestamp = safeParseDate(state.updatedAt)
 
@@ -146,7 +146,7 @@ export function transformAIValidationState(state: CrewAIValidationState): AIEvid
  */
 export function mergeEvidenceSources(
   userEvidence: Evidence[],
-  aiStates: CrewAIValidationState[]
+  aiStates: CrewAIValidationEvidenceState[]
 ): UnifiedEvidenceItem[] {
   // Transform user evidence
   const userItems: UnifiedEvidenceItem[] = userEvidence.map(transformUserEvidence)
@@ -274,7 +274,7 @@ export function calculateEvidenceSummary(evidence: UnifiedEvidenceItem[]): Evide
  * Generate trend data points from AI validation states
  * Used for Recharts visualization
  */
-export function generateTrendData(aiStates: CrewAIValidationState[]): TrendDataPoint[] {
+export function generateTrendData(aiStates: CrewAIValidationEvidenceState[]): TrendDataPoint[] {
   // Sort by timestamp ascending for trend display
   const sortedStates = [...aiStates].sort(
     (a, b) => safeParseDate(a.updatedAt).getTime() - safeParseDate(b.updatedAt).getTime()
@@ -293,7 +293,7 @@ export function generateTrendData(aiStates: CrewAIValidationState[]): TrendDataP
 /**
  * Count evidence items in a validation state
  */
-function countEvidenceInState(state: CrewAIValidationState): number {
+function countEvidenceInState(state: CrewAIValidationEvidenceState): number {
   let count = 0
   if (state.desirabilityEvidence) count++
   if (state.feasibilityEvidence) count++

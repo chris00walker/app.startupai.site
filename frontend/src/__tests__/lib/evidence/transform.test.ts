@@ -3,8 +3,7 @@
  * Tests for evidence transform utilities - specifically date handling edge cases
  *
  * These tests verify that the transform functions handle null/undefined dates
- * gracefully, even though TypeScript types say dates are non-null.
- * This is defensive testing for runtime data that may not match types.
+ * gracefully when runtime data does not match schema expectations.
  */
 
 import {
@@ -14,25 +13,40 @@ import {
   mergeEvidenceSources,
 } from '@/lib/evidence/transform'
 import { type Evidence } from '@/db/schema/evidence'
-import { type CrewAIValidationState } from '@/db/schema/crewai-validation-states'
+import type { DesirabilityEvidence } from '@/types/crewai'
+import type { CrewAIValidationEvidenceState } from '@/types/evidence-explorer'
+
+const minimalDesirabilityEvidence: DesirabilityEvidence = {
+  problem_resonance: 0.5,
+  conversion_rate: 0.2,
+  commitment_depth: 'verbal',
+  zombie_ratio: 0.1,
+  experiments: [],
+  key_learnings: [],
+  tested_segments: [],
+  impressions: 0,
+  clicks: 0,
+  signups: 0,
+  spend_usd: 0,
+}
 
 // Helper to create minimal AI validation state for testing
-// Uses type assertion via unknown because we're testing edge cases where runtime data
-// doesn't match TypeScript types (e.g., null dates from database)
-function createTestAIState(overrides: Partial<Record<string, unknown>> = {}): CrewAIValidationState {
+// Uses partial overrides to simulate runtime edge cases (e.g., null dates from database)
+function createTestAIState(
+  overrides: Partial<CrewAIValidationEvidenceState> = {}
+): CrewAIValidationEvidenceState {
   return {
     id: 'state-1',
-    projectId: 'proj-1',
-    userId: 'user-1',
     iteration: 1,
-    phase: 'ideation',
-    desirabilitySignal: 'strong_positive',
+    desirabilitySignal: 'strong_commitment',
     feasibilitySignal: 'unknown',
     viabilitySignal: 'unknown',
-    createdAt: new Date('2024-01-01T00:00:00Z'),
     updatedAt: new Date('2024-01-01T00:00:00Z'),
+    desirabilityEvidence: minimalDesirabilityEvidence,
+    feasibilityEvidence: null,
+    viabilityEvidence: null,
     ...overrides,
-  } as unknown as CrewAIValidationState
+  }
 }
 
 // Helper to create minimal Evidence for testing
@@ -68,7 +82,7 @@ describe('Evidence Transform - Date Handling', () => {
       const statesWithNullDates = [
         createTestAIState({
           updatedAt: null, // Simulating null from database
-          desirabilityEvidence: { signals: [] },
+          desirabilityEvidence: minimalDesirabilityEvidence,
         }),
       ]
 
@@ -80,7 +94,7 @@ describe('Evidence Transform - Date Handling', () => {
       const statesWithUndefinedDates = [
         createTestAIState({
           updatedAt: undefined,
-          desirabilityEvidence: { signals: [] },
+          desirabilityEvidence: minimalDesirabilityEvidence,
         }),
       ]
 
@@ -91,7 +105,7 @@ describe('Evidence Transform - Date Handling', () => {
       const statesWithNullDates = [
         createTestAIState({
           updatedAt: null,
-          desirabilityEvidence: { signals: [] },
+          desirabilityEvidence: minimalDesirabilityEvidence,
         }),
       ]
 
@@ -108,13 +122,13 @@ describe('Evidence Transform - Date Handling', () => {
         createTestAIState({
           id: 'state-1',
           updatedAt: new Date('2024-06-15T10:00:00Z'), // Valid
-          desirabilityEvidence: { signals: [] },
+          desirabilityEvidence: minimalDesirabilityEvidence,
         }),
         createTestAIState({
           id: 'state-2',
           iteration: 2,
           updatedAt: null, // Invalid
-          desirabilityEvidence: { signals: [] },
+          desirabilityEvidence: minimalDesirabilityEvidence,
         }),
       ]
 
@@ -128,7 +142,7 @@ describe('Evidence Transform - Date Handling', () => {
     it('should NOT throw when updatedAt is null', () => {
       const stateWithNullDate = createTestAIState({
         updatedAt: null,
-        desirabilityEvidence: { signals: [] },
+        desirabilityEvidence: minimalDesirabilityEvidence,
       })
 
       expect(() => transformAIValidationState(stateWithNullDate)).not.toThrow()
@@ -137,7 +151,7 @@ describe('Evidence Transform - Date Handling', () => {
     it('should return items with valid timestamps when input date is null', () => {
       const stateWithNullDate = createTestAIState({
         updatedAt: null,
-        desirabilityEvidence: { signals: [] },
+        desirabilityEvidence: minimalDesirabilityEvidence,
       })
 
       const result = transformAIValidationState(stateWithNullDate)
@@ -182,7 +196,7 @@ describe('Evidence Transform - Date Handling', () => {
       const aiStates = [
         createTestAIState({
           updatedAt: null,
-          desirabilityEvidence: { signals: [] },
+          desirabilityEvidence: minimalDesirabilityEvidence,
         }),
       ]
 

@@ -27,6 +27,22 @@ export type EvidenceDimension = 'desirability' | 'feasibility' | 'viability'
 export type EvidenceSource = 'user' | 'ai'
 
 /**
+ * Minimal CrewAI validation state shape needed by Evidence Explorer.
+ * This avoids depending on the full DB schema shape and supports runtime validation.
+ */
+export interface CrewAIValidationEvidenceState {
+  id: string
+  iteration: number
+  updatedAt: Date | string | null
+  desirabilitySignal: DesirabilitySignal
+  feasibilitySignal: FeasibilitySignal
+  viabilitySignal: ViabilitySignal
+  desirabilityEvidence: DesirabilityEvidence | null
+  feasibilityEvidence: FeasibilityEvidence | null
+  viabilityEvidence: ViabilityEvidence | null
+}
+
+/**
  * User-created evidence item from the `evidence` table
  */
 export interface UserEvidenceItem {

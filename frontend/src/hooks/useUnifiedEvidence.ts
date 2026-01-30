@@ -16,14 +16,15 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Evidence } from '@/db/schema/evidence'
-import type { CrewAIValidationState } from '@/db/schema/crewai-validation-states'
 import type {
   UnifiedEvidenceItem,
   EvidenceFilters,
   EvidenceSummary,
   TrendDataPoint,
+  CrewAIValidationEvidenceState,
 } from '@/types/evidence-explorer'
 import { DEFAULT_EVIDENCE_FILTERS } from '@/types/evidence-explorer'
+import { fetchEvidenceSources } from '@/lib/evidence/data-access'
 import {
   mergeEvidenceSources,
   filterEvidence,
@@ -40,7 +41,7 @@ interface UseUnifiedEvidenceResult {
   unifiedEvidence: UnifiedEvidenceItem[]
   filteredEvidence: UnifiedEvidenceItem[]
   userEvidence: Evidence[]
-  aiStates: CrewAIValidationState[]
+  aiStates: CrewAIValidationEvidenceState[]
   summary: EvidenceSummary
   trendData: TrendDataPoint[]
 
@@ -66,7 +67,7 @@ export function useUnifiedEvidence(
 
   // Raw data state
   const [userEvidence, setUserEvidence] = useState<Evidence[]>([])
-  const [aiStates, setAIStates] = useState<CrewAIValidationState[]>([])
+  const [aiStates, setAIStates] = useState<CrewAIValidationEvidenceState[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -89,28 +90,14 @@ export function useUnifiedEvidence(
     setError(null)
 
     try {
-      // Fetch both sources in parallel
-      const [userResult, aiResult] = await Promise.all([
-        // User evidence
-        supabase
-          .from('evidence')
-          .select('*')
-          .eq('project_id', projectId)
-          .order('created_at', { ascending: false }),
+      const { userEvidence: evidenceRows, aiStates: validationStates } =
+        await fetchEvidenceSources(projectId, {
+          supabase,
+          policy: { mode: 'open', source: 'useUnifiedEvidence' },
+        })
 
-        // AI validation states
-        supabase
-          .from('crewai_validation_states')
-          .select('*')
-          .eq('project_id', projectId)
-          .order('updated_at', { ascending: false }),
-      ])
-
-      if (userResult.error) throw userResult.error
-      if (aiResult.error) throw aiResult.error
-
-      setUserEvidence((userResult.data as Evidence[]) || [])
-      setAIStates((aiResult.data as CrewAIValidationState[]) || [])
+      setUserEvidence(evidenceRows)
+      setAIStates(validationStates)
     } catch (err) {
       console.error('Error fetching evidence:', err)
       setError(err as Error)

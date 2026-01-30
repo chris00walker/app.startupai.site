@@ -7,6 +7,7 @@
  * - user_profiles: User account information
  * - projects: User projects for strategy development
  * - evidence: Project evidence with vector embeddings
+ * - analytics_events: Server-side analytics events
  * - reports: AI-generated reports and insights
  * - hypotheses: User hypotheses/assumptions for validation
  * - experiments: Experiment tracking
@@ -30,6 +31,7 @@
  * - landing_page_variants: A/B test landing pages
  * - consultant_profiles: Extended consultant user profiles
  * - consultant_onboarding_sessions: Consultant onboarding state
+ * - assistant_conversations: AI assistant chat history
  * - clients (legacy): Original client management table
  * - archived_clients: Consultant-archived client relationships
  *
@@ -43,6 +45,7 @@
 export * from './users';
 export * from './projects';
 export * from './evidence';
+export * from './analytics-events';
 export * from './reports';
 export * from './hypotheses';
 export * from './experiments';
@@ -102,6 +105,7 @@ export * from './landing-page-variants';
 // Consultant Infrastructure (US-CT01)
 export * from './consultant-profiles';
 export * from './consultant-onboarding-sessions';
+export * from './assistant-conversations';
 
 // Legacy Tables (backwards compatibility)
 export * from './legacy-clients';

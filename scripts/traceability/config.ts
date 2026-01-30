@@ -406,3 +406,22 @@ export const OVERRIDE_ALLOWED_FIELDS = [
   'domain_candidate', // Mark as future hexagonal domain extraction candidate
   'domain_function', // Future function name for domain extraction
 ] as const;
+
+// =============================================================================
+// Documentation Scanning (Knowledge Index Integration)
+// =============================================================================
+
+/**
+ * Doc scanning patterns are defined in the knowledge-index system.
+ * See: scripts/knowledge-index/config.ts
+ *
+ * Key exports from knowledge-index/config.ts:
+ * - DOC_SCAN_DIRS: Directories to scan per repo
+ * - DOC_EXTENSIONS: File extensions (.md, .mdx)
+ * - DOC_EXCLUDE_DIRS: Directories to skip
+ * - DOC_CATEGORY_PATTERNS: Category classification patterns
+ * - TOPIC_PATTERNS: Topic keyword patterns for navigation
+ *
+ * The knowledge-index system generates docs-registry.json which serves
+ * as the canonical doc list for the unified knowledge index.
+ */
