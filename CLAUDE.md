@@ -76,18 +76,49 @@ const projects = await db.select().from(projectsTable).where(eq(projectsTable.us
 - Validate inputs with Zod
 - Use Supabase Service Role only when needed
 
+## Knowledge Index Lookup Protocol (MANDATORY)
+
+**BEFORE using Glob, Grep, or any file search tool to find information, you MUST query the knowledge index first.**
+
+### Step 1: Query the Index
+
+```bash
+# Find documents by topic
+jq '.navigation.by_topic["<topic>"]' docs/traceability/unified-knowledge-index.json
+
+# Search docs-registry for titles/categories
+jq '.[] | select(.title | test("<keyword>"; "i"))' docs/traceability/docs-registry.json
+
+# Check if a specific document type exists
+jq '.[] | select(.category == "spec")' docs/traceability/docs-registry.json
+```
+
+### Step 2: Only Use File Search as Fallback
+
+If the knowledge index doesn't contain what you need, THEN use Glob/Grep.
+
+### Index Locations
+
+| Index | Purpose |
+|-------|---------|
+| `docs/traceability/unified-knowledge-index.json` | Master navigation index |
+| `docs/traceability/docs-registry.json` | All canonical documents |
+| `docs/traceability/story-code-map.json` | Story ↔ code mappings |
+| `docs/traceability/agent-indexes/*.json` | Per-agent curated docs |
+
 ## Traceability Protocol
 
 **Self-sustaining story-code traceability.** Follow this protocol to maintain bidirectional links between user stories and code.
 
 ### Before Implementing Any US-* Story
 
-1. **Look up the story** using `/story-lookup` or:
+1. **Query the knowledge index** first (see above)
+2. **Look up the story** using `/story-lookup` or:
    ```bash
    jq '.stories["US-XXX"]' docs/traceability/story-code-map.json
    ```
-2. **Read existing files** listed in the lookup
-3. **Check gap report** if exploring a category: `docs/traceability/gap-report.md`
+3. **Read existing files** listed in the lookup
+4. **Check gap report** if exploring a category: `docs/traceability/gap-report.md`
 
 ### While Implementing
 
@@ -199,4 +230,4 @@ Data flow: `Modal → /api/crewai/webhook → Supabase → Components`
 | `docs/work/` | Detailed work files (in-progress, done, backlog) |
 
 ---
-**Last Updated**: 2026-01-27
+**Last Updated**: 2026-01-29
