@@ -109,3 +109,6 @@ export * from './assistant-conversations';
 
 // Legacy Tables (backwards compatibility)
 export * from './legacy-clients';
+
+// Design Asset Infrastructure (Figma Integration)
+export * from './design-assets';

@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-28T19:43:37.336Z",
+    "generated_at": "2026-01-30T18:42:46.795Z",
     "version": "1.0.0",
-    "story_count": 262,
-    "annotated_file_count": 565
+    "story_count": 264,
+    "annotated_file_count": 570
   },
   "stories": {
     "US-F01": {
@@ -1151,6 +1151,8 @@
         "frontend/src/hooks/useUnifiedEvidence.ts"
       ],
       "lib": [
+        "frontend/src/lib/evidence/boundary.ts",
+        "frontend/src/lib/evidence/data-access.ts",
         "frontend/src/lib/evidence/transform.ts"
       ],
       "e2e_tests": [
@@ -1158,7 +1160,10 @@
           "file": "37-evidence-features.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/lib/evidence/boundary.test.ts",
+        "frontend/src/__tests__/lib/evidence/transform.test.ts"
+      ],
       "links": {
         "annotated": {
           "components": [
@@ -1178,6 +1183,8 @@
             "frontend/src/hooks/useUnifiedEvidence.ts"
           ],
           "lib": [
+            "frontend/src/lib/evidence/boundary.ts",
+            "frontend/src/lib/evidence/data-access.ts",
             "frontend/src/lib/evidence/transform.ts"
           ],
           "e2e_tests": [
@@ -1185,7 +1192,10 @@
               "file": "37-evidence-features.spec.ts"
             }
           ],
-          "unit_tests": []
+          "unit_tests": [
+            "frontend/src/__tests__/lib/evidence/boundary.test.ts",
+            "frontend/src/__tests__/lib/evidence/transform.test.ts"
+          ]
         },
         "baseline": {
           "components": [],
@@ -13696,6 +13706,80 @@
       "implementation_status": "complete",
       "implementation_status_inferred": "partial",
       "notes": "LinkedIn Marketing Ads - B2B Sponsored Content with professional targeting"
+    },
+    "US-DA01": {
+      "title": "Design Asset Storage",
+      "components": [
+        "frontend/src/db/schema/design-assets.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "links": {
+        "annotated": {
+          "components": [
+            "frontend/src/db/schema/design-assets.ts"
+          ],
+          "api_routes": [],
+          "pages": [],
+          "hooks": [],
+          "lib": [],
+          "e2e_tests": [],
+          "unit_tests": []
+        },
+        "baseline": {
+          "components": [],
+          "api_routes": [],
+          "pages": [],
+          "hooks": [],
+          "lib": [],
+          "e2e_tests": [],
+          "unit_tests": []
+        }
+      },
+      "db_tables": [],
+      "implementation_status": "partial",
+      "implementation_status_inferred": "partial"
+    },
+    "US-DA02": {
+      "title": "Design Generation Logging",
+      "components": [
+        "frontend/src/db/schema/design-assets.ts"
+      ],
+      "api_routes": [],
+      "pages": [],
+      "hooks": [],
+      "lib": [],
+      "e2e_tests": [],
+      "unit_tests": [],
+      "links": {
+        "annotated": {
+          "components": [
+            "frontend/src/db/schema/design-assets.ts"
+          ],
+          "api_routes": [],
+          "pages": [],
+          "hooks": [],
+          "lib": [],
+          "e2e_tests": [],
+          "unit_tests": []
+        },
+        "baseline": {
+          "components": [],
+          "api_routes": [],
+          "pages": [],
+          "hooks": [],
+          "lib": [],
+          "e2e_tests": [],
+          "unit_tests": []
+        }
+      },
+      "db_tables": [],
+      "implementation_status": "partial",
+      "implementation_status_inferred": "partial"
     }
   },
   "files": {
@@ -14500,7 +14584,27 @@
         "US-F14"
       ]
     },
+    "frontend/src/lib/evidence/boundary.ts": {
+      "stories": [
+        "US-F14"
+      ]
+    },
+    "frontend/src/lib/evidence/data-access.ts": {
+      "stories": [
+        "US-F14"
+      ]
+    },
     "frontend/src/lib/evidence/transform.ts": {
+      "stories": [
+        "US-F14"
+      ]
+    },
+    "frontend/src/__tests__/lib/evidence/boundary.test.ts": {
+      "stories": [
+        "US-F14"
+      ]
+    },
+    "frontend/src/__tests__/lib/evidence/transform.test.ts": {
       "stories": [
         "US-F14"
       ]
@@ -17073,6 +17177,12 @@
     "frontend/src/lib/ads/linkedin/types.ts": {
       "stories": [
         "US-AP08"
+      ]
+    },
+    "frontend/src/db/schema/design-assets.ts": {
+      "stories": [
+        "US-DA01",
+        "US-DA02"
       ]
     }
   }

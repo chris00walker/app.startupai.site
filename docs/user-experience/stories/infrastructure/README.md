@@ -1,8 +1,8 @@
 ---
 purpose: "Index for infrastructure user stories"
 status: "active"
-last_reviewed: "2026-01-26"
-last_updated: "2026-01-26"
+last_reviewed: "2026-01-30"
+last_updated: "2026-01-30"
 ---
 
 # Infrastructure User Stories
@@ -29,7 +29,8 @@ These stories ensure architectural work is visible in the traceability system al
 | `US-PA` | Provider APIs | 10 | [provider-apis.md](./provider-apis.md) |
 | `US-INF` | Core Infrastructure | 10 | [core-infrastructure.md](./core-infrastructure.md) |
 | `US-AP` | Ad Platforms | 8 | [ad-platforms.md](./ad-platforms.md) |
-| **Total** | | **75** | |
+| `US-DA` | Design Assets | 2 | [design-assets.md](./design-assets.md) |
+| **Total** | | **77** | |
 
 ---
 
@@ -42,6 +43,7 @@ These stories ensure architectural work is visible in the traceability system al
 | [provider-apis.md](./provider-apis.md) | US-PA01-PA10 | API clients for 10 integration providers |
 | [core-infrastructure.md](./core-infrastructure.md) | US-INF01-INF10 | OAuth fixes, token refresh, email, MCP server |
 | [ad-platforms.md](./ad-platforms.md) | US-AP01-AP08 | Meta/Google/LinkedIn ad integration with HITL |
+| [design-assets.md](./design-assets.md) | US-DA01-DA02 | Design asset storage, generation logging, Figma integration |
 
 ---
 
@@ -170,4 +172,4 @@ These stories ensure architectural work is visible in the traceability system al
 
 ---
 
-**Last Updated**: 2026-01-26
+**Last Updated**: 2026-01-30

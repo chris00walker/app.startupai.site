@@ -193,6 +193,7 @@ export const STORY_SOURCES = [
   'docs/user-experience/stories/infrastructure/provider-apis.md',
   'docs/user-experience/stories/infrastructure/core-infrastructure.md',
   'docs/user-experience/stories/infrastructure/ad-platforms.md',
+  'docs/user-experience/stories/infrastructure/design-assets.md',
 ] as const;
 
 /**
@@ -363,6 +364,7 @@ export const STORY_CATEGORIES: Record<string, string> = {
   'US-PA': 'Provider API',
   'US-INF': 'Infrastructure',
   'US-AP': 'Ad Platform',
+  'US-DA': 'Design Asset',
 };
 
 /**
