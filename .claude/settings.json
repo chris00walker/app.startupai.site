@@ -34,6 +34,9 @@
   },
 
   "permissions": {
+    "allow": [
+      "mcp__figma-mcp-bridge__*"
+    ],
     "allowed_commands_no_confirm": [
       "git status",
       "git log",
