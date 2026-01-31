@@ -52,8 +52,8 @@ export interface APIInventory {
   /** Repository identifier */
   repo: string;
 
-  /** ISO timestamp of generation */
-  generated_at: string;
+  /** ISO timestamp of generation (optional - git history provides this) */
+  generated_at?: string;
 
   /** Route definitions */
   routes: RouteDefinition[];

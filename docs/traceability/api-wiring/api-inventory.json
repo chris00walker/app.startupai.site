@@ -1,7 +1,6 @@
 {
   "schema_version": "1.0",
   "repo": "app.startupai.site",
-  "generated_at": "2026-01-30T18:32:49.277Z",
   "routes": [
     {
       "path": "/api/admin/ad-platforms",

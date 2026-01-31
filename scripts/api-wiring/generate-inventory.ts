@@ -217,7 +217,6 @@ function generateInventory(): APIInventory {
   return {
     schema_version: '1.0',
     repo: 'app.startupai.site',
-    generated_at: new Date().toISOString(),
     routes: allRoutes,
   };
 }
