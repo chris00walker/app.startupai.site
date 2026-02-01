@@ -1,6 +1,6 @@
 # StartupAI Project Governance
 
-**Status**: Draft v2.1 | **Created**: 2026-01-29 | **Updated**: 2026-01-30 | **Approved By**: Pending final sign-off
+**Status**: Draft v2.2 | **Created**: 2026-01-29 | **Updated**: 2026-01-31 | **Approved By**: Pending final sign-off
 
 **Process**: This document was created through a leadership team meeting with input from product-strategist, system-architect, domain-expert-vpd, and project-manager. Unresolved conflicts are flagged for founder decision.
 
@@ -146,6 +146,15 @@ Responsible for quality assurance and documentation.
 
 ---
 
+### Decision #6: User Story Ownership (2026-01-31)
+
+- **Issue**: User stories had split responsibility (ux-designer crafts, product-strategist prioritizes) with no single owner for the full lifecycle.
+- **Risk**: Accountability gap, conflicting priorities, unclear acceptance criteria ownership.
+- **Decision**: **product-strategist** owns user stories end-to-end (Accountable). **ux-designer** is Consulted and informs stories via journey maps and personas.
+- **Rationale**: Single owner eliminates handoff friction; UX research remains an input, not a bottleneck.
+
+---
+
 ## 4. Ownership Rules
 
 ### Single Accountable Owner (SAO) Principle
@@ -160,6 +169,7 @@ Every work item MUST have exactly ONE accountable owner. This owner:
 
 | Work Category | Default Accountable | Rationale |
 |---------------|---------------------|-----------|
+| **User stories** | product-strategist (C: ux-designer) | Owns backlog; UX informs via journey maps |
 | Validation assumptions (A1-A8) outcomes | product-strategist | Owns product vision |
 | Validation evidence design & integrity | domain-expert-vpd | Owns framework methodology |
 | VPD phase gate decisions | domain-expert-vpd | Owns methodology compliance |
