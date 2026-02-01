@@ -8,6 +8,7 @@
 
 | File | Purpose |
 |------|---------|
+| `PROJECT-PLAN.md` | **Master plan**: critical path, milestones, engineering + validation work |
 | `WORK.md` | Single source of truth: current sprint, backlog, assumptions |
 | `done.md` | Completion history (items moved from WORK.md after 2 weeks) |
 | `roadmap.md` | Validation phase milestones and progress |

@@ -2,7 +2,7 @@
 
 **Status**: ~85% Complete (Phase Alpha) | **Last Updated**: 2026-01-31
 
-> **Master Plan**: See [PROJECT-PLAN.md](../PROJECT-PLAN.md) for critical path, milestones, and how this work connects to market launch.
+> **Master Plan**: See [PROJECT-PLAN.md](PROJECT-PLAN.md) for critical path, milestones, and how this work connects to market launch.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Quick Reference
 - **Status**: ~85% Complete (Phase Alpha)
-- **Project Plan**: [`docs/PROJECT-PLAN.md`](docs/PROJECT-PLAN.md) - Critical path to market
+- **Project Plan**: [`docs/work/PROJECT-PLAN.md`](docs/work/PROJECT-PLAN.md) - Critical path to market
 - **Framework**: Next.js 15.5.3 (App Router + Pages Router)
 - **Deployment**: Netlify
 - **CLI Tools**: See `~/.claude/CLAUDE.md`
