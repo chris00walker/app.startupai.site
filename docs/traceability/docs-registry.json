@@ -3332,21 +3332,6 @@
   },
   {
     "repo": "app",
-    "path": "docs/status/linting.md",
-    "title": "Linting Status (Staged Re-Enablement)",
-    "category": "spec",
-    "topics": [
-      "quality"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/adr/004-two-pass-onboarding-architecture.md",
-      "crew:docs/adr/005-state-first-synchronized-loop.md",
-      "marketing:docs/archive/aspirational-contracts/crewai-integration.md",
-      "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
-    ]
-  },
-  {
-    "repo": "app",
     "path": "docs/testing/README.md",
     "title": "Testing Documentation",
     "category": "spec",
@@ -5005,128 +4990,6 @@
   },
   {
     "repo": "app",
-    "path": "docs/validation/assumptions.md",
-    "title": "StartupAI Assumptions Catalog",
-    "category": "spec",
-    "topics": [
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "hypothesis",
-      "experiment",
-      "phase-0",
-      "phase-1",
-      "schema",
-      "crewai",
-      "netlify",
-      "testing",
-      "quality",
-      "founder",
-      "consultant",
-      "admin",
-      "analytics"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/master-architecture/02-organization.md",
-      "crew:docs/master-architecture/03-methodology.md",
-      "marketing:docs/overview/jtbd/consultants-agencies.md",
-      "marketing:docs/work/implementation-plan.md"
-    ]
-  },
-  {
-    "repo": "app",
-    "path": "docs/validation/evidence-tracker.md",
-    "title": "StartupAI Evidence Tracker",
-    "category": "spec",
-    "topics": [
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "hypothesis",
-      "phase-0",
-      "phase-1",
-      "crewai",
-      "netlify",
-      "testing",
-      "quality",
-      "founder",
-      "consultant",
-      "admin",
-      "analytics"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/master-architecture/02-organization.md",
-      "crew:docs/master-architecture/03-methodology.md",
-      "marketing:docs/overview/jtbd/consultants-agencies.md",
-      "marketing:docs/work/implementation-plan.md"
-    ]
-  },
-  {
-    "repo": "app",
-    "path": "docs/validation/roadmap.md",
-    "title": "Validation-Driven Roadmap",
-    "category": "work",
-    "topics": [
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "hypothesis",
-      "experiment",
-      "phase-0",
-      "phase-1",
-      "phase-2",
-      "netlify",
-      "testing",
-      "quality",
-      "founder",
-      "consultant",
-      "analytics"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/features/flow-inventory.md",
-      "crew:docs/features/phase-mapping.md",
-      "marketing:docs/overview/jtbd/consultants-agencies.md",
-      "marketing:docs/overview/jtbd/independent-founders.md"
-    ]
-  },
-  {
-    "repo": "app",
-    "path": "docs/validation/startupai-brief.md",
-    "title": "StartupAI Founder's Brief",
-    "category": "spec",
-    "topics": [
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "hypothesis",
-      "experiment",
-      "phase-0",
-      "phase-1",
-      "phase-2",
-      "phase-3",
-      "phase-4",
-      "crewai",
-      "netlify",
-      "testing",
-      "quality",
-      "founder",
-      "consultant",
-      "admin",
-      "analytics"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/master-architecture/02-organization.md",
-      "crew:docs/master-architecture/03-methodology.md",
-      "marketing:docs/overview/jtbd/consultants-agencies.md",
-      "marketing:docs/work/implementation-plan.md"
-    ]
-  },
-  {
-    "repo": "app",
     "path": "docs/work/WORK.md",
     "title": "StartupAI Product App Work Tracker",
     "category": "work",
@@ -5297,38 +5160,6 @@
     "cross_repo_connections": [
       "crew:docs/master-architecture/02-organization.md",
       "crew:docs/master-architecture/03-methodology.md",
-      "marketing:docs/work/implementation-plan.md",
-      "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
-    ]
-  },
-  {
-    "repo": "app",
-    "path": "docs/work/roadmap.md",
-    "title": "Validation Roadmap",
-    "category": "work",
-    "topics": [
-      "evidence",
-      "vpc",
-      "brief",
-      "hypothesis",
-      "experiment",
-      "phase-0",
-      "phase-1",
-      "phase-2",
-      "phase-3",
-      "phase-4",
-      "schema",
-      "modal",
-      "crewai",
-      "testing",
-      "founder",
-      "consultant",
-      "analytics",
-      "slos"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/master-architecture/reference/flywheel-learning.md",
-      "crew:docs/features/flow-inventory.md",
       "marketing:docs/work/implementation-plan.md",
       "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
     ]
@@ -9616,37 +9447,6 @@
     ]
   },
   {
-    "repo": "crew",
-    "path": "docs/work/roadmap.md",
-    "title": "Roadmap",
-    "category": "work",
-    "topics": [
-      "auth",
-      "evidence",
-      "approval",
-      "experiment",
-      "phase-0",
-      "phase-3",
-      "phase-4",
-      "schema",
-      "modal",
-      "crewai",
-      "supabase",
-      "netlify",
-      "testing",
-      "quality",
-      "founder",
-      "analytics",
-      "observability-unified"
-    ],
-    "cross_repo_connections": [
-      "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
-      "app:docs/archive/work-history/phases.md",
-      "marketing:docs/archive/persona-documentation-draft-2026-01-22.md",
-      "marketing:docs/work/implementation-plan.md"
-    ]
-  },
-  {
     "repo": "marketing",
     "path": "README.md",
     "title": "StartupAI Marketing Site",
@@ -11253,29 +11053,6 @@
       "app:docs/archive/audits/strategyzer-ux-audit.md",
       "crew:docs/adr/003-landing-page-storage-migration.md",
       "crew:docs/architecture-audit/comprehensive-deficiency-report.md"
-    ]
-  },
-  {
-    "repo": "marketing",
-    "path": "docs/work/roadmap.md",
-    "title": "Marketing Roadmap",
-    "category": "work",
-    "topics": [
-      "evidence",
-      "phase-2",
-      "phase-4",
-      "schema",
-      "crewai",
-      "supabase",
-      "testing",
-      "founder",
-      "analytics"
-    ],
-    "cross_repo_connections": [
-      "app:docs/archive/architecture-recommendations-2025-11.md",
-      "app:docs/archive/audits/crewai-data-flow-verification.md",
-      "crew:docs/adr/001-flow-to-crew-migration.md",
-      "crew:docs/adr/002-modal-serverless-migration.md"
     ]
   }
 ]

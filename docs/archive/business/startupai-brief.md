@@ -1,5 +1,7 @@
 # StartupAI Founder's Brief
 
+> **ARCHIVED**: This document has been archived. For current assumptions and evidence, see [PROJECT-PLAN.md](../../work/PROJECT-PLAN.md).
+
 > **StartupAI validates itself using its own methodology. This is our Customer Zero brief.**
 
 **Created**: 2026-01-20
@@ -128,7 +130,7 @@ A SaaS platform where founders complete a 30-second Quick Start, then 6 AI Found
 | **A7** | "AI Founders" metaphor is compelling vs generic "AI" | LOW | Solution | A/B test messaging |
 | **A8** | Indie Hackers is viable acquisition channel | MEDIUM | Channel | CAC, sign-up quality |
 
-See [assumptions.md](assumptions.md) for full test cards.
+See [PROJECT-PLAN.md](../../work/PROJECT-PLAN.md) for full test cards (consolidated).
 
 ---
 
@@ -186,10 +188,10 @@ making Fortune 500-quality strategic analysis accessible to early-stage founders
 
 ## Cross-References
 
-- [Assumptions Catalog](assumptions.md) - Full test cards for each assumption
-- [Evidence Tracker](evidence-tracker.md) - Current validation state
-- [Validation Roadmap](roadmap.md) - Feature-to-assumption mapping
-- [Dogfooding Methodology](../../startupai-crew/docs/master-architecture/10-dogfooding.md)
+**Note**: This document is archived. See [PROJECT-PLAN.md](../../work/PROJECT-PLAN.md) for consolidated assumptions, test cards, and evidence.
+
+- [PROJECT-PLAN.md](../../work/PROJECT-PLAN.md) - Master plan with test cards and evidence log
+- [Dogfooding Methodology](../../../startupai-crew/docs/master-architecture/10-dogfooding.md)
 
 ---
 

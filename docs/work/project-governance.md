@@ -322,7 +322,7 @@ Every work item testing an assumption (A1-A8) requires:
 | Document | Purpose |
 |----------|---------|
 | [WORK.md](./WORK.md) | Sprint status and backlog |
-| [roadmap.md](./roadmap.md) | Validation phase progress |
+| [PROJECT-PLAN.md](./PROJECT-PLAN.md) | Master plan, assumptions, test cards, evidence |
 | [cross-repo-blockers.md](./cross-repo-blockers.md) | Ecosystem dependencies |
 | [approval-workflows.md](../../startupai-crew/docs/master-architecture/reference/approval-workflows.md) | HITL checkpoint patterns |
 | [09-status.md](../../startupai-crew/docs/master-architecture/09-status.md) | Ecosystem status |

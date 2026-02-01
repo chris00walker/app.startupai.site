@@ -12,7 +12,7 @@ supersedes: "docs/archive/status/linting.md"
 - `pnpm lint` now runs **warning-only** ESLint using `eslint.config.warn.mjs`.
 - A strict baseline config exists at `eslint.config.base.mjs` for Stage 3 enforcement.
 - Accessibility linting remains available via `pnpm lint:a11y` (warnings only).
-- Baseline report output: `docs/status/linting-baseline.json`.
+- Baseline report output: `docs/archive/linting/linting-baseline.json`.
 
 ## Why It Was Deferred
 
@@ -59,5 +59,5 @@ CI integration:
 
 ## Tracking
 
-- Baseline violations are captured in `docs/status/linting-baseline.json`.
+- Baseline violations are captured in `docs/archive/linting/linting-baseline.json`.
 - Revisit this file after each stage to update status and next steps.
