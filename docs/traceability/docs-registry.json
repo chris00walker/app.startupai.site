@@ -5222,13 +5222,6 @@
   },
   {
     "repo": "app",
-    "path": "docs/work/backlog.md",
-    "title": "Backlog",
-    "category": "work",
-    "topics": []
-  },
-  {
-    "repo": "app",
     "path": "docs/work/cross-repo-blockers.md",
     "title": "Cross-Repository Blockers",
     "category": "work",
@@ -5270,47 +5263,6 @@
   },
   {
     "repo": "app",
-    "path": "docs/work/current-state-map.md",
-    "title": "StartupAI Ecosystem Current-State Map",
-    "category": "work",
-    "topics": [
-      "auth",
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "hypothesis",
-      "experiment",
-      "phase-0",
-      "phase-1",
-      "phase-2",
-      "phase-3",
-      "phase-4",
-      "api",
-      "schema",
-      "webhook",
-      "modal",
-      "crewai",
-      "supabase",
-      "netlify",
-      "testing",
-      "founder",
-      "consultant",
-      "admin",
-      "analytics",
-      "pgvector",
-      "observability-unified",
-      "pgvector-evidence"
-    ],
-    "cross_repo_connections": [
-      "crew:docs/master-architecture/02-organization.md",
-      "crew:docs/master-architecture/03-methodology.md",
-      "marketing:docs/work/implementation-plan.md",
-      "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
-    ]
-  },
-  {
-    "repo": "app",
     "path": "docs/work/done.md",
     "title": "Completed Work",
     "category": "work",
@@ -5348,13 +5300,6 @@
       "marketing:docs/work/implementation-plan.md",
       "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
     ]
-  },
-  {
-    "repo": "app",
-    "path": "docs/work/in-progress.md",
-    "title": "In Progress",
-    "category": "work",
-    "topics": []
   },
   {
     "repo": "app",
@@ -9460,41 +9405,6 @@
   },
   {
     "repo": "crew",
-    "path": "docs/work/backlog.md",
-    "title": "StartupAI Validation Backlog",
-    "category": "work",
-    "topics": [
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "hypothesis",
-      "phase-0",
-      "phase-1",
-      "phase-2",
-      "phase-3",
-      "phase-4",
-      "api",
-      "webhook",
-      "modal",
-      "crewai",
-      "supabase",
-      "netlify",
-      "testing",
-      "quality",
-      "consultant",
-      "analytics",
-      "observability-unified"
-    ],
-    "cross_repo_connections": [
-      "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
-      "app:docs/archive/work-history/WORK.md",
-      "marketing:docs/work/implementation-plan.md",
-      "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
-    ]
-  },
-  {
-    "repo": "crew",
     "path": "docs/work/cross-repo-blockers.md",
     "title": "Cross-Repository Blockers",
     "category": "work",
@@ -9667,42 +9577,6 @@
       "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
       "marketing:docs/work/implementation-plan.md",
       "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
-    ]
-  },
-  {
-    "repo": "crew",
-    "path": "docs/work/in-progress.md",
-    "title": "In Progress",
-    "category": "work",
-    "topics": [
-      "auth",
-      "evidence",
-      "vpc",
-      "brief",
-      "approval",
-      "phase-0",
-      "phase-1",
-      "phase-2",
-      "phase-3",
-      "phase-4",
-      "api",
-      "schema",
-      "webhook",
-      "modal",
-      "crewai",
-      "supabase",
-      "netlify",
-      "testing",
-      "quality",
-      "founder",
-      "analytics",
-      "observability-unified"
-    ],
-    "cross_repo_connections": [
-      "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
-      "app:docs/archive/work-history/phases.md",
-      "marketing:docs/archive/persona-documentation-draft-2026-01-22.md",
-      "marketing:docs/work/implementation-plan.md"
     ]
   },
   {
@@ -11235,30 +11109,6 @@
   },
   {
     "repo": "marketing",
-    "path": "docs/work/backlog.md",
-    "title": "Backlog",
-    "category": "work",
-    "topics": [
-      "auth",
-      "evidence",
-      "vpc",
-      "api",
-      "crewai",
-      "netlify",
-      "testing",
-      "founder",
-      "analytics",
-      "observability-unified"
-    ],
-    "cross_repo_connections": [
-      "app:docs/archive/audits/crewai-data-flow-verification.md",
-      "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
-      "crew:docs/adr/001-flow-to-crew-migration.md",
-      "crew:docs/adr/002-modal-serverless-migration.md"
-    ]
-  },
-  {
-    "repo": "marketing",
     "path": "docs/work/cross-repo-blockers.md",
     "title": "Cross-Repository Blockers",
     "category": "work",
@@ -11378,30 +11228,6 @@
       "app:docs/features/feature-inventory.md",
       "crew:docs/master-architecture/02-organization.md",
       "crew:docs/master-architecture/03-methodology.md"
-    ]
-  },
-  {
-    "repo": "marketing",
-    "path": "docs/work/in-progress.md",
-    "title": "In Progress",
-    "category": "work",
-    "topics": [
-      "evidence",
-      "approval",
-      "phase-2",
-      "api",
-      "schema",
-      "crewai",
-      "netlify",
-      "testing",
-      "analytics",
-      "observability-unified"
-    ],
-    "cross_repo_connections": [
-      "app:docs/archive/audits/crewai-data-flow-verification.md",
-      "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
-      "crew:docs/adr/001-flow-to-crew-migration.md",
-      "crew:docs/adr/002-modal-serverless-migration.md"
     ]
   },
   {
