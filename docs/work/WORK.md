@@ -139,10 +139,9 @@
 | [done.md](done.md) | Complete delivery history | When items move from "Recently Completed" |
 | [roadmap.md](roadmap.md) | Validation phase progress | Monthly |
 | [cross-repo-blockers.md](cross-repo-blockers.md) | Ecosystem dependencies | As needed |
+| [README.md](README.md) | Folder purpose and allowed file types | As needed |
 
-**Archived** (read-only, replaced by this file):
-- `in-progress.md` → Merged into Current Sprint section
-- `backlog.md` → Merged into Backlog section
+**Authoritative ecosystem status**: See [startupai-crew/docs/master-architecture/09-status.md](../../startupai-crew/docs/master-architecture/09-status.md)
 
 ---
 
