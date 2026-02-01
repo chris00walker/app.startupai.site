@@ -1,6 +1,6 @@
 # Product Vision: Portfolio Holder Ecosystem
 
-**Status**: Draft v1.0 | **Created**: 2026-01-31 | **Owner**: product-strategist
+**Status**: Draft v1.1 | **Created**: 2026-01-31 | **Owner**: product-strategist
 **Approved By**: Pending founder sign-off
 
 ---
@@ -87,20 +87,35 @@ Founders don't operate in isolation. They maintain relationships with multiple s
 
 *"Will I get my money back (+ return)?"*
 
-| Entity | Typical Check Size | Validation Need |
-|--------|-------------------|-----------------|
-| Friends & Family | $5K-$50K | "Is my loved one's dream viable?" |
-| Angel Investors | $25K-$250K | "Will I see a return?" |
-| Credit Unions | $10K-$100K | "Can they repay?" |
-| Small Business Associations (SBA) | $50K-$5M (guaranteed) | "Does this meet program criteria?" |
-| Micro Lending (Kiva, Grameen) | $500-$50K | "Will this create impact?" |
-| Fund Managers (VC/PE) | $500K-$50M+ | "Is this fundable at the next stage?" |
-| Banks | $50K-$500K | "What's the default risk?" |
-| Crowdfunding Backers | $50-$500 | "Will this product exist?" |
-| Revenue-Based Finance (Clearco, Pipe) | $10K-$500K | "Are the unit economics real?" |
-| Grants (Gov't, Foundation) | $10K-$500K | "Does this meet our mandate?" |
-| Corporate Venture | $250K-$5M | "Strategic fit + return?" |
-| Family Offices | $100K-$2M | "Diversification + thesis fit?" |
+```
+┌───────────────────────────────────────┬───────────────────────┬───────────────────────────────────────┐
+│                Entity                 │  Typical Check Size   │            Validation Need            │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Friends & Family                      │ $5K-$50K              │ "Is my loved one's dream viable?"     │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Angel Investors                       │ $25K-$250K            │ "Will I see a return?"                │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Credit Unions                         │ $10K-$100K            │ "Can they repay?"                     │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Small Business Associations (SBA)     │ $50K-$5M (guaranteed) │ "Does this meet program criteria?"    │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Micro Lending (Kiva, Grameen)         │ $500-$50K             │ "Will this create impact?"            │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Fund Managers (VC/PE)                 │ $500K-$50M+           │ "Is this fundable at the next stage?" │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Banks                                 │ $50K-$500K            │ "What's the default risk?"            │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Crowdfunding Backers                  │ $50-$500              │ "Will this product exist?"            │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Revenue-Based Finance (Clearco, Pipe) │ $10K-$500K            │ "Are the unit economics real?"        │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Grants (Gov't, Foundation)            │ $10K-$500K            │ "Does this meet our mandate?"         │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Corporate Venture                     │ $250K-$5M             │ "Strategic fit + return?"             │
+├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
+│ Family Offices                        │ $100K-$2M             │ "Diversification + thesis fit?"       │
+└───────────────────────────────────────┴───────────────────────┴───────────────────────────────────────┘
+```
 
 **Common denominator**: "Show me evidence this isn't going to zero."
 
@@ -110,14 +125,23 @@ Founders don't operate in isolation. They maintain relationships with multiple s
 
 *"Is my guidance being applied?"*
 
-| Entity | Relationship |
-|--------|--------------|
-| Business Coaches | Ongoing development |
-| Mentors | Informal guidance |
-| Fractional Executives (CFO, CTO, CMO) | Part-time leadership |
-| Advisory Board Members | Strategic input |
-| Industry Experts | Domain knowledge |
-| Management Consultants | Project-based |
+```
+┌───────────────────────────────────────┬──────────────────────┐
+│                Entity                 │     Relationship     │
+├───────────────────────────────────────┼──────────────────────┤
+│ Business Coaches                      │ Ongoing development  │
+├───────────────────────────────────────┼──────────────────────┤
+│ Mentors                               │ Informal guidance    │
+├───────────────────────────────────────┼──────────────────────┤
+│ Fractional Executives (CFO, CTO, CMO) │ Part-time leadership │
+├───────────────────────────────────────┼──────────────────────┤
+│ Advisory Board Members                │ Strategic input      │
+├───────────────────────────────────────┼──────────────────────┤
+│ Industry Experts                      │ Domain knowledge     │
+├───────────────────────────────────────┼──────────────────────┤
+│ Management Consultants                │ Project-based        │
+└───────────────────────────────────────┴──────────────────────┘
+```
 
 **Common denominator**: "Is the founder making progress based on my advice?"
 
@@ -127,14 +151,23 @@ Founders don't operate in isolation. They maintain relationships with multiple s
 
 *"Is our program delivering outcomes?"*
 
-| Entity | Context |
-|--------|---------|
-| Accelerators (YC, Techstars) | Cohort-based, equity |
-| Incubators | Longer-term, often non-profit |
-| University Programs | Student founders |
-| Government Programs | Economic development |
-| Corporate Innovation Labs | Strategic ventures |
-| Startup Studios | Venture builders |
+```
+┌──────────────────────────────┬───────────────────────────────┐
+│            Entity            │            Context            │
+├──────────────────────────────┼───────────────────────────────┤
+│ Accelerators (YC, Techstars) │ Cohort-based, equity          │
+├──────────────────────────────┼───────────────────────────────┤
+│ Incubators                   │ Longer-term, often non-profit │
+├──────────────────────────────┼───────────────────────────────┤
+│ University Programs          │ Student founders              │
+├──────────────────────────────┼───────────────────────────────┤
+│ Government Programs          │ Economic development          │
+├──────────────────────────────┼───────────────────────────────┤
+│ Corporate Innovation Labs    │ Strategic ventures            │
+├──────────────────────────────┼───────────────────────────────┤
+│ Startup Studios              │ Venture builders              │
+└──────────────────────────────┴───────────────────────────────┘
+```
 
 **Common denominator**: "How do we demonstrate program ROI?"
 
@@ -144,13 +177,21 @@ Founders don't operate in isolation. They maintain relationships with multiple s
 
 *"Is this client worth the credit risk?"*
 
-| Entity | Service |
-|--------|---------|
-| Startup Lawyers | Legal, IP, incorporation |
-| Accountants/Bookkeepers | Financial management |
-| Insurance Brokers | Risk coverage |
-| Payroll Providers | HR infrastructure |
-| Marketing Agencies | Growth services |
+```
+┌─────────────────────────┬──────────────────────────┐
+│         Entity          │         Service          │
+├─────────────────────────┼──────────────────────────┤
+│ Startup Lawyers         │ Legal, IP, incorporation │
+├─────────────────────────┼──────────────────────────┤
+│ Accountants/Bookkeepers │ Financial management     │
+├─────────────────────────┼──────────────────────────┤
+│ Insurance Brokers       │ Risk coverage            │
+├─────────────────────────┼──────────────────────────┤
+│ Payroll Providers       │ HR infrastructure        │
+├─────────────────────────┼──────────────────────────┤
+│ Marketing Agencies      │ Growth services          │
+└─────────────────────────┴──────────────────────────┘
+```
 
 **Common denominator**: "Should I extend credit terms to this client?"
 
@@ -160,15 +201,45 @@ Founders don't operate in isolation. They maintain relationships with multiple s
 
 *"How do we prove value to our community?"*
 
-| Entity | Role |
-|--------|------|
-| Coworking Spaces | Physical infrastructure |
-| Startup Communities | Network/events |
-| Chambers of Commerce | Business advocacy |
-| Industry Associations | Sector support |
-| Economic Development Agencies | Regional growth |
+```
+┌───────────────────────────────┬─────────────────────────┐
+│            Entity             │          Role           │
+├───────────────────────────────┼─────────────────────────┤
+│ Coworking Spaces              │ Physical infrastructure │
+├───────────────────────────────┼─────────────────────────┤
+│ Startup Communities           │ Network/events          │
+├───────────────────────────────┼─────────────────────────┤
+│ Chambers of Commerce          │ Business advocacy       │
+├───────────────────────────────┼─────────────────────────┤
+│ Industry Associations         │ Sector support          │
+├───────────────────────────────┼─────────────────────────┤
+│ Economic Development Agencies │ Regional growth         │
+└───────────────────────────────┴─────────────────────────┘
+```
 
 **Common denominator**: "Are we creating measurable value for our members?"
+
+---
+
+### Summary: Each Cohort's Core Question
+
+```
+┌───────────────────┬────────────────────────────────────────────┐
+│      Cohort       │               Core Question                │
+├───────────────────┼────────────────────────────────────────────┤
+│ Capital Provider  │ "Will I get my money back (+ return)?"     │
+├───────────────────┼────────────────────────────────────────────┤
+│ Advisory Provider │ "Is my guidance creating progress?"        │
+├───────────────────┼────────────────────────────────────────────┤
+│ Program Operator  │ "Is our program delivering outcomes?"      │
+├───────────────────┼────────────────────────────────────────────┤
+│ Service Provider  │ "Is this client a credit/churn risk?"      │
+├───────────────────┼────────────────────────────────────────────┤
+│ Ecosystem Enabler │ "Are we creating value for our community?" │
+└───────────────────┴────────────────────────────────────────────┘
+```
+
+All five collapse into one Portfolio Holder persona with different relationship types. The platform stays unified.
 
 ---
 
@@ -352,4 +423,5 @@ Before building, validate these assumptions:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-01-31 | 1.1 | Added ASCII table diagrams for improved readability |
 | 2026-01-31 | 1.0 | Initial draft from product-strategist / founder discussion |
