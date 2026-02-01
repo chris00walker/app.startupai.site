@@ -1,6 +1,8 @@
 # StartupAI Product App Work Tracker
 
-**Status**: ~85% Complete (Phase Alpha) | **Last Updated**: 2026-01-29
+**Status**: ~85% Complete (Phase Alpha) | **Last Updated**: 2026-01-31
+
+> **Master Plan**: See [PROJECT-PLAN.md](../PROJECT-PLAN.md) for critical path, milestones, and how this work connects to market launch.
 
 ---
 
@@ -119,16 +121,19 @@
 
 ## Assumption Reference
 
-| ID | Assumption | Phase | Status |
-|----|------------|-------|--------|
-| A1 | Founders trust AI recommendations | 0-1 | Testing |
-| A2 | Quick Start converts to engagement | 0 | Testing |
-| A3 | AI extracts accurate business context | 0-1 | Testing |
-| A4 | WTP for validation platform | 2-4 | Untested |
-| A5 | VPD methodology resonates | 2 | Untested |
-| A6 | Consultants see portfolio value | 2-3 | Untested |
-| A7 | "AI Founders" messaging attracts | 2 | Untested |
-| A8 | IH community is right channel | 2 | Untested |
+| ID | Assumption | Phase | Status | Spec |
+|----|------------|-------|--------|------|
+| A1 | Founders trust AI recommendations | 0-1 | Testing | - |
+| A2 | Quick Start converts to engagement | 0 | Testing | - |
+| A3 | AI extracts accurate business context | 0-1 | Testing | - |
+| A4 | WTP for validation platform | 2-4 | Testing | - |
+| A5 | VPD methodology resonates | 2 | Untested | - |
+| A6 | Consultants see portfolio value | 2-3 | Untested | - |
+| A7 | "AI Founders" messaging attracts | 2 | Untested | - |
+| A8 | IH community is right channel | 2 | Untested | - |
+| A9 | Portfolio Holders will pay | Future | Gated (A6) | [Vision](../specs/portfolio-holder-vision.md) |
+| A10 | Portfolio Holders will mandate usage | Future | Gated (A9) | [Vision](../specs/portfolio-holder-vision.md) |
+| A11 | One cohort has most urgent pain | Future | Gated (A6) | [Vision](../specs/portfolio-holder-vision.md) |
 
 ---
 
@@ -136,10 +141,12 @@
 
 | Document | Purpose | Update Frequency |
 |----------|---------|------------------|
+| [PROJECT-PLAN.md](../PROJECT-PLAN.md) | **Critical path, milestones, dependencies** | Weekly |
 | [done.md](done.md) | Complete delivery history | When items move from "Recently Completed" |
 | [roadmap.md](roadmap.md) | Validation phase progress | Monthly |
 | [cross-repo-blockers.md](cross-repo-blockers.md) | Ecosystem dependencies | As needed |
 | [README.md](README.md) | Folder purpose and allowed file types | As needed |
+| [portfolio-holder-vision.md](../specs/portfolio-holder-vision.md) | Future expansion (A9-A11) | As needed |
 
 **Authoritative ecosystem status**: See [startupai-crew/docs/master-architecture/09-status.md](../../startupai-crew/docs/master-architecture/09-status.md)
 
