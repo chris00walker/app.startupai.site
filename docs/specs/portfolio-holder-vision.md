@@ -1,7 +1,7 @@
 # Product Vision: Portfolio Holder Ecosystem
 
-**Status**: Draft v1.1 | **Created**: 2026-01-31 | **Owner**: product-strategist
-**Approved By**: Pending founder sign-off
+**Status**: Approved v2.0 | **Created**: 2026-01-31 | **Owner**: product-strategist
+**Approved By**: Founder (2026-01-31) | **Leadership Review**: Complete
 
 ---
 
@@ -314,71 +314,191 @@ Portfolio Holders become distribution channels:
 
 ---
 
+## Leadership Team Review (2026-01-31)
+
+### Reviewers
+
+| Agent | Role | Verdict |
+|-------|------|---------|
+| **system-architect** | Technical Architecture | Feasible as overlay; 11-18 days if built |
+| **domain-expert-vpd** | VPD Methodology | Aligned; Test Cards need strengthening |
+| **project-manager** | Execution Planning | Approve; queue A9-A11 behind A6 |
+
+### Key Decisions
+
+| Decision | Resolution | Rationale |
+|----------|------------|-----------|
+| **Implementation approach** | Overlay (not rename) | Add `relationship_type` without renaming `consultant`; lower risk, faster |
+| **Cohort priority** | A11 determines | Test which cohort has most urgent pain first |
+| **Validation sequencing** | A11 → A9 → A10 | One assumption at a time per VPD principles |
+| **Evidence bar for build** | ≥5 LOIs + ≥1 paying pilot | Behavioral evidence required, not just interviews |
+| **Timing** | Can start when founder has bandwidth | Discovery doesn't require engineering resources |
+
+### Architecture Decision
+
+**Approved approach: Overlay, not refactor**
+
+```
+Phase 2a: Add relationship_type to existing schema
+          └── consultant_clients gains relationship_type column
+          └── Default: 'advisory' for existing relationships
+
+Phase 2b: UI supports relationship types
+          └── Configurable invite flows
+          └── Cohort-specific dashboard views
+
+Phase 2c: Rename (deferred, optional)
+          └── consultant → portfolio_holder
+          └── Only if model proves out with evidence
+```
+
+**Rationale**: Lower migration risk, faster to implement, backwards compatible.
+
+---
+
 ## Validation Requirements
 
-Before building, validate these assumptions:
+Before building, validate these assumptions. **Sequenced per VPD principles.**
 
-### A9: Capital Provider Demand
+### Sequence
 
-**Hypothesis**: Lenders/investors would pay for founder validation visibility.
+```
+┌─────────────────────────────────────────────────────────────┐
+│  A11 (Which cohort?) ──► A9 (Will they pay?) ──► A10 (Will │
+│       2 weeks                  3 weeks            they      │
+│                                                   mandate?) │
+│                                                   2 weeks   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-**Test**: 5-8 discovery interviews with:
-- 2 angel investors
-- 2 credit union loan officers
-- 2 accelerator program managers
-- 2 SBA-affiliated lenders
-
-**Evidence required**:
-- Willingness to pay signal
-- Current workflow pain points
-- Integration requirements
-
-### A10: Distribution Channel Viability
-
-**Hypothesis**: Capital providers would require founders to use the platform.
-
-**Test**: Ask in discovery interviews:
-- "Would you require portfolio companies to use this?"
-- "What would make this a due diligence requirement?"
-
-### A11: Cohort Priority
+### A11: Cohort Priority (First)
 
 **Hypothesis**: One cohort has significantly more urgent pain than others.
 
-**Test**: Rank cohorts by:
-- Willingness to pay (1-5)
-- Sales cycle length (shorter = better)
-- Distribution potential (can they bring founders?)
+**Test**: Comparative interviews across 3 cohorts (Capital, Advisory, Program)
+- 2-3 interviews per cohort
+- Rank by: pain severity, willingness to pay, sales cycle, distribution potential
+
+**Criteria**:
+- Clear winner emerges with ≥2x pain signal vs. others
+- Time bound: 2 weeks
+
+**Pivot trigger**: If no clear winner, default to Capital (highest strategic value).
+
+---
+
+### A9: Capital Provider Demand (Second - focused on winning cohort)
+
+**Hypothesis**: [Winning cohort] will pay for founder validation visibility.
+
+**Test Card**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ASSUMPTION: A9 - Portfolio Holder Willingness to Pay        │
+├─────────────────────────────────────────────────────────────┤
+│ We believe: [Winning cohort] will pay ≥$200/mo per         │
+│             portfolio for validation visibility             │
+│                                                             │
+│ To verify: 8 discovery interviews + landing page test       │
+│                                                             │
+│ Measuring:                                                  │
+│   • SAY: WTP expressed as specific price point              │
+│   • DO-indirect: Landing page email signups (≥50)           │
+│   • DO-indirect: LOI signatures (≥5)                        │
+│                                                             │
+│ We are right if:                                            │
+│   • ≥5 of 8 indicate WTP of ≥$200/mo                       │
+│   • ≥50 landing page signups in 2 weeks                    │
+│   • ≥5 signed LOIs                                          │
+│                                                             │
+│ Time bound: 3 weeks                                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Pivot trigger**: If <4 of 8 express WTP, re-evaluate cohort selection or pause expansion.
+
+---
+
+### A10: Distribution Channel Viability (Third - only if A9 validates)
+
+**Hypothesis**: Portfolio holders would require founders to use the platform.
+
+**Test Card**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ASSUMPTION: A10 - Mandatory Adoption Potential              │
+├─────────────────────────────────────────────────────────────┤
+│ We believe: Portfolio holders will make validation a        │
+│             prerequisite for funding/engagement             │
+│                                                             │
+│ To verify: Direct questions in A9 interviews + follow-up    │
+│                                                             │
+│ Measuring:                                                  │
+│   • "Would you require portfolio companies to use this?"    │
+│   • "What would make this a due diligence requirement?"     │
+│   • Commitment to pilot with ≥3 founders                    │
+│                                                             │
+│ We are right if:                                            │
+│   • ≥3 of 8 indicate they would mandate usage              │
+│   • ≥1 commits to paid pilot with their founders           │
+│                                                             │
+│ Time bound: 2 weeks (concurrent with late A9)               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Pivot trigger**: If 0 indicate mandate potential, position as "optional visibility" not "credit bureau."
+
+---
+
+### Phase 3 Entry Gate
+
+**Required evidence before ANY implementation:**
+
+| Evidence Type | Requirement | Weight |
+|---------------|-------------|--------|
+| Discovery interviews | 8 completed | SAY (0.3) |
+| Landing page signups | ≥50 emails | DO-indirect (0.8) |
+| Letters of Intent | ≥5 signed | DO-indirect (0.8) |
+| Paying pilot commitment | ≥1 customer | DO-direct (1.0) |
+
+**Gate review**: Leadership Team convenes to evaluate evidence before Phase 3 begins.
 
 ---
 
 ## Implementation Roadmap
 
-### Phase 0: Documentation (Current)
+### Phase 0: Documentation (Complete)
 - [x] Document vision (this spec)
-- [ ] Founder approval of strategic direction
-- [ ] Add to product roadmap
+- [x] Leadership Team review
+- [x] Founder approval of strategic direction
+- [ ] Add A9-A11 to backlog as P2
 
-### Phase 1: Validation (Before Building)
-- [ ] Discovery interviews with 2-3 cohorts
-- [ ] Test Card for A9 (Capital Provider Demand)
-- [ ] Determine priority cohort
+### Phase 1: Validation (7 weeks total)
+- [ ] **A11**: Cohort priority interviews (2 weeks)
+- [ ] **A9**: WTP validation for winning cohort (3 weeks)
+  - [ ] 8 discovery interviews
+  - [ ] Landing page test (≥50 signups)
+  - [ ] LOI collection (≥5 signed)
+- [ ] **A10**: Distribution channel validation (2 weeks)
+  - [ ] Mandate potential assessment
+  - [ ] Pilot commitment (≥1 paying customer)
 
-### Phase 2: Architecture Preparation
-- [ ] ADR for Portfolio Holder refactor
-- [ ] Schema design for `relationship_type`
-- [ ] Migration strategy from `consultant` → `portfolio_holder`
+### Phase 2: Architecture Preparation (Gate: A9-A10 evidence)
+- [ ] ADR for Portfolio Holder overlay approach
+- [ ] Schema design: add `relationship_type` to `consultant_clients`
+- [ ] Backwards compatibility plan (existing consultants = advisory)
 
 ### Phase 3: MVP for Priority Cohort
-- [ ] Implement `relationship_type` field
-- [ ] Configurable invite flows
+- [ ] Add `relationship_type` column (default: 'advisory')
+- [ ] Configurable invite flows per type
 - [ ] Cohort-specific dashboard view
-- [ ] Pilot with 3-5 portfolio holders
+- [ ] Pilot with ≥3 portfolio holders from winning cohort
 
-### Phase 4: Expansion
-- [ ] Additional cohort support based on demand
+### Phase 4: Expansion (Based on Demand)
+- [ ] Additional relationship types based on evidence
 - [ ] B2B sales motion for institutional accounts
 - [ ] API for programmatic access (accelerators, lenders)
+- [ ] Optional: Rename `consultant` → `portfolio_holder` if model proves out
 
 ---
 
@@ -404,6 +524,11 @@ Before building, validate these assumptions:
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
+| 2026-01-31 | **Founder approved** strategic direction | Leadership Team review complete; path forward endorsed |
+| 2026-01-31 | **Overlay approach** for implementation | Add `relationship_type` without renaming; lower risk, faster |
+| 2026-01-31 | **Sequence A11 → A9 → A10** | One assumption at a time per VPD principles |
+| 2026-01-31 | **Evidence gate**: ≥5 LOIs + ≥1 paying pilot | Behavioral evidence required before build |
+| 2026-01-31 | **Strengthened Test Cards** for A9, A10 | Added measurable thresholds, time bounds, pivot triggers |
 | 2026-01-31 | Treat relationship types as features, not separate products | Avoid platform dilution; maintain unified codebase |
 | 2026-01-31 | Identify 5 cohorts (Capital, Advisory, Program, Service, Ecosystem) | Comprehensive mapping of founder relationship ecosystem |
 | 2026-01-31 | Require validation before building | VPD methodology - evidence before investment |
@@ -423,5 +548,6 @@ Before building, validate these assumptions:
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-01-31 | 2.0 | **Approved**: Leadership Team review; strengthened Test Cards; overlay approach; evidence gates |
 | 2026-01-31 | 1.1 | Added ASCII table diagrams for improved readability |
 | 2026-01-31 | 1.0 | Initial draft from product-strategist / founder discussion |
