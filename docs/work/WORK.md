@@ -119,21 +119,19 @@
 
 ---
 
-## Assumption Reference
+## Business Model Validation
 
-| ID | Assumption | Phase | Status | Spec |
-|----|------------|-------|--------|------|
-| A1 | Founders trust AI recommendations | 0-1 | Testing | - |
-| A2 | Quick Start converts to engagement | 0 | Testing | - |
-| A3 | AI extracts accurate business context | 0-1 | Testing | - |
-| A4 | WTP for validation platform | 2-4 | Testing | - |
-| A5 | VPD methodology resonates | 2 | Untested | - |
-| A6 | Consultants see portfolio value | 2-3 | Untested | - |
-| A7 | "AI Founders" messaging attracts | 2 | Untested | - |
-| A8 | IH community is right channel | 2 | Untested | - |
-| A9 | Portfolio Holders will pay | Future | Gated (A6) | [Vision](../specs/portfolio-holder-vision.md) |
-| A10 | Portfolio Holders will mandate usage | Future | Gated (A9) | [Vision](../specs/portfolio-holder-vision.md) |
-| A11 | One cohort has most urgent pain | Future | Gated (A6) | [Vision](../specs/portfolio-holder-vision.md) |
+Business model assumptions (A1-A11) are now tracked **in the StartupAI product**, not in markdown.
+
+| Where | What |
+|-------|------|
+| **StartupAI Product** | Hypotheses, evidence, phase progress |
+| **CW Consulting** | First Consultant account |
+| **StartupAI (client)** | First Client project |
+
+**To view/update validation status**: Log into [app.startupai.site](https://app.startupai.site) as CW Consulting.
+
+**Reference data**: See [validation-reference.md](../archive/business/validation-reference.md) for archived test cards and evidence.
 
 ---
 
@@ -141,12 +139,12 @@
 
 | Document | Purpose | Update Frequency |
 |----------|---------|------------------|
-| [PROJECT-PLAN.md](../PROJECT-PLAN.md) | **Critical path, milestones, dependencies** | Weekly |
+| [PROJECT-PLAN.md](PROJECT-PLAN.md) | **Engineering milestones, platform capabilities** | Weekly |
 | [done.md](done.md) | Complete delivery history | When items move from "Recently Completed" |
-| [roadmap.md](roadmap.md) | Validation phase progress | Monthly |
+| [project-governance.md](project-governance.md) | Team structure, RACI | As needed |
 | [cross-repo-blockers.md](cross-repo-blockers.md) | Ecosystem dependencies | As needed |
 | [README.md](README.md) | Folder purpose and allowed file types | As needed |
-| [portfolio-holder-vision.md](../specs/portfolio-holder-vision.md) | Future expansion (A9-A11) | As needed |
+| [validation-reference.md](../archive/business/validation-reference.md) | Archived business validation data | Reference only |
 
 **Authoritative ecosystem status**: See [startupai-crew/docs/master-architecture/09-status.md](../../startupai-crew/docs/master-architecture/09-status.md)
 

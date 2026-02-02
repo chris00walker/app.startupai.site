@@ -615,6 +615,23 @@
   },
   {
     "repo": "app",
+    "path": "docs/archive/business/validation-reference.md",
+    "title": "Business Validation Reference (Archived)",
+    "category": "archive",
+    "topics": [
+      "evidence",
+      "hypothesis",
+      "phase-0",
+      "phase-1",
+      "phase-2",
+      "founder",
+      "consultant",
+      "validation"
+    ],
+    "cross_repo_connections": []
+  },
+  {
+    "repo": "app",
     "path": "docs/archive/completion-reports/CONSULTANT_GATE_ENHANCEMENTS_COMPLETE.md",
     "title": "✅ Consultant Dashboard Gate Enhancements Complete",
     "category": "spec",
