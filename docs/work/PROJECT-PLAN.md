@@ -1,377 +1,670 @@
-# StartupAI Master Project Plan
+# StartupAI Project Plan
 
-**Status**: Active | **Owner**: project-manager | **Updated**: 2026-02-01
+**Goal**: First Paying Customer | **Timeline**: 4 Weeks | **End Date**: 2026-03-02
 
----
+**Owner**: project-manager | **Approved By**: Pending | **Created**: 2026-02-02
 
-## Purpose
-
-This is the **single source of truth** for engineering and development of the StartupAI platform. It tracks what we build, not what we prove about the business.
-
-| Concern | Tracked In |
-|---------|------------|
-| Engineering milestones | **This document** |
-| Technical backlog | **This document** + WORK.md |
-| Platform capabilities | **This document** |
-| Business model validation | **StartupAI product** (CW Consulting → StartupAI client) |
+**Revision**: v2.2 - Team feedback incorporated, RACI fixed, totals reconciled
 
 ---
 
-## The Bootstrap Paradox
+## Executive Summary
 
-StartupAI is a validation platform that must validate itself. This creates a unique constraint:
+| Metric | Value |
+|--------|-------|
+| **Goal** | First paying customer (cold acquisition, completes 1 HITL) |
+| **Duration** | 4 weeks (2026-02-02 → 2026-03-02) |
+| **Repos** | 3 (Product App, AI Backend, Marketing) |
+| **Teams** | 4 (Leadership, Design, Engineering, Quality) |
+| **Agents** | 18 specialists |
+| **Milestones** | 4 (weekly gates) |
+| **Total Hours** | 195.5h |
+| **Budget** | $500 |
+
+### Hours by Category
+
+| Category | Hours | % |
+|----------|-------|---|
+| Product App (Engineering) | 48.5h | 25% |
+| AI Backend | 68h | 34% |
+| Marketing | 30h | 15% |
+| Design | 20h | 10% |
+| Documentation | 11h | 6% |
+| Analytics | 7h | 4% |
+| External (Founder) | 11h | 6% |
+| **Total** | **195.5h** | 100% |
+
+---
+
+## Blocking Decision: Pricing
+
+**STATUS: MUST RESOLVE BEFORE E1 (Stripe Account)**
+
+| Document | Founder Plan Price | Trial Duration |
+|----------|-------------------|----------------|
+| `trial-limits-and-upgrade.md` | $99/month | 30 days |
+| `founder-trial-journey-map.md` | $49/month | 14 days |
+| `validation-reference.md` (A4) | $49/month | -- |
+
+**Decision Required**: Founder must resolve pricing and trial duration before Stripe account creation.
+
+| Option | Price | Trial | Recommended |
+|--------|-------|-------|-------------|
+| A | $49/month | 14 days | Lower barrier, faster conversion signal |
+| B | $99/month | 30 days | Higher revenue, more validation time |
+| C | $49/month | 30 days | Hybrid approach |
+
+**Owner**: Founder + product-strategist | **Deadline**: Feb 3, 2026
+
+---
+
+## The Three Repositories
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                     NORMAL STARTUP vs STARTUPAI                          │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  NORMAL STARTUP:                                                         │
-│  ┌─────────┐      ┌─────────┐      ┌─────────┐                          │
-│  │ Validate │ ──► │  Build   │ ──► │  Scale   │                          │
-│  │  first   │      │ what's   │      │          │                          │
-│  │          │      │ proven   │      │          │                          │
-│  └─────────┘      └─────────┘      └─────────┘                          │
-│                                                                          │
-│  STARTUPAI (Bootstrap Paradox):                                          │
-│  ┌─────────┐      ┌─────────┐      ┌─────────┐                          │
-│  │  Build   │ ──► │   Use    │ ──► │  Prove   │                          │
-│  │   the    │      │   it to  │      │  itself  │                          │
-│  │  tool    │      │ validate │      │          │                          │
-│  └─────────┘      └─────────┘      └─────────┘                          │
-│       │                │                 │                               │
-│       ▼                ▼                 ▼                               │
-│  "Platform must   "Dogfood our      "Platform is                        │
-│   exist first"     own platform"     validated"                          │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-**Implication**: We run TWO sequential tracks for development, plus business validation happens in the product itself.
-
-```
-┌──────────────────────┬────────────────────────────┬─────────────────────────────────┐
-│        Track         │          Purpose           │            Constraint           │
-├──────────────────────┼────────────────────────────┼─────────────────────────────────┤
-│ TRACK 1: Engineering │ Build platform capability  │ Must complete BEFORE verify     │
-├──────────────────────┼────────────────────────────┼─────────────────────────────────┤
-│ TRACK 2: Verify      │ Confirm software works     │ Requires engineering to be done │
-├──────────────────────┼────────────────────────────┼─────────────────────────────────┤
-│ Business Validation  │ Prove the business model   │ Runs IN the StartupAI product   │
-└──────────────────────┴────────────────────────────┴─────────────────────────────────┘
-```
-
-**Where business validation lives:**
-- CW Consulting = First Consultant account
-- StartupAI = First Client project
-- Hypotheses, evidence, phases = Managed in StartupAI UI
-- See: [docs/archive/business/validation-reference.md](../archive/business/validation-reference.md) for reference data to enter
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    CRITICAL PATH (SEQUENTIAL TRACKS)                     │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  Build Phase 0 ──► Verify Phase 0 ──► 🔄 ACTIVE ◄── YOU ARE HERE        │
-│         │                                                                │
-│         ▼                                                                │
-│  Build Phase 1 ──► Verify Phase 1 ──► ⏳ Pending                         │
-│         │                                                                │
-│         ▼                                                                │
-│  Build Phase 2 ──► Verify Phase 2 ──► ⏳ Pending                         │
-│         │                                                                │
-│         ▼                                                                │
-│  Build Phase 3 ──► Verify Phase 3 ──► ⏳ Pending                         │
-│         │                                                                │
-│         ▼                                                                │
-│  Build Phase 4 ──► Verify Phase 4 ──► ⏳ Pending                         │
-│         │                                                                │
-│         ▼                                                                │
-│      WORKING ──► LAUNCH                                                  │
-│                                                                          │
-│  (Business validation runs in parallel IN the StartupAI product)        │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        STARTUPAI ECOSYSTEM (3 REPOS)                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  app.startupai.site          startupai-crew           startupai.site        │
+│  ──────────────────          ──────────────           ──────────────        │
+│  Product App                 AI Backend               Marketing Site        │
+│  Next.js + Supabase          CrewAI + Modal           Lead capture          │
+│  ~95% complete               ~80% complete            ~95% complete         │
+│                                                                              │
+│  LEAD: frontend-dev          LEAD: ai-engineer        LEAD: content-strat   │
+│  TEAM: backend-dev,          TEAM: platform-eng,      TEAM: graphic-designer│
+│        data-engineer,              system-architect         ui-designer     │
+│        security-eng                                                         │
+│                                                                              │
+│  KEY WORK:                   KEY WORK:                KEY WORK:             │
+│  • Stripe integration        • MCP tool wiring        • Wire to real APIs   │
+│  • PostHog events            • Phase 3-4 testing      • Landing page A/B    │
+│  • Security hardening        • Production validation  • IH community launch │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Document Map
-
-| Document | Purpose | Link |
-|----------|---------|------|
-| **This file** | Engineering milestones, platform capabilities | You're reading it |
-| `WORK.md` | Current sprint, WIP, backlog | [WORK.md](WORK.md) |
-| `project-governance.md` | Team structure, RACI | [project-governance.md](project-governance.md) |
-| `09-status.md` | Ecosystem technical status | [startupai-crew/docs/master-architecture/09-status.md](../../startupai-crew/docs/master-architecture/09-status.md) |
-| `validation-reference.md` | Archived business validation data | [validation-reference.md](../archive/business/validation-reference.md) |
-| **StartupAI Product** | Business model validation | [app.startupai.site](https://app.startupai.site) |
-
----
-
-## Two-Track Execution
-
-### The Question We're Answering
-
-> "What is the shortest path from today to first paying customer?"
-
-Because of the bootstrap paradox, the answer is: **Build each phase's capability, then dogfood it, then proceed.**
-
----
-
-## TRACK 1: Platform Engineering (Build)
-
-**Purpose**: Create the capability to validate each VPD phase.
-
-**Constraint**: Must complete BEFORE dogfooding can begin for that phase.
-
-### Phase 0-1 Engineering ✅ COMPLETE
-
-| Capability | Status | What It Enables |
-|------------|--------|-----------------|
-| Quick Start form (ADR-006) | ✅ Done | 30-second project creation |
-| Two-Pass Architecture (ADR-004) | ✅ Done | Deterministic backend assessment |
-| Project Archive/Delete | ✅ Done | Founder project management |
-| Client Archive | ✅ Done | Consultant portfolio management |
-| Admin Dashboard (Epic 11) | ✅ Done | Platform monitoring |
-| Core Founder Journey (US-F01-F17) | ✅ Done | End-to-end founder flow |
-
-### Phase 2 Engineering 🔄 IN PROGRESS
-
-**Current Sprint** (from WORK.md):
-
-| Item | Owner | Status | Enables |
-|------|-------|--------|---------|
-| Apply pending migrations | data-engineer | 🔄 Ready | Schema stability for Phase 2 |
-| PostHog Quick Start events | frontend-dev | 🔄 Ready | A2 measurement capability |
-| PostHog HITL approval events | frontend-dev | 🔄 Ready | A1 measurement capability |
-
-**Backlog** (required before Phase 2 dogfooding):
-
-| Item | Owner | Priority | Enables |
-|------|-------|----------|---------|
-| **Epic 5: Template Library** | ui-designer, frontend-dev | P1 | Landing page generation |
-| **Epic 6: Agent Tools Integration** | ai-engineer | P1 | Ad creative generation |
-| HITL Approval UI data source | backend-dev | P1 | Trust signal improvement |
-| Consultant Trial mock client | frontend-dev | P1 | A6 testing capability |
-| Schema: Trial split migration | data-engineer | P1 | US-FT03, US-FT04 |
-
-### Phase 3 Engineering ⏳ PENDING
-
-**Cannot start until Phase 2 dogfooding validates A5-A8**
-
-| Item | Owner | Priority | Enables |
-|------|-------|----------|---------|
-| E2E journey completion | qa-engineer | P2 | Journey verification |
-| Modal reliability SLOs | platform-eng | P2 | Production stability |
-| Performance benchmarks | system-architect | P2 | Response time targets |
-| E2E tests: Billing (US-B01-B10) | qa-engineer | P2 | Payment flow testing |
-
-### Phase 4 Engineering ⏳ PENDING
-
-**Cannot start until Phase 3 dogfooding confirms feasibility**
-
-| Item | Owner | Priority | Enables |
-|------|-------|----------|---------|
-| Pricing tiers implemented | frontend-dev, backend-dev | P1 | Monetization |
-| Stripe webhooks complete | backend-dev | P1 | Payment processing |
-| US-FT03: Stripe upgrade webhook | backend-dev | Blocked | Revenue capture |
-| US-FT04: Post-upgrade orientation | frontend-dev | Blocked | User activation |
-| Upgrade/downgrade flows | frontend-dev | P1 | Plan changes |
-
-### Blocked (External Dependencies)
-
-| Item | Blocker | Phase Impact |
-|------|---------|--------------|
-| Stripe integration | No Stripe account | Blocks Phase 4 engineering |
-| Ad Platform OAuth | No business accounts | Blocks Phase 2 ad experiments |
-
----
-
-## TRACK 2: Technical Verification
-
-**Purpose**: Confirm the software works as designed.
-
-**Constraint**: Requires Track 1 engineering to be complete for that phase.
-
-### Phase 0 Verification 🔄 ACTIVE (YOU ARE HERE)
-
-**Requires**: Platform foundation complete
-
-| Verification | Test | Status | Pass Criteria |
-|--------------|------|--------|---------------|
-| Platform boots | Deploy to Netlify | 🔄 Testing | No errors on load |
-| Auth works | Sign up as Founder | 🔄 Testing | Account created |
-| Quick Start works | Complete onboarding | 🔄 Testing | Reach first HITL |
-| Consultant flow | Sign up as Consultant | ⏳ Pending | Can add client |
-| Client linkage | Add StartupAI as client | ⏳ Pending | Relationship created |
-
-**Gate**: Can CW Consulting onboard StartupAI as first client?
-
-### Phase 1 Verification ⏳ PENDING
-
-**Requires**: HITL checkpoints functional
-
-| Verification | Test | Status | Pass Criteria |
-|--------------|------|--------|---------------|
-| HITL approval flow | Approve brief | ⏳ Pending | Status updates |
-| VPC generation | View VPC canvas | ⏳ Pending | Canvas renders |
-| Evidence capture | Log evidence | ⏳ Pending | Data persisted |
-
-**Gate**: Does the core founder journey complete end-to-end?
-
-### Phase 2 Verification ⏳ PENDING
-
-**Requires**: Analytics instrumentation
-
-| Verification | Test | Status | Pass Criteria |
-|--------------|------|--------|---------------|
-| PostHog events fire | Trigger Quick Start | ⏳ Pending | Events in PostHog |
-| HITL events fire | Approve checkpoint | ⏳ Pending | Events in PostHog |
-| Consultant dashboard | View portfolio | ⏳ Pending | Clients listed |
-
-**Gate**: Can we measure user behavior?
-
-### Phase 3 Verification ⏳ PENDING
-
-**Requires**: E2E journey, Modal reliability
-
-| Verification | Test | Status | Pass Criteria |
-|--------------|------|--------|---------------|
-| Full journey timing | Start to finish | ⏳ Pending | <10 minutes |
-| Modal reliability | Run 10 validations | ⏳ Pending | >90% success |
-| Error recovery | Trigger failures | ⏳ Pending | Graceful handling |
-
-**Gate**: Is the platform production-ready?
-
-### Phase 4 Verification ⏳ PENDING
-
-**Requires**: Stripe integration
-
-| Verification | Test | Status | Pass Criteria |
-|--------------|------|--------|---------------|
-| Payment flow | Test checkout | ⏳ Pending | Payment succeeds |
-| Upgrade flow | Free → Paid | ⏳ Pending | Plan changes |
-| Webhook handling | Simulate events | ⏳ Pending | Status updates |
-
-**Gate**: Can we accept payments?
-
----
-
-## Track Dependencies Visualization
+## Critical Path
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    TRACK DEPENDENCIES BY PHASE                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  PHASE    TRACK 1 (BUILD)              TRACK 2 (VERIFY)                 │
-│  ─────    ───────────────              ─────────────────                 │
-│                                                                          │
-│    0      Platform foundation ──────► Auth + Quick Start work           │
-│           ✅ COMPLETE                  🔄 ACTIVE                         │
-│                │                            │                            │
-│                ▼                            ▼                            │
-│    1      HITL checkpoints ────────► Core journey completes             │
-│           ✅ COMPLETE                  ⏳ PENDING                         │
-│                │                            │                            │
-│                ▼                            ▼                            │
-│    2      PostHog + Templates ─────► Events fire correctly              │
-│           🔄 IN PROGRESS               ⏳ PENDING                         │
-│                │                            │                            │
-│                ▼                            ▼                            │
-│    3      E2E + SLOs ──────────────► <10min journey, reliable           │
-│           ⏳ PENDING                   ⏳ PENDING                         │
-│                │                            │                            │
-│                ▼                            ▼                            │
-│    4      Stripe + Pricing ────────► Payment flow works                 │
-│           ⏳ PENDING                   ⏳ PENDING                         │
-│                │                            │                            │
-│                ▼                            ▼                            │
-│                └──────────── WORKING ───────┘                           │
-│                               │                                          │
-│                               ▼                                          │
-│                            LAUNCH                                        │
-│                                                                          │
-│  Business validation runs IN the product (CW Consulting → StartupAI)   │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CRITICAL PATH TO FIRST CUSTOMER                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  WEEK 1                WEEK 2                WEEK 3              WEEK 4      │
+│  Foundation            Core Engineering      Integration         Launch      │
+│  ─────────             ───────────────       ───────────         ──────      │
+│                                                                              │
+│  ┌─────────┐          ┌─────────┐           ┌─────────┐        ┌─────────┐  │
+│  │ Pricing │ ───────► │ Payment │ ────────► │ E2E     │ ─────► │ First   │  │
+│  │ Decision│          │ + Design│           │ Verified│        │ Customer│  │
+│  └─────────┘          └─────────┘           └─────────┘        └─────────┘  │
+│       │                    │                     │                  │        │
+│       │ FOUNDER            │ ENG + DESIGN        │ QA               │ SALES  │
+│       │ (external)         │ (internal)          │ (internal)       │        │
+│                                                                              │
+│  PARALLEL TRACKS:                                                            │
+│  ├── Pricing decision (Day 1) ─────────────────────────────────────────►    │
+│  ├── PostHog instrumentation (Week 1-2)                                     │
+│  ├── MCP tool wiring (Week 1-4)                                             │
+│  ├── Design reviews (Week 2-3)                                              │
+│  ├── IH draft (Week 2) → launch (Week 4)                                    │
+│  └── Documentation (Week 2-3)                                               │
+│                                                                              │
+│  GATE 1: Foundation  GATE 2: Payments    GATE 3: E2E      GATE 4: REVENUE   │
+│  (Feb 9)             work (Feb 16)       passes (Feb 23)  (Mar 2)           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Non-Critical (Parallel Work)
+## Milestones
 
-These can run alongside without blocking either track:
+### M1: Foundation Complete (Feb 9)
 
-| Work | Owner | Dependency |
-|------|-------|------------|
-| Documentation refresh | technical-writer | None |
-| E2E test expansion | qa-engineer | None |
-| Figma design system | ui-designer | None |
-| Performance optimization | platform-eng | None |
+**Gate**: Pricing decided, Stripe account active, products configured, schema applied, analytics instrumented
+
+| Deliverable | Owner | Repo | Hours | Status |
+|-------------|-------|------|-------|--------|
+| E0: Pricing decision | Founder | External | 1h | ⏳ BLOCKER |
+| E1: Stripe account created | Founder | External | 2h | ⏳ Blocked (E0) |
+| E2: Configure Stripe products/prices | Founder | External | 2h | ⏳ Blocked (E1) |
+| P5: Stripe env vars in Netlify | platform-eng | Product | 1h | ⏳ Blocked (E1) |
+| P5a: Webhook URL in Stripe dashboard | platform-eng | Product | 0.5h | ⏳ Blocked (P5) |
+| P1: Apply pending migrations | data-engineer | Product | 2h | ⏳ Pending |
+| P2: Trial split verification | data-engineer | Product | 2h | ⏳ Pending |
+| A1: Event taxonomy design | data-analyst | Product | 2h | ⏳ Pending |
+| P3: PostHog Quick Start events | frontend-dev | Product | 3h | ⏳ Pending |
+| P4: PostHog HITL approval events | frontend-dev | Product | 4h | ⏳ Pending |
+| D1: Design system token sync | ui-designer | Product | 2h | ⏳ Pending |
+
+**M1 Total**: 21.5h
 
 ---
 
-## Current Engineering Sprint
+### M2: Core Engineering Complete (Feb 16)
 
-From [WORK.md](WORK.md):
+**Gate**: Payment flow works, design reviewed, MCP Phase A-B complete, Phase 0-1 verified
 
-| Sprint Item | Track | Impact |
-|-------------|-------|--------|
-| Apply pending migrations | Track 1 (Build) | Enables schema stability |
-| PostHog Quick Start events | Track 1 (Build) | Enables behavior measurement |
-| PostHog HITL approval events | Track 1 (Build) | Enables checkpoint tracking |
+| Deliverable | Owner | Repo | Hours | Status |
+|-------------|-------|------|-------|--------|
+| P6: Stripe upgrade webhook | backend-dev | Product | 5h | ⏳ Blocked (P2, P5) |
+| P6a: Webhook idempotency | backend-dev | Product | 2h | ⏳ Blocked (P6) |
+| P6b: RLS policies for billing | security-eng | Product | 1h | ⏳ Blocked (P2) |
+| P6c: Rate limiting checkout | security-eng | Product | 1h | ⏳ Blocked (P6) |
+| P7: Post-upgrade orientation wiring | frontend-dev | Product | 4h | ⏳ Blocked (P6) |
+| D2: Upgrade journey UX review | ux-designer | Product | 3h | ⏳ Blocked (P7) |
+| D3: Payment flow design review | ui-designer | Product | 4h | ⏳ Blocked (P7) |
+| C1: MCP Phase A: Core Server | ai-engineer | Crew | 15h | ⏳ Pending |
+| C2: MCP Phase B: Advanced Tools | ai-engineer | Crew | 14h | ⏳ Blocked (C1) |
+| M1: Wire Activity Feed to API | content-strat | Marketing | 6h | ⏳ Pending |
+| M2: Wire Metrics to API | content-strat | Marketing | 6h | ⏳ Pending |
+| M5: IH community post draft | content-strat | Marketing | 8h | ⏳ Pending |
+| D5: IH launch visual assets | graphic-designer | Marketing | 6h | ⏳ Pending |
+| P8: Phase 0 verification | qa-engineer | Product | 2h | ⏳ Blocked (P3, P4) |
+| P9: Phase 1 verification | qa-engineer | Product | 5h | ⏳ Blocked (P8) |
+| A2: Event validation | qa-engineer | Product | 2h | ⏳ Blocked (P3, P4) |
+| Doc1: API reference (Stripe + MCP) | tech-writer | Product | 4h | ⏳ Pending |
+| Doc2: Error message inventory | content-strat | Product | 2h | ⏳ Pending |
 
-**Sprint health**: 3 Build items = Phase 2 engineering focus ✅
+**M2 Total**: 90h
 
-**Note**: Business validation work (WTP surveys, etc.) is tracked in the StartupAI product, not here.
+---
+
+### M3: Integration Complete (Feb 23)
+
+**Gate**: E2E journey <10min, accessibility passed, payment tested, A/B running
+
+| Deliverable | Owner | Repo | Hours | Status |
+|-------------|-------|------|-------|--------|
+| C3: MCP Phase C: External + Analytics | ai-engineer | Crew | 13h | ⏳ Blocked (C2) |
+| C4: MCP Phase D: CrewAI Integration | ai-engineer | Crew | 18h | ⏳ Blocked (C3) |
+| D4: Accessibility audit upgrade flow | ui-designer | Product | 3h | ⏳ Blocked (D3) |
+| D6: Brand consistency audit | visual-designer | All | 2h | ⏳ Pending |
+| P10: Phase 2 verification | qa-engineer | Product | 4h | ⏳ Blocked (P9, C2) |
+| P11: Phase 3-4 verification | qa-engineer | Product | 6h | ⏳ Blocked (P10, C4) |
+| P12: E2E journey timing (<10min) | qa-engineer | All | 3h | ⏳ Blocked (P11) |
+| P13: Test payment (Stripe test mode) | qa-engineer | Product | 3h | ⏳ Blocked (P7) |
+| M3: A/B test measurement plan | data-analyst | Marketing | 2h | ⏳ Pending |
+| M4: Landing page A/B test launch | content-strat | Marketing | 4h | ⏳ Blocked (M3, D6) |
+| A3: Launch dashboard | data-analyst | Product | 3h | ⏳ Pending |
+| Doc3: Quick-start guide | tech-writer | Product | 3h | ⏳ Pending |
+| Doc4: Founder demo script | tech-writer | Product | 2h | ⏳ Pending |
+
+**M3 Total**: 66h
+
+---
+
+### M4: Launch (Mar 2)
+
+**Gate**: First paying customer acquired (cold, completes 1 HITL)
+
+| Deliverable | Owner | Repo | Hours | Status |
+|-------------|-------|------|-------|--------|
+| C5: Phase 3-4 live testing | qa-engineer | Crew | 6h | ⏳ Blocked (P11, C4) |
+| C6: First production validation | ai-engineer | Crew | 2h | ⏳ Blocked (C5, P12) |
+| M6: IH community launch | content-strat | Marketing | 4h | ⏳ Blocked (M5, D5, P12) |
+| E3: First customer outreach | Founder | External | 4h | ⏳ Blocked (P12) |
+| E4: Close first sale | Founder | External | 2h | ⏳ Blocked (E3) |
+
+**M4 Total**: 18h
+
+---
+
+## Work Breakdown Structure (WBS)
+
+### 1. Product App (app.startupai.site) - 48.5h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| P1 | Apply pending migrations | 2h | data-engineer | data-engineer | system-architect | backend-dev | PM | - |
+| P2 | Trial split verification | 2h | data-engineer | data-engineer | system-architect | security-eng | PM | P1 |
+| P3 | PostHog Quick Start events | 3h | frontend-dev | frontend-dev | product-strategist | data-analyst | PM | A1 |
+| P4 | PostHog HITL approval events | 4h | frontend-dev | frontend-dev | product-strategist | data-analyst | PM | A1 |
+| P5 | Stripe env vars setup | 1h | platform-eng | platform-eng | system-architect | security-eng | PM | E1 |
+| P5a | Webhook URL in Stripe | 0.5h | platform-eng | platform-eng | system-architect | backend-dev | PM | P5 |
+| P6 | Stripe upgrade webhook | 5h | backend-dev | backend-dev | system-architect | security-eng | PM | P2, P5 |
+| P6a | Webhook idempotency | 2h | backend-dev | backend-dev | system-architect | qa-engineer | PM | P6 |
+| P6b | RLS policies for billing | 1h | security-eng | security-eng | system-architect | data-engineer | PM | P2 |
+| P6c | Rate limiting checkout | 1h | security-eng | security-eng | system-architect | platform-eng | PM | P6 |
+| P7 | Post-upgrade orientation wiring | 4h | frontend-dev | frontend-dev | product-strategist | ux-designer | PM | P6 |
+| P8 | Phase 0 verification | 2h | qa-engineer | qa-engineer | product-strategist | frontend-dev | PM | P3, P4 |
+| P9 | Phase 1 verification | 5h | qa-engineer | qa-engineer | product-strategist | ai-engineer | PM | P8 |
+| P10 | Phase 2 verification | 4h | qa-engineer | qa-engineer | product-strategist | ai-engineer | PM | P9, C2 |
+| P11 | Phase 3-4 verification | 6h | qa-engineer | qa-engineer | system-architect | ai-engineer | PM | P10, C4 |
+| P12 | E2E journey timing | 3h | qa-engineer | qa-engineer | system-architect | platform-eng | PM | P11 |
+| P13 | Test payment (Stripe test) | 3h | qa-engineer | qa-engineer | backend-dev | security-eng | PM | P7 |
+
+**Subtotal**: 48.5h (includes 2h security: P6b, P6c)
+
+---
+
+### 2. AI Backend (startupai-crew) - 68h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| C1 | MCP Phase A: Core Server | 15h | ai-engineer | ai-engineer | system-architect | platform-eng | PM | - |
+| C2 | MCP Phase B: Advanced Tools | 14h | ai-engineer | ai-engineer | system-architect | platform-eng | PM | C1 |
+| C3 | MCP Phase C: External + Analytics | 13h | ai-engineer | ai-engineer | system-architect | data-analyst | PM | C2 |
+| C4 | MCP Phase D: CrewAI Integration | 18h | ai-engineer | ai-engineer | system-architect | platform-eng | PM | C3 |
+| C5 | Phase 3-4 live testing | 6h | qa-engineer | qa-engineer | ai-engineer | system-architect | PM | P11, C4 |
+| C6 | First production validation | 2h | ai-engineer | ai-engineer | product-strategist | qa-engineer | PM | C5, P12 |
+
+**Subtotal**: 68h
+
+---
+
+### 3. Marketing Site (startupai.site) - 30h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| M1 | Wire Activity Feed to API | 6h | content-strat | frontend-dev | content-strat | ui-designer | PM | - |
+| M2 | Wire Metrics to API | 6h | content-strat | frontend-dev | content-strat | data-analyst | PM | - |
+| M3 | A/B test measurement plan | 2h | data-analyst | data-analyst | content-strat | product-strategist | PM | - |
+| M4 | Landing page A/B test launch | 4h | content-strat | content-strat | product-strategist | visual-designer | PM | M3, D6 |
+| M5 | IH community post draft | 8h | content-strat | content-strat | product-strategist | graphic-designer | PM | - |
+| M6 | IH community launch | 4h | content-strat | content-strat | product-strategist | data-analyst | PM | M5, D5, P12 |
+
+**Subtotal**: 30h
+
+---
+
+### 4. Design - 20h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| D1 | Design system token sync | 2h | ui-designer | ui-designer | visual-designer | frontend-dev | PM | - |
+| D2 | Upgrade journey UX review | 3h | ux-designer | ux-designer | ui-designer | frontend-dev | PM | P7 |
+| D3 | Payment flow design review | 4h | ui-designer | ui-designer | product-strategist | backend-dev | PM | P7 |
+| D4 | Accessibility audit | 3h | ui-designer | ui-designer | qa-engineer | frontend-dev | PM | D3 |
+| D5 | IH launch visual assets | 6h | graphic-designer | graphic-designer | visual-designer | content-strat | PM | - |
+| D6 | Brand consistency audit | 2h | visual-designer | visual-designer | ui-designer | content-strat | PM | - |
+
+**Subtotal**: 20h
+
+---
+
+### 5. Documentation - 11h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| Doc1 | API reference (Stripe + MCP) | 4h | tech-writer | tech-writer | system-architect | backend-dev | PM | P6, C2 |
+| Doc2 | Error message inventory | 2h | content-strat | content-strat | ux-designer | frontend-dev | PM | - |
+| Doc3 | Quick-start guide | 3h | tech-writer | tech-writer | product-strategist | ux-designer | PM | P9 |
+| Doc4 | Founder demo script | 2h | tech-writer | tech-writer | product-strategist | Founder | PM | P12 |
+
+**Subtotal**: 11h
+
+---
+
+### 6. Analytics - 7h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| A1 | Event taxonomy design | 2h | data-analyst | data-analyst | product-strategist | frontend-dev | PM | - |
+| A2 | Event validation | 2h | qa-engineer | qa-engineer | data-analyst | frontend-dev | PM | P3, P4 |
+| A3 | Launch dashboard | 3h | data-analyst | data-analyst | product-strategist | qa-engineer | PM | A1 |
+
+**Subtotal**: 7h
+
+---
+
+### 7. External (Founder) - 11h
+
+| ID | Task | Hours | Owner | R | A | C | I | Depends On |
+|----|------|-------|-------|---|---|---|---|------------|
+| E0 | Pricing decision | 1h | Founder | Founder | Founder | product-strategist | PM | - |
+| E1 | Create Stripe account | 2h | Founder | Founder | Founder | system-architect | PM | E0 |
+| E2 | Configure Stripe products/prices | 2h | Founder | Founder | product-strategist | backend-dev | PM | E1 |
+| E3 | First customer outreach | 4h | Founder | Founder | Founder | content-strat | PM | P12 |
+| E4 | Close first sale | 2h | Founder | Founder | Founder | product-strategist | PM | E3 |
+
+**Subtotal**: 11h
+
+---
+
+### Total Work
+
+| Category | Hours | Percentage |
+|----------|-------|------------|
+| Product App | 48.5h | 25% |
+| AI Backend | 68h | 34% |
+| Marketing | 30h | 15% |
+| Design | 20h | 10% |
+| Documentation | 11h | 6% |
+| Analytics | 7h | 4% |
+| External (Founder) | 11h | 6% |
+| **TOTAL** | **195.5h** | 100% |
+
+---
+
+## Resource Allocation
+
+### Week 1: Foundation (Feb 2-9)
+
+| Agent | Tasks | Hours |
+|-------|-------|-------|
+| **Founder** | E0, E1, E2 (Pricing + Stripe) | 5h |
+| **data-engineer** | P1, P2 (migrations) | 4h |
+| **frontend-dev** | P3, P4 (PostHog events) | 7h |
+| **platform-eng** | P5, P5a (Stripe env) | 1.5h |
+| **ai-engineer** | C1 (MCP Phase A) | 15h |
+| **content-strat** | M1, M2 (API wiring) | 12h |
+| **ui-designer** | D1 (token sync) | 2h |
+| **data-analyst** | A1 (event taxonomy) | 2h |
+
+**Week 1 Total**: 48.5h
+
+---
+
+### Week 2: Core Engineering (Feb 9-16)
+
+| Agent | Tasks | Hours |
+|-------|-------|-------|
+| **backend-dev** | P6, P6a (Stripe webhook) | 7h |
+| **security-eng** | P6b, P6c (RLS, rate limit) | 2h |
+| **frontend-dev** | P7 (post-upgrade UX) | 4h |
+| **ai-engineer** | C2 (MCP Phase B) | 14h |
+| **qa-engineer** | P8, P9, A2 (Phase 0-1, events) | 9h |
+| **content-strat** | M5, Doc2 (IH draft, errors) | 10h |
+| **graphic-designer** | D5 (IH visual assets) | 6h |
+| **ux-designer** | D2 (upgrade UX review) | 3h |
+| **ui-designer** | D3 (payment design review) | 4h |
+| **tech-writer** | Doc1 (API reference) | 4h |
+
+**Week 2 Total**: 63h
+
+---
+
+### Week 3: Integration (Feb 16-23)
+
+| Agent | Tasks | Hours |
+|-------|-------|-------|
+| **ai-engineer** | C3, C4 (MCP Phase C+D) | 31h |
+| **qa-engineer** | P10, P11, P12, P13 (verify + test) | 16h |
+| **ui-designer** | D4 (accessibility audit) | 3h |
+| **visual-designer** | D6 (brand audit) | 2h |
+| **content-strat** | M4 (A/B launch) | 4h |
+| **data-analyst** | M3, A3 (measurement, dashboard) | 5h |
+| **tech-writer** | Doc3, Doc4 (guide, demo script) | 5h |
+
+**Week 3 Total**: 66h
+
+---
+
+### Week 4: Launch (Feb 23-Mar 2)
+
+| Agent | Tasks | Hours |
+|-------|-------|-------|
+| **qa-engineer** | C5 (Phase 3-4 live test) | 6h |
+| **ai-engineer** | C6 (production validation) | 2h |
+| **content-strat** | M6 (IH launch) | 4h |
+| **Founder** | E3, E4 (outreach, close) | 6h |
+
+**Week 4 Total**: 18h
+
+---
+
+## Budget
+
+| Category | Amount | Notes |
+|----------|--------|-------|
+| **Stripe fees** | $25 | 2.9% + 30¢ per transaction (est. 1-5 customers) |
+| **Modal compute** | $50 | ~$5-10/month × 4 weeks + buffer |
+| **Ad spend (A/B test)** | $200 | Landing page test |
+| **IH promoted post** | $0 | Organic launch |
+| **Contingency** | $225 | Unexpected costs |
+| **TOTAL** | **$500** | |
+
+---
+
+## Dependencies Map
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           DEPENDENCY GRAPH                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  EXTERNAL (BLOCKERS)                                                         │
+│  ───────────────────                                                         │
+│  E0 (Pricing) ──► E1 (Stripe) ──► P5 (env) ──► P6 (webhook) ──► P7 (UX)    │
+│                        │              │              │              │        │
+│                        ▼              │              │              ▼        │
+│                   E2 (products)       │              │         P13 (test)   │
+│                                       │              │              │        │
+│  PRODUCT APP                          │              │              │        │
+│  ───────────                          │              ▼              │        │
+│  P1 (migrations) ──► P2 (trial) ──────┴──► P6b (RLS)               │        │
+│                                                                     │        │
+│  A1 (taxonomy) ──► P3 (PostHog QS) ──► P8 (Phase 0)                │        │
+│        │           P4 (PostHog HITL) ─┘       │                     │        │
+│        │                                      ▼                     │        │
+│        └──► A2 (event validation)       P9 (Phase 1)               │        │
+│                                              │                      │        │
+│  DESIGN                                      ▼                      │        │
+│  ──────                              P10 (Phase 2) ◄────────────────┘        │
+│  D1 (tokens) ──────────────────────┐      │                                 │
+│  D5 (IH assets) ──────────────────┐│      ▼                                 │
+│  D6 (brand) ──► M4 (A/B launch)   ││  P11 (Phase 3-4) ◄─────┐               │
+│                                   ││      │                  │               │
+│  P7 ──► D2 (UX review)           ││      ▼                  │               │
+│     └──► D3 (design review) ──► D4 (a11y)                   │               │
+│                                   ││  P12 (E2E timing) ◄────┼───────────┐   │
+│                                   ││      │                  │           │   │
+│  AI BACKEND                       ││      │                  │           │   │
+│  ──────────                       ││      │                  │           │   │
+│  C1 ──► C2 ──► C3 ──► C4 ────────┼┼──────┼──────────────────┘           │   │
+│  (A)    (B)    (C)    (D)        ││      │                              │   │
+│                   │               ││      │                              │   │
+│                   │               ││      ▼                              │   │
+│                   └───────────────┼┼► C5 (live test) ◄─── P11           │   │
+│                                   ││      │                              │   │
+│                                   ││      ▼                              │   │
+│                                   ││  C6 (production) ◄───── P12        │   │
+│                                   ││                                     │   │
+│  MARKETING                        ││                                     │   │
+│  ─────────                        ││                                     │   │
+│  M1, M2 (API wiring)              ││                                     │   │
+│  M5 (IH draft) ──► M6 (launch) ◄──┼┴─────────────────────────────────────┘   │
+│                        │          │                                          │
+│  DOCUMENTATION         │          │                                          │
+│  ─────────────         │          │                                          │
+│  Doc1 (API ref) ◄── P6, C2       │                                          │
+│  Doc3 (guide) ◄── P9             │                                          │
+│  Doc4 (demo) ◄── P12             │                                          │
+│                                   │                                          │
+│  LAUNCH                           │                                          │
+│  ──────                           │                                          │
+│                E3 (outreach) ──► E4 (close) ──► FIRST CUSTOMER              │
+│                     ▲                                                        │
+│                     └────────── P12                                          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Risk Register
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Stripe account delay | High | High | Escalate; can demo without payments |
-| Modal reliability issues | High | Low | Fallback to mocked responses |
-| Technical debt accumulation | Medium | Medium | Regular refactoring sprints |
-| Integration failures | Medium | Low | E2E tests before deploy |
-| Resource contention | Medium | Medium | Parallel tracks don't share owners |
+| Risk | Probability | Impact | Mitigation | Owner |
+|------|-------------|--------|------------|-------|
+| **Pricing decision delay** | Medium | Critical | Escalate Day 1 if no decision | Founder |
+| **Stripe account delay** | Medium | Critical | Founder escalates immediately | Founder |
+| **MCP implementation overrun** | Medium | High | Descope Phase D if needed | ai-engineer |
+| **No customers from IH** | Medium | High | Parallel outreach to 10 warm contacts (E3) | Founder |
+| **Modal reliability issues** | Low | High | Fallback to mocked responses | platform-eng |
+| **PostHog events not firing** | Low | Medium | E2E tests verify events (A2) | qa-engineer |
+| **Assumption A1-A4 failure** | Medium | Critical | Pivot meeting if conversion <1% | product-strategist |
+| **43% E2E tests skipped** | Medium | Medium | Define skip policy before Gate 3 | qa-engineer |
 
-**Note**: Business model risks are tracked in the StartupAI product as hypotheses.
+---
+
+## RACI Summary
+
+### Leadership Team
+
+| Role | Responsibilities |
+|------|-----------------|
+| **Founder** | Pricing (E0), Stripe setup (E1-E2), customer acquisition (E3-E4), final approval |
+| **project-manager** | Coordination, status reporting, blocker escalation |
+| **product-strategist** | Assumption accountability, pricing input, pivot decisions |
+| **system-architect** | Architecture accountability, technical decisions |
+
+### Engineering Team
+
+| Role | Responsibilities |
+|------|-----------------|
+| **frontend-dev** | PostHog events (P3-P4), Stripe UX (P7), Engineering Team Lead |
+| **backend-dev** | Stripe webhook (P6, P6a) |
+| **data-engineer** | Migrations (P1-P2) |
+| **ai-engineer** | MCP implementation (C1-C4), production validation (C6) |
+| **platform-eng** | Stripe env vars (P5, P5a), infra support |
+| **security-eng** | RLS policies (P6b), rate limiting (P6c) |
+
+### Design Team
+
+| Role | Responsibilities |
+|------|-----------------|
+| **ui-designer** | Token sync (D1), payment review (D3), accessibility (D4), Design Team Lead |
+| **ux-designer** | Upgrade journey review (D2) |
+| **visual-designer** | Brand consistency (D6) |
+| **graphic-designer** | IH visual assets (D5) |
+
+### Quality Team
+
+| Role | Responsibilities |
+|------|-----------------|
+| **qa-engineer** | All verification (P8-P13, C5), event validation (A2), Quality Team Lead |
+| **tech-writer** | API docs (Doc1), guide (Doc3), demo script (Doc4) |
+| **content-strat** | Marketing (M1-M6), error messages (Doc2) |
+| **data-analyst** | Event taxonomy (A1), measurement (M3), dashboard (A3) |
 
 ---
 
 ## Weekly Cadence
 
-| Day | Activity | Owner |
-|-----|----------|-------|
-| Monday | Sprint planning (if needed) | project-manager |
-| Wednesday | Async status check | All |
-| Friday | WORK.md review, WIP check | project-manager |
-
-**Gate reviews**: Leadership Team convenes at each milestone.
+| Day | Activity | Participants | Output |
+|-----|----------|--------------|--------|
+| **Monday** | Sprint planning | Leadership Team | Week goals set |
+| **Wednesday** | Leads sync | Team leads + PM | Blockers cleared |
+| **Friday** | Sprint review | Leadership + Founder | Status report |
 
 ---
 
-## How to Use This Plan
+## Gate Criteria
 
-1. **For engineering work**: Check Track 1 (Build) and Track 2 (Verify) in this document
-2. **For sprint items**: See [WORK.md](WORK.md)
-3. **For business validation**: Log into StartupAI as CW Consulting → StartupAI client
-4. **At phase gates**: Verify software works before moving to next phase
+### Gate 1: Foundation (Feb 9)
+
+- [ ] **E0**: Pricing decision made ($49 or $99, trial 14 or 30 days)
+- [ ] **E1**: Stripe account active and configured
+- [ ] **E2**: Stripe products/prices configured per E0 decision
+- [ ] **P5**: Stripe env vars in Netlify
+- [ ] **P2**: Trial split verified (schema matches role enum)
+- [ ] **A1**: Event taxonomy documented
+- [ ] **P3, P4**: PostHog events instrumented
+- [ ] `pnpm schema:fk:ci` passes (no FK type mismatches)
+
+### Gate 2: Core Engineering (Feb 16)
+
+- [ ] **P6**: Stripe payment flow works (test mode)
+- [ ] **P6a**: Webhook handles duplicate delivery correctly
+- [ ] **P6b, P6c**: Security hardening complete
+- [ ] **C1, C2**: MCP Phase A+B complete (29h)
+- [ ] **D2, D3**: Design review passed for upgrade flow
+- [ ] **P8, P9**: Phase 0-1 verified working
+- [ ] **M1, M2**: Marketing APIs wired
+- [ ] **M5**: IH post draft complete
+- [ ] **Doc1**: API reference available
+- [ ] Unit tests maintain >70% coverage
+
+### Gate 3: Integration Complete (Feb 23)
+
+- [ ] **C3, C4**: MCP Phase C+D complete
+- [ ] **P10**: Phase 2 verified working
+- [ ] **P11**: Phase 3-4 verified working
+- [ ] **P12**: E2E journey completes in <10 minutes
+- [ ] **P13**: Test payment successful
+- [ ] **D4**: Accessibility audit passed (WCAG 2.1 AA critical paths)
+- [ ] **D6**: Brand consistency verified across repos
+- [ ] **M4**: Landing page A/B test running with measurement plan
+- [ ] **A3**: Launch dashboard operational
+- [ ] **Doc3**: Quick-start guide available
+- [ ] `pnpm test:e2e` passes (skipped test policy defined)
+
+### Gate 4: Launch (Mar 2)
+
+- [ ] **C5**: Phase 3-4 live testing passed
+- [ ] **C6**: Production validation run successful
+- [ ] **M6**: IH community launched
+- [ ] **D5**: Marketing visual assets delivered
+- [ ] **Doc4**: Founder demo script ready
+- [ ] Production smoke test passed (error rate <1%)
+- [ ] **E4**: **First paying customer acquired** (cold acquisition, 1 HITL completed)
 
 ---
 
-## References
+## Success Criteria
 
-- [WORK.md](WORK.md) - Sprint details
-- [09-status.md](../../startupai-crew/docs/master-architecture/09-status.md) - Technical status
-- [project-governance.md](project-governance.md) - Team structure, RACI
-- [validation-reference.md](../archive/business/validation-reference.md) - Archived business validation data
-- [StartupAI Product](https://app.startupai.site) - Business model validation (CW Consulting → StartupAI)
+### Definition of "First Paying Customer"
+
+Per Leadership Team feedback, success requires:
+
+| Criterion | Requirement |
+|-----------|-------------|
+| **Source** | Cold acquisition (not founder's network) |
+| **Action** | Completed Stripe payment |
+| **Engagement** | Completed at least 1 HITL approval |
+| **Validation** | Counts toward A4 (WTP) evidence |
+
+### Post-Launch Checkpoint (M5: Week 6)
+
+Although outside this 4-week plan, define now:
+
+- [ ] 30-day retention check (customer still active)
+- [ ] n ≥ 5 customers for statistical confidence
+- [ ] Conversion rate measured (signup → trial → paid)
+- [ ] A1-A4 evidence thresholds reviewed
 
 ---
 
-**Last Updated**: 2026-02-01 | **Next Review**: Weekly Friday
+## Business Validation
+
+Business model validation happens **IN the StartupAI product**, not in this document.
+
+| Role | Entity | Action |
+|------|--------|--------|
+| Consultant | CW Consulting | First consultant account |
+| Client | StartupAI | First client project |
+| Validation | In-product | Hypotheses, evidence, phases tracked in UI |
+
+**Reference data**: [validation-reference.md](../archive/business/validation-reference.md)
+
+---
+
+## Related Documents
+
+| Document | Purpose |
+|----------|---------|
+| [WORK.md](WORK.md) | Sprint details, current WIP |
+| [project-governance.md](project-governance.md) | Team structure, RACI detail, decisions |
+| [cross-repo-blockers.md](cross-repo-blockers.md) | Ecosystem dependencies |
+| [09-status.md](../../startupai-crew/docs/master-architecture/09-status.md) | Technical ecosystem status |
+| [validation-reference.md](../archive/business/validation-reference.md) | Archived business validation data |
+
+---
+
+## Revision History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| v1.0 | 2026-02-02 | project-manager | Initial plan (143h) |
+| v2.0 | 2026-02-02 | project-manager | Incorporated feedback from 18 team members across 4 teams. Added: Design work (20h), Documentation (11h), Analytics (7h), Security tasks (4h). Adjusted verification times (+8h). Added pricing blocker (E0). Fixed C5 dependency. Updated RACI for design team. Added gate criteria. Total: 177h |
+| v2.1 | 2026-02-02 | project-manager | Fixed 5 RACI violations: E0, E3, E4 (Founder as A for Founder decisions), P6c (system-architect as A for security), D3 (product-strategist as A to avoid hierarchy conflict) |
+| v2.2 | 2026-02-02 | project-manager | Fixed effort totals (177h→195.5h), Product App hours (41h→48.5h), security note (7.5h→2h), Gate 3 criteria (P11 is Phase 3-4 not 2-4), Gate 1 added E2, Stripe fees budget ($0→$25), percentages sum to 100%, M1 gate mentions E2 |
+
+---
+
+**Last Updated**: 2026-02-02 | **Next Review**: Weekly Friday | **Status**: Awaiting Founder Approval
