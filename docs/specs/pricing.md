@@ -15,8 +15,8 @@ decision_owner: "Founder + product-strategist"
 ## Executive Summary
 
 StartupAI operates a **two-sided marketplace**:
-- **Supply side**: Founders validating business ideas ($49/month)
-- **Demand side**: Portfolio Holders seeking pre-validated deal flow ($199-$1,499/month)
+- **Supply side**: Founders validating business ideas ($49/month or $1,499 Sprint)
+- **Demand side**: Portfolio Holders seeking pre-validated deal flow ($199-$499/month)
 
 The marketplace is seeded with Founders first. Portfolio Holders (especially Capital providers) become the draw that attracts more Founders - creating a quality flywheel.
 
@@ -44,10 +44,25 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 │  │  • Full validation platform (all 5 phases)                          │    │
 │  │  • 5 concurrent projects                                            │    │
 │  │  • All HITL checkpoints                                             │    │
-│  │  • Ad integration + evidence collection                             │    │
+│  │  • Ad budget: pass-through (founder-approved)                       │    │
 │  │  • PDF/JSON exports                                                 │    │
 │  │                                                                     │    │
 │  │  Annual: $470/year (2 months free)                                  │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  FOUNDER SPRINT                                      $1,499 one-time│    │
+│  │  ─────────────────────────────────────────────────────────────────  │    │
+│  │  For founders who need to sprint to a go/no-go decision             │    │
+│  │                                                                     │    │
+│  │  • Everything in Founder Plan                                       │    │
+│  │  • $500 ad budget INCLUDED (no separate charges)                    │    │
+│  │  • Up to 3 pivots included                                          │    │
+│  │  • Target: 7-10 days to decision (max 30 days)                      │    │
+│  │  • Priority AI processing                                           │    │
+│  │  • After Sprint: auto-enrolled at $49/month                         │    │
+│  │                                                                     │    │
+│  │  Target: Funded founders, corporate innovation, tight deadlines    │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -79,25 +94,12 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 │  │  • Founder contact requests (with consent)                          │    │
 │  │  • Advanced filtering (stage, sector, geography, fit score)         │    │
 │  │  • Investment thesis matching                                       │    │
+│  │  • API access (programmatic deal flow integration)                  │    │
+│  │  • Multi-seat licensing (5 seats included)                          │    │
+│  │  • SSO/SAML integration                                             │    │
 │  │                                                                     │    │
 │  │  Annual: $4,990/year (2 months free)                                │    │
-│  │  Target: Angels, family offices, micro VCs, revenue-based lenders  │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  INSTITUTIONAL TIER                                   $1,499/month │    │
-│  │  ─────────────────────────────────────────────────────────────────  │    │
-│  │  Everything in Capital, plus:                                       │    │
-│  │  • Multi-seat licensing (5 seats included)                          │    │
-│  │  • API access (programmatic deal flow integration)                  │    │
-│  │  • Bulk evidence exports                                            │    │
-│  │  • Custom cohort views (accelerators)                               │    │
-│  │  • SSO/SAML integration                                             │    │
-│  │  • Dedicated success manager                                        │    │
-│  │  • SLA guarantees                                                   │    │
-│  │                                                                     │    │
-│  │  Annual: $14,990/year (2 months free)                               │    │
-│  │  Target: VCs, accelerators, corporate innovation, grant programs   │    │
+│  │  Target: Angels, VCs, accelerators, family offices, institutions   │    │
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -107,13 +109,13 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 
 ## Founder Pricing
 
-### Decision Summary
+### Tier Summary
 
-| Parameter | Value | Rationale |
-|-----------|-------|-----------|
-| **Founder Plan Price** | $49/month | Strategyzer-level positioning; accessible to bootstrapped founders |
-| **Trial Duration** | 30 days | Allows completion of full Phase 1 VPC Discovery |
-| **Ad Budget** | Separate (pass-through) | Founder-approved, not included in SaaS fee |
+| Tier | Price | Ad Budget | Pivots | Timeline | After |
+|------|-------|-----------|--------|----------|-------|
+| **Trial** | FREE | Pass-through | N/A | 30 days | Upgrade required |
+| **Founder** | $49/month | Pass-through | Unlimited | Ongoing | Continues |
+| **Sprint** | $1,499 one-time | $500 included | 3 included | 7-10 days (max 30) | $49/month |
 
 ### Free Trial
 
@@ -126,7 +128,7 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 | Ad Integration | Available (founder pays ad costs directly) |
 | Credit Card Required | No |
 
-### Founder Plan
+### Founder Plan ($49/month)
 
 | Attribute | Value |
 |-----------|-------|
@@ -135,33 +137,73 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 | Projects | 5 concurrent |
 | Phases | All (0-4) |
 | HITL Checkpoints | All |
-| Ad Integration | Full access |
+| Ad Budget | Pass-through (founder-approved, separate) |
+| Pivots | Unlimited (standard pace) |
 | Export | PDF, JSON |
 | History | Unlimited |
 
-### Why $49/month
+### Founder Sprint ($1,499 one-time)
 
-| Factor | Analysis |
-|--------|----------|
-| **Market positioning** | Strategyzer-level ($50/mo); professional, not commodity |
-| **Persona fit** | Bootstrapped founders expect ~$50/mo tools |
-| **Psychology** | Below $50 threshold; "cost of a nice lunch" |
-| **Optionality** | Easy to raise later; hard to lower |
-| **A4 Testing** | Validates willingness to pay at this price point |
+| Attribute | Value |
+|-----------|-------|
+| Price | $1,499 one-time |
+| Ad Budget | **$500 INCLUDED** (no separate charges) |
+| Pivots | Up to 3 included |
+| Target Timeline | 7-10 days to go/no-go decision |
+| Maximum Duration | 30 days |
+| Processing | Priority AI queue |
+| After Sprint | Auto-enrolled at $49/month |
+| Projects | 1 (the sprint project) |
 
-### Why 30-Day Trial
+#### Who Sprint Is For
 
-| Factor | Analysis |
-|--------|----------|
-| **Phase 1 completion** | Real validation takes 2-4 weeks |
-| **Evidence quality** | Customer interviews cannot be rushed |
-| **Value realization** | Founders experience full VPC Discovery before paying |
-| **WTP signal quality** | Informed decision > rushed decision |
-| **Procrastination risk** | Mitigated with Day 7/14/21 email nudges |
+| Persona | Why They Pay $1,499 |
+|---------|---------------------|
+| **Accelerator founders** | Demo day deadline, need validated pitch fast |
+| **Corporate innovation** | Budget exists, time is scarce |
+| **Funded founders** | Runway pressure, need quick go/no-go |
+| **Serial entrepreneurs** | Know the value of speed, want certainty |
+| **Competition threat** | Need to move before market window closes |
+
+#### What "3 Pivots" Means
+
+Per the VPD methodology documented at `startupai.site`:
+- A **pivot** is a structured restart when evidence indicates the current hypothesis is wrong
+- Types: SEGMENT_PIVOT, VALUE_PIVOT, CHANNEL_PIVOT, FEATURE_PIVOT, etc.
+- Sprint includes up to 3 pivots within the 30-day window
+- Each pivot restarts the validation loop with a new direction
+- If all 3 pivots are exhausted and no fit is found, the recommendation is KILL
+
+#### Sprint Economics
+
+| Component | Value |
+|-----------|-------|
+| Sprint price | $1,499 |
+| Less: Ad budget included | -$500 |
+| Platform premium | $999 |
+| Equivalent months at $49 | ~20 months |
+| Value proposition | Speed + certainty + all-inclusive |
+
+### Why Two Founder Tiers
+
+| Factor | Founder ($49) | Sprint ($1,499) |
+|--------|---------------|-----------------|
+| **Budget** | Bootstrapped | Funded/corporate |
+| **Timeline** | Flexible | Urgent |
+| **Ad budget** | Pay as you go | All-inclusive |
+| **Pivots** | Self-paced | Structured (3 max) |
+| **Support** | Standard | Priority |
 
 ---
 
 ## Portfolio Holder Pricing
+
+### Tier Summary
+
+| Tier | Monthly | Annual | Marketplace Access |
+|------|---------|--------|-------------------|
+| **Advisor** | $199 | $1,990 | Directory visible, no RFQ |
+| **Capital** | $499 | $4,990 | Full marketplace + API |
 
 ### Strategic Context
 
@@ -178,6 +220,7 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 | AngelList Syndicates | $8,000 + 20% carry | Access to curated deals |
 | Angel Group Membership | $750-1,000 | Access to group deal flow + events |
 | Deal Sourcing Services | $60,000-120,000 | Introductions + curated matches |
+| **StartupAI Capital** | **$5,988** | **Validated deal flow + evidence** |
 
 ### What StartupAI Provides That Others Cannot
 
@@ -190,39 +233,70 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 | **HITL Checkpoint Record** | Shows coachability |
 | **Fit Score Algorithm** | Quantified problem-solution fit |
 
+### Advisor Tier ($199/month)
+
+| Attribute | Value |
+|-----------|-------|
+| Price | $199/month |
+| Annual | $1,990/year (2 months free) |
+| Clients | Unlimited |
+| Portfolio Dashboard | Full access |
+| Validation Visibility | All phases |
+| Connection Flows | All (invite-new, link-existing) |
+| Exports | White-label PDF/JSON |
+| Verified Status | Yes (directory opt-in) |
+| Marketplace (Directory) | Listed, cannot browse |
+| Marketplace (RFQ Board) | Cannot view or respond |
+| API Access | No |
+
+**Target**: Consultants, coaches, fractional executives, service providers
+
+### Capital Tier ($499/month)
+
+| Attribute | Value |
+|-----------|-------|
+| Price | $499/month |
+| Annual | $4,990/year (2 months free) |
+| Everything in Advisor | Yes |
+| Founder Directory | Full access (browse validated startups) |
+| RFQ/RFP Board | Full access (respond to capital-seeking founders) |
+| Evidence Packages | Full VPD reports for any founder |
+| Contact Requests | With founder consent |
+| Advanced Filtering | Stage, sector, geography, fit score |
+| Investment Thesis Matching | AI-powered matching |
+| API Access | Yes (programmatic integration) |
+| Multi-seat | 5 seats included |
+| SSO/SAML | Yes |
+
+**Target**: Angels, VCs, accelerators, family offices, corporate innovation, grant programs
+
 ### Tier Comparison
 
-| Feature | Advisor ($199) | Capital ($499) | Institutional ($1,499) |
-|---------|---------------|----------------|------------------------|
-| Portfolio Dashboard | ✓ | ✓ | ✓ |
-| Unlimited Clients | ✓ | ✓ | ✓ |
-| Validation Visibility | ✓ | ✓ | ✓ |
-| White-label Exports | ✓ | ✓ | ✓ |
-| Verified Status | ✓ | ✓ | ✓ |
-| **Founder Directory** | ✗ | ✓ | ✓ |
-| **RFQ/RFP Board** | ✗ | ✓ | ✓ |
-| **Evidence Packages** | ✗ | ✓ | ✓ |
-| **Contact Requests** | ✗ | ✓ | ✓ |
-| API Access | ✗ | ✗ | ✓ |
-| Multi-seat (5 included) | ✗ | ✗ | ✓ |
-| SSO/SAML | ✗ | ✗ | ✓ |
-| Dedicated Success Manager | ✗ | ✗ | ✓ |
+| Feature | Advisor ($199) | Capital ($499) |
+|---------|---------------|----------------|
+| Portfolio Dashboard | ✓ | ✓ |
+| Unlimited Clients | ✓ | ✓ |
+| Validation Visibility | ✓ | ✓ |
+| White-label Exports | ✓ | ✓ |
+| Verified Status | ✓ | ✓ |
+| Connection Flows | ✓ | ✓ |
+| **Founder Directory** | ✗ | ✓ |
+| **RFQ/RFP Board** | ✗ | ✓ |
+| **Evidence Packages** | ✗ | ✓ |
+| **Contact Requests** | ✗ | ✓ |
+| **API Access** | ✗ | ✓ |
+| **Multi-seat (5)** | ✗ | ✓ |
+| **SSO/SAML** | ✗ | ✓ |
 
-### Pricing Rationale
+### Why Two Portfolio Holder Tiers (Not Three)
 
-| Tier | Annual Cost | Competitive Benchmark | Position |
-|------|-------------|----------------------|----------|
-| **Advisor** | $2,388 | Business SaaS ($600-1,200/yr) | 2-3x premium for AI assistance |
-| **Capital** | $5,988 | Angel group + data ($1,750-3,000/yr) | Below alternatives, unique validation value |
-| **Institutional** | $17,988 | PitchBook ($12K-25K/yr) | Positioned as complement, not replacement |
-
-### Target Segments
-
-| Tier | Primary Target | Secondary Target |
-|------|----------------|------------------|
-| **Advisor** | Consultants, coaches, fractional executives | Service providers (lawyers, accountants) |
-| **Capital** | Angels, family offices, micro VCs | Revenue-based lenders, grant programs |
-| **Institutional** | VCs, accelerators | Corporate innovation, government programs |
+| Factor | Decision |
+|--------|----------|
+| **Simplicity** | Easier to sell, easier to understand |
+| **Price gap** | $199 → $499 is reasonable; $499 → $1,499 was too large |
+| **Feature bundling** | API/multi-seat fit naturally with marketplace access |
+| **Enterprise needs** | Capital tier at $499 covers VCs and accelerators |
+| **Custom contracts** | True enterprise (100+ seats, SLA) handled separately |
 
 ---
 
@@ -230,11 +304,11 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 
 ### Verification System
 
-| Status | Meaning | Directory Access | RFQ Board |
-|--------|---------|------------------|-----------|
-| **Unverified** | Trial or lapsed | Cannot view | Cannot view |
-| **Verified** (Advisor) | Paid Advisor tier | Visible in directory | Cannot respond |
-| **Verified** (Capital+) | Paid Capital or Institutional | Visible in directory | Full access |
+| Status | Meaning | Directory | RFQ Board | Grace Period |
+|--------|---------|-----------|-----------|--------------|
+| **Unverified** | Trial or lapsed | Hidden | No access | N/A |
+| **Verified** (Advisor) | Paid Advisor | Listed (opt-in) | Cannot respond | 7 days |
+| **Verified** (Capital) | Paid Capital | Listed (opt-in) | Full access | 7 days |
 
 ### The Quality Flywheel
 
@@ -278,16 +352,17 @@ All flows require **founder acceptance** - participation is recommended, never m
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. Founder Subscriptions                                       │
-│     └── $49/month (validation platform)                         │
+│     └── $49/month (ongoing validation)                          │
+│     └── $1,499 one-time (Sprint to decision)                    │
 │                                                                 │
 │  2. Portfolio Holder Subscriptions                              │
 │     └── $199/month (Advisor)                                    │
 │     └── $499/month (Capital)                                    │
-│     └── $1,499/month (Institutional)                            │
 │                                                                 │
-│  3. Ad Budget (Pass-through)                                    │
+│  3. Ad Budget (Pass-through) - Founder Plan only                │
 │     └── Founder-approved amount                                 │
 │     └── StartupAI does NOT profit from ad spend                 │
+│     └── Sprint tier: $500 included, no pass-through             │
 │                                                                 │
 │  4. Future: Transaction Fees (Phase 4+)                         │
 │     └── Consider success fees on funded deals                   │
@@ -296,38 +371,24 @@ All flows require **founder acceptance** - participation is recommended, never m
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Ad Budget Model
-
-The ad platform integration automates the DO evidence loop (real behavioral data).
-
-| Aspect | Details |
-|--------|---------|
-| **Included in subscription?** | No - ad costs are separate |
-| **Who pays?** | Founder approves budget, charges to their payment method |
-| **Recommendation** | AI suggests budget based on validation goals |
-| **HITL Checkpoint** | `approve_spend_increase` gates ad activation |
-| **Minimum Budget** | $50 recommended for statistically meaningful results |
-| **During Trial** | Optional - platform is free, ads cost money if founder wants real DO evidence |
-
 ---
 
 ## Implementation Phasing
 
 | Phase | Scope | Pricing | Timeline |
 |-------|-------|---------|----------|
-| **Launch** | Founder tier only | $49/month | Now |
+| **Launch** | Founder + Sprint tiers | $49/month, $1,499 one-time | Now |
 | **Post-A4** | Add Advisor tier | $199/month | Week 6+ |
-| **Post-A9** | Add Capital tier with marketplace | $499/month | Week 10+ |
-| **Post-Pilot** | Add Institutional tier | $1,499/month | Week 14+ |
+| **Post-A6** | Add Capital tier with marketplace | $499/month | Week 10+ |
 
 ### Validation Gates
 
 | Assumption | Must Validate Before |
 |------------|----------------------|
 | A4: Founder WTP ($49) | Launching Advisor tier |
+| A4b: Sprint WTP ($1,499) | Can test concurrently with A4 |
 | A6: Advisor WTP ($199) | Launching Capital tier |
-| A9: Capital WTP ($499) | Launching Institutional tier |
-| A10: Mandate potential | Launching API/programmatic access |
+| A9: Capital WTP ($499) | Full marketplace launch |
 
 ---
 
@@ -335,16 +396,32 @@ The ad platform integration automates the DO evidence loop (real behavioral data
 
 ### Products
 
-| Product ID | Name | Price | Status |
-|------------|------|-------|--------|
-| `prod_founder` | Founder Plan | $49/month | Active |
-| `prod_founder_annual` | Founder Plan (Annual) | $470/year | Active |
-| `prod_advisor` | Advisor Tier | $199/month | Pending A4 |
-| `prod_advisor_annual` | Advisor Tier (Annual) | $1,990/year | Pending A4 |
-| `prod_capital` | Capital Tier | $499/month | Pending A9 |
-| `prod_capital_annual` | Capital Tier (Annual) | $4,990/year | Pending A9 |
-| `prod_institutional` | Institutional Tier | $1,499/month | Pending pilot |
-| `prod_institutional_annual` | Institutional Tier (Annual) | $14,990/year | Pending pilot |
+| Product ID | Name | Price | Type | Status |
+|------------|------|-------|------|--------|
+| `prod_founder` | Founder Plan | $49/month | Subscription | Active |
+| `prod_founder_annual` | Founder Plan (Annual) | $470/year | Subscription | Active |
+| `prod_sprint` | Founder Sprint | $1,499 | One-time | Active |
+| `prod_advisor` | Advisor Tier | $199/month | Subscription | Pending A4 |
+| `prod_advisor_annual` | Advisor Tier (Annual) | $1,990/year | Subscription | Pending A4 |
+| `prod_capital` | Capital Tier | $499/month | Subscription | Pending A6 |
+| `prod_capital_annual` | Capital Tier (Annual) | $4,990/year | Subscription | Pending A6 |
+
+### Sprint Flow
+
+```typescript
+// Sprint purchase creates:
+// 1. One-time charge: $1,499
+// 2. Scheduled subscription: $49/month starting after Sprint completion (max 30 days)
+
+const SPRINT_CONFIG = {
+  price: 1499_00, // cents
+  ad_budget_included: 500_00, // cents
+  max_pivots: 3,
+  target_days: 10,
+  max_days: 30,
+  post_sprint_plan: 'prod_founder', // $49/month auto-enrollment
+};
+```
 
 ### Trial Settings
 
@@ -366,7 +443,7 @@ const STRIPE_CONFIG = {
 
 ```typescript
 interface CheckoutMetadata {
-  plan: 'founder' | 'advisor' | 'capital' | 'institutional';
+  plan: 'founder' | 'sprint' | 'advisor' | 'capital';
   source: 'upgrade_modal' | 'pricing_page' | 'limit_hit' | 'trial_expiring' | 'marketplace_upgrade';
   trial_days_remaining?: number;
   relationship_type?: 'advisory' | 'capital' | 'program' | 'service' | 'ecosystem';
@@ -381,11 +458,12 @@ These documents reference pricing and must stay in sync:
 
 | Document | Key Values |
 |----------|------------|
-| `docs/features/trial-limits-and-upgrade.md` | Founder: $49, Trial: 30 days |
+| `docs/features/trial-limits-and-upgrade.md` | Founder: $49, Sprint: $1,499, Trial: 30 days |
 | `docs/user-experience/journeys/trials/founder-trial-journey-map.md` | Trial: 30 days |
-| `docs/specs/portfolio-holder-vision.md` | Marketplace pricing framework |
+| `docs/specs/portfolio-holder-vision.md` | Advisor: $199, Capital: $499 |
 | `docs/user-experience/journeys/trials/consultant-trial-journey-map.md` | Trial: 30 days |
 | `docs/features/consultant-client-system.md` | Connection flows, verification |
+| `startupai.site` (marketing) | Pivot methodology, Sprint details |
 
 ---
 
@@ -393,7 +471,9 @@ These documents reference pricing and must stay in sync:
 
 | Date | Change | Owner |
 |------|--------|-------|
-| 2026-02-03 | Added tiered Portfolio Holder pricing (Advisor/Capital/Institutional) | Founder + product-strategist |
+| 2026-02-03 | Added Founder Sprint tier ($1,499 one-time, $500 ad budget, 3 pivots) | Founder + product-strategist |
+| 2026-02-03 | Simplified Portfolio Holder to 2 tiers (removed Institutional $1,499) | Founder + product-strategist |
+| 2026-02-03 | Moved API/multi-seat to Capital tier ($499) | Founder + product-strategist |
+| 2026-02-03 | Added tiered Portfolio Holder pricing (Advisor/Capital) | Founder + product-strategist |
 | 2026-02-03 | Added marketplace dynamics and quality flywheel | Founder + product-strategist |
-| 2026-02-03 | Updated revenue model for two-sided marketplace | Founder + product-strategist |
 | 2026-02-03 | Initial creation - canonicalized founder pricing decision | Founder + product-strategist |

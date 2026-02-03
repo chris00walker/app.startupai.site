@@ -107,28 +107,38 @@ StartupAI is creating a new category: **pre-validated deal flow marketplace**.
 | Tier | Monthly | Annual | Target |
 |------|---------|--------|--------|
 | **Advisor** | $199 | $1,990 | Consultants, coaches, fractional executives |
-| **Capital** | $499 | $4,990 | Angels, family offices, micro VCs |
-| **Institutional** | $1,499 | $14,990 | VCs, accelerators, corporate innovation |
+| **Capital** | $499 | $4,990 | Angels, VCs, accelerators, family offices |
 
 ### Why These Prices
 
 | Tier | Rationale |
 |------|-----------|
 | **Advisor ($199)** | 2-3x typical business SaaS, justified by AI assistance + portfolio visibility |
-| **Capital ($499)** | Below angel group memberships ($750-1,000/yr), vastly more value (validated deal flow) |
-| **Institutional ($1,499)** | Below PitchBook ($12K-25K/yr), positioned as complement with unique validation evidence |
+| **Capital ($499)** | Below angel group memberships ($750-1,000/yr), vastly more value (validated deal flow + API + multi-seat) |
+
+### Why Two Tiers (Not Three)
+
+| Factor | Decision |
+|--------|----------|
+| **Simplicity** | Easier to sell, easier to understand |
+| **Price gap** | $199 → $499 is reasonable; $499 → $1,499 was too large |
+| **Feature bundling** | API/multi-seat fit naturally with marketplace access |
+| **Enterprise needs** | Capital tier at $499 covers VCs and accelerators |
+| **Custom contracts** | True enterprise (100+ seats, SLA) handled separately |
 
 ### Marketplace Access by Tier
 
-| Feature | Advisor | Capital | Institutional |
-|---------|---------|---------|---------------|
-| Portfolio Dashboard | ✓ | ✓ | ✓ |
-| Validation Visibility | ✓ | ✓ | ✓ |
-| White-label Exports | ✓ | ✓ | ✓ |
-| **Founder Directory** | ✗ | ✓ | ✓ |
-| **RFQ/RFP Board** | ✗ | ✓ | ✓ |
-| **Evidence Packages** | ✗ | ✓ | ✓ |
-| API Access | ✗ | ✗ | ✓ |
+| Feature | Advisor | Capital |
+|---------|---------|---------|
+| Portfolio Dashboard | ✓ | ✓ |
+| Validation Visibility | ✓ | ✓ |
+| White-label Exports | ✓ | ✓ |
+| **Founder Directory** | ✗ | ✓ |
+| **RFQ/RFP Board** | ✗ | ✓ |
+| **Evidence Packages** | ✗ | ✓ |
+| **API Access** | ✗ | ✓ |
+| **Multi-seat (5)** | ✗ | ✓ |
+| **SSO/SAML** | ✗ | ✓ |
 
 ---
 
@@ -185,7 +195,7 @@ StartupAI is creating a new category: **pre-validated deal flow marketplace**.
 
 **Common denominator**: "Show me evidence this isn't going to zero."
 
-**Pricing tier**: Capital ($499/month) or Institutional ($1,499/month)
+**Pricing tier**: Capital ($499/month)
 
 ### Cohort 2: Advisory Providers
 
@@ -217,7 +227,7 @@ StartupAI is creating a new category: **pre-validated deal flow marketplace**.
 
 **Common denominator**: "How do we demonstrate program ROI?"
 
-**Pricing tier**: Institutional ($1,499/month)
+**Pricing tier**: Capital ($499/month)
 
 ### Cohort 4: Professional Service Providers
 
@@ -245,7 +255,7 @@ StartupAI is creating a new category: **pre-validated deal flow marketplace**.
 
 **Common denominator**: "Are we creating measurable value for our members?"
 
-**Pricing tier**: Advisor ($199/month) or Institutional ($1,499/month for larger organizations)
+**Pricing tier**: Advisor ($199/month) or Capital ($499/month for larger organizations)
 
 ---
 
@@ -308,8 +318,8 @@ Per discussion with Codex, the following decisions are baked into the architectu
 | Status | Meaning | Directory | RFQ Board | Grace Period |
 |--------|---------|-----------|-----------|--------------|
 | **Unverified** | Trial or no plan | Hidden | No access | N/A |
-| **Verified** (Advisor) | Paid Advisor tier | Listed (opt-in) | View only | 7 days |
-| **Verified** (Capital+) | Paid Capital/Institutional | Listed (opt-in) | Full access | 7 days |
+| **Verified** (Advisor) | Paid Advisor tier | Listed (opt-in) | Cannot respond | 7 days |
+| **Verified** (Capital) | Paid Capital tier | Listed (opt-in) | Full access | 7 days |
 | **Grace** | Payment failed, within 7 days | Listed | Full access | Counting down |
 | **Revoked** | Payment failed, past 7 days | Hidden | No access | N/A |
 
@@ -466,7 +476,8 @@ Per discussion with Codex, the following decisions are baked into the architectu
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-02-03 | 3.0 | **Major update**: Added marketplace economics, tiered pricing ($199/$499/$1,499), quality flywheel, Codex reconciliation decisions |
+| 2026-02-03 | 3.1 | Simplified to 2 tiers ($199 Advisor, $499 Capital); removed Institutional tier |
+| 2026-02-03 | 3.0 | Added marketplace economics, tiered pricing, quality flywheel, Codex reconciliation decisions |
 | 2026-01-31 | 2.0 | Leadership Team review; strengthened Test Cards; overlay approach; evidence gates |
 | 2026-01-31 | 1.1 | Added ASCII table diagrams for improved readability |
 | 2026-01-31 | 1.0 | Initial draft from product-strategist / founder discussion |
