@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -36,20 +36,25 @@ const RELATIONSHIP_TYPES: Record<string, string> = {
   ecosystem: 'Ecosystem',
 };
 
-export default function FounderRFQPage() {
+// Wrapper component to handle useSearchParams with Suspense
+function SuccessMessageHandler({ onSuccess }: { onSuccess: (msg: string) => void }) {
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams?.get('success') === 'created') {
+      onSuccess('Your request has been posted and is now visible to verified consultants.');
+      window.history.replaceState({}, '', '/founder/rfq');
+    }
+  }, [searchParams, onSuccess]);
+
+  return null;
+}
+
+export default function FounderRFQPage() {
   const [rfqs, setRfqs] = useState<RFQ[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (searchParams?.get('success') === 'created') {
-      setSuccessMessage('Your request has been posted and is now visible to verified consultants.');
-      // Clear the success param from URL
-      window.history.replaceState({}, '', '/founder/rfq');
-    }
-  }, [searchParams]);
 
   const fetchRFQs = async () => {
     setIsLoading(true);
@@ -88,6 +93,11 @@ export default function FounderRFQPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Suspense boundary for useSearchParams */}
+      <Suspense fallback={null}>
+        <SuccessMessageHandler onSuccess={setSuccessMessage} />
+      </Suspense>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">My Requests</h1>

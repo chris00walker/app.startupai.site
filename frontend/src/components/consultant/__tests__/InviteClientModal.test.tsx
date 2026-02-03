@@ -115,6 +115,7 @@ describe('InviteClientModal', () => {
         expect(onInvite).toHaveBeenCalledWith({
           email: 'client@example.com',
           name: undefined,
+          relationshipType: 'advisory', // Default relationship type
         });
       });
     });
@@ -148,6 +149,7 @@ describe('InviteClientModal', () => {
         expect(onInvite).toHaveBeenCalledWith({
           email: 'client@example.com',
           name: 'John Doe',
+          relationshipType: 'advisory', // Default relationship type
         });
       });
     });

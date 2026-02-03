@@ -406,6 +406,39 @@
       "description": "Consultant Client Archive Route"
     },
     {
+      "path": "/api/consultant/connections",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Connections API"
+    },
+    {
+      "path": "/api/consultant/connections/[id]/accept",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Accept Connection API"
+    },
+    {
+      "path": "/api/consultant/connections/[id]/decline",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Decline Connection API"
+    },
+    {
+      "path": "/api/consultant/founders",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Founder Directory API"
+    },
+    {
       "path": "/api/consultant/invites",
       "methods": [
         "POST",
@@ -451,6 +484,31 @@
         "POST"
       ],
       "type": "nextjs"
+    },
+    {
+      "path": "/api/consultant/profile/marketplace",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Marketplace Settings API"
+    },
+    {
+      "path": "/api/consultant/rfq",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Consultant RFQ Board API"
+    },
+    {
+      "path": "/api/consultant/rfq/[id]/respond",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Consultant RFQ Response API"
     },
     {
       "path": "/api/copy-bank/[projectId]",
@@ -545,6 +603,81 @@
       "description": "Auto-Sync Projects Cron Job"
     },
     {
+      "path": "/api/founder/connections",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Founder Connections API"
+    },
+    {
+      "path": "/api/founder/connections/[id]/accept",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Founder Accept Connection API"
+    },
+    {
+      "path": "/api/founder/connections/[id]/decline",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Founder Decline Connection API"
+    },
+    {
+      "path": "/api/founder/consultants",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Consultant Directory API"
+    },
+    {
+      "path": "/api/founder/profile/marketplace",
+      "methods": [
+        "GET",
+        "PUT"
+      ],
+      "type": "nextjs",
+      "description": "Founder Marketplace Settings API"
+    },
+    {
+      "path": "/api/founder/rfq",
+      "methods": [
+        "POST",
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Founder RFQ API"
+    },
+    {
+      "path": "/api/founder/rfq/[id]/responses",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Founder RFQ Responses API"
+    },
+    {
+      "path": "/api/founder/rfq/[id]/responses/[responseId]/accept",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Founder Accept RFQ Response API"
+    },
+    {
+      "path": "/api/founder/rfq/[id]/responses/[responseId]/decline",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Founder Decline RFQ Response API"
+    },
+    {
       "path": "/api/health",
       "methods": [
         "GET",
@@ -617,6 +750,14 @@
       ],
       "type": "nextjs",
       "description": "Sync API"
+    },
+    {
+      "path": "/api/internal/verification/sync",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Verification Sync Endpoint"
     },
     {
       "path": "/api/mappings",
