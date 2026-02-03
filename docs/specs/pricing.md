@@ -79,6 +79,10 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 │  │  • Progress tracking & alerts                                       │    │
 │  │  • White-label PDF/JSON exports                                     │    │
 │  │  • Verified status (directory listing opt-in)                       │    │
+│  │  • Founder Directory access (browse validated startups)             │    │
+│  │  • RFQ/RFP Board (respond to founder requests)                      │    │
+│  │  • Evidence packages (full VPD validation reports)                  │    │
+│  │  • Founder contact requests (with consent)                          │    │
 │  │                                                                     │    │
 │  │  Annual: $1,990/year (2 months free)                                │    │
 │  │  Target: Consultants, coaches, fractional executives, advisors     │    │
@@ -88,15 +92,12 @@ The marketplace is seeded with Founders first. Portfolio Holders (especially Cap
 │  │  CAPITAL TIER                                           $499/month │    │
 │  │  ─────────────────────────────────────────────────────────────────  │    │
 │  │  Everything in Advisor, plus:                                       │    │
-│  │  • Founder Directory access (validated startups only)               │    │
-│  │  • RFQ/RFP Board (respond to capital-seeking founders)              │    │
-│  │  • Evidence packages (full VPD validation reports)                  │    │
-│  │  • Founder contact requests (with consent)                          │    │
 │  │  • Advanced filtering (stage, sector, geography, fit score)         │    │
 │  │  • Investment thesis matching                                       │    │
 │  │  • API access (programmatic deal flow integration)                  │    │
 │  │  • Multi-seat licensing (5 seats included)                          │    │
 │  │  • SSO/SAML integration                                             │    │
+│  │  • Priority support                                                 │    │
 │  │                                                                     │    │
 │  │  Annual: $4,990/year (2 months free)                                │    │
 │  │  Target: Angels, VCs, accelerators, family offices, institutions   │    │
@@ -200,10 +201,10 @@ Per the VPD methodology documented at `startupai.site`:
 
 ### Tier Summary
 
-| Tier | Monthly | Annual | Marketplace Access |
-|------|---------|--------|-------------------|
-| **Advisor** | $199 | $1,990 | Directory visible, no RFQ |
-| **Capital** | $499 | $4,990 | Full marketplace + API |
+| Tier | Monthly | Annual | Key Difference |
+|------|---------|--------|----------------|
+| **Advisor** | $199 | $1,990 | Full marketplace access |
+| **Capital** | $499 | $4,990 | + API, multi-seat, SSO, advanced filtering |
 
 ### Strategic Context
 
@@ -245,9 +246,12 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 | Connection Flows | All (invite-new, link-existing) |
 | Exports | White-label PDF/JSON |
 | Verified Status | Yes (directory opt-in) |
-| Marketplace (Directory) | Listed, cannot browse |
-| Marketplace (RFQ Board) | Cannot view or respond |
+| Founder Directory | Full access (browse validated startups) |
+| RFQ/RFP Board | Full access (respond to founder requests) |
+| Evidence Packages | Full VPD reports |
+| Contact Requests | With founder consent |
 | API Access | No |
+| Multi-seat | No (single user) |
 
 **Target**: Consultants, coaches, fractional executives, service providers
 
@@ -258,15 +262,12 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 | Price | $499/month |
 | Annual | $4,990/year (2 months free) |
 | Everything in Advisor | Yes |
-| Founder Directory | Full access (browse validated startups) |
-| RFQ/RFP Board | Full access (respond to capital-seeking founders) |
-| Evidence Packages | Full VPD reports for any founder |
-| Contact Requests | With founder consent |
 | Advanced Filtering | Stage, sector, geography, fit score |
 | Investment Thesis Matching | AI-powered matching |
 | API Access | Yes (programmatic integration) |
 | Multi-seat | 5 seats included |
 | SSO/SAML | Yes |
+| Priority Support | Yes |
 
 **Target**: Angels, VCs, accelerators, family offices, corporate innovation, grant programs
 
@@ -280,13 +281,16 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 | White-label Exports | ✓ | ✓ |
 | Verified Status | ✓ | ✓ |
 | Connection Flows | ✓ | ✓ |
-| **Founder Directory** | ✗ | ✓ |
-| **RFQ/RFP Board** | ✗ | ✓ |
-| **Evidence Packages** | ✗ | ✓ |
-| **Contact Requests** | ✗ | ✓ |
+| Founder Directory | ✓ | ✓ |
+| RFQ/RFP Board | ✓ | ✓ |
+| Evidence Packages | ✓ | ✓ |
+| Contact Requests | ✓ | ✓ |
+| **Advanced Filtering** | ✗ | ✓ |
+| **Thesis Matching** | ✗ | ✓ |
 | **API Access** | ✗ | ✓ |
 | **Multi-seat (5)** | ✗ | ✓ |
 | **SSO/SAML** | ✗ | ✓ |
+| **Priority Support** | ✗ | ✓ |
 
 ### Why Two Portfolio Holder Tiers (Not Three)
 
@@ -294,8 +298,8 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 |--------|----------|
 | **Simplicity** | Easier to sell, easier to understand |
 | **Price gap** | $199 → $499 is reasonable; $499 → $1,499 was too large |
-| **Feature bundling** | API/multi-seat fit naturally with marketplace access |
-| **Enterprise needs** | Capital tier at $499 covers VCs and accelerators |
+| **Marketplace for all** | Both tiers get full marketplace access (directory, RFQ, evidence) |
+| **Enterprise = premium** | Capital tier premium is API, multi-seat, SSO, advanced filtering |
 | **Custom contracts** | True enterprise (100+ seats, SLA) handled separately |
 
 ---
@@ -307,8 +311,8 @@ StartupAI is not selling portfolio management software. StartupAI is selling **a
 | Status | Meaning | Directory | RFQ Board | Grace Period |
 |--------|---------|-----------|-----------|--------------|
 | **Unverified** | Trial or lapsed | Hidden | No access | N/A |
-| **Verified** (Advisor) | Paid Advisor | Listed (opt-in) | Cannot respond | 7 days |
-| **Verified** (Capital) | Paid Capital | Listed (opt-in) | Full access | 7 days |
+| **Verified** (Advisor) | Paid Advisor | Full access | Full access | 7 days |
+| **Verified** (Capital) | Paid Capital | Full access | Full access | 7 days |
 
 ### The Quality Flywheel
 

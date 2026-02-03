@@ -128,17 +128,23 @@ StartupAI is creating a new category: **pre-validated deal flow marketplace**.
 
 ### Marketplace Access by Tier
 
-| Feature | Advisor | Capital |
-|---------|---------|---------|
+Both tiers get **full marketplace access**. The difference is enterprise features.
+
+| Feature | Advisor ($199) | Capital ($499) |
+|---------|---------------|----------------|
 | Portfolio Dashboard | ✓ | ✓ |
 | Validation Visibility | ✓ | ✓ |
 | White-label Exports | ✓ | ✓ |
-| **Founder Directory** | ✗ | ✓ |
-| **RFQ/RFP Board** | ✗ | ✓ |
-| **Evidence Packages** | ✗ | ✓ |
+| Founder Directory | ✓ | ✓ |
+| RFQ/RFP Board | ✓ | ✓ |
+| Evidence Packages | ✓ | ✓ |
+| Contact Requests | ✓ | ✓ |
+| **Advanced Filtering** | ✗ | ✓ |
+| **Thesis Matching** | ✗ | ✓ |
 | **API Access** | ✗ | ✓ |
 | **Multi-seat (5)** | ✗ | ✓ |
 | **SSO/SAML** | ✗ | ✓ |
+| **Priority Support** | ✗ | ✓ |
 
 ---
 
@@ -318,9 +324,9 @@ Per discussion with Codex, the following decisions are baked into the architectu
 | Status | Meaning | Directory | RFQ Board | Grace Period |
 |--------|---------|-----------|-----------|--------------|
 | **Unverified** | Trial or no plan | Hidden | No access | N/A |
-| **Verified** (Advisor) | Paid Advisor tier | Listed (opt-in) | Cannot respond | 7 days |
-| **Verified** (Capital) | Paid Capital tier | Listed (opt-in) | Full access | 7 days |
-| **Grace** | Payment failed, within 7 days | Listed | Full access | Counting down |
+| **Verified** (Advisor) | Paid Advisor tier | Full access | Full access | 7 days |
+| **Verified** (Capital) | Paid Capital tier | Full access | Full access | 7 days |
+| **Grace** | Payment failed, within 7 days | Full access | Full access | Counting down |
 | **Revoked** | Payment failed, past 7 days | Hidden | No access | N/A |
 
 ### Schema Additions
@@ -476,6 +482,7 @@ Per discussion with Codex, the following decisions are baked into the architectu
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-02-03 | 3.2 | Both tiers now get full marketplace access; Capital premium is enterprise features |
 | 2026-02-03 | 3.1 | Simplified to 2 tiers ($199 Advisor, $499 Capital); removed Institutional tier |
 | 2026-02-03 | 3.0 | Added marketplace economics, tiered pricing, quality flywheel, Codex reconciliation decisions |
 | 2026-01-31 | 2.0 | Leadership Team review; strengthened Test Cards; overlay approach; evidence gates |
