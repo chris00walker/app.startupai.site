@@ -1,77 +1,138 @@
-# Product Vision: Portfolio Holder Ecosystem
+# Product Vision: Portfolio Holder Marketplace
 
-**Status**: Approved v2.0 | **Created**: 2026-01-31 | **Owner**: product-strategist
-**Approved By**: Founder (2026-01-31) | **Leadership Review**: Complete
+**Status**: Approved v3.0 | **Updated**: 2026-02-03 | **Owner**: product-strategist
+**Approved By**: Founder (2026-02-03) | **Leadership Review**: Complete
 
 ---
 
 ## Executive Summary
 
-StartupAI's "Consultant" persona is too narrow. The platform serves anyone who maintains an ongoing relationship with Founders and needs visibility into their validation progress.
+StartupAI is evolving from a validation tool into a **two-sided marketplace** connecting validated founders with capital providers. The "Consultant" persona has been expanded into a **Portfolio Holder** umbrella covering five relationship types.
 
-**Key insight**: Whether someone is a consultant, investor, lender, or accelerator operator, they all share a common job-to-be-done:
+**Key strategic insight**: The bait for Founders is now **access to capital**. Portfolio Holders (VCs, angels, accelerators) are the draw that attracts founders to the platform - creating a quality flywheel.
 
-> "Show me evidence this founder/venture is worth my [money/time/resources]."
-
-This document proposes a unified **Portfolio Holder** persona with configurable relationship types, enabling StartupAI to serve the entire founder relationship ecosystem without platform dilution.
-
----
-
-## Current State
-
-### Existing Personas
-
-| Persona | Description | Status |
-|---------|-------------|--------|
-| **Founder** | Person validating a business idea | Implemented |
-| **Consultant** | Advisor managing multiple founder clients | Implemented |
-| **Admin** | Platform administrator | Implemented |
-
-### Limitation
-
-"Consultant" assumes an advisory relationship. This excludes:
-- Investors who want to monitor portfolio companies
-- Lenders who want to de-risk loans
-- Accelerators who want to track cohort progress
-- Service providers who want to assess client viability
+**Core value proposition**:
+> "StartupAI: The marketplace for pre-validated deal flow"
 
 ---
 
-## Vision
+## The Two-Sided Marketplace
 
-### The Founder Relationship Ecosystem
+### Supply Side: Founders
 
-Founders don't operate in isolation. They maintain relationships with multiple stakeholders who have legitimate needs for validation visibility:
+Founders use StartupAI to validate their business ideas using the VPD methodology. Their validation evidence becomes a **quality signal** that attracts capital providers.
+
+| What Founders Get | What Founders Provide |
+|-------------------|----------------------|
+| Structured validation methodology | Pre-validated deal flow |
+| AI-powered market research | Evidence packages |
+| Customer interview frameworks | Behavioral data (DO evidence) |
+| Access to verified capital providers | Marketplace liquidity |
+
+### Demand Side: Portfolio Holders
+
+Portfolio Holders pay for access to validated founders. They are not buying software - they are buying **de-risked deal flow**.
+
+| What Portfolio Holders Get | What They Pay |
+|---------------------------|---------------|
+| VPD-validated startups | $199-$1,499/month |
+| Evidence packages (interviews, DO data) | Subscription tiers |
+| RFQ Board (founders seeking capital) | Marketplace access |
+| Founder Directory | Contact request system |
+
+### The Quality Flywheel
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                              FOUNDER                                    │
-│                     (Validating a business idea)                        │
-└───────────────────────────────┬────────────────────────────────────────┘
-                                │
-    ┌───────────┬───────────┬───┴───┬───────────┬───────────┐
-    │           │           │       │           │           │
-    ▼           ▼           ▼       ▼           ▼           │
-┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐      │
-│Capital │ │Advisory│ │Program │ │Service │ │Ecosystem│     │
-│Provider│ │Provider│ │Operator│ │Provider│ │Enabler │      │
-└────────┘ └────────┘ └────────┘ └────────┘ └────────┘      │
-    │           │           │       │           │           │
-    └───────────┴───────────┴───┬───┴───────────┴───────────┘
-                                │
-                                ▼
-              ┌─────────────────────────────────┐
-              │        PORTFOLIO HOLDER          │
-              │    "Show me the evidence"        │
-              │                                  │
-              │  Relationship Type:              │
-              │  • Capital (money)               │
-              │  • Advisory (guidance)           │
-              │  • Program (cohort)              │
-              │  • Service (professional)        │
-              │  • Ecosystem (community)         │
-              └─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    MARKETPLACE FLYWHEEL                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│    Validated Founders ──────────────► Capital Providers         │
+│         (Supply)                           (Demand)             │
+│            │                                   │                │
+│            │    "X verified investors          │                │
+│            │     on StartupAI"                 │                │
+│            │                                   │                │
+│            ▼                                   ▼                │
+│    More founders ◄──────────────────── More deal flow           │
+│    seeking capital                     attracts VCs             │
+│                                                                 │
+│    THE BAIT FOR FOUNDERS = ACCESS TO CAPITAL                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Marketplace Economics
+
+### What Capital Providers Pay Today
+
+| Platform | Annual Cost | What They Get |
+|----------|-------------|---------------|
+| PitchBook | $12,000-70,000 | Company data, funding history, contacts |
+| Crunchbase Enterprise | $2,000-5,000 | Company profiles, funding rounds, alerts |
+| AngelList Syndicates | $8,000 + 20% carry | Access to curated deals |
+| Angel Group Membership | $750-1,000 | Access to group deal flow + events |
+| Deal Sourcing Services | $60,000-120,000 | Introductions + curated matches |
+
+### What StartupAI Provides That Others Cannot
+
+| Differentiator | Why It Matters |
+|----------------|----------------|
+| **VPD Validation Evidence** | Not available anywhere else |
+| **Customer Interview Data** | Primary research, not secondary |
+| **Behavioral Evidence (DO data)** | Real traction signals, not vanity metrics |
+| **Hypothesis Testing History** | Shows founder rigor |
+| **HITL Checkpoint Record** | Shows coachability |
+| **Fit Score Algorithm** | Quantified problem-solution fit |
+
+### Competitive Positioning
+
+StartupAI is not competing with:
+- **Crunchbase** (data) - we provide evidence, not databases
+- **AngelList** (transactions) - we provide validation, not SPVs
+- **Gust** (application management) - we provide deal flow, not intake forms
+
+StartupAI is creating a new category: **pre-validated deal flow marketplace**.
+
+---
+
+## Pricing Tiers
+
+**See `docs/specs/pricing.md` for canonical pricing.**
+
+### Summary
+
+| Tier | Monthly | Annual | Target |
+|------|---------|--------|--------|
+| **Advisor** | $199 | $1,990 | Consultants, coaches, fractional executives |
+| **Capital** | $499 | $4,990 | Angels, family offices, micro VCs |
+| **Institutional** | $1,499 | $14,990 | VCs, accelerators, corporate innovation |
+
+### Why These Prices
+
+| Tier | Rationale |
+|------|-----------|
+| **Advisor ($199)** | 2-3x typical business SaaS, justified by AI assistance + portfolio visibility |
+| **Capital ($499)** | Below angel group memberships ($750-1,000/yr), vastly more value (validated deal flow) |
+| **Institutional ($1,499)** | Below PitchBook ($12K-25K/yr), positioned as complement with unique validation evidence |
+
+### Marketplace Access by Tier
+
+| Feature | Advisor | Capital | Institutional |
+|---------|---------|---------|---------------|
+| Portfolio Dashboard | ✓ | ✓ | ✓ |
+| Validation Visibility | ✓ | ✓ | ✓ |
+| White-label Exports | ✓ | ✓ | ✓ |
+| **Founder Directory** | ✗ | ✓ | ✓ |
+| **RFQ/RFP Board** | ✗ | ✓ | ✓ |
+| **Evidence Packages** | ✗ | ✓ | ✓ |
+| API Access | ✗ | ✗ | ✓ |
+
+---
+
+## The Five Cohorts
 
 ### Unified Persona: Portfolio Holder
 
@@ -79,389 +140,252 @@ Founders don't operate in isolation. They maintain relationships with multiple s
 
 **Core job-to-be-done**: Track, support, and evaluate Founders using evidence-based validation data.
 
----
-
-## The Five Cohorts
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                              FOUNDER                                    │
+│                     (Validating a business idea)                        │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+    ┌───────────┬───────────┬───────┴───┬───────────┬───────────┐
+    │           │           │           │           │           │
+    ▼           ▼           ▼           ▼           ▼           │
+┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐          │
+│Capital │ │Advisory│ │Program │ │Service │ │Ecosystem│         │
+│Provider│ │Provider│ │Operator│ │Provider│ │Enabler │          │
+└────────┘ └────────┘ └────────┘ └────────┘ └────────┘          │
+    │           │           │           │           │           │
+    └───────────┴───────────┴─────┬─────┴───────────┴───────────┘
+                                  │
+                                  ▼
+                ┌─────────────────────────────────┐
+                │        PORTFOLIO HOLDER          │
+                │    "Show me the evidence"        │
+                │                                  │
+                │  Relationship Type:              │
+                │  • Capital (money)               │
+                │  • Advisory (guidance)           │
+                │  • Program (cohort)              │
+                │  • Service (professional)        │
+                │  • Ecosystem (community)         │
+                └─────────────────────────────────┘
+```
 
 ### Cohort 1: Capital Providers
 
 *"Will I get my money back (+ return)?"*
 
-```
-┌───────────────────────────────────────┬───────────────────────┬───────────────────────────────────────┐
-│                Entity                 │  Typical Check Size   │            Validation Need            │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Friends & Family                      │ $5K-$50K              │ "Is my loved one's dream viable?"     │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Angel Investors                       │ $25K-$250K            │ "Will I see a return?"                │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Credit Unions                         │ $10K-$100K            │ "Can they repay?"                     │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Small Business Associations (SBA)     │ $50K-$5M (guaranteed) │ "Does this meet program criteria?"    │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Micro Lending (Kiva, Grameen)         │ $500-$50K             │ "Will this create impact?"            │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Fund Managers (VC/PE)                 │ $500K-$50M+           │ "Is this fundable at the next stage?" │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Banks                                 │ $50K-$500K            │ "What's the default risk?"            │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Crowdfunding Backers                  │ $50-$500              │ "Will this product exist?"            │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Revenue-Based Finance (Clearco, Pipe) │ $10K-$500K            │ "Are the unit economics real?"        │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Grants (Gov't, Foundation)            │ $10K-$500K            │ "Does this meet our mandate?"         │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Corporate Venture                     │ $250K-$5M             │ "Strategic fit + return?"             │
-├───────────────────────────────────────┼───────────────────────┼───────────────────────────────────────┤
-│ Family Offices                        │ $100K-$2M             │ "Diversification + thesis fit?"       │
-└───────────────────────────────────────┴───────────────────────┴───────────────────────────────────────┘
-```
+| Entity | Typical Check Size | Validation Need |
+|--------|-------------------|-----------------|
+| Friends & Family | $5K-$50K | "Is my loved one's dream viable?" |
+| Angel Investors | $25K-$250K | "Will I see a return?" |
+| Micro VCs | $100K-$500K | "Is this fundable at next stage?" |
+| Family Offices | $100K-$2M | "Diversification + thesis fit?" |
+| Revenue-Based Finance | $10K-$500K | "Are the unit economics real?" |
+| Grants (Gov't, Foundation) | $10K-$500K | "Does this meet our mandate?" |
 
 **Common denominator**: "Show me evidence this isn't going to zero."
 
----
+**Pricing tier**: Capital ($499/month) or Institutional ($1,499/month)
 
 ### Cohort 2: Advisory Providers
 
 *"Is my guidance being applied?"*
 
-```
-┌───────────────────────────────────────┬──────────────────────┐
-│                Entity                 │     Relationship     │
-├───────────────────────────────────────┼──────────────────────┤
-│ Business Coaches                      │ Ongoing development  │
-├───────────────────────────────────────┼──────────────────────┤
-│ Mentors                               │ Informal guidance    │
-├───────────────────────────────────────┼──────────────────────┤
-│ Fractional Executives (CFO, CTO, CMO) │ Part-time leadership │
-├───────────────────────────────────────┼──────────────────────┤
-│ Advisory Board Members                │ Strategic input      │
-├───────────────────────────────────────┼──────────────────────┤
-│ Industry Experts                      │ Domain knowledge     │
-├───────────────────────────────────────┼──────────────────────┤
-│ Management Consultants                │ Project-based        │
-└───────────────────────────────────────┴──────────────────────┘
-```
+| Entity | Relationship |
+|--------|--------------|
+| Business Coaches | Ongoing development |
+| Mentors | Informal guidance |
+| Fractional Executives | Part-time leadership |
+| Advisory Board Members | Strategic input |
+| Management Consultants | Project-based |
 
 **Common denominator**: "Is the founder making progress based on my advice?"
 
----
+**Pricing tier**: Advisor ($199/month)
 
 ### Cohort 3: Program Operators
 
 *"Is our program delivering outcomes?"*
 
-```
-┌──────────────────────────────┬───────────────────────────────┐
-│            Entity            │            Context            │
-├──────────────────────────────┼───────────────────────────────┤
-│ Accelerators (YC, Techstars) │ Cohort-based, equity          │
-├──────────────────────────────┼───────────────────────────────┤
-│ Incubators                   │ Longer-term, often non-profit │
-├──────────────────────────────┼───────────────────────────────┤
-│ University Programs          │ Student founders              │
-├──────────────────────────────┼───────────────────────────────┤
-│ Government Programs          │ Economic development          │
-├──────────────────────────────┼───────────────────────────────┤
-│ Corporate Innovation Labs    │ Strategic ventures            │
-├──────────────────────────────┼───────────────────────────────┤
-│ Startup Studios              │ Venture builders              │
-└──────────────────────────────┴───────────────────────────────┘
-```
+| Entity | Context |
+|--------|---------|
+| Accelerators (YC, Techstars) | Cohort-based, equity |
+| Incubators | Longer-term, often non-profit |
+| University Programs | Student founders |
+| Government Programs | Economic development |
+| Corporate Innovation Labs | Strategic ventures |
 
 **Common denominator**: "How do we demonstrate program ROI?"
 
----
+**Pricing tier**: Institutional ($1,499/month)
 
 ### Cohort 4: Professional Service Providers
 
 *"Is this client worth the credit risk?"*
 
-```
-┌─────────────────────────┬──────────────────────────┐
-│         Entity          │         Service          │
-├─────────────────────────┼──────────────────────────┤
-│ Startup Lawyers         │ Legal, IP, incorporation │
-├─────────────────────────┼──────────────────────────┤
-│ Accountants/Bookkeepers │ Financial management     │
-├─────────────────────────┼──────────────────────────┤
-│ Insurance Brokers       │ Risk coverage            │
-├─────────────────────────┼──────────────────────────┤
-│ Payroll Providers       │ HR infrastructure        │
-├─────────────────────────┼──────────────────────────┤
-│ Marketing Agencies      │ Growth services          │
-└─────────────────────────┴──────────────────────────┘
-```
+| Entity | Service |
+|--------|---------|
+| Startup Lawyers | Legal, IP, incorporation |
+| Accountants/Bookkeepers | Financial management |
+| Marketing Agencies | Growth services |
 
 **Common denominator**: "Should I extend credit terms to this client?"
 
----
+**Pricing tier**: Advisor ($199/month)
 
 ### Cohort 5: Ecosystem Enablers
 
 *"How do we prove value to our community?"*
 
-```
-┌───────────────────────────────┬─────────────────────────┐
-│            Entity             │          Role           │
-├───────────────────────────────┼─────────────────────────┤
-│ Coworking Spaces              │ Physical infrastructure │
-├───────────────────────────────┼─────────────────────────┤
-│ Startup Communities           │ Network/events          │
-├───────────────────────────────┼─────────────────────────┤
-│ Chambers of Commerce          │ Business advocacy       │
-├───────────────────────────────┼─────────────────────────┤
-│ Industry Associations         │ Sector support          │
-├───────────────────────────────┼─────────────────────────┤
-│ Economic Development Agencies │ Regional growth         │
-└───────────────────────────────┴─────────────────────────┘
-```
+| Entity | Role |
+|--------|------|
+| Coworking Spaces | Physical infrastructure |
+| Startup Communities | Network/events |
+| Chambers of Commerce | Business advocacy |
 
 **Common denominator**: "Are we creating measurable value for our members?"
 
----
-
-### Summary: Each Cohort's Core Question
-
-```
-┌───────────────────┬────────────────────────────────────────────┐
-│      Cohort       │               Core Question                │
-├───────────────────┼────────────────────────────────────────────┤
-│ Capital Provider  │ "Will I get my money back (+ return)?"     │
-├───────────────────┼────────────────────────────────────────────┤
-│ Advisory Provider │ "Is my guidance creating progress?"        │
-├───────────────────┼────────────────────────────────────────────┤
-│ Program Operator  │ "Is our program delivering outcomes?"      │
-├───────────────────┼────────────────────────────────────────────┤
-│ Service Provider  │ "Is this client a credit/churn risk?"      │
-├───────────────────┼────────────────────────────────────────────┤
-│ Ecosystem Enabler │ "Are we creating value for our community?" │
-└───────────────────┴────────────────────────────────────────────┘
-```
-
-All five collapse into one Portfolio Holder persona with different relationship types. The platform stays unified.
+**Pricing tier**: Advisor ($199/month) or Institutional ($1,499/month for larger organizations)
 
 ---
 
-## Platform Architecture
+## Architecture Decisions
 
-### Core Principle: No Dilution
+### Final Decisions (Reconciled 2026-02-03)
 
-The platform remains unified. Relationship types are a **configuration**, not separate products.
+Per discussion with Codex, the following decisions are baked into the architecture:
 
-### Current vs. Proposed Model
+| Decision | Resolution |
+|----------|------------|
+| **UI Label** | Keep "Consultant" as UI label; Portfolio Holder is the architectural umbrella |
+| **Connection Flows** | Three flows: invite-new, link-existing, founder-RFQ |
+| **Founder Acceptance** | Required for all relationship types |
+| **Portfolio Holder Overlay** | Integral to architecture now (not speculative) |
+| **Relationship Types** | All five supported: advisory, capital, program, service, ecosystem |
+| **Verification** | Paid plan = verified; trial = unverified |
+| **Marketplace Access** | Directory + RFQ Board visible only to verified (Capital+ tier) |
+| **Grace Period** | 7 days after payment failure before losing verified status |
 
-| Aspect | Current | Proposed |
-|--------|---------|----------|
-| Persona name | `consultant` | `portfolio_holder` |
-| Relationship model | Implicit (advisory) | Explicit (`relationship_type` field) |
-| Feature set | One-size-fits-all | Shared core + type-specific views |
-| Messaging | "Manage your clients" | Configurable per relationship type |
-
-### Shared Features (All Relationship Types)
-
-- Portfolio dashboard (multi-founder view)
-- Founder progress visibility
-- Validation evidence access (VPC, Brief, Gates)
-- HITL approval visibility
-- Founder invite/onboarding
-- Reporting and exports
-
-### Configurable by Relationship Type
-
-| Aspect | Capital | Advisory | Program | Service | Ecosystem |
-|--------|---------|----------|---------|---------|-----------|
-| **Invite language** | "Validate your venture" | "Join my practice" | "Join the cohort" | "Connect your account" | "Join our community" |
-| **Dashboard focus** | Risk metrics, milestones | Coaching notes, progress | Cohort comparison | Client health | Member activity |
-| **Reporting** | Investment thesis fit | Session summaries | Program outcomes | Churn prediction | Community metrics |
-| **Founder permission** | May be required | Opt-in | Program enrollment | Opt-in | Opt-in |
-| **Billing model** | Per-portfolio or AUM | Per-client | Per-cohort | Per-client | Per-member |
-
----
-
-## Strategic Implications
-
-### Market Positioning
-
-**Current**: "AI-powered validation for startup founders"
-
-**Expanded**: "The validation layer for the founder ecosystem"
-
-Or more boldly:
-
-> "StartupAI: The credit bureau for startup validation"
-
-### Distribution Channels
-
-Portfolio Holders become distribution channels:
-
-| Channel | Mechanism |
-|---------|-----------|
-| Lenders | Require founders to validate before funding |
-| Accelerators | Built into program curriculum |
-| Investors | Due diligence requirement |
-| Service Providers | Client health monitoring |
-
-### Revenue Model Implications
-
-| Segment | Model | Rationale |
-|---------|-------|-----------|
-| Individual Consultants | Per-client subscription | Current model |
-| Institutional Capital | Per-portfolio or AUM-based | Higher value, longer contracts |
-| Program Operators | Per-cohort licensing | Bulk pricing |
-| Service Providers | Freemium → per-client | Lead qualification value |
-| Ecosystem Enablers | Platform partnership | Community value |
-
----
-
-## Leadership Team Review (2026-01-31)
-
-### Reviewers
-
-| Agent | Role | Verdict |
-|-------|------|---------|
-| **system-architect** | Technical Architecture | Feasible as overlay; 11-18 days if built |
-| **domain-expert-vpd** | VPD Methodology | Aligned; Test Cards need strengthening |
-| **project-manager** | Execution Planning | Approve; queue A9-A11 behind A6 |
-
-### Key Decisions
-
-| Decision | Resolution | Rationale |
-|----------|------------|-----------|
-| **Implementation approach** | Overlay (not rename) | Add `relationship_type` without renaming `consultant`; lower risk, faster |
-| **Cohort priority** | A11 determines | Test which cohort has most urgent pain first |
-| **Validation sequencing** | A11 → A9 → A10 | One assumption at a time per VPD principles |
-| **Evidence bar for build** | ≥5 LOIs + ≥1 paying pilot | Behavioral evidence required, not just interviews |
-| **Timing** | Can start when founder has bandwidth | Discovery doesn't require engineering resources |
-
-### Architecture Decision
-
-**Approved approach: Overlay, not refactor**
+### Three Connection Flows
 
 ```
-Phase 2a: Add relationship_type to existing schema
-          └── consultant_clients gains relationship_type column
-          └── Default: 'advisory' for existing relationships
-
-Phase 2b: UI supports relationship types
-          └── Configurable invite flows
-          └── Cohort-specific dashboard views
-
-Phase 2c: Rename (deferred, optional)
-          └── consultant → portfolio_holder
-          └── Only if model proves out with evidence
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       CONNECTION FLOWS                                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  FLOW 1: INVITE-NEW                                                      │
+│  ─────────────────────────────────                                       │
+│  Portfolio Holder invites a founder who isn't on platform yet            │
+│                                                                          │
+│  PH sends invite → Founder receives email → Founder signs up →           │
+│  Founder accepts connection → Relationship active                        │
+│                                                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  FLOW 2: LINK-EXISTING                                                   │
+│  ─────────────────────────────────                                       │
+│  Portfolio Holder requests connection to existing founder                │
+│                                                                          │
+│  PH searches by email → Founder found → PH sends request →               │
+│  Founder reviews → Founder accepts/declines → Relationship active/none   │
+│                                                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  FLOW 3: FOUNDER RFQ (Marketplace)                                       │
+│  ─────────────────────────────────                                       │
+│  Founder posts request seeking capital/advice                            │
+│                                                                          │
+│  Founder creates RFQ → Posted to Request Board → Verified PH views →     │
+│  PH responds with message → Founder reviews → Founder accepts/declines   │
+│                                                                          │
+│  NOTE: Only Capital+ tier can view/respond to RFQ Board                  │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Rationale**: Lower migration risk, faster to implement, backwards compatible.
+### Verification System
+
+| Status | Meaning | Directory | RFQ Board | Grace Period |
+|--------|---------|-----------|-----------|--------------|
+| **Unverified** | Trial or no plan | Hidden | No access | N/A |
+| **Verified** (Advisor) | Paid Advisor tier | Listed (opt-in) | View only | 7 days |
+| **Verified** (Capital+) | Paid Capital/Institutional | Listed (opt-in) | Full access | 7 days |
+| **Grace** | Payment failed, within 7 days | Listed | Full access | Counting down |
+| **Revoked** | Payment failed, past 7 days | Hidden | No access | N/A |
+
+### Schema Additions
+
+**consultant_clients table:**
+- `relationship_type` (enum: advisory, capital, program, service, ecosystem)
+- `connection_status` (enum: invited, requested, active, declined, archived)
+- `initiated_by` (enum: consultant, founder)
+- `request_message` (nullable text)
+- `accepted_at`, `declined_at` (timestamps)
+
+**user_profiles / consultant profile:**
+- `consultant_verification_status` (enum: unverified, verified, grace, revoked)
+- `directory_opt_in` (boolean)
+
+**New tables (RFQ/RFP):**
+- `consultant_requests` (founder posts seeking capital/advice)
+- `consultant_request_responses` (PH responses to requests)
 
 ---
 
 ## Validation Requirements
 
-Before building, validate these assumptions. **Sequenced per VPD principles.**
-
-### Sequence
+### Assumption Sequence
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  A11 (Which cohort?) ──► A9 (Will they pay?) ──► A10 (Will │
-│       2 weeks                  3 weeks            they      │
-│                                                   mandate?) │
-│                                                   2 weeks   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  A4 (Founder WTP $49) ──► A6 (Advisor WTP $199) ──►             │
+│       Week 4                   Week 8                           │
+│                                                                 │
+│  ──► A9 (Capital WTP $499) ──► A10 (Mandate potential)          │
+│           Week 12                  Week 14                      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### A11: Cohort Priority (First)
+### Updated Test Cards
 
-**Hypothesis**: One cohort has significantly more urgent pain than others.
+#### A6: Advisor Willingness to Pay (Updated)
 
-**Test**: Comparative interviews across 3 cohorts (Capital, Advisory, Program)
-- 2-3 interviews per cohort
-- Rank by: pain severity, willingness to pay, sales cycle, distribution potential
+| Field | Value |
+|-------|-------|
+| **We believe** | Advisors/consultants will pay $199/month for portfolio visibility |
+| **To verify** | 8 discovery interviews + landing page test |
+| **We are right if** | ≥5 of 8 express WTP at $199, ≥30 landing page signups |
+| **We are wrong if** | <4 of 8 express WTP OR <15 signups |
+| **Time bound** | 3 weeks (post-A4 validation) |
 
-**Criteria**:
-- Clear winner emerges with ≥2x pain signal vs. others
-- Time bound: 2 weeks
+#### A9: Capital Provider Willingness to Pay (Updated)
 
-**Pivot trigger**: If no clear winner, default to Capital (highest strategic value).
+| Field | Value |
+|-------|-------|
+| **We believe** | Capital providers will pay $499/month for validated deal flow |
+| **To verify** | 8 interviews (angels, micro VCs) + LOI collection |
+| **We are right if** | ≥5 of 8 express WTP at $499, ≥5 signed LOIs |
+| **We are wrong if** | <4 of 8 express WTP OR <3 LOIs |
+| **Time bound** | 3 weeks (post-A6 validation) |
 
----
+#### A10: Distribution Channel / Mandate Potential
 
-### A9: Capital Provider Demand (Second - focused on winning cohort)
+| Field | Value |
+|-------|-------|
+| **We believe** | Portfolio holders will require founders to use StartupAI |
+| **To verify** | Direct questions in A9 interviews + pilot commitment |
+| **We are right if** | ≥3 of 8 indicate mandate potential, ≥1 paid pilot |
+| **We are wrong if** | 0 indicate mandate potential |
+| **Time bound** | 2 weeks (concurrent with late A9) |
 
-**Hypothesis**: [Winning cohort] will pay for founder validation visibility.
-
-**Test Card**:
-```
-┌─────────────────────────────────────────────────────────────┐
-│ ASSUMPTION: A9 - Portfolio Holder Willingness to Pay        │
-├─────────────────────────────────────────────────────────────┤
-│ We believe: [Winning cohort] will pay ≥$200/mo per         │
-│             portfolio for validation visibility             │
-│                                                             │
-│ To verify: 8 discovery interviews + landing page test       │
-│                                                             │
-│ Measuring:                                                  │
-│   • SAY: WTP expressed as specific price point              │
-│   • DO-indirect: Landing page email signups (≥50)           │
-│   • DO-indirect: LOI signatures (≥5)                        │
-│                                                             │
-│ We are right if:                                            │
-│   • ≥5 of 8 indicate WTP of ≥$200/mo                       │
-│   • ≥50 landing page signups in 2 weeks                    │
-│   • ≥5 signed LOIs                                          │
-│                                                             │
-│ Time bound: 3 weeks                                         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Pivot trigger**: If <4 of 8 express WTP, re-evaluate cohort selection or pause expansion.
-
----
-
-### A10: Distribution Channel Viability (Third - only if A9 validates)
-
-**Hypothesis**: Portfolio holders would require founders to use the platform.
-
-**Test Card**:
-```
-┌─────────────────────────────────────────────────────────────┐
-│ ASSUMPTION: A10 - Mandatory Adoption Potential              │
-├─────────────────────────────────────────────────────────────┤
-│ We believe: Portfolio holders will make validation a        │
-│             prerequisite for funding/engagement             │
-│                                                             │
-│ To verify: Direct questions in A9 interviews + follow-up    │
-│                                                             │
-│ Measuring:                                                  │
-│   • "Would you require portfolio companies to use this?"    │
-│   • "What would make this a due diligence requirement?"     │
-│   • Commitment to pilot with ≥3 founders                    │
-│                                                             │
-│ We are right if:                                            │
-│   • ≥3 of 8 indicate they would mandate usage              │
-│   • ≥1 commits to paid pilot with their founders           │
-│                                                             │
-│ Time bound: 2 weeks (concurrent with late A9)               │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Pivot trigger**: If 0 indicate mandate potential, position as "optional visibility" not "credit bureau."
-
----
-
-### Phase 3 Entry Gate
-
-**Required evidence before ANY implementation:**
+### Evidence Gate for Build
 
 | Evidence Type | Requirement | Weight |
 |---------------|-------------|--------|
-| Discovery interviews | 8 completed | SAY (0.3) |
+| Discovery interviews | 8 completed per cohort | SAY (0.3) |
 | Landing page signups | ≥50 emails | DO-indirect (0.8) |
 | Letters of Intent | ≥5 signed | DO-indirect (0.8) |
 | Paying pilot commitment | ≥1 customer | DO-direct (1.0) |
-
-**Gate review**: Leadership Team convenes to evaluate evidence before Phase 3 begins.
 
 ---
 
@@ -471,52 +395,46 @@ Before building, validate these assumptions. **Sequenced per VPD principles.**
 - [x] Document vision (this spec)
 - [x] Leadership Team review
 - [x] Founder approval of strategic direction
-- [ ] Add A9-A11 to backlog as P2
+- [x] Pricing framework established
+- [x] Marketplace economics analysis
+- [x] Reconciliation with Codex decisions
 
-### Phase 1: Validation (7 weeks total)
-- [ ] **A11**: Cohort priority interviews (2 weeks)
-- [ ] **A9**: WTP validation for winning cohort (3 weeks)
-  - [ ] 8 discovery interviews
-  - [ ] Landing page test (≥50 signups)
-  - [ ] LOI collection (≥5 signed)
-- [ ] **A10**: Distribution channel validation (2 weeks)
-  - [ ] Mandate potential assessment
-  - [ ] Pilot commitment (≥1 paying customer)
+### Phase 1: Founder Launch (Current)
+- [ ] Launch Founder tier ($49/month)
+- [ ] Validate A4 (Founder WTP)
+- [ ] Collect founder supply for marketplace
 
-### Phase 2: Architecture Preparation (Gate: A9-A10 evidence)
-- [ ] ADR for Portfolio Holder overlay approach
-- [ ] Schema design: add `relationship_type` to `consultant_clients`
-- [ ] Backwards compatibility plan (existing consultants = advisory)
+### Phase 2: Advisor Tier (Post-A4)
+- [ ] Validate A6 (Advisor WTP at $199)
+- [ ] Launch Advisor tier
+- [ ] Build portfolio dashboard
+- [ ] Build connection flows (invite-new, link-existing)
 
-### Phase 3: MVP for Priority Cohort
-- [ ] Add `relationship_type` column (default: 'advisory')
-- [ ] Configurable invite flows per type
-- [ ] Cohort-specific dashboard view
-- [ ] Pilot with ≥3 portfolio holders from winning cohort
+### Phase 3: Capital Tier + Marketplace (Post-A6)
+- [ ] Validate A9 (Capital WTP at $499)
+- [ ] Build Founder Directory
+- [ ] Build RFQ/RFP Board
+- [ ] Build evidence packages
+- [ ] Launch Capital tier
 
-### Phase 4: Expansion (Based on Demand)
-- [ ] Additional relationship types based on evidence
-- [ ] B2B sales motion for institutional accounts
-- [ ] API for programmatic access (accelerators, lenders)
-- [ ] Optional: Rename `consultant` → `portfolio_holder` if model proves out
+### Phase 4: Institutional Tier (Post-A9)
+- [ ] Validate A10 (mandate potential)
+- [ ] Build API access
+- [ ] Build multi-seat licensing
+- [ ] Launch Institutional tier
+- [ ] Enterprise sales motion
 
 ---
 
-## Open Questions
+## Open Questions (Resolved)
 
-1. **Naming**: Is "Portfolio Holder" the right term? Alternatives:
-   - Relationship Manager
-   - Stakeholder
-   - Partner
-   - Sponsor
-
-2. **Permission Model**: Should founders be able to reject portfolio holder requests? Or can some relationship types (lender) require participation?
-
-3. **Data Access Levels**: Should all relationship types see the same data? Or should Capital Providers see more financial detail while Advisory sees more coaching notes?
-
-4. **Multi-Relationship**: Can a founder have multiple portfolio holders of different types? (Yes, almost certainly)
-
-5. **Competitive Moat**: If we become the "validation credit bureau," what prevents incumbents (credit bureaus, investor platforms) from copying?
+| Question | Resolution |
+|----------|------------|
+| Is "Portfolio Holder" the right term? | Keep "Consultant" as UI label; Portfolio Holder is internal/architectural |
+| Should founders reject PH requests? | Yes, founder acceptance required for all flows |
+| Data access levels by type? | All types see same validation data; relationship context differs |
+| Multi-relationship support? | Yes, founders can have multiple PHs of different types |
+| Competitive moat? | VPD validation evidence is unique; data + methodology + evidence |
 
 ---
 
@@ -524,23 +442,23 @@ Before building, validate these assumptions. **Sequenced per VPD principles.**
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-01-31 | **Founder approved** strategic direction | Leadership Team review complete; path forward endorsed |
-| 2026-01-31 | **Overlay approach** for implementation | Add `relationship_type` without renaming; lower risk, faster |
-| 2026-01-31 | **Sequence A11 → A9 → A10** | One assumption at a time per VPD principles |
-| 2026-01-31 | **Evidence gate**: ≥5 LOIs + ≥1 paying pilot | Behavioral evidence required before build |
-| 2026-01-31 | **Strengthened Test Cards** for A9, A10 | Added measurable thresholds, time bounds, pivot triggers |
-| 2026-01-31 | Treat relationship types as features, not separate products | Avoid platform dilution; maintain unified codebase |
-| 2026-01-31 | Identify 5 cohorts (Capital, Advisory, Program, Service, Ecosystem) | Comprehensive mapping of founder relationship ecosystem |
-| 2026-01-31 | Require validation before building | VPD methodology - evidence before investment |
+| 2026-02-03 | **Tiered pricing**: Advisor $199, Capital $499, Institutional $1,499 | Marketplace economics analysis; competitive benchmarking |
+| 2026-02-03 | **Marketplace model**: Two-sided with founders as supply, PHs as demand | Bait for founders is capital access; flywheel dynamics |
+| 2026-02-03 | **Three connection flows**: invite-new, link-existing, founder-RFQ | Codex reconciliation; comprehensive marketplace coverage |
+| 2026-02-03 | **Founder acceptance required**: All relationships need consent | Privacy, trust, founder autonomy |
+| 2026-02-03 | **7-day grace period**: Before losing verified status | Balance user experience with payment enforcement |
+| 2026-01-31 | **Overlay approach**: Add relationship_type without renaming | Lower migration risk, faster |
+| 2026-01-31 | **Evidence gates**: ≥5 LOIs + ≥1 paying pilot before build | VPD methodology compliance |
 
 ---
 
 ## References
 
-- [Project Governance](../project-governance.md) - Decision #6 (User Story Ownership)
+- [Pricing Specification](pricing.md) - Canonical pricing source
 - [Consultant Journey Map](../user-experience/journeys/consultant/consultant-journey-map.md)
 - [Consultant Persona](../user-experience/personas/consultant.md)
 - [VPD Methodology](../../startupai-crew/docs/master-architecture/03-methodology.md)
+- [Consultant Client System](../features/consultant-client-system.md)
 
 ---
 
@@ -548,6 +466,7 @@ Before building, validate these assumptions. **Sequenced per VPD principles.**
 
 | Date | Version | Change |
 |------|---------|--------|
-| 2026-01-31 | 2.0 | **Approved**: Leadership Team review; strengthened Test Cards; overlay approach; evidence gates |
+| 2026-02-03 | 3.0 | **Major update**: Added marketplace economics, tiered pricing ($199/$499/$1,499), quality flywheel, Codex reconciliation decisions |
+| 2026-01-31 | 2.0 | Leadership Team review; strengthened Test Cards; overlay approach; evidence gates |
 | 2026-01-31 | 1.1 | Added ASCII table diagrams for improved readability |
 | 2026-01-31 | 1.0 | Initial draft from product-strategist / founder discussion |
