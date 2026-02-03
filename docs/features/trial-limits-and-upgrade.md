@@ -1,7 +1,8 @@
 ---
 purpose: "Feature specification for founder trial user limits and upgrade flow"
 status: "active"
-last_reviewed: "2026-01-22"
+last_reviewed: "2026-02-03"
+pricing_source: "docs/specs/pricing.md"
 user_stories: ["US-FT01", "US-FT02", "US-FT03"]
 ---
 
@@ -18,6 +19,27 @@ Trial users have limited access to StartupAI features to experience the platform
 | US-FT01 | Start Founder Trial Onboarding | High |
 | US-FT02 | View Trial Limits | High |
 | US-FT03 | Upgrade to Founder | High |
+
+---
+
+## Revenue Model
+
+### Platform Fee vs Ad Budget
+
+| Revenue Stream | Included in $49/mo? | Details |
+|----------------|---------------------|---------|
+| Platform Access | Yes | Full access to all features |
+| AI Analysis | Yes | All 5 phases, all HITL checkpoints |
+| Ad Budget | **No** | Pass-through cost, founder-approved |
+
+**Ad Budget Model:**
+- Founders are presented with an AI-recommended ad budget
+- Founder approves the amount via HITL checkpoint (`approve_spend_increase`)
+- Charges go directly to founder's payment method
+- StartupAI does NOT profit from ad spend (aligned incentives)
+- During trial: Platform free, but ad costs apply if founder wants real DO evidence
+
+See `docs/specs/pricing.md` for complete pricing specification.
 
 ---
 
@@ -80,7 +102,7 @@ Shown on founder dashboard for trial users:
 │  │  • Export & Sharing                                     │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
-│  [ Upgrade to Founder - $99/mo ]                                │
+│  [ Upgrade to Founder - $49/mo ]                                │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -98,7 +120,7 @@ Shown when trial user hits a limit:
 │  to test your idea in the real market.                          │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │  Founder Plan - $99/month                                │   │
+│  │  Founder Plan - $49/month                                │   │
 │  │                                                          │   │
 │  │  ✓ Full 5-phase validation                              │   │
 │  │  ✓ AI-powered market testing                            │   │
@@ -237,7 +259,7 @@ interface TrialUser {
 │  • Access your Founder's Brief                                  │
 │  • Unlock full D-F-V analysis                                   │
 │                                                                 │
-│  [ Upgrade to Founder - $99/mo ]                                │
+│  [ Upgrade to Founder - $49/mo ]                                │
 │                                                                 │
 │  Or [ Download Your Data ] before deletion                      │
 │                                                                 │
@@ -416,3 +438,4 @@ Action: Update user.plan, remove trial_expires_at
 
 **Last Updated**: 2026-01-22
 **Status**: Active specification
+**Pricing Source**: See `docs/specs/pricing.md` for canonical pricing

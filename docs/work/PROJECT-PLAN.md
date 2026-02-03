@@ -38,23 +38,17 @@
 
 ## Blocking Decision: Pricing
 
-**STATUS: MUST RESOLVE BEFORE E1 (Stripe Account)**
+**STATUS: RESOLVED (2026-02-03)**
 
-| Document | Founder Plan Price | Trial Duration |
-|----------|-------------------|----------------|
-| `trial-limits-and-upgrade.md` | $99/month | 30 days |
-| `founder-trial-journey-map.md` | $49/month | 14 days |
-| `validation-reference.md` (A4) | $49/month | -- |
+| Parameter | Decision | Rationale |
+|-----------|----------|-----------|
+| **Founder Plan Price** | $49/month | Strategyzer-level positioning; accessible to bootstrapped founders |
+| **Trial Duration** | 30 days | Allows completion of full Phase 1 VPC Discovery |
+| **Ad Budget** | Separate (pass-through) | Founder-approved, not included in SaaS fee |
 
-**Decision Required**: Founder must resolve pricing and trial duration before Stripe account creation.
+**Canonical Source**: `docs/specs/pricing.md`
 
-| Option | Price | Trial | Recommended |
-|--------|-------|-------|-------------|
-| A | $49/month | 14 days | Lower barrier, faster conversion signal |
-| B | $99/month | 30 days | Higher revenue, more validation time |
-| C | $49/month | 30 days | Hybrid approach |
-
-**Owner**: Founder + product-strategist | **Deadline**: Feb 3, 2026
+**Decision Owner**: Founder + product-strategist | **Decision Date**: Feb 3, 2026
 
 ---
 
@@ -129,7 +123,7 @@
 
 | Deliverable | Owner | Repo | Hours | Status |
 |-------------|-------|------|-------|--------|
-| E0: Pricing decision | Founder | External | 1h | ⏳ BLOCKER |
+| E0: Pricing decision | Founder | External | 1h | ✅ DONE |
 | E1: Stripe account created | Founder | External | 2h | ⏳ Blocked (E0) |
 | E2: Configure Stripe products/prices | Founder | External | 2h | ⏳ Blocked (E1) |
 | P5: Stripe env vars in Netlify | platform-eng | Product | 1h | ⏳ Blocked (E1) |
@@ -316,7 +310,7 @@
 
 | ID | Task | Hours | Owner | R | A | C | I | Depends On |
 |----|------|-------|-------|---|---|---|---|------------|
-| E0 | Pricing decision | 1h | Founder | Founder | Founder | product-strategist | PM | - |
+| E0 | Pricing decision | 1h | Founder | Founder | Founder | product-strategist | PM | ✅ DONE |
 | E1 | Create Stripe account | 2h | Founder | Founder | Founder | system-architect | PM | E0 |
 | E2 | Configure Stripe products/prices | 2h | Founder | Founder | product-strategist | backend-dev | PM | E1 |
 | E3 | First customer outreach | 4h | Founder | Founder | Founder | content-strat | PM | P12 |
@@ -558,7 +552,7 @@
 
 ### Gate 1: Foundation (Feb 9)
 
-- [ ] **E0**: Pricing decision made ($49 or $99, trial 14 or 30 days)
+- [x] **E0**: Pricing decision made ($49/month, 30-day trial) - DONE 2026-02-03
 - [ ] **E1**: Stripe account active and configured
 - [ ] **E2**: Stripe products/prices configured per E0 decision
 - [ ] **P5**: Stripe env vars in Netlify

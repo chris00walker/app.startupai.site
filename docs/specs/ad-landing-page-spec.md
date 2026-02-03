@@ -129,7 +129,7 @@ and a go/no-go recommendation backed by real evidence.
 
 **E. Trust Indicators (Below Form)**
 ```
-✓ No credit card required  ·  ✓ 14-day free trial  ·  ✓ Cancel anytime
+✓ No credit card required  ·  ✓ 30-day free trial  ·  ✓ Cancel anytime
 ```
 - Text: Slate-400, 14px
 - Checkmarks: Primary color
@@ -249,7 +249,7 @@ and a go/no-go recommendation backed by real evidence.
 │                                                         │
 │    [First Name]  [Email]  [Start Free Trial →]          │
 │                                                         │
-│    ✓ No credit card  ·  ✓ 14-day trial  ·  ✓ Cancel    │
+│    ✓ No credit card  ·  ✓ 30-day trial  ·  ✓ Cancel    │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -405,7 +405,7 @@ Include hidden fields in form to capture:
 
 1. **Hero section** with gradient background (slate-50 to blue-50 to indigo-50), centered layout, bold headline with gradient text accent, subheadline, and inline form (name + email + button)
 
-2. **Trust indicators** below form showing "No credit card required", "14-day free trial", "Cancel anytime" with checkmarks
+2. **Trust indicators** below form showing "No credit card required", "30-day free trial", "Cancel anytime" with checkmarks
 
 3. **Social proof strip** with a customer quote and attribution
 

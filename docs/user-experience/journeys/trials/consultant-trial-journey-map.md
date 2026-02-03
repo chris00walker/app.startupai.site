@@ -1,8 +1,9 @@
 ---
 purpose: "Complete consultant trial journey map and UX specification"
 status: "active"
-last_reviewed: "2026-01-22"
-last_updated: "2026-01-22"
+last_reviewed: "2026-02-03"
+last_updated: "2026-02-03"
+pricing_source: "docs/specs/pricing.md"
 ---
 
 # Complete Consultant Trial Journey Map
@@ -21,7 +22,7 @@ This document maps the complete user journey for Consultant Trial users from sig
 
 **Trial Promise:** "Experience the full consultant workflow with realistic mock clients"
 **Conversion Target:** Consultant plan ($149/month)
-**Trial Duration:** 14 days
+**Trial Duration:** 30 days
 
 ---
 

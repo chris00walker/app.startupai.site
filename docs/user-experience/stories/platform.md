@@ -1793,7 +1793,7 @@ These stories cover error recovery, timeout handling, and other edge cases that 
 
 **Given** I am undecided between plans
 **When** I look for help
-**Then** I should see "Not sure? Start with our 14-day free trial"
+**Then** I should see "Not sure? Start with our 30-day free trial"
 
 **E2E Test:** Gap - marketing site (cross-repo)
 **Journey Reference:** [`founder-journey-map.md`](../journeys/founder/founder-journey-map.md) - Step 4

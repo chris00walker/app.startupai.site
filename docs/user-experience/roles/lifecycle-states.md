@@ -19,7 +19,7 @@ last_reviewed: "2026-01-22"
 │                                                                 │
 │  ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
 │  │  Signup  │───>│  Trial   │───>│  Active  │                  │
-│  │          │    │(14 days) │    │  (Paid)  │                  │
+│  │          │    │(30 days) │    │  (Paid)  │                  │
 │  └──────────┘    └────┬─────┘    └────┬─────┘                  │
 │                       │               │                         │
 │                       │               │                         │
@@ -56,7 +56,7 @@ last_reviewed: "2026-01-22"
 | State | Description | User Access | Duration | Next State |
 |-------|-------------|-------------|----------|------------|
 | `signup` | User creating account | None (in progress) | Minutes | `trial` |
-| `trial` | Evaluating platform | Limited features | 14 days | `active` or `expired` |
+| `trial` | Evaluating platform | Limited features | 30 days | `active` or `expired` |
 | `active` | Paid, current subscription | Full features | Ongoing | `cancelled` or `past_due` |
 | `past_due` | Payment failed | Full (grace) | 14 days | `active` or `suspended` |
 | `suspended` | Multiple payment failures | Read-only | 16 days | `active` or `cancelled` |
@@ -72,7 +72,7 @@ last_reviewed: "2026-01-22"
 |------|----|---------|
 | `signup` | `trial` | Account creation complete |
 | `trial` | `active` | Payment successful |
-| `trial` | `expired` | 14 days passed, no payment |
+| `trial` | `expired` | 30 days passed, no payment |
 | `active` | `cancelled` | User cancels subscription |
 | `active` | `past_due` | Payment fails |
 | `past_due` | `active` | Payment recovered |

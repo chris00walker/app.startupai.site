@@ -62,7 +62,7 @@ The Billing journey consists of 6 phases covering the complete payment lifecycle
 
 | State | Description | User Access | Actions Available |
 |-------|-------------|-------------|-------------------|
-| `trial` | 14-day evaluation | Limited features | Upgrade |
+| `trial` | 30-day evaluation | Limited features | Upgrade |
 | `active` | Paid, current | Full features | All billing actions |
 | `past_due` | Payment failed | Full (grace period) | Update payment |
 | `suspended` | Multiple failures | Read-only | Update payment, cancel |

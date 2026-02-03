@@ -1,8 +1,9 @@
 ---
 purpose: "Trial user profiles, restrictions, and conversion paths"
 status: "active"
-last_reviewed: "2026-01-22"
-last_updated: "2026-01-22"
+last_reviewed: "2026-02-03"
+last_updated: "2026-02-03"
+pricing_source: "docs/specs/pricing.md"
 ---
 
 # Trial Personas
@@ -21,7 +22,7 @@ Trial users are prospective customers evaluating the platform. There are two dis
 |-----------|-------|
 | **Primary Role** | Prospective Founder |
 | **Status** | Evaluating platform for personal use |
-| **Duration** | 14-day trial |
+| **Duration** | 30-day trial |
 | **Conversion Target** | Founder plan ($49/month) |
 
 #### Goals
@@ -83,7 +84,7 @@ Upgrade Prompt → Founder ($49/mo)
 |-----------|-------|
 | **Primary Role** | Prospective Consultant |
 | **Status** | Evaluating platform for client practice |
-| **Duration** | 14-day trial |
+| **Duration** | 30-day trial |
 | **Conversion Target** | Consultant plan ($149/month) |
 
 #### Goals

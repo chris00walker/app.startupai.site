@@ -1,8 +1,9 @@
 ---
 purpose: "Complete founder trial journey map and UX specification"
 status: "active"
-last_reviewed: "2026-01-22"
-last_updated: "2026-01-22"
+last_reviewed: "2026-02-03"
+last_updated: "2026-02-03"
+pricing_source: "docs/specs/pricing.md"
 ---
 
 # Complete Founder Trial Journey Map
@@ -21,7 +22,7 @@ This document maps the complete user journey for Founder Trial users from signup
 
 **Trial Promise:** "Validate your idea before you commit"
 **Conversion Target:** Founder plan ($49/month)
-**Trial Duration:** 14 days
+**Trial Duration:** 30 days
 
 ---
 
@@ -68,10 +69,10 @@ signup_ui:
   form_fields:
     - email: "Required"
     - name: "Required (first and last)"
-    - plan: "Pre-selected: Free Trial (14 days)"
+    - plan: "Pre-selected: Free Trial (30 days)"
 
   value_props_displayed:
-    - "14-day free trial"
+    - "30-day free trial"
     - "No credit card required"
     - "Full access to AI analysis"
 
@@ -367,44 +368,69 @@ triggers:
 
   trial_day_7:
     timing: "Day 7 of trial"
-    action: "Email: 'Halfway there - how's your validation going?'"
+    action: "Email: 'Your first week - how's validation going?'"
 
-  trial_day_10:
-    timing: "Day 10 of trial"
-    action: "In-app banner + email: '4 days left'"
+  trial_day_14:
+    timing: "Day 14 of trial"
+    action: "Email: 'Halfway there - check your Phase 1 progress'"
 
-  trial_day_13:
-    timing: "Day 13 of trial"
+  trial_day_21:
+    timing: "Day 21 of trial"
+    action: "In-app banner + email: '9 days left'"
+
+  trial_day_27:
+    timing: "Day 27 of trial"
+    action: "In-app banner + email: '3 days left'"
+
+  trial_day_29:
+    timing: "Day 29 of trial"
     action: "Urgent email + dashboard modal: 'Trial ends tomorrow'"
 
   trial_expiration:
-    timing: "Day 14"
+    timing: "Day 30"
     action: "Full-page upgrade prompt, read-only access"
 
 conversion_emails:
   day_7:
-    subject: "How's your validation journey going?"
+    subject: "Your first week with StartupAI"
     content:
-      - "You're halfway through your trial"
+      - "You've completed your first week"
       - "Here's what you've accomplished so far"
-      - "What's coming in the next 7 days"
-    cta: "Continue My Trial"
+      - "Next steps: Complete Phase 1 Discovery"
+    cta: "Continue My Validation"
 
-  day_10:
-    subject: "4 days left in your StartupAI trial"
+  day_14:
+    subject: "Halfway there - how's Phase 1 going?"
     content:
-      - "Your trial ends in 4 days"
-      - "Don't lose your analysis results"
-      - "Upgrade now to continue validating"
+      - "You're halfway through your 30-day trial"
+      - "Have you collected SAY and DO evidence?"
+      - "Time to triangulate your findings"
+    cta: "Check My Progress"
+
+  day_21:
+    subject: "9 days left in your StartupAI trial"
+    content:
+      - "Your trial ends in 9 days"
+      - "Don't lose your validation progress"
+      - "Upgrade now to continue through all 5 phases"
     cta: "Upgrade to Founder"
     offer: "10% off first month"
 
-  day_13:
+  day_27:
+    subject: "3 days left - lock in your pricing"
+    content:
+      - "Your trial ends in 3 days"
+      - "Your {project_name} analysis will become read-only"
+      - "Upgrade now to keep your momentum"
+    cta: "Upgrade to Founder"
+    offer: "15% off first month"
+
+  day_29:
     subject: "Your trial ends tomorrow"
     content:
       - "Last day to save your work"
-      - "Your {project_name} analysis will become read-only"
-      - "Upgrade now to keep your momentum"
+      - "All validation progress preserved on upgrade"
+      - "Upgrade now to continue"
     cta: "Upgrade Now"
     offer: "20% off first month"
 ```
@@ -561,7 +587,7 @@ trial_specific_help:
 ## Trial Expiration Flow
 
 ```
-Day 14 Reached (Trial Expires)
+Day 30 Reached (Trial Expires)
            │
            ▼
     ┌──────────────┐
@@ -615,4 +641,5 @@ Day 14 Reached (Trial Expires)
 
 | Date | Change |
 |------|--------|
+| 2026-02-03 | Updated trial duration from 14 to 30 days per pricing decision |
 | 2026-01-22 | Initial creation - 4-phase founder trial journey with conversion triggers |
