@@ -1098,7 +1098,7 @@
     ],
     "cross_repo_connections": [
       "crew:docs/adr/001-flow-to-crew-migration.md",
-      "crew:docs/adr/003-landing-page-storage-migration.md",
+      "crew:docs/adr/003-validation-asset-architecture.md",
       "marketing:docs/archive/accessibility-requirements.md",
       "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
     ]
@@ -1202,7 +1202,7 @@
     ],
     "cross_repo_connections": [
       "crew:docs/adr/001-flow-to-crew-migration.md",
-      "crew:docs/adr/003-landing-page-storage-migration.md",
+      "crew:docs/adr/003-validation-asset-architecture.md",
       "marketing:docs/archive/accessibility-requirements.md",
       "marketing:docs/archive/persona-documentation-draft-2026-01-22.md"
     ]
@@ -5347,8 +5347,8 @@
   },
   {
     "repo": "crew",
-    "path": "docs/adr/003-landing-page-storage-migration.md",
-    "title": "ADR-003: Migration from Netlify to Supabase Storage for Landing Pages",
+    "path": "docs/adr/003-validation-asset-architecture.md",
+    "title": "ADR-003: Validation Asset Architecture (Landing Pages and Ad Creatives)",
     "category": "spec",
     "topics": [
       "auth",
@@ -11068,7 +11068,7 @@
     "cross_repo_connections": [
       "app:docs/archive/audits/CREWAI-FRONTEND-INTEGRATION-QA.md",
       "app:docs/archive/audits/strategyzer-ux-audit.md",
-      "crew:docs/adr/003-landing-page-storage-migration.md",
+      "crew:docs/adr/003-validation-asset-architecture.md",
       "crew:docs/architecture-audit/comprehensive-deficiency-report.md"
     ]
   }

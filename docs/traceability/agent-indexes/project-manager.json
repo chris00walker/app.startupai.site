@@ -300,7 +300,7 @@
     "app:docs/archive/completion-reports/IMPLEMENTATION_STATUS_REPORT.md",
     "app:docs/archive/incidents/nextjs-module-bundling-2025-10-31.md",
     "app:docs/user-experience/journeys/platform/account-settings-journey-map.md",
-    "crew:docs/adr/003-landing-page-storage-migration.md",
+    "crew:docs/adr/003-validation-asset-architecture.md",
     "crew:docs/adr/007-hexagonal-domain.md",
     "crew:docs/crewai-documentation/mcp-integration/mcp-dsl-integration.md",
     "crew:docs/crewai-documentation/mcp-integration/mcp-servers-as-tools.md",

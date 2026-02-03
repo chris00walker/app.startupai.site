@@ -145,7 +145,7 @@
     "crew:docs/README.md",
     "crew:docs/adr/001-flow-to-crew-migration.md",
     "crew:docs/adr/002-modal-serverless-migration.md",
-    "crew:docs/adr/003-landing-page-storage-migration.md",
+    "crew:docs/adr/003-validation-asset-architecture.md",
     "crew:docs/adr/005-state-first-synchronized-loop.md",
     "crew:docs/adr/006-quick-start-architecture.md",
     "crew:docs/adr/007-hexagonal-domain.md",

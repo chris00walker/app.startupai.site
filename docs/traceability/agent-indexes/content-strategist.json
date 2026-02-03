@@ -138,7 +138,7 @@
     "app:docs/work/done.md",
     "crew:README.md",
     "crew:docs/adr/002-modal-serverless-migration.md",
-    "crew:docs/adr/003-landing-page-storage-migration.md",
+    "crew:docs/adr/003-validation-asset-architecture.md",
     "crew:docs/adr/004-two-pass-onboarding-architecture.md",
     "crew:docs/adr/005-state-first-synchronized-loop.md",
     "crew:docs/adr/006-quick-start-architecture.md",
