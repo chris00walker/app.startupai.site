@@ -17,6 +17,9 @@ import { z } from 'zod';
 const createInviteSchema = z.object({
   email: z.string().email('Invalid email address'),
   name: z.string().optional(),
+  relationshipType: z
+    .enum(['advisory', 'capital', 'program', 'service', 'ecosystem'])
+    .default('advisory'),
 });
 
 /**
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, name } = validation.data;
+    const { email, name, relationshipType } = validation.data;
 
     // Get admin client for database operations
     let adminClient;
@@ -130,6 +133,9 @@ export async function POST(request: NextRequest) {
         invite_expires_at: expiresAt.toISOString(),
         client_name: name || null,
         status: 'invited',
+        relationship_type: relationshipType,
+        connection_status: 'invited',
+        initiated_by: 'consultant',
       })
       .select()
       .single();

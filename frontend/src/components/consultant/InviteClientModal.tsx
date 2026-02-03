@@ -21,7 +21,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Mail, User, CheckCircle2, Copy, ExternalLink, Crown, Lock, Sparkles } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Loader2, Mail, User, CheckCircle2, Copy, ExternalLink, Crown, Lock, Sparkles, Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -29,10 +36,20 @@ import Link from 'next/link';
 // Types
 // ============================================================================
 
+export type RelationshipType = 'advisory' | 'capital' | 'program' | 'service' | 'ecosystem';
+
+export const RELATIONSHIP_TYPES: { value: RelationshipType; label: string; description: string }[] = [
+  { value: 'advisory', label: 'Advisory', description: 'Strategic guidance. Mentors, coaches, fractional executives.' },
+  { value: 'capital', label: 'Capital', description: 'Funding support. Angels, VCs, family offices.' },
+  { value: 'program', label: 'Program', description: 'Cohort-based support. Accelerators, incubators.' },
+  { value: 'service', label: 'Service', description: 'Professional support. Lawyers, accountants, agencies.' },
+  { value: 'ecosystem', label: 'Ecosystem', description: 'Community and networking. Coworking, startup communities.' },
+];
+
 export interface InviteClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onInvite: (params: { email: string; name?: string }) => Promise<{
+  onInvite: (params: { email: string; name?: string; relationshipType: RelationshipType }) => Promise<{
     success: boolean;
     invite?: {
       id: string;
@@ -46,6 +63,8 @@ export interface InviteClientModalProps {
   }>;
   /** If true, show upgrade prompt instead of sending invite (US-CT03) */
   isTrial?: boolean;
+  /** Default relationship type for the consultant */
+  defaultRelationshipType?: RelationshipType;
 }
 
 type ModalState = 'form' | 'success' | 'upgrade';
@@ -67,10 +86,12 @@ export function InviteClientModal({
   onClose,
   onInvite,
   isTrial = false,
+  defaultRelationshipType = 'advisory',
 }: InviteClientModalProps) {
   const [state, setState] = useState<ModalState>('form');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationshipType);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -81,6 +102,7 @@ export function InviteClientModal({
     setState('form');
     setEmail('');
     setName('');
+    setRelationshipType(defaultRelationshipType);
     setError(null);
     setInviteUrl(null);
     setCopied(false);
@@ -113,6 +135,7 @@ export function InviteClientModal({
       const result = await onInvite({
         email: email.trim().toLowerCase(),
         name: name.trim() || undefined,
+        relationshipType,
       });
 
       if (!result.success) {
@@ -197,6 +220,35 @@ export function InviteClientModal({
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Personalizes the invite. They can change their name during signup.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="relationship-type">
+                  Relationship Type <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={relationshipType}
+                  onValueChange={(value: RelationshipType) => setRelationshipType(value)}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger id="relationship-type" className="pl-9">
+                    <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <SelectValue placeholder="Select relationship type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RELATIONSHIP_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div>
+                          <div className="font-medium">{type.label}</div>
+                          <div className="text-xs text-muted-foreground">{type.description}</div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Describes your relationship with this client.
                 </p>
               </div>
 

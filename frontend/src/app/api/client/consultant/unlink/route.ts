@@ -51,10 +51,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Archive the relationship (client-initiated)
+    // Update both status and connection_status for consistency
     const { error: updateError } = await adminClient
       .from('consultant_clients')
       .update({
         status: 'archived',
+        connection_status: 'archived', // Keep in sync with status
         archived_at: new Date().toISOString(),
         archived_by: 'client',
         updated_at: new Date().toISOString(),

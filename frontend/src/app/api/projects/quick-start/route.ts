@@ -119,12 +119,13 @@ export async function POST(request: NextRequest) {
     // Determine the target user ID (for consultant flow)
     let targetUserId = user.id;
     if (validatedData.client_id) {
-      // Verify consultant has access to this client
+      // Verify consultant has ACTIVE connection to this client
       const { data: clientAccess, error: clientError } = await supabase
         .from('consultant_clients')
         .select('client_id')
         .eq('consultant_id', user.id)
         .eq('client_id', validatedData.client_id)
+        .eq('connection_status', 'active') // Only active connections grant access
         .single();
 
       if (clientError || !clientAccess) {

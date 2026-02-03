@@ -1,0 +1,136 @@
+/**
+ * Founder Marketplace Settings API
+ *
+ * GET: Get founder marketplace settings
+ * PUT: Update founder marketplace settings
+ *
+ * @story US-FM10
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
+
+const updateSchema = z.object({
+  founderDirectoryOptIn: z.boolean(),
+});
+
+export async function GET() {
+  const supabase = await createClient();
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Get founder profile with qualification status
+  const { data: profile, error: profileError } = await supabase
+    .from('user_profiles')
+    .select('founder_directory_opt_in')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    return NextResponse.json(
+      { error: 'not_found', message: 'User profile not found' },
+      { status: 404 }
+    );
+  }
+
+  // Check if founder qualifies for directory (has project with partial_fit or strong_fit)
+  const { data: project } = await supabase
+    .from('projects')
+    .select('problem_fit')
+    .eq('user_id', user.id)
+    .in('problem_fit', ['partial_fit', 'strong_fit'])
+    .limit(1)
+    .single();
+
+  const qualifiesForDirectory = !!project;
+  const problemFit = project?.problem_fit || 'no_fit';
+
+  return NextResponse.json({
+    founderDirectoryOptIn: profile.founder_directory_opt_in,
+    problemFit,
+    qualifiesForDirectory,
+  });
+}
+
+export async function PUT(request: NextRequest) {
+  const supabase = await createClient();
+
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Parse request body
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const validation = updateSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: 'Invalid input', details: validation.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const { founderDirectoryOptIn } = validation.data;
+
+  // If opting in, verify qualification
+  if (founderDirectoryOptIn) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('problem_fit')
+      .eq('user_id', user.id)
+      .in('problem_fit', ['partial_fit', 'strong_fit'])
+      .limit(1)
+      .single();
+
+    if (!project) {
+      return NextResponse.json(
+        {
+          error: 'not_qualified',
+          message: 'Complete more validation to qualify for the Founder Directory.',
+          currentFit: 'no_fit',
+          requiredFit: 'partial_fit',
+        },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Update founder profile
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ founder_directory_opt_in: founderDirectoryOptIn })
+    .eq('id', user.id);
+
+  if (error) {
+    console.error('[founder/profile/marketplace] Update error:', error);
+    return NextResponse.json(
+      { error: 'Failed to update settings' },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    founderDirectoryOptIn,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export const dynamic = 'force-dynamic';

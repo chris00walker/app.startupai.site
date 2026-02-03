@@ -468,13 +468,33 @@ Per discussion with Codex, the following decisions are baked into the architectu
 
 ---
 
+## Glossary
+
+| Term | Definition |
+|------|------------|
+| **Portfolio Holder** | Architectural umbrella for entities managing multiple founder relationships. UI label: "Consultant" |
+| **Verified** | Portfolio Holder with active paid subscription (Advisor $199/mo or Capital $499/mo) |
+| **Grace Period** | 7-day window after payment failure before losing verified status |
+| **Founder Directory** | Directory where verified consultants browse founders who have opted in and have problem-fit |
+| **Consultant Directory** | Directory where authenticated founders browse verified consultants |
+| **RFQ** | Request for Quote - founder posts seeking capital/advice; verified consultants can respond |
+| **Connection Request** | Request to establish relationship; requires recipient acceptance |
+| **Cooldown** | 30-day waiting period after declining a connection before new request allowed |
+| **Evidence Package** | Validation data shared between connected parties (interviews, experiments, fit score) |
+
+---
+
 ## References
 
 - [Pricing Specification](pricing.md) - Canonical pricing source
-- [Consultant Journey Map](../user-experience/journeys/consultant/consultant-journey-map.md)
-- [Consultant Persona](../user-experience/personas/consultant.md)
+- [Consultant Journey Map](../user-experience/journeys/consultant/consultant-journey-map.md) - Phases 1-8 including marketplace
+- [Consultant Persona](../user-experience/personas/consultant.md) - Portfolio Holder context
+- [Portfolio Holder Stories](../user-experience/stories/portfolio-holder.md) - US-PH01-07, US-FM01-11
 - [VPD Methodology](../../startupai-crew/docs/master-architecture/03-methodology.md)
-- [Consultant Client System](../features/consultant-client-system.md)
+- [Consultant Client System](../features/consultant-client-system.md) - Three connection flows
+- [Marketplace Analytics](marketplace-analytics.md) - KPIs and event taxonomy
+- [Master Architecture - Organization](../../startupai-crew/docs/master-architecture/02-organization.md) - Portfolio Holder section
+- [Master Architecture - API Contracts](../../startupai-crew/docs/master-architecture/reference/api-contracts.md) - Marketplace API endpoints
 
 ---
 

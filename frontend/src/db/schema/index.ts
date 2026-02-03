@@ -107,6 +107,10 @@ export * from './consultant-profiles';
 export * from './consultant-onboarding-sessions';
 export * from './assistant-conversations';
 
+// Portfolio Holder Marketplace Infrastructure (US-PH01-07, US-FM01-11)
+export * from './consultant-requests';
+export * from './consultant-request-responses';
+
 // Legacy Tables (backwards compatibility)
 export * from './legacy-clients';
 

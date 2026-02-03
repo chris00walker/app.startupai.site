@@ -43,7 +43,8 @@ import {
   Tablet,
   Clock,
   MapPin,
-  LogOut
+  LogOut,
+  Store
 } from "lucide-react"
 import {
   Dialog,
@@ -57,6 +58,7 @@ import {
 import { ProjectsTab } from "@/components/settings/ProjectsTab"
 import { ClientsTab } from "@/components/settings/ClientsTab"
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab"
+import { MarketplaceTab } from "@/components/settings/MarketplaceTab"
 import { useAuth, useRoleInfo } from "@/lib/auth/hooks"
 import { createClient } from "@/lib/supabase/client"
 import type { ApprovalType } from "@/types/crewai"
@@ -680,6 +682,17 @@ export default function SettingsPage() {
                 <Users className="h-4 w-4 sm:mr-1.5 lg:hidden" />
                 <span className="hidden sm:inline lg:hidden">Clients</span>
                 <span className="hidden lg:inline">Clients</span>
+              </TabsTrigger>
+            )}
+            {(role === 'founder' || role === 'consultant') && (
+              <TabsTrigger
+                value="marketplace"
+                className="flex-1 px-2 py-2 text-xs sm:text-sm"
+                title="Marketplace"
+              >
+                <Store className="h-4 w-4 sm:mr-1.5 lg:hidden" />
+                <span className="hidden sm:inline lg:hidden">Market</span>
+                <span className="hidden lg:inline">Marketplace</span>
               </TabsTrigger>
             )}
             <TabsTrigger
@@ -1384,6 +1397,13 @@ export default function SettingsPage() {
           <TabsContent value="integrations" className="space-y-4">
             <IntegrationsTab />
           </TabsContent>
+
+          {/* Marketplace Tab */}
+          {(role === 'founder' || role === 'consultant') && (
+            <TabsContent value="marketplace" className="space-y-4">
+              <MarketplaceTab role={role as 'founder' | 'consultant'} userId={user?.id || ''} />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </DashboardLayout>

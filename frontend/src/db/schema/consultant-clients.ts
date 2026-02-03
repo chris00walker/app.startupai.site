@@ -2,12 +2,39 @@
  * Consultant Clients Schema
  *
  * Tracks the relationship between consultants and their clients,
- * including invite status, tokens, and archival state.
+ * including invite status, tokens, connection flows, and archival state.
+ *
+ * @story US-C02, US-PH03, US-PH04, US-FM03, US-FM05, US-FM06
  */
 
-import { pgTable, text, timestamp, uuid, index, uniqueIndex, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, index, boolean } from 'drizzle-orm/pg-core';
 import { userProfiles } from './users';
 
+/**
+ * Relationship types for Portfolio Holder marketplace
+ * @see docs/specs/portfolio-holder-vision.md
+ */
+export const relationshipTypeEnum = ['advisory', 'capital', 'program', 'service', 'ecosystem'] as const;
+export type RelationshipType = (typeof relationshipTypeEnum)[number];
+
+/**
+ * Connection status - expanded for marketplace flows
+ * - invited: Traditional invite flow (email sent, awaiting signup)
+ * - requested: Marketplace connection request (awaiting acceptance)
+ * - active: Relationship established
+ * - declined: Request was declined (30-day cooldown applies)
+ * - archived: Relationship ended by either party
+ */
+export const connectionStatusEnum = ['invited', 'requested', 'active', 'declined', 'archived'] as const;
+export type ConnectionStatus = (typeof connectionStatusEnum)[number];
+
+/**
+ * Who initiated the connection
+ */
+export const initiatedByEnum = ['consultant', 'founder'] as const;
+export type InitiatedBy = (typeof initiatedByEnum)[number];
+
+// Legacy enums for backwards compatibility
 export const consultantClientsStatusEnum = ['invited', 'active', 'archived'] as const;
 export type ConsultantClientStatus = (typeof consultantClientsStatusEnum)[number];
 
@@ -27,15 +54,24 @@ export const consultantClients = pgTable(
       onDelete: 'set null',
     }),
 
-    // Invite details
-    inviteEmail: text('invite_email').notNull(),
-    inviteToken: text('invite_token').unique().notNull(),
-    inviteExpiresAt: timestamp('invite_expires_at', { withTimezone: true }).notNull(),
+    // Invite details (for Flow 1: Invite-New) - nullable for marketplace flows
+    inviteEmail: text('invite_email'),
+    inviteToken: text('invite_token').unique(),
+    inviteExpiresAt: timestamp('invite_expires_at', { withTimezone: true }),
 
     // Optional: Client name for personalization before they sign up
     clientName: text('client_name'),
 
-    // Status tracking
+    // Connection details (Portfolio Holder marketplace - added 2026-02-03)
+    // @story US-PH03, US-FM03
+    relationshipType: text('relationship_type').notNull(), // NO DEFAULT - must be explicitly selected
+    connectionStatus: text('connection_status').default('invited').notNull(),
+    initiatedBy: text('initiated_by').default('consultant').notNull(),
+    requestMessage: text('request_message'), // Optional message with connection request
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+    declinedAt: timestamp('declined_at', { withTimezone: true }),
+
+    // Legacy status field (kept for backwards compatibility during migration)
     status: text('status').default('invited').notNull(),
 
     // Timestamps
@@ -54,9 +90,11 @@ export const consultantClients = pgTable(
     index('idx_consultant_clients_consultant').on(table.consultantId),
     index('idx_consultant_clients_client').on(table.clientId),
     index('idx_consultant_clients_token').on(table.inviteToken),
-    index('idx_consultant_clients_status').on(table.status),
+    index('idx_consultant_clients_status').on(table.connectionStatus),
     index('idx_consultant_clients_invite_email').on(table.inviteEmail),
-    index('idx_consultant_clients_consultant_status').on(table.consultantId, table.status),
+    index('idx_consultant_clients_consultant_status').on(table.consultantId, table.connectionStatus),
+    // New indexes for marketplace queries
+    index('idx_consultant_clients_relationship_type').on(table.relationshipType),
   ]
 );
 
@@ -69,11 +107,12 @@ export type NewConsultantClient = typeof consultantClients.$inferInsert;
 export interface ConsultantInvite {
   id: string;
   consultantId: string;
-  inviteEmail: string;
-  inviteToken: string;
-  inviteExpiresAt: Date;
+  inviteEmail: string | null; // Nullable for marketplace flows
+  inviteToken: string | null; // Nullable for marketplace flows
+  inviteExpiresAt: Date | null; // Nullable for marketplace flows
   clientName: string | null;
-  status: ConsultantClientStatus;
+  relationshipType: RelationshipType;
+  connectionStatus: ConnectionStatus;
   invitedAt: Date;
 }
 
@@ -84,11 +123,33 @@ export interface LinkedClient {
   id: string;
   consultantId: string;
   clientId: string;
-  inviteEmail: string;
+  inviteEmail: string | null; // Nullable for marketplace flows
   clientName: string | null;
-  status: ConsultantClientStatus;
+  relationshipType: RelationshipType;
+  connectionStatus: ConnectionStatus;
   linkedAt: Date;
+  acceptedAt: Date | null;
   // Joined from user_profiles
   fullName?: string;
   company?: string;
+}
+
+/**
+ * Type for connection request response (marketplace flows)
+ * @story US-PH03, US-FM03
+ */
+export interface ConnectionRequest {
+  id: string;
+  consultantId: string;
+  clientId: string | null;
+  relationshipType: RelationshipType;
+  connectionStatus: ConnectionStatus;
+  initiatedBy: InitiatedBy;
+  requestMessage: string | null;
+  createdAt: Date;
+  // Joined from user_profiles (for display)
+  consultantName?: string;
+  consultantOrganization?: string;
+  founderName?: string;
+  founderCompany?: string;
 }

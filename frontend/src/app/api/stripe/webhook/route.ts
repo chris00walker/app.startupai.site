@@ -7,8 +7,10 @@
  * - checkout.session.completed: User completed payment
  * - customer.subscription.updated: Subscription changed
  * - customer.subscription.deleted: Subscription cancelled
+ * - invoice.paid: Invoice paid (for verification)
+ * - invoice.payment_failed: Payment failed (start grace period)
  *
- * @story US-FT03
+ * @story US-FT03, US-PH01-07
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -16,6 +18,10 @@ import { headers } from 'next/headers';
 import { getStripe, deriveUpgradeRole } from '@/lib/stripe/client';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { handleMockClientsOnUpgrade } from '@/lib/mock-data';
+import {
+  handleSubscriptionEvent,
+  isMarketplacePlan,
+} from '@/lib/verification';
 import type Stripe from 'stripe';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -78,6 +84,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   console.log(`[stripe/webhook] User ${userId} upgraded to ${newRole} plan`);
 
+  // US-PH01-07: Handle Portfolio Holder verification for consultant upgrades
+  if (newRole === 'consultant') {
+    const priceId = session.line_items?.data?.[0]?.price?.id;
+    if (priceId && isMarketplacePlan(priceId)) {
+      try {
+        await handleSubscriptionEvent('customer.subscription.created', userId, priceId);
+        console.log(`[stripe/webhook] Granted verification to consultant ${userId}`);
+      } catch (err) {
+        console.warn('[stripe/webhook] Failed to grant verification:', err);
+      }
+    }
+  }
+
   // US-CT05: Archive mock clients when consultant trial upgrades
   if (currentRole === 'consultant_trial' && newRole === 'consultant') {
     try {
@@ -114,6 +133,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 /**
  * Process customer.subscription.updated event
  * - Handle plan changes, cancellation scheduling, etc.
+ * - Update Portfolio Holder verification status on plan changes
  */
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.user_id;
@@ -151,11 +171,24 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   console.log(`[stripe/webhook] Updated subscription status for user ${userId}: ${subscriptionStatus}`);
+
+  // US-PH01-07: Handle Portfolio Holder verification on plan changes
+  // Get the current price ID to check if it's a marketplace plan
+  const priceId = subscription.items?.data?.[0]?.price?.id;
+  if (priceId) {
+    try {
+      await handleSubscriptionEvent('customer.subscription.updated', userId, priceId);
+      console.log(`[stripe/webhook] Updated verification status for ${userId}`);
+    } catch (err) {
+      console.warn('[stripe/webhook] Failed to update verification:', err);
+    }
+  }
 }
 
 /**
  * Process customer.subscription.deleted event
  * - Downgrade user to trial (limited access, not full trial again)
+ * - Revoke Portfolio Holder verification
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.user_id;
@@ -185,6 +218,14 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   console.log(`[stripe/webhook] Subscription canceled for user ${userId}`);
 
+  // US-PH01-07: Revoke Portfolio Holder verification
+  try {
+    await handleSubscriptionEvent('customer.subscription.deleted', userId);
+    console.log(`[stripe/webhook] Revoked verification for ${userId}`);
+  } catch (err) {
+    console.warn('[stripe/webhook] Failed to revoke verification:', err);
+  }
+
   // Log cancellation event
   try {
     await supabase.from('analytics_events').insert({
@@ -197,6 +238,105 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     });
   } catch (err) {
     console.warn('[stripe/webhook] Failed to log cancellation event:', err);
+  }
+}
+
+/**
+ * Process invoice.paid event
+ * - Refresh verification status on successful payment
+ */
+async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const customerId = typeof invoice.customer === 'string'
+    ? invoice.customer
+    : invoice.customer?.id;
+
+  if (!customerId) {
+    console.warn('[stripe/webhook] No customer in invoice');
+    return;
+  }
+
+  // Look up user by Stripe customer ID
+  const supabase = createAdminClient();
+  const { data: user } = await supabase
+    .from('user_profiles')
+    .select('id, role')
+    .eq('stripe_customer_id', customerId)
+    .single();
+
+  if (!user) {
+    console.warn('[stripe/webhook] No user found for customer:', customerId);
+    return;
+  }
+
+  // Only process for consultants
+  if (user.role !== 'consultant') {
+    return;
+  }
+
+  // Get the price ID from the invoice line items
+  const lineItem = invoice.lines?.data?.[0];
+  const priceObj = lineItem?.pricing?.price_details?.price;
+  const priceId = typeof priceObj === 'string' ? priceObj : priceObj?.id;
+
+  try {
+    await handleSubscriptionEvent('invoice.paid', user.id, priceId);
+    console.log(`[stripe/webhook] Verified consultant ${user.id} on invoice.paid`);
+  } catch (err) {
+    console.warn('[stripe/webhook] Failed to verify on invoice.paid:', err);
+  }
+}
+
+/**
+ * Process invoice.payment_failed event
+ * - Start 7-day grace period for Portfolio Holders
+ */
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  const customerId = typeof invoice.customer === 'string'
+    ? invoice.customer
+    : invoice.customer?.id;
+
+  if (!customerId) {
+    console.warn('[stripe/webhook] No customer in invoice');
+    return;
+  }
+
+  // Look up user by Stripe customer ID
+  const supabase = createAdminClient();
+  const { data: user } = await supabase
+    .from('user_profiles')
+    .select('id, role')
+    .eq('stripe_customer_id', customerId)
+    .single();
+
+  if (!user) {
+    console.warn('[stripe/webhook] No user found for customer:', customerId);
+    return;
+  }
+
+  // Only process for consultants
+  if (user.role !== 'consultant') {
+    return;
+  }
+
+  try {
+    await handleSubscriptionEvent('invoice.payment_failed', user.id);
+    console.log(`[stripe/webhook] Started grace period for consultant ${user.id}`);
+  } catch (err) {
+    console.warn('[stripe/webhook] Failed to start grace period:', err);
+  }
+
+  // Log the event
+  try {
+    await supabase.from('analytics_events').insert({
+      user_id: user.id,
+      event_type: 'payment_failed',
+      event_data: {
+        invoice_id: invoice.id,
+        failed_at: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    console.warn('[stripe/webhook] Failed to log payment_failed event:', err);
   }
 }
 
@@ -255,6 +395,18 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         await handleSubscriptionDeleted(subscription);
+        break;
+      }
+
+      case 'invoice.paid': {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaid(invoice);
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentFailed(invoice);
         break;
       }
 

@@ -6,6 +6,8 @@ last_reviewed: "2026-01-22"
 
 # Consultant Persona
 
+> **Portfolio Holder Context (2026-02-03)**: The Consultant persona is part of the broader "Portfolio Holder" umbrella that encompasses five relationship types: advisory, capital, program, service, and ecosystem. "Consultant" remains the UI label while "Portfolio Holder" is the architectural umbrella. See [portfolio-holder-vision.md](../../specs/portfolio-holder-vision.md) for the complete marketplace vision.
+
 ## Consultant Persona
 
 ### Profile
@@ -88,5 +90,30 @@ Consultant (1) ────────> (N) Clients
 ```
 
 **Critical Constraint:** Archiving a client hides them from Consultant's view but **never affects** the Client's actual project data.
+
+### Portfolio Holder Umbrella
+
+The Consultant persona is one of five relationship types under the Portfolio Holder umbrella:
+
+| Relationship Type | Description | Pricing Tier |
+|-------------------|-------------|--------------|
+| **Advisory** | Coaches, mentors, fractional executives | Advisor ($199/mo) |
+| **Capital** | Angels, VCs, family offices | Capital ($499/mo) |
+| **Program** | Accelerators, incubators | Capital ($499/mo) |
+| **Service** | Lawyers, accountants, agencies | Advisor ($199/mo) |
+| **Ecosystem** | Coworking, startup communities | Advisor ($199/mo) |
+
+### Marketplace Features
+
+Verified consultants (paid Advisor or Capital tier) gain access to:
+
+| Feature | Description |
+|---------|-------------|
+| **Founder Directory** | Browse opt-in founders with validated ideas |
+| **RFQ Board** | View and respond to founder requests for capital/advice |
+| **Connection Requests** | Request or accept connections with founders |
+| **Evidence Access** | View founder validation evidence after connection |
+
+See [portfolio-holder.md](../stories/portfolio-holder.md) for complete marketplace user stories.
 
 ---

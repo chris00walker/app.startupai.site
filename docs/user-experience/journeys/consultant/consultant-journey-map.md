@@ -440,6 +440,147 @@ success_metrics:
   - unlink_notification_rate: (future feature)
 ```
 
+### Phase 7: Founder Directory (Marketplace)
+
+> **Added 2026-02-03**: Portfolio Holder marketplace feature for verified consultants.
+
+**Step 19: Browse Founder Directory (ongoing)**
+```yaml
+touchpoint: app.startupai.site/consultant/founders
+user_state: browsing_validated_founders
+user_goal: discover_founders_matching_expertise
+user_actions:
+  - navigates to Founder Directory
+  - browses founder cards with evidence badges
+  - applies filters (industry, stage, problem_fit)
+  - clicks "Request Connection" on interesting founders
+displayed_information:
+  - founder display name (anonymized)
+  - company name
+  - industry and stage
+  - problem fit badge (partial_fit, strong_fit)
+  - evidence badges (interviews, experiments, fit score)
+user_emotions: discovery, evaluating
+pain_points:
+  - too many founders to review
+  - wants to see more evidence before connecting
+  - unclear which founders are actively seeking advisors
+success_metrics:
+  - directory_browse_rate: >30% of verified consultants
+  - filter_usage_rate: >50%
+  - connection_request_rate: >10% of views
+access_control:
+  - requires verification_status IN ('verified', 'grace')
+  - returns 403 for unverified consultants
+```
+
+**Step 20: Request Connection to Founder (2-3 minutes)**
+```yaml
+touchpoint: connection request modal
+user_state: requesting_founder_connection
+user_goal: establish_professional_relationship
+user_actions:
+  - clicks "Request Connection" on founder card
+  - selects relationship_type (advisory, capital, program, service, ecosystem)
+  - writes optional introduction message
+  - clicks "Send Request"
+system_actions:
+  - creates consultant_clients record (status: requested)
+  - sets initiated_by: consultant
+  - notifies founder of pending request
+user_emotions: hopeful, professional
+pain_points:
+  - uncertain if founder will respond
+  - wants to stand out from other consultants
+  - cooldown limits reconnection attempts
+success_metrics:
+  - request_completion_rate: >80%
+  - message_inclusion_rate: >60%
+  - acceptance_rate: >40%
+```
+
+**Step 21: Respond to Founder Connection Requests (ongoing)**
+```yaml
+touchpoint: dashboard connection requests card
+user_state: reviewing_founder_requests
+user_goal: accept_or_decline_incoming_connections
+displayed_information:
+  - badge count on dashboard ("2 pending")
+  - founder name and company
+  - relationship type requested
+  - founder's message (if any)
+  - "Accept" and "Decline" buttons
+user_actions:
+  - views pending requests on dashboard
+  - reviews founder details
+  - accepts (grants evidence access) or declines (30-day cooldown)
+user_emotions: evaluating, decisive
+success_metrics:
+  - response_rate: >80% within 7 days
+  - acceptance_rate: >50%
+```
+
+---
+
+### Phase 8: RFQ Board (Marketplace)
+
+> **Added 2026-02-03**: Portfolio Holder marketplace feature for verified consultants.
+
+**Step 22: Browse RFQ Board (ongoing)**
+```yaml
+touchpoint: app.startupai.site/consultant/rfq
+user_state: browsing_founder_requests
+user_goal: discover_opportunities_matching_expertise
+user_actions:
+  - navigates to RFQ Board
+  - browses open RFQs from founders
+  - filters by relationship_type, industry, timeline
+  - clicks "View Details" or "Respond" on relevant RFQs
+displayed_information:
+  - RFQ title and description preview
+  - relationship_type (capital, advisory, etc.)
+  - industries requested
+  - timeline and budget range
+  - response count
+user_emotions: opportunity_seeking, evaluating
+pain_points:
+  - too many RFQs to review
+  - unclear which founders are most qualified
+  - competition from other consultants
+success_metrics:
+  - rfq_browse_rate: >40% of verified consultants
+  - response_rate: >15% of viewed RFQs
+access_control:
+  - requires verification_status IN ('verified', 'grace')
+  - returns 403 for unverified consultants
+```
+
+**Step 23: Respond to RFQ (3-5 minutes)**
+```yaml
+touchpoint: RFQ response modal
+user_state: responding_to_founder_rfq
+user_goal: propose_services_or_capital
+user_actions:
+  - views RFQ details
+  - clicks "Respond"
+  - writes compelling message explaining fit
+  - clicks "Send Response"
+system_actions:
+  - creates consultant_request_responses record (status: pending)
+  - notifies founder of new response
+  - displays "Response Sent" on RFQ card
+user_emotions: hopeful, competitive
+pain_points:
+  - wants to know how many others responded
+  - uncertain what founders look for in responses
+  - no way to edit after sending
+success_metrics:
+  - response_completion_rate: >90%
+  - message_quality_score: (future metric)
+```
+
+---
+
 ### Cross-Cutting: Get Help (Any Time)
 
 **Get Help Step (available throughout journey)**
