@@ -4,7 +4,7 @@
 
 **Owner**: project-manager | **Approved By**: Pending | **Created**: 2026-02-02
 
-**Revision**: v2.2 - Team feedback incorporated, RACI fixed, totals reconciled
+**Revision**: v2.3 - Marketplace analytics and security work completed (Feb 4)
 
 ---
 
@@ -18,21 +18,21 @@
 | **Teams** | 4 (Leadership, Design, Engineering, Quality) |
 | **Agents** | 18 specialists |
 | **Milestones** | 4 (weekly gates) |
-| **Total Hours** | 195.5h |
+| **Total Hours** | 213.5h (was 195.5h + 18h marketplace) |
 | **Budget** | $500 |
 
 ### Hours by Category
 
-| Category | Hours | % |
-|----------|-------|---|
-| Product App (Engineering) | 48.5h | 25% |
-| AI Backend | 68h | 34% |
-| Marketing | 30h | 15% |
-| Design | 20h | 10% |
-| Documentation | 11h | 6% |
-| Analytics | 7h | 4% |
-| External (Founder) | 11h | 6% |
-| **Total** | **195.5h** | 100% |
+| Category | Hours | % | Notes |
+|----------|-------|---|-------|
+| Product App (Engineering) | 66.5h | 31% | +18h marketplace work completed |
+| AI Backend | 68h | 32% | |
+| Marketing | 30h | 14% | |
+| Design | 20h | 9% | |
+| Documentation | 11h | 5% | |
+| Analytics | 7h | 3% | Event taxonomy done |
+| External (Founder) | 11h | 5% | |
+| **Total** | **213.5h** | 100% | Was 195.5h before marketplace |
 
 ---
 
@@ -63,7 +63,7 @@
 │  ──────────────────          ──────────────           ──────────────        │
 │  Product App                 AI Backend               Marketing Site        │
 │  Next.js + Supabase          CrewAI + Modal           Lead capture          │
-│  ~95% complete               ~80% complete            ~95% complete         │
+│  ~90% complete               ~80% complete            ~95% complete         │
 │                                                                              │
 │  LEAD: frontend-dev          LEAD: ai-engineer        LEAD: content-strat   │
 │  TEAM: backend-dev,          TEAM: platform-eng,      TEAM: graphic-designer│
@@ -72,8 +72,9 @@
 │                                                                              │
 │  KEY WORK:                   KEY WORK:                KEY WORK:             │
 │  • Stripe integration        • MCP tool wiring        • Wire to real APIs   │
-│  • PostHog events            • Phase 3-4 testing      • Landing page A/B    │
-│  • Security hardening        • Production validation  • IH community launch │
+│  • Security hardening        • Phase 3-4 testing      • Landing page A/B    │
+│  ✅ Marketplace analytics    • Production validation  • IH community launch │
+│  ✅ RLS security fixes                                                      │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -128,14 +129,17 @@
 | E2: Configure Stripe products/prices | Founder | External | 2h | ⏳ Blocked (E1) |
 | P5: Stripe env vars in Netlify | platform-eng | Product | 1h | ⏳ Blocked (E1) |
 | P5a: Webhook URL in Stripe dashboard | platform-eng | Product | 0.5h | ⏳ Blocked (P5) |
-| P1: Apply pending migrations | data-engineer | Product | 2h | ⏳ Pending |
+| P1: Apply pending migrations | data-engineer | Product | 2h | ✅ DONE (17 marketplace migrations) |
 | P2: Trial split verification | data-engineer | Product | 2h | ⏳ Pending |
-| A1: Event taxonomy design | data-analyst | Product | 2h | ⏳ Pending |
+| A1: Event taxonomy design | data-analyst | Product | 2h | ✅ DONE (marketplace-analytics.md) |
 | P3: PostHog Quick Start events | frontend-dev | Product | 3h | ⏳ Pending |
 | P4: PostHog HITL approval events | frontend-dev | Product | 4h | ⏳ Pending |
 | D1: Design system token sync | ui-designer | Product | 2h | ⏳ Pending |
+| **MP1**: Marketplace analytics implementation | frontend-dev | Product | 6h | ✅ DONE |
+| **MP2**: RLS security hardening (17 migrations) | security-eng | Product | 8h | ✅ DONE |
+| **MP3**: E2E marketplace tests | qa-engineer | Product | 4h | ✅ DONE |
 
-**M1 Total**: 21.5h
+**M1 Total**: 39.5h (was 21.5h + 18h marketplace work completed)
 
 ---
 
@@ -231,8 +235,11 @@
 | P11 | Phase 3-4 verification | 6h | qa-engineer | qa-engineer | system-architect | ai-engineer | PM | P10, C4 |
 | P12 | E2E journey timing | 3h | qa-engineer | qa-engineer | system-architect | platform-eng | PM | P11 |
 | P13 | Test payment (Stripe test) | 3h | qa-engineer | qa-engineer | backend-dev | security-eng | PM | P7 |
+| MP1 | Marketplace analytics implementation | 6h | frontend-dev | frontend-dev | data-analyst | qa-engineer | PM | A1 | ✅ DONE |
+| MP2 | RLS security hardening (17 migrations) | 8h | security-eng | security-eng | system-architect | backend-dev | PM | - | ✅ DONE |
+| MP3 | E2E marketplace flow tests | 4h | qa-engineer | qa-engineer | frontend-dev | security-eng | PM | MP1, MP2 | ✅ DONE |
 
-**Subtotal**: 48.5h (includes 2h security: P6b, P6c)
+**Subtotal**: 66.5h (was 48.5h + 18h marketplace work completed)
 
 ---
 
@@ -322,16 +329,16 @@
 
 ### Total Work
 
-| Category | Hours | Percentage |
-|----------|-------|------------|
-| Product App | 48.5h | 25% |
-| AI Backend | 68h | 34% |
-| Marketing | 30h | 15% |
-| Design | 20h | 10% |
-| Documentation | 11h | 6% |
-| Analytics | 7h | 4% |
-| External (Founder) | 11h | 6% |
-| **TOTAL** | **195.5h** | 100% |
+| Category | Hours | Percentage | Status |
+|----------|-------|------------|--------|
+| Product App | 66.5h | 31% | 18h marketplace done |
+| AI Backend | 68h | 32% | Pending |
+| Marketing | 30h | 14% | Pending |
+| Design | 20h | 9% | Pending |
+| Documentation | 11h | 5% | Pending |
+| Analytics | 7h | 3% | A1 done |
+| External (Founder) | 11h | 5% | E0 done |
+| **TOTAL** | **213.5h** | 100% | ~22h complete |
 
 ---
 
@@ -557,9 +564,12 @@
 - [ ] **E2**: Stripe products/prices configured per E0 decision
 - [ ] **P5**: Stripe env vars in Netlify
 - [ ] **P2**: Trial split verified (schema matches role enum)
-- [ ] **A1**: Event taxonomy documented
+- [x] **A1**: Event taxonomy documented (marketplace-analytics.md) - DONE 2026-02-03
 - [ ] **P3, P4**: PostHog events instrumented
 - [ ] `pnpm schema:fk:ci` passes (no FK type mismatches)
+- [x] **MP1**: Marketplace analytics (server + client) - DONE 2026-02-04
+- [x] **MP2**: 17 RLS security migrations applied - DONE 2026-02-04
+- [x] **MP3**: E2E marketplace flow tests - DONE 2026-02-04
 
 ### Gate 2: Core Engineering (Feb 16)
 
@@ -658,7 +668,52 @@ Business model validation happens **IN the StartupAI product**, not in this docu
 | v2.0 | 2026-02-02 | project-manager | Incorporated feedback from 18 team members across 4 teams. Added: Design work (20h), Documentation (11h), Analytics (7h), Security tasks (4h). Adjusted verification times (+8h). Added pricing blocker (E0). Fixed C5 dependency. Updated RACI for design team. Added gate criteria. Total: 177h |
 | v2.1 | 2026-02-02 | project-manager | Fixed 5 RACI violations: E0, E3, E4 (Founder as A for Founder decisions), P6c (system-architect as A for security), D3 (product-strategist as A to avoid hierarchy conflict) |
 | v2.2 | 2026-02-02 | project-manager | Fixed effort totals (177h→195.5h), Product App hours (41h→48.5h), security note (7.5h→2h), Gate 3 criteria (P11 is Phase 3-4 not 2-4), Gate 1 added E2, Stripe fees budget ($0→$25), percentages sum to 100%, M1 gate mentions E2 |
+| v2.3 | 2026-02-04 | project-manager | Marketplace work completed: 17 RLS migrations, server+client analytics, E2E tests. Added MP1-MP3 deliverables. Updated M1 total (21.5h→39.5h). Marked A1 complete. |
 
 ---
 
-**Last Updated**: 2026-02-02 | **Next Review**: Weekly Friday | **Status**: Awaiting Founder Approval
+## Completed Work (Feb 3-4, 2026) - Marketplace Phase
+
+### Summary
+
+Major unplanned work completed to ship the Portfolio Holder marketplace features:
+
+| Category | Work | Commits |
+|----------|------|---------|
+| **Schema/Security** | 17 migrations fixing RLS, INSERT constraints, analytics RPC | 20260203000001-000017 |
+| **Server Analytics** | PostHog HTTP API tracking for all marketplace routes | `lib/analytics/server.ts` |
+| **Client Analytics** | Directory browse, profile view, filter events | `lib/analytics/index.ts` |
+| **E2E Tests** | Full marketplace flow coverage | `41-marketplace-flows.spec.ts` |
+| **API Hardening** | Verification status, graceful error handling | All marketplace routes |
+
+### Key Files Created/Modified
+
+**New Files:**
+- `frontend/src/lib/analytics/server.ts` - Server-side PostHog tracking
+- `frontend/tests/e2e/41-marketplace-flows.spec.ts` - E2E marketplace tests
+- `supabase/migrations/20260203000001-17_*.sql` - 17 security migrations
+
+**Major Changes:**
+- All marketplace API routes now emit server-side analytics
+- RLS policies hardened with SECURITY DEFINER functions
+- INSERT policy constraints enforce `connection_status` and `initiated_by`
+- Trial consultants can now use legacy invite flow
+
+### Defects Addressed
+
+From `docs/work/marketplace-defects.md`:
+- S-001: NOT NULL invite fields (FIXED - migration 000003)
+- A-001: Missing cooldown check (FIXED - API routes)
+- A-003: Missing verification check (FIXED - RPC functions)
+- S-008: Founder directory exposed (FIXED - RLS migration 000004)
+- Analytics RLS blocking (FIXED - SECURITY DEFINER in 000017)
+
+### Impact on Plan
+
+- M1 total increased from 21.5h to 39.5h (+18h for marketplace work)
+- Product App completion increased from ~85% to ~90%
+- Several critical security issues resolved before they reached production
+
+---
+
+**Last Updated**: 2026-02-04 | **Next Review**: Weekly Friday | **Status**: Awaiting Founder Approval

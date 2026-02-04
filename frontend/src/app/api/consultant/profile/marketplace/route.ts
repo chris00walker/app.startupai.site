@@ -32,7 +32,11 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Get consultant profile (use maybeSingle to handle missing profile gracefully)
+  // Get consultant profile
+  // NOTE: Using .maybeSingle() (not .single()) because consultant_profiles may not exist
+  // during onboarding - the profile is created AFTER the user completes consultant onboarding.
+  // This differs from founder API which uses .single() since user_profiles always exists.
+  // See: 2026-02-04 discussion on .single() vs .maybeSingle() pattern for marketplace APIs.
   const { data: profile, error } = await supabase
     .from('consultant_profiles')
     .select('directory_opt_in, default_relationship_type, verification_status, grace_started_at')

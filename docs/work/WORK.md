@@ -1,6 +1,6 @@
 # StartupAI Product App Work Tracker
 
-**Status**: ~85% Complete (Phase Alpha) | **Last Updated**: 2026-01-31
+**Status**: ~90% Complete (Phase Alpha) | **Last Updated**: 2026-02-04
 
 > **Master Plan**: See [PROJECT-PLAN.md](PROJECT-PLAN.md) for critical path, milestones, and how this work connects to market launch.
 
@@ -30,11 +30,10 @@
 
 ---
 
-## Current Sprint (WIP: 4/5)
+## Current Sprint (WIP: 3/5)
 
 | Item | Owner | Status | Assumption | Notes |
 |------|-------|--------|------------|-------|
-| Apply pending migrations | @supabase | Ready | - | - |
 | PostHog Quick Start events | @frontend | Ready | A2 | Quick Start flow tracking |
 | PostHog HITL approval events | @frontend | Ready | A1 | Trust signal measurement |
 | WTP pricing survey | @product | Ready | A4 | Willingness-to-pay research |
@@ -50,10 +49,18 @@
 
 ---
 
-## Recently Completed (Jan 2026)
+## Recently Completed (Jan-Feb 2026)
 
 | Item | Date | Notes |
 |------|------|-------|
+| Schema Cleanup: 21 Column Renames | 2026-02-04 | Renamed ambiguous columns (type, source, phase, etc.) across 17 tables |
+| Apply 17 Marketplace Migrations | 2026-02-04 | Schema, RLS, functions deployed to production |
+| Portfolio Holder Marketplace Analytics | 2026-02-04 | Server+client PostHog tracking per spec |
+| Marketplace RLS Security (17 migrations) | 2026-02-04 | INSERT constraints, SECURITY DEFINER RPCs |
+| E2E Marketplace Flow Tests | 2026-02-04 | 41-marketplace-flows.spec.ts |
+| Client ID Masking | 2026-02-04 | DB-level PII protection for connections |
+| Event Taxonomy Design | 2026-02-03 | marketplace-analytics.md spec |
+| Pricing Decision | 2026-02-03 | $49/month, 30-day trial canonicalized |
 | Quick Start Architecture (ADR-006) | 2026-01-19 | Replaced 7-stage AI with 30-sec form |
 | Two-Pass Architecture (ADR-004) | 2026-01-16 | Deterministic backend assessment |
 | Project Archive/Delete | 2026-01-14 | Founder project management |
