@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const updateSchema = z.object({
   directoryOptIn: z.boolean().optional(),
@@ -93,6 +94,16 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'No updates provided' }, { status: 400 });
   }
 
+  // Query previous state for analytics (before update)
+  const { data: previousState } = await supabase
+    .from('consultant_profiles')
+    .select('directory_opt_in')
+    .eq('id', user.id)
+    .single();
+
+  const wasOptedIn = previousState?.directory_opt_in ?? false;
+  const willBeOptedIn = validation.data.directoryOptIn ?? wasOptedIn;
+
   // Update consultant profile
   const { error } = await supabase
     .from('consultant_profiles')
@@ -105,6 +116,14 @@ export async function PUT(request: NextRequest) {
       { error: 'Failed to update settings' },
       { status: 500 }
     );
+  }
+
+  // Server-side analytics: track opt-in state changes
+  if (!wasOptedIn && willBeOptedIn) {
+    trackMarketplaceServerEvent.consultantOptInEnabled(user.id, validation.data.defaultRelationshipType);
+  } else if (wasOptedIn && !willBeOptedIn) {
+    // Note: days_opted_in would require tracking opt_in timestamp (future enhancement)
+    trackMarketplaceServerEvent.consultantOptInDisabled(user.id);
   }
 
   return NextResponse.json({

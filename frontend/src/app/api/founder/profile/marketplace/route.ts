@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const updateSchema = z.object({
   founderDirectoryOptIn: z.boolean(),
@@ -91,6 +92,15 @@ export async function PUT(request: NextRequest) {
 
   const { founderDirectoryOptIn } = validation.data;
 
+  // Query previous state for analytics
+  const { data: previousState } = await supabase
+    .from('user_profiles')
+    .select('founder_directory_opt_in')
+    .eq('id', user.id)
+    .single();
+
+  const wasOptedIn = previousState?.founder_directory_opt_in ?? false;
+
   // If opting in, verify qualification
   // TASK-026/027: problem_fit lives in crewai_validation_states, not projects
   if (founderDirectoryOptIn) {
@@ -127,6 +137,23 @@ export async function PUT(request: NextRequest) {
       { error: 'Failed to update settings' },
       { status: 500 }
     );
+  }
+
+  // Server-side analytics: track opt-in state changes
+  if (!wasOptedIn && founderDirectoryOptIn) {
+    // Get problem_fit for the enabled event
+    const { data: validationState } = await supabase
+      .from('crewai_validation_states')
+      .select('problem_fit, project_id, projects!inner(user_id)')
+      .eq('projects.user_id', user.id)
+      .in('problem_fit', ['partial_fit', 'strong_fit'])
+      .limit(1)
+      .single();
+
+    trackMarketplaceServerEvent.founderOptInEnabled(user.id, validationState?.problem_fit);
+  } else if (wasOptedIn && !founderDirectoryOptIn) {
+    // Note: days_opted_in would require tracking opt_in timestamp (future enhancement)
+    trackMarketplaceServerEvent.founderOptInDisabled(user.id);
   }
 
   return NextResponse.json({
