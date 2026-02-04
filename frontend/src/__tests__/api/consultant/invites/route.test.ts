@@ -233,7 +233,7 @@ describe('/api/consultant/invites', () => {
 
         const req = createMockRequest({
           method: 'POST',
-          body: { email: 'client@example.com' },
+          body: { email: 'client@example.com', relationshipType: 'advisory' },
         });
 
         const response = await POST(req as any);
@@ -251,7 +251,7 @@ describe('/api/consultant/invites', () => {
 
         const req = createMockRequest({
           method: 'POST',
-          body: { email: 'client@example.com' },
+          body: { email: 'client@example.com', relationshipType: 'advisory' },
         });
 
         const response = await POST(req as any);
@@ -272,7 +272,7 @@ describe('/api/consultant/invites', () => {
 
         const req = createMockRequest({
           method: 'POST',
-          body: { email: 'client@example.com' },
+          body: { email: 'client@example.com', relationshipType: 'advisory' },
         });
 
         const response = await POST(req as any);
@@ -311,7 +311,7 @@ describe('/api/consultant/invites', () => {
       it('should create invite and return 200', async () => {
         const req = createMockRequest({
           method: 'POST',
-          body: { email: 'newclient@example.com', name: 'New Client' },
+          body: { email: 'newclient@example.com', name: 'New Client', relationshipType: 'advisory' },
         });
 
         const response = await POST(req as any);
@@ -328,7 +328,7 @@ describe('/api/consultant/invites', () => {
       it('should normalize email to lowercase', async () => {
         const req = createMockRequest({
           method: 'POST',
-          body: { email: 'NewClient@Example.COM' },
+          body: { email: 'NewClient@Example.COM', relationshipType: 'capital' },
         });
 
         const response = await POST(req as any);
@@ -336,6 +336,19 @@ describe('/api/consultant/invites', () => {
 
         expect(response.status).toBe(200);
         expect(data.invite.email).toBe('newclient@example.com');
+      });
+
+      it('should return 400 for missing relationship type', async () => {
+        const req = createMockRequest({
+          method: 'POST',
+          body: { email: 'client@example.com' },
+        });
+
+        const response = await POST(req as any);
+        const data = await response.json();
+
+        expect(response.status).toBe(400);
+        expect(data.error).toBe('Invalid request');
       });
     });
   });

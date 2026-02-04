@@ -34,6 +34,8 @@ describe('InviteClientModal', () => {
     isOpen: true,
     onClose: jest.fn(),
     onInvite: jest.fn(),
+    // Provide default relationship type for tests that don't test relationship selection
+    defaultRelationshipType: 'advisory' as const,
   };
 
   beforeEach(() => {
@@ -87,7 +89,25 @@ describe('InviteClientModal', () => {
       expect(defaultProps.onInvite).not.toHaveBeenCalled();
     });
 
-    it('accepts valid email without name', async () => {
+    it('shows error when submitting without relationship type', async () => {
+      const user = userEvent.setup();
+      // Note: No defaultRelationshipType provided to test validation
+      render(
+        <InviteClientModal
+          isOpen={true}
+          onClose={jest.fn()}
+          onInvite={defaultProps.onInvite}
+        />
+      );
+
+      await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
+      await user.click(screen.getByRole('button', { name: /send invite/i }));
+
+      expect(screen.getByText('Please select a relationship type')).toBeInTheDocument();
+      expect(defaultProps.onInvite).not.toHaveBeenCalled();
+    });
+
+    it('accepts valid email with default relationship type', async () => {
       const user = userEvent.setup();
       const deferred = createDeferred<any>();
       const onInvite = jest.fn().mockReturnValue(deferred.promise);
@@ -115,7 +135,7 @@ describe('InviteClientModal', () => {
         expect(onInvite).toHaveBeenCalledWith({
           email: 'client@example.com',
           name: undefined,
-          relationshipType: 'advisory', // Default relationship type
+          relationshipType: 'advisory',
         });
       });
     });
@@ -125,7 +145,14 @@ describe('InviteClientModal', () => {
       const deferred = createDeferred<any>();
       const onInvite = jest.fn().mockReturnValue(deferred.promise);
 
-      render(<InviteClientModal {...defaultProps} onInvite={onInvite} />);
+      // Test with a different default relationship type
+      render(
+        <InviteClientModal
+          {...defaultProps}
+          onInvite={onInvite}
+          defaultRelationshipType="capital"
+        />
+      );
 
       await user.type(screen.getByLabelText(/email address/i), 'client@example.com');
       await user.type(screen.getByLabelText(/client name/i), 'John Doe');
@@ -149,7 +176,7 @@ describe('InviteClientModal', () => {
         expect(onInvite).toHaveBeenCalledWith({
           email: 'client@example.com',
           name: 'John Doe',
-          relationshipType: 'advisory', // Default relationship type
+          relationshipType: 'capital',
         });
       });
     });
