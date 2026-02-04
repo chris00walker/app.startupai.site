@@ -40,6 +40,8 @@ import HypothesisManager from "@/components/hypothesis/HypothesisManager"
 // Hooks for real data
 import { useRecentActivity, type ActivityItem } from "@/hooks/useRecentActivity"
 import { useRecommendedActions, type RecommendedAction } from "@/hooks/useRecommendedActions"
+// Connection requests (TASK-025)
+import { ConnectionRequestCard } from "@/components/dashboard/ConnectionRequestCard"
 import { trackPageView, trackEvent } from "@/lib/analytics"
 import {
   Target,
@@ -359,6 +361,31 @@ export default function FounderDashboard() {
   const router = useRouter()
   const { isEnabled: isAIAssistantEnabled } = useFeatureFlag('dashboard_ai_assistant')
 
+  // TASK-025: Pending connection requests count
+  const [pendingConnectionCount, setPendingConnectionCount] = React.useState(0)
+
+  // Fetch pending connection requests
+  React.useEffect(() => {
+    async function fetchPendingConnections() {
+      try {
+        const response = await fetch('/api/founder/connections?status=requested')
+        if (response.ok) {
+          const data = await response.json()
+          // Count requests initiated by consultants (incoming requests)
+          const incomingRequests = (data.connections || []).filter(
+            (c: { initiatedBy: string }) => c.initiatedBy === 'consultant'
+          )
+          setPendingConnectionCount(incomingRequests.length)
+        }
+      } catch {
+        // Silently fail - this is a non-critical feature
+      }
+    }
+    if (user) {
+      fetchPendingConnections()
+    }
+  }, [user])
+
   // Get current project (first project for now, can be enhanced later)
   const currentProject = projects.length > 0 ? projects[0] : null
   const projectId = currentProject?.id
@@ -497,6 +524,9 @@ export default function FounderDashboard() {
         </div>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* TASK-025: Connection request notification */}
+          <ConnectionRequestCard count={pendingConnectionCount} role="founder" />
+
           {/* Quick Stats */}
           <QuickStats projectId={projectId} currentStage={currentStage} />
 

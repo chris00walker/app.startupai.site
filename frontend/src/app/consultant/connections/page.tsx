@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle, Clock, Users, Building2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 interface Connection {
   id: string;
@@ -56,6 +57,8 @@ export default function ConsultantConnectionsPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
   const [showDeclineDialog, setShowDeclineDialog] = useState(false);
+  // TASK-033: Accept confirmation modal
+  const [showAcceptDialog, setShowAcceptDialog] = useState(false);
 
   const fetchConnections = async () => {
     setIsLoading(true);
@@ -79,10 +82,18 @@ export default function ConsultantConnectionsPage() {
     fetchConnections();
   }, []);
 
-  const handleAccept = async (connection: Connection) => {
+  // TASK-033: Show confirmation dialog before accepting
+  const handleAcceptClick = (connection: Connection) => {
+    setSelectedConnection(connection);
+    setShowAcceptDialog(true);
+  };
+
+  const handleAcceptConfirm = async () => {
+    if (!selectedConnection) return;
+
     setIsProcessing(true);
     try {
-      const response = await fetch(`/api/consultant/connections/${connection.id}/accept`, {
+      const response = await fetch(`/api/consultant/connections/${selectedConnection.id}/accept`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -93,8 +104,12 @@ export default function ConsultantConnectionsPage() {
         throw new Error(data.message || 'Failed to accept connection');
       }
 
+      // TASK-034: Track marketplace event
+      trackMarketplaceEvent.connectionAccepted('founder', selectedConnection.relationshipType);
+
       await fetchConnections();
       setSelectedConnection(null);
+      setShowAcceptDialog(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to accept connection');
     } finally {
@@ -117,6 +132,9 @@ export default function ConsultantConnectionsPage() {
         const data = await response.json();
         throw new Error(data.message || 'Failed to decline connection');
       }
+
+      // TASK-034: Track marketplace event
+      trackMarketplaceEvent.connectionDeclined('founder', selectedConnection.relationshipType);
 
       await fetchConnections();
       setSelectedConnection(null);
@@ -171,7 +189,7 @@ export default function ConsultantConnectionsPage() {
         </div>
         {showActions && (
           <div className="flex gap-2 mt-4">
-            <Button onClick={() => handleAccept(connection)} disabled={isProcessing}>
+            <Button onClick={() => handleAcceptClick(connection)} disabled={isProcessing}>
               {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Accept
             </Button>
@@ -274,13 +292,51 @@ export default function ConsultantConnectionsPage() {
         </Tabs>
       )}
 
+      {/* TASK-033: Accept Confirmation Dialog */}
+      <Dialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Accept Connection Request</DialogTitle>
+            <DialogDescription>
+              You&apos;re about to connect with this founder.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <span className="text-sm text-muted-foreground">Relationship Type</span>
+              <Badge variant="outline">
+                {RELATIONSHIP_TYPES[selectedConnection?.relationshipType || ''] || selectedConnection?.relationshipType}
+              </Badge>
+            </div>
+            {selectedConnection?.message && (
+              <div className="p-3 bg-muted rounded-lg">
+                <span className="text-sm text-muted-foreground block mb-1">Their message</span>
+                <p className="text-sm italic">&quot;{selectedConnection.message}&quot;</p>
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Once connected, the founder will be able to see your contact information.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAcceptDialog(false)} disabled={isProcessing}>
+              Cancel
+            </Button>
+            <Button onClick={handleAcceptConfirm} disabled={isProcessing}>
+              {isProcessing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
+              Accept Connection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Decline Dialog */}
       <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Decline Connection Request</DialogTitle>
             <DialogDescription>
-              This founder won't be able to request a connection again for 30 days.
+              This founder won&apos;t be able to request a connection again for 30 days.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

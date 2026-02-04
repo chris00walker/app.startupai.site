@@ -7,9 +7,7 @@
  * @story US-FM04, US-PH04
  */
 
-'use client';
-
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,8 +27,6 @@ export function ConnectionRequestCard({
   role,
   className,
 }: ConnectionRequestCardProps) {
-  const router = useRouter();
-
   // Don't show if no pending requests
   if (count === 0) {
     return null;
@@ -61,10 +57,12 @@ export function ConnectionRequestCard({
         <Button
           variant="outline"
           className="w-full justify-between"
-          onClick={() => router.push(requestsPath)}
+          asChild
         >
-          View Requests
-          <ArrowRight className="h-4 w-4" />
+          <Link href={requestsPath}>
+            View Requests
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </Button>
       </CardContent>
     </Card>

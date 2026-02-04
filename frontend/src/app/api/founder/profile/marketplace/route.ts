@@ -42,16 +42,17 @@ export async function GET() {
   }
 
   // Check if founder qualifies for directory (has project with partial_fit or strong_fit)
-  const { data: project } = await supabase
-    .from('projects')
-    .select('problem_fit')
-    .eq('user_id', user.id)
+  // TASK-026/027: problem_fit lives in crewai_validation_states, not projects
+  const { data: validationState } = await supabase
+    .from('crewai_validation_states')
+    .select('problem_fit, project_id, projects!inner(user_id)')
+    .eq('projects.user_id', user.id)
     .in('problem_fit', ['partial_fit', 'strong_fit'])
     .limit(1)
     .single();
 
-  const qualifiesForDirectory = !!project;
-  const problemFit = project?.problem_fit || 'no_fit';
+  const qualifiesForDirectory = !!validationState;
+  const problemFit = validationState?.problem_fit || 'no_fit';
 
   return NextResponse.json({
     founderDirectoryOptIn: profile.founder_directory_opt_in,
@@ -91,16 +92,17 @@ export async function PUT(request: NextRequest) {
   const { founderDirectoryOptIn } = validation.data;
 
   // If opting in, verify qualification
+  // TASK-026/027: problem_fit lives in crewai_validation_states, not projects
   if (founderDirectoryOptIn) {
-    const { data: project } = await supabase
-      .from('projects')
-      .select('problem_fit')
-      .eq('user_id', user.id)
+    const { data: validationState } = await supabase
+      .from('crewai_validation_states')
+      .select('problem_fit, project_id, projects!inner(user_id)')
+      .eq('projects.user_id', user.id)
       .in('problem_fit', ['partial_fit', 'strong_fit'])
       .limit(1)
       .single();
 
-    if (!project) {
+    if (!validationState) {
       return NextResponse.json(
         {
           error: 'not_qualified',

@@ -264,3 +264,97 @@ export const trackCrewAIEvent = {
       category: 'ai_workflow',
     }),
 }
+
+/**
+ * Track marketplace events (TASK-034)
+ * @story US-FM01-11, US-PH01-07
+ */
+export const trackMarketplaceEvent = {
+  // Connection events
+  connectionRequested: (initiatedBy: 'founder' | 'consultant', relationshipType: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.connection_requested',
+      initiated_by: initiatedBy,
+      relationship_type: relationshipType,
+      category: 'marketplace',
+    }),
+
+  connectionAccepted: (initiatedBy: 'founder' | 'consultant', relationshipType: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.connection_accepted',
+      initiated_by: initiatedBy,
+      relationship_type: relationshipType,
+      category: 'marketplace',
+    }),
+
+  connectionDeclined: (initiatedBy: 'founder' | 'consultant', relationshipType: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.connection_declined',
+      initiated_by: initiatedBy,
+      relationship_type: relationshipType,
+      category: 'marketplace',
+    }),
+
+  // RFQ events
+  rfqCreated: (relationshipType: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.rfq_created',
+      relationship_type: relationshipType,
+      category: 'marketplace',
+    }),
+
+  rfqResponseSubmitted: (rfqId: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.rfq_response_submitted',
+      rfq_id: rfqId,
+      category: 'marketplace',
+    }),
+
+  rfqResponseAccepted: (rfqId: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.rfq_response_accepted',
+      rfq_id: rfqId,
+      category: 'marketplace',
+    }),
+
+  // Directory events
+  founderOptedIn: () =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.founder_opted_in',
+      category: 'marketplace',
+    }),
+
+  founderOptedOut: () =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.founder_opted_out',
+      category: 'marketplace',
+    }),
+
+  consultantVerified: () =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.consultant_verified',
+      category: 'marketplace',
+    }),
+
+  consultantDirectoryOptIn: (defaultRelationshipType: string) =>
+    trackEvent('button_clicked', {
+      event_type: 'marketplace.consultant_directory_opt_in',
+      default_relationship_type: defaultRelationshipType,
+      category: 'marketplace',
+    }),
+
+  // Directory browsing
+  founderDirectoryViewed: (filterApplied: boolean) =>
+    trackEvent('dashboard_viewed', {
+      event_type: 'marketplace.founder_directory_viewed',
+      filter_applied: filterApplied,
+      category: 'marketplace',
+    }),
+
+  consultantDirectoryViewed: (filterApplied: boolean) =>
+    trackEvent('dashboard_viewed', {
+      event_type: 'marketplace.consultant_directory_viewed',
+      filter_applied: filterApplied,
+      category: 'marketplace',
+    }),
+}

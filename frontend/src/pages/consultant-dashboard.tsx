@@ -26,6 +26,8 @@ import { useAuth, useRoleInfo } from "@/lib/auth/hooks"
 import { usePortfolioActivity } from "@/hooks/usePortfolioActivity"
 import { InviteClientModal } from "@/components/consultant/InviteClientModal"
 import { TrialStatusCard } from "@/components/upgrade/TrialStatusCard"
+// Connection requests (TASK-025)
+import { ConnectionRequestCard } from "@/components/dashboard/ConnectionRequestCard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -318,6 +320,8 @@ function Dashboard() {
   const roleInfo = useRoleInfo()
   const [userRole, setUserRole] = React.useState<string | null>(null)
   const [showInviteModal, setShowInviteModal] = React.useState(false)
+  // TASK-025: Pending connection requests count
+  const [pendingConnectionCount, setPendingConnectionCount] = React.useState(0)
 
   // Fetch user role
   React.useEffect(() => {
@@ -338,6 +342,28 @@ function Dashboard() {
     }
     fetchUserRole()
   }, [user])
+
+  // TASK-025: Fetch pending connection requests
+  React.useEffect(() => {
+    async function fetchPendingConnections() {
+      try {
+        const response = await fetch('/api/consultant/connections?status=requested')
+        if (response.ok) {
+          const data = await response.json()
+          // Count requests initiated by founders (incoming requests)
+          const incomingRequests = (data.connections || []).filter(
+            (c: { initiatedBy: string }) => c.initiatedBy === 'founder'
+          )
+          setPendingConnectionCount(incomingRequests.length)
+        }
+      } catch {
+        // Silently fail - this is a non-critical feature
+      }
+    }
+    if (user && userRole === 'consultant') {
+      fetchPendingConnections()
+    }
+  }, [user, userRole])
 
   // Use appropriate hook based on user role
   const isConsultant = userRole === 'consultant'
@@ -509,6 +535,9 @@ function Dashboard() {
               <PortfolioOverview projects={allProjects} />
             </div>
             <div className="space-y-6">
+              {/* TASK-025: Connection request notification */}
+              <ConnectionRequestCard count={pendingConnectionCount} role="consultant" />
+
               {/* Trial Status Card - shown for trial users */}
               <TrialStatusCard />
 

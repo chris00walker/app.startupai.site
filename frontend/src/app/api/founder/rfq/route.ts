@@ -109,13 +109,14 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const status = searchParams.get('status');
 
-  // Query RFQs
+  // Query RFQs (TASK-022: include description for list display)
   let query = supabase
     .from('consultant_requests')
     .select(
       `
       id,
       title,
+      description,
       relationship_type,
       status,
       created_at,
@@ -143,8 +144,10 @@ export async function GET(request: NextRequest) {
   // Get response counts using RPC to bypass RLS (TASK-011)
   const rfqIds = (rfqs || []).map((r) => r.id);
   const countMap = new Map<string, number>();
+  const pendingMap = new Map<string, number>();
 
   if (rfqIds.length > 0) {
+    // Get total response counts
     const { data: responseCounts } = await supabase.rpc('get_rfq_response_counts', {
       rfq_ids: rfqIds,
     });
@@ -152,15 +155,26 @@ export async function GET(request: NextRequest) {
     (responseCounts || []).forEach((r: { request_id: string; response_count: number }) => {
       countMap.set(r.request_id, r.response_count);
     });
+
+    // TASK-022: Get pending response counts
+    const { data: pendingCounts } = await supabase.rpc('get_rfq_pending_counts', {
+      rfq_ids: rfqIds,
+    });
+
+    (pendingCounts || []).forEach((r: { request_id: string; pending_count: number }) => {
+      pendingMap.set(r.request_id, r.pending_count);
+    });
   }
 
-  // Transform
+  // Transform (TASK-022: include description and pendingResponses)
   const transformedRfqs = (rfqs || []).map((r) => ({
     id: r.id,
     title: r.title,
+    description: r.description,
     relationshipType: r.relationship_type,
     status: r.status,
     responseCount: countMap.get(r.id) || 0,
+    pendingResponses: pendingMap.get(r.id) || 0,
     createdAt: r.created_at,
     expiresAt: r.expires_at,
   }));

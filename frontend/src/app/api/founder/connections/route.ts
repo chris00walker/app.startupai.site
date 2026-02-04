@@ -48,6 +48,30 @@ export async function POST(request: NextRequest) {
 
   const { consultantId, relationshipType, message } = validation.data;
 
+  // TASK-024: Verify the consultant is verified (founders can only request verified consultants)
+  const { data: consultantProfile } = await supabase
+    .from('consultant_profiles')
+    .select('verification_status')
+    .eq('id', consultantId)
+    .single();
+
+  if (!consultantProfile) {
+    return NextResponse.json(
+      { error: 'consultant_not_found', message: 'Consultant not found.' },
+      { status: 404 }
+    );
+  }
+
+  if (!['verified', 'grace'].includes(consultantProfile.verification_status || '')) {
+    return NextResponse.json(
+      {
+        error: 'consultant_not_verified',
+        message: 'This consultant is not currently available for new connections.',
+      },
+      { status: 403 }
+    );
+  }
+
   // Check cooldown (30-day period after declined connection)
   const { data: cooldown } = await supabase.rpc('check_connection_cooldown', {
     p_consultant_id: consultantId,
@@ -89,12 +113,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Create connection request
+  // TASK-020: Must set BOTH status and connection_status for dual-field sync
   const { data: connection, error } = await supabase
     .from('consultant_clients')
     .insert({
       consultant_id: consultantId,
       client_id: user.id,
       relationship_type: relationshipType,
+      status: 'requested',
       connection_status: 'requested',
       initiated_by: 'founder',
       request_message: message,

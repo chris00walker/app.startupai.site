@@ -135,12 +135,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
     existingConnectionUsed = true;
   } else {
     // Create new connection using RFQ's relationship_type
+    // TASK-020: Must set BOTH status and connection_status for dual-field sync
     const { data: newConnection, error: connectionError } = await supabase
       .from('consultant_clients')
       .insert({
         consultant_id: response.consultant_id,
         client_id: user.id,
         relationship_type: rfq.relationship_type, // Use RFQ's type, not hardcoded
+        status: 'active',
         connection_status: 'active',
         initiated_by: 'founder',
         request_message: 'Connected via RFQ response',

@@ -102,12 +102,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Create connection request
+  // TASK-020: Must set BOTH status and connection_status for dual-field sync
   const { data: connection, error } = await supabase
     .from('consultant_clients')
     .insert({
       consultant_id: user.id,
       client_id: founderId,
       relationship_type: relationshipType,
+      status: 'requested',
       connection_status: 'requested',
       initiated_by: 'consultant',
       request_message: message,
