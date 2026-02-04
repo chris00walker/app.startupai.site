@@ -164,11 +164,13 @@ These 9 findings from the user's manual audit are mapped to tasks below:
 1. [ ] Fix `founder_directory` view to require verification:
    ```sql
    -- Option A: Add function check in view
+   -- Note: problem_fit is in crewai_validation_states, not projects
    CREATE OR REPLACE VIEW public.founder_directory AS
    SELECT ... FROM user_profiles u
    JOIN projects p ON p.user_id = u.id
+   JOIN crewai_validation_states cvs ON cvs.project_id = p.id
    WHERE u.founder_directory_opt_in = TRUE
-     AND p.problem_fit IN ('partial_fit', 'strong_fit')
+     AND cvs.problem_fit IN ('partial_fit', 'strong_fit')
      AND public.is_verified_consultant();  -- Add this gate
    ```
 2. [ ] Update consultant connections GET to hide founder details:

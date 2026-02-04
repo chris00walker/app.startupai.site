@@ -91,11 +91,13 @@ WHERE verification_status IN ('verified', 'grace')
   AND directory_opt_in = TRUE;
 
 -- Eligible founders (VPD gate + opt-in)
+-- Note: problem_fit is in crewai_validation_states, not projects
 SELECT COUNT(DISTINCT u.id) as eligible_founders
 FROM user_profiles u
 JOIN projects p ON p.user_id = u.id
+JOIN crewai_validation_states cvs ON cvs.project_id = p.id
 WHERE u.founder_directory_opt_in = TRUE
-  AND p.problem_fit IN ('partial_fit', 'strong_fit');
+  AND cvs.problem_fit IN ('partial_fit', 'strong_fit');
 
 -- Connection request funnel (30 days)
 SELECT
