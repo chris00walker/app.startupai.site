@@ -1582,6 +1582,144 @@ Portfolio Holders receive **both** formats simultaneously. The narrative gets th
 
 This maintains integrity guarantees when PDFs are shared outside the platform and creates a lead capture mechanism for external investors.
 
+#### PDF Brand Guidelines
+
+The 10-slide pitch deck is an external-facing artifact representing StartupAI to investors. PDF exports must maintain brand consistency.
+
+**Slide Specifications**:
+| Property | Value |
+|----------|-------|
+| Dimensions | 16:9 (1920x1080px for digital delivery) |
+| Margins | 80px safe zone on all sides |
+| Background | White (#FFFFFF) or brand off-white for contrast |
+
+**Typography Stack**:
+| Element | Font | Weight | Size |
+|---------|------|--------|------|
+| Slide title | Inter | 600 (Semi-bold) | 32px |
+| Body text | Inter | 400 (Regular) | 18px |
+| Evidence items | Inter | 500 (Medium) | 16px |
+| Footer/meta | Inter | 400 (Regular) | 12px |
+| Fallback | System UI, -apple-system, sans-serif | — | — |
+
+**Header/Footer Treatment**:
+- **Header**: StartupAI logo (monochrome, 24px height) in top-right corner of all slides except Cover
+- **Footer**: Verification URL (left), slide number (center), QR code (right, 48x48px)
+- **Cover slide**: Full branded treatment with centered logo, venture name, tagline
+
+**Cover Slide Layout** (when no visual identity uploaded):
+```
++-------------------------------------------------------------+
+|                                                              |
+|                    [StartupAI Logo]                         |
+|                                                              |
+|                    VENTURE NAME                             |
+|                    -------------                            |
+|                    "Tagline goes here"                      |
+|                                                              |
+|                    Founder Name                             |
+|                    founder@email.com                        |
+|                                                              |
+|  ---------------------------------------------------------- |
+|  Verified by StartupAI | Feb 2026 | app.startupai.site/v/x |
+|                                                              |
++-------------------------------------------------------------+
+```
+
+---
+
+## Marketing Asset Specifications
+
+The Narrative Layer produces external-facing artifacts that require consistent marketing assets for professional presentation and social sharing.
+
+### Open Graph Assets
+
+When verification URLs or Evidence Package links are shared externally (LinkedIn, Twitter, email), they must display branded preview cards.
+
+**OG Image Template** (1200x630px):
+```
++-----------------------------------------------------------------------------+
+|                                                                              |
+|  [StartupAI Logo]                                    [Fit Score Badge]      |
+|                                                           0.82              |
+|                                                                              |
+|           VENTURE NAME                                                      |
+|           ----------------------------------------                          |
+|           "Tagline: Reducing last-mile delivery                             |
+|            costs by 40%"                                                    |
+|                                                                              |
+|           Stage: Solution Testing | 12 evidence items                       |
+|                                                                              |
+|  -------------------------------------------------------------------------  |
+|  Methodology-verified validation  *  app.startupai.site                     |
+|                                                                              |
++-----------------------------------------------------------------------------+
+```
+
+**Dynamic fields**:
+- `venture_name`: From pitch narrative cover
+- `tagline`: From pitch narrative cover (truncate at 80 chars)
+- `fit_score`: Visual badge with score (color-coded: green >0.7, yellow 0.4-0.7, gray <0.4)
+- `validation_stage`: Current gate
+- `evidence_count`: Total evidence items
+
+**Generation**: Serverless function at `/api/og/evidence-package/[id]` using `@vercel/og` or `satori`. Cache generated images for 1 hour.
+
+**Meta tags** (for Evidence Package pages):
+```html
+<meta property="og:image" content="https://app.startupai.site/api/og/evidence-package/{id}" />
+<meta property="og:title" content="{venture_name} - Validated by StartupAI" />
+<meta property="og:description" content="{tagline} | Fit Score: {fit_score}" />
+<meta name="twitter:card" content="summary_large_image" />
+```
+
+### Cover Slide Placeholder
+
+When founders have not uploaded a visual identity, the Cover slide uses a branded placeholder.
+
+**Placeholder design**:
+- Background: Subtle gradient using brand colors (primary -> accent, 5% opacity)
+- Center element: Geometric pattern derived from industry tags (e.g., "logistics" -> connected nodes, "fintech" -> abstract currency symbols)
+- Venture name: Large, centered, Inter 600
+- Tagline: Below name, Inter 400 italic
+
+**Industry pattern library** (Phase 2+):
+| Industry Tag | Pattern Concept |
+|--------------|-----------------|
+| logistics | Connected route nodes |
+| fintech | Abstract currency flow |
+| healthtech | Pulse/vitals wave |
+| saas | Cloud/stack layers |
+| default | StartupAI compass motif |
+
+**Phase 1 approach**: Use default compass motif pattern for all placeholders. Industry-specific patterns deferred to Phase 2.
+
+### Shareable Assets
+
+Founders should be able to download branded assets for external use.
+
+**Available downloads** (from Founder Dashboard):
+| Asset | Format | Size | Use Case |
+|-------|--------|------|----------|
+| Evidence Package Card | PNG | 1200x630 | LinkedIn/Twitter sharing |
+| Fit Score Badge | PNG/SVG | 200x200 | Email signatures, decks |
+| Verification QR Code | PNG/SVG | 400x400 | Print materials |
+| "Verified by StartupAI" Badge | PNG/SVG | Multiple | External presentations |
+
+**Download UI**: Add "Download Assets" button to Founder Dashboard narrative section, opening a modal with asset options.
+
+### AI-Generated Visuals (Phase 4+)
+
+**Deferred scope**: DALL-E integration for industry-specific hero images on Cover slides.
+
+**When implemented**:
+- Prompt library per industry vertical
+- Brand-consistent style guide for AI generation
+- Human review before publishing (founder approval)
+- Storage in Supabase `design_assets` bucket
+
+**Not in Phase 1-3**: AI-generated visuals require significant prompt engineering and quality control. The branded placeholder approach is sufficient for initial launch.
+
 ---
 
 ## Evidence Integrity System
@@ -2342,20 +2480,37 @@ This prevents a critical UX failure mode: SAY evidence (interview quotes, survey
 #### CSS Token Mapping
 
 ```css
-/* Evidence hierarchy tokens (Tailwind) */
---evidence-do-direct-color: theme('colors.green.600');
+/* Evidence hierarchy tokens - mapped to brand palette for consistency */
+--evidence-do-direct-color: hsl(var(--accent));        /* Validation green - represents verified behavioral evidence */
 --evidence-do-direct-size: theme('fontSize.base');  /* 16px */
 --evidence-do-direct-weight: theme('fontWeight.semibold');
 
---evidence-do-indirect-color: theme('colors.blue.600');
+--evidence-do-indirect-color: hsl(var(--primary));     /* Strategic blue - represents trusted indirect signals */
 --evidence-do-indirect-size: theme('fontSize.sm');  /* 14px */
 --evidence-do-indirect-weight: theme('fontWeight.medium');
 
---evidence-say-color: theme('colors.gray.500');
+--evidence-say-color: hsl(var(--muted-foreground));    /* Muted - de-emphasized stated evidence */
 --evidence-say-size: theme('fontSize.xs');  /* 13px */
 --evidence-say-weight: theme('fontWeight.normal');
 --evidence-say-style: italic;
 ```
+
+These colors align with the brand palette defined in `globals.css`. The semantic mapping reinforces the evidence hierarchy: accent (validation) for DO-direct, primary (trust) for DO-indirect, muted for SAY.
+
+#### Methodology Verified Badge
+
+A visual seal reinforcing StartupAI's methodology-backed positioning. Used on:
+- PDF exports (Cover slide footer)
+- Evidence Package integrity tab
+- External verification page
+
+**Design specifications**:
+- Shape: Circular badge with geometric inner mark (compass-inspired, per brand)
+- Colors: Accent green (#22c55e) on white, or reversed for dark backgrounds
+- Sizes: 24px (inline), 48px (PDF footer), 96px (verification page hero)
+- Text: "Methodology Verified" or "VPD Verified" in Inter 500
+
+**Usage**: Badge appears alongside integrity hash and timestamp to create a trust cluster.
 
 #### Component Implementation Notes
 
@@ -2657,6 +2812,10 @@ _Aligned with: Portfolio Holder Vision Phase 1 (Founder Launch)_
   - [ ] Export PDF and verify verification URL resolves
   - [ ] Preview evidence package as consultant account
   - [ ] Document any UX friction for iteration
+- [ ] **Marketing assets**
+  - [ ] Implement OG image generation endpoint (`/api/og/evidence-package/[id]`)
+  - [ ] Create Cover slide placeholder design (compass motif)
+  - [ ] Design "Verified by StartupAI" badge (3 sizes)
 
 ### Phase 2: Evidence Packages + Editing (Weeks 4-6)
 
@@ -2673,6 +2832,9 @@ _Aligned with: Portfolio Holder Vision Phase 2 (Advisor Tier)_
 - [ ] Build narrative editor UI with field-level editing
 - [ ] Implement Guardian alignment check for edits (`PATCH /api/narrative/:id/edit`)
 - [ ] Add provenance badges to PH view (AI-generated / Founder-edited / Verified / Flagged)
+- [ ] **Shareable marketing assets**
+  - [ ] Add "Download Assets" modal to Founder Dashboard
+  - [ ] Generate shareable Evidence Package cards
 
 ### Phase 3: Marketplace Integration (Weeks 7-10)
 
