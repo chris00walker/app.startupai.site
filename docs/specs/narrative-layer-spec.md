@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v1.6 | **Updated**: 2026-02-04 | **Owner**: product-strategist
+**Status**: Draft v1.7 | **Updated**: 2026-02-04 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -757,6 +757,107 @@ interface EvidencePackage {
     opt_in_timestamp: string;
   };
 }
+
+// --- Supporting Interfaces for Validation Evidence ---
+
+type RelationshipType = 'capital' | 'advice' | 'connections' | 'industry_expertise';
+
+interface ValuePropositionCanvas {
+  customer_segment: string;
+  customer_jobs: string[];
+  pains: { description: string; severity: number }[];
+  gains: { description: string; importance: number }[];
+  pain_relievers: string[];
+  gain_creators: string[];
+  products_services: string[];
+  fit_assessment: string;
+}
+
+interface CustomerProfile {
+  segment_name: string;
+  jobs_to_be_done: { job: string; importance: number; frequency: string }[];
+  pains: { pain: string; severity: number; current_solution: string }[];
+  gains: { gain: string; relevance: number }[];
+  demographics?: Record<string, string>;
+  behavioral_insights: string[];
+}
+
+interface CompetitorMap {
+  competitors: {
+    name: string;
+    category: 'direct' | 'indirect' | 'substitute';
+    strengths: string[];
+    weaknesses: string[];
+    market_share_estimate?: number;
+  }[];
+  positioning_statement: string;
+  differentiation_axes: { axis: string; our_position: string; competitor_positions: Record<string, string> }[];
+}
+
+interface BusinessModelCanvas {
+  key_partners: string[];
+  key_activities: string[];
+  key_resources: string[];
+  value_propositions: string[];
+  customer_relationships: string[];
+  channels: string[];
+  customer_segments: string[];
+  cost_structure: { item: string; type: 'fixed' | 'variable'; amount?: number }[];
+  revenue_streams: { stream: string; type: string; pricing_model: string }[];
+}
+
+interface ExperimentResult {
+  experiment_id: string;
+  hypothesis_id: string;
+  experiment_type: 'landing_page' | 'concierge' | 'wizard_of_oz' | 'prototype' | 'interview' | 'survey';
+  start_date: string;
+  end_date: string;
+  sample_size: number;
+  success_criteria: string;
+  actual_result: string;
+  outcome: 'validated' | 'invalidated' | 'inconclusive';
+  learnings: string[];
+  evidence_category: 'DO-direct' | 'DO-indirect' | 'SAY';
+}
+
+interface GateScores {
+  desirability: number;  // 0-1
+  feasibility: number;   // 0-1
+  viability: number;     // 0-1
+  overall_fit: number;   // 0-1, weighted combination
+  current_gate: 'desirability' | 'feasibility' | 'viability' | 'complete';
+  gate_passed_at?: Record<string, string>;  // Gate name -> ISO timestamp
+}
+
+interface HITLRecord {
+  checkpoints: {
+    checkpoint_id: string;
+    checkpoint_type: string;
+    triggered_at: string;
+    responded_at?: string;
+    response_summary?: string;
+    approval_status: 'pending' | 'approved' | 'rejected' | 'revised';
+  }[];
+  coachability_score: number;  // 0-1, derived from response time and revision acceptance
+  total_checkpoints: number;
+  completed_checkpoints: number;
+}
+
+interface AlignmentIssue {
+  field: string;              // Dot-notation path like "traction.evidence_summary"
+  issue: string;              // Human-readable description of the problem
+  severity: 'warning' | 'error';
+  suggested_language?: string;  // What language would be permitted
+  evidence_needed?: string;     // What evidence would unlock the claimed language
+}
+
+interface EditHistoryEntry {
+  timestamp: string;    // ISO timestamp
+  field: string;        // Dot-notation path
+  old_value: unknown;
+  new_value: unknown;
+  alignment_result?: 'verified' | 'flagged';
+}
 ```
 
 ---
@@ -897,6 +998,25 @@ CREATE POLICY "Founders can update own narratives"
   ON pitch_narratives FOR UPDATE
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Founders can create own narratives"
+  ON pitch_narratives FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Founders can delete own narratives"
+  ON pitch_narratives FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Narrative versions: inherit access from parent narrative
+CREATE POLICY "Founders can view own narrative versions"
+  ON narrative_versions FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM pitch_narratives pn
+      WHERE pn.id = narrative_versions.narrative_id
+        AND pn.user_id = auth.uid()
+    )
+  );
+
 -- Evidence packages: founder + connected Portfolio Holders
 CREATE POLICY "Founders can view own packages"
   ON evidence_packages FOR SELECT
@@ -908,7 +1028,7 @@ CREATE POLICY "Connected PHs can view shared packages"
     EXISTS (
       SELECT 1 FROM consultant_clients cc
       WHERE cc.consultant_id = auth.uid()
-        AND cc.founder_id = evidence_packages.founder_id
+        AND cc.client_id = evidence_packages.founder_id  -- Note: consultant_clients uses client_id, not founder_id
         AND cc.connection_status = 'active'
     )
     OR (
@@ -916,7 +1036,7 @@ CREATE POLICY "Connected PHs can view shared packages"
       AND EXISTS (
         SELECT 1 FROM user_profiles up
         WHERE up.id = auth.uid()
-          AND up.consultant_verification_status = 'verified'
+          AND up.role = 'consultant'  -- Use existing role column; consultant_verification_status requires migration
       )
     )
   );
@@ -934,7 +1054,7 @@ CREATE POLICY "Verified PHs can view founder profiles"
     OR EXISTS (
       SELECT 1 FROM user_profiles up
       WHERE up.id = auth.uid()
-        AND up.consultant_verification_status = 'verified'
+        AND up.role = 'consultant'  -- Use existing role column; consultant_verification_status requires migration
     )
   );
 
@@ -1065,6 +1185,13 @@ CREATE TRIGGER vpc_change_stales_narrative
   FOR EACH ROW
   EXECUTE FUNCTION mark_narrative_stale();
 ```
+
+> **⚠️ Prerequisite Tables for Triggers**: The staleness triggers above reference tables that may not yet exist in the Drizzle schema:
+> - `gate_scores` - Currently stored as JSONB within `crewai_validation_states`. Either create a dedicated table or modify the trigger to query JSONB.
+> - `customer_profiles` - Currently stored as JSONB within `crewai_validation_states`. Either create a dedicated table or modify the trigger.
+> - `value_proposition_canvas` - Verify this table exists or adjust trigger accordingly.
+>
+> **Migration Strategy**: Deploy triggers only for tables that exist (`evidence`, `hypotheses`, `validation_runs`). Add remaining triggers when prerequisite tables are created. See Infrastructure Requirements for migration ordering.
 
 ### Analytics Tables
 
@@ -1938,16 +2065,18 @@ The verification URL uses a full UUID token rather than a truncated SHA-256 hash
 
 ```
 Per IP Address:
-- 100 requests per minute (burst limit)
-- 1,000 requests per hour (sustained limit)
+- 30 requests per minute (burst limit)  -- Reduced from 100 per security review
+- 500 requests per hour (sustained limit)  -- Reduced from 1,000 per security review
 
 Response when exceeded:
 HTTP 429 Too Many Requests
 Retry-After: <seconds until reset>
-X-RateLimit-Limit: 100
+X-RateLimit-Limit: 30
 X-RateLimit-Remaining: 0
 X-RateLimit-Reset: <unix timestamp>
 ```
+
+> **Security Note**: Burst limit reduced from 100/min to 30/min based on security review. Legitimate verification use cases (1-2 requests per PDF view) are accommodated while reducing enumeration attack surface.
 
 Implementation: Use Upstash Redis with sliding window algorithm (compatible with Netlify Edge Functions).
 
@@ -3119,3 +3248,4 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-04 | 1.4     | **Leadership team review**: Incorporated feedback from Product Strategist, Domain Expert VPD, and System Architect. Changes: (1) Fixed all FK references to use `user_profiles(id)` per codebase convention. (2) Added supporting indexes for RLS policies and JSONB queries. (3) Added claim-language mapping table for Guardian validation. (4) Added pivot narrative handling to celebrate validated learning. (5) Added verification endpoint security (UUID token, rate limiting, response sanitization). (6) Added evidence visual hierarchy specifications for DO/SAY display. |
 | 2026-02-04 | 1.5     | **Full team review integration**: Incorporated feedback from 8 additional team members. Changes: (1) Added 7 missing TypeScript interfaces and evidence classification note. (2) Consolidated status indicators, added first-run experience and regeneration UX. (3) Added user-facing terminology mapping, empty states, and tagline guidance. (4) Added founder profile API, async Guardian checks, and missing staleness triggers. (5) Added technical test cards T1/T2, E2E test structure, and dogfooding checkpoint. (6) Added Infrastructure Requirements section with dependencies and migration ordering. (7) Added analytics tables, Success Metrics section, and funnel definitions. (8) Added Table of Contents, Error Response Schema, and accessibility requirements. |
 | 2026-02-04 | 1.6     | **Design team contributions**: Visual Designer and Graphic Designer additions. Changes: (1) Added PDF Brand Guidelines with slide specs, typography stack, and header/footer treatment. (2) Fixed evidence hierarchy color tokens to use brand palette (--accent, --primary, --muted-foreground). (3) Added Methodology Verified Badge specification. (4) Added Marketing Asset Specifications section with OG image template, Cover slide placeholder design, and shareable assets table. (5) Deferred AI-generated visuals to Phase 4+. (6) Updated Phase 1/2 checklists with marketing asset tasks. |
+| 2026-02-04 | 1.7     | **Critical fixes from 18-agent swarm review**: (1) Fixed RLS policy FK mismatch: `cc.founder_id` → `cc.client_id` to match actual `consultant_clients` schema. (2) Fixed RLS policies using non-existent `consultant_verification_status` column to use existing `role = 'consultant'` pattern. (3) Added missing RLS policies: INSERT/DELETE for `pitch_narratives`, SELECT for `narrative_versions`. (4) Reduced rate limiting from 100/min to 30/min per security review (enumeration attack surface reduction). (5) Added 10 missing TypeScript interfaces: `RelationshipType`, `ValuePropositionCanvas`, `CustomerProfile`, `CompetitorMap`, `BusinessModelCanvas`, `ExperimentResult`, `GateScores`, `HITLRecord`, `AlignmentIssue`, `EditHistoryEntry`. (6) Added prerequisite note for staleness triggers referencing non-existent tables (`gate_scores`, `customer_profiles`). |
