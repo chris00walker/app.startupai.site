@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const createRfqSchema = z.object({
   title: z.string().min(10).max(100),
@@ -81,6 +82,16 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  // Server-side analytics tracking (non-blocking)
+  trackMarketplaceServerEvent.rfqCreated(
+    user.id,
+    rfq.id,
+    relationshipType,
+    industries,
+    timeline,
+    budgetRange
+  );
 
   return NextResponse.json(
     {

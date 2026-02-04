@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { validateUuid } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -44,6 +45,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
+  // Fetch connection details for analytics (before state change)
+  const { data: connectionDetails } = await supabase
+    .from('consultant_clients')
+    .select('relationship_type, initiated_by, created_at')
+    .eq('id', connectionId)
+    .eq('consultant_id', user.id)
+    .eq('connection_status', 'requested')
+    .single();
+
   // Call the SECURITY DEFINER function to accept
   const { data: result, error } = await supabase.rpc('accept_connection', {
     connection_id: connectionId,
@@ -67,6 +77,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json(
       { error: result.error, message: result.message },
       { status: statusMap[result.error] || 400 }
+    );
+  }
+
+  // Server-side analytics tracking (non-blocking)
+  if (connectionDetails) {
+    const createdAt = new Date(connectionDetails.created_at);
+    const acceptedAt = new Date(result.accepted_at);
+    const daysToAccept = Math.floor((acceptedAt.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+
+    trackMarketplaceServerEvent.connectionAccepted(
+      user.id,
+      connectionId,
+      connectionDetails.relationship_type,
+      connectionDetails.initiated_by as 'founder' | 'consultant',
+      daysToAccept
     );
   }
 

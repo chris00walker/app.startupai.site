@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { validateUuid } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const declineSchema = z.object({
   reason: z.enum(['not_right_fit', 'went_another_direction', 'other']).optional(),
@@ -113,6 +114,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       { status: 500 }
     );
   }
+
+  // Server-side analytics tracking (non-blocking)
+  trackMarketplaceServerEvent.rfqResponseDeclined(user.id, rfqId, responseId, validation.data?.reason);
 
   return NextResponse.json({
     responseId,

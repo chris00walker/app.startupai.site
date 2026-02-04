@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { validateUuid } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const acceptSchema = z.object({
   confirmedRelationshipType: z
@@ -80,6 +81,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
       { status: statusMap[result.error] || 400 }
     );
   }
+
+  // Server-side analytics tracking
+  // Calculate days to accept from created_at to now (if available from result)
+  const daysToAccept = result.created_at
+    ? Math.floor((Date.now() - new Date(result.created_at).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+  trackMarketplaceServerEvent.connectionAccepted(
+    user.id,
+    connectionId,
+    result.relationship_type,
+    result.initiated_by || 'consultant', // Founder is accepting, so it was likely initiated by consultant
+    daysToAccept
+  );
 
   return NextResponse.json({
     connectionId: result.connection_id,

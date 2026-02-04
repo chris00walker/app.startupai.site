@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { validateUuid } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const acceptSchema = z.object({
   markAsFilled: z.boolean().optional().default(false),
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   // Get the response and consultant info
   const { data: response, error: responseError } = await supabase
     .from('consultant_request_responses')
-    .select('id, consultant_id, status')
+    .select('id, consultant_id, status, responded_at')
     .eq('id', responseId)
     .eq('request_id', rfqId)
     .single();
@@ -172,6 +173,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
     .select('full_name')
     .eq('id', response.consultant_id)
     .single();
+
+  // Server-side analytics tracking (non-blocking)
+  const respondedAt = new Date(response.responded_at);
+  const acceptedAt = new Date();
+  const daysToAccept = Math.floor((acceptedAt.getTime() - respondedAt.getTime()) / (1000 * 60 * 60 * 24));
+  trackMarketplaceServerEvent.rfqResponseAccepted(user.id, rfqId, responseId, daysToAccept);
 
   return NextResponse.json({
     responseId,

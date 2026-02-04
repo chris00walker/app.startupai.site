@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { validateUuid } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const declineSchema = z.object({
   reason: z.enum(['not_right_fit', 'timing', 'other']).optional(),
@@ -78,6 +79,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
       { status: statusMap[result.error] || 400 }
     );
   }
+
+  // Server-side analytics tracking
+  trackMarketplaceServerEvent.connectionDeclined(
+    user.id,
+    connectionId,
+    result.relationship_type || 'unknown',
+    result.initiated_by || 'consultant',
+    validation.data?.reason
+  );
 
   return NextResponse.json({
     connectionId: result.connection_id,

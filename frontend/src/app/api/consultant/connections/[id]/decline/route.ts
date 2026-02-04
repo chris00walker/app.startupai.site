@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { validateUuid } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const declineSchema = z.object({
   reason: z.enum(['not_right_fit', 'timing', 'other']).optional(),
@@ -65,6 +66,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
+  // Fetch connection details for analytics (before state change)
+  const { data: connectionDetails } = await supabase
+    .from('consultant_clients')
+    .select('relationship_type, initiated_by')
+    .eq('id', connectionId)
+    .eq('consultant_id', user.id)
+    .eq('connection_status', 'requested')
+    .single();
+
   // Call the SECURITY DEFINER function to decline
   const { data: result, error } = await supabase.rpc('decline_connection', {
     connection_id: connectionId,
@@ -89,6 +99,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json(
       { error: result.error, message: result.message },
       { status: statusMap[result.error] || 400 }
+    );
+  }
+
+  // Server-side analytics tracking (non-blocking)
+  if (connectionDetails) {
+    trackMarketplaceServerEvent.connectionDeclined(
+      user.id,
+      connectionId,
+      connectionDetails.relationship_type,
+      connectionDetails.initiated_by as 'founder' | 'consultant',
+      validation.data?.reason
     );
   }
 

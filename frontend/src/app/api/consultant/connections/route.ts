@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { parsePagination } from '@/lib/api/validation';
+import { trackMarketplaceServerEvent } from '@/lib/analytics/server';
 
 const connectionRequestSchema = z.object({
   founderId: z.string().uuid(),
@@ -83,6 +84,14 @@ export async function POST(request: NextRequest) {
       { status }
     );
   }
+
+  // Server-side analytics tracking
+  trackMarketplaceServerEvent.connectionRequestedByConsultant(
+    user.id,
+    founderId,
+    relationshipType,
+    !!message
+  );
 
   return NextResponse.json(
     {
