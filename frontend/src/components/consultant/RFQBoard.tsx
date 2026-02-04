@@ -158,8 +158,9 @@ export function RFQBoard() {
         throw new Error(data.message || 'Failed to submit response');
       }
 
-      // TASK-034: Track marketplace event
-      trackMarketplaceEvent.rfqResponseSubmitted(selectedRfq.id);
+      // TASK-034: Track marketplace event (per marketplace-analytics.md spec)
+      // Note: consultant_id omitted (tracked server-side via auth)
+      trackMarketplaceEvent.rfqResponseSent(selectedRfq.id, '', responseMessage.length);
 
       setResponseSuccess(true);
 

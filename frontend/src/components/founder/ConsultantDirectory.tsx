@@ -75,9 +75,8 @@ export function ConsultantDirectory({ onRequestConnection }: ConsultantDirectory
       setConsultants(data.consultants);
       setTotal(data.total);
 
-      // TASK-034: Track directory view
-      const filterApplied = !!(relationshipType || industry);
-      trackMarketplaceEvent.consultantDirectoryViewed(filterApplied);
+      // TASK-034: Track directory view (per marketplace-analytics.md spec)
+      trackMarketplaceEvent.consultantDirectoryViewed(data.total);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load consultants');
     } finally {

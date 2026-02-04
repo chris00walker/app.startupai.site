@@ -94,13 +94,19 @@ export function RFQForm() {
         }),
       });
 
+      const responseData = await response.json();
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to create RFQ');
+        throw new Error(responseData.message || 'Failed to create RFQ');
       }
 
-      // TASK-034: Track marketplace event
-      trackMarketplaceEvent.rfqCreated(relationshipType);
+      // TASK-034: Track marketplace event (per marketplace-analytics.md spec)
+      trackMarketplaceEvent.rfqCreated(
+        responseData.id,
+        relationshipType,
+        industries.length > 0 ? industries : undefined,
+        timeline || undefined,
+        budgetRange || undefined
+      );
 
       // Success - redirect to RFQ list
       router.push('/founder/rfq?success=created');

@@ -117,9 +117,9 @@ export function FounderDirectory({ onRequestConnection }: FounderDirectoryProps)
       setFounders(data.founders);
       setTotal(data.total);
 
-      // TASK-034: Track directory view
-      const filterApplied = !!(industry || stage || problemFit);
-      trackMarketplaceEvent.founderDirectoryViewed(filterApplied);
+      // TASK-034: Track directory view (per marketplace-analytics.md spec)
+      // Note: Only verified consultants can view, so verification_status is 'verified'
+      trackMarketplaceEvent.founderDirectoryViewed(data.total, 'verified');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load founders');
     } finally {

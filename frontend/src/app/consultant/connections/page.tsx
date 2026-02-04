@@ -104,8 +104,16 @@ export default function ConsultantConnectionsPage() {
         throw new Error(data.message || 'Failed to accept connection');
       }
 
-      // TASK-034: Track marketplace event
-      trackMarketplaceEvent.connectionAccepted('founder', selectedConnection.relationshipType);
+      // TASK-034: Track marketplace event (per marketplace-analytics.md spec)
+      const daysToAccept = Math.floor(
+        (Date.now() - new Date(selectedConnection.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+      );
+      trackMarketplaceEvent.connectionAccepted(
+        selectedConnection.id,
+        selectedConnection.relationshipType,
+        selectedConnection.initiatedBy as 'founder' | 'consultant',
+        daysToAccept
+      );
 
       await fetchConnections();
       setSelectedConnection(null);
@@ -133,8 +141,13 @@ export default function ConsultantConnectionsPage() {
         throw new Error(data.message || 'Failed to decline connection');
       }
 
-      // TASK-034: Track marketplace event
-      trackMarketplaceEvent.connectionDeclined('founder', selectedConnection.relationshipType);
+      // TASK-034: Track marketplace event (per marketplace-analytics.md spec)
+      trackMarketplaceEvent.connectionDeclined(
+        selectedConnection.id,
+        selectedConnection.relationshipType,
+        selectedConnection.initiatedBy as 'founder' | 'consultant',
+        declineReason || undefined
+      );
 
       await fetchConnections();
       setSelectedConnection(null);

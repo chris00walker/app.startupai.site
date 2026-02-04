@@ -113,9 +113,9 @@ export default function ConsultantOnboardingPage() {
         }
       }
 
-      // Track analytics
-      if (directoryOptIn) {
-        trackMarketplaceEvent.consultantDirectoryOptIn(defaultRelationshipType);
+      // Track analytics (per marketplace-analytics.md spec)
+      if (directoryOptIn && userId) {
+        trackMarketplaceEvent.consultantOptInEnabled(userId, defaultRelationshipType || undefined);
       }
 
       // Redirect to dashboard

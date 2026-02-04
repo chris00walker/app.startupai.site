@@ -46,6 +46,32 @@ export type ProductEvent =
   | 'crewai_analysis_started'
   | 'crewai_analysis_completed'
   | 'crewai_analysis_failed'
+  // Marketplace events (per marketplace-analytics.md spec)
+  | 'marketplace.consultant_directory.viewed'
+  | 'marketplace.consultant_directory.filtered'
+  | 'marketplace.consultant_profile.viewed'
+  | 'marketplace.connection.requested_by_founder'
+  | 'marketplace.founder_directory.viewed'
+  | 'marketplace.founder_directory.filtered'
+  | 'marketplace.founder_profile.viewed'
+  | 'marketplace.connection.requested_by_consultant'
+  | 'marketplace.connection.accepted'
+  | 'marketplace.connection.declined'
+  | 'marketplace.connection.expired'
+  | 'marketplace.rfq.created'
+  | 'marketplace.rfq.viewed'
+  | 'marketplace.rfq.response_sent'
+  | 'marketplace.rfq.response_accepted'
+  | 'marketplace.rfq.response_declined'
+  | 'marketplace.rfq.cancelled'
+  | 'marketplace.rfq.filled'
+  | 'marketplace.verification.granted'
+  | 'marketplace.verification.grace_started'
+  | 'marketplace.verification.revoked'
+  | 'marketplace.opt_in.consultant_enabled'
+  | 'marketplace.opt_in.consultant_disabled'
+  | 'marketplace.opt_in.founder_enabled'
+  | 'marketplace.opt_in.founder_disabled'
 
 interface EventProperties {
   [key: string]: string | number | boolean | undefined
@@ -267,94 +293,181 @@ export const trackCrewAIEvent = {
 
 /**
  * Track marketplace events (TASK-034)
+ * Event names follow marketplace-analytics.md spec
  * @story US-FM01-11, US-PH01-07
  */
 export const trackMarketplaceEvent = {
-  // Connection events
-  connectionRequested: (initiatedBy: 'founder' | 'consultant', relationshipType: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.connection_requested',
+  // Consultant Directory Events (Founders Browsing)
+  consultantDirectoryViewed: (count: number) =>
+    trackEvent('marketplace.consultant_directory.viewed', { count }),
+
+  consultantDirectoryFiltered: (filters: { relationship_type?: string; industries?: string[]; services?: string[] }) =>
+    trackEvent('marketplace.consultant_directory.filtered', {
+      relationship_type: filters.relationship_type,
+      industries: filters.industries?.join(','),
+      services: filters.services?.join(','),
+    }),
+
+  consultantProfileViewed: (consultantId: string, relationshipType: string, isVerified: boolean) =>
+    trackEvent('marketplace.consultant_profile.viewed', {
+      consultant_id: consultantId,
+      relationship_type: relationshipType,
+      is_verified: isVerified,
+    }),
+
+  // Founder Directory Events (Consultants Browsing)
+  founderDirectoryViewed: (count: number, verificationStatus: string) =>
+    trackEvent('marketplace.founder_directory.viewed', {
+      count,
+      verification_status: verificationStatus,
+    }),
+
+  founderDirectoryFiltered: (filters: { problem_fit?: string; industry?: string; stage?: string }) =>
+    trackEvent('marketplace.founder_directory.filtered', {
+      problem_fit: filters.problem_fit,
+      industry: filters.industry,
+      stage: filters.stage,
+    }),
+
+  founderProfileViewed: (founderId: string, problemFit: string, hasEvidence: boolean) =>
+    trackEvent('marketplace.founder_profile.viewed', {
+      founder_id: founderId,
+      problem_fit: problemFit,
+      has_evidence: hasEvidence,
+    }),
+
+  // Connection Flow Events
+  connectionRequestedByFounder: (consultantId: string, relationshipType: string, hasMessage: boolean) =>
+    trackEvent('marketplace.connection.requested_by_founder', {
+      consultant_id: consultantId,
+      relationship_type: relationshipType,
+      has_message: hasMessage,
+    }),
+
+  connectionRequestedByConsultant: (founderId: string, relationshipType: string, hasMessage: boolean) =>
+    trackEvent('marketplace.connection.requested_by_consultant', {
+      founder_id: founderId,
+      relationship_type: relationshipType,
+      has_message: hasMessage,
+    }),
+
+  connectionAccepted: (connectionId: string, relationshipType: string, initiatedBy: 'founder' | 'consultant', daysToAccept: number) =>
+    trackEvent('marketplace.connection.accepted', {
+      connection_id: connectionId,
+      relationship_type: relationshipType,
       initiated_by: initiatedBy,
-      relationship_type: relationshipType,
-      category: 'marketplace',
+      days_to_accept: daysToAccept,
     }),
 
-  connectionAccepted: (initiatedBy: 'founder' | 'consultant', relationshipType: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.connection_accepted',
+  connectionDeclined: (connectionId: string, relationshipType: string, initiatedBy: 'founder' | 'consultant', declineReason?: string) =>
+    trackEvent('marketplace.connection.declined', {
+      connection_id: connectionId,
+      relationship_type: relationshipType,
       initiated_by: initiatedBy,
-      relationship_type: relationshipType,
-      category: 'marketplace',
+      decline_reason: declineReason,
     }),
 
-  connectionDeclined: (initiatedBy: 'founder' | 'consultant', relationshipType: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.connection_declined',
+  connectionExpired: (connectionId: string, initiatedBy: 'founder' | 'consultant', daysPending: number) =>
+    trackEvent('marketplace.connection.expired', {
+      connection_id: connectionId,
       initiated_by: initiatedBy,
-      relationship_type: relationshipType,
-      category: 'marketplace',
+      days_pending: daysPending,
     }),
 
-  // RFQ events
-  rfqCreated: (relationshipType: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.rfq_created',
-      relationship_type: relationshipType,
-      category: 'marketplace',
-    }),
-
-  rfqResponseSubmitted: (rfqId: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.rfq_response_submitted',
+  // RFQ Board Events
+  rfqCreated: (rfqId: string, relationshipType: string, industries?: string[], timeline?: string, budgetRange?: string) =>
+    trackEvent('marketplace.rfq.created', {
       rfq_id: rfqId,
-      category: 'marketplace',
+      relationship_type: relationshipType,
+      industries: industries?.join(','),
+      timeline,
+      budget_range: budgetRange,
     }),
 
-  rfqResponseAccepted: (rfqId: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.rfq_response_accepted',
+  rfqViewed: (rfqId: string, viewerVerificationStatus: string) =>
+    trackEvent('marketplace.rfq.viewed', {
       rfq_id: rfqId,
-      category: 'marketplace',
+      viewer_verification_status: viewerVerificationStatus,
     }),
 
-  // Directory events
-  founderOptedIn: () =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.founder_opted_in',
-      category: 'marketplace',
+  rfqResponseSent: (rfqId: string, consultantId: string, messageLength: number) =>
+    trackEvent('marketplace.rfq.response_sent', {
+      rfq_id: rfqId,
+      consultant_id: consultantId,
+      message_length: messageLength,
     }),
 
-  founderOptedOut: () =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.founder_opted_out',
-      category: 'marketplace',
+  rfqResponseAccepted: (rfqId: string, responseId: string, daysToAccept: number) =>
+    trackEvent('marketplace.rfq.response_accepted', {
+      rfq_id: rfqId,
+      response_id: responseId,
+      days_to_accept: daysToAccept,
     }),
 
-  consultantVerified: () =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.consultant_verified',
-      category: 'marketplace',
+  rfqResponseDeclined: (rfqId: string, responseId: string, declineReason?: string) =>
+    trackEvent('marketplace.rfq.response_declined', {
+      rfq_id: rfqId,
+      response_id: responseId,
+      decline_reason: declineReason,
     }),
 
-  consultantDirectoryOptIn: (defaultRelationshipType: string) =>
-    trackEvent('button_clicked', {
-      event_type: 'marketplace.consultant_directory_opt_in',
+  rfqCancelled: (rfqId: string, responsesCount: number, reason?: string) =>
+    trackEvent('marketplace.rfq.cancelled', {
+      rfq_id: rfqId,
+      responses_count: responsesCount,
+      reason,
+    }),
+
+  rfqFilled: (rfqId: string, responsesCount: number, daysToFill: number) =>
+    trackEvent('marketplace.rfq.filled', {
+      rfq_id: rfqId,
+      responses_count: responsesCount,
+      days_to_fill: daysToFill,
+    }),
+
+  // Verification Events
+  verificationGranted: (consultantId: string, planTier: string, source: string) =>
+    trackEvent('marketplace.verification.granted', {
+      consultant_id: consultantId,
+      plan_tier: planTier,
+      source,
+    }),
+
+  verificationGraceStarted: (consultantId: string, reason: string) =>
+    trackEvent('marketplace.verification.grace_started', {
+      consultant_id: consultantId,
+      reason,
+    }),
+
+  verificationRevoked: (consultantId: string, reason: string, daysInGrace: number) =>
+    trackEvent('marketplace.verification.revoked', {
+      consultant_id: consultantId,
+      reason,
+      days_in_grace: daysInGrace,
+    }),
+
+  // Opt-in Events
+  consultantOptInEnabled: (consultantId: string, defaultRelationshipType?: string) =>
+    trackEvent('marketplace.opt_in.consultant_enabled', {
+      consultant_id: consultantId,
       default_relationship_type: defaultRelationshipType,
-      category: 'marketplace',
     }),
 
-  // Directory browsing
-  founderDirectoryViewed: (filterApplied: boolean) =>
-    trackEvent('dashboard_viewed', {
-      event_type: 'marketplace.founder_directory_viewed',
-      filter_applied: filterApplied,
-      category: 'marketplace',
+  consultantOptInDisabled: (consultantId: string, daysOptedIn: number) =>
+    trackEvent('marketplace.opt_in.consultant_disabled', {
+      consultant_id: consultantId,
+      days_opted_in: daysOptedIn,
     }),
 
-  consultantDirectoryViewed: (filterApplied: boolean) =>
-    trackEvent('dashboard_viewed', {
-      event_type: 'marketplace.consultant_directory_viewed',
-      filter_applied: filterApplied,
-      category: 'marketplace',
+  founderOptInEnabled: (founderId: string, problemFit: string) =>
+    trackEvent('marketplace.opt_in.founder_enabled', {
+      founder_id: founderId,
+      problem_fit: problemFit,
+    }),
+
+  founderOptInDisabled: (founderId: string, daysOptedIn: number) =>
+    trackEvent('marketplace.opt_in.founder_disabled', {
+      founder_id: founderId,
+      days_opted_in: daysOptedIn,
     }),
 }
