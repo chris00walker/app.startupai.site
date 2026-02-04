@@ -32,6 +32,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Search, Clock, MessageSquare, Crown, RefreshCw, Send, Info, CheckCircle } from 'lucide-react';
 import { RELATIONSHIP_TYPES } from '@/components/consultant/InviteClientModal';
 import { formatDistanceToNow } from 'date-fns';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 interface RFQ {
   id: string;
@@ -156,6 +157,9 @@ export function RFQBoard() {
         const data = await response.json();
         throw new Error(data.message || 'Failed to submit response');
       }
+
+      // TASK-034: Track marketplace event
+      trackMarketplaceEvent.rfqResponseSubmitted(selectedRfq.id);
 
       setResponseSuccess(true);
 

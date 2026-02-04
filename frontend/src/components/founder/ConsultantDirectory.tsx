@@ -23,6 +23,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Search, Building2, CheckCircle, Clock, Users, RefreshCw } from 'lucide-react';
 import { RELATIONSHIP_TYPES } from '@/components/consultant/InviteClientModal';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 interface Consultant {
   id: string;
@@ -73,6 +74,10 @@ export function ConsultantDirectory({ onRequestConnection }: ConsultantDirectory
       const data = await response.json();
       setConsultants(data.consultants);
       setTotal(data.total);
+
+      // TASK-034: Track directory view
+      const filterApplied = !!(relationshipType || industry);
+      trackMarketplaceEvent.consultantDirectoryViewed(filterApplied);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load consultants');
     } finally {

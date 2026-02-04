@@ -226,13 +226,14 @@ Accept a connection request from a consultant.
 
 **Authorization:** Authenticated founder (must be the recipient)
 
-**Request Body:**
+**Request Body:** (optional - empty body is valid)
 
 ```json
-{
-  "confirmedRelationshipType": "advisory"
-}
+{}
 ```
+
+Note: The relationship type is established when the request is created.
+The accept endpoint simply transitions the connection to 'active' status.
 
 **Response 200:**
 

@@ -25,6 +25,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Send, Info } from 'lucide-react';
 import { RELATIONSHIP_TYPES, type RelationshipType } from '@/components/consultant/InviteClientModal';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 const TIMELINES = [
   { value: '1_month', label: '1 month' },
@@ -97,6 +98,9 @@ export function RFQForm() {
         const data = await response.json();
         throw new Error(data.message || 'Failed to create RFQ');
       }
+
+      // TASK-034: Track marketplace event
+      trackMarketplaceEvent.rfqCreated(relationshipType);
 
       // Success - redirect to RFQ list
       router.push('/founder/rfq?success=created');

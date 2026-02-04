@@ -86,12 +86,13 @@ export function InviteClientModal({
   onClose,
   onInvite,
   isTrial = false,
-  defaultRelationshipType = 'advisory',
+  defaultRelationshipType,
 }: InviteClientModalProps) {
   const [state, setState] = useState<ModalState>('form');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationshipType);
+  // No default - must be explicitly selected (per plan) unless consultant has a profile default
+  const [relationshipType, setRelationshipType] = useState<RelationshipType | ''>(defaultRelationshipType || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -102,7 +103,7 @@ export function InviteClientModal({
     setState('form');
     setEmail('');
     setName('');
-    setRelationshipType(defaultRelationshipType);
+    setRelationshipType(defaultRelationshipType || '');
     setError(null);
     setInviteUrl(null);
     setCopied(false);
@@ -123,6 +124,11 @@ export function InviteClientModal({
       return;
     }
 
+    if (!relationshipType) {
+      setError('Please select a relationship type');
+      return;
+    }
+
     // US-CT03: Trial users see upgrade prompt instead of sending invite
     if (isTrial) {
       setState('upgrade');
@@ -135,7 +141,7 @@ export function InviteClientModal({
       const result = await onInvite({
         email: email.trim().toLowerCase(),
         name: name.trim() || undefined,
-        relationshipType,
+        relationshipType: relationshipType as RelationshipType,  // Validated above
       });
 
       if (!result.success) {
@@ -228,8 +234,8 @@ export function InviteClientModal({
                   Relationship Type <span className="text-destructive">*</span>
                 </Label>
                 <Select
-                  value={relationshipType}
-                  onValueChange={(value: RelationshipType) => setRelationshipType(value)}
+                  value={relationshipType || undefined}
+                  onValueChange={(value) => setRelationshipType(value as RelationshipType)}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger id="relationship-type" className="pl-9">

@@ -121,10 +121,8 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_founder_opt_in
 ON user_profiles(founder_directory_opt_in)
 WHERE founder_directory_opt_in = TRUE;
 
--- Add index for VPD gate (problem_fit filter) on projects table
-CREATE INDEX IF NOT EXISTS idx_projects_problem_fit
-ON projects(user_id, problem_fit)
-WHERE problem_fit IN ('partial_fit', 'strong_fit');
+-- NOTE: problem_fit lives in crewai_validation_states (not projects)
+-- Index for VPD gate is created in a later migration after that table exists
 
 -- ============================================================================
 -- 4. Create consultant_requests table (RFQ)

@@ -23,7 +23,8 @@ GRANT EXECUTE ON FUNCTION public.accept_connection(UUID, TEXT) TO authenticated;
 -- 2. Founders can only INSERT with 'requested' status
 -- All other state transitions must go through SECURITY DEFINER functions.
 
--- Drop existing INSERT policies
+-- Drop ALL existing INSERT policies (including the permissive one from 000002)
+DROP POLICY IF EXISTS "consultant_clients_insert_policy" ON consultant_clients;
 DROP POLICY IF EXISTS "consultants_can_invite_clients" ON consultant_clients;
 DROP POLICY IF EXISTS "founders_can_request_connections" ON consultant_clients;
 

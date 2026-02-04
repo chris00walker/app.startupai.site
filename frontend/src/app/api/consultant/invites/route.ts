@@ -14,12 +14,11 @@ import { randomBytes } from 'crypto';
 import { z } from 'zod';
 
 // Validation schema for creating an invite
+// NOTE: relationshipType is required - no default (explicit selection per plan)
 const createInviteSchema = z.object({
   email: z.string().email('Invalid email address'),
   name: z.string().optional(),
-  relationshipType: z
-    .enum(['advisory', 'capital', 'program', 'service', 'ecosystem'])
-    .default('advisory'),
+  relationshipType: z.enum(['advisory', 'capital', 'program', 'service', 'ecosystem']),
 });
 
 /**

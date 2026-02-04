@@ -362,6 +362,8 @@ USING (
 
 -- View for Founder Directory (what consultants see about founders)
 -- Anonymizes founder identity until connection is active
+-- NOTE: problem_fit is in crewai_validation_states, not projects
+-- NOTE: industry is in projects.hints JSONB, not a direct column
 CREATE OR REPLACE VIEW public.founder_directory AS
 SELECT
   u.id,
@@ -372,11 +374,14 @@ SELECT
     UPPER(LEFT(SPLIT_PART(u.full_name, ' ', 2), 1)),
     '.'
   ) as display_name,
-  -- Company info (if they have a project with a company name)
-  COALESCE(p.company_name, 'Stealth startup') as company,
-  p.industry,
-  p.stage,
-  p.problem_fit,
+  -- Company info from user profile (projects doesn't have company column)
+  COALESCE(u.company, 'Stealth startup') as company,
+  -- Industry from project hints JSONB field
+  COALESCE(p.hints->>'industry', 'General') as industry,
+  -- Stage from project (validation stage enum)
+  COALESCE(p.stage, 'DESIRABILITY') as stage,
+  -- problem_fit from crewai_validation_states (not projects)
+  cvs.problem_fit,
   -- Evidence summary badges
   (
     SELECT COUNT(*) FROM hypotheses h
@@ -387,25 +392,38 @@ SELECT
     JOIN hypotheses h ON e.hypothesis_id = h.id
     WHERE h.project_id = p.id AND e.status = 'completed'
   ) as experiments_passed,
-  p.fit_score,
+  -- Fit score derived from problem_fit enum
+  CASE cvs.problem_fit
+    WHEN 'strong_fit' THEN 85
+    WHEN 'partial_fit' THEN 65
+    ELSE 50
+  END as fit_score,
   u.created_at as joined_at
 FROM user_profiles u
 JOIN projects p ON p.user_id = u.id
+-- Join validation states to get problem_fit
+LEFT JOIN crewai_validation_states cvs ON cvs.project_id = p.id
 WHERE u.founder_directory_opt_in = TRUE
-  AND p.problem_fit IN ('partial_fit', 'strong_fit');
+  -- Filter by problem_fit from validation states
+  AND cvs.problem_fit IN ('partial_fit', 'strong_fit');
 
 COMMENT ON VIEW public.founder_directory IS
-  'Anonymized founder directory for verified consultants. Shows validation progress without PII.';
+  'Anonymized founder directory for verified consultants. Shows validation progress without PII. Uses crewai_validation_states for problem_fit.';
 
 -- Grant access to the view for authenticated users (RLS on underlying tables still applies)
 GRANT SELECT ON public.founder_directory TO authenticated;
 
 -- View for active connections with full details
+-- PII PROTECTION: Founder identity only revealed for active connections
 CREATE OR REPLACE VIEW public.active_connections AS
 SELECT
   cc.id as connection_id,
   cc.consultant_id,
-  cc.client_id as founder_id,
+  -- PII: founder_id only visible when connection is active
+  CASE
+    WHEN cc.connection_status = 'active' THEN cc.client_id
+    ELSE NULL
+  END as founder_id,
   cc.relationship_type,
   cc.connection_status,
   cc.initiated_by,

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Search, Building2, FlaskConical, MessageSquare, Target, Crown, RefreshCw } from 'lucide-react';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 interface Founder {
   id: string;
@@ -115,6 +116,10 @@ export function FounderDirectory({ onRequestConnection }: FounderDirectoryProps)
       const data = await response.json();
       setFounders(data.founders);
       setTotal(data.total);
+
+      // TASK-034: Track directory view
+      const filterApplied = !!(industry || stage || problemFit);
+      trackMarketplaceEvent.founderDirectoryViewed(filterApplied);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load founders');
     } finally {
