@@ -119,16 +119,13 @@ export async function POST(request: NextRequest) {
     // Determine the target user ID (for consultant flow)
     let targetUserId = user.id;
     if (validatedData.client_id) {
-      // Verify consultant has ACTIVE connection to this client
-      const { data: clientAccess, error: clientError } = await supabase
-        .from('consultant_clients')
-        .select('client_id')
-        .eq('consultant_id', user.id)
-        .eq('client_id', validatedData.client_id)
-        .eq('connection_status', 'active') // Only active connections grant access
-        .single();
+      // Verify consultant has ACTIVE connection to this client (via SECURITY DEFINER function)
+      const { data: hasAccess, error: accessError } = await supabase.rpc(
+        'check_consultant_client_access',
+        { p_client_id: validatedData.client_id }
+      );
 
-      if (clientError || !clientAccess) {
+      if (accessError || !hasAccess) {
         return NextResponse.json(
           { error: 'Client not found or access denied', code: 'CLIENT_ACCESS_DENIED' },
           { status: 403 }

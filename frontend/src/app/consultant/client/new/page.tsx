@@ -50,16 +50,12 @@ export default async function ClientOnboardingPage({ searchParams }: PageProps) 
 
   // If clientId provided, show Quick Start form
   if (clientId) {
-    // Verify this client belongs to the consultant
-    const { data: clientRelation } = await supabase
-      .from('consultant_clients')
-      .select('client_id, client_name, status')
-      .eq('consultant_id', user.id)
-      .eq('client_id', clientId)
-      .eq('status', 'active')
-      .single();
+    // Verify this client belongs to the consultant (via SECURITY DEFINER function)
+    const { data: hasAccess } = await supabase.rpc('check_consultant_client_access', {
+      p_client_id: clientId,
+    });
 
-    if (!clientRelation) {
+    if (!hasAccess) {
       redirect('/consultant/clients?error=client_not_found');
     }
 
@@ -70,7 +66,7 @@ export default async function ClientOnboardingPage({ searchParams }: PageProps) 
       .eq('id', clientId)
       .single();
 
-    const clientName = clientProfile?.full_name || clientProfile?.company || clientRelation.client_name || 'Client';
+    const clientName = clientProfile?.full_name || clientProfile?.company || 'Client';
 
     return (
       <main className="min-h-screen bg-background">
@@ -85,18 +81,8 @@ export default async function ClientOnboardingPage({ searchParams }: PageProps) 
     );
   }
 
-  // No clientId - show client selection
-  const { data: clients } = await supabase
-    .from('consultant_clients')
-    .select(`
-      client_id,
-      client_name,
-      invite_email,
-      status
-    `)
-    .eq('consultant_id', user.id)
-    .eq('status', 'active')
-    .order('linked_at', { ascending: false });
+  // No clientId - show client selection (via SECURITY DEFINER function)
+  const { data: clients } = await supabase.rpc('get_consultant_active_clients');
 
   // Get client profile info for active clients
   const clientIds = clients?.map(c => c.client_id).filter((id): id is string => Boolean(id)) || [];

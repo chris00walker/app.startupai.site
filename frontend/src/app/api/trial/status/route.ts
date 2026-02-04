@@ -134,12 +134,8 @@ export async function GET() {
     const limits: TrialStatusResponse['limits'] = {};
 
     if (role === 'consultant_trial') {
-      // For consultant trial, show mock clients limit
-      const { count: mockClientCount } = await supabase
-        .from('consultant_clients')
-        .select('id', { count: 'exact', head: true })
-        .eq('consultant_id', user.id)
-        .eq('is_mock', true);
+      // For consultant trial, show mock clients limit (via SECURITY DEFINER function)
+      const { data: mockClientCount } = await supabase.rpc('count_consultant_mock_clients');
 
       limits.mock_clients = {
         used: mockClientCount || 0,
