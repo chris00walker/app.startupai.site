@@ -40,7 +40,8 @@
     "schema:fk:ci": "pnpm -C .. schema:fk:ci",
     "schema:expected": "pnpm exec tsx ../scripts/schema-drift/analyze.ts",
     "schema:test": "pnpm exec tsx ../scripts/schema-drift/__tests__/run.ts",
-    "traceability:validate": "pnpm -C .. traceability:validate"
+    "traceability:validate": "pnpm -C .. traceability:validate",
+    "figma:sync-tokens": "tsx scripts/figma-sync-tokens.ts"
   },
   "keywords": [],
   "author": "",
