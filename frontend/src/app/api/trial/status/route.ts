@@ -112,19 +112,19 @@ export async function GET() {
     const [projectsUsage, reportsUsage, workflowsUsage] = await Promise.all([
       findTrialUsageCounter({
         userId: user.id,
-        action: 'projects.create',
+        trackedAction: 'projects.create',
         period: 'lifetime',
         periodStart: lifetimeStart,
       }),
       findTrialUsageCounter({
         userId: user.id,
-        action: 'reports.generate',
+        trackedAction: 'reports.generate',
         period: 'daily',
         periodStart: today,
       }),
       findTrialUsageCounter({
         userId: user.id,
-        action: 'workflows.run',
+        trackedAction: 'workflows.run',
         period: 'monthly',
         periodStart: monthStart,
       }),
@@ -145,19 +145,19 @@ export async function GET() {
 
     if (role === 'founder_trial') {
       limits.projects = {
-        used: projectsUsage?.count || 0,
+        used: projectsUsage?.usage_count || 0,
         max: TRIAL_LIMITS['projects.create'].limit,
       };
     }
 
     // These limits apply to both trial types
     limits.reports_daily = {
-      used: reportsUsage?.count || 0,
+      used: reportsUsage?.usage_count || 0,
       max: TRIAL_LIMITS['reports.generate'].limit,
     };
 
     limits.workflows_monthly = {
-      used: workflowsUsage?.count || 0,
+      used: workflowsUsage?.usage_count || 0,
       max: TRIAL_LIMITS['workflows.run'].limit,
     };
 

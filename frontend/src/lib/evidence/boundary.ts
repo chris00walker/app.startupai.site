@@ -65,7 +65,7 @@ const EvidenceRowSchema = z
     id: z.string(),
     project_id: z.string().optional().nullable(),
     title: z.string().optional().nullable(),
-    category: z.enum(EVIDENCE_CATEGORIES).optional().nullable(),
+    evidence_category: z.enum(EVIDENCE_CATEGORIES).optional().nullable(),
     summary: z.string().optional().nullable(),
     full_text: z.string().optional().nullable(),
     content: z.string().optional().nullable(),
@@ -76,7 +76,7 @@ const EvidenceRowSchema = z
     source_type: z.string().optional().nullable(),
     source_url: z.string().optional().nullable(),
     author: z.string().optional().nullable(),
-    source: z.string().optional().nullable(),
+    evidence_source: z.string().optional().nullable(),
     occurred_on: z.union([z.string(), z.date()]).optional().nullable(),
     linked_assumptions: z.array(z.string()).optional().nullable(),
     tags: z.array(z.string()).optional().nullable(),
@@ -184,7 +184,7 @@ export function parseEvidenceRows(
       id: data.id,
       projectId: data.project_id || '',
       title: data.title ?? null,
-      category: data.category ?? null,
+      evidenceCategory: data.evidence_category ?? null,
       summary: data.summary ?? null,
       fullText: data.full_text ?? null,
       content: data.content ?? '',
@@ -195,7 +195,7 @@ export function parseEvidenceRows(
       sourceType: data.source_type ?? null,
       sourceUrl: data.source_url ?? null,
       author: data.author ?? null,
-      source: data.source ?? null,
+      evidenceSource: data.evidence_source ?? null,
       occurredOn: data.occurred_on
         ? data.occurred_on instanceof Date
           ? data.occurred_on.toISOString().slice(0, 10)

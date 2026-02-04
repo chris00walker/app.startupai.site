@@ -745,11 +745,11 @@ export default function EditableValuePropositionCanvas({
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className={cn(
-            segment.source === 'crewai' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-            segment.source === 'manual' ? 'bg-green-50 border-green-200 text-green-700' :
+            segment.dataSource === 'crewai' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+            segment.dataSource === 'manual' ? 'bg-green-50 border-green-200 text-green-700' :
             'bg-yellow-50 border-yellow-200 text-yellow-700'
           )}>
-            {segment.source === 'crewai' ? 'AI Generated' : segment.source === 'manual' ? 'Manual' : 'Hybrid'}
+            {segment.dataSource === 'crewai' ? 'AI Generated' : segment.dataSource === 'manual' ? 'Manual' : 'Hybrid'}
           </Badge>
           {onResetToCrewAI && segment.originalCrewaiData && (
             <Button variant="outline" size="sm" onClick={onResetToCrewAI} disabled={isSaving}>

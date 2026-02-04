@@ -38,7 +38,7 @@ export const approvalHistory = pgTable('approval_history', {
     .references(() => approvalRequests.id, { onDelete: 'cascade' }),
 
   // Action details
-  action: text('action').$type<ApprovalAction>().notNull(),
+  approvalAction: text('approval_action').$type<ApprovalAction>().notNull(),
   actorId: uuid('actor_id')
     .references(() => userProfiles.id, { onDelete: 'set null' }),
   actorType: text('actor_type').$type<ApprovalActorType>(),

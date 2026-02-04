@@ -50,7 +50,7 @@ export function transformUserEvidence(evidence: Evidence): UserEvidenceItem {
     title: evidence.title || 'Untitled Evidence',
     strength: evidence.strength || 'medium',
     isContradiction: evidence.isContradiction || false,
-    category: evidence.category || 'Research',
+    category: evidence.evidenceCategory || 'Research',
   }
 }
 

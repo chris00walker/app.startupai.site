@@ -82,8 +82,8 @@ export const onboardingSessions = pgTable('onboarding_sessions', {
   userAgent: text('user_agent'),
   referralSource: text('referral_source'),
 
-  // Versioning
-  version: integer('version').default(1).notNull(),
+  // Versioning (ADR-005 concurrency control)
+  sessionVersion: integer('session_version').default(1).notNull(),
 });
 
 export type OnboardingSession = typeof onboardingSessions.$inferSelect;

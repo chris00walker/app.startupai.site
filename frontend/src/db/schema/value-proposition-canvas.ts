@@ -134,7 +134,7 @@ export const valuePropositionCanvas = pgTable('value_proposition_canvas', {
   segmentName: text('segment_name').notNull(),
 
   // Data source tracking
-  source: text('source').$type<VPCSource>().default('crewai').notNull(),
+  dataSource: text('data_source').$type<VPCSource>().default('crewai').notNull(),
 
   // Reference to the CrewAI run that generated initial data
   kickoffId: text('kickoff_id'),

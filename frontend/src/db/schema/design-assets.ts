@@ -24,10 +24,10 @@ export const designAssets = pgTable('design_assets', {
     .references(() => projects.id, { onDelete: 'cascade' }),
 
   // Asset classification
-  type: text('type')
+  assetType: text('asset_type')
     .$type<'illustration' | 'background' | 'marketing' | 'icon' | 'hero'>()
     .notNull(),
-  category: text('category'), // 'hero', 'social', 'spot', 'email', etc.
+  assetCategory: text('asset_category'), // 'hero', 'social', 'spot', 'email', etc.
 
   // Storage information
   storagePath: text('storage_path').notNull(), // Supabase Storage path

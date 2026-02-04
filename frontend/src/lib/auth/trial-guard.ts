@@ -33,12 +33,12 @@ export async function assertTrialAllowance(params: {
 
   const record = await findTrialUsageCounter({
     userId,
-    action,
+    trackedAction: action,
     period: config.period,
     periodStart: periodStartDate,
   });
 
-  const currentCount = record?.count ?? 0;
+  const currentCount = record?.usage_count ?? 0;
   const { allowed, remaining } = evaluateTrialAllowance({
     currentCount,
     config,
@@ -50,10 +50,10 @@ export async function assertTrialAllowance(params: {
 
   await upsertTrialUsageCounter({
     userId,
-    action,
+    trackedAction: action,
     period: config.period,
     periodStart: periodStartDate,
-    count: currentCount + 1,
+    usageCount: currentCount + 1,
     now,
   });
 

@@ -35,7 +35,7 @@ export const hitlRequests = pgTable('hitl_requests', {
 
   // Checkpoint identification
   checkpointName: text('checkpoint_name').notNull(),
-  phase: integer('phase').notNull(),
+  validationPhase: integer('validation_phase').notNull(),
 
   // Request content
   context: jsonb('context').$type<Record<string, unknown>>().default({}).notNull(),

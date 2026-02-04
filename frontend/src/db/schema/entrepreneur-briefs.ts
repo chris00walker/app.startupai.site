@@ -80,7 +80,7 @@ export const entrepreneurBriefs = pgTable('entrepreneur_briefs', {
   completedAt: timestamp('completed_at', { withTimezone: true }),
 
   // Versioning
-  version: integer('version').default(1).notNull(),
+  briefVersion: integer('brief_version').default(1).notNull(),
   previousVersionId: uuid('previous_version_id'),
 });
 

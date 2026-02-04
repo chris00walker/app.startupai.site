@@ -8,17 +8,17 @@ export const trialUsageCounters = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => userProfiles.id, { onDelete: 'cascade' }),
-    action: text('action').notNull(),
+    trackedAction: text('tracked_action').notNull(),
     period: text('period').notNull(),
     periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
-    count: integer('count').notNull().default(0),
+    usageCount: integer('usage_count').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex('trial_usage_user_action_period_idx').on(
       table.userId,
-      table.action,
+      table.trackedAction,
       table.period,
       table.periodStart,
     ),

@@ -68,7 +68,7 @@ export const crewaiValidationStates = pgTable(
   iteration: integer('iteration').default(1).notNull(),
 
   // Phase & Risk Tracking
-  phase: text('phase')
+  validationPhase: text('validation_phase')
     .$type<Phase>()
     .default('ideation')
     .notNull(),

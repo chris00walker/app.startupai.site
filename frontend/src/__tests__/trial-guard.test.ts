@@ -50,7 +50,7 @@ describe('assertTrialAllowance', () => {
 
   it('increments usage when under the limit', async () => {
     mockGetUserProfile.mockResolvedValue({ id: 'user-3', role: 'trial', plan_status: 'trial', subscription_status: 'trial' });
-    mockFindTrialUsageCounter.mockResolvedValue({ count: 1 });
+    mockFindTrialUsageCounter.mockResolvedValue({ usage_count: 1 });
 
     const now = new Date('2025-10-04T12:00:00Z');
     const result = await assertTrialAllowance({ userId: 'user-3', action: 'projects.create', now });
@@ -60,8 +60,8 @@ describe('assertTrialAllowance', () => {
     expect(mockUpsertTrialUsageCounter).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 'user-3',
-        action: 'projects.create',
-        count: 2,
+        trackedAction: 'projects.create',
+        usageCount: 2,
         now,
       })
     );
@@ -69,7 +69,7 @@ describe('assertTrialAllowance', () => {
 
   it('blocks when limit exhausted', async () => {
     mockGetUserProfile.mockResolvedValue({ id: 'user-4', role: 'trial', plan_status: 'trial', subscription_status: 'trial' });
-    mockFindTrialUsageCounter.mockResolvedValue({ count: 3 });
+    mockFindTrialUsageCounter.mockResolvedValue({ usage_count: 3 });
 
     const result = await assertTrialAllowance({ userId: 'user-4', action: 'projects.create' });
 

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Search, X, Heart, Cog, DollarSign, Bot, User } from 'lucide-react'
-import type { EvidenceFilters as FilterState, EvidenceDimension, EvidenceSource } from '@/types/evidence-explorer'
+import type { EvidenceFilters as FilterState, EvidenceDimension, EvidenceSubmitter } from '@/types/evidence-explorer'
 import { DIMENSION_CONFIG } from '@/types/evidence-explorer'
 
 interface EvidenceFiltersProps {
@@ -105,7 +105,7 @@ export function EvidenceFilters({
         {/* Source Filter */}
         <Select
           value={filters.source}
-          onValueChange={(value) => onFilterChange('source', value as 'all' | EvidenceSource)}
+          onValueChange={(value) => onFilterChange('source', value as 'all' | EvidenceSubmitter)}
         >
           <SelectTrigger className="w-[140px]">
             <SelectValue placeholder="Source" />

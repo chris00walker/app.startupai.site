@@ -16,7 +16,7 @@ export const hypotheses = pgTable('hypotheses', {
 
   statement: text('statement').notNull(),
 
-  type: text('type')
+  hypothesisType: text('hypothesis_type')
     .$type<'desirable' | 'feasible' | 'viable'>()
     .notNull(),
 
@@ -32,7 +32,7 @@ export const hypotheses = pgTable('hypotheses', {
     .$type<'untested' | 'testing' | 'validated' | 'invalidated'>()
     .notNull(),
 
-  source: text('source'),
+  hypothesisSource: text('hypothesis_source'),
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

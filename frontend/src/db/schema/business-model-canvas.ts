@@ -45,7 +45,7 @@ export const businessModelCanvas = pgTable('business_model_canvas', {
     .references(() => userProfiles.id, { onDelete: 'cascade' }),
 
   // Data source tracking
-  source: text('source')
+  dataSource: text('data_source')
     .$type<BMCSource>()
     .default('crewai')
     .notNull(),

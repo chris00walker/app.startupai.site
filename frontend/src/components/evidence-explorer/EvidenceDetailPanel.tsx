@@ -210,7 +210,7 @@ function UserEvidenceDetails({ item }: { item: UserEvidenceItem }) {
             className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
           >
             <ExternalLink className="h-3 w-3" />
-            {item.data.source || 'View source'}
+            {item.data.evidenceSource || 'View source'}
           </a>
         </div>
       )}

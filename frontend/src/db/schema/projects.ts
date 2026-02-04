@@ -38,7 +38,7 @@ export const projects = pgTable('projects', {
   // Project status and metadata
   status: text('status').default('active').notNull(), // active, archived, completed
 
-  stage: text('stage')
+  validationStage: text('validation_stage')
     .$type<'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE'>()
     .default('DESIRABILITY')
     .notNull(),

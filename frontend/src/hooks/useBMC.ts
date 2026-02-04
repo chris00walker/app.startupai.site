@@ -41,7 +41,7 @@ export interface UseBMCResult {
   isLoading: boolean;
   error: Error | null;
   hasData: boolean;
-  source: BMCSource;
+  dataSource: BMCSource;
 
   // Block data accessors
   customerSegments: BMCItem[];
@@ -278,14 +278,14 @@ export function useBMC(options: UseBMCOptions = {}): UseBMCResult {
 
   // Derived values
   const hasData = !!bmc;
-  const source: BMCSource = bmc?.source || 'crewai';
+  const dataSource: BMCSource = bmc?.dataSource || 'crewai';
 
   return {
     bmc,
     isLoading,
     error,
     hasData,
-    source,
+    dataSource,
 
     // Block data - cast to BMCItem[] with defaults
     customerSegments: (bmc?.customerSegments as BMCItem[]) || [],

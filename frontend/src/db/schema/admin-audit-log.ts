@@ -76,7 +76,7 @@ export const adminAuditLog = pgTable(
     newValue: jsonb('new_value'),
 
     // Admin-provided reason for the action (required for sensitive operations)
-    reason: text('reason'),
+    auditReason: text('audit_reason'),
 
     // Request context
     ipAddress: text('ip_address'),

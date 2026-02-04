@@ -50,7 +50,7 @@ export const foundersBriefs = pgTable('founders_briefs', {
   projectId: uuid('project_id')
     .references(() => projects.id, { onDelete: 'cascade' })
     .unique(),
-  version: integer('version').default(1),
+  briefVersion: integer('brief_version').default(1),
 
   // ============= THE IDEA =============
   ideaOneLiner: text('idea_one_liner'),

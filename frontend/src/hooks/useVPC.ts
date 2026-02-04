@@ -269,12 +269,12 @@ export function useVPC(options: UseVPCOptions = {}): UseVPCResult {
         // Determine new source based on items
         const hasCrewAI = items.some((item: any) => item.source === 'crewai');
         const hasManual = items.some((item: any) => item.source === 'manual');
-        const newSource: VPCSource = hasCrewAI && hasManual ? 'hybrid' : hasManual ? 'manual' : 'crewai';
+        const newDataSource: VPCSource = hasCrewAI && hasManual ? 'hybrid' : hasManual ? 'manual' : 'crewai';
 
         await saveSegment({
           segmentKey: activeSegment.segmentKey,
           segmentName: activeSegment.segmentName,
-          source: newSource,
+          dataSource: newDataSource,
           [blockKey]: items,
         });
 
@@ -596,7 +596,7 @@ export function useVPC(options: UseVPCOptions = {}): UseVPCResult {
       await saveSegment({
         segmentKey: activeSegment.segmentKey,
         segmentName: activeSegment.segmentName,
-        source: 'crewai',
+        dataSource: 'crewai',
         jobs: original.jobs || [],
         pains: original.pains || [],
         gains: original.gains || [],

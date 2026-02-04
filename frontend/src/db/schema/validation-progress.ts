@@ -27,7 +27,7 @@ export const validationProgress = pgTable('validation_progress', {
   runId: text('run_id').notNull(),
 
   // Phase and crew information
-  phase: integer('phase').notNull(),
+  validationPhase: integer('validation_phase').notNull(),
   crew: text('crew').notNull(),
   task: text('task'),
   agent: text('agent'),

@@ -21,7 +21,7 @@ export const featureFlags = pgTable(
     id: uuid('id').primaryKey().defaultRandom().notNull(),
 
     // Unique identifier for the flag (e.g., 'quick_start_v2', 'new_dashboard')
-    key: text('key').notNull().unique(),
+    flagKey: text('flag_key').notNull().unique(),
 
     // Human-readable name and description
     name: text('name').notNull(),
@@ -46,7 +46,7 @@ export const featureFlags = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('idx_feature_flags_key').on(table.key)]
+  (table) => [index('idx_feature_flags_flag_key').on(table.flagKey)]
 );
 
 export type FeatureFlag = typeof featureFlags.$inferSelect;
@@ -57,42 +57,42 @@ export type NewFeatureFlag = typeof featureFlags.$inferInsert;
  */
 export const DEFAULT_FEATURE_FLAGS = [
   {
-    key: 'quick_start_v2',
+    flagKey: 'quick_start_v2',
     name: 'Quick Start V2',
     description: 'New streamlined quick start flow with improved UX',
     enabledGlobally: false,
     percentageRollout: 0,
   },
   {
-    key: 'phase_2_agents',
+    flagKey: 'phase_2_agents',
     name: 'Phase 2 Validation Agents',
     description: 'Enable Phase 2 desirability validation agents',
     enabledGlobally: true,
     percentageRollout: 100,
   },
   {
-    key: 'ad_platform_integration',
+    flagKey: 'ad_platform_integration',
     name: 'Ad Platform Integration',
     description: 'Enable live ad platform connections for validation campaigns',
     enabledGlobally: false,
     percentageRollout: 0,
   },
   {
-    key: 'consultant_trial',
+    flagKey: 'consultant_trial',
     name: 'Consultant Trial Mode',
     description: 'Enable consultant trial experience for advisor personas',
     enabledGlobally: true,
     percentageRollout: 100,
   },
   {
-    key: 'impersonation_mode',
+    flagKey: 'impersonation_mode',
     name: 'Admin Impersonation',
     description: 'Allow admins to view the app as a specific user (read-only)',
     enabledGlobally: true,
     percentageRollout: 100,
   },
   {
-    key: 'dashboard_ai_assistant',
+    flagKey: 'dashboard_ai_assistant',
     name: 'Dashboard AI Assistant',
     description: 'Floating AI chatbot on founder/consultant dashboards (US-F16)',
     enabledGlobally: false,

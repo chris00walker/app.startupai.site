@@ -24,7 +24,11 @@ import type {
 // =======================================================================================
 
 export type EvidenceDimension = 'desirability' | 'feasibility' | 'viability'
-export type EvidenceSource = 'user' | 'ai'
+/**
+ * Identifies who submitted the evidence (user vs AI-generated).
+ * Renamed from EvidenceSource to avoid collision with evidence.evidence_source DB column.
+ */
+export type EvidenceSubmitter = 'user' | 'ai'
 
 /**
  * Minimal CrewAI validation state shape needed by Evidence Explorer.
@@ -86,7 +90,7 @@ export interface EvidenceFilters {
   dimension: 'all' | EvidenceDimension
   search: string
   strength: 'all' | 'weak' | 'medium' | 'strong'
-  source: 'all' | EvidenceSource
+  source: 'all' | EvidenceSubmitter
   dateRange: { start: Date; end: Date } | null
   showContradictions: boolean
 }

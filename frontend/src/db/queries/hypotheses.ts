@@ -38,12 +38,12 @@ export async function getProjectHypothesesByStatus(
  */
 export async function getProjectHypothesesByType(
   projectId: string,
-  type: Hypothesis['type']
+  hypothesisType: Hypothesis['hypothesisType']
 ): Promise<Hypothesis[]> {
   return await db
     .select()
     .from(hypotheses)
-    .where(and(eq(hypotheses.projectId, projectId), eq(hypotheses.type, type)))
+    .where(and(eq(hypotheses.projectId, projectId), eq(hypotheses.hypothesisType, hypothesisType)))
     .orderBy(desc(hypotheses.createdAt));
 }
 

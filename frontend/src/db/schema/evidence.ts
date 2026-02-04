@@ -17,7 +17,7 @@ export const evidence = pgTable('evidence', {
     .references(() => projects.id, { onDelete: 'cascade' }),
   
   title: text('title'),
-  category: text('category')
+  evidenceCategory: text('evidence_category')
     .$type<'Survey' | 'Interview' | 'Experiment' | 'Analytics' | 'Research'>(),
   summary: text('summary'),
   fullText: text('full_text'),
@@ -37,7 +37,7 @@ export const evidence = pgTable('evidence', {
   sourceType: text('source_type'), // 'user_input', 'web_scrape', 'document', 'api'
   sourceUrl: text('source_url'),
   author: text('author'),
-  source: text('source'),
+  evidenceSource: text('evidence_source'),
   occurredOn: date('occurred_on'),
   linkedAssumptions: text('linked_assumptions').array(),
   

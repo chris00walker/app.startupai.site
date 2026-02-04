@@ -36,7 +36,7 @@ export const adminSessions = pgTable(
     sessionToken: text('session_token').notNull().unique(),
 
     // Admin-provided reason for impersonation (required)
-    reason: text('reason').notNull(),
+    impersonationReason: text('impersonation_reason').notNull(),
 
     // Session lifecycle
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
