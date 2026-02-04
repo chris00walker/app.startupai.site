@@ -32,25 +32,36 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Get consultant profile
+  // Get consultant profile (use maybeSingle to handle missing profile gracefully)
   const { data: profile, error } = await supabase
     .from('consultant_profiles')
     .select('directory_opt_in, default_relationship_type, verification_status, grace_started_at')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (error || !profile) {
+  if (error) {
+    console.error('[consultant/profile/marketplace] Query error:', error);
     return NextResponse.json(
-      { error: 'not_found', message: 'Consultant profile not found' },
-      { status: 404 }
+      { error: 'query_failed', message: 'Failed to fetch settings' },
+      { status: 500 }
     );
   }
 
+  // Return defaults if no profile exists yet
+  if (!profile) {
+    return NextResponse.json({
+      directoryOptIn: false,
+      defaultRelationshipType: null,
+      verificationStatus: 'unverified',
+      graceStartedAt: null,
+    });
+  }
+
   return NextResponse.json({
-    directoryOptIn: profile.directory_opt_in,
-    defaultRelationshipType: profile.default_relationship_type,
-    verificationStatus: profile.verification_status,
-    graceStartedAt: profile.grace_started_at,
+    directoryOptIn: profile.directory_opt_in ?? false,
+    defaultRelationshipType: profile.default_relationship_type ?? null,
+    verificationStatus: profile.verification_status ?? 'unverified',
+    graceStartedAt: profile.grace_started_at ?? null,
   });
 }
 
