@@ -22,7 +22,7 @@ interface DbProject {
   description: string | null;
   user_id: string;
   status: string;
-  stage: 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE';
+  validation_stage: 'DESIRABILITY' | 'FEASIBILITY' | 'VIABILITY' | 'SCALE';
   gate_status: 'Pending' | 'Passed' | 'Failed';
   risk_budget_planned: number;
   risk_budget_actual: number;
@@ -43,7 +43,7 @@ function transformProject(dbProject: DbProject): PortfolioProject {
   return {
     id: dbProject.id,
     clientName: dbProject.name,
-    stage: dbProject.stage,
+    stage: dbProject.validation_stage,
     gateStatus: dbProject.gate_status,
     riskBudget: {
       planned: Number(dbProject.risk_budget_planned),

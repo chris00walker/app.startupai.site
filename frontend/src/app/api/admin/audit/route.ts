@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
       targetResourceId: l.target_resource_id,
       oldValue: l.old_value,
       newValue: l.new_value,
-      reason: l.reason,
+      reason: l.audit_reason,
       ipAddress: l.ip_address,
       createdAt: l.created_at,
     }));

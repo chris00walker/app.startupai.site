@@ -62,7 +62,7 @@ export async function GET() {
     const { data: flags, error: queryError } = await supabase
       .from('feature_flags')
       .select('*')
-      .order('key');
+      .order('flag_key');
 
     if (queryError) {
       console.error('[api/admin/features] Query error:', queryError);
@@ -72,7 +72,7 @@ export async function GET() {
     // Transform response
     const transformedFlags = (flags || []).map((f) => ({
       id: f.id,
-      key: f.key,
+      key: f.flag_key,
       name: f.name,
       description: f.description,
       enabledGlobally: f.enabled_globally,
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     const { data: flag, error: insertError } = await supabase
       .from('feature_flags')
       .insert({
-        key,
+        flag_key: key,
         name,
         description,
         enabled_globally: enabledGlobally,
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       {
         flag: {
           id: flag.id,
-          key: flag.key,
+          key: flag.flag_key,
           name: flag.name,
           description: flag.description,
           enabledGlobally: flag.enabled_globally,
@@ -250,7 +250,7 @@ export async function PATCH(request: NextRequest) {
     await logFeatureFlagChange(
       user.id,
       id,
-      currentFlag.key,
+      currentFlag.flag_key,
       {
         enabledGlobally: currentFlag.enabled_globally,
         percentageRollout: currentFlag.percentage_rollout,
@@ -267,7 +267,7 @@ export async function PATCH(request: NextRequest) {
     return successResponse({
       flag: {
         id: updatedFlag.id,
-        key: updatedFlag.key,
+        key: updatedFlag.flag_key,
         name: updatedFlag.name,
         description: updatedFlag.description,
         enabledGlobally: updatedFlag.enabled_globally,

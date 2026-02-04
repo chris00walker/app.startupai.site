@@ -240,13 +240,13 @@ function buildEvidenceRows(payload: FounderValidationPayload) {
     evidenceRows.push({
       project_id: payload.project_id,
       title: 'Desirability Evidence',
-      category: 'Research',
+      evidence_category: 'Research',
       summary: `Problem resonance: ${(d.problem_resonance || 0) * 100}%, Conversion: ${(d.conversion_rate || 0) * 100}%`,
       content: JSON.stringify(d),
       strength: d.problem_resonance && d.problem_resonance > 0.6 ? 'strong' : d.problem_resonance && d.problem_resonance > 0.3 ? 'medium' : 'weak',
       fit_type: 'Desirability',
       source_type: 'crew_analysis',
-      source: 'CrewAI Growth Crew',
+      evidence_source: 'CrewAI Growth Crew',
       tags: ['desirability', 'crew_ai', 'validation'],
       created_at: nowIso,
       updated_at: nowIso,
@@ -258,13 +258,13 @@ function buildEvidenceRows(payload: FounderValidationPayload) {
         evidenceRows.push({
           project_id: payload.project_id,
           title: exp.name || `Experiment ${index + 1}`,
-          category: 'Experiment',
+          evidence_category: 'Experiment',
           summary: exp.summary || exp.key_learnings?.join('; ') || 'Experiment result',
           content: JSON.stringify(exp),
           strength: exp.success ? 'strong' : 'weak',
           fit_type: 'Desirability',
           source_type: 'experiment',
-          source: 'CrewAI Growth Crew',
+          evidence_source: 'CrewAI Growth Crew',
           tags: ['experiment', 'desirability', 'crew_ai'],
           created_at: nowIso,
           updated_at: nowIso,
@@ -282,13 +282,13 @@ function buildEvidenceRows(payload: FounderValidationPayload) {
     evidenceRows.push({
       project_id: payload.project_id,
       title: 'Feasibility Evidence',
-      category: 'Research',
+      evidence_category: 'Research',
       summary: `${feasibleCount}/${totalFeatures} core features feasible. Monthly cost: $${f.total_monthly_cost || 0}`,
       content: JSON.stringify(f),
       strength: f.downgrade_required ? 'medium' : totalFeatures > 0 && feasibleCount === totalFeatures ? 'strong' : 'weak',
       fit_type: 'Feasibility',
       source_type: 'crew_analysis',
-      source: 'CrewAI Build Crew',
+      evidence_source: 'CrewAI Build Crew',
       tags: ['feasibility', 'crew_ai', 'validation'],
       created_at: nowIso,
       updated_at: nowIso,
@@ -303,13 +303,13 @@ function buildEvidenceRows(payload: FounderValidationPayload) {
     evidenceRows.push({
       project_id: payload.project_id,
       title: 'Viability Evidence',
-      category: 'Analytics',
+      evidence_category: 'Analytics',
       summary: `CAC: $${v.cac || 0}, LTV: $${v.ltv || 0}, LTV/CAC: ${ltvCacRatio.toFixed(1)}, Gross Margin: ${((v.gross_margin || 0) * 100).toFixed(0)}%`,
       content: JSON.stringify(v),
       strength: ltvCacRatio > 3 ? 'strong' : ltvCacRatio > 1 ? 'medium' : 'weak',
       fit_type: 'Viability',
       source_type: 'crew_analysis',
-      source: 'CrewAI Finance Crew',
+      evidence_source: 'CrewAI Finance Crew',
       tags: ['viability', 'crew_ai', 'validation', 'unit_economics'],
       created_at: nowIso,
       updated_at: nowIso,
@@ -373,7 +373,7 @@ function buildValidationStateRow(payload: FounderValidationPayload) {
     session_id: payload.session_id || null,
     kickoff_id: executionId || null,  // Store run_id in legacy kickoff_id column
     iteration: payload.iteration || 1,
-    phase: payload.phase || 'desirability',
+    validation_phase: payload.phase || 'desirability',
     current_risk_axis: payload.current_risk_axis || 'desirability',
     problem_fit: payload.problem_fit || 'unknown',
     current_segment: payload.current_segment || segments[0] || null,
@@ -779,20 +779,27 @@ async function handleProgressUpdate(payload: ProgressUpdatePayload): Promise<Nex
   }
 
   // Also insert into validation_progress for Realtime subscriptions
+  const progressStatusMap: Record<ProgressUpdatePayload['status'], string> = {
+    pending: 'started',
+    running: 'in_progress',
+    paused: 'in_progress',
+    completed: 'completed',
+    failed: 'failed',
+  };
+
+  const progressStatus = progressStatusMap[payload.status] || 'in_progress';
+
   const { error: progressError } = await admin
     .from('validation_progress')
     .insert({
       run_id: payload.run_id,
-      project_id: payload.project_id,
-      user_id: payload.user_id,
-      status: payload.status,
-      current_phase: payload.current_phase,
-      phase_name: payload.phase_name,
-      crew: payload.progress?.crew,
+      validation_phase: payload.current_phase,
+      status: progressStatus,
+      crew: payload.progress?.crew || 'unknown',
       task: payload.progress?.task,
       agent: payload.progress?.agent,
       progress_pct: payload.progress?.progress_pct ?? 0,
-      error: payload.error,
+      error_message: payload.error,
       created_at: payload.timestamp || new Date().toISOString(),
     });
 

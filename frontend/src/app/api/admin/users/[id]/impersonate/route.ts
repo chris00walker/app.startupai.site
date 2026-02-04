@@ -100,7 +100,7 @@ export async function POST(
         admin_id: user.id,
         impersonating_user_id: targetUserId,
         session_token: sessionToken,
-        reason,
+        impersonation_reason: reason,
         expires_at: expiresAt.toISOString(),
       });
 

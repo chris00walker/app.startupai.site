@@ -213,7 +213,7 @@ async function checkEvidenceIntegrity(
   // Check evidence
   const { data: evidence, error } = await supabase
     .from('evidence')
-    .select('id, project_id, hypothesis_id, type, source')
+    .select('id, project_id, hypothesis_id, evidence_category, evidence_source')
     .in('project_id', projectIds);
 
   if (error) {
@@ -247,14 +247,14 @@ async function checkEvidenceIntegrity(
       });
     }
 
-    if (!ev.type) {
+    if (!ev.evidence_category) {
       issues.push({
         severity: 'info',
         category: 'Evidence',
-        message: 'Evidence has no type classification',
+        message: 'Evidence has no category classification',
         table: 'evidence',
         recordId: ev.id,
-        field: 'type',
+        field: 'evidence_category',
       });
     }
   }
@@ -286,7 +286,7 @@ async function checkValidationStateIntegrity(
   // Check validation states
   const { data: states, error } = await supabase
     .from('crewai_validation_states')
-    .select('id, project_id, run_status, phase, current_crew')
+    .select('id, project_id, run_status, validation_phase, current_crew')
     .in('project_id', projectIds);
 
   if (error) {

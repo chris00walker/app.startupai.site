@@ -65,7 +65,7 @@ export function useRecommendedActions(options: UseRecommendedActionsOptions = {}
         // 1. High-criticality untested assumptions (Test First quadrant)
         supabase
           .from('hypotheses')
-          .select('id, statement, type, importance, evidence_strength')
+          .select('id, statement, hypothesis_type, importance, evidence_strength')
           .eq('project_id', projectId)
           .eq('status', 'untested')
           .in('importance', ['high', 'medium'])

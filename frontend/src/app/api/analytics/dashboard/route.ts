@@ -43,7 +43,7 @@ export async function GET() {
         .from("crewai_validation_states")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .in("phase", ["validated", "killed"]),
+        .in("validation_phase", ["validated", "killed"]),
       projectIds.length > 0
         ? supabase
             .from("hypotheses")

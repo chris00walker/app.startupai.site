@@ -373,7 +373,7 @@ export default function AdminUserProfilePage({ params }: { params: Promise<{ id:
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Phase</TableHead>
+                        <TableHead>Stage</TableHead>
                         <TableHead>Created</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -385,9 +385,7 @@ export default function AdminUserProfilePage({ params }: { params: Promise<{ id:
                             <Badge variant="outline">{project.status}</Badge>
                           </TableCell>
                           <TableCell>
-                            {project.validationPhase !== null
-                              ? `Phase ${project.validationPhase}`
-                              : '-'}
+                            {project.validationStage || '-'}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {formatDistanceToNow(new Date(project.createdAt), {

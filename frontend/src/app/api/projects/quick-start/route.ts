@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         hints: validatedData.hints || null,
         additional_context: validatedData.additional_context || null,
         status: 'active',
-        stage: 'DESIRABILITY',
+        validation_stage: 'DESIRABILITY',
         gate_status: 'Pending',
         last_activity: new Date().toISOString(),
       })
@@ -210,7 +210,7 @@ export async function POST(request: NextRequest) {
         project_id: project.id,
         user_id: targetUserId,
         kickoff_id: runId,
-        phase: 'ideation',  // Initial phase while Phase 1 (VPC Discovery) runs
+        validation_phase: 'ideation',  // Initial phase while Phase 1 (VPC Discovery) runs
         current_risk_axis: 'desirability',
         business_idea: validatedData.raw_idea,
         entrepreneur_input: validatedData.raw_idea,

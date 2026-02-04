@@ -55,7 +55,7 @@ const INDUSTRIES = [
   { value: 'E-commerce', label: 'E-commerce' },
 ];
 
-// Validation stages from projects.stage enum
+// Validation stages from projects.validation_stage enum
 const STAGES = [
   { value: '', label: 'All Stages' },
   { value: 'DESIRABILITY', label: 'Desirability' },

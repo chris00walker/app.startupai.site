@@ -311,13 +311,13 @@ export function CanvasGallery({ canvases: providedCanvases, projectId }: CanvasG
           supabase
             .from("value_proposition_canvas")
             .select(
-              "id, project_id, segment_key, segment_name, source, updated_at, jobs, pains, gains, products_and_services, pain_relievers, gain_creators, differentiators"
+              "id, project_id, segment_key, segment_name, data_source, updated_at, jobs, pains, gains, products_and_services, pain_relievers, gain_creators, differentiators"
             )
             .in("project_id", projectIds),
           supabase
             .from("business_model_canvas")
             .select(
-              "id, project_id, source, updated_at, customer_segments, value_propositions, channels, customer_relationships, revenue_streams, key_resources, key_activities, key_partners, cost_structure"
+              "id, project_id, data_source, updated_at, customer_segments, value_propositions, channels, customer_relationships, revenue_streams, key_resources, key_activities, key_partners, cost_structure"
             )
             .in("project_id", projectIds),
         ])
@@ -402,7 +402,7 @@ export function CanvasGallery({ canvases: providedCanvases, projectId }: CanvasG
             client: projectName,
             status: buildStatus(completionRate),
             lastModified: formatRelativeTime(new Date(record.updated_at as string)),
-            aiGenerated: ["crewai", "hybrid"].includes(getString(record.source) || ""),
+            aiGenerated: ["crewai", "hybrid"].includes(getString(record.data_source) || ""),
             completionRate,
             segmentKey: getString(record.segment_key) || undefined,
             vpcData,
@@ -463,7 +463,7 @@ export function CanvasGallery({ canvases: providedCanvases, projectId }: CanvasG
             client: projectName,
             status: buildStatus(completionRate),
             lastModified: formatRelativeTime(new Date(record.updated_at as string)),
-            aiGenerated: ["crewai", "hybrid"].includes(getString(record.source) || ""),
+            aiGenerated: ["crewai", "hybrid"].includes(getString(record.data_source) || ""),
             completionRate,
             bmcData,
           }

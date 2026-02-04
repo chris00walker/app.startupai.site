@@ -197,7 +197,7 @@ const getProjectStatusTool = tool({
       return {
         found: true,
         projectName: project.name,
-        stage: project.stage || 'validation',
+        stage: project.validation_stage || 'validation',
         status: project.status || 'active',
         evidenceCount: evidenceCount || 0,
         reportsCount: reportsCount || 0,
@@ -268,12 +268,12 @@ export async function POST(req: NextRequest) {
       try {
         const { data: project } = await supabaseClient
           .from('projects')
-          .select('name, stage, status')
+          .select('name, validation_stage, status')
           .eq('id', projectId)
           .single();
 
         if (project) {
-          contextMessage = `\n\n[Current Project Context: ID="${projectId}", Name="${project.name}", Stage: ${project.stage}, Status: ${project.status}. IMPORTANT: When using tools that require projectId, always use the exact ID "${projectId}".]`;
+          contextMessage = `\n\n[Current Project Context: ID="${projectId}", Name="${project.name}", Stage: ${project.validation_stage}, Status: ${project.status}. IMPORTANT: When using tools that require projectId, always use the exact ID "${projectId}".]`;
         }
       } catch (error) {
         console.error('[AssistantChat] Failed to fetch project context:', error);

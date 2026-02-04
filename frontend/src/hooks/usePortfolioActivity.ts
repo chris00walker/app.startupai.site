@@ -108,7 +108,7 @@ export function usePortfolioActivity(options: UsePortfolioActivityOptions = {}):
       // Fetch recent hypotheses/assumptions
       const { data: hypothesesData, error: hypothesesError } = await supabase
         .from('hypotheses')
-        .select('id, statement, type, status, updated_at, project_id')
+        .select('id, statement, hypothesis_type, status, updated_at, project_id')
         .in('project_id', projectIds)
         .order('updated_at', { ascending: false })
         .limit(limit)
@@ -172,7 +172,7 @@ export function usePortfolioActivity(options: UsePortfolioActivityOptions = {}):
             id: `hypothesis-${item.id}`,
             action: actionMap[item.status] || 'Assumption Updated',
             client: projectNameMap.get(item.project_id) || 'Unknown Project',
-            type: item.type || 'Assumption',
+            type: item.hypothesis_type || 'Assumption',
             time: formatRelativeTime(timestamp),
             status: getActivityStatus('hypothesis', { status: item.status }),
             projectId: item.project_id,

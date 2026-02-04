@@ -49,7 +49,7 @@ interface DbProject {
 interface DbValidationState {
   id: string;
   project_id: string;
-  phase: string;
+  validation_phase: string;
   desirability_signal: string;
   feasibility_signal: string;
   viability_signal: string;
@@ -268,7 +268,7 @@ export function useClients(options: UseClientsOptions = {}) {
         const { data: stateData, error: stateError } = await supabase
           .from('crewai_validation_states')
           .select(`
-            id, project_id, phase,
+            id, project_id, validation_phase,
             desirability_signal, feasibility_signal, viability_signal,
             human_approval_status, ad_spend, campaign_spend_usd,
             synthesis_confidence, updated_at
@@ -328,7 +328,7 @@ export function useClients(options: UseClientsOptions = {}) {
             const viabilitySignal = (state?.viability_signal as ViabilitySignal) || null;
 
             const stage = mapToValidationStage(
-              state?.phase || null,
+              state?.validation_phase || null,
               desirabilitySignal,
               feasibilitySignal,
               viabilitySignal

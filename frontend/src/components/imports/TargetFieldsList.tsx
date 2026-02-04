@@ -88,7 +88,7 @@ export const DEFAULT_TARGET_FIELDS: TargetField[] = [
   { section: 'bmc', field: 'costStructure', label: 'Cost Structure', description: 'What you spend' },
 
   // Evidence Fields
-  { section: 'evidence', field: 'category', label: 'Category', description: 'Evidence type category' },
+  { section: 'evidence', field: 'evidence_category', label: 'Category', description: 'Evidence type category' },
   { section: 'evidence', field: 'summary', label: 'Summary', description: 'Evidence summary' },
   { section: 'evidence', field: 'strength', label: 'Strength', description: 'Evidence strength level' },
   { section: 'evidence', field: 'fit_type', label: 'Fit Type', description: 'Problem-solution or product-market fit' },

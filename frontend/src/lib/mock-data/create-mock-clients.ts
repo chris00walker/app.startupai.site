@@ -131,7 +131,7 @@ async function createSingleMockClient(
       user_id: mockUserId,
       segment_key: mockData.vpc.segmentKey,
       segment_name: mockData.vpc.segmentName,
-      source: mockData.vpc.source,
+      data_source: mockData.vpc.source,
       resonance_score: mockData.vpc.resonanceScore,
       jobs: mockData.vpc.jobs,
       pains: mockData.vpc.pains,
@@ -149,12 +149,12 @@ async function createSingleMockClient(
   for (const evidenceItem of mockData.evidence) {
     await supabase.from('evidence').insert({
       project_id: projectId,
-      category: evidenceItem.category,
+      evidence_category: evidenceItem.category,
       summary: evidenceItem.summary,
       content: evidenceItem.summary, // content is required
       strength: evidenceItem.strength,
       fit_type: evidenceItem.fitType,
-      source: 'experiment',
+      evidence_source: 'experiment',
     });
   }
 

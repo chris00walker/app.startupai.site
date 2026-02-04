@@ -297,7 +297,7 @@ export async function POST(
         user_id: user.id,
         segment_key: formatSegmentKey(segmentKey),
         segment_name: profile.segment_name || segmentKey,
-        source: 'crewai',
+        data_source: 'crewai',
         kickoff_id: validationState.kickoff_id || null,
         jobs,
         pains,

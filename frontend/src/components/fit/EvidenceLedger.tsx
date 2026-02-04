@@ -69,7 +69,7 @@ type DbEvidence = {
   id: string
   project_id: string
   title: string | null
-  category: EvidenceItem['category'] | null
+  evidence_category: EvidenceItem['category'] | null
   summary: string | null
   full_text: string | null
   strength: EvidenceItem['strength'] | null
@@ -77,7 +77,7 @@ type DbEvidence = {
   fit_type: EvidenceItem['fitType'] | null
   occurred_on: string | null
   author: string | null
-  source: string | null
+  evidence_source: string | null
   linked_assumptions: string[] | null
   created_at: string
 }
@@ -93,7 +93,7 @@ function transformEvidence(record: DbEvidence): EvidenceItem {
   return {
     id: record.id,
     title: record.title ?? 'Untitled evidence',
-    category: (record.category ?? 'Research') as EvidenceItem['category'],
+    category: (record.evidence_category ?? 'Research') as EvidenceItem['category'],
     summary: record.summary ?? record.full_text?.slice(0, 180) ?? '',
     fullText: record.full_text ?? record.summary ?? '',
     strength: (record.strength ?? 'medium') as EvidenceItem['strength'],
@@ -101,7 +101,7 @@ function transformEvidence(record: DbEvidence): EvidenceItem {
     fitType: (record.fit_type ?? 'Desirability') as EvidenceItem['fitType'],
     date: formatEvidenceDate(record.occurred_on ?? record.created_at),
     author: record.author ?? 'Unknown',
-    source: record.source ?? 'Unspecified',
+    source: record.evidence_source ?? 'Unspecified',
     linkedAssumptions: record.linked_assumptions ?? []
   }
 }
@@ -344,13 +344,13 @@ export function EvidenceLedger() {
         .insert({
           project_id: activeProjectId,
           title: data.title,
-          category: data.category,
+          evidence_category: data.category,
           summary: data.summary,
           full_text: data.fullText || null,
           fit_type: data.fitType,
           strength: data.strength,
           is_contradiction: data.isContradiction,
-          source: data.source || null,
+          evidence_source: data.source || null,
           author: data.author || null,
           occurred_on: data.occurredOn?.toISOString().split('T')[0] || null,
           linked_assumptions: data.linkedAssumptions || [],

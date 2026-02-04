@@ -425,11 +425,11 @@ export interface DbHypothesisRecord {
   id: string
   project_id: string
   statement: string
-  type: string  // 'desirability' | 'feasibility' | 'viability'
+  hypothesis_type: string  // 'desirability' | 'feasibility' | 'viability'
   status: string
   importance: string  // 'high' | 'medium' | 'low'
   evidence_strength: string | null
-  source?: string | null
+  hypothesis_source?: string | null
   created_at: string
   updated_at: string
 }
@@ -482,14 +482,14 @@ export function transformDbToAssumption(record: DbHypothesisRecord): Assumption 
   return {
     id: record.id,
     statement: record.statement,
-    category: record.type as AssumptionCategory,
+    category: record.hypothesis_type as AssumptionCategory,
     priority: importanceToPriority[record.importance] || 5,
     evidence_needed: '', // Not in old schema - should be added
     status: record.status as AssumptionStatus,
     evidence_strength: mapEvidenceStrength(record.evidence_strength),
     test_results: [],
     project_id: record.project_id,
-    source: record.source || undefined,
+    source: record.hypothesis_source || undefined,
     created_at: record.created_at,
     updated_at: record.updated_at,
   }
@@ -516,11 +516,11 @@ export function transformAssumptionToDb(assumption: Assumption): Omit<DbHypothes
     id: assumption.id,
     project_id: assumption.project_id || '',
     statement: assumption.statement,
-    type: assumption.category,
+    hypothesis_type: assumption.category,
     status: assumption.status,
     importance: priorityToImportance(assumption.priority),
     evidence_strength: mapEvidenceStrengthToDb(assumption.evidence_strength),
-    source: assumption.source || null,
+    hypothesis_source: assumption.source || null,
   }
 }
 

@@ -44,7 +44,7 @@ const TARGET_FIELDS: Record<string, string[]> = {
     'keyPartnerships',
     'costStructure',
   ],
-  evidence: ['category', 'summary', 'strength', 'fit_type'],
+  evidence: ['evidence_category', 'summary', 'strength', 'fit_type'],
   project: ['name', 'description', 'rawIdea', 'hints'],
 };
 
@@ -271,7 +271,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       const { error: evidenceError } = await supabase.from('evidence').insert({
         project_id: projectId,
         user_id: user.id,
-        source: 'import',
+        evidence_source: 'import',
         source_id: importId,
         ...updates.evidence,
       });

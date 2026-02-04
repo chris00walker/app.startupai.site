@@ -85,7 +85,7 @@ export async function GET(
         id,
         name,
         status,
-        validation_phase,
+        validation_stage,
         created_at,
         updated_at
       `)
@@ -136,7 +136,7 @@ export async function GET(
         id: p.id,
         name: p.name,
         status: p.status,
-        validationPhase: p.validation_phase,
+        validationStage: p.validation_stage,
         createdAt: p.created_at,
         updatedAt: p.updated_at,
       })),

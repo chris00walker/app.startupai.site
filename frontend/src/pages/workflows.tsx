@@ -73,7 +73,7 @@ interface DbProject {
 interface DbValidationState {
   id: string
   project_id: string
-  phase: string
+  validation_phase: string
   created_at: string
   updated_at: string
 }
@@ -157,7 +157,7 @@ export default function WorkflowsPage() {
 
         const { data: validationStates, error: statesError } = await supabase
           .from("crewai_validation_states")
-          .select("id, project_id, phase, created_at, updated_at")
+          .select("id, project_id, validation_phase, created_at, updated_at")
           .eq("user_id", user.id)
           .order("updated_at", { ascending: false })
 
@@ -177,7 +177,7 @@ export default function WorkflowsPage() {
 
         const workflowItems: AIWorkflow[] = Array.from(latestByProject.values()).map((state) => {
           const project = projectMap.get(state.project_id)
-          const status = mapPhaseToStatus(state.phase)
+          const status = mapPhaseToStatus(state.validation_phase)
           const durationMinutes = Math.max(
             0,
             Math.round((new Date(state.updated_at).getTime() - new Date(state.created_at).getTime()) / 60000)
@@ -190,7 +190,7 @@ export default function WorkflowsPage() {
             client: project?.name ?? "Unknown project",
             type: "validation",
             status,
-            progress: mapPhaseToProgress(state.phase),
+            progress: mapPhaseToProgress(state.validation_phase),
             startedAt: formatRelativeTime(new Date(state.created_at)),
             steps: [],
             artifacts: [],

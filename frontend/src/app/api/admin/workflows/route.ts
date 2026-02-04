@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         user_id,
         project_id,
         run_status,
-        phase,
+        validation_phase,
         current_crew,
         error_message,
         updated_at,
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (phase) {
-      query = query.eq('phase', phase);
+      query = query.eq('validation_phase', phase);
     }
 
     // Apply pagination and ordering
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
       projectId: w.project_id,
       projectName: projectMap.get(w.project_id) || 'Unknown',
       status: w.run_status,
-      phase: w.phase,
+      phase: w.validation_phase,
       crew: w.current_crew,
       errorMessage: w.error_message,
       failedAt: w.updated_at,

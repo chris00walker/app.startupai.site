@@ -66,7 +66,7 @@ describe('useClients', () => {
   const mockValidationState = {
     id: 'state-1',
     project_id: 'project-1',
-    phase: 'desirability',
+    validation_phase: 'desirability',
     desirability_signal: 'strong_commitment',
     feasibility_signal: 'unknown',
     viability_signal: 'unknown',

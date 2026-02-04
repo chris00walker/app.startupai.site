@@ -242,7 +242,7 @@ export async function POST(
       user_id: user.id,
       segment_key: data.segmentKey,
       segment_name: data.segmentName,
-      source: calculateSource(),
+      data_source: calculateSource(),
       kickoff_id: data.kickoffId || null,
       jobs: data.jobs || [],
       pains: data.pains || [],

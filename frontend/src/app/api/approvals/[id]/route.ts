@@ -82,7 +82,7 @@ export async function GET(
       projects (
         id,
         name,
-        stage
+        validation_stage
       )
     `)
     .eq('id', id)
@@ -116,7 +116,7 @@ export async function GET(
   // Record view in history
   await admin.from('approval_history').insert({
     approval_request_id: id,
-    action: 'viewed',
+    approval_action: 'viewed',
     actor_id: user.id,
     actor_type: 'user',
   });
@@ -232,7 +232,7 @@ export async function PATCH(
   // Record in history
   await admin.from('approval_history').insert({
     approval_request_id: id,
-    action: isApproved ? 'approved' : 'rejected',
+    approval_action: isApproved ? 'approved' : 'rejected',
     actor_id: user.id,
     actor_type: 'user',
     details: {

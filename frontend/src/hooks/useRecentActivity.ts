@@ -78,7 +78,7 @@ export function useRecentActivity(options: UseRecentActivityOptions = {}): UseRe
       // Fetch recent hypotheses/assumptions
       const { data: hypothesesData, error: hypothesesError } = await supabase
         .from('hypotheses')
-        .select('id, statement, type, status, created_at, updated_at')
+        .select('id, statement, hypothesis_type, status, created_at, updated_at')
         .eq('project_id', projectId)
         .order('updated_at', { ascending: false })
         .limit(limit)
@@ -160,7 +160,7 @@ export function useRecentActivity(options: UseRecentActivityOptions = {}): UseRe
             description: item.statement?.substring(0, 60) + (item.statement?.length > 60 ? '...' : ''),
             timestamp: new Date(item.updated_at || item.created_at),
             metadata: {
-              category: item.type,
+              category: item.hypothesis_type,
               status: item.status
             }
           })

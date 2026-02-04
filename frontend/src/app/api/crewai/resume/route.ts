@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       // Record in history
       await admin.from('approval_history').insert({
         approval_request_id: pendingApproval.id,
-        action: isApproved ? 'approved' : 'rejected',
+        approval_action: isApproved ? 'approved' : 'rejected',
         actor_id: user.id,
         actor_type: 'user',
         details: {

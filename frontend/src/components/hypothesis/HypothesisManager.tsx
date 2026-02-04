@@ -102,11 +102,11 @@ type DbHypothesis = {
   id: string
   project_id: string
   statement: string
-  type: Hypothesis['type']
+  hypothesis_type: Hypothesis['type']
   importance: Hypothesis['importance']
   evidence_strength: Hypothesis['evidence']
   status: Hypothesis['status']
-  source: string | null
+  hypothesis_source: string | null
   created_at: string
   updated_at: string
 }
@@ -115,11 +115,11 @@ function transformHypothesis(record: DbHypothesis): Hypothesis {
   return {
     id: record.id,
     statement: record.statement,
-    type: record.type,
+    type: record.hypothesis_type,
     importance: record.importance,
     evidence: record.evidence_strength,
     status: record.status,
-    source: record.source ?? 'Unspecified',
+    source: record.hypothesis_source ?? 'Unspecified',
     createdAt: new Date(record.created_at),
     updatedAt: new Date(record.updated_at)
   }
@@ -199,11 +199,11 @@ export default function HypothesisManager() {
         .insert({
           project_id: activeProjectId,
           statement: newHypothesis.statement,
-          type: newHypothesis.type,
+          hypothesis_type: newHypothesis.type,
           importance: newHypothesis.importance,
           evidence_strength: 'none',
           status: 'untested',
-          source: newHypothesis.source || null
+          hypothesis_source: newHypothesis.source || null
         })
 
       if (insertError) throw insertError
@@ -229,11 +229,11 @@ export default function HypothesisManager() {
         .from('hypotheses')
         .update({
           statement: editHypothesis.statement,
-          type: editHypothesis.type,
+          hypothesis_type: editHypothesis.type,
           importance: editHypothesis.importance,
           evidence_strength: editHypothesis.evidence,
           status: editHypothesis.status,
-          source: editHypothesis.source || null,
+          hypothesis_source: editHypothesis.source || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', editHypothesis.id)

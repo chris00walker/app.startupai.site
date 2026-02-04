@@ -127,7 +127,7 @@ export function useCrewAIState(options: CrewAIStateOptions = {}): UseCrewAIState
           iteration: data.iteration || 1,
 
           // Phase & Risk
-          phase: data.phase || 'ideation',
+          phase: data.validation_phase || 'ideation',
           current_risk_axis: data.current_risk_axis || 'desirability',
 
           // Problem/Solution Fit

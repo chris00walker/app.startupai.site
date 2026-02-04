@@ -35,6 +35,23 @@ export interface UseValidationProgressResult {
   refetch: () => Promise<void>;
 }
 
+function mapProgressRow(row: Record<string, unknown>): ValidationProgressEvent {
+  return {
+    id: row.id as string,
+    run_id: row.run_id as string,
+    phase: (row.validation_phase ?? row.phase ?? 0) as number,
+    crew: row.crew as string,
+    task: row.task as string | undefined,
+    agent: row.agent as string | undefined,
+    status: row.status as ValidationProgressEvent['status'],
+    progress_pct: row.progress_pct as number | undefined,
+    output: row.output as Record<string, unknown> | undefined,
+    error_message: row.error_message as string | undefined,
+    duration_ms: row.duration_ms as number | undefined,
+    created_at: row.created_at as string,
+  };
+}
+
 export function useValidationProgress(
   runId: string | null,
   options?: UseValidationProgressOptions
@@ -89,7 +106,7 @@ export function useValidationProgress(
         throw progressError;
       }
 
-      setProgress((progressData || []) as ValidationProgressEvent[]);
+      setProgress((progressData || []).map((row) => mapProgressRow(row as Record<string, unknown>)));
       setError(null);
     } catch (err) {
       console.error('[useValidationProgress] Error:', err);
@@ -123,7 +140,7 @@ export function useValidationProgress(
         },
         (payload) => {
           console.log('[useValidationProgress] Progress event:', payload.new);
-          const newEvent = payload.new as ValidationProgressEvent;
+          const newEvent = mapProgressRow(payload.new as Record<string, unknown>);
           setProgress((prev) => [...prev, newEvent]);
         }
       )

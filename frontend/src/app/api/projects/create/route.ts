@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         description: validatedData.description,
         user_id: user.id,
         status: 'active',
-        stage: validatedData.stage,
+        validation_stage: validatedData.stage,
         gate_status: 'Pending',
         risk_budget_planned: 100,
         risk_budget_actual: 0,
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         id: project.id,
         name: project.name,
         description: project.description,
-        stage: project.stage,
+        stage: project.validation_stage,
         status: project.status
       },
       clientId: validatedData.clientId

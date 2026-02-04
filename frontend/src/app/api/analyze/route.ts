@@ -157,7 +157,7 @@ function normalizeEvidenceItems(userId: string, projectId: string, items?: CrewF
     user_id: userId,
     title: item.title || `AI Evidence ${index + 1}`,
     content: item.content || item.title || 'AI generated insight',
-    source: item.source || 'CrewAI synthesis',
+    evidence_source: item.source || 'CrewAI synthesis',
     strength: item.strength ?? 'medium',
     tags: item.tags ?? ['crew_ai'],
     created_at: nowIso,

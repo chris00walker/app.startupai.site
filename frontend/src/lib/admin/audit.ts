@@ -67,7 +67,7 @@ export async function logAdminAction(entry: AdminAuditEntry): Promise<void> {
       target_resource_id: entry.targetResourceId || null,
       old_value: entry.oldValue || null,
       new_value: entry.newValue || null,
-      reason: entry.reason || null,
+      audit_reason: entry.reason || null,
       ip_address: ipAddress,
       user_agent: userAgent.substring(0, 500),
     });

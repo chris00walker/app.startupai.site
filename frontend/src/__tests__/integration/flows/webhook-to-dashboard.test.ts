@@ -172,7 +172,7 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
       id: testProjectId,
       user_id: testUserId,
       name: createTestName('Integration Project'),
-      stage: 'DESIRABILITY',
+      validation_stage: 'DESIRABILITY',
       gate_status: 'Pending',
       evidence_count: 0,
       status: 'active',
@@ -253,32 +253,32 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
       const evidenceItems = [
         {
           title: createTestName('Desirability Evidence'),
-          category: 'Research',
+          evidence_category: 'Research',
           summary: `Problem resonance: ${(payload.evidence.desirability.problem_resonance * 100).toFixed(0)}%`,
           content: JSON.stringify(payload.evidence.desirability),
           strength: 'strong',
           fit_type: 'Desirability',
-          source: 'CrewAI Growth Crew',
+          evidence_source: 'CrewAI Growth Crew',
           tags: ['desirability', 'crew_ai', 'validation', 'integration_test'],
         },
         {
           title: createTestName('Feasibility Evidence'),
-          category: 'Research',
+          evidence_category: 'Research',
           summary: `Monthly cost: $${payload.evidence.feasibility.total_monthly_cost}`,
           content: JSON.stringify(payload.evidence.feasibility),
           strength: 'strong',
           fit_type: 'Feasibility',
-          source: 'CrewAI Build Crew',
+          evidence_source: 'CrewAI Build Crew',
           tags: ['feasibility', 'crew_ai', 'validation', 'integration_test'],
         },
         {
           title: createTestName('Viability Evidence'),
-          category: 'Analytics',
+          evidence_category: 'Analytics',
           summary: `LTV/CAC: ${payload.evidence.viability.ltv_cac_ratio}x`,
           content: JSON.stringify(payload.evidence.viability),
           strength: 'strong',
           fit_type: 'Viability',
-          source: 'CrewAI Finance Crew',
+          evidence_source: 'CrewAI Finance Crew',
           tags: ['viability', 'crew_ai', 'validation', 'integration_test'],
         },
       ];
@@ -300,7 +300,7 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
             user_id: ctx.testUserId,
             kickoff_id: ctx.testRunId,
             iteration: payload.iteration,
-            phase: payload.phase,
+            validation_phase: payload.phase,
             current_risk_axis: payload.current_risk_axis,
             problem_fit: payload.problem_fit,
             desirability_signal: payload.desirability_signal,
@@ -378,7 +378,7 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
       expect(state!.viability_signal).toBe('profitable');
 
       // Check phase and iteration
-      expect(state!.phase).toBe('desirability');
+      expect(state!.validation_phase).toBe('desirability');
       expect(state!.iteration).toBe(1);
 
       // Check evidence containers
@@ -433,7 +433,7 @@ maybeDescribe('Webhook to Dashboard Integration', () => {
         expect(data).toHaveProperty('desirability_signal');
         expect(data).toHaveProperty('feasibility_signal');
         expect(data).toHaveProperty('viability_signal');
-        expect(data).toHaveProperty('phase');
+        expect(data).toHaveProperty('validation_phase');
         expect(data).toHaveProperty('iteration');
       }
     });

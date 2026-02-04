@@ -46,7 +46,7 @@ export interface AdminProjectSummary {
   id: string;
   name: string;
   status: string;
-  validationPhase: number | null;
+  validationStage: string | null;
   createdAt: string;
   updatedAt: string;
 }

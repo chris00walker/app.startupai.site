@@ -67,27 +67,17 @@ export async function GET(request: NextRequest) {
   // Use the founder_directory view which handles anonymization and VPD gating
   let query = supabase
     .from('founder_directory')
-    .select('*', { count: 'exact' });
+    .select('*');
 
-  // Apply filters
+  // Apply filters supported by the view
   if (industry) {
     query = query.eq('industry', industry);
-  }
-  if (stage) {
-    query = query.eq('stage', stage);
   }
   if (problemFit) {
     query = query.eq('problem_fit', problemFit);
   }
 
-  // Apply pagination
-  query = query.range(offset, offset + limit - 1);
-
-  // Order by fit score (highest first), then by join date (newest first)
-  query = query.order('fit_score', { ascending: false, nullsFirst: false });
-  query = query.order('joined_at', { ascending: false });
-
-  const { data: founders, count, error } = await query;
+  const { data: founders, error } = await query;
 
   if (error) {
     console.error('[consultant/founders] Query error:', error);
@@ -97,29 +87,55 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Transform to match API spec
-  const transformedFounders = (founders || []).map((f) => ({
+  const deriveStage = (row: any) => {
+    if (row.viability_signal && row.viability_signal !== 'unknown') return 'VIABILITY';
+    if (row.feasibility_signal && row.feasibility_signal !== 'unknown') return 'FEASIBILITY';
+    if (row.desirability_signal && row.desirability_signal !== 'no_signal') return 'DESIRABILITY';
+    return 'DESIRABILITY';
+  };
+
+  const deriveFitScore = (fit: string | null | undefined) => {
+    if (fit === 'strong_fit') return 85;
+    if (fit === 'partial_fit') return 65;
+    return 50;
+  };
+
+  const enrichedFounders = (founders || []).map((f: any) => ({
     id: f.id,
     displayName: f.display_name,
-    company: f.company,
+    company: f.project_name || 'Stealth startup',
     industry: f.industry,
-    stage: f.stage,
+    stage: deriveStage(f),
     problemFit: f.problem_fit,
     evidenceBadges: {
       interviewsCompleted: f.interviews_completed || 0,
-      experimentsPassed: f.experiments_passed || 0,
-      fitScore: f.fit_score || 0,
+      experimentsPassed: f.experiments_run || 0,
+      fitScore: deriveFitScore(f.problem_fit),
     },
-    joinedAt: f.joined_at,
+    joinedAt: f.project_created_at,
   }));
+
+  // Apply optional stage filter and ordering in memory
+  const filteredFounders = stage
+    ? enrichedFounders.filter((f) => f.stage === stage)
+    : enrichedFounders;
+
+  const sortedFounders = filteredFounders.sort((a, b) => {
+    const fitDiff = (b.evidenceBadges.fitScore || 0) - (a.evidenceBadges.fitScore || 0);
+    if (fitDiff !== 0) return fitDiff;
+    return new Date(b.joinedAt || 0).getTime() - new Date(a.joinedAt || 0).getTime();
+  });
+
+  const total = sortedFounders.length;
+  const pagedFounders = sortedFounders.slice(offset, offset + limit);
 
   // Server-side analytics tracking (non-blocking)
   // Note: verification_status is always 'verified' or 'grace' at this point (passed check above)
-  trackMarketplaceServerEvent.founderDirectoryViewed(user.id, count || 0, verificationStatus);
+  trackMarketplaceServerEvent.founderDirectoryViewed(user.id, total, verificationStatus);
 
   return NextResponse.json({
-    founders: transformedFounders,
-    total: count || 0,
+    founders: pagedFounders,
+    total,
     limit,
     offset,
     viewerVerificationStatus: verificationStatus,

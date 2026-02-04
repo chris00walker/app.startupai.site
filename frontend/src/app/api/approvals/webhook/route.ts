@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
       .from('approval_history')
       .insert({
         approval_request_id: approval.id,
-        action: shouldAutoApprove ? 'auto_approved' : 'created',
+        approval_action: shouldAutoApprove ? 'auto_approved' : 'created',
         actor_type: 'system',
         details: {
           source: 'crewai_webhook',

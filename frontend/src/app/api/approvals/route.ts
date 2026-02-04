@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       projects (
         id,
         name,
-        stage
+        validation_stage
       )
     `, { count: 'exact' })
     .eq('user_id', user.id)
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
           projects (
             id,
             name,
-            stage
+            validation_stage
           )
         `, { count: 'exact' })
         .in('user_id', clientIds)

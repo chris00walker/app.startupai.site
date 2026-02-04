@@ -159,7 +159,7 @@ export function useBMC(options: UseBMCOptions = {}): UseBMCResult {
 
         const updateData = {
           [columnMap[blockKey]]: items,
-          source: newSource,
+          data_source: newSource,
           updated_at: new Date().toISOString(),
         };
 
@@ -176,7 +176,7 @@ export function useBMC(options: UseBMCOptions = {}): UseBMCResult {
           const { error: insertError } = await supabase.from('business_model_canvas').insert({
             project_id: projectId,
             user_id: user.id,
-            source: newSource,
+            data_source: newSource,
             [columnMap[blockKey]]: items,
           });
 
@@ -260,7 +260,7 @@ export function useBMC(options: UseBMCOptions = {}): UseBMCResult {
           key_activities: original.keyActivities || [],
           key_partners: original.keyPartners || [],
           cost_structure: original.costStructure || [],
-          source: 'crewai',
+          data_source: 'crewai',
           updated_at: new Date().toISOString(),
         })
         .eq('id', bmc.id);
@@ -278,7 +278,8 @@ export function useBMC(options: UseBMCOptions = {}): UseBMCResult {
 
   // Derived values
   const hasData = !!bmc;
-  const dataSource: BMCSource = bmc?.dataSource || 'crewai';
+  const dataSource: BMCSource =
+    (bmc as unknown as { data_source?: BMCSource }).data_source || bmc?.dataSource || 'crewai';
 
   return {
     bmc,
