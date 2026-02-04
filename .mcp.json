@@ -1,5 +1,22 @@
 {
   "mcpServers": {
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
+    },
+    "figma-console": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/home/chris/.claude/mcp-servers/figma-console-mcp/dist/local.js"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
+      }
+    },
+    "startupai-dalle": {
+      "type": "stdio",
+      "command": "/home/chris/.claude/mcp-servers/dalle/run.sh",
+      "args": []
+    },
     "netlify": {
       "type": "stdio",
       "command": "npx",
@@ -8,17 +25,17 @@
         "@netlify/mcp"
       ],
       "env": {
-        "NETLIFY_AUTH_TOKEN": "nfp_EoBkKMRiN9N1UmoU5iQzU13DdU8RXWhE0e18",
-        "NETLIFY_SITE_ID": "d92f884b-1113-4821-b0a5-54bb8ff8612a"
+        "NETLIFY_AUTH_TOKEN": "${NETLIFY_AUTH_TOKEN}",
+        "NETLIFY_SITE_ID": "${NETLIFY_SITE_ID}"
       }
     },
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp",
       "env": {
-        "SUPABASE_ACCESS_TOKEN": "sbp_b3c3c4579d28e374f2f66278f1c3f93d7de2f04f",
-        "SUPABASE_PROJECT_ID": "eqxropalhxjeyvfcoyxg",
-        "SUPABASE_URL": "https://eqxropalhxjeyvfcoyxg.supabase.co"
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}",
+        "SUPABASE_PROJECT_ID": "${SUPABASE_PROJECT_ID}",
+        "SUPABASE_URL": "${SUPABASE_URL}"
       }
     },
     "shadcn": {
