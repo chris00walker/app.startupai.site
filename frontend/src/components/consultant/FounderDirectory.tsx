@@ -54,12 +54,13 @@ const INDUSTRIES = [
   { value: 'E-commerce', label: 'E-commerce' },
 ];
 
+// Validation stages from projects.stage enum
 const STAGES = [
   { value: '', label: 'All Stages' },
-  { value: 'seed', label: 'Seed' },
-  { value: 'series_a', label: 'Series A' },
-  { value: 'series_b', label: 'Series B' },
-  { value: 'growth', label: 'Growth' },
+  { value: 'DESIRABILITY', label: 'Desirability' },
+  { value: 'FEASIBILITY', label: 'Feasibility' },
+  { value: 'VIABILITY', label: 'Viability' },
+  { value: 'SCALE', label: 'Scale' },
 ];
 
 const FIT_LEVELS = [

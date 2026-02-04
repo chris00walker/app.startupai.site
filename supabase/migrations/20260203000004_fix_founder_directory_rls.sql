@@ -32,8 +32,8 @@ SELECT
   COALESCE(u.company, 'Stealth startup') as company,
   -- Industry from project hints JSONB field
   COALESCE(p.hints->>'industry', 'General') as industry,
-  -- Stage from project (if exists) or default
-  COALESCE(p.stage, 'pre_seed') as stage,
+  -- Stage from project (validation stage enum)
+  COALESCE(p.stage, 'DESIRABILITY') as stage,
   -- problem_fit from crewai_validation_states (not projects)
   cvs.problem_fit,
   -- Evidence summary badges
