@@ -44,6 +44,19 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Fetch verification status for analytics (verified/grace)
+  const { data: profile, error: profileError } = await supabase
+    .from('consultant_profiles')
+    .select('verification_status')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.warn('[consultant/founders] Failed to fetch verification status:', profileError);
+  }
+
+  const verificationStatus = profile?.verification_status || 'verified';
+
   // Parse query parameters with NaN-safe pagination (TASK-013)
   const searchParams = request.nextUrl.searchParams;
   const industry = searchParams.get('industry');
@@ -102,13 +115,14 @@ export async function GET(request: NextRequest) {
 
   // Server-side analytics tracking (non-blocking)
   // Note: verification_status is always 'verified' or 'grace' at this point (passed check above)
-  trackMarketplaceServerEvent.founderDirectoryViewed(user.id, count || 0, 'verified');
+  trackMarketplaceServerEvent.founderDirectoryViewed(user.id, count || 0, verificationStatus);
 
   return NextResponse.json({
     founders: transformedFounders,
     total: count || 0,
     limit,
     offset,
+    viewerVerificationStatus: verificationStatus,
   });
 }
 

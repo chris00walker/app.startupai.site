@@ -43,6 +43,18 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const { data: profile, error: profileError } = await supabase
+    .from('consultant_profiles')
+    .select('verification_status')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.warn('[consultant/rfq] Failed to fetch verification status:', profileError);
+  }
+
+  const verificationStatus = profile?.verification_status || 'verified';
+
   // Parse query parameters
   const searchParams = request.nextUrl.searchParams;
   const relationshipType = searchParams.get('relationship_type');
@@ -126,6 +138,7 @@ export async function GET(request: NextRequest) {
     total: count || 0,
     limit,
     offset,
+    viewerVerificationStatus: verificationStatus,
   });
 }
 

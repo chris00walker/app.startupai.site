@@ -31,10 +31,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
-COMMENT ON FUNCTION public.get_connection_for_analytics IS
+COMMENT ON FUNCTION public.get_connection_for_analytics(UUID) IS
   'Fetch connection details for analytics. Consultant-only, bypasses RLS.';
 
-GRANT EXECUTE ON FUNCTION public.get_connection_for_analytics TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_connection_for_analytics(UUID) TO authenticated;
 
 -- ============================================================================
 -- 2. Trial consultant invite policy

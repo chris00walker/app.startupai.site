@@ -100,6 +100,14 @@ export function ConsultantDirectory({ onRequestConnection }: ConsultantDirectory
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [relationshipType, industry]);
 
+  useEffect(() => {
+    if (!relationshipType && !industry) return;
+    trackMarketplaceEvent.consultantDirectoryFiltered({
+      relationship_type: relationshipType || undefined,
+      industries: industry ? [industry] : undefined,
+    });
+  }, [relationshipType, industry]);
+
   const getTypeLabel = (type: string) => {
     const found = RELATIONSHIP_TYPES.find((t) => t.value === type);
     return found?.label || type;
@@ -230,7 +238,14 @@ export function ConsultantDirectory({ onRequestConnection }: ConsultantDirectory
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onRequestConnection(consultant.id)}
+                      onClick={() => {
+                        trackMarketplaceEvent.consultantProfileViewed(
+                          consultant.id,
+                          consultant.relationshipTypesOffered,
+                          consultant.verificationBadge === 'verified'
+                        );
+                        onRequestConnection(consultant.id);
+                      }}
                     >
                       Request Connection
                     </Button>

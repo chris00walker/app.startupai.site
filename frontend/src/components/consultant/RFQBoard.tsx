@@ -70,6 +70,7 @@ export function RFQBoard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUnverified, setIsUnverified] = useState(false);
+  const [viewerVerificationStatus, setViewerVerificationStatus] = useState('verified');
 
   // Filters
   const [relationshipType, setRelationshipType] = useState('');
@@ -117,6 +118,7 @@ export function RFQBoard() {
       const data = await response.json();
       setRfqs(data.rfqs);
       setTotal(data.total);
+      setViewerVerificationStatus(data.viewerVerificationStatus || 'verified');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load RFQs');
     } finally {
@@ -139,6 +141,11 @@ export function RFQBoard() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [relationshipType, timeline, budgetRange]);
+
+  useEffect(() => {
+    if (!selectedRfq) return;
+    trackMarketplaceEvent.rfqViewed(selectedRfq.id, viewerVerificationStatus);
+  }, [selectedRfq, viewerVerificationStatus]);
 
   const handleRespond = async () => {
     if (!selectedRfq || responseMessage.length < 50) return;

@@ -118,8 +118,7 @@ export function FounderDirectory({ onRequestConnection }: FounderDirectoryProps)
       setTotal(data.total);
 
       // TASK-034: Track directory view (per marketplace-analytics.md spec)
-      // Note: Only verified consultants can view, so verification_status is 'verified'
-      trackMarketplaceEvent.founderDirectoryViewed(data.total, 'verified');
+      trackMarketplaceEvent.founderDirectoryViewed(data.total, data.viewerVerificationStatus || 'verified');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load founders');
     } finally {
@@ -141,6 +140,15 @@ export function FounderDirectory({ onRequestConnection }: FounderDirectoryProps)
       setOffset(0); // This will trigger the above effect
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [industry, stage, problemFit]);
+
+  useEffect(() => {
+    if (!industry && !stage && !problemFit) return;
+    trackMarketplaceEvent.founderDirectoryFiltered({
+      industry: industry || undefined,
+      stage: stage || undefined,
+      problem_fit: problemFit || undefined,
+    });
   }, [industry, stage, problemFit]);
 
   if (isUnverified) {
@@ -297,7 +305,17 @@ export function FounderDirectory({ onRequestConnection }: FounderDirectoryProps)
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => onRequestConnection(founder.id)}
+                    onClick={() => {
+                      const hasEvidence =
+                        founder.evidenceBadges.interviewsCompleted > 0 ||
+                        founder.evidenceBadges.experimentsPassed > 0;
+                      trackMarketplaceEvent.founderProfileViewed(
+                        founder.id,
+                        founder.problemFit,
+                        hasEvidence
+                      );
+                      onRequestConnection(founder.id);
+                    }}
                   >
                     Request Connection
                   </Button>
