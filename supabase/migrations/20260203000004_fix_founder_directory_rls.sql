@@ -39,7 +39,7 @@ SELECT
   -- Evidence summary badges
   (
     SELECT COUNT(*) FROM hypotheses h
-    WHERE h.project_id = p.id AND h.hypothesis_type = 'customer'
+    WHERE h.project_id = p.id AND h.type = 'customer'
   ) as interviews_completed,
   (
     SELECT COUNT(*) FROM experiments e

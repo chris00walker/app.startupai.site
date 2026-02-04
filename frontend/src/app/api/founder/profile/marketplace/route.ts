@@ -29,23 +29,13 @@ export async function GET() {
   }
 
   // Get founder profile with qualification status
-  // Use maybeSingle and handle missing column gracefully (column may not exist in older schemas)
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('founder_directory_opt_in')
     .eq('id', user.id)
-    .maybeSingle();
+    .single();
 
   if (profileError) {
-    // Check if it's a column-not-found error (migration not deployed)
-    if (profileError.message?.includes('founder_directory_opt_in')) {
-      console.warn('[founder/profile/marketplace] Column not found, returning defaults');
-      return NextResponse.json({
-        founderDirectoryOptIn: false,
-        problemFit: 'no_fit',
-        qualifiesForDirectory: false,
-      });
-    }
     console.error('[founder/profile/marketplace] Query error:', profileError);
     return NextResponse.json(
       { error: 'query_failed', message: 'Failed to fetch settings' },
