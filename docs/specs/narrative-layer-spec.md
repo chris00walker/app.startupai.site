@@ -368,6 +368,26 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 **Key innovation**: Traditional "use of funds" slides show pie charts. StartupAI's version shows a **validation experiment roadmap** — each dollar maps to a specific hypothesis being tested, with clear success/failure criteria. This demonstrates founder rigor.
 
+#### Pivot Narrative Handling
+
+The VPD methodology treats hypothesis invalidation as valuable learning, not failure. When a founder correctly identifies that a hypothesis is false based on evidence, this demonstrates rigor and founder discipline. The narrative layer must reflect this philosophy.
+
+**When a project has invalidated hypotheses**, the narrative should:
+
+1. **Celebrate the pivot** - Frame invalidations as "validated learning" that strengthened the venture's direction
+2. **Show evidence-driven decision making** - Explain what evidence led to the invalidation
+3. **Connect to current direction** - Demonstrate how the pivot informed the current strategy
+
+**Example pivot narrative in Overview slide**:
+
+> "Our initial hypothesis that SMBs would pay for automated invoicing was invalidated through 12 customer interviews — SMBs valued cash flow forecasting 3x more than invoicing automation. This evidence-driven pivot refined our focus to cash flow management, where we achieved 0.85 problem-solution fit."
+
+**Narrative velocity considerations**:
+
+- Pivot count should not penalize founders in marketplace visibility
+- A project with 2 validated hypotheses and 1 invalidated hypothesis demonstrates more rigor than a project with 2 validated hypotheses and no invalidations explored
+- The `pivot_count` metric captures learning velocity, not failure rate
+
 ---
 
 ## Narrative Layer Architecture
@@ -495,6 +515,15 @@ interface PitchNarrative {
     interview_count: number;
     experiment_count: number;
     hitl_completion_rate: number; // Checkpoints completed / total
+    display_config: {
+      evidence_order: ['do_direct', 'do_indirect', 'say_evidence']; // Render order
+      show_weights: boolean; // Always true for PH view
+      visual_emphasis: {
+        do_direct: 'primary';   // Green, large text, checkmark icon
+        do_indirect: 'secondary'; // Blue, normal text, partial-check icon
+        say_evidence: 'tertiary'; // Gray, smaller text, quote icon, italic
+      };
+    };
   };
 
   // Slide 6: Customer
@@ -541,6 +570,13 @@ interface PitchNarrative {
     overall_fit_score: number;
     validation_stage: string; // Current gate
     last_updated: string;
+    pivot_count: number;           // Number of hypotheses invalidated
+    latest_pivot?: {
+      original_hypothesis: string;
+      invalidation_evidence: string;
+      new_direction: string;
+      pivot_date: string;
+    };
   };
 }
 
@@ -627,7 +663,7 @@ interface EvidencePackage {
 CREATE TABLE pitch_narratives (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
 
   -- Narrative content (JSON matching PitchNarrative schema)
   narrative_data JSONB NOT NULL,              -- Current narrative (may be edited)
@@ -648,6 +684,10 @@ CREATE TABLE pitch_narratives (
   is_stale BOOLEAN DEFAULT FALSE,             -- True when source evidence changes
   stale_severity VARCHAR(10) DEFAULT 'hard',  -- 'soft' or 'hard'
   stale_reason TEXT,                          -- Which evidence changed
+
+  -- Verification security (see "Verification Endpoint Security" section)
+  verification_token UUID DEFAULT gen_random_uuid(),  -- For public verification URL (full UUID entropy)
+  verification_request_count INTEGER DEFAULT 0,       -- Track verification requests for abuse detection
 
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -681,7 +721,7 @@ CREATE TABLE narrative_versions (
 CREATE TABLE evidence_packages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id),
-  founder_id UUID NOT NULL REFERENCES auth.users(id),
+  founder_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
 
   -- Package content
   pitch_narrative_id UUID REFERENCES pitch_narratives(id),
@@ -702,7 +742,7 @@ CREATE TABLE evidence_packages (
 CREATE TABLE evidence_package_access (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   evidence_package_id UUID NOT NULL REFERENCES evidence_packages(id),
-  portfolio_holder_id UUID NOT NULL REFERENCES auth.users(id),
+  portfolio_holder_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   connection_id UUID REFERENCES consultant_clients(id),
 
   -- Access tracking
@@ -721,7 +761,7 @@ CREATE TABLE evidence_package_access (
 -- Founder profile data for Team slide (not in onboarding)
 CREATE TABLE founder_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
 
   -- Professional background
   professional_summary VARCHAR(500),
@@ -795,6 +835,29 @@ CREATE POLICY "Founders can manage own profile"
   ON founder_profiles FOR ALL
   USING (auth.uid() = user_id);
 ```
+
+### Indexes
+
+```sql
+-- GIN index for JSONB queries on narrative_data
+CREATE INDEX idx_pitch_narratives_narrative_data ON pitch_narratives USING GIN (narrative_data);
+
+-- Composite index to support RLS policy checking consultant-founder connections
+CREATE INDEX idx_consultant_clients_connection_lookup
+  ON consultant_clients(consultant_id, client_id, connection_status);
+
+-- Index to support RLS policy checking consultant verification status
+CREATE INDEX idx_user_profiles_consultant_verification
+  ON user_profiles(id, consultant_verification_status);
+
+-- Index for staleness queries on pitch narratives
+CREATE INDEX idx_pitch_narratives_staleness ON pitch_narratives(project_id, is_stale);
+
+-- Index for version history queries
+CREATE INDEX idx_narrative_versions_lookup ON narrative_versions(narrative_id, version_number);
+```
+
+**Note on JSONB Size Monitoring**: The `edit_history` column stores an array of edit records that grows unboundedly with founder edits. At scale (Phase 4+), consider implementing an archival strategy that moves older edit records to a separate `edit_history_archive` table, keeping only the most recent N entries in the primary column. Monitor JSONB column sizes via `pg_column_size()` and alert if average size exceeds 100KB per row.
 
 ### Schema Modifications to Existing Tables
 
@@ -1349,6 +1412,44 @@ Guardian's governance role extends to evidence integrity:
 
 **Narrative-Evidence Alignment Check**: When the Report Compiler generates a pitch narrative, Guardian verifies that narrative claims are supported by the underlying evidence. Flag any narrative statement that overstates the evidence (e.g., narrative says "strong product-market fit" but Fit Score is 0.45).
 
+### Claim-Language Mapping
+
+To enforce narrative-evidence alignment, Guardian uses a structured mapping between evidence strength and permitted narrative language.
+
+**Mapping Table**
+
+| Fit Score Range | DO-Direct Count | DO-Indirect Count | Permitted Language | Prohibited Language |
+|-----------------|-----------------|-------------------|--------------------|--------------------|
+| 0.0 - 0.39 | 0 | 0-2 | "exploring", "early signals", "initial feedback" | "validated", "proven", "strong" |
+| 0.4 - 0.59 | 0-1 | 1-3 | "positive indicators", "growing evidence", "encouraging signs" | "proven", "strong demand", "confirmed" |
+| 0.6 - 0.79 | 1-3 | 2-5 | "validated interest", "demonstrated demand", "solid evidence" | "proven product-market fit", "confirmed at scale" |
+| 0.8+ | 3+ | 5+ | "strong validation", "proven demand", "confirmed fit" | (none - full language permitted) |
+
+**Guardian Implementation**
+
+Guardian checks narrative text against this mapping during three key operations:
+
+1. **Initial narrative generation**: When Report Compiler generates narrative content, Guardian validates each claim against current evidence before the narrative is stored.
+
+2. **Founder edit validation**: When founders modify narrative text, Guardian scans the edited content for language that exceeds what evidence permits. This ensures founder customizations maintain evidence integrity.
+
+3. **Regeneration after evidence changes**: When evidence is added, updated, or removed, and the narrative is regenerated, Guardian re-validates all claims against the new evidence state.
+
+**Flagging Behavior**
+
+When narrative language exceeds what evidence permits, Guardian responds differently based on the source:
+
+- **Auto-generated narratives**: Guardian auto-corrects to permitted language. For example, if the LLM generates "strong demand" but evidence only supports "positive indicators," Guardian downgrades the language automatically before presenting to the founder.
+
+- **Founder edits**: Guardian flags the specific issue without auto-correcting, preserving founder agency. The flag includes actionable context:
+  > "Claims 'strong demand' but evidence supports 'positive indicators'. Current evidence: 1 DO-direct, 2 DO-indirect, Fit Score 0.52. Add 2+ more DO-direct evidence to unlock this language."
+
+**Edge Cases**
+
+- **Mixed evidence (high DO-indirect, low DO-direct)**: Use DO-direct count as the primary gate. A founder with 10 DO-indirect pieces but 0 DO-direct cannot claim "validated demand." Rationale: behavioral evidence from actual users (DO-direct) is the strongest signal; indirect evidence alone may indicate interest without true validation.
+
+- **Recent pivot**: Allow "pivoted based on evidence" and "adjusted direction following validation" language regardless of current Fit Score. A pivot is itself a form of validation learning, and founders should be able to communicate this regardless of where the new direction stands in validation.
+
 ### External Sharing Integrity
 
 When founders export PDFs and share them outside the platform, integrity guarantees must persist. The exported PDF includes:
@@ -1402,19 +1503,95 @@ When founders export PDFs and share them outside the platform, integrity guarant
 GET /api/verify/{short-hash}
 ```
 
-**Response**:
+**Response** (public, unauthenticated):
 ```json
 {
   "status": "verified" | "updated" | "not_found",
   "generated_at": "2026-02-04T14:34:00Z",
   "venture_name": "Acme Logistics",
-  "evidence_id": "a3f8c2d1e9b4",
+  "evidence_id": "a3f8c2...d1e9b4",
   "current_hash_matches": true,
   "evidence_updated_at": "2026-02-04T14:34:00Z",
-  "fit_score_at_generation": 0.72,
   "validation_stage_at_generation": "Solution Testing"
 }
 ```
+
+**Note**: `fit_score_at_generation` is intentionally excluded from the public response. See Security section below.
+
+#### Verification Endpoint Security
+
+The public verification endpoint requires careful security design to prevent abuse while maintaining utility.
+
+**Hash Generation**:
+
+The verification URL uses a full UUID token rather than a truncated SHA-256 hash:
+
+| Approach | Entropy | Attack Surface |
+|----------|---------|----------------|
+| Truncated SHA-256 (12 chars) | ~48 bits | Enumerable with ~280 trillion attempts |
+| Full UUID v4 | 122 bits | Computationally infeasible to enumerate |
+
+- Generate a separate random UUID as `verification_token` (not derived from content)
+- Store in `pitch_narratives` table alongside the integrity hash
+- URL format: `app.startupai.site/verify/{verification_token}`
+- The `evidence_id` displayed to users remains the truncated SHA-256 for readability
+
+**Rate Limiting**:
+
+```
+Per IP Address:
+- 100 requests per minute (burst limit)
+- 1,000 requests per hour (sustained limit)
+
+Response when exceeded:
+HTTP 429 Too Many Requests
+Retry-After: <seconds until reset>
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: <unix timestamp>
+```
+
+Implementation: Use Upstash Redis with sliding window algorithm (compatible with Netlify Edge Functions).
+
+**Response Sanitization**:
+
+The public endpoint intentionally omits sensitive data:
+
+| Field | Public | Authenticated | Rationale |
+|-------|--------|---------------|-----------|
+| `status` | Yes | Yes | Core verification purpose |
+| `generated_at` | Yes | Yes | Timestamp verification |
+| `venture_name` | Yes | Yes | Already on the PDF |
+| `evidence_id` | Truncated | Full | Prevent hash collision attacks |
+| `validation_stage` | Yes | Yes | General context |
+| `fit_score` | No | Yes | Competitive intelligence risk |
+| `narrative_content` | No | No | Never exposed via verification |
+| `evidence_details` | No | Yes | Requires founder consent |
+
+Why exclude Fit Score from public response:
+- Investors could systematically verify shared PDFs to compare founders
+- Creates competitive pressure on founders to delay sharing until score improves
+- Score is contextual (methodology stage affects meaning)
+
+**Logging and Monitoring**:
+
+All verification requests are logged for security analysis:
+
+```typescript
+interface VerificationLog {
+  timestamp: string;           // ISO 8601
+  ip_address: string;          // Hashed for privacy after 30 days
+  verification_token: string;  // Which narrative was verified
+  user_agent: string;          // Browser/client identification
+  referrer: string | null;     // Where the request originated
+  result: 'verified' | 'updated' | 'not_found' | 'rate_limited';
+}
+```
+
+Alerting thresholds:
+- **>10 unique IPs verifying same token in 24h**: Flag for review (potential wide distribution)
+- **>50 requests from single IP in 1h**: Temporary block, notify security
+- **Burst of not_found requests**: Potential enumeration attempt
 
 ---
 
@@ -1591,6 +1768,82 @@ GET /api/verify/{short-hash}
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### Evidence Visual Hierarchy
+
+**Design Principle**: The visual treatment of evidence must reinforce the DO/SAY hierarchy, regardless of narrative phrasing. DO-direct evidence should be unmistakably prominent; SAY evidence should be visually de-emphasized.
+
+This prevents a critical UX failure mode: SAY evidence (interview quotes, survey responses) should never visually compete with DO evidence (payments, signed contracts, behavioral data). Portfolio Holders must be able to scan the Traction slide and immediately understand which claims have the strongest evidentiary backing.
+
+#### Hierarchy Specifications
+
+| Evidence Type | Visual Treatment |
+|---------------|------------------|
+| DO-direct (1.0) | Large text (16px), primary color (green-600), checkmark icon, first position |
+| DO-indirect (0.8) | Normal text (14px), secondary color (blue-600), partial-check icon, second position |
+| SAY (0.3) | Smaller text (13px), muted color (gray-500), quote icon, last position, italic |
+
+#### Visual Weight Rules
+
+1. **Size Hierarchy**: DO-direct items use larger font size than DO-indirect, which uses larger than SAY
+2. **Color Hierarchy**: DO-direct uses primary brand color (success/green), DO-indirect uses secondary (info/blue), SAY uses muted/tertiary (gray)
+3. **Icon Hierarchy**:
+   - DO-direct: Solid checkmark (complete confidence)
+   - DO-indirect: Partial/half-filled check (strong signal)
+   - SAY: Quote marks (verbal claim, needs corroboration)
+4. **Position Hierarchy**: Evidence types always render in order: DO-direct first, DO-indirect second, SAY last
+5. **Weight Badges**: Always show evidence weight visually (e.g., `[1.0]`, `[0.8]`, `[0.3]`) so PHs understand the methodology's confidence in each type
+
+#### Traction Slide Layout Wireframe
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ TRACTION                                                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│ [checkmark] DO-DIRECT EVIDENCE                              [1.0 weight] │
+│ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│   * 3 paying customers ($2,400 MRR)                                     │
+│   * 2 signed LOIs ($50K committed)                                      │
+│                                                                          │
+│ [half-check] DO-INDIRECT EVIDENCE                           [0.8 weight] │
+│ ──────────────────────────────────────────────────────────────────────  │
+│   * Landing page: 23.5% conversion (47/200)                             │
+│   * Waitlist: 127 signups                                               │
+│                                                                          │
+│ [quote] SAY EVIDENCE                                        [0.3 weight] │
+│ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  │
+│   "8 interviews indicated strong interest"                              │
+│   "Survey: 73% would pay $50/month"                                     │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### CSS Token Mapping
+
+```css
+/* Evidence hierarchy tokens (Tailwind) */
+--evidence-do-direct-color: theme('colors.green.600');
+--evidence-do-direct-size: theme('fontSize.base');  /* 16px */
+--evidence-do-direct-weight: theme('fontWeight.semibold');
+
+--evidence-do-indirect-color: theme('colors.blue.600');
+--evidence-do-indirect-size: theme('fontSize.sm');  /* 14px */
+--evidence-do-indirect-weight: theme('fontWeight.medium');
+
+--evidence-say-color: theme('colors.gray.500');
+--evidence-say-size: theme('fontSize.xs');  /* 13px */
+--evidence-say-weight: theme('fontWeight.normal');
+--evidence-say-style: italic;
+```
+
+#### Component Implementation Notes
+
+The `EvidenceList` component must:
+1. Sort evidence by type before rendering (do_direct -> do_indirect -> say_evidence)
+2. Apply type-specific styling based on the `display_config.visual_emphasis` settings
+3. Always show weight badges in PH view (`display_config.show_weights = true`)
+4. Founders editing can optionally hide weights in preview mode
+
 ---
 
 ## CrewAI Report Compiler Modifications
@@ -1611,6 +1864,12 @@ narrative_synthesis_task:
     5. Prioritize DO-evidence over SAY-evidence in traction
     6. Generate tagline (≤10 words) and 3-sentence thesis
     7. Frame "Use of Funds" as validation experiments, not budget categories
+    8. When hypotheses have status='invalidated', frame pivots positively:
+       - State the original hypothesis clearly
+       - Explain what evidence led to invalidation (this demonstrates rigor)
+       - Describe the new direction and why evidence supports it
+       - Use language: "validated learning", "evidence-driven pivot", "refined focus"
+       - Never frame invalidation as failure - it demonstrates founder discipline
 
   expected_output: >
     JSON object matching the PitchNarrative schema with all 10 slides
