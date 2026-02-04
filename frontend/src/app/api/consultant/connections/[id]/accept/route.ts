@@ -45,14 +45,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     );
   }
 
-  // Fetch connection details for analytics (before state change)
-  const { data: connectionDetails } = await supabase
-    .from('consultant_clients')
-    .select('relationship_type, initiated_by, created_at')
-    .eq('id', connectionId)
-    .eq('consultant_id', user.id)
-    .eq('connection_status', 'requested')
-    .single();
+  // Fetch connection details for analytics via RPC (bypasses RLS)
+  const { data: connectionDetailsArray } = await supabase.rpc('get_connection_for_analytics', {
+    p_connection_id: connectionId,
+  });
+  const connectionDetails = connectionDetailsArray?.[0];
 
   // Call the SECURITY DEFINER function to accept
   const { data: result, error } = await supabase.rpc('accept_connection', {

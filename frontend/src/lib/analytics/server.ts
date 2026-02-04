@@ -163,4 +163,16 @@ export const trackMarketplaceServerEvent = {
       founder_id: founderId,
       days_opted_in: daysOptedIn,
     }),
+
+  // Directory browse events
+  consultantDirectoryViewed: (userId: string, count: number) =>
+    trackServerEvent('marketplace.consultant_directory.viewed', userId, {
+      count,
+    }),
+
+  founderDirectoryViewed: (userId: string, count: number, verificationStatus: string) =>
+    trackServerEvent('marketplace.founder_directory.viewed', userId, {
+      count,
+      verification_status: verificationStatus,
+    }),
 };
