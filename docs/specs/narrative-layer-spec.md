@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v1.2 | **Updated**: 2026-02-04 | **Owner**: product-strategist
+**Status**: Draft v1.3 | **Updated**: 2026-02-04 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -15,6 +15,106 @@ This specification defines a **Narrative Layer** that transforms existing VPD va
 **Core principle**: The Narrative Layer does not generate new data. It **re-renders existing validation evidence** through a storytelling lens optimized for capital provider consumption.
 
 **Strategic value**: Founders get investor-ready artifacts without additional work. Portfolio Holders get narrative-structured deal flow backed by methodology-verified evidence. The marketplace flywheel accelerates because both sides extract more value from the same underlying data.
+
+---
+
+## Design Rationale
+
+### Origin: The Get Backed Framework
+
+This specification draws heavily from _Get Backed: Craft Your Story, Build the Perfect Pitch Deck, and Launch the Venture of Your Dreams_ by Evan Baehr and Evan Loomis (Harvard Business Review Press, 2015). The book is a foundational text for startup founders, focusing on a dual-track approach to fundraising:
+
+1. **The Artifact**: Developing a narrative-driven, 10-slide pitch deck based on real-world examples from 15 ventures that raised $150M+
+2. **The Relationship**: Implementing the "Friendship Loop" to transition from cold outreach to warm investor relationships
+
+While published in 2015, its emphasis on storytelling over spreadsheets and building relational capital remains highly relevant in today's hyper-selective venture environment.
+
+### The Translation Gap
+
+The intersection of Get Backed's methodology with the Portfolio Holder marketplace vision closes a critical gap in the Founder journey that had not been explicitly addressed.
+
+StartupAI's VPD validation engine produces **evidence** — Value Proposition Canvases, competitor maps, experiment results, Fit Scores, HITL checkpoint records. The Portfolio Holder marketplace consumes that evidence as de-risked deal flow. But there was a missing translation layer between "I have rigorous validation data" and "I can compellingly communicate why this matters to someone with capital."
+
+**VCs don't read Value Proposition Canvases. They read decks and hear stories.**
+
+The validation evidence exists in Strategyzer artifact format — perfect for methodology practitioners but not how capital providers consume information. The Narrative Layer provides that translation.
+
+### Why This Works: CrewAI Output Mapping
+
+When overlaying Baehr and Loomis's 10-slide structure against existing CrewAI outputs, the coverage is remarkable:
+
+| Get Backed Slide | CrewAI Source | Data Available |
+|------------------|---------------|----------------|
+| Problem | Pulse customer profile | Top-ranked pains, unmet jobs |
+| Solution | VPC pain relievers + gain creators | Direct mapping |
+| Traction | Validation Agent DO-evidence | Behavioral data, experiment results |
+| Customer/Market | Pulse market sensing | TAM/SAM/SOM, segments |
+| Competition | Competitor Analyst | Positioning map, differentiators |
+| Business Model | Ledger viability assessment | BMC, unit economics |
+| Use of Funds | 3-tier validation roadmap | Costed experiments |
+| Cover, Overview | Sage synthesis | **New capability needed** |
+| Team | Founder input | **Scaffolded self-input needed** |
+
+**9 of 10 essential slides can be populated entirely from existing validation data.** No new data collection required — only narrative re-rendering.
+
+The practical implication: StartupAI can build a Pitch Deck Generator that doesn't ask founders to start from a blank slide. Instead, it assembles a narrative-driven deck from validation evidence they've already generated. That's fundamentally different from Canva templates or Slidebean's AI — those tools help you make slides. **StartupAI helps you make the case, backed by real evidence.**
+
+### The Friendship Loop Inversion
+
+Baehr and Loomis's Friendship Loop — the progression from cold outreach to warm relationship before any ask — maps to StartupAI's three connection flows, but with a **critical inversion**.
+
+In the traditional Friendship Loop, the burden is entirely on the founder to build the relationship. They research investors, find warm introductions, nurture the connection, and eventually pitch. Warm intros are gatekeeping mechanisms that favor founders with network privilege.
+
+**StartupAI inverts this dynamic.** Through the Founder Directory and RFQ Board, Portfolio Holders come to founders who have already demonstrated rigor. The evidence package *is* the warm introduction. When a capital provider sees a Fit Score of 0.85 with 12 completed customer interviews and 3 validated experiments, the relationship temperature starts warm because trust has been pre-established through methodology.
+
+This isn't just "pre-warming relationships through evidence." It's **democratizing access to capital** by making evidence the currency of trust, not relationships. A founder without Stanford connections but with strong DO-evidence gets the same marketplace visibility as a founder with a Y Combinator network.
+
+| Traditional Friendship Loop | StartupAI Equivalent |
+|-----------------------------|----------------------|
+| Research investors manually | Publish validated evidence; self-select PHs |
+| Find warm introductions | Evidence package *is* the introduction |
+| Nurture relationship before ask | Ongoing validation progress = relationship nurturing |
+| Pitch with static deck | Living evidence + narrative auto-updated |
+
+### The Dual-Format Moat
+
+The strategic defensibility of this architecture lies in the **dual-format Evidence Package**:
+
+- **Narrative without evidence** = another pitch deck tool (competitors exist: Canva, Slidebean, Tome)
+- **Evidence without narrative** = methodology artifacts VCs won't consume
+- **Narrative + evidence** = defensible differentiation
+
+Competitors can copy the pitch deck generator. They cannot copy the evidence layer, because that requires the full VPD methodology, CrewAI pipeline, HITL checkpoints, and DO/SAY evidence classification. The dual-format design (tabs for Pitch Narrative / Validation Evidence / Integrity) makes every claim verifiable.
+
+**Marketing positioning**: "Every claim is evidence-backed. Click to verify."
+
+### Narrative Velocity: Beyond Static Decks
+
+Get Backed was designed for a world where the pitch deck is a static artifact delivered in a meeting. StartupAI operates differently — evidence is living, continuously updated, and consumed asynchronously.
+
+The Narrative Layer's real power isn't the 10-slide artifact. It's **narrative velocity** — the trajectory of improvement visible over time. A Portfolio Holder watching a founder's narrative evolve over 6 weeks (Fit Score improving, new experiments completing, hypotheses being validated or pivoted) is seeing execution in real-time. That's more signal than any static deck provides.
+
+The underlying narrative architecture — problem, evidence of problem severity, solution, evidence of solution fit, market opportunity, execution plan — should be a shared layer that manifests differently depending on audience and context:
+
+- The pitch deck is one rendering
+- The Evidence Package is another
+- The RFQ posting is another
+- The Founder Directory card is another
+
+All draw from the same narrative layer, all backed by the same evidence.
+
+### Risk: Narrative Quality ≠ Validation Quality
+
+One caution worth explicit acknowledgment: a founder with weak evidence but strong storytelling instincts might produce a more "readable" narrative than a founder with strong evidence but poor communication skills. If the marketplace rewards narrative polish over evidence rigor, we've created a new form of signal pollution.
+
+**Mitigations in this specification**:
+- Narrative quality is NOT included in Fit Score (Fit Score measures validation rigor only)
+- Evidence strength indicators displayed alongside narrative (DO-direct / DO-indirect / SAY)
+- DO/SAY weights surfaced explicitly in Traction slide
+- Guardian alignment checks prevent narrative from overstating evidence
+- Provenance badges show whether narrative is AI-generated or founder-edited
+
+The marketplace should reward founders who do the validation work, not founders who write compelling copy about work they haven't done.
 
 ---
 
@@ -1873,3 +1973,4 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-04 | 1.0     | Initial specification: narrative layer architecture, 10-slide mapping, evidence packages, database schema, API contracts, test cards, implementation roadmap                                                                                                                                                                                                                                                                                                                                                                                              |
 | 2026-02-04 | 1.1     | **Framework correction**: Corrected 10-slide sequence per _Get Backed_ to: Overview, Opportunity, Problem, Solution, Traction, Customer, Competition, Business Model, Team, Use of Funds. Cover page separated as title card (not one of the essential ten). Opportunity and Customer now distinct slides (previously combined as "Customer/Market"). Team moved to slide 9, Use of Funds to slide 10. Updated TypeScript schema (`summary` → `overview`, `customer_market` split into `opportunity` + `customer`), PH wireframe, and CrewAI task config. |
 | 2026-02-04 | 1.2     | **Design resolutions**: (1) Resolved founder editing with provenance model — allow editing, preserve baseline, Guardian alignment checks, provenance badges for PHs. (2) Resolved narrative quality — NOT in Fit Score; variance is acceptable signal. (3) Added soft/hard staleness thresholds to prevent UX friction. (4) Added external sharing integrity with verification URLs and QR codes. (5) Added narrative version history for founder learning. (6) Resolved Team slide as optional. (7) Resolved financial projections excluded from Evidence Package. Added `narrative_versions` table, updated `pitch_narratives` schema with editing provenance fields, added `/api/verify/{hash}` endpoint. |
+| 2026-02-04 | 1.3     | **Design Rationale section**: Added comprehensive rationale documenting the Get Backed inspiration, translation gap insight, CrewAI output mapping, Friendship Loop inversion (democratizing access to capital), dual-format moat analysis, narrative velocity concept, and explicit risk acknowledgment (narrative quality ≠ validation quality). |
