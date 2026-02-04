@@ -30,19 +30,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Check if user is a verified consultant
-  const { data: isVerified } = await supabase.rpc('is_verified_consultant');
-
-  if (!isVerified) {
-    return NextResponse.json(
-      {
-        error: 'unverified',
-        message: 'Upgrade to Advisor or Capital plan to request connections.',
-      },
-      { status: 403 }
-    );
-  }
-
   // Parse request body
   let body;
   try {
@@ -61,75 +48,47 @@ export async function POST(request: NextRequest) {
 
   const { founderId, relationshipType, message } = validation.data;
 
-  // Check cooldown
-  const { data: cooldown } = await supabase.rpc('check_connection_cooldown', {
-    p_consultant_id: user.id,
+  // Use SECURITY DEFINER function that handles all validation and creation
+  // This enforces client_id masking at the DB level
+  const { data: result, error } = await supabase.rpc('create_connection_request', {
     p_founder_id: founderId,
+    p_relationship_type: relationshipType,
+    p_message: message || null,
   });
 
-  if (cooldown?.cooldown_active) {
-    return NextResponse.json(
-      {
-        error: 'cooldown_active',
-        message: `You can reconnect with this founder in ${cooldown.days_remaining} days.`,
-        cooldownEndsAt: cooldown.cooldown_ends_at,
-        daysRemaining: cooldown.days_remaining,
-      },
-      { status: 429 }
-    );
-  }
-
-  // Check if already connected or pending
-  const { data: existing } = await supabase
-    .from('consultant_clients')
-    .select('id, connection_status')
-    .eq('consultant_id', user.id)
-    .eq('client_id', founderId)
-    .in('connection_status', ['requested', 'active'])
-    .single();
-
-  if (existing) {
-    if (existing.connection_status === 'active') {
-      return NextResponse.json(
-        { error: 'already_connected', message: "You're already connected with this founder." },
-        { status: 409 }
-      );
-    }
-    return NextResponse.json(
-      { error: 'request_pending', message: 'A connection request is already pending.' },
-      { status: 409 }
-    );
-  }
-
-  // Create connection request
-  // TASK-020: Must set BOTH status and connection_status for dual-field sync
-  const { data: connection, error } = await supabase
-    .from('consultant_clients')
-    .insert({
-      consultant_id: user.id,
-      client_id: founderId,
-      relationship_type: relationshipType,
-      status: 'requested',
-      connection_status: 'requested',
-      initiated_by: 'consultant',
-      request_message: message,
-    })
-    .select('id, connection_status, created_at')
-    .single();
-
   if (error) {
-    console.error('[consultant/connections] Insert error:', error);
+    console.error('[consultant/connections] RPC error:', error);
     return NextResponse.json(
       { error: 'Failed to create connection request' },
       { status: 500 }
     );
   }
 
+  // Handle function-level errors
+  if (result?.error) {
+    const statusMap: Record<string, number> = {
+      unverified: 403,
+      cooldown_active: 429,
+      already_exists: 409,
+    };
+    const status = statusMap[result.error] || 400;
+
+    return NextResponse.json(
+      {
+        error: result.error,
+        message: result.message,
+        ...(result.cooldown_ends_at && { cooldownEndsAt: result.cooldown_ends_at }),
+        ...(result.days_remaining && { daysRemaining: result.days_remaining }),
+      },
+      { status }
+    );
+  }
+
   return NextResponse.json(
     {
-      connectionId: connection.id,
-      status: connection.connection_status,
-      createdAt: connection.created_at,
+      connectionId: result.connection_id,
+      status: result.status,
+      createdAt: result.created_at,
     },
     { status: 201 }
   );
@@ -152,62 +111,53 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get('status');
   const { limit, offset } = parsePagination(searchParams);
 
-  // Query connections
-  let query = supabase
-    .from('consultant_clients')
-    .select(
-      `
-      id,
-      client_id,
-      relationship_type,
-      connection_status,
-      initiated_by,
-      request_message,
-      accepted_at,
-      declined_at,
-      created_at,
-      user_profiles!consultant_clients_client_id_fkey(
-        full_name,
-        email,
-        company
-      )
-    `,
-      { count: 'exact' }
-    )
-    .eq('consultant_id', user.id);
-
-  if (status) {
-    query = query.eq('connection_status', status);
-  }
-
-  query = query.order('created_at', { ascending: false });
-  query = query.range(offset, offset + limit - 1);
-
-  const { data: connections, count, error } = await query;
+  // Use SECURITY DEFINER function with built-in client_id masking
+  // This enforces PII protection at the DB level for consultant-initiated pending requests
+  const { data: connections, error } = await supabase.rpc('get_my_connections', {
+    p_status: status || null,
+    p_limit: limit,
+    p_offset: offset,
+  });
 
   if (error) {
-    console.error('[consultant/connections] Query error:', error);
+    console.error('[consultant/connections] RPC error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch connections' },
       { status: 500 }
     );
   }
 
-  // Transform - only show founder details for active connections
-  const transformedConnections = (connections || []).map((c) => {
-    const founderProfile = Array.isArray(c.user_profiles)
-      ? c.user_profiles[0]
-      : c.user_profiles;
+  // Get total count from first row (all rows have same total_count)
+  const total = connections?.[0]?.total_count ?? 0;
 
-    const isActive = c.connection_status === 'active';
+  // Get founder profiles for connections where client_id is visible
+  const visibleClientIds = (connections || [])
+    .filter((c: any) => c.client_id)
+    .map((c: any) => c.client_id);
+
+  let founderProfiles: Record<string, any> = {};
+  if (visibleClientIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('user_profiles')
+      .select('id, full_name, email, company')
+      .in('id', visibleClientIds);
+
+    if (profiles) {
+      founderProfiles = Object.fromEntries(profiles.map((p) => [p.id, p]));
+    }
+  }
+
+  // Transform response
+  const transformedConnections = (connections || []).map((c: any) => {
+    const founderProfile = c.client_id ? founderProfiles[c.client_id] : null;
 
     return {
       id: c.id,
-      // PII protection: hide founder identity until connection is active
-      founderId: isActive ? c.client_id : null,
-      founderName: isActive ? founderProfile?.full_name : null,
-      founderEmail: isActive ? founderProfile?.email : null,
-      founderCompany: isActive ? founderProfile?.company : null,
+      // client_id is already masked by the RPC function for consultant-initiated pending requests
+      founderId: c.client_id,
+      founderName: founderProfile?.full_name || null,
+      founderEmail: founderProfile?.email || null,
+      founderCompany: founderProfile?.company || null,
       relationshipType: c.relationship_type,
       status: c.connection_status,
       initiatedBy: c.initiated_by,
@@ -220,7 +170,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     connections: transformedConnections,
-    total: count || 0,
+    total: Number(total),
     limit,
     offset,
   });

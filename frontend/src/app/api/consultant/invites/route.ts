@@ -210,27 +210,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all consultant_clients records
-    const { data: records, error: fetchError } = await supabase
-      .from('consultant_clients')
-      .select(
-        `
-        id,
-        consultant_id,
-        client_id,
-        invite_email,
-        invite_token,
-        invite_expires_at,
-        client_name,
-        status,
-        invited_at,
-        linked_at,
-        archived_at,
-        archived_by
-      `
-      )
-      .eq('consultant_id', user.id)
-      .order('created_at', { ascending: false });
+    // Use SECURITY DEFINER function to fetch connections with client_id masking
+    // This enforces PII protection at the DB level
+    const { data: records, error: fetchError } = await supabase.rpc('get_my_connections', {
+      p_status: null,  // Get all statuses
+      p_limit: 1000,   // High limit for listing
+      p_offset: 0,
+    });
 
     if (fetchError) {
       console.error('[ConsultantInvites] Fetch error:', fetchError);

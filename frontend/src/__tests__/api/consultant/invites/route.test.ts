@@ -32,6 +32,7 @@ const mockIn = jest.fn();
 const mockSingle = jest.fn();
 const mockMaybeSingle = jest.fn();
 const mockOrder = jest.fn();
+const mockRpc = jest.fn();
 
 // Setup Supabase chain mocks
 const setupSupabaseMock = () => {
@@ -66,6 +67,9 @@ const setupSupabaseMock = () => {
       single: mockSingle,
     }),
   });
+
+  // Default RPC mock for get_my_connections
+  mockRpc.mockResolvedValue({ data: [], error: null });
 };
 
 jest.mock('@/lib/supabase/server', () => ({
@@ -73,6 +77,7 @@ jest.mock('@/lib/supabase/server', () => ({
     Promise.resolve({
       auth: { getUser: mockGetUser },
       from: mockFrom,
+      rpc: mockRpc,
     })
   ),
 }));
@@ -405,7 +410,7 @@ describe('/api/consultant/invites', () => {
       });
 
       it('should return empty lists when no invites or clients', async () => {
-        mockOrder.mockResolvedValue({ data: [], error: null });
+        mockRpc.mockResolvedValue({ data: [], error: null });
 
         const req = createMockRequest({ method: 'GET' });
 
@@ -458,7 +463,7 @@ describe('/api/consultant/invites', () => {
           },
         ];
 
-        mockOrder.mockResolvedValue({ data: mockRecords, error: null });
+        mockRpc.mockResolvedValue({ data: mockRecords, error: null });
 
         const req = createMockRequest({ method: 'GET' });
 
@@ -487,7 +492,7 @@ describe('/api/consultant/invites', () => {
           },
         ];
 
-        mockOrder.mockResolvedValue({ data: mockRecords, error: null });
+        mockRpc.mockResolvedValue({ data: mockRecords, error: null });
 
         const req = createMockRequest({ method: 'GET' });
 
@@ -504,7 +509,7 @@ describe('/api/consultant/invites', () => {
           data: { role: 'admin' },
           error: null,
         });
-        mockOrder.mockResolvedValue({ data: [], error: null });
+        mockRpc.mockResolvedValue({ data: [], error: null });
 
         const req = createMockRequest({ method: 'GET' });
 
@@ -529,7 +534,7 @@ describe('/api/consultant/invites', () => {
       });
 
       it('should return 500 on database error', async () => {
-        mockOrder.mockResolvedValue({
+        mockRpc.mockResolvedValue({
           data: null,
           error: { message: 'Database connection failed' },
         });
