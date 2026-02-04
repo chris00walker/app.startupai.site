@@ -4,6 +4,30 @@
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Design Rationale](#design-rationale)
+3. [Problem Statement](#problem-statement)
+4. [The 10-Slide Narrative Framework](#the-10-slide-narrative-framework)
+5. [Narrative Layer Architecture](#narrative-layer-architecture)
+6. [Database Schema Additions](#database-schema-additions)
+7. [API Contracts](#api-contracts)
+8. [Friendship Loop Integration](#friendship-loop-integration)
+9. [Dual-Format Evidence Package Design](#dual-format-evidence-package-design)
+10. [Evidence Integrity System](#evidence-integrity-system)
+11. [Frontend Components](#frontend-components)
+12. [CrewAI Report Compiler Modifications](#crewai-report-compiler-modifications)
+13. [Validation Requirements](#validation-requirements)
+14. [Implementation Roadmap](#implementation-roadmap)
+15. [Design Considerations](#design-considerations)
+16. [Resolved Design Questions](#resolved-design-questions)
+17. [Open Questions](#open-questions)
+18. [Decision Log](#decision-log)
+19. [Glossary](#glossary)
+20. [References](#references)
+21. [Changelog](#changelog)
+
 ---
 
 ## Executive Summary
@@ -227,6 +251,12 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 **Narrative function**: First impression. Must communicate "what we do" in ≤10 words. This is the title card — it sets the stage but is not counted among the essential ten.
 
 **Generation prompt context**: Sage receives the complete VPC and generates a tagline that connects the primary customer pain to the primary gain creator in plain language. No jargon. No buzzwords.
+
+**Tagline tone guidance**: Use active verbs and specific outcomes. The founder's voice should feel present.
+- Good: "Reduce last-mile delivery costs by 40%"
+- Good: "Help mid-market retailers compete with Amazon on speed"
+- Avoid: "The future of logistics"
+- Avoid: "AI-powered supply chain optimization"
 
 #### Slide 1: Overview
 
@@ -608,6 +638,83 @@ interface Milestone {
   experiments: string[]; // Experiments that must complete
   unlocks: string; // What achieving this enables
 }
+
+interface MarketSize {
+  value: number;
+  unit: 'USD' | 'users' | 'transactions';
+  timeframe: 'annual' | 'monthly';
+  source: string;  // Citation for the market size data
+  confidence: 'estimated' | 'researched' | 'verified';
+}
+
+interface CustomerSegment {
+  name: string;
+  description: string;
+  size_estimate: number;
+  priority: 'primary' | 'secondary' | 'tertiary';
+  jobs_to_be_done: string[];
+  key_pains: string[];
+}
+
+interface Competitor {
+  name: string;
+  category: 'direct' | 'indirect' | 'substitute';
+  strengths: string[];
+  weaknesses: string[];
+  market_position: string;
+  differentiation: string;  // How we differ from this competitor
+}
+
+interface UnitEconomics {
+  cac: number;              // Customer Acquisition Cost
+  ltv: number;              // Lifetime Value
+  ltv_cac_ratio: number;
+  gross_margin_percent: number;
+  payback_period_months: number;
+  assumptions: string[];    // Key assumptions behind these numbers
+}
+
+interface FounderProfile {
+  name: string;
+  role: string;
+  professional_summary: string;  // 200 char max
+  domain_expertise: string[];
+  linkedin_url?: string;
+  previous_ventures?: {
+    name: string;
+    role: string;
+    outcome: string;
+    year: number;
+  }[];
+}
+
+interface AdvisorProfile {
+  name: string;
+  role: string;
+  organization: string;
+  relevance: string;  // Why this advisor is valuable
+}
+
+interface AgentVersion {
+  agent_name: string;
+  version: string;
+  run_timestamp: string;
+}
+
+/**
+ * Evidence Classification Note:
+ *
+ * The narrative layer uses a DO/SAY classification (behavioral vs stated):
+ * - DO-direct (weight 1.0): Paying customers, signed contracts
+ * - DO-indirect (weight 0.8): LOIs, waitlist signups, prototype usage
+ * - SAY (weight 0.3): Interview responses, survey data
+ *
+ * This is SEPARATE from the existing evidence.strength field ('weak'|'medium'|'strong')
+ * which measures confidence in the evidence itself.
+ *
+ * Implementation: Add `evidence_category: 'DO-direct'|'DO-indirect'|'SAY'` column
+ * to the evidence table. The narrative layer aggregates both dimensions.
+ */
 ```
 
 #### Evidence Package Schema
@@ -946,11 +1053,112 @@ CREATE TRIGGER validation_stage_change_stales_narrative
   AFTER INSERT OR UPDATE ON validation_runs
   FOR EACH ROW
   EXECUTE FUNCTION mark_narrative_stale();
+
+-- Additional triggers for completeness (customer profile and VPC changes)
+CREATE TRIGGER customer_profile_change_stales_narrative
+  AFTER INSERT OR UPDATE ON customer_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION mark_narrative_stale();
+
+CREATE TRIGGER vpc_change_stales_narrative
+  AFTER INSERT OR UPDATE ON value_proposition_canvas
+  FOR EACH ROW
+  EXECUTE FUNCTION mark_narrative_stale();
+```
+
+### Analytics Tables
+
+```sql
+-- Funnel events for narrative generation journey
+CREATE TABLE narrative_funnel_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES projects(id),
+  user_id UUID NOT NULL REFERENCES user_profiles(id),
+
+  event_type VARCHAR(50) NOT NULL,
+  -- Values: 'threshold_met', 'generation_started', 'generation_completed',
+  --         'narrative_viewed', 'slide_viewed', 'edit_started', 'edit_saved',
+  --         'package_created', 'package_shared', 'pdf_exported'
+
+  event_metadata JSONB,  -- {slide_number, duration_ms, edit_field, etc.}
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_narrative_funnel_project ON narrative_funnel_events(project_id, event_type);
+CREATE INDEX idx_narrative_funnel_time ON narrative_funnel_events(created_at);
+
+-- Tab and slide-level engagement for evidence packages
+CREATE TABLE package_engagement_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  access_id UUID NOT NULL REFERENCES evidence_package_access(id),
+
+  event_type VARCHAR(50) NOT NULL,
+  -- Values: 'tab_switch', 'slide_view', 'evidence_expand', 'pdf_download'
+
+  event_value JSONB NOT NULL,
+  -- {tab: 'pitch_narrative'|'validation_evidence'|'integrity',
+  --  slide: 1-10, duration_ms: number}
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_package_engagement_access ON package_engagement_events(access_id);
+
+-- Verification to connection conversion tracking
+ALTER TABLE evidence_package_access
+  ADD COLUMN verification_token_used UUID,  -- Links to pitch_narratives.verification_token
+  ADD COLUMN source VARCHAR(50);            -- 'directory', 'connection', 'verification_url', 'direct_share'
 ```
 
 ---
 
 ## API Contracts
+
+### Error Response Schema
+
+All API endpoints return errors in a consistent format:
+
+```typescript
+interface ApiError {
+  error: {
+    code: string;           // Machine-readable error code
+    message: string;        // Human-readable description
+    details?: {             // Field-specific errors (for validation)
+      [field: string]: string;
+    };
+  };
+}
+```
+
+**Common Error Codes**:
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `UNAUTHORIZED` | 401 | Missing or invalid authentication |
+| `FORBIDDEN` | 403 | Authenticated but not permitted |
+| `NOT_FOUND` | 404 | Resource does not exist |
+| `VALIDATION_ERROR` | 400 | Request body failed validation |
+| `INSUFFICIENT_EVIDENCE` | 400 | Not enough evidence to generate narrative |
+| `NARRATIVE_STALE` | 409 | Narrative is stale, regeneration recommended |
+| `ALIGNMENT_FAILED` | 422 | Edit contradicts evidence (Guardian check) |
+| `RATE_LIMITED` | 429 | Too many requests |
+| `INTERNAL_ERROR` | 500 | Unexpected server error |
+
+**Example error response**:
+```json
+{
+  "error": {
+    "code": "ALIGNMENT_FAILED",
+    "message": "Your edit claims 'strong demand' but evidence supports 'positive indicators'",
+    "details": {
+      "field": "traction.evidence_summary",
+      "current_evidence": "1 DO-direct, 2 DO-indirect",
+      "permitted_language": ["positive indicators", "growing evidence"]
+    }
+  }
+}
+```
 
 ### Narrative Generation
 
@@ -1038,6 +1246,44 @@ GET /api/evidence-package/:id
 
 **Response**: Full `EvidencePackage` schema (both narrative and methodology formats).
 
+### Founder Profile CRUD
+
+```
+GET /api/founder/profile
+```
+
+**Authorization**: Authenticated founder only.
+
+**Response**:
+
+```json
+{
+  "id": "uuid",
+  "professional_summary": "string",
+  "domain_expertise": ["string"],
+  "previous_ventures": [...],
+  "linkedin_url": "string",
+  "completeness_percent": 80,
+  "missing_fields": ["linkedin_url"]
+}
+```
+
+```
+PATCH /api/founder/profile
+```
+
+**Request**:
+
+```json
+{
+  "professional_summary": "10+ years in logistics tech...",
+  "domain_expertise": ["logistics", "b2b-saas"],
+  "linkedin_url": "https://linkedin.com/in/..."
+}
+```
+
+**Response**: Updated profile object.
+
 ### Narrative Editing
 
 ```
@@ -1063,31 +1309,45 @@ PATCH /api/narrative/:id/edit
 }
 ```
 
-**Response**:
+**Response (Phase 1 - Immediate)**:
 
 ```json
 {
   "narrative_id": "uuid",
   "is_edited": true,
-  "alignment_status": "verified" | "flagged" | "pending",
+  "alignment_status": "pending",
+  "edit_saved": true
+}
+```
+
+**Response (Phase 2 - via Realtime)**:
+
+After the Guardian alignment check completes (2-5 seconds), the `pitch_narratives` row is updated with:
+
+```json
+{
+  "alignment_status": "verified" | "flagged",
   "alignment_issues": [
     {
       "field": "traction.evidence_summary",
       "issue": "Claims 'strong demand' but DO-evidence count is 0",
       "severity": "warning"
     }
-  ],
-  "edit_history_count": 3
+  ]
 }
 ```
+
+> **Implementation note**: The Guardian alignment check involves LLM-based claim-language validation and may take 2-5 seconds. To avoid blocking the UI, edits are saved immediately with `alignment_status: "pending"`, and the Guardian check runs as a background job. The frontend should subscribe to Realtime updates on the `pitch_narratives` table to receive the final alignment status.
 
 **Logic**:
 
 1. Apply edits to `narrative_data` (preserving `baseline_narrative`)
-2. Run Guardian alignment check on edited fields
-3. Update `alignment_status` based on check results
-4. Append to `edit_history` array
-5. Return alignment status to founder
+2. Set `alignment_status = "pending"` and save immediately
+3. Append to `edit_history` array
+4. Return immediate response to founder
+5. Enqueue background job: Guardian alignment check on edited fields
+6. Background job updates `alignment_status` to "verified" or "flagged"
+7. Supabase Realtime pushes update to subscribed clients
 
 ### Narrative Version History
 
@@ -1597,6 +1857,52 @@ Alerting thresholds:
 
 ## Frontend Components
 
+### User-Facing Terminology
+
+Internal technical terms must be translated to user-friendly language in all UI copy. This mapping ensures consistency across the Narrative Layer interface.
+
+| Internal Term | User-Facing Term | Context |
+|---------------|------------------|---------|
+| Soft stale | "Minor updates available" | Staleness indicator |
+| Hard stale | "Regeneration recommended" | Staleness indicator |
+| Alignment check | "Evidence match" | Edit validation |
+| Alignment verified | "All claims supported by your evidence" | Edit status |
+| Alignment flagged | "Some claims may overstate your evidence" | Edit status |
+| Evidence gap | "Add evidence to strengthen this slide" | Slide status |
+| Coachability score | "Feedback responsiveness" | Team slide metric |
+| Baseline narrative | "Original AI draft" | Edit comparison |
+
+**Implementation note**: Copy constants should be defined in `frontend/src/lib/constants/` to maintain consistency. Never expose internal terminology directly in component JSX.
+
+### Empty States
+
+Before a founder has completed sufficient validation to generate a narrative, the dashboard shows an encouraging empty state that guides them toward generation eligibility.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  PITCH NARRATIVE                                                         │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Complete your validation to unlock your pitch narrative.               │
+│                                                                          │
+│  Your evidence will automatically become a 10-slide investor deck.      │
+│                                                                          │
+│  Progress toward narrative generation:                                  │
+│  ████████░░░░░░░░░░░░  40% complete                                    │
+│                                                                          │
+│  [x] Problem hypothesis defined                                         │
+│  [x] Solution hypothesis defined                                        │
+│  [ ] 5+ customer interviews (you have 2)                               │
+│  [ ] 1+ experiment completed                                            │
+│  [x] Fit Score calculated                                               │
+│                                                                          │
+│  [Preview what your narrative could look like]                          │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Tone**: Warm and guiding. The empty state should feel like encouragement, not a blocker. The preview link shows a sample narrative structure (with placeholder content) so founders understand what they're working toward.
+
 ### Founder Dashboard Additions
 
 ```
@@ -1606,9 +1912,10 @@ Alerting thresholds:
 │                                                                          │
 │  ┌─── Pitch Narrative Card ──────────────────────────────────┐          │
 │  │                                                            │          │
-│  │  Status: ● Generated (or ⚠ Stale — evidence has changed)  │          │
-│  │  Staleness: ○ Fresh  ● Soft (new evidence)  ○ Hard        │          │
-│  │  Editing: ○ AI-generated  ● Founder-edited · Verified     │          │
+│  │  Status: ● Up to date                                      │          │
+│  │          ○ Minor updates available                        │          │
+│  │          ○ Regeneration recommended                       │          │
+│  │  Source: AI-generated | Founder-edited ✓                  │          │
 │  │  Last updated: Feb 4, 2026 | Version: 4                   │          │
 │  │                                                            │          │
 │  │  [Preview]  [Edit]  [Regenerate]  [Export PDF]  [History] │          │
@@ -1641,6 +1948,121 @@ Alerting thresholds:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### First-Run Narrative Experience
+
+The first narrative generation is a milestone moment for founders. This section defines the UX for guiding founders through their first pitch narrative.
+
+**Trigger Conditions**:
+- First validation gate passed (Desirability Gate), OR
+- 5+ evidence items collected (interviews, experiments, or market research)
+- No existing pitch narrative for the project
+
+**Flow**:
+
+1. **Dashboard Prompt Card** - Appears when trigger conditions met
+2. **One-Click Generation** - Single CTA with clear expectations
+3. **Loading State** - Progress indicator with meaningful status messages
+4. **Celebratory First View** - Guided highlights of generated content
+5. **Next Step CTA** - Clear action to refine or share
+
+**Prompt Card Wireframe**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  YOUR PITCH NARRATIVE IS READY                                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Based on your validation evidence, we can now generate an               │
+│  investor-ready pitch narrative.                                         │
+│                                                                          │
+│  Your evidence includes:                                                 │
+│  - 8 customer interviews                                                 │
+│  - 3 completed experiments                                               │
+│  - Problem-Solution Fit Score: 0.72                                     │
+│                                                                          │
+│  [Generate My Pitch Narrative]                                          │
+│                                                                          │
+│  This will create a 10-slide narrative from your validation data.       │
+│  You can edit and refine it after generation.                           │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Loading State Wireframe**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  CRAFTING YOUR NARRATIVE                                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ████████████░░░░░░░░░░░░░░░░░░  Analyzing 8 interviews...              │
+│                                                                          │
+│  Transforming your validation evidence into a compelling story.         │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Loading State Messages** (cycle through):
+- "Analyzing 8 interviews..."
+- "Synthesizing experiment results..."
+- "Crafting your problem statement..."
+- "Building your traction story..."
+- "Generating slide content..."
+- "Finalizing your narrative..."
+
+**Celebratory First View**:
+
+After generation completes, the founder sees their narrative with guided highlights:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  YOUR PITCH NARRATIVE                                              v1   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Narrative generated from your validation evidence                      │
+│                                                                          │
+│  ┌─ What's in your narrative ──────────────────────────────────────────┐│
+│  │                                                                      ││
+│  │  [1] Problem           Based on 8 interview pain points             ││
+│  │  [2] Solution          Mapped to validated hypotheses               ││
+│  │  [3] Traction          3 experiments with measurable results        ││
+│  │  [4] Business Model    Derived from pricing experiment              ││
+│  │  ...                                                                 ││
+│  │                                                                      ││
+│  └──────────────────────────────────────────────────────────────────────┘│
+│                                                                          │
+│  [Preview Full Narrative]    [Edit & Personalize]                       │
+│                                                                          │
+│  Tip: Your narrative is already backed by evidence. Personalize it      │
+│  with your unique story and insights.                                   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Interaction Specification**:
+
+| Trigger | Action | Result |
+|---------|--------|--------|
+| Click "Generate My Pitch Narrative" | POST to `/api/narrative/generate` | Loading state, then celebratory view |
+| Generation completes | Redirect to narrative view | Show celebratory first-view overlay |
+| Click "Preview Full Narrative" | Navigate to `/projects/[id]/narrative` | Full 10-slide view |
+| Click "Edit & Personalize" | Navigate to narrative editor | Slide-by-slide editor |
+| Dismiss prompt card | Set `narrative_prompt_dismissed` flag | Card hidden until new trigger |
+
+**Error States**:
+
+| Error | Display | Recovery |
+|-------|---------|----------|
+| Insufficient evidence | "Add more validation evidence to generate a narrative" | Link to evidence collection |
+| Generation timeout | "Generation is taking longer than expected" | "Check back in a few minutes" link |
+| Generation failed | "We couldn't generate your narrative" | Retry button + support link |
+
+**Accessibility Notes**:
+- Progress bar has `aria-live="polite"` for screen reader updates
+- Loading messages announced via `aria-label` changes
+- Generate button disabled during loading with `aria-disabled="true"`
+- Focus management: after generation, focus moves to narrative preview
+
 ### Narrative Editor (Founder)
 
 ```
@@ -1650,7 +2072,7 @@ Alerting thresholds:
 │                                                                          │
 │  Editing: Slide 5 — Traction                                            │
 │                                                                          │
-│  ┌─── AI-Generated (baseline) ────────────────────────────────────────┐ │
+│  ┌─── Original AI draft ─────────────────────────────────────────────┐  │
 │  │ "8 customer interviews validated the core pain hypothesis.          │ │
 │  │  3 experiments completed with positive signals."                    │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
@@ -1663,15 +2085,15 @@ Alerting thresholds:
 │  │  prototype usability (4.2/5 score)."                               │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │                                                                          │
-│  Alignment Check: ✓ Verified                                            │
+│  Evidence match: ✓ All claims supported by your evidence                │
 │  Your edit adds context (who interviewees were, geographic focus)       │
 │  without overstating the evidence.                                      │
 │                                                                          │
-│  [Save Edit]  [Revert to Baseline]  [Cancel]                           │
+│  [Save Edit]  [Revert to Original]  [Cancel]                           │
 │                                                                          │
 │  ─── OR ───                                                             │
 │                                                                          │
-│  Alignment Check: ⚠ Flagged                                             │
+│  Evidence match: ⚠ Some claims may overstate your evidence              │
 │  Issue: Edit claims "strong demand" but DO-direct evidence count is 0. │
 │  Suggestion: Use "early positive signals" instead.                      │
 │                                                                          │
@@ -1679,6 +2101,95 @@ Alerting thresholds:
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Regeneration with Edit Preservation
+
+When founders click "Regenerate" after evidence changes, they need clarity about what happens to their edits. This section defines the UX for preserving founder customizations during regeneration.
+
+**The Problem**: Founders invest time personalizing their narrative. Regeneration could discard that work, creating frustration and distrust.
+
+**The Solution**: Give founders explicit control over what gets regenerated.
+
+**Regeneration Options**:
+
+| Option | Behavior | Use Case |
+|--------|----------|----------|
+| **Keep my edits** (default) | Only regenerate slides/sections without founder edits. Update evidence citations and metrics. | Most common - founder wants fresh data but keeps their voice |
+| **Regenerate everything** | Full regeneration from scratch. Previous version saved in history. | Founder wants a clean slate or made edits they regret |
+
+**Confirmation Dialog Wireframe**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  REGENERATE NARRATIVE                                                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  New evidence is available since your last generation:                   │
+│  - +2 customer interviews                                                │
+│  - +1 completed experiment (pricing test)                                │
+│  - Fit Score: 0.72 -> 0.78                                              │
+│                                                                          │
+│  ─── What would you like to regenerate? ────────────────────────────── │
+│                                                                          │
+│  ( ) Keep my edits, update evidence sections only                       │
+│      Your edits on 3 slides will be preserved.                          │
+│      AI-generated sections will be refreshed with new evidence.         │
+│                                                                          │
+│  ( ) Regenerate everything, I'll re-edit                                │
+│      Start fresh. Your current version (v4) will be saved in history.  │
+│                                                                          │
+│  ─── Preview of changes ─────────────────────────────────────────────── │
+│                                                                          │
+│  Slides that will change:                                                │
+│  [5] Traction        New experiment results will be added               │
+│  [8] Business Model  Pricing experiment data available                  │
+│                                                                          │
+│  Slides with your edits (preserved if "Keep my edits"):                 │
+│  [1] Overview        Your custom tagline                                │
+│  [3] Problem         Your founder story addition                        │
+│  [9] Team            Your background details                            │
+│                                                                          │
+│  [Cancel]                              [Regenerate]                     │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Interaction Specification**:
+
+| Trigger | Action | Result |
+|---------|--------|--------|
+| Click "Regenerate" button | Show confirmation dialog | Dialog appears with options |
+| Select "Keep my edits" | Set `preserve_edits: true` | Preview updates to show preserved slides |
+| Select "Regenerate everything" | Set `preserve_edits: false` | Preview shows all slides will change |
+| Click "Regenerate" in dialog | POST to `/api/narrative/regenerate` | Loading state, then updated view |
+| Click "Cancel" | Close dialog | No changes |
+
+**Technical Implementation**:
+
+When `preserve_edits: true`:
+1. Fetch all slides with `is_edited: true` from current narrative
+2. Generate new narrative from evidence
+3. For each edited slide:
+   - Keep founder's `content` field
+   - Update `evidence_refs` to new evidence IDs where applicable
+   - Keep `is_edited: true` flag
+4. For non-edited slides:
+   - Replace with newly generated content
+5. Increment version, save previous to history
+
+**Error States**:
+
+| Error | Display | Recovery |
+|-------|---------|----------|
+| Regeneration conflict | "Some evidence no longer supports your edits" | Show affected slides, offer to review |
+| No changes needed | "Your narrative is already up to date" | Close dialog |
+| Regeneration failed | "Regeneration failed" | Retry button, previous version preserved |
+
+**Accessibility Notes**:
+- Radio buttons are keyboard navigable
+- Preview section has `aria-label="Changes preview"`
+- Focus trapped within dialog until dismissed
+- Escape key closes dialog without action
 
 ### Narrative Version History (Founder)
 
@@ -1726,7 +2237,7 @@ Alerting thresholds:
 │                                                                          │
 │  Founder: Jane Doe | Fit Score: 0.82 | Stage: Solution Testing          │
 │  Connected: Jan 15, 2026 | Relationship: Capital                        │
-│  Narrative: Founder-edited · Alignment verified ✓                       │
+│  Narrative: Founder-edited · All claims supported ✓                       │
 │                                                                          │
 │  ┌─── [Pitch Narrative] ─── [Validation Evidence] ─── [Integrity] ──┐  │
 │  │                                                                    │  │
@@ -1792,6 +2303,16 @@ This prevents a critical UX failure mode: SAY evidence (interview quotes, survey
    - SAY: Quote marks (verbal claim, needs corroboration)
 4. **Position Hierarchy**: Evidence types always render in order: DO-direct first, DO-indirect second, SAY last
 5. **Weight Badges**: Always show evidence weight visually (e.g., `[1.0]`, `[0.8]`, `[0.3]`) so PHs understand the methodology's confidence in each type
+
+**Accessibility Requirements**:
+
+- Color must not be the only differentiator. Icons (checkmark, half-check, quote) and weight badges ([1.0], [0.8], [0.3]) provide non-color cues.
+- Verify color contrast meets WCAG AA standards:
+  - Green-600 on white: 3.2:1 (passes for large text, add bold)
+  - Blue-600 on white: 4.0:1 (passes AA)
+  - Gray-500 on white: 4.6:1 (passes AA)
+- Evidence weight badges must be visible by default, not only on hover.
+- Screen readers should announce evidence type and weight (e.g., "DO-direct evidence, weight 1.0, 3 paying customers")
 
 #### Traction Slide Layout Wireframe
 
@@ -1935,6 +2456,42 @@ narrative_integrity_check:
 
 ---
 
+## Success Metrics
+
+### Phase 1-2 Metrics (Founder Value)
+
+| Metric | Definition | Target | Data Source |
+|--------|------------|--------|-------------|
+| Narrative Generation Rate | narratives_generated / eligible_projects | >80% | `pitch_narratives` count |
+| Time-to-First-Narrative | Days from first evidence to narrative | <7 days | `created_at` timestamps |
+| Founder Edit Rate | edited_narratives / total_narratives | 30-60% | `pitch_narratives.is_edited` |
+| Alignment Pass Rate | verified / (verified + flagged) | >90% | `alignment_status` |
+| Regeneration Lag | Days from hard-stale to regeneration | <3 days | staleness timestamps |
+
+### Phase 3-4 Metrics (Marketplace Value)
+
+| Metric | Definition | Target | Data Source |
+|--------|------------|--------|-------------|
+| Package-to-Connection | Connections from package views | >5% | `evidence_package_access` joins |
+| Verification Conversion | Connections from external PDF | >2% | `verification_token_used` |
+| PH Engagement Depth | Avg tabs viewed per access | >2.0 | `package_engagement_events` |
+| Evidence Tab Usage | % of accesses viewing Evidence tab | >40% | `package_engagement_events` |
+| Slide Attention Distribution | Views per slide (identify drop-off) | Even distribution | `slide_view` events |
+
+### Funnel Definitions
+
+**Narrative Generation Funnel**:
+```
+Evidence Threshold Met -> Generation Started -> Generation Completed -> First View -> First Edit -> Package Created -> Package Shared
+```
+
+**PH Evidence Consumption Funnel**:
+```
+Package Access -> Pitch Tab View -> Evidence Tab View -> Integrity Tab View -> PDF Export -> Connection Request
+```
+
+---
+
 ## Validation Requirements
 
 ### Assumption Sequence
@@ -1980,6 +2537,87 @@ This feature introduces two new assumptions to validate before build:
 | **We are wrong if** | <4 of 8 rate value ≥4/5 OR <3 prefer dual-format                                                                                  |
 | **Time bound**      | 2 weeks (concurrent with A9 interviews)                                                                                           |
 
+#### T1: Staleness Detection Accuracy
+
+| Field | Value |
+|-------|-------|
+| **We believe** | Database triggers correctly detect evidence changes and set appropriate staleness severity |
+| **To verify** | Automated test suite covering all trigger scenarios |
+| **We measure** | Trigger accuracy (correct state transitions), latency (time from change to stale flag), false positive/negative rates |
+| **We are right if** | 100% correct state transitions, <1s trigger latency, 0 false negatives |
+| **We are wrong if** | Any false negative (stale narrative served as fresh) or trigger latency >5s |
+| **Test type** | Integration test (database) |
+| **Time bound** | Must pass before Phase 1 launch |
+
+**Test scenarios**:
+- Insert new evidence → soft stale
+- Update hypothesis status to 'invalidated' → hard stale
+- Fit Score change >0.1 → hard stale
+- Fit Score change <0.1 → soft stale (no upgrade)
+- Gate passage → hard stale
+- Multiple soft changes → remains soft (no auto-escalation)
+
+#### T2: Guardian Alignment Check Accuracy
+
+| Field | Value |
+|-------|-------|
+| **We believe** | Guardian correctly identifies narrative edits that contradict or overstate evidence |
+| **To verify** | Unit test suite with known contradiction scenarios |
+| **We measure** | True positive rate (catches contradictions), false positive rate (blocks valid edits) |
+| **We are right if** | ≥95% true positive rate, ≤5% false positive rate |
+| **We are wrong if** | <90% true positive OR >10% false positive |
+| **Test type** | Unit test (Guardian prompt + claim-language mapping) |
+| **Time bound** | Must pass before Phase 2 launch |
+
+**Test scenarios**:
+- Edit claims "strong demand" with 0 DO-direct evidence → flagged
+- Edit claims "positive indicators" with 0 DO-direct evidence → verified
+- Edit adds founder context without changing claims → verified
+- Edit removes qualifier ("some interest" → "strong interest") → flagged
+- Edit with Fit Score 0.8+ using "proven demand" → verified
+
+### E2E Test Structure
+
+**New test file**: `frontend/tests/e2e/42-narrative-layer.spec.ts`
+
+```typescript
+// Phase 1: Narrative Generation
+test.describe('Narrative Generation', () => {
+  test('founder sees prompt when evidence threshold met');
+  test('founder generates narrative and sees all 10 slides');
+  test('founder exports PDF with verification footer');
+  test('public verification URL returns valid status');
+  test('narrative shows soft stale after new evidence added');
+});
+
+// Phase 2: Evidence Packages & Editing
+test.describe('Evidence Packages', () => {
+  test('founder enables sharing consent');
+  test('founder previews package as Portfolio Holder');
+  test('PH views dual-format tabs');
+  test('PH sees correct provenance badges');
+});
+
+test.describe('Narrative Editing', () => {
+  test('founder edits field and sees pending status');
+  test('alignment check completes and shows verified');
+  test('overstatement edit shows flagged status');
+  test('version history shows edit diff');
+});
+
+// Phase 3: Marketplace Integration
+test.describe('Marketplace Integration', () => {
+  test('PH requests more evidence from founder');
+  test('founder receives and acts on feedback');
+  test('verification endpoint rate limits excessive requests');
+});
+```
+
+**Anti-patterns to avoid** (per TESTING-GUIDELINES.md):
+- No `waitForTimeout()` - use explicit waitFor conditions
+- No permissive `if (visible)` guards - assert expected state
+- Each test creates fresh data - no inter-test dependencies
+
 ### Evidence Gate for Build
 
 | Evidence Type             | Requirement                                              | Weight            |
@@ -1998,6 +2636,11 @@ This feature introduces two new assumptions to validate before build:
 
 _Aligned with: Portfolio Holder Vision Phase 1 (Founder Launch)_
 
+- [ ] **Infrastructure setup**
+  - [ ] Provision Upstash Redis instance
+  - [ ] Add UPSTASH_* env vars to Netlify (all contexts)
+  - [ ] Install `@react-pdf/renderer` and `qrcode` packages
+  - [ ] Verify PDF generation works in Netlify Functions (test memory/timeout)
 - [ ] Add `founder_profiles` table to Supabase
 - [ ] Add `pitch_narratives` table with editing provenance fields
 - [ ] Add `narrative_versions` table for version history
@@ -2009,6 +2652,11 @@ _Aligned with: Portfolio Holder Vision Phase 1 (Founder Launch)_
 - [ ] Add PDF export with verification footer (URL + QR code)
 - [ ] Implement `/api/verify/{hash}` public endpoint
 - [ ] Validate A11 (Founder Narrative Value) concurrent with A6 interviews
+- [ ] **Dogfooding checkpoint**: Before Phase 1 launch
+  - [ ] Generate narrative for chris00walker@proton.me test founder account
+  - [ ] Export PDF and verify verification URL resolves
+  - [ ] Preview evidence package as consultant account
+  - [ ] Document any UX friction for iteration
 
 ### Phase 2: Evidence Packages + Editing (Weeks 4-6)
 
@@ -2040,6 +2688,9 @@ _Aligned with: Portfolio Holder Vision Phase 3 (Capital Tier + Marketplace)_
 - [ ] JSON API export for Capital tier PHs
 - [ ] Build narrative version history UI (`GET /api/narrative/:id/versions`)
 - [ ] Implement version diff view (`GET /api/narrative/:id/versions/:version/diff`)
+- [ ] Implement `narrative_funnel_events` tracking
+- [ ] Implement `package_engagement_events` tracking
+- [ ] Build founder analytics dashboard (narrative versions, edit history)
 
 ### Phase 4: Feedback Loop + Learning (Weeks 11-14)
 
@@ -2053,6 +2704,76 @@ _Aligned with: Portfolio Holder Vision Phase 4 (Institutional Tier)_
 - [ ] Add narrative evolution insights ("Your Traction slide improved after adding DO evidence")
 - [ ] Build comparative context feature (Fit Score in context of stage/industry)
 - [ ] Add PH-specific slide highlighting based on investment profile
+- [ ] Build marketplace analytics dashboard
+- [ ] Implement cohort analysis (early vs late narrative generators)
+- [ ] Add verification-to-connection conversion tracking
+- [ ] A/B test evidence visual hierarchy effectiveness
+
+---
+
+## Infrastructure Requirements
+
+### New Dependencies
+
+| Dependency | Purpose | Phase Required |
+|------------|---------|----------------|
+| Upstash Redis | Rate limiting for `/api/verify` endpoint | Phase 1 |
+| PDF generation library | Export pitch deck as PDF | Phase 1 |
+| QR code library | Verification QR on PDF footer | Phase 1 |
+
+### Environment Variables
+
+Add to Netlify environment (all contexts):
+
+| Variable | Description | Required By |
+|----------|-------------|-------------|
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis endpoint | Phase 1 |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis auth token | Phase 1 |
+
+### PDF Generation Strategy
+
+**Decision required**: Choose PDF generation approach before Phase 1 implementation.
+
+| Option | Pros | Cons | Recommendation |
+|--------|------|------|----------------|
+| `@react-pdf/renderer` | Lightweight, runs in serverless | Limited styling control | **Recommended for Phase 1** |
+| Puppeteer/Playwright | Full CSS support | Memory-intensive (1GB+), slow | Phase 4 if needed |
+| Modal endpoint | Offloads to existing infra | Cross-repo coordination | Alternative if React-PDF insufficient |
+
+**Phase 1 approach**: Use `@react-pdf/renderer` with `qrcode` package for verification QR. If styling limitations become blockers, escalate to Modal-based generation in Phase 2.
+
+### Database Migration Ordering
+
+Migrations must be applied in this order:
+
+1. `ALTER TABLE projects ADD COLUMN narrative_is_stale...` (add columns to projects)
+2. `CREATE TABLE founder_profiles...`
+3. `CREATE TABLE pitch_narratives...`
+4. `CREATE TABLE narrative_versions...`
+5. `CREATE TABLE evidence_packages...`
+6. `CREATE TABLE evidence_package_access...`
+7. `CREATE FUNCTION mark_narrative_stale()...` (create trigger function)
+8. `CREATE TRIGGER...` (attach triggers - must come after function and target tables exist)
+9. `CREATE INDEX...` (create indexes last)
+
+**Rollback plan**: If staleness triggers cause performance issues:
+```sql
+-- Emergency rollback
+DROP TRIGGER IF EXISTS evidence_change_stales_narrative ON evidence;
+DROP TRIGGER IF EXISTS hypothesis_change_stales_narrative ON hypotheses;
+-- ... (drop all triggers)
+DROP FUNCTION IF EXISTS mark_narrative_stale();
+```
+
+### Cross-Repo Coordination
+
+Add to `docs/work/cross-repo-blockers.md`:
+
+| Blocker | Repo | Description | Required By |
+|---------|------|-------------|-------------|
+| `narrative_synthesis` run type | startupai-crew | Add to Modal `/kickoff` endpoint | Phase 1 |
+| `evidence_package_task` | startupai-crew | Add to Report Compiler | Phase 2 |
+| `narrative_integrity_check` | startupai-crew | Add to Guardian | Phase 2 |
 
 ---
 
@@ -2097,9 +2818,9 @@ Founder editing serves a legitimate purpose: adding **context and voice** that t
 
 | Badge | Meaning | Color |
 |-------|---------|-------|
-| "AI-generated" | Unmodified baseline | Neutral |
-| "Founder-edited · Alignment verified" | Edits pass Guardian check | Green |
-| "Founder-edited · Review flagged" | Edits diverge from evidence | Amber |
+| "AI-generated" | Unmodified original AI draft | Neutral |
+| "Founder-edited · All claims supported" | Edits pass Guardian check | Green |
+| "Founder-edited · Review suggested" | Edits diverge from evidence | Amber |
 
 The amber flag doesn't imply fraud — it signals the PH should review the Evidence tab to understand what context the founder added. This preserves founder agency while maintaining PH trust.
 
