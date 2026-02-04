@@ -278,8 +278,9 @@ export function useBMC(options: UseBMCOptions = {}): UseBMCResult {
 
   // Derived values
   const hasData = !!bmc;
-  const dataSource: BMCSource =
-    (bmc as unknown as { data_source?: BMCSource }).data_source || bmc?.dataSource || 'crewai';
+  const dataSource: BMCSource = bmc
+    ? ((bmc as unknown as { data_source?: BMCSource }).data_source || bmc.dataSource || 'crewai')
+    : 'crewai';
 
   return {
     bmc,
