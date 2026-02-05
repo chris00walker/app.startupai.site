@@ -10,23 +10,24 @@
 2. [Design Rationale](#design-rationale)
 3. [Problem Statement](#problem-statement)
 4. [The 10-Slide Narrative Framework](#the-10-slide-narrative-framework)
-5. [Narrative Layer Architecture](#narrative-layer-architecture)
-6. [Database Schema Additions](#database-schema-additions)
-7. [API Contracts](#api-contracts)
-8. [Friendship Loop Integration](#friendship-loop-integration)
-9. [Dual-Format Evidence Package Design](#dual-format-evidence-package-design)
-10. [Evidence Integrity System](#evidence-integrity-system)
-11. [Frontend Components](#frontend-components)
-12. [CrewAI Report Compiler Modifications](#crewai-report-compiler-modifications)
-13. [Validation Requirements](#validation-requirements)
-14. [Implementation Roadmap](#implementation-roadmap)
-15. [Design Considerations](#design-considerations)
-16. [Resolved Design Questions](#resolved-design-questions)
-17. [Open Questions](#open-questions)
-18. [Decision Log](#decision-log)
-19. [Glossary](#glossary)
-20. [References](#references)
-21. [Changelog](#changelog)
+5. [Beyond Architecture: Story, Design, and Text](#beyond-architecture-story-design-and-text)
+6. [Narrative Layer Architecture](#narrative-layer-architecture)
+7. [Database Schema Additions](#database-schema-additions)
+8. [API Contracts](#api-contracts)
+9. [Friendship Loop Integration](#friendship-loop-integration)
+10. [Dual-Format Evidence Package Design](#dual-format-evidence-package-design)
+11. [Evidence Integrity System](#evidence-integrity-system)
+12. [Frontend Components](#frontend-components)
+13. [CrewAI Report Compiler Modifications](#crewai-report-compiler-modifications)
+14. [Validation Requirements](#validation-requirements)
+15. [Implementation Roadmap](#implementation-roadmap)
+16. [Design Considerations](#design-considerations)
+17. [Resolved Design Questions](#resolved-design-questions)
+18. [Open Questions](#open-questions)
+19. [Decision Log](#decision-log)
+20. [Glossary](#glossary)
+21. [References](#references)
+22. [Changelog](#changelog)
 
 ---
 
@@ -646,6 +647,188 @@ _Note: Some entrepreneurs like to create slides with exit strategies, acquisitio
 **Narrative function**: The closing slide — show the investor exactly what their capital buys. Framed as validation experiments, not vague "product development" buckets. Placed last because the ask is most compelling _after_ the investor knows the team (Slide 9) and has full context.
 
 **Key innovation**: Traditional "use of funds" slides show pie charts. StartupAI's version shows a **validation experiment roadmap** — each dollar maps to a specific hypothesis being tested, with clear success/failure criteria. This demonstrates founder rigor.
+
+---
+
+### Beyond Architecture: Story, Design, and Text
+
+The 10 essential slides are the building blocks — the architecture of a pitch deck. Most entrepreneurs stop there. But the key elements that transform a deck from a lifeless document that fails to inspire into one of a founder's biggest assets are: **story**, **design**, and **text**.
+
+For perspective, a founder may spend 25% of their time on the architecture and the remaining 75% on these components that really differentiate their deck.
+
+_Note: This section covers Story. Design and Text guidance will be added in future versions._
+
+---
+
+#### Story
+
+Stories explain, captivate, disturb, and inspire. They can tell us there is something very, very wrong, and they can give us a vision for what we never thought possible. Great stories are about what's true inside all of us. That's what makes them work.
+
+Entrepreneurship is about telling a story that connects the deep needs of a group of people with a repeatable solution. For the founder's deck, stories are the fabric that stitches everything together.
+
+**Three primary uses of story in a pitch:**
+
+1. **To create a narrative arc** that ties your slide deck together
+2. **To explain one or more of your slides** with concrete examples
+3. **To have as a reservoir** of things to discuss and ways to respond to questions during a conversation
+
+Without the elements of story, your deck is just a bunch of boring slides — whether you're presenting in person or sending the deck to someone to read.
+
+---
+
+#### The Four Story Archetypes
+
+##### 1. The Origin Story
+
+The founder's personal journey to this venture.
+
+**Elements:**
+
+1. You're living life as normal, unaware of anything wrong with the world
+2. Suddenly, you have an epiphany and feel a call to adventure
+3. You accept the challenge and take bold action
+4. That action gives you a new sense of purpose
+
+**Best for:**
+- Products or services with high social benefit
+- **Effect**: Taps into the audience's desire for meaning
+
+**Maps to slides**: Cover, Team
+
+---
+
+##### 2. The Customer Story
+
+A specific person's transformation through your product.
+
+**Elements:**
+
+1. Meet Joe. Joe has a problem. This problem really bothers Joe
+2. Joe tried this and this, but no matter what he does he can't solve his problem
+3. Until, one day, Joe finds [your amazing product]
+4. Now Joe is so happy, he tells all his friends. Don't you want to be like Joe?
+
+**Best for:**
+- Complex products or services
+- Customers with dramatic transformation stories
+- **Effect**: Explains your venture and its value
+
+**Maps to slides**: Problem, Solution
+
+---
+
+##### 3. The Industry Story
+
+How market shifts create your opportunity.
+
+**Elements:**
+
+1. For a long time, the industry has operated according to a set of assumptions based on the environment it grew up within
+2. As a result of specific social, technological, or economic factors, those assumptions are no longer holding true, creating problems for the big players in the industry
+3. This change creates a unique opportunity for someone to step in and take advantage of these new circumstances
+
+**Best for:**
+- Disruptive products or services
+- **Effect**: Shows you know what you are talking about and that the idea could be huge
+
+**Maps to slides**: Opportunity
+
+---
+
+##### 4. The Venture Growth Story
+
+Your traction and momentum.
+
+**Elements:**
+
+1. We took action
+2. We got results. We learned from those results and took more action
+3. This resulted in unbelievable progress
+4. For as much progress that has already been made, the vision for what we can do is bigger
+
+**Best for:**
+- Ventures with immediate traction
+- **Effect**: Feels like you're on a train headed somewhere big
+
+**Maps to slides**: Competition, Business Model, Traction, Use of Funds
+
+---
+
+#### What Makes a Great Story?
+
+**1. Things happen**
+
+For a story to be a story, things have to happen. Static descriptions aren't stories — they're exposition. Events, actions, and consequences are what drive narrative forward.
+
+**2. Vivid sensory details**
+
+If you want to tell a story, you must start where human knowledge begins: with the senses. As highly educated adults, we like to speak in abstractions — focusing on ideas, concepts, and complex emotions that are the result of thousands of years of philosophy. But to get your audience's attention, you must literally put them into the scene:
+
+- Let them **see** what you see
+- Let them **feel** what you feel
+- Let them **hear** what you hear
+
+The more vivid the details in your story, the more likely they will stick in the mind of your audience.
+
+**3. Conflict**
+
+Life is about struggle, and stories should be, too. If there is no conflict in your story, the audience won't have anyone to root for. The point of the story is to get people to care.
+
+---
+
+#### Using Story to Craft the Arc of Your Pitch
+
+You'll need to choose how to arrange the stories and slides in your pitch. By leading with the stories and aspects of your venture that are the strongest, you can align your stories in a way that creates an interesting arc and captures the audience's attention.
+
+**Story-to-Slide Mapping:**
+
+| Story Type | Slides | When to Lead With |
+|------------|--------|-------------------|
+| Origin Story | Cover, Team | High social benefit ventures |
+| Industry Story | Opportunity | Disruptive products/services |
+| Customer Story | Problem, Solution | Complex products, dramatic transformations |
+| Venture Story | Competition, Business Model, Traction, Use of Funds | Strong immediate traction |
+
+**Example Arc (Origin-Led):**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  ORIGIN STORY                                                   │
+│  1. Cover — Set the tone with founder's "why"                   │
+│  2. Team — The people behind the purpose                        │
+├─────────────────────────────────────────────────────────────────┤
+│  INDUSTRY STORY                                                 │
+│  3. Opportunity — Market shifts that make this possible         │
+├─────────────────────────────────────────────────────────────────┤
+│  CUSTOMER STORY                                                 │
+│  4. Problem — Meet the person suffering                         │
+│  5. Solution — Their transformation                             │
+├─────────────────────────────────────────────────────────────────┤
+│  VENTURE STORY                                                  │
+│  6. Competition — Our position in the landscape                 │
+│  7. Traction — Evidence of momentum                             │
+│  8. Business Model — How we make money                          │
+│  9. Customer — Who we serve (ties back to Customer Story)       │
+│  10. Use of Funds — The next chapter                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### StartupAI Story Generation
+
+StartupAI's narrative layer can assist with story generation by:
+
+1. **Origin Story**: Prompting founders for their epiphany moment during onboarding, capturing the "call to adventure"
+2. **Customer Story**: Synthesizing interview evidence into a specific customer narrative (with founder approval for using real names/details)
+3. **Industry Story**: Using Pulse market sensing data to identify the assumption shifts and macro trends
+4. **Venture Story**: Assembling traction evidence into a momentum narrative
+
+**Schema support**: The `customer_story` field in the Problem slide schema directly supports the Customer Story archetype. The `why_now` field in Opportunity supports the Industry Story.
+
+**HITL checkpoint**: Story content should be reviewed by founders before publication — these are deeply personal and strategic choices about how to present the venture.
+
+---
 
 #### Pivot Narrative Handling
 
