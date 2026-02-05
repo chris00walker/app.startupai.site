@@ -241,12 +241,23 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 #### Cover (Title Card — precedes the essential ten)
 
-| Field           | Source                             | Generation Method                             |
-| --------------- | ---------------------------------- | --------------------------------------------- |
-| Venture Name    | `entrepreneur_briefs.company_name` | Direct pull                                   |
-| Tagline         | Sage synthesis                     | NEW: Generate from VPC core value proposition |
-| Visual Identity | Founder upload or AI-generated     | Optional; placeholder if absent               |
-| Contact Info    | `user_profiles`                    | Direct pull                                   |
+**Purpose**: Capture attention, set the tone, and create "white space" for the founder to express gratitude, show passion, and mention mutual connections during a live pitch.
+
+| Field             | Source                             | Generation Method                             |
+| ----------------- | ---------------------------------- | --------------------------------------------- |
+| Venture Name      | `entrepreneur_briefs.company_name` | Direct pull                                   |
+| Tagline           | Sage synthesis                     | Generate from VPC core value proposition      |
+| Logo              | Founder upload                     | Optional; placeholder pattern if absent       |
+| Hero Image        | Founder upload                     | Optional; product/customer in action          |
+| Document Type     | Fixed value                        | "Investor Briefing" (default)                 |
+| Presentation Date | Generated                          | Current date when narrative generated         |
+| Contact Info      | `user_profiles` + `founder_profiles` | Direct pull (email, LinkedIn, website)      |
+
+**Quality Checks** (per *Get Backed*):
+- Does the cover make you want to open the pitch deck?
+- Does the cover visual communicate what the product is or who it serves?
+- Is the logo clean and professional (the "face of the brand")?
+- Is there an inviting picture of the product or customer?
 
 **Narrative function**: First impression. Must communicate "what we do" in ≤10 words. This is the title card — it sets the stage but is not counted among the essential ten.
 
@@ -260,71 +271,175 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 #### Slide 1: Overview
 
-| Field                | Source           | Generation Method                         |
-| -------------------- | ---------------- | ----------------------------------------- |
-| One-paragraph thesis | Sage synthesis   | NEW: 3-sentence narrative arc             |
-| Key metrics snapshot | Validation Agent | Pull top 3 evidence data points           |
-| Ask (if applicable)  | Founder input    | Optional field in onboarding or dashboard |
+**Purpose**: Your "elevator pitch" — the fifteen-second version of your deck. It describes a problem you see in the world and how you are going to solve it. Give your audience a small taste of what your company does, but leave them hungry for more.
 
-**Narrative function**: The "elevator pitch" — the entire story in 30 seconds. This is the single slide an investor reads if they read nothing else.
+| Field                | Source              | Generation Method                                  |
+| -------------------- | ------------------- | -------------------------------------------------- |
+| `one_liner`          | Sage synthesis      | Single sentence: "We do X for Y by Z"              |
+| `thesis`             | Sage synthesis      | 3-sentence narrative arc (Problem → Solution → Evidence) |
+| `industry`           | Founder input       | What industry are you in?                          |
+| `novel_insight`      | Sage synthesis      | What's unique/audacious about this approach?       |
+| `key_metrics`        | Validation Agent    | Top 3 evidence data points (traction proof)        |
+| `ask` (optional)     | Founder input       | Amount, instrument, use summary                    |
+
+**What to demonstrate**:
+
+1. **Clarity** — It should be extremely easy to understand what the company does.
+2. **Swagger** — Startups are bold, audacious undertakings. Your summary of the venture should demonstrate that you have the energy and the confidence to take on something big.
+3. **Passion** — If you don't care about what you're doing, no one else will.
+
+**Quality checks** (questions this slide must answer):
+
+- What exactly does your company do? → `one_liner` answers this
+- What industry are you in? → `industry` field
+- Is this a novel idea? → `novel_insight` field
 
 **Structure**: [Problem in the world] → [Our unique approach] → [Evidence it works] → [What we need next].
 
-**Generation prompt context**: Sage synthesizes across all agent outputs to produce a 3-sentence thesis. Sentence 1 = problem severity (from Pulse). Sentence 2 = solution uniqueness (from Forge + VPC). Sentence 3 = traction evidence (from Validation Agent DO-data).
+**Generation prompt context**: Sage synthesizes across all agent outputs:
+
+- `one_liner`: Extremely clear single sentence distilling the entire venture
+- `thesis` Sentence 1 = problem severity (from Pulse)
+- `thesis` Sentence 2 = solution uniqueness (from Forge + VPC)
+- `thesis` Sentence 3 = traction evidence (from Validation Agent DO-data)
+- `novel_insight`: What makes this approach different from obvious solutions?
 
 #### Slide 2: Opportunity
 
+**Purpose**: The 40,000-foot picture of your product's space. Describe your industry and how your business will work within it — trends, market size, and growth potential. You want investors to see the trends and market conditions that will give you an entrance into the market and a competitive position. If your audience agrees with you on how things actually are right now, they will be open to the particular problems and solutions you describe.
+
 | Field                    | Source               | Generation Method                            |
 | ------------------------ | -------------------- | -------------------------------------------- |
-| TAM / SAM / SOM          | Pulse market sensing | Market sizing data                           |
-| Market growth trajectory | Pulse                | Growth rate + timing                         |
-| Why now                  | Sage synthesis       | Macro trends enabling this venture           |
-| Market tailwinds         | Pulse                | Regulatory, technological, behavioral shifts |
+| `tam`                    | Pulse market sensing | Total Addressable Market                     |
+| `sam`                    | Pulse market sensing | Serviceable Addressable Market               |
+| `som`                    | Pulse market sensing | Serviceable Obtainable Market                |
+| `growth_rate`            | Pulse                | Market growth trajectory (%)                 |
+| `why_now`                | Sage synthesis       | Macro trends enabling this venture           |
+| `market_tailwinds`       | Pulse                | Regulatory, technological, behavioral shifts |
+| `market_confusion`       | Pulse + Sage         | Ambiguity/fragmentation creating opportunity |
 
-**Narrative function**: Show the investor the _size and timing_ of the opportunity. This is the "is this market big enough to matter?" slide. Separated from Customer (Slide 6) because Opportunity answers "how big?" while Customer answers "for whom?"
+**What to demonstrate**:
+
+1. **Explosive market sectors** — By explosive, we mean growing very, very fast. The faster your market is growing, the bigger the opportunity for your venture will be.
+2. **Confusion and ambiguity in the market** — A lack of clarity allows ventures to easily differentiate themselves from others.
+3. **Thoroughness** — This slide is proof that you have done some serious research and really understand the market better than your audience does.
+
+**Quality checks** (questions this slide must answer):
+
+- What trends is your company riding? → `why_now`, `market_tailwinds`
+- How big is the market? → `tam`, `sam`, `som`
+- How big can your company be? → `som` + `growth_rate`
+- What are the macro- and micro-trends that your company will be riding? → `market_tailwinds`
 
 **Data source detail**:
 
 - `market_sensing.tam`, `market_sensing.sam`, `market_sensing.som` → market sizing
 - `market_sensing.growth_rate` → trajectory
 - Sage synthesizes macro context from Pulse market data into a "why now" narrative
+- Pulse identifies market fragmentation/confusion that creates differentiation opportunity
 
 #### Slide 3: Problem
 
-| Field                  | Source                    | Generation Method                 |
-| ---------------------- | ------------------------- | --------------------------------- |
-| Primary customer pain  | `customer_profiles.pains` | Top-ranked pain by severity       |
-| Pain severity evidence | Validation Agent          | Interview quotes, behavioral data |
-| Market context         | Pulse                     | Market size affected by this pain |
-| Status quo alternative | Competitor Analyst        | Current workaround or competitor  |
+**Purpose**: Entrepreneurship, at its core, is about solving problems. The bigger the problem, the better. Describe the problem you are solving and how and why that problem is painful. Your audience should feel as if an injustice has been done. In a meeting, you'll know if your problem hits home when investors begin nodding their heads in agreement.
 
-**Narrative function**: Make the investor _feel_ the problem. Data proves it exists; narrative makes it urgent.
+Describe the problem at a high level first and then quickly transition to a specific story of a customer to make the problem personal. People don't empathize with big, general problems; they empathize with the struggles of specific people with names and faces.
+
+_Note: Not all companies solve new problems; some focus on solving age-old problems in a way that changes customer preferences (apparel, restaurants, consumer goods). For these ventures, focus more on Opportunity (Slide 2) rather than Problem._
+
+| Field                  | Source                    | Generation Method                      |
+| ---------------------- | ------------------------- | -------------------------------------- |
+| `primary_pain`         | `customer_profiles.pains` | Top-ranked pain by severity            |
+| `pain_narrative`       | Sage synthesis            | High-level description of the injustice |
+| `affected_population`  | Pulse + Validation        | Large, specific number of people affected |
+| `customer_story`       | Validation Agent          | Specific person's experience (name, face, struggle) |
+| `why_exists`           | Sage synthesis            | Root cause — why does this problem persist? |
+| `status_quo`           | Competitor Analyst        | How is it currently being addressed?   |
+| `severity_evidence`    | Validation Agent          | Interview quotes, behavioral data      |
+
+**What to demonstrate**:
+
+1. **A big problem in a big market** — Provide a very large and specific number of people who feel the pain of this problem every day.
+2. **Deep understanding** — Confidently and empathetically display how well you understand the complex market dynamics surrounding the problem.
+3. **A specific person** — Consider presenting the problem by telling a short story of a real person and how he/she experiences the problem.
+
+**Quality checks** (questions this slide must answer):
+
+- What is the problem? → `primary_pain`, `pain_narrative`
+- How big is the problem? → `affected_population`
+- Why does the problem exist? → `why_exists`
+- How is the problem currently being addressed? → `status_quo`
 
 **Data source detail**:
 
 - `customer_profiles.pains[]` → ranked by severity score
 - `evidence[]` where `evidence_type = 'interview'` → pull verbatim quotes illustrating pain
 - `gate_scores.desirability` → quantified pain validation score
+- Customer story synthesized from interview evidence with real names/details (with founder approval)
 
 #### Slide 4: Solution
 
+**Purpose**: By this point, you and your audience agree on what is happening in the industry and you have introduced a huge problem. Now, it is time to pull out all the stops. Show them your magic, your one-of-a-kind solution to the problem. You want the investors to marvel at it.
+
+Develop use cases to demonstrate how your customer will be delighted with your solution. Make your solution as realistic and interactive as possible. Short (1-3 minute) videos, illustrations, screenshots, pictures, prototypes, samples, sketches, or demos are all great ways to show rather than tell your solution.
+
+**Never use bullet points for your solution slide!**
+
 | Field                       | Source             | Generation Method                          |
 | --------------------------- | ------------------ | ------------------------------------------ |
-| Value proposition statement | VPC                | Pain Relievers + Gain Creators → narrative |
-| How it works                | Forge feasibility  | Technical approach in plain language       |
-| Key differentiator          | Competitor Analyst | Unique positioning vs. alternatives        |
-| Fit Score                   | Validation Agent   | `fit_scores.problem_solution_fit`          |
+| `value_proposition`         | VPC                | Pain Relievers + Gain Creators → narrative |
+| `how_it_works`              | Forge feasibility  | Technical approach in plain language       |
+| `key_differentiator`        | Competitor Analyst | Unique positioning vs. alternatives        |
+| `use_cases`                 | Validation Agent   | Real customer delight scenarios            |
+| `demo_assets`               | Founder input      | URLs to videos, screenshots, prototypes    |
+| `ip_defensibility`          | Founder input      | Patents, trade secrets, moats              |
+| `fit_score`                 | Validation Agent   | `fit_scores.problem_solution_fit`          |
+
+**What to demonstrate**:
+
+1. **Beauty** — There should be an element of elegance to your solution. It should feel like the way things should be.
+2. **Surprise** — Your solution should feel like nothing your audience has ever seen.
+3. **Repeatable and Scalable** — It should be evident that what you are building can be replicated across the market.
+4. **Solving something painful** — It should be clear that your solution relieves a persistent pain point the customer currently experiences.
+5. **Team excellence** — This is your chance to brag and show off that you have an awesome team that has built something that delights.
+
+**Quality checks** (questions this slide must answer):
+
+- Does it solve the customer's problems like magic? → `value_proposition`, `use_cases`
+- Is the customer going to crave this product? → `use_cases`, `demo_assets`
+- What will the customer's life be like once the problem is solved? → `use_cases`
+- How are you going to pull this off? → `how_it_works`, `ip_defensibility`
+- Is it awesome? → `demo_assets`, overall presentation
 
 **Narrative function**: Show how the solution directly addresses the problem from Slide 3. The connection must be explicit and evidence-backed.
 
 #### Slide 5: Traction
 
+**Purpose**: Demonstrate that each of your assumptions about the venture is proving true and you are making significant progress. The most common way to show traction is through growing sales or users — the "hockey-stick" graph — but you can also focus on other key metrics you have identified.
+
+Investors don't want to feel that a venture needs them. Traction helps convince an investor that the idea is going to be a success no matter what.
+
+_Note: If you are pre-product and don't have meaningful milestones or metrics, use this slide to illustrate your sales and marketing strategy instead._
+
 | Field                    | Source             | Generation Method                      |
 | ------------------------ | ------------------ | -------------------------------------- |
-| DO-evidence (behavioral) | Validation Agent   | Signup rates, LOIs, usage data         |
-| Experiment results       | Validation Agent   | Completed experiments + outcomes       |
-| Interview count          | Evidence table     | Count of `evidence_type = 'interview'` |
-| HITL checkpoint progress | Approval workflows | Checkpoints completed / total          |
+| `growth_metrics`         | Validation Agent   | Key metrics with trend data (hockey-stick) |
+| `do_evidence`            | Validation Agent   | Signup rates, LOIs, usage data         |
+| `assumptions_validated`  | Validation Agent   | Which assumptions are proving true     |
+| `experiment_results`     | Validation Agent   | Completed experiments + outcomes       |
+| `sales_process`          | Founder input      | How you attract, educate, qualify, close, service |
+| `hitl_progress`          | Approval workflows | Checkpoints completed / total          |
+
+**What to demonstrate**:
+
+1. **A pattern of fast-growing momentum** — The hockey-stick graph. Show acceleration, not just growth.
+2. **Clarity around what you are measuring and why it matters** — Don't just show numbers; explain why these metrics prove the business works.
+3. **A clear sales process** — How you attract, educate, qualify, close, and provide after-sale service for your customers.
+
+**Quality checks** (questions this slide must answer):
+
+- Is there massive growth? → `growth_metrics`
+- Where are the venture's assumptions proving true? → `assumptions_validated`, `experiment_results`
+- What is the strategy to reach and close more customers? → `sales_process`
 
 **Narrative function**: This is StartupAI's **killer differentiator**. Traditional pitch decks claim traction with vanity metrics. StartupAI provides methodology-verified behavioral evidence. The narrative must frame this distinction explicitly.
 
@@ -336,12 +451,32 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 #### Slide 6: Customer
 
-| Field                  | Source              | Generation Method                   |
-| ---------------------- | ------------------- | ----------------------------------- |
-| Customer segments      | `customer_profiles` | Segment definitions from onboarding |
-| Customer persona       | Customer Profile    | Jobs-to-be-done summary             |
-| Behavioral insights    | Validation Agent    | Interview-derived patterns          |
-| Segment prioritization | Sage synthesis      | Which segment first and why         |
+**Purpose**: Demonstrate how well you know your customers and the market they represent. Describe where they live, what they like to do, and how much they'd be willing to spend. If you already have sales, use those as examples. Also describe the market — how many potential customers are out there who will want to buy your product.
+
+| Field                  | Source              | Generation Method                        |
+| ---------------------- | ------------------- | ---------------------------------------- |
+| `customer_persona`     | Customer Profile    | Describe the person (reminds of someone they know) |
+| `demographics`         | Customer Profile    | Where they live, what they do            |
+| `willingness_to_pay`   | Validation Agent    | How much they'd spend                    |
+| `market_size`          | Pulse               | How many people fit this description     |
+| `target_percentage`    | Sage synthesis      | What % you expect to buy, who you target first |
+| `acquisition_channel`  | Founder input       | How will you reach them?                 |
+| `acquisition_cost`     | Founder input / Validation | CAC estimate                      |
+| `paying_customers`     | Validation Agent    | Existing revenue proof (if any)          |
+| `behavioral_insights`  | Validation Agent    | Interview-derived patterns               |
+
+**What to demonstrate**:
+
+1. **The Customer** — Describe the person in a way that reminds listeners of someone they know.
+2. **A clearly defined market** — Give specific numbers for how many people fit your customer description. Include how many might buy, what percentage you expect to buy, and which ones you will target first.
+3. **Revenue** — It's much easier to argue there's demand for your product if you have paying customers.
+
+**Quality checks** (questions this slide must answer):
+
+- Who is your customer(s)? → `customer_persona`, `demographics`
+- How will you reach the customer? → `acquisition_channel`
+- What is the acquisition cost per customer? → `acquisition_cost`
+- Is your customer willing to pay for your product or service? → `willingness_to_pay`, `paying_customers`
 
 **Narrative function**: Show the investor _who specifically_ the product serves. This is the "do you know your customer?" slide. Separated from Opportunity (Slide 2) because Customer answers "for whom?" while Opportunity answers "how big?"
 
@@ -353,33 +488,103 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 #### Slide 7: Competition
 
-| Field                 | Source             | Generation Method        |
-| --------------------- | ------------------ | ------------------------ |
-| Competitive landscape | Competitor Analyst | Positioning map          |
-| Key differentiators   | Competitor Analyst | Feature/value comparison |
-| Unfair advantage      | Sage synthesis     | Moat analysis            |
+**Purpose**: Every venture has competition. Every venture. Your customers must be doing something right now to cope with the problem you solve — that "something" is your competitor. List competitors and describe how each competes in the market. Then show what differentiates you and what advantage you have over them.
+
+Many founders find it helpful to create a map of the competitive landscape, using important aspects of the product as x and y axes (e.g., "cost" on x-axis, "value" on y-axis). By doing this, you visually demonstrate how your product differentiates itself from other players in the market.
+
+| Field                   | Source             | Generation Method                         |
+| ----------------------- | ------------------ | ----------------------------------------- |
+| `primary_competitors`   | Competitor Analyst | Direct competitors, how they compete      |
+| `secondary_competitors` | Competitor Analyst | Indirect alternatives                     |
+| `potential_threats`     | Sage synthesis     | Unknown/potential competitors with better advantage |
+| `positioning_map`       | Competitor Analyst | 2x2 quadrant visualization (x/y axes)     |
+| `differentiators`       | Competitor Analyst | What makes you different enough to compete |
+| `unfair_advantage`      | Sage synthesis     | Partnerships, IP, expertise, processes, networks |
+| `incumbent_defense`     | Sage synthesis     | Why won't they rip you off and roll out faster? |
+
+**What to demonstrate**:
+
+1. **Industry Knowledge** — You should know your competitors and their unique advantages and disadvantages.
+2. **Sober judgment** — Entrepreneurs caught up in the brilliance of their own ideas might miss major warning signs. Investors want to know whether you are underestimating the threat of competition.
+3. **Differentiation** — Is it clear that you are different enough to compete?
+4. **Unique advantage** — What is your specific advantage over your competitors?
+
+**Quality checks** (questions this slide must answer):
+
+- Who are your primary and secondary competitors? In what ways do they compete for your customers? → `primary_competitors`, `secondary_competitors`
+- Are there unknown or potential competitors with better advantage if they entered? → `potential_threats`
+- Do you displace commonly used companies? → `primary_competitors`
+- How will you disrupt the current competitive landscape? Are you faster, cheaper, better? → `differentiators`, `positioning_map`
+- Why won't an incumbent rip your product off and roll it out faster than you can? → `incumbent_defense`, `unfair_advantage`
 
 **Narrative function**: Position against alternatives honestly. Investors respect founders who understand their competitive landscape rather than claiming "no competition."
 
 #### Slide 8: Business Model
 
-| Field                 | Source | Generation Method             |
-| --------------------- | ------ | ----------------------------- |
-| Revenue model         | Ledger | BMC revenue streams           |
-| Unit economics        | Ledger | CAC, LTV, margins             |
-| Pricing strategy      | Ledger | Pricing model + rationale     |
-| Path to profitability | Ledger | Financial projections summary |
+**Purpose**: Showing how the business makes money is simpler than you think. A solid financial model answers: 1) How much does it cost to acquire a customer? 2) How much cash will you make from that customer over their lifetime? 3) How do your costs break down, per unit and on a monthly basis?
+
+Pre-revenue companies may make up assumptions and financials, but that is not an excuse for unrealistic projections. Since the pitch deck is designed to introduce the idea, it's not necessary to show a full-blown financial model with every assumption, sensitivity, and margin analysis. However, it should include gross profit, EBITDA, net income, burn rate, and cash flow.
+
+Equally important: contextualize your math (e.g., "if we get 1% of the market, then we will have hit our revenue projection").
+
+| Field                   | Source         | Generation Method                  |
+| ----------------------- | -------------- | ---------------------------------- |
+| `cac`                   | Ledger         | Customer acquisition cost          |
+| `ltv`                   | Ledger         | Lifetime value per customer        |
+| `ltv_cac_ratio`         | Ledger         | LTV/CAC (should be >3x)            |
+| `unit_economics`        | Ledger         | Per-unit cost breakdown            |
+| `monthly_costs`         | Ledger         | Monthly cost breakdown             |
+| `burn_rate`             | Ledger         | Monthly spend rate                 |
+| `gross_profit`          | Ledger         | Revenue - COGS                     |
+| `ebitda`                | Ledger         | Earnings before interest, taxes, depreciation, amortization |
+| `net_income`            | Ledger         | Bottom line                        |
+| `cash_flow`             | Ledger         | Cash in vs. cash out               |
+| `revenue_projections`   | Ledger         | Forward-looking revenue estimates  |
+| `market_context`        | Sage synthesis | "If we get X% of market..." framing |
+
+**What to demonstrate**:
+
+1. **Consistency** — There should be a clear relationship between how costs and revenues grow over time.
+2. **Financial literacy** — You know how to think about the financials of a startup.
+3. **Level-headedness** — You are not overly optimistic about your projections or too cautious.
+
+**Quality checks** (questions this slide must answer):
+
+- Can you acquire customers for less than a third of their lifetime value? → `ltv_cac_ratio` (should be >3x)
+- What is your monthly burn rate — how much money are you spending a month? → `burn_rate`
+- Are the revenue projections reasonable? → `revenue_projections`, `market_context`
+- Are costs legitimate? → `unit_economics`, `monthly_costs`
 
 **Narrative function**: Show the investor how money flows. Evidence-backed unit economics from Ledger carry more weight than founder projections.
 
 #### Slide 9: Team
 
+**Purpose**: Give the background for each key team member, including their current roles, prior experience, significant accomplishments, and education. If there are major investors or advisers, name them here. Keep your bio to less than a minute total when presenting. Your goals are to build rapport, be known, and build confidence that the team can accomplish the mission.
+
 | Field                    | Source           | Generation Method                           |
 | ------------------------ | ---------------- | ------------------------------------------- |
-| Founder bio              | Founder input    | Scaffolded form during onboarding           |
-| Relevant experience      | Founder input    | Pre-structured fields                       |
-| Advisory board           | Founder input    | Optional                                    |
-| HITL coachability signal | HITL checkpoints | Checkpoint completion rate + responsiveness |
+| `team_members`           | Founder input    | Key team member profiles (≤75 words each)   |
+| `current_roles`          | Founder input    | What each person does now                   |
+| `prior_experience`       | Founder input    | Relevant past roles                         |
+| `accomplishments`        | Founder input    | Significant achievements                    |
+| `education`              | Founder input    | Relevant degrees/certifications             |
+| `domain_expertise`       | Founder input    | Why they have insight to get the job done   |
+| `advisors_investors`     | Founder input    | Major advisers or investors (optional)      |
+| `hiring_gaps`            | Founder input    | Who else needs to be hired                  |
+| `team_culture`           | Founder input    | What kind of culture are you creating       |
+| `hitl_coachability`      | HITL checkpoints | Checkpoint completion rate + responsiveness |
+
+**What to demonstrate**:
+
+1. **Brevity** — Each bio should be only 75 words or less.
+2. **Domain Expertise** — You have the experience and insight to get the job done.
+3. **Passion, intensity, and a good team culture** — You know the kind of team culture you are creating and that each person is committed to it.
+
+**Quality checks** (questions this slide must answer):
+
+- Why are you the right people for the job? → `domain_expertise`, `prior_experience`, `accomplishments`
+- Is this team sufficient to accomplish the goal? → `team_members`, `advisors_investors`
+- Are there others who need to be hired? → `hiring_gaps`
 
 **Narrative function**: Show who is behind the venture. The HITL coachability signal is unique to StartupAI — it provides behavioral evidence that the founder responds to feedback, iterates, and executes. Team precedes Use of Funds because investors back _people_ before they evaluate _budgets_.
 
@@ -387,12 +592,30 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 #### Slide 10: Use of Funds
 
+**Purpose**: A good pitch deck has a clear ask of the investor. This is married with an understanding of what the investor gets in return and what the money will be used for. Spell out how you actually plan to use the money you are asking for — what will it give you in terms of resources or achieved milestones?
+
+_Note: Some entrepreneurs like to create slides with exit strategies, acquisition targets, IPOs, etc. Focus on your company instead._
+
 | Field                | Source           | Generation Method                        |
 | -------------------- | ---------------- | ---------------------------------------- |
-| Funding ask          | Founder input    | Amount + instrument (SAFE, equity, etc.) |
-| Allocation breakdown | Validation Agent | 3-tier roadmap costed by category        |
-| Milestones           | Validation Agent | What each experiment unlocks             |
-| Timeline             | Validation Agent | Experiment sequence with dates           |
+| `ask_amount`         | Founder input    | How much are you raising?                |
+| `ask_type`           | Founder input    | SAFE, equity, convertible note, etc.     |
+| `allocation`         | Validation Agent | How will you spend it? (specific breakdown) |
+| `milestones`         | Validation Agent | What will you accomplish with it?        |
+| `timeline`           | Validation Agent | When will milestones be achieved?        |
+| `other_participants` | Founder input    | Who else is participating in this round? |
+
+**What to demonstrate**:
+
+1. **Clarity** — You specifically and clearly state what the funds will be used for.
+2. **Milestones** — You should show what you expect to achieve by the time the money is gone.
+
+**Quality checks** (questions this slide must answer):
+
+- What size and type of investment are you looking for? → `ask_amount`, `ask_type`
+- How will you spend it? → `allocation`
+- What will you accomplish with it? → `milestones`
+- Who else is likely to be participating in this investment round? → `other_participants`
 
 **Narrative function**: The closing slide — show the investor exactly what their capital buys. Framed as validation experiments, not vague "product development" buckets. Placed last because the ask is most compelling _after_ the investor knows the team (Slide 9) and has full context.
 
@@ -493,61 +716,140 @@ interface PitchNarrative {
   project_id: string; // FK to projects table
 
   // Cover (title card — precedes the essential ten)
+  // PURPOSE: Capture attention, set tone, create "white space" for founder to express
+  //          gratitude, show passion, and mention mutual connections during live pitch
   cover: {
     venture_name: string;
-    tagline: string; // ≤10 words, AI-generated
+    tagline: string; // ≤10 words, should communicate what product is or who it serves
+
+    // Branding
+    logo_url?: string;        // Founder-uploaded logo (the "face of the brand")
+    hero_image_url?: string;  // Engaging picture of product or customer in action
+
+    // Document metadata (helps track versions, sets professional tone)
+    document_type: 'Investor Briefing' | 'Investor Presentation' | 'Pitch Deck';
+    presentation_date: string; // ISO date — helps track different versions
+
+    // Contact
     contact: {
       founder_name: string;
       email: string;
       linkedin_url?: string;
+      website_url?: string;   // Company website for follow-up
     };
   };
+
+  // COVER QUALITY CHECK: Does the cover make you want to open the deck?
+  // Does the visual communicate what the product is or who it serves?
 
   // --- THE ESSENTIAL TEN (ordered per Get Backed framework) ---
 
   // Slide 1: Overview
+  // PURPOSE: Your "elevator pitch" — the 15-second version of the deck.
+  //          Describe a problem and how you solve it. Leave them hungry for more.
+  // DEMONSTRATE: Clarity (easy to understand), Swagger (bold confidence), Passion (you care deeply)
   overview: {
-    thesis: string; // 3-sentence narrative arc
-    key_metrics: MetricSnapshot[]; // Top 3 evidence data points
+    // Core pitch
+    thesis: string;           // 3-sentence narrative arc: Problem → Solution → Evidence
+    one_liner: string;        // Single sentence: "We do X for Y by Z" — extremely clear
+    industry: string;         // What industry are you in? (e.g., "logistics", "fintech", "healthtech")
+
+    // What makes this novel/bold?
+    novel_insight: string;    // What's the unique insight or approach? Why is this audacious?
+
+    // Proof points
+    key_metrics: MetricSnapshot[]; // Top 3 evidence data points (traction proof)
+
+    // Optional funding ask (can also appear on Use of Funds slide)
     ask?: {
-      // Optional funding ask
       amount: number;
-      instrument: string; // "SAFE" | "equity" | "convertible_note"
+      instrument: 'SAFE' | 'equity' | 'convertible_note';
       use_summary: string; // One-sentence purpose
     };
   };
 
+  // OVERVIEW QUALITY CHECK:
+  // - What exactly does your company do? (one_liner answers this)
+  // - What industry are you in? (industry field)
+  // - Is this a novel idea? (novel_insight field)
+
   // Slide 2: Opportunity
+  // Slide 2: Opportunity
+  // PURPOSE: The 40,000-foot picture of your product's space. Show trends and market
+  //          conditions that give you an entrance into the market and competitive position.
+  // DEMONSTRATE: Explosive markets, Confusion/ambiguity, Thoroughness
   opportunity: {
     tam: MarketSize;
     sam: MarketSize;
     som: MarketSize;
-    growth_trajectory: string; // Market growth rate + timing
-    why_now: string; // Macro trends enabling this venture
+    growth_trajectory: string; // Market growth rate + timing — shows "explosive" potential
+    why_now: string;           // Macro trends enabling this venture
     market_tailwinds: string[]; // Regulatory, tech, behavioral shifts
+    market_confusion?: string; // Ambiguity/fragmentation creating differentiation opportunity
   };
 
   // Slide 3: Problem
+  // PURPOSE: Make investors feel an injustice has been done. The bigger the problem, the better.
+  //          People empathize with specific people, not general problems — use customer stories.
+  // DEMONSTRATE: Big problem in big market, Deep understanding, A specific person
   problem: {
-    primary_pain: string; // Top-ranked pain, narrative form
-    severity_score: number; // 0-1 from gate_scores
-    evidence_quotes: string[]; // Top 3 interview quotes
-    market_context: string; // Size of affected market
-    status_quo: string; // Current alternative / workaround
+    primary_pain: string;        // Top-ranked pain, narrative form
+    pain_narrative: string;      // High-level description of the injustice
+    affected_population: string; // Large, specific number of people affected
+    customer_story?: {           // Specific person's experience (makes it personal)
+      name: string;
+      context: string;           // Who they are, what they do
+      struggle: string;          // How they experience the problem
+    };
+    why_exists: string;          // Root cause — why does this problem persist?
+    status_quo: string;          // How is it currently being addressed?
+    severity_score: number;      // 0-1 from gate_scores
+    evidence_quotes: string[];   // Top 3 interview quotes illustrating pain
   };
 
   // Slide 4: Solution
+  // PURPOSE: Pull out all the stops. Show your magic, one-of-a-kind solution.
+  //          Make it realistic and interactive. Show rather than tell.
+  // DEMONSTRATE: Beauty, Surprise, Repeatable/Scalable, Solving pain, Team excellence
+  // NOTE: Never use bullet points for your solution slide!
   solution: {
-    value_proposition: string; // Narrative-form VP statement
-    how_it_works: string; // Plain-language technical description
-    key_differentiator: string; // vs. competition
-    fit_score: number; // 0-1 problem-solution fit
+    value_proposition: string;   // Narrative-form VP statement
+    how_it_works: string;        // Plain-language technical description
+    key_differentiator: string;  // Unique positioning vs. competition
+    use_cases: string[];         // Real customer delight scenarios
+    demo_assets?: {              // Show rather than tell
+      type: 'video' | 'screenshot' | 'prototype' | 'illustration';
+      url: string;
+      caption?: string;
+    }[];
+    ip_defensibility?: string;   // Patents, trade secrets, moats
+    fit_score: number;           // 0-1 problem-solution fit
   };
 
   // Slide 5: Traction
+  // PURPOSE: Demonstrate assumptions are proving true and you're making significant progress.
+  //          Investors don't want to feel a venture needs them — show it will succeed regardless.
+  // DEMONSTRATE: Fast-growing momentum, Clarity on metrics, Clear sales process
   traction: {
-    evidence_summary: string; // Narrative summary of all evidence
-    do_direct: EvidenceItem[]; // Weight 1.0 evidence
+    evidence_summary: string;    // Narrative summary of all evidence
+    growth_metrics: {            // The "hockey-stick" graph data
+      metric_name: string;
+      values: { date: string; value: number }[];
+      trend: 'accelerating' | 'linear' | 'flat';
+    }[];
+    assumptions_validated: {     // Which assumptions are proving true
+      assumption: string;
+      evidence: string;
+      confidence: number;        // 0-1
+    }[];
+    sales_process?: {            // How you attract, educate, qualify, close, service
+      attract: string;
+      educate: string;
+      qualify: string;
+      close: string;
+      service: string;
+    };
+    do_direct: EvidenceItem[];   // Weight 1.0 evidence
     do_indirect: EvidenceItem[]; // Weight 0.8 evidence
     say_evidence: EvidenceItem[]; // Weight 0.3 evidence
     interview_count: number;
@@ -555,9 +857,9 @@ interface PitchNarrative {
     hitl_completion_rate: number; // Checkpoints completed / total
     display_config: {
       evidence_order: ['do_direct', 'do_indirect', 'say_evidence']; // Render order
-      show_weights: boolean; // Always true for PH view
+      show_weights: boolean;     // Always true for PH view
       visual_emphasis: {
-        do_direct: 'primary';   // Green, large text, checkmark icon
+        do_direct: 'primary';    // Green, large text, checkmark icon
         do_indirect: 'secondary'; // Blue, normal text, partial-check icon
         say_evidence: 'tertiary'; // Gray, smaller text, quote icon, italic
       };
@@ -565,41 +867,145 @@ interface PitchNarrative {
   };
 
   // Slide 6: Customer
+  // PURPOSE: Demonstrate how well you know your customers and the market they represent.
+  //          Describe them so vividly that listeners are reminded of someone they know.
+  // DEMONSTRATE: The Customer (relatable), Clearly defined market (numbers), Revenue (proof)
   customer: {
     segments: CustomerSegment[];
-    persona_summary: string; // Jobs-to-be-done narrative
+    persona_summary: string;     // Describe the person vividly
+    demographics: {
+      location: string;          // Where they live
+      behaviors: string;         // What they like to do
+    };
+    willingness_to_pay: string;  // How much they'd spend
+    market_size: number;         // How many people fit this description
+    target_percentage: number;   // What % you expect to buy (0-1)
+    target_first: string;        // Which segment you will target first
+    acquisition_channel: string; // How will you reach them?
+    acquisition_cost?: number;   // CAC estimate
+    paying_customers?: {         // Revenue proof (if any)
+      count: number;
+      revenue: number;
+      example_story?: string;    // Use existing sales as examples
+    };
     behavioral_insights: string[]; // Interview-derived patterns
     segment_prioritization: string; // Which segment first and why
   };
 
   // Slide 7: Competition
+  // PURPOSE: Every venture has competition. Show you know them and can beat them.
+  //          Your customers are doing something right now to cope — that's your competitor.
+  // DEMONSTRATE: Industry knowledge, Sober judgment, Differentiation, Unique advantage
   competition: {
-    landscape_summary: string; // Narrative positioning
-    competitors: Competitor[];
-    unfair_advantage: string;
+    landscape_summary: string;   // Narrative positioning
+    primary_competitors: {       // Direct competitors
+      name: string;
+      how_they_compete: string;
+      strengths: string[];
+      weaknesses: string[];
+    }[];
+    secondary_competitors: {     // Indirect alternatives
+      name: string;
+      how_they_compete: string;
+    }[];
+    potential_threats?: string[]; // Unknown competitors with possible better advantage
+    positioning_map?: {          // 2x2 quadrant visualization
+      x_axis: string;            // e.g., "cost"
+      y_axis: string;            // e.g., "value"
+      your_position: { x: number; y: number }; // 0-1 scale
+      competitor_positions: { name: string; x: number; y: number }[];
+    };
+    differentiators: string[];   // What makes you different enough to compete
+    unfair_advantage: string;    // Partnerships, IP, expertise, processes, networks
+    incumbent_defense: string;   // Why won't they rip you off and roll out faster?
   };
 
   // Slide 8: Business Model
+  // PURPOSE: Answer three questions: 1) CAC? 2) LTV? 3) Cost breakdown per unit and monthly?
+  //          Include gross profit, EBITDA, net income, burn rate, and cash flow.
+  // DEMONSTRATE: Consistency, Financial literacy, Level-headedness
   business_model: {
-    revenue_model: string; // Narrative description
-    unit_economics: UnitEconomics;
+    revenue_model: string;       // Narrative description
+    cac: number;                 // Customer acquisition cost
+    ltv: number;                 // Lifetime value per customer
+    ltv_cac_ratio: number;       // Should be >3x
+    unit_economics: {
+      cost_per_unit: number;
+      revenue_per_unit: number;
+      margin_per_unit: number;
+      breakdown: { category: string; amount: number }[];
+    };
+    monthly_costs: {
+      total: number;
+      breakdown: { category: string; amount: number }[];
+    };
+    burn_rate: number;           // Monthly spend rate
+    gross_profit?: number;       // Revenue - COGS
+    ebitda?: number;             // Earnings before interest, taxes, depreciation, amortization
+    net_income?: number;         // Bottom line
+    cash_flow?: number;          // Cash in vs. cash out
+    revenue_projections?: {      // Forward-looking estimates
+      period: string;
+      amount: number;
+    }[];
+    market_context: string;      // "If we get X% of market..." framing
     pricing_strategy: string;
     path_to_profitability: string;
   };
 
   // Slide 9: Team
+  // PURPOSE: Build rapport, be known, build confidence the team can accomplish the mission.
+  //          Keep bios to <1 minute total when presenting.
+  // DEMONSTRATE: Brevity (≤75 words each), Domain expertise, Passion/intensity/culture
   team: {
-    founders: FounderProfile[];
-    advisors?: AdvisorProfile[];
-    coachability_score: number; // From HITL checkpoint data
+    members: {
+      name: string;
+      current_role: string;        // What they do now
+      bio: string;                 // ≤75 words!
+      prior_experience: string[];  // Relevant past roles
+      accomplishments: string[];   // Significant achievements
+      education?: string;          // Relevant degrees/certifications
+      domain_expertise: string;    // Why they have insight to get the job done
+      linkedin_url?: string;
+    }[];
+    advisors?: {
+      name: string;
+      title: string;
+      relevance: string;           // Why they matter to this venture
+    }[];
+    investors?: {
+      name: string;
+      firm?: string;
+    }[];
+    hiring_gaps?: string[];        // Who else needs to be hired
+    team_culture?: string;         // What kind of culture you're creating
+    coachability_score: number;    // From HITL checkpoint data (StartupAI unique)
   };
 
   // Slide 10: Use of Funds
+  // PURPOSE: Clear ask + what investor gets in return + how money will be used.
+  //          Show what you'll achieve by the time the money is gone.
+  // DEMONSTRATE: Clarity (specific breakdown), Milestones (what you'll accomplish)
   use_of_funds: {
-    total_ask?: number;
-    allocations: FundAllocation[]; // Mapped to validation experiments
-    milestones: Milestone[];
-    timeline_weeks: number;
+    ask_amount: number;          // How much are you raising?
+    ask_type: 'SAFE' | 'equity' | 'convertible_note' | 'other';
+    allocations: {               // How will you spend it?
+      category: string;
+      amount: number;
+      percentage: number;
+      validation_experiment?: string; // What hypothesis does this test?
+    }[];
+    milestones: {                // What will you accomplish?
+      description: string;
+      target_date: string;       // ISO date
+      success_criteria: string;  // Clear success/failure criteria
+    }[];
+    timeline_weeks: number;      // Total runway
+    other_participants?: {       // Who else is participating?
+      name: string;
+      amount?: number;
+      confirmed: boolean;
+    }[];
   };
 
   metadata: {
@@ -2066,13 +2472,44 @@ When verification URLs or Evidence Package links are shared externally (LinkedIn
 <meta name="twitter:card" content="summary_large_image" />
 ```
 
-### Cover Slide Placeholder
+### Cover Slide Design
 
-When founders have not uploaded a visual identity, the Cover slide uses a branded placeholder.
+The Cover slide captures attention, sets the tone, and creates "white space" for the founder to express gratitude, show passion, and mention mutual connections during a live pitch.
 
-**Placeholder design**:
-- Background: Subtle gradient using brand colors (primary -> accent, 5% opacity)
-- Center element: Geometric pattern derived from industry tags (e.g., "logistics" -> connected nodes, "fintech" -> abstract currency symbols)
+**Cover Slide Principles** (per *Get Backed*):
+| Element | Purpose | Quality Check |
+|---------|---------|---------------|
+| Clean logo | Face of the brand; important to overall image | Is it professional and memorable? |
+| Inviting picture | Engaging image of product or customer | Does it communicate what you do or who you serve? |
+| Descriptive title | "Investor Briefing" + date for version tracking | Is it clear this is a professional investor document? |
+| Overall impression | First impression sets expectations | Does it make you want to open the deck? |
+
+**Cover Layout**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│     [Logo - top left or centered]                          │
+│                                                             │
+│     ┌─────────────────────────────────────────────────┐    │
+│     │                                                 │    │
+│     │         [Hero Image - product/customer]         │    │
+│     │                                                 │    │
+│     └─────────────────────────────────────────────────┘    │
+│                                                             │
+│                    VENTURE NAME                            │
+│            Tagline that explains what you do               │
+│                                                             │
+│     ─────────────────────────────────────────────────      │
+│     Investor Briefing · February 2026                      │
+│                                                             │
+│     founder@company.com · linkedin.com/in/founder          │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**When logo/hero image not uploaded** (placeholder):
+- Background: Subtle gradient using brand colors (primary → accent, 5% opacity)
+- Center element: Geometric pattern derived from industry tags
 - Venture name: Large, centered, Inter 600
 - Tagline: Below name, Inter 400 italic
 
