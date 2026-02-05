@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v3.4 | **Updated**: 2026-02-05 | **Owner**: product-strategist
+**Status**: Draft v3.5 | **Updated**: 2026-02-05 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -1702,6 +1702,7 @@ interface FounderProfile {
   professional_summary: string;  // 500 char max (stored); truncated to 200 chars in pitch narrative
   domain_expertise: string[];
   linkedin_url?: string;
+  company_website?: string;  // Optional company/personal website for Cover contact
   previous_ventures?: {
     name: string;
     role: string;
@@ -2058,23 +2059,28 @@ CREATE UNIQUE INDEX idx_narrative_exports_verification_token
 -- Index for finding exports by narrative (dashboard listing)
 CREATE INDEX idx_narrative_exports_narrative_id
   ON narrative_exports(narrative_id);
+```
 
 ### Narrative Hash Algorithm
 
 The narrative hash (`generation_hash` in `narrative_exports`, compared against `current_hash` at verification time) represents **content integrity** of the pitch narrative itself.
 
-**Fields INCLUDED in hash**:
-- `narrative_data` (full JSONB content - the actual narrative slides and text)
+**What Gets Hashed**: The `narrative_data` JSONB column only, which contains the actual narrative slides and text.
 
-**Fields EXCLUDED from hash** (metadata that does not affect content):
-- `created_at`, `updated_at`, `generated_at` (timestamps)
-- `alignment_status`, `alignment_issues` (transient Guardian state)
-- `generation_version` (metadata about generation)
-- `is_edited`, `edit_history` (editing state, not content)
-- `is_published`, `first_published_at`, `last_publish_review_at` (publication state)
-- `verification_request_count` (abuse tracking)
+**Schema Design Note**: By design, `narrative_data` contains ONLY content (slides, text, formatting). All metadata fields that could affect hash stability are stored as **separate table columns** on `pitch_narratives`, not within the JSONB:
 
-**Rationale**: Users should not see "outdated" status just because a timestamp changed. The hash should only change when the actual narrative content changes. This ensures that:
+| Separate Column (NOT in narrative_data) | Purpose |
+|----------------------------------------|---------|
+| `created_at`, `updated_at` | Row timestamps |
+| `alignment_status`, `alignment_issues` | Transient Guardian state |
+| `generation_version` | Generation metadata |
+| `is_edited`, `edit_history` | Editing provenance |
+| `is_published`, `first_published_at`, `last_publish_review_at` | Publication state |
+| `verification_request_count` | Abuse tracking |
+
+This schema separation means the hash implementation does NOT need to strip or exclude fields - it simply hashes the entire `narrative_data` JSONB, which by design contains only content.
+
+**Rationale for Schema Separation**: Users should not see "outdated" status just because a timestamp changed. By keeping metadata in separate columns rather than in the JSONB, the hash naturally tracks only content changes. This ensures that:
 1. Re-opening an exported PDF does not show "outdated" if content is identical
 2. Guardian re-verification does not invalidate the hash
 3. Publication state changes do not affect content integrity
@@ -2092,6 +2098,10 @@ import { createHash } from 'crypto';
  * Compute deterministic hash of narrative content.
  * Uses recursive key sorting to ensure identical content always produces
  * identical hashes, regardless of object key insertion order.
+ *
+ * Note: narrative_data contains ONLY content (slides, text, formatting).
+ * Timestamps and metadata are stored in separate table columns, so no
+ * field stripping is required.
  */
 function computeNarrativeHash(narrativeData: PitchNarrative): string {
   // Sort keys recursively for deterministic output
@@ -2119,7 +2129,13 @@ import json
 import hashlib
 
 def compute_narrative_hash(narrative_data: dict) -> str:
-    """Compute deterministic hash matching TypeScript implementation."""
+    """
+    Compute deterministic hash matching TypeScript implementation.
+
+    Note: narrative_data contains ONLY content (slides, text, formatting).
+    Timestamps and metadata are stored in separate table columns, so no
+    field stripping is required.
+    """
     canonical = json.dumps(narrative_data, sort_keys=True, separators=(',', ':'))
     return hashlib.sha256(canonical.encode('utf-8')).hexdigest()
 ```
@@ -2817,6 +2833,8 @@ GET /api/founder/profile
   "domain_expertise": ["string"],
   "previous_ventures": [...],
   "linkedin_url": "string",
+  "company_website": "string",
+  "years_experience": 10,
   "completeness_percent": 80,
   "missing_fields": ["linkedin_url"]
 }
@@ -2832,7 +2850,9 @@ PATCH /api/founder/profile
 {
   "professional_summary": "10+ years in logistics tech...",
   "domain_expertise": ["logistics", "b2b-saas"],
-  "linkedin_url": "https://linkedin.com/in/..."
+  "linkedin_url": "https://linkedin.com/in/...",
+  "company_website": "https://example.com",
+  "years_experience": 10
 }
 ```
 
@@ -3067,6 +3087,7 @@ GET /api/verify/:verification_token
 ```
 
 **Response Field Notes**:
+- `evidence_id`: Derived at verification time from the primary `evidence_packages` record for the narrative's project. This is the first 12 characters of `evidence_packages.integrity_hash` (SHA-256 of validation evidence). See "Evidence ID Derivation" section under Verification for the lookup query.
 - `fit_score_at_generation`: **Intentionally excluded** from public response. See Response Sanitization table for rationale.
 - `is_edited`: `true` if founder has modified the AI-generated narrative. Provides transparency about customization.
 - `alignment_status`: `"verified"` | `"flagged"` | `"pending"` — Guardian's assessment of whether edits maintain evidence alignment.
@@ -3151,7 +3172,27 @@ Creates an export record and generates a downloadable file. Each export gets a u
    - `verification_token`: New UUID for this export
    - `generation_hash`: SHA-256 of narrative content
    - `format`: Requested format
+   - `storage_path`: Path in Supabase Storage
    - `qr_code_included`: Whether QR code was embedded
+
+   ```sql
+   INSERT INTO narrative_exports (
+     narrative_id,
+     verification_token,
+     generation_hash,
+     export_format,
+     storage_path,
+     qr_code_included
+   ) VALUES (
+     :narrative_id,
+     gen_random_uuid(),
+     :generation_hash,
+     :format,
+     'narrative-exports/' || :narrative_id || '/' || currval('narrative_exports_id_seq') || '.' || :format,
+     :include_qr_code
+   );
+   ```
+
 4. Upload file to Supabase Storage bucket `narrative-exports`
 5. Generate signed URL with 24-hour expiration
 6. If `include_qr_code = true` (PDF only):
@@ -3166,6 +3207,63 @@ Creates an export record and generates a downloadable file. Each export gets a u
 - Each export creates a new verification token (per-export tokens, not per-narrative)
 - Download URLs expire after 24 hours; export record persists for re-download
 - Export record links back to narrative version for audit trail
+
+### List Exports
+
+```
+GET /api/narrative/:id/exports
+```
+
+**Authorization**: Founder owner only (RLS enforced).
+
+Lists all exports for a narrative. Generates fresh signed URLs for each export.
+
+**Response (Success)**:
+
+```typescript
+{
+  exports: Array<{
+    export_id: string;
+    verification_token: string;
+    export_format: 'pdf' | 'pptx' | 'json';
+    exported_at: string;
+    qr_code_included: boolean;
+    download_url: string;      // Fresh signed URL (24hr expiry)
+    download_expires_at: string;
+  }>;
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `export_id` | Unique identifier for this export record |
+| `verification_token` | Token for external integrity verification |
+| `export_format` | Format of the exported file |
+| `exported_at` | When the export was created |
+| `qr_code_included` | Whether QR code was embedded in export |
+| `download_url` | Fresh signed URL for downloading (24-hour expiry) |
+| `download_expires_at` | When the download URL expires |
+
+**Response (Error)**:
+
+| HTTP Status | Error Code | Condition |
+|-------------|------------|-----------|
+| 401 | `UNAUTHORIZED` | Missing or invalid authentication |
+| 403 | `FORBIDDEN` | Authenticated but not owner of narrative |
+| 404 | `NOT_FOUND` | Narrative does not exist |
+
+**Logic**:
+
+1. Verify user owns the narrative
+2. Query `narrative_exports` table for all exports with matching `narrative_id`
+3. For each export, generate fresh signed URL from `storage_path`
+4. Return exports ordered by `exported_at` descending (newest first)
+
+**Implementation Notes**:
+
+- Fresh signed URLs generated on each request (24-hour expiry from request time)
+- RLS policy "Founders can view own exports" enforces ownership check
+- Storage paths follow pattern: `narrative-exports/{narrative_id}/{export_id}.{format}`
 
 ### Portfolio Holder Feedback (Phase 3)
 
@@ -3329,7 +3427,9 @@ Portfolio Holders receive **both** formats simultaneously. The narrative gets th
 - Verification URL: `app.startupai.site/verify/{verification_token}`
 - QR code linking to verification URL
 - Generation timestamp
-- Evidence ID (first 12 characters of integrity hash)
+- Evidence ID (first 12 characters of `evidence_packages.integrity_hash` for the primary evidence package)
+
+**Note**: Evidence ID is derived at export time by joining from `narrative_exports` to `pitch_narratives` to `evidence_packages` (using `is_primary = TRUE` or matching `pitch_narrative_id`). See "Evidence ID Derivation" section under Verification for the lookup query.
 
 This maintains integrity guarantees when PDFs are shared outside the platform and creates a lead capture mechanism for external investors.
 
@@ -3724,6 +3824,33 @@ The `/api/verify/:verification_token` endpoint uses the per-export verification 
 
 This per-export model allows old PDFs to be detected as stale after narrative regeneration, while new exports remain verified. See the `narrative_exports` table schema and Decision Log entry "Verification tokens are per-export, not per-narrative" for details.
 
+#### Evidence ID Derivation
+
+The `evidence_id` field in the verification response and PDF footer is derived at verification/export time by joining to the primary `evidence_packages` record for the narrative's project. This is NOT stored on `narrative_exports` but computed dynamically:
+
+```sql
+-- Get evidence_id for verification response or PDF export
+SELECT
+  LEFT(ep.integrity_hash, 12) as evidence_id,
+  ep.id as evidence_package_id
+FROM narrative_exports ne
+JOIN pitch_narratives pn ON pn.id = ne.narrative_id
+JOIN evidence_packages ep ON ep.project_id = pn.project_id
+  AND (ep.is_primary = TRUE OR ep.pitch_narrative_id = pn.id)
+WHERE ne.verification_token = :token
+ORDER BY
+  CASE WHEN ep.pitch_narrative_id = pn.id THEN 0 ELSE 1 END,  -- Prefer exact match
+  ep.created_at DESC  -- Then most recent
+LIMIT 1;
+```
+
+**Rationale**: The `evidence_id` represents the underlying validation evidence that supports the narrative. By deriving it at verification time:
+1. The ID always reflects the current primary evidence package
+2. No denormalization required on `narrative_exports`
+3. If evidence is re-packaged, the ID updates automatically
+
+**Display Format**: First 12 characters of `evidence_packages.integrity_hash` (SHA-256), displayed as `a3f8c2...d1e9b4` in UI contexts where brevity is preferred.
+
 ### Staleness Threshold Model
 
 Not all evidence changes are equal. The staleness system distinguishes between **soft stale** (informational) and **hard stale** (action required):
@@ -3920,7 +4047,7 @@ The verification URL uses a full UUID token rather than a truncated SHA-256 hash
 - Generate a separate random UUID as `verification_token` (not derived from content)
 - Store in `narrative_exports` table alongside the `generation_hash` (per-export, not per-narrative)
 - URL format: `app.startupai.site/verify/{verification_token}`
-- The `evidence_id` displayed to users remains the truncated SHA-256 for readability
+- The `evidence_id` displayed to users is the first 12 characters of `evidence_packages.integrity_hash`, derived at verification time (see "Evidence ID Derivation" section)
 - Each export gets its own token; regeneration creates new exports with new tokens
 - Old export tokens continue to work but return `outdated` status
 
@@ -3952,7 +4079,7 @@ The public endpoint intentionally omits sensitive data:
 | `status` | Yes | Yes | Core verification purpose |
 | `generated_at` | Yes | Yes | Timestamp verification |
 | `venture_name` | Yes | Yes | Already on the PDF |
-| `evidence_id` | Truncated | Full | Prevent hash collision attacks |
+| `evidence_id` | Truncated (12 chars) | Full (64 chars) | Derived from `evidence_packages.integrity_hash`; truncated in public to prevent hash collision attacks |
 | `validation_stage` | Yes | Yes | General context |
 | `is_edited` | Yes | Yes | Transparency about founder customization |
 | `alignment_status` | Yes | Yes | Trust signal (Guardian verification) |
@@ -5020,6 +5147,70 @@ test.describe('Narrative export access controls', () => {
     expect(exports).toHaveLength(0);  // RLS filters results
   });
 });
+
+// Narrative Hash Stability (Task #55)
+// Validates that timestamps (in separate columns) don't affect content hash
+test.describe('Narrative hash stability', () => {
+  test('timestamp-only update does not change current_hash', async () => {
+    // Setup: Create narrative and export
+    const founder = await createFounder();
+    const narrative = await createNarrative(founder.id);
+    const export1 = await exportNarrative(narrative.id, 'pdf', founder.token);
+    const originalHash = export1.generation_hash;
+
+    // Act: Touch the record (update timestamp without content change)
+    // This updates the updated_at column, but NOT narrative_data
+    await touchNarrativeTimestamp(narrative.id);
+
+    // Assert: Hash unchanged (timestamps are in columns, not narrative_data)
+    const verification = await verifyToken(export1.verification_token);
+    expect(verification.status).toBe('verified');
+    expect(verification.current_hash_matches).toBe(true);
+
+    // Double-check: current_hash still equals generation_hash
+    expect(verification.current_hash).toBe(originalHash);
+  });
+
+  test('content update DOES change current_hash', async () => {
+    // Setup
+    const founder = await createFounder();
+    const narrative = await createNarrative(founder.id);
+    const export1 = await exportNarrative(narrative.id, 'pdf', founder.token);
+    const originalHash = export1.generation_hash;
+
+    // Act: Update actual content (narrative_data JSONB)
+    await updateNarrativeContent(narrative.id, {
+      slides: [{ ...existingSlide, title: 'New Title' }]
+    });
+
+    // Assert: Hash changed, export shows outdated
+    const verification = await verifyToken(export1.verification_token);
+    expect(verification.status).toBe('outdated');
+    expect(verification.current_hash_matches).toBe(false);
+
+    // Verify the hash actually changed
+    expect(verification.current_hash).not.toBe(originalHash);
+    expect(verification.generation_hash).toBe(originalHash);
+  });
+
+  test('multiple timestamp updates still preserve hash', async () => {
+    // Setup: Create narrative and export
+    const founder = await createFounder();
+    const narrative = await createNarrative(founder.id);
+    const export1 = await exportNarrative(narrative.id, 'pdf', founder.token);
+    const originalHash = export1.generation_hash;
+
+    // Act: Touch the record multiple times
+    await touchNarrativeTimestamp(narrative.id);
+    await touchNarrativeTimestamp(narrative.id);
+    await touchNarrativeTimestamp(narrative.id);
+
+    // Assert: Hash still unchanged after multiple timestamp updates
+    const verification = await verifyToken(export1.verification_token);
+    expect(verification.status).toBe('verified');
+    expect(verification.current_hash).toBe(originalHash);
+  });
+});
 ```
 
 **Anti-patterns to avoid** (per TESTING-GUIDELINES.md):
@@ -5387,7 +5578,8 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-05 | **HITL review required for first publication**                        | Founders must take ownership of AI-generated content before sharing with investors; subsequent edits don't require re-review unless flagged                                              |
 | 2026-02-05 | **Option B (generate first, prompt to fill)** recommended for Phase 1 | Faster time-to-value; founders see immediate results; publish gate catches gaps before sharing; Option A (pre-step) deferred to Phase 2                                                  |
 | 2026-02-05 | **Verification tokens are per-export, not per-narrative**             | Per-export tokens allow detecting stale PDFs after regeneration. Each export has its own `verification_token` and `generation_hash`; old exports show "outdated" status while new exports show "verified". Supports: (1) integrity verification of externally-shared PDFs, (2) export audit trail, (3) lead capture from external investors. |
-| 2026-02-05 | **Narrative hash excludes timestamps and metadata**                   | The narrative hash (`generation_hash`) represents content integrity, not metadata changes. Timestamps (`created_at`, `updated_at`, `generated_at`), alignment state (`alignment_status`, `alignment_issues`), editing state (`is_edited`, `edit_history`), and publication state are excluded. Users should not see "outdated" status just because a timestamp changed - only when actual narrative content changes. |
+| 2026-02-05 | **Narrative hash covers narrative_data JSONB only**                   | The narrative hash (`generation_hash`) represents content integrity by hashing the entire `narrative_data` JSONB. By schema design, `narrative_data` contains ONLY content (slides, text, formatting) - all metadata (timestamps, alignment state, editing state, publication state) are stored in separate table columns. This means the hash implementation does NOT need to strip or exclude fields; it simply hashes the JSONB which already contains only content. Users see "outdated" status only when actual narrative content changes. |
+| 2026-02-05 | **Timestamps stored in columns, not narrative_data JSONB**            | The `narrative_data` JSONB contains ONLY content (slides, text, formatting). Timestamps (`created_at`, `updated_at`) are stored in separate table columns on `pitch_narratives`, not within the JSONB. This schema separation ensures the hash naturally tracks only content changes without requiring field stripping, and follows PostgreSQL best practices for timestamp handling (indexing, range queries, trigger-based auto-update). |
 
 ---
 
@@ -5450,4 +5642,5 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-05 | 3.1     | **Beyond Architecture: Story, Design, and Text**: Added comprehensive guidance for the 75% of pitch deck work that goes beyond slide architecture. **Story section**: Four story archetypes (Origin, Customer, Industry, Venture Growth) with elements for each, what makes a great story (things happen, vivid sensory details, conflict), story-to-slide mapping table, example arc diagram, and StartupAI story generation support. **Design section**: Five key elements (Layout, Typography, Color, Images/Photography, Visualized Data) with guidance for each, links to existing PDF Brand Guidelines. **Text section**: Four key elements (Writing Style, Voice and Tone, Format, When Words Are Not Enough) with techniques table for making evidence compelling. Critical insight: "Your evidence will not speak for itself." Updated Table of Contents. |
 | 2026-02-05 | 3.2     | **Generation Prerequisites and Narrative Publication**: (1) Added Generation Prerequisites section defining minimum required evidence for narrative generation (project basics, at least one hypothesis, customer profile, VPC). (2) Defined founder-input field categories: required for generation (`company_name`, `industry`), optional with placeholder (`sales_process`, `acquisition_channel`, `ask_amount`, `ask_type`, `logo_url`, `hero_image_url`), and optional for richness (`linkedin_url`, `ip_defensibility`, `other_participants`). (3) Added evidence gaps for missing inputs with `blocking_publish` flag. (4) Documented UI flow options: Option A (pre-step) vs Option B (generate first), recommending Option B for Phase 1. (5) Added Narrative Publication section defining draft/published states, publication gate requirements (no blocking gaps, alignment passed, HITL review, not hard-stale), HITL review checkpoint flow for first publication, unpublish flow. (6) Added `is_published`, `first_published_at`, `last_publish_review_at` to `pitch_narratives` schema. (7) Added `POST /api/narrative/:id/publish` and `POST /api/narrative/:id/unpublish` API endpoints with request/response schemas. (8) Added publication metrics (`time_to_first_publish`, `publish_gate_failure_reasons`, `unpublish_rate`, `edit_after_publish_rate`). Updated Table of Contents, Decision Log. |
 | 2026-02-05 | 3.3     | **Per-export verification tokens**: Architectural decision that verification tokens are per-export, not per-narrative. (1) Deprecated `verification_token` column on `pitch_narratives` table. (2) Added `narrative_exports` table with: `id` UUID PK, `narrative_id` UUID FK, `verification_token` UUID UNIQUE, `generation_hash` VARCHAR(64), `export_format` VARCHAR(10), `exported_at` TIMESTAMPTZ. (3) Updated Verification Endpoint Security section to reference `narrative_exports` table. (4) Updated `evidence_package_access.verification_token_used` FK reference. (5) Added Decision Log entry documenting rationale: per-export allows detecting stale PDFs after regeneration; old exports show "outdated" status while new exports show "verified". |
-| 2026-02-05 | 3.4     | **Narrative Hash Algorithm documented**: Added explicit "Narrative Hash Algorithm" section after `narrative_exports` table schema. Documents that the narrative hash (`generation_hash`) includes only `narrative_data` (actual content) and excludes all metadata: timestamps (`created_at`, `updated_at`, `generated_at`), alignment state (`alignment_status`, `alignment_issues`), editing state (`is_edited`, `edit_history`), publication state (`is_published`, `first_published_at`, `last_publish_review_at`), and tracking fields (`verification_request_count`, `generation_version`). Rationale: hash should represent content integrity, not metadata changes. Added Decision Log entry. |
+| 2026-02-05 | 3.4     | **Narrative Hash Algorithm documented**: Added explicit "Narrative Hash Algorithm" section after `narrative_exports` table schema. Documents that the narrative hash (`generation_hash`) covers only the `narrative_data` JSONB (actual content). By schema design, all metadata (timestamps, alignment state, editing state, publication state, tracking fields) are stored in separate table columns, not within `narrative_data`. This means the hash implementation simply hashes the entire JSONB without needing to strip or exclude fields. Rationale: hash should represent content integrity, not metadata changes. Added Decision Log entry. |
+| 2026-02-05 | 3.5     | Round 4 fixes: (1) Clarified narrative_data contains only content (timestamps are separate columns), (2) Added GET /api/narrative/:id/exports endpoint, (3) Added storage_path to export insert logic, (4) Clarified evidence_id source for verification, (5) Added company_website to Founder Profile CRUD, (6) Fixed markdown code fence, (7) Added hash stability tests |
