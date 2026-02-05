@@ -650,7 +650,7 @@ _Note: Some entrepreneurs like to create slides with exit strategies, acquisitio
 
 ---
 
-### Beyond Architecture: Story, Design, and Text
+## Beyond Architecture: Story, Design, and Text
 
 The 10 essential slides are the building blocks — the architecture of a pitch deck. Most entrepreneurs stop there. But the key elements that transform a deck from a lifeless document that fails to inspire into one of a founder's biggest assets are: **story**, **design**, and **text**.
 
@@ -778,40 +778,46 @@ Life is about struggle, and stories should be, too. If there is no conflict in y
 
 #### Using Story to Craft the Arc of Your Pitch
 
-You'll need to choose how to arrange the stories and slides in your pitch. By leading with the stories and aspects of your venture that are the strongest, you can align your stories in a way that creates an interesting arc and captures the audience's attention.
+You'll need to weave your stories through the slides in your pitch. By emphasizing the stories and aspects of your venture that are strongest, you can create an interesting arc that captures the audience's attention.
+
+**Important**: Story arcs are **overlays on the fixed canonical slide order**, not a reordering. The slides always follow the Get Backed sequence (Cover → Overview → Opportunity → Problem → Solution → Traction → Customer → Competition → Business Model → Team → Use of Funds). Story arcs determine which narrative thread you emphasize at each point.
 
 **Story-to-Slide Mapping:**
 
-| Story Type | Slides | When to Lead With |
+| Story Type | Slides | When to Emphasize |
 |------------|--------|-------------------|
 | Origin Story | Cover, Team | High social benefit ventures |
 | Industry Story | Opportunity | Disruptive products/services |
-| Customer Story | Problem, Solution | Complex products, dramatic transformations |
-| Venture Story | Competition, Business Model, Traction, Use of Funds | Strong immediate traction |
+| Customer Story | Problem, Solution, Customer | Complex products, dramatic transformations |
+| Venture Story | Overview, Traction, Competition, Business Model, Use of Funds | Strong immediate traction |
 
-**Example Arc (Origin-Led):**
+**Story Arc Overlay (Canonical Order Preserved):**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  ORIGIN STORY                                                   │
-│  1. Cover — Set the tone with founder's "why"                   │
-│  2. Team — The people behind the purpose                        │
+│  Cover    — ORIGIN STORY: Set the tone with founder's "why"     │
 ├─────────────────────────────────────────────────────────────────┤
-│  INDUSTRY STORY                                                 │
-│  3. Opportunity — Market shifts that make this possible         │
-├─────────────────────────────────────────────────────────────────┤
-│  CUSTOMER STORY                                                 │
-│  4. Problem — Meet the person suffering                         │
-│  5. Solution — Their transformation                             │
-├─────────────────────────────────────────────────────────────────┤
-│  VENTURE STORY                                                  │
-│  6. Competition — Our position in the landscape                 │
-│  7. Traction — Evidence of momentum                             │
-│  8. Business Model — How we make money                          │
-│  9. Customer — Who we serve (ties back to Customer Story)       │
-│  10. Use of Funds — The next chapter                            │
+│  1. Overview    — VENTURE STORY: The elevator pitch             │
+│  2. Opportunity — INDUSTRY STORY: Market shifts enabling this   │
+│  3. Problem     — CUSTOMER STORY: Meet the person suffering     │
+│  4. Solution    — CUSTOMER STORY: Their transformation          │
+│  5. Traction    — VENTURE STORY: Evidence of momentum           │
+│  6. Customer    — CUSTOMER STORY: Who we serve (with faces)     │
+│  7. Competition — VENTURE STORY: Our position in landscape      │
+│  8. Business Model — VENTURE STORY: How we make money           │
+│  9. Team        — ORIGIN STORY: The people behind the purpose   │
+│  10. Use of Funds — VENTURE STORY: The next chapter             │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+**Choosing your lead story**: While all four archetypes appear in a complete pitch, you should decide which one to _emphasize_ based on your venture's strengths:
+
+| Lead With | Best For | Effect |
+|-----------|----------|--------|
+| Origin Story | High social benefit | Taps into desire for meaning |
+| Industry Story | Disruptive products | Shows you know the market; idea could be huge |
+| Customer Story | Complex products | Explains venture and its value |
+| Venture Story | Strong traction | Feels like a train headed somewhere big |
 
 ---
 
