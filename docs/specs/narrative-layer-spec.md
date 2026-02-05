@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v2.0 | **Updated**: 2026-02-04 | **Owner**: product-strategist
+**Status**: Draft v2.3 | **Updated**: 2026-02-04 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -1025,6 +1025,11 @@ CREATE TABLE pitch_narratives (
   alignment_status VARCHAR(20) DEFAULT 'verified',  -- 'verified' | 'flagged' | 'pending'
   alignment_issues JSONB DEFAULT '[]',        -- Array of Guardian-detected issues
 
+  -- NOTE: Per-slide edit tracking is DERIVED from edit_history, not stored separately.
+  -- To get edited slides: SELECT DISTINCT jsonb_array_elements(edit_history)->>'slide'
+  --                       FROM pitch_narratives WHERE id = ? AND edit_history @> '[{"edit_source":"founder"}]'
+  -- See "Regeneration with Edit Preservation" section for helper functions.
+
   -- IMPORTANT: alignment_status state transitions
   -- 1. New AI-generated narrative: DEFAULT 'verified' (AI output is trusted)
   -- 2. Founder makes ANY edit: Application MUST set alignment_status = 'pending'
@@ -1234,7 +1239,8 @@ CREATE POLICY "Verified PHs can view founder profiles"
 
 CREATE POLICY "Founders can manage own profile"
   ON founder_profiles FOR ALL
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);  -- Required for INSERT/UPDATE operations
 ```
 
 ### Indexes
@@ -1426,6 +1432,33 @@ CREATE TABLE package_engagement_events (
 
 CREATE INDEX idx_package_engagement_access ON package_engagement_events(access_id);
 
+-- ============================================================================
+-- ANALYTICS TABLES RLS POLICY
+-- ============================================================================
+-- These tables are written by the application (service role) and read for analytics.
+-- No user-facing RLS policies are needed; all access is via service role.
+--
+-- Access Pattern:
+--   WRITE: Application backend via service role (tracking events)
+--   READ:  Admin dashboards via service role (analytics queries)
+--
+-- If user-facing analytics are needed in future (e.g., founders see their own funnel):
+--
+-- CREATE POLICY "Founders can view own funnel events"
+--   ON narrative_funnel_events FOR SELECT
+--   USING (auth.uid() = user_id);
+--
+-- CREATE POLICY "PHs can view own engagement events"
+--   ON package_engagement_events FOR SELECT
+--   USING (
+--     EXISTS (
+--       SELECT 1 FROM evidence_package_access epa
+--       WHERE epa.id = package_engagement_events.access_id
+--         AND epa.portfolio_holder_id = auth.uid()
+--     )
+--   );
+-- ============================================================================
+
 -- Verification to connection conversion tracking
 ALTER TABLE evidence_package_access
   ADD COLUMN verification_token_used UUID,  -- Links to pitch_narratives.verification_token
@@ -1518,11 +1551,31 @@ POST /api/narrative/generate
 
 **Logic**:
 
-1. Check if existing narrative exists and `is_stale = false` → return cached
-2. If stale or `force_regenerate = true` → gather all project evidence
+1. Check if existing narrative exists and `projects.narrative_is_stale = false` → return cached
+2. If `projects.narrative_is_stale = true` or `force_regenerate = true` → gather all project evidence
 3. Pass to Report Compiler with narrative synthesis prompt
 4. Store result in `pitch_narratives` table
-5. Set `is_stale = false`, update `source_evidence_hash`
+5. Update projects table: `narrative_is_stale = false`, `narrative_generated_at = NOW()`
+6. Update `pitch_narratives.source_evidence_hash` with new hash
+
+**Cache Check Query**:
+```sql
+SELECT pn.*, p.narrative_is_stale, p.narrative_stale_severity
+FROM pitch_narratives pn
+JOIN projects p ON p.id = pn.project_id
+WHERE pn.project_id = $1
+  AND p.narrative_is_stale = FALSE;
+```
+
+**Cache Invalidation** (after successful generation):
+```sql
+UPDATE projects
+SET narrative_is_stale = FALSE,
+    narrative_generated_at = NOW(),
+    narrative_stale_severity = NULL,
+    narrative_stale_reason = NULL
+WHERE id = $1;
+```
 
 ### Evidence Package CRUD
 
@@ -1731,7 +1784,6 @@ GET /api/verify/:verification_token
   "evidence_id": "a3f8c2d1e9b4",
   "current_hash_matches": true,
   "evidence_updated_at": "2026-02-04T14:34:00Z",
-  "fit_score_at_generation": 0.72,
   "validation_stage_at_generation": "Solution Testing",
   "is_edited": true,
   "alignment_status": "verified",
@@ -1740,11 +1792,13 @@ GET /api/verify/:verification_token
 ```
 
 **Response Field Notes**:
+- `fit_score_at_generation`: **Intentionally excluded** from public response. See Response Sanitization table for rationale.
 - `is_edited`: `true` if founder has modified the AI-generated narrative. Provides transparency about customization.
 - `alignment_status`: `"verified"` | `"flagged"` | `"pending"` — Guardian's assessment of whether edits maintain evidence alignment.
   - `verified`: Edits checked and approved by Guardian
   - `flagged`: Guardian detected claims that may exceed evidence (view with caution)
   - `pending`: Edits not yet reviewed by Guardian
+- `request_access_url`: Deep link to request founder connection (lead capture for marketplace).
 
 ### Portfolio Holder Feedback (Phase 3)
 
@@ -2084,70 +2138,139 @@ To ensure deterministic hash computation across services (Next.js, CrewAI, verif
 
 **Canonicalization Algorithm**
 
+The hash is computed over `validation_evidence` (the methodology data), NOT the pitch_narrative (which may be edited by founders).
+
 ```typescript
+import { createHash } from 'crypto';
+
+/**
+ * Recursively sorts object keys for deterministic serialization.
+ * Arrays are NOT reordered (order may be semantically meaningful),
+ * but objects within arrays have their keys sorted.
+ */
+function stableStringify(obj: unknown): string {
+  if (obj === null || obj === undefined) {
+    return 'null';
+  }
+  if (typeof obj !== 'object') {
+    return JSON.stringify(obj);
+  }
+  if (Array.isArray(obj)) {
+    return '[' + obj.map(stableStringify).join(',') + ']';
+  }
+  // Sort object keys alphabetically
+  const sortedKeys = Object.keys(obj).sort();
+  const pairs = sortedKeys.map(key =>
+    JSON.stringify(key) + ':' + stableStringify((obj as Record<string, unknown>)[key])
+  );
+  return '{' + pairs.join(',') + '}';
+}
+
 function canonicalizeEvidence(evidence: EvidencePackage): string {
-  // 1. Extract hashable fields in defined order
+  // Hash the validation_evidence section (methodology data)
+  // This is immutable and represents the actual evidence
   const hashableData = {
     // Project identity
     project_id: evidence.project_id,
+    version: evidence.version,
 
-    // Evidence items (sorted by id for determinism)
-    evidence_items: evidence.evidence_items
-      .map(item => ({
-        id: item.id,
-        type: item.type,
-        description: item.description.trim(),
-        metric_value: item.metric_value ?? null,
-        source: item.source.trim(),
-        weight: item.weight,
-      }))
-      .sort((a, b) => a.id.localeCompare(b.id)),
+    // Validation evidence (sorted arrays for determinism)
+    validation_evidence: {
+      // VPC - sort pains/gains by description
+      vpc: {
+        ...evidence.validation_evidence.vpc,
+        pains: [...evidence.validation_evidence.vpc.pains]
+          .sort((a, b) => a.description.localeCompare(b.description)),
+        gains: [...evidence.validation_evidence.vpc.gains]
+          .sort((a, b) => a.description.localeCompare(b.description)),
+      },
 
-    // Fit scores (sorted by category)
-    fit_scores: Object.keys(evidence.fit_scores)
-      .sort()
-      .reduce((acc, key) => {
-        acc[key] = evidence.fit_scores[key];
-        return acc;
-      }, {} as Record<string, number>),
+      // Customer profile - sort by job/pain description
+      customer_profile: {
+        ...evidence.validation_evidence.customer_profile,
+        jobs_to_be_done: [...evidence.validation_evidence.customer_profile.jobs_to_be_done]
+          .sort((a, b) => a.job.localeCompare(b.job)),
+        pains: [...evidence.validation_evidence.customer_profile.pains]
+          .sort((a, b) => a.pain.localeCompare(b.pain)),
+      },
 
-    // Validation gate
-    validation_stage: evidence.validation_stage,
+      // Competitor map - sort competitors by name
+      competitor_map: {
+        ...evidence.validation_evidence.competitor_map,
+        competitors: [...evidence.validation_evidence.competitor_map.competitors]
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      },
 
-    // HITL checkpoints (sorted by checkpoint_type, then timestamp)
-    hitl_checkpoints: evidence.hitl_checkpoints
-      .map(c => ({
-        checkpoint_type: c.checkpoint_type,
-        approved_at: c.approved_at,  // ISO 8601 format required
-        approver_id: c.approver_id,
-      }))
-      .sort((a, b) =>
-        a.checkpoint_type.localeCompare(b.checkpoint_type) ||
-        a.approved_at.localeCompare(b.approved_at)
-      ),
+      // BMC - keep as-is (single values, not arrays)
+      bmc: evidence.validation_evidence.bmc,
+
+      // Experiment results - sort by experiment_id
+      experiment_results: [...evidence.validation_evidence.experiment_results]
+        .sort((a, b) => a.experiment_id.localeCompare(b.experiment_id)),
+
+      // Gate scores - object with fixed keys
+      gate_scores: evidence.validation_evidence.gate_scores,
+
+      // HITL record - sort checkpoints by type then timestamp
+      hitl_record: {
+        ...evidence.validation_evidence.hitl_record,
+        checkpoints: [...(evidence.validation_evidence.hitl_record.checkpoints || [])]
+          .sort((a, b) =>
+            a.checkpoint_type.localeCompare(b.checkpoint_type) ||
+            a.approved_at.localeCompare(b.approved_at)
+          ),
+      },
+    },
+
+    // Integrity metadata (excluding the hash itself)
+    integrity: {
+      methodology_version: evidence.integrity.methodology_version,
+      fit_score_algorithm: evidence.integrity.fit_score_algorithm,
+      agent_versions: [...evidence.integrity.agent_versions]
+        .sort((a, b) => a.agent_name.localeCompare(b.agent_name)),
+    },
   };
 
-  // 2. Serialize to JSON with sorted keys (no whitespace)
-  return JSON.stringify(hashableData, Object.keys(hashableData).sort());
+  // Use stable stringify for deterministic key ordering
+  return stableStringify(hashableData);
 }
 
 function computeEvidenceHash(evidence: EvidencePackage): string {
   const canonical = canonicalizeEvidence(evidence);
-  return crypto.createHash('sha256').update(canonical, 'utf8').digest('hex');
+  return createHash('sha256').update(canonical, 'utf8').digest('hex');
 }
 ```
+
+**Why `stableStringify` instead of `JSON.stringify`?**
+
+`JSON.stringify(obj, replacer)` does NOT sort nested object keys. The `replacer` argument filters/transforms values but doesn't affect key ordering. Different JavaScript engines may serialize `{b: 1, a: 2}` differently, causing hash mismatches across services.
+
+**Alternative**: Use the `json-stable-stringify` npm package for production.
 
 **Canonicalization Rules**
 
 | Rule | Description | Example |
 |------|-------------|---------|
-| String trimming | All string fields trimmed of leading/trailing whitespace | `" text "` → `"text"` |
-| Null handling | Missing optional fields become explicit `null` | `metric_value: undefined` → `metric_value: null` |
-| Array ordering | Arrays sorted by deterministic key (id, type, timestamp) | Evidence items sorted by `id` |
-| Object key ordering | Object keys sorted alphabetically during serialization | `{b: 1, a: 2}` → `{"a":2,"b":1}` |
+| Hash scope | Only `validation_evidence` + `integrity` metadata; NOT `pitch_narrative` | Founder edits don't change hash |
+| Object key ordering | All nested object keys sorted alphabetically via `stableStringify` | `{b: 1, a: 2}` → `{"a":2,"b":1}` |
+| Array ordering | Arrays sorted by semantic key (name, id, timestamp) | VPC pains sorted by `description` |
+| Null handling | Missing optional fields become explicit `null` | `metric_value: undefined` → `"null"` |
 | Timestamp format | All timestamps in ISO 8601 UTC format | `2026-02-04T12:00:00.000Z` |
-| Number precision | Floats rounded to 4 decimal places | `0.78333...` → `0.7833` |
+| Number precision | Floats kept as-is (JavaScript number precision) | `0.78333` stays `0.78333` |
 | No whitespace | JSON serialized without pretty-printing | `{"key":"value"}` not `{ "key": "value" }` |
+
+**Fields Included in Hash**:
+- `project_id`, `version`
+- `validation_evidence.vpc`, `validation_evidence.customer_profile`, `validation_evidence.competitor_map`
+- `validation_evidence.bmc`, `validation_evidence.experiment_results`, `validation_evidence.gate_scores`
+- `validation_evidence.hitl_record`
+- `integrity.methodology_version`, `integrity.fit_score_algorithm`, `integrity.agent_versions`
+
+**Fields EXCLUDED from Hash**:
+- `pitch_narrative` (can be edited by founder)
+- `generated_at` (changes on regeneration)
+- `access.*` (computed at query time)
+- `integrity.evidence_hash` (circular dependency)
 
 **Verification**
 
@@ -2310,7 +2433,7 @@ When founders export PDFs and share them outside the platform, integrity guarant
 **API Endpoint**:
 
 ```
-GET /api/verify/{short-hash}
+GET /api/verify/:verification_token
 ```
 
 **Response** (public, unauthenticated):
@@ -2322,11 +2445,14 @@ GET /api/verify/{short-hash}
   "evidence_id": "a3f8c2...d1e9b4",
   "current_hash_matches": true,
   "evidence_updated_at": "2026-02-04T14:34:00Z",
-  "validation_stage_at_generation": "Solution Testing"
+  "validation_stage_at_generation": "Solution Testing",
+  "is_edited": true,
+  "alignment_status": "verified",
+  "request_access_url": "/connect/request?founder=uuid"
 }
 ```
 
-**Note**: `fit_score_at_generation` is intentionally excluded from the public response. See Security section below.
+**Note**: See Response Sanitization table for fields intentionally excluded from public response (e.g., `fit_score_at_generation`).
 
 #### Verification Endpoint Security
 
@@ -2376,6 +2502,9 @@ The public endpoint intentionally omits sensitive data:
 | `venture_name` | Yes | Yes | Already on the PDF |
 | `evidence_id` | Truncated | Full | Prevent hash collision attacks |
 | `validation_stage` | Yes | Yes | General context |
+| `is_edited` | Yes | Yes | Transparency about founder customization |
+| `alignment_status` | Yes | Yes | Trust signal (Guardian verification) |
+| `request_access_url` | Yes | Yes | Lead capture for marketplace |
 | `fit_score` | No | Yes | Competitive intelligence risk |
 | `narrative_content` | No | No | Never exposed via verification |
 | `evidence_details` | No | Yes | Requires founder consent |
@@ -2718,16 +2847,60 @@ When founders click "Regenerate" after evidence changes, they need clarity about
 
 **Technical Implementation**:
 
-When `preserve_edits: true`:
-1. Fetch all slides with `is_edited: true` from current narrative
-2. Generate new narrative from evidence
-3. For each edited slide:
-   - Keep founder's `content` field
-   - Update `evidence_refs` to new evidence IDs where applicable
-   - Keep `is_edited: true` flag
-4. For non-edited slides:
-   - Replace with newly generated content
-5. Increment version, save previous to history
+**Helper: Derive edited slides from edit_history**
+
+```typescript
+/**
+ * Extract unique slides that have founder edits from edit_history.
+ * Only considers edits with edit_source: 'founder' (ignores regeneration changes).
+ */
+function getFounderEditedSlides(editHistory: EditHistoryEntry[]): Set<SlideKey> {
+  return new Set(
+    editHistory
+      .filter(entry => entry.edit_source === 'founder')
+      .map(entry => entry.slide)
+  );
+}
+
+/**
+ * Get the most recent founder edit for each field within a slide.
+ * Used to preserve specific customizations during regeneration.
+ */
+function getSlideEdits(editHistory: EditHistoryEntry[], slide: SlideKey): Map<string, unknown> {
+  const edits = new Map<string, unknown>();
+  editHistory
+    .filter(entry => entry.slide === slide && entry.edit_source === 'founder')
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp)) // Oldest first
+    .forEach(entry => edits.set(entry.field, entry.new_value)); // Later overwrites earlier
+  return edits;
+}
+```
+
+**Regeneration Algorithm** (when `preserve_edits: true`):
+
+1. Compute `editedSlides = getFounderEditedSlides(narrative.edit_history)`
+2. Generate new narrative from current evidence (full regeneration internally)
+3. For each slide in the new narrative:
+   - If slide NOT in `editedSlides`: Use new AI-generated content
+   - If slide IS in `editedSlides`:
+     a. Start with new AI-generated content as base
+     b. Get founder edits via `getSlideEdits(edit_history, slide)`
+     c. Apply each founder edit to the new content (deep merge)
+     d. Re-run Guardian alignment check on merged content
+4. Set `is_edited = (editedSlides.size > 0)`
+5. Preserve `edit_history` entries with `edit_source: 'founder'`
+6. Add new entries with `edit_source: 'regeneration'` for AI changes
+7. Increment version, save previous to `narrative_versions`
+
+**Evidence Citation Updates**:
+
+When regenerating, evidence citations within narrative text may become stale (e.g., evidence ID changed, evidence deleted). The regeneration process:
+
+1. Parses citation markers in narrative text: `[evidence:uuid]` or `[interview:uuid]`
+2. Maps old evidence IDs to new evidence IDs where possible
+3. For unmappable citations:
+   - If slide is NOT founder-edited: New AI content won't have stale citations
+   - If slide IS founder-edited: Flag as `regeneration_conflict` for founder review
 
 **Error States**:
 
@@ -3219,7 +3392,7 @@ _Aligned with: Portfolio Holder Vision Phase 1 (Founder Launch)_
 - [ ] Build narrative preview component (Founder Dashboard)
 - [ ] Implement soft/hard staleness detection triggers
 - [ ] Add PDF export with verification footer (URL + QR code)
-- [ ] Implement `/api/verify/{hash}` public endpoint
+- [ ] Implement `/api/verify/:verification_token` public endpoint
 - [ ] Validate A11 (Founder Narrative Value) concurrent with A6 interviews
 - [ ] **Dogfooding checkpoint**: Before Phase 1 launch
   - [ ] Generate narrative for chris00walker@proton.me test founder account
@@ -3588,3 +3761,6 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-04 | 1.8     | **Batch 1 refinements**: (1) Added `evidence_gaps` field to PitchNarrative metadata for tracking missing/weak evidence per slide. (2) Added RLS policies for analytics: founders can view access to their packages, PHs can INSERT/UPDATE access records. (3) Added comprehensive Hash Canonicalization Rules section with algorithm, sorting rules, and verification notes. (4) Replaced `@vercel/og` with `satori + @resvg/resvg-js` for Netlify-compatible OG image generation. (5) Verified staleness single source of truth on `projects` table (per v1.7). (6) Verified verification URL uses `verification_token` consistently throughout spec. |
 | 2026-02-04 | 1.9     | **Batch 2 refinements**: (1) Enhanced `EditHistoryEntry` with `slide` field for per-slide edit tracking, added `SlideKey` type and `edit_source` discriminator. (2) Aligned `professional_summary` limits: 500 chars stored, 200 chars displayed in pitch. Added `years_experience` to FounderProfile. (3) Added comprehensive `evidence_category` migration rules with SQL backfill strategy and mapping table. (4) Clarified `access.shared_with` is computed from `evidence_package_access` table, not stored. (5) Added Font Bundling section for `@react-pdf/renderer` with setup code, file requirements, and testing checklist. |
 | 2026-02-04 | 2.0     | **Batch 3 refinements (spec complete)**: (1) Added EvidencePackage schema-to-DB mapping table clarifying API response vs database storage. (2) Added `is_edited` and `alignment_status` to verification endpoint response with field notes. (3) Added EXCEPTION handlers to `mark_narrative_stale()` trigger with fallback behavior for schema mismatches. (4) Added Timestamp Semantics table and `last_updated` field to PitchNarrative. (5) Added MarketSize normalization rules with conversion formulas, implementation code, and display formatting. (6) Added alignment_status state transition documentation with explicit rules for edit → pending → verified/flagged flow. |
+| 2026-02-04 | 2.1     | **Schema/RLS fixes**: (1) Added `WITH CHECK` clause to `founder_profiles FOR ALL` RLS policy for INSERT/UPDATE operations. (2) Added analytics tables RLS guidance: service-role only access with commented future user-facing policies. (3) Updated narrative caching logic to reference `projects.narrative_is_stale` instead of removed field, with explicit cache check and invalidation SQL queries. |
+| 2026-02-04 | 2.2     | **Contract alignment**: (1) Aligned verification endpoint to use `/api/verify/:verification_token` consistently (removed `{short-hash}` references). (2) Removed `fit_score_at_generation` from public verification response per sanitization table security rationale. (3) Added `is_edited`, `alignment_status`, `request_access_url` to Response Sanitization table. (4) Rewrote hash canonicalization to use actual EvidencePackage fields (`validation_evidence.*` instead of non-existent fields). (5) Added `stableStringify` function for deterministic nested key ordering (fixes `JSON.stringify` limitation). (6) Clarified hash scope: validation_evidence + integrity metadata only; pitch_narrative excluded so founder edits don't change hash. |
+| 2026-02-04 | 2.3     | **Regeneration algorithm fix**: (1) Added `getFounderEditedSlides()` and `getSlideEdits()` helper functions to derive per-slide edit status from `edit_history`. (2) Rewrote regeneration algorithm to use actual schema: computes edited slides from edit_history, applies founder edits via deep merge, tracks edit_source for each change. (3) Added Evidence Citation Updates section explaining how stale citations are handled during regeneration. (4) Added SQL note to pitch_narratives schema showing how to query per-slide edits from JSONB. (5) Removed references to non-existent per-slide `is_edited` and `content` fields. |
