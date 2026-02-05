@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v3.5 | **Updated**: 2026-02-05 | **Owner**: product-strategist
+**Status**: Draft v3.6 | **Updated**: 2026-02-05 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -1242,7 +1242,7 @@ The Narrative Layer is NOT a separate agent. It is an **additional output format
 
 **Current responsibility**: Compile agent outputs into structured Strategyzer artifact reports.
 
-**Extended responsibility**: Additionally generate a `pitch_narrative` JSON object and an `evidence_package` JSON object from the same underlying data.
+**Extended responsibility**: Additionally generate a `pitch_narrative` **content** JSON object (`PitchNarrativeContent`) and an `evidence_package` JSON object from the same underlying data.
 
 **No new agents required.** The Report Compiler already has access to all agent outputs. The extension adds two new output schemas and narrative synthesis prompts to its task configuration.
 
@@ -1250,7 +1250,17 @@ The Narrative Layer is NOT a separate agent. It is an **additional output format
 
 #### Pitch Narrative Schema
 
-**Timestamp Semantics**:
+**Important**: `PitchNarrativeContent` defines the JSON stored in `pitch_narratives.narrative_data` and is the **hash input**. `PitchNarrative` defines the **API response shape**, assembled from table columns + `PitchNarrativeContent`.
+
+| Interface Field | Database Source |
+|-----------------|-----------------|
+| `id` | `pitch_narratives.id` |
+| `project_id` | `pitch_narratives.project_id` |
+| `generated_at` | `pitch_narratives.created_at` |
+| `last_updated` | `pitch_narratives.updated_at` |
+| `content` | `pitch_narratives.narrative_data` (JSONB, `PitchNarrativeContent`) |
+
+**Timestamp Semantics** (for `PitchNarrative` response):
 | TypeScript Field | Database Source | Meaning |
 |------------------|-----------------|---------|
 | `generated_at` | `pitch_narratives.created_at` | When AI generated this narrative version |
@@ -1259,10 +1269,15 @@ The Narrative Layer is NOT a separate agent. It is an **additional output format
 
 ```typescript
 interface PitchNarrative {
-  version: string; // Schema version
+  id: string;
+  project_id: string;
   generated_at: string; // ISO timestamp — maps to pitch_narratives.created_at
   last_updated?: string; // ISO timestamp — maps to pitch_narratives.updated_at (if different from generated_at)
-  project_id: string; // FK to projects table
+  content: PitchNarrativeContent;
+}
+
+interface PitchNarrativeContent {
+  version: string; // Schema version
 
   // Cover (title card — precedes the essential ten)
   // PURPOSE: Capture attention, set tone, create "white space" for founder to express
@@ -1567,7 +1582,6 @@ interface PitchNarrative {
     evidence_strength: "SAY" | "DO-indirect" | "DO-direct";
     overall_fit_score: number;
     validation_stage: string; // Current gate
-    last_updated: string;
     pivot_count: number;           // Number of hypotheses invalidated
     latest_pivot?: {
       original_hypothesis: string;
@@ -1973,9 +1987,9 @@ CREATE TABLE pitch_narratives (
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
 
-  -- Narrative content (JSON matching PitchNarrative schema)
-  narrative_data JSONB NOT NULL,              -- Current narrative (may be edited)
-  baseline_narrative JSONB NOT NULL,          -- Original AI-generated narrative (never modified)
+  -- Narrative content (JSON matching PitchNarrativeContent schema)
+  narrative_data JSONB NOT NULL,              -- Current narrative content (may be edited)
+  baseline_narrative JSONB NOT NULL,          -- Original AI-generated content (never modified)
 
   -- Editing provenance
   is_edited BOOLEAN DEFAULT FALSE,            -- True if founder has modified baseline
@@ -2039,6 +2053,11 @@ CREATE TABLE narrative_exports (
   verification_token UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE,  -- Public verification URL token
   generation_hash VARCHAR(64) NOT NULL,             -- SHA-256 of narrative content at export time
 
+  -- Evidence snapshot (ensures verification response matches the exported PDF)
+  evidence_package_id UUID NOT NULL REFERENCES evidence_packages(id),
+  venture_name_at_export VARCHAR(200) NOT NULL,
+  validation_stage_at_export VARCHAR(50) NOT NULL,
+
   -- Export metadata
   export_format VARCHAR(10) NOT NULL,               -- 'pdf', 'pptx', 'json'
   storage_path VARCHAR(500) NOT NULL,               -- Supabase Storage path: narrative-exports/{narrative_id}/{export_id}.{format}
@@ -2065,9 +2084,9 @@ CREATE INDEX idx_narrative_exports_narrative_id
 
 The narrative hash (`generation_hash` in `narrative_exports`, compared against `current_hash` at verification time) represents **content integrity** of the pitch narrative itself.
 
-**What Gets Hashed**: The `narrative_data` JSONB column only, which contains the actual narrative slides and text.
+**What Gets Hashed**: The `narrative_data` JSONB column only, which stores `PitchNarrativeContent` (slides, text, formatting).
 
-**Schema Design Note**: By design, `narrative_data` contains ONLY content (slides, text, formatting). All metadata fields that could affect hash stability are stored as **separate table columns** on `pitch_narratives`, not within the JSONB:
+**Schema Design Note**: By design, `narrative_data` contains ONLY `PitchNarrativeContent`. All metadata fields that could affect hash stability are stored as **separate table columns** on `pitch_narratives`, not within the JSONB:
 
 | Separate Column (NOT in narrative_data) | Purpose |
 |----------------------------------------|---------|
@@ -2099,11 +2118,11 @@ import { createHash } from 'crypto';
  * Uses recursive key sorting to ensure identical content always produces
  * identical hashes, regardless of object key insertion order.
  *
- * Note: narrative_data contains ONLY content (slides, text, formatting).
- * Timestamps and metadata are stored in separate table columns, so no
+ * Note: narrative_data contains ONLY PitchNarrativeContent (slides, text, formatting).
+ * Timestamps and API metadata are stored in separate table columns, so no
  * field stripping is required.
  */
-function computeNarrativeHash(narrativeData: PitchNarrative): string {
+function computeNarrativeHash(narrativeData: PitchNarrativeContent): string {
   // Sort keys recursively for deterministic output
   const sortKeys = (obj: unknown): unknown => {
     if (Array.isArray(obj)) return obj.map(sortKeys);
@@ -2132,8 +2151,8 @@ def compute_narrative_hash(narrative_data: dict) -> str:
     """
     Compute deterministic hash matching TypeScript implementation.
 
-    Note: narrative_data contains ONLY content (slides, text, formatting).
-    Timestamps and metadata are stored in separate table columns, so no
+    Note: narrative_data contains ONLY PitchNarrativeContent (slides, text, formatting).
+    Timestamps and API metadata are stored in separate table columns, so no
     field stripping is required.
     """
     canonical = json.dumps(narrative_data, sort_keys=True, separators=(',', ':'))
@@ -2148,7 +2167,7 @@ CREATE TABLE narrative_versions (
   narrative_id UUID NOT NULL REFERENCES pitch_narratives(id) ON DELETE CASCADE,
   version_number INTEGER NOT NULL,
 
-  -- Snapshot at this version
+  -- Snapshot at this version (PitchNarrativeContent)
   narrative_data JSONB NOT NULL,
   source_evidence_hash VARCHAR(64) NOT NULL,
   fit_score_at_version DECIMAL(3,2),
@@ -2270,7 +2289,7 @@ CREATE POLICY "Founders can view own narrative versions"
 -- Narrative exports: inherit access from parent narrative
 -- NOTE: Public verification uses SERVICE ROLE to lookup tokens (see "Verification Endpoint Security")
 -- This allows anyone with a verification URL to validate an export without Supabase auth.
--- The /api/narratives/verify endpoint returns only limited verification response, not full export data.
+-- The /api/verify/:verification_token endpoint returns only limited verification response, not full export data.
 ALTER TABLE narrative_exports ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Founders can view own exports"
@@ -2700,7 +2719,7 @@ POST /api/narrative/generate
 {
   "narrative_id": "uuid",
   "pitch_narrative": {
-    /* PitchNarrative schema */
+    /* PitchNarrative (API response) */
   },
   "is_fresh": true,
   "generated_from": {
@@ -3072,14 +3091,14 @@ GET /api/verify/:verification_token
 ```json
 {
   "status": "verified" | "outdated" | "not_found",
-  "generated_at": "2026-02-04T14:34:00Z",
+  "exported_at": "2026-02-04T14:34:00Z",
   "venture_name": "Acme Logistics",
   "evidence_id": "a3f8c2d1e9b4",
   "generation_hash": "abc123...",
   "current_hash": "abc123...",
   "current_hash_matches": true,
-  "evidence_updated_at": "2026-02-04T14:34:00Z",
-  "validation_stage_at_generation": "Solution Testing",
+  "evidence_generated_at": "2026-02-04T14:34:00Z",
+  "validation_stage_at_export": "Solution Testing",
   "is_edited": true,
   "alignment_status": "verified",
   "request_access_url": "/connect/request?founder=uuid"
@@ -3087,13 +3106,18 @@ GET /api/verify/:verification_token
 ```
 
 **Response Field Notes**:
-- `evidence_id`: Derived at verification time from the primary `evidence_packages` record for the narrative's project. This is the first 12 characters of `evidence_packages.integrity_hash` (SHA-256 of validation evidence). See "Evidence ID Derivation" section under Verification for the lookup query.
-- `fit_score_at_generation`: **Intentionally excluded** from public response. See Response Sanitization table for rationale.
+- `exported_at`: Timestamp of the export that generated this verification token (`narrative_exports.exported_at`).
+- `venture_name`: Snapshot from `narrative_exports.venture_name_at_export`.
+- `evidence_id`: Derived from `narrative_exports.evidence_package_id` → `evidence_packages.integrity_hash`. This is the first 12 characters of the hash (SHA-256 of validation evidence). See "Evidence ID Derivation" section under Verification for the lookup query.
+- `evidence_generated_at`: `evidence_packages.created_at` for the exported evidence package (snapshot).
+- `validation_stage_at_export`: Snapshot at export time (from `narrative_exports.validation_stage_at_export`).
+- `fit_score_at_export`: **Intentionally excluded** from public response. See Response Sanitization table for rationale.
 - `is_edited`: `true` if founder has modified the AI-generated narrative. Provides transparency about customization.
 - `alignment_status`: `"verified"` | `"flagged"` | `"pending"` — Guardian's assessment of whether edits maintain evidence alignment.
   - `verified`: Edits checked and approved by Guardian
   - `flagged`: Guardian detected claims that may exceed evidence (view with caution)
   - `pending`: Edits not yet reviewed by Guardian
+- `is_edited` and `alignment_status` reflect the **current** narrative state (post-export), so viewers see the latest Guardian assessment even for older PDFs.
 - `request_access_url`: Deep link to request founder connection (lead capture for marketplace).
 
 ### Narrative Export
@@ -3163,43 +3187,60 @@ Creates an export record and generates a downloadable file. Each export gets a u
 | 403 | `FORBIDDEN` | Authenticated but not owner of narrative |
 | 404 | `NOT_FOUND` | Narrative does not exist |
 | 422 | `FORMAT_NOT_SUPPORTED` | Requested format not available |
+| 422 | `EVIDENCE_PACKAGE_MISSING` | No evidence package available for export snapshot |
 
 **Logic**:
 
 1. Verify user owns the narrative
 2. Generate export file in requested format
-3. Create row in `narrative_exports` table with:
+3. Resolve `evidence_package_id` snapshot:
+   - Prefer `evidence_packages` where `pitch_narrative_id = :narrative_id`
+   - Fallback to `evidence_packages.is_primary = TRUE` for the project
+   - If none found: return `422` with `EVIDENCE_PACKAGE_MISSING`
+4. Generate `export_id` (UUID) in application code (used for storage_path)
+5. Create row in `narrative_exports` table with:
    - `verification_token`: New UUID for this export
    - `generation_hash`: SHA-256 of narrative content
    - `format`: Requested format
    - `storage_path`: Path in Supabase Storage
    - `qr_code_included`: Whether QR code was embedded
+   - `evidence_package_id`: Snapshot of evidence package used for this export
+   - `venture_name_at_export`: Snapshot of cover venture name (`narrative_data.cover.venture_name`)
+   - `validation_stage_at_export`: Snapshot of narrative validation stage (`narrative_data.metadata.validation_stage`)
 
    ```sql
    INSERT INTO narrative_exports (
+     id,
      narrative_id,
      verification_token,
      generation_hash,
+     evidence_package_id,
+     venture_name_at_export,
+     validation_stage_at_export,
      export_format,
      storage_path,
      qr_code_included
    ) VALUES (
+     :export_id,
      :narrative_id,
      gen_random_uuid(),
      :generation_hash,
+     :evidence_package_id,
+     :venture_name_at_export,
+     :validation_stage_at_export,
      :format,
-     'narrative-exports/' || :narrative_id || '/' || currval('narrative_exports_id_seq') || '.' || :format,
+     'narrative-exports/' || :narrative_id || '/' || :export_id || '.' || :format,
      :include_qr_code
    );
    ```
 
-4. Upload file to Supabase Storage bucket `narrative-exports`
-5. Generate signed URL with 24-hour expiration
-6. If `include_qr_code = true` (PDF only):
-   - QR code contains `verification_url`
+6. Upload file to Supabase Storage bucket `narrative-exports`
+7. Generate signed URL with 24-hour expiration
+8. If `include_qr_code = true` (PDF only):
+   - QR code encodes **only** the `verification_url` (scan-to-open)
    - QR placement: Bottom-right of cover slide
-   - QR includes: venture name, generation date, verification link
-7. Return export metadata with download URL
+   - Venture name and export date are printed in the footer (not encoded in the QR)
+9. Return export metadata with download URL
 
 **Implementation Notes**:
 
@@ -3426,10 +3467,10 @@ Portfolio Holders receive **both** formats simultaneously. The narrative gets th
 **PDF Verification Footer**: All exported PDFs include a footer on every slide:
 - Verification URL: `app.startupai.site/verify/{verification_token}`
 - QR code linking to verification URL
-- Generation timestamp
-- Evidence ID (first 12 characters of `evidence_packages.integrity_hash` for the primary evidence package)
+- Export timestamp
+- Evidence ID (first 12 characters of `evidence_packages.integrity_hash` for the exported evidence package)
 
-**Note**: Evidence ID is derived at export time by joining from `narrative_exports` to `pitch_narratives` to `evidence_packages` (using `is_primary = TRUE` or matching `pitch_narrative_id`). See "Evidence ID Derivation" section under Verification for the lookup query.
+**Note**: Evidence ID is derived from `narrative_exports.evidence_package_id` (snapshot at export time). See "Evidence ID Derivation" section under Verification for the lookup query.
 
 This maintains integrity guarantees when PDFs are shared outside the platform and creates a lead capture mechanism for external investors.
 
@@ -3824,32 +3865,29 @@ The `/api/verify/:verification_token` endpoint uses the per-export verification 
 
 This per-export model allows old PDFs to be detected as stale after narrative regeneration, while new exports remain verified. See the `narrative_exports` table schema and Decision Log entry "Verification tokens are per-export, not per-narrative" for details.
 
+**Note**: Verification `status` reflects **narrative content integrity only**. Evidence freshness (staleness) does **not** change `status`; use in-app staleness indicators. The public response exposes `evidence_generated_at` as context for the evidence snapshot used at export.
+
 #### Evidence ID Derivation
 
-The `evidence_id` field in the verification response and PDF footer is derived at verification/export time by joining to the primary `evidence_packages` record for the narrative's project. This is NOT stored on `narrative_exports` but computed dynamically:
+The `evidence_id` field in the verification response and PDF footer is derived from the evidence package snapshot captured at export time. `narrative_exports.evidence_package_id` points to the exact `evidence_packages` row used for the export.
 
 ```sql
 -- Get evidence_id for verification response or PDF export
 SELECT
-  LEFT(ep.integrity_hash, 12) as evidence_id,
-  ep.id as evidence_package_id
+  ep.integrity_hash as evidence_hash,
+  LEFT(ep.integrity_hash, 12) as evidence_id
 FROM narrative_exports ne
-JOIN pitch_narratives pn ON pn.id = ne.narrative_id
-JOIN evidence_packages ep ON ep.project_id = pn.project_id
-  AND (ep.is_primary = TRUE OR ep.pitch_narrative_id = pn.id)
+JOIN evidence_packages ep ON ep.id = ne.evidence_package_id
 WHERE ne.verification_token = :token
-ORDER BY
-  CASE WHEN ep.pitch_narrative_id = pn.id THEN 0 ELSE 1 END,  -- Prefer exact match
-  ep.created_at DESC  -- Then most recent
 LIMIT 1;
 ```
 
-**Rationale**: The `evidence_id` represents the underlying validation evidence that supports the narrative. By deriving it at verification time:
-1. The ID always reflects the current primary evidence package
-2. No denormalization required on `narrative_exports`
-3. If evidence is re-packaged, the ID updates automatically
+**Rationale**: The `evidence_id` represents the underlying validation evidence that supports the narrative. By deriving it from the export snapshot at verification time:
+1. The ID always matches the evidence snapshot used at export time
+2. Old PDFs remain verifiable even if a new primary evidence package is created
+3. Verification responses remain consistent with the exported PDF content
 
-**Display Format**: First 12 characters of `evidence_packages.integrity_hash` (SHA-256), displayed as `a3f8c2...d1e9b4` in UI contexts where brevity is preferred.
+**Display Format**: Public verification returns the first 12 characters of `evidence_packages.integrity_hash` (SHA-256), displayed as `a3f8c2...d1e9b4`. Authenticated/internal views may show the full 64-character hash.
 
 ### Staleness Threshold Model
 
@@ -3964,7 +4002,7 @@ When founders export PDFs and share them outside the platform, integrity guarant
 
 1. **Verification URL**: `app.startupai.site/verify/{verification_token}`
 2. **QR code**: Links to the same verification URL
-3. **Generation timestamp**: Embedded in footer
+3. **Export timestamp**: Embedded in footer
 4. **Integrity hash**: First 12 characters visible as "Evidence ID"
 
 **Verification Page** (public, no auth required):
@@ -3975,7 +4013,7 @@ When founders export PDFs and share them outside the platform, integrity guarant
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
 │  Narrative: "Acme Logistics"                                  │
-│  Generated: February 4, 2026 at 2:34 PM UTC                  │
+│  Exported: February 4, 2026 at 2:34 PM UTC                   │
 │  Evidence ID: a3f8c2d1e9b4                                   │
 │                                                               │
 │  Status: ✓ VERIFIED                                          │
@@ -4015,21 +4053,21 @@ GET /api/verify/:verification_token
 ```json
 {
   "status": "verified" | "outdated" | "not_found",
-  "generated_at": "2026-02-04T14:34:00Z",
+  "exported_at": "2026-02-04T14:34:00Z",
   "venture_name": "Acme Logistics",
   "evidence_id": "a3f8c2...d1e9b4",
   "generation_hash": "abc123...",
   "current_hash": "abc123...",
   "current_hash_matches": true,
-  "evidence_updated_at": "2026-02-04T14:34:00Z",
-  "validation_stage_at_generation": "Solution Testing",
+  "evidence_generated_at": "2026-02-04T14:34:00Z",
+  "validation_stage_at_export": "Solution Testing",
   "is_edited": true,
   "alignment_status": "verified",
   "request_access_url": "/connect/request?founder=uuid"
 }
 ```
 
-**Note**: See Response Sanitization table for fields intentionally excluded from public response (e.g., `fit_score_at_generation`).
+**Note**: See Response Sanitization table for fields intentionally excluded from public response (e.g., `fit_score_at_export`).
 
 #### Verification Endpoint Security
 
@@ -4047,7 +4085,7 @@ The verification URL uses a full UUID token rather than a truncated SHA-256 hash
 - Generate a separate random UUID as `verification_token` (not derived from content)
 - Store in `narrative_exports` table alongside the `generation_hash` (per-export, not per-narrative)
 - URL format: `app.startupai.site/verify/{verification_token}`
-- The `evidence_id` displayed to users is the first 12 characters of `evidence_packages.integrity_hash`, derived at verification time (see "Evidence ID Derivation" section)
+- The `evidence_id` displayed to users is the first 12 characters of `evidence_packages.integrity_hash`, derived from `narrative_exports.evidence_package_id` (see "Evidence ID Derivation" section)
 - Each export gets its own token; regeneration creates new exports with new tokens
 - Old export tokens continue to work but return `outdated` status
 
@@ -4077,10 +4115,11 @@ The public endpoint intentionally omits sensitive data:
 | Field | Public | Authenticated | Rationale |
 |-------|--------|---------------|-----------|
 | `status` | Yes | Yes | Core verification purpose |
-| `generated_at` | Yes | Yes | Timestamp verification |
+| `exported_at` | Yes | Yes | Timestamp verification |
 | `venture_name` | Yes | Yes | Already on the PDF |
+| `evidence_generated_at` | Yes | Yes | Evidence snapshot context |
 | `evidence_id` | Truncated (12 chars) | Full (64 chars) | Derived from `evidence_packages.integrity_hash`; truncated in public to prevent hash collision attacks |
-| `validation_stage` | Yes | Yes | General context |
+| `validation_stage_at_export` | Yes | Yes | General context (as of export) |
 | `is_edited` | Yes | Yes | Transparency about founder customization |
 | `alignment_status` | Yes | Yes | Trust signal (Guardian verification) |
 | `request_access_url` | Yes | Yes | Lead capture for marketplace |
@@ -4714,7 +4753,7 @@ narrative_synthesis_task:
        - Never frame invalidation as failure - it demonstrates founder discipline
 
   expected_output: >
-    JSON object matching the PitchNarrative schema with all 10 slides
+    JSON object matching the PitchNarrativeContent schema with all 10 slides
     populated from available evidence. Slides with insufficient evidence
     should have entries in `metadata.evidence_gaps[slide_name]` describing
     the gap_type, description, recommended_action, and blocking_publish status.
@@ -4982,6 +5021,20 @@ test.describe('Verification integrity after regeneration', () => {
   test('verification returns not_found for invalid token', async () => {
     const verification = await verifyNarrative('invalid-token-uuid');
     expect(verification.status).toBe('not_found');
+  });
+
+  test('verification evidence_id stays tied to export snapshot', async () => {
+    // Setup: Export using current evidence package
+    const narrative = await generateNarrative(projectId);
+    const exportResult = await exportNarrative(narrative.id, 'pdf');
+    const v1 = await verifyNarrative(exportResult.verification_token);
+
+    // Act: Create a NEW primary evidence package after export
+    await createEvidencePackage(projectId, { is_primary: true, replace_primary: true });
+
+    // Verify: evidence_id should remain the same for the old export
+    const v1After = await verifyNarrative(exportResult.verification_token);
+    expect(v1After.evidence_id).toBe(v1.evidence_id);
   });
 });
 
@@ -5416,10 +5469,11 @@ Migrations must be applied in this order:
 3. `CREATE TABLE pitch_narratives...`
 4. `CREATE TABLE narrative_versions...`
 5. `CREATE TABLE evidence_packages...`
-6. `CREATE TABLE evidence_package_access...`
-7. `CREATE FUNCTION mark_narrative_stale()...` (create trigger function)
-8. `CREATE TRIGGER...` (attach triggers - must come after function and target tables exist)
-9. `CREATE INDEX...` (create indexes last)
+6. `CREATE TABLE narrative_exports...` (FK to `evidence_packages` requires table first)
+7. `CREATE TABLE evidence_package_access...`
+8. `CREATE FUNCTION mark_narrative_stale()...` (create trigger function)
+9. `CREATE TRIGGER...` (attach triggers - must come after function and target tables exist)
+10. `CREATE INDEX...` (create indexes last)
 
 **Rollback plan**: If staleness triggers cause performance issues:
 ```sql
@@ -5644,3 +5698,4 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-05 | 3.3     | **Per-export verification tokens**: Architectural decision that verification tokens are per-export, not per-narrative. (1) Deprecated `verification_token` column on `pitch_narratives` table. (2) Added `narrative_exports` table with: `id` UUID PK, `narrative_id` UUID FK, `verification_token` UUID UNIQUE, `generation_hash` VARCHAR(64), `export_format` VARCHAR(10), `exported_at` TIMESTAMPTZ. (3) Updated Verification Endpoint Security section to reference `narrative_exports` table. (4) Updated `evidence_package_access.verification_token_used` FK reference. (5) Added Decision Log entry documenting rationale: per-export allows detecting stale PDFs after regeneration; old exports show "outdated" status while new exports show "verified". |
 | 2026-02-05 | 3.4     | **Narrative Hash Algorithm documented**: Added explicit "Narrative Hash Algorithm" section after `narrative_exports` table schema. Documents that the narrative hash (`generation_hash`) covers only the `narrative_data` JSONB (actual content). By schema design, all metadata (timestamps, alignment state, editing state, publication state, tracking fields) are stored in separate table columns, not within `narrative_data`. This means the hash implementation simply hashes the entire JSONB without needing to strip or exclude fields. Rationale: hash should represent content integrity, not metadata changes. Added Decision Log entry. |
 | 2026-02-05 | 3.5     | Round 4 fixes: (1) Clarified narrative_data contains only content (timestamps are separate columns), (2) Added GET /api/narrative/:id/exports endpoint, (3) Added storage_path to export insert logic, (4) Clarified evidence_id source for verification, (5) Added company_website to Founder Profile CRUD, (6) Fixed markdown code fence, (7) Added hash stability tests |
+| 2026-02-05 | 3.6     | **Buildability alignment**: (1) Split `PitchNarrativeContent` (stored/hash input) from `PitchNarrative` API response metadata, (2) Added export-time evidence snapshot fields (`evidence_package_id`, `venture_name_at_export`, `validation_stage_at_export`) to `narrative_exports`, (3) Fixed export insert to use app-generated `export_id` (no sequence), (4) Verification response now uses `exported_at` + `evidence_generated_at` and derives evidence_id from export snapshot, (5) Clarified verification status vs evidence freshness, (6) Updated migration ordering, (7) Added evidence_id snapshot verification test. |
