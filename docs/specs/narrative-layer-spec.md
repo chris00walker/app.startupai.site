@@ -11,23 +11,25 @@
 3. [Problem Statement](#problem-statement)
 4. [The 10-Slide Narrative Framework](#the-10-slide-narrative-framework)
 5. [Beyond Architecture: Story, Design, and Text](#beyond-architecture-story-design-and-text)
-6. [Narrative Layer Architecture](#narrative-layer-architecture)
-7. [Database Schema Additions](#database-schema-additions)
-8. [API Contracts](#api-contracts)
-9. [Friendship Loop Integration](#friendship-loop-integration)
-10. [Dual-Format Evidence Package Design](#dual-format-evidence-package-design)
-11. [Evidence Integrity System](#evidence-integrity-system)
-12. [Frontend Components](#frontend-components)
-13. [CrewAI Report Compiler Modifications](#crewai-report-compiler-modifications)
-14. [Validation Requirements](#validation-requirements)
-15. [Implementation Roadmap](#implementation-roadmap)
-16. [Design Considerations](#design-considerations)
-17. [Resolved Design Questions](#resolved-design-questions)
-18. [Open Questions](#open-questions)
-19. [Decision Log](#decision-log)
-20. [Glossary](#glossary)
-21. [References](#references)
-22. [Changelog](#changelog)
+6. [Generation Prerequisites](#generation-prerequisites)
+7. [Narrative Publication](#narrative-publication)
+8. [Narrative Layer Architecture](#narrative-layer-architecture)
+9. [Database Schema Additions](#database-schema-additions)
+10. [API Contracts](#api-contracts)
+11. [Friendship Loop Integration](#friendship-loop-integration)
+12. [Dual-Format Evidence Package Design](#dual-format-evidence-package-design)
+13. [Evidence Integrity System](#evidence-integrity-system)
+14. [Frontend Components](#frontend-components)
+15. [CrewAI Report Compiler Modifications](#crewai-report-compiler-modifications)
+16. [Validation Requirements](#validation-requirements)
+17. [Implementation Roadmap](#implementation-roadmap)
+18. [Design Considerations](#design-considerations)
+19. [Resolved Design Questions](#resolved-design-questions)
+20. [Open Questions](#open-questions)
+21. [Decision Log](#decision-log)
+22. [Glossary](#glossary)
+23. [References](#references)
+24. [Changelog](#changelog)
 
 ---
 
@@ -252,7 +254,13 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 | Hero Image        | Founder upload                     | Optional; product/customer in action          |
 | Document Type     | Fixed value                        | "Investor Briefing" (default)                 |
 | Presentation Date | Generated                          | Current date when narrative generated         |
-| Contact Info      | `user_profiles` + `founder_profiles` | Direct pull (email, LinkedIn, website)      |
+| Contact Info      | `user_profiles` + `founder_profiles` | Direct pull (see note below)                |
+
+**Contact Info Data Sources**:
+- `email`: From `user_profiles.email` (NOT `auth.users` - the user_profiles table stores email directly)
+- `linkedin_url`: From `founder_profiles.linkedin_url`
+- `website_url`: Founder-provided, stored in `founder_profiles` (field TBD - consider adding `company_website` column)
+- `founder_name`: From `user_profiles.full_name`
 
 **Quality Checks** (per *Get Backed*):
 - Does the cover make you want to open the pitch deck?
@@ -977,13 +985,208 @@ The VPD methodology treats hypothesis invalidation as valuable learning, not fai
 
 **Example pivot narrative in Overview slide**:
 
-> "Our initial hypothesis that SMBs would pay for automated invoicing was invalidated through 12 customer interviews — SMBs valued cash flow forecasting 3x more than invoicing automation. This evidence-driven pivot refined our focus to cash flow management, where we achieved 0.85 problem-solution fit."
-
-**Narrative velocity considerations**:
-
-- Pivot count should not penalize founders in marketplace visibility
-- A project with 2 validated hypotheses and 1 invalidated hypothesis demonstrates more rigor than a project with 2 validated hypotheses and no invalidations explored
 - The `pivot_count` metric captures learning velocity, not failure rate
+
+---
+
+## Generation Prerequisites
+
+This section defines what data must be available before narrative generation can proceed, and how the system handles missing or incomplete founder inputs.
+
+### Minimum Required Evidence
+
+Narrative generation requires a baseline of validated evidence. Without this foundation, the generated narrative would be speculative rather than evidence-backed.
+
+| Requirement | Source | Rationale |
+|-------------|--------|-----------|
+| Project basics | `projects` table | Venture name, description required for Cover and Overview |
+| At least one hypothesis | `hypotheses` table | Narrative must be grounded in testable assumptions |
+| Customer profile exists | `customer_profiles` | Problem and Customer slides require persona data |
+| VPC populated | `value_proposition_canvases` | Solution slide requires pain relievers and gain creators |
+
+**Generation gate**: If any of these are missing, the `/api/narrative/generate` endpoint returns `INSUFFICIENT_EVIDENCE` error with a list of missing prerequisites.
+
+### Founder-Input Fields
+
+Several narrative fields require founder input that cannot be inferred from validation data. These fields fall into three categories:
+
+#### Required for Generation
+
+These fields must be present before narrative generation can proceed.
+
+| Field | Slide | Reason Required |
+|-------|-------|-----------------|
+| `company_name` | Cover, Overview | Identity of the venture |
+| `industry` | Overview | Investor context |
+
+#### Optional with Placeholder Generation
+
+These fields can be empty. The narrative generates with contextual placeholders that prompt the founder to complete them.
+
+| Field | Slide | Placeholder Behavior |
+|-------|-------|---------------------|
+| `sales_process` | Traction | Generated text: "Your sales process [to be documented]" |
+| `acquisition_channel` | Customer | Generated text: "Customer acquisition approach [to be defined]" |
+| `ask_amount` | Use of Funds | Slide marked as incomplete; placeholder: "Investment amount [to be specified]" |
+| `ask_type` | Use of Funds | Defaults to "SAFE" with note: "Investment instrument [confirm or update]" |
+| `logo_url` | Cover | Uses branded placeholder pattern |
+| `hero_image_url` | Cover | Uses branded placeholder pattern |
+
+#### Optional for Narrative Richness
+
+These fields enhance the narrative but are not required. Missing fields do not generate placeholders; the narrative simply omits that content.
+
+| Field | Slide | Effect if Missing |
+|-------|-------|-------------------|
+| `linkedin_url` | Cover, Team | Contact section omits LinkedIn |
+| `ip_defensibility` | Solution | Omitted from generated text |
+| `other_participants` | Use of Funds | Omitted from investor list |
+
+### Behavior for Missing Inputs
+
+When founder-input fields are missing, the system follows this decision tree:
+
+1. **Required for generation?** YES -> Block generation; return error with list of missing fields
+2. **Affects sharing quality?** YES -> Generate with placeholder; add to evidence_gaps with appropriate blocking_publish flag
+3. **Neither?** -> Generate without; omit from narrative
+
+### Evidence Gaps for Missing Inputs
+
+When optional-with-placeholder fields are missing, they are recorded in `metadata.evidence_gaps`:
+
+```json
+{
+  "metadata": {
+    "evidence_gaps": {
+      "traction": {
+        "gap_type": "missing",
+        "description": "Sales process not documented",
+        "recommended_action": "Document how you attract, educate, qualify, close, and service customers",
+        "blocking_publish": false
+      },
+      "use_of_funds": {
+        "gap_type": "missing",
+        "description": "Investment ask amount not specified",
+        "recommended_action": "Specify the amount you are raising and investment instrument",
+        "blocking_publish": true
+      }
+    }
+  }
+}
+```
+
+### UI Flow Options
+
+Two approaches for collecting founder inputs before narrative generation.
+
+#### Option A: Pitch Editor Pre-Step (Recommended)
+
+Before generating, prompt founders to review and complete key inputs: company name, industry, investment amount, investment type, and optional sales process.
+
+**Pros**: Narrative starts more complete; founder primed for content
+**Cons**: Additional step before generation
+
+#### Option B: Generate First, Prompt to Fill
+
+Generate the narrative with placeholders, then use the Pitch Editor to highlight incomplete sections and prompt founders to complete them.
+
+**Pros**: Founders see immediate value; editing in context
+**Cons**: May leave gaps unfilled; publish gate catches later
+
+**Recommendation**: Implement Option B for Phase 1 (faster time-to-value), add Option A as enhancement in Phase 2 based on founder feedback on gap completion rates.
+
+---
+
+## Narrative Publication
+
+This section defines what "publish" means for a narrative and the requirements for transitioning from draft to published state.
+
+### Publication States
+
+A pitch narrative exists in one of two states:
+
+| State | Stored As | Description |
+|-------|-----------|-------------|
+| **Draft** | `is_published = false` | Private to founder; can be edited freely; not visible in marketplace |
+| **Published** | `is_published = true` | Shareable with Portfolio Holders; visible in Founder Directory if opted in |
+
+### State Transitions
+
+- **Draft -> Published**: Passes publish gate + founder HITL approval
+- **Published -> Draft**: Founder unpublishes (optional)
+- **Edit while published**: Edits are immediately visible; no auto-unpublish
+
+Note: Editing a published narrative does NOT automatically unpublish it. Use HITL review for significant edits (Phase 2+).
+
+### Publication Gate
+
+Before a narrative can be published, it must pass the publication gate. This ensures Portfolio Holders receive quality, complete narratives.
+
+#### Gate Requirements
+
+| Requirement | Check | Blocking? |
+|-------------|-------|-----------|
+| No blocking evidence gaps | `metadata.evidence_gaps` where `blocking_publish = true` | Yes |
+| Alignment check passed | `alignment_status != 'flagged'` | Yes |
+| HITL review completed (first publish) | Founder has reviewed and approved | Yes |
+| Not hard-stale | `narrative_stale_severity != 'hard'` | Yes |
+| Soft-stale acknowledged | Founder acknowledges stale warning | No (warning only) |
+
+#### Blocking Evidence Gaps
+
+The following gaps block publication:
+
+| Gap | Reason |
+|-----|--------|
+| `ask_amount` missing | Portfolio Holders need to know the investment amount |
+| No traction evidence | Narrative claims not backed by validation data |
+| Customer segment undefined | Cannot pitch to investors without target customer |
+
+The following gaps warn but do not block:
+
+| Gap | Reason |
+|-----|--------|
+| `sales_process` missing | Important but not critical for initial sharing |
+| Team slide incomplete | Founder profile optional for early-stage |
+| Logo/hero image missing | Visual polish, not content quality |
+
+### HITL Review for First Publication
+
+Before a founder can publish their narrative for the first time, they must complete a Human-in-the-Loop review checkpoint.
+
+**Checkpoint Purpose**: Ensure founders have reviewed AI-generated content and take ownership of the narrative they share with investors.
+
+**Checkpoint Flow**:
+
+1. Founder clicks "Publish" for the first time
+2. System displays review modal asking founder to confirm they have reviewed all 10 slides for accuracy, verified traction claims match their evidence, added personal context to AI-generated text, and confirmed the investment ask is current
+3. On approval, record HITL checkpoint in `approval_checkpoints` table
+4. Set `is_published = true` and `first_published_at = NOW()`
+
+**Subsequent Edits**: After first publication, edits do not require re-review unless:
+- The edit is flagged by Guardian alignment check (Phase 2)
+- The narrative becomes hard-stale and is regenerated
+
+### Unpublish Flow
+
+Founders can unpublish a narrative at any time:
+
+1. Founder clicks "Unpublish" from Pitch Editor
+2. Confirmation modal: "This will remove your narrative from Portfolio Holder view. Are you sure?"
+3. On confirm: Set `is_published = false`
+4. Existing Evidence Packages remain accessible to connected PHs (snapshot)
+5. New PH connections will not see the narrative
+
+### Publication Metrics
+
+Track publication behavior for product insights:
+
+| Metric | Definition | Purpose |
+|--------|------------|---------|
+| `time_to_first_publish` | Days from generation to first publish | Measure founder review friction |
+| `publish_gate_failure_reasons` | Which requirements block most often | Identify UX improvements needed |
+| `unpublish_rate` | Published to Unpublished transitions | Signal quality concerns |
+| `edit_after_publish_rate` | Edits made post-publication | Measure "launch and iterate" behavior |
 
 ---
 
@@ -1633,7 +1836,11 @@ interface EvidencePackage {
 
 // --- Supporting Interfaces for Validation Evidence ---
 
-type RelationshipType = 'capital' | 'advice' | 'connections' | 'industry_expertise';
+// RelationshipType must match consultant_clients.relationship_type column values
+// Source: frontend/src/db/schema/consultant-clients.ts (relationshipTypeEnum)
+// Note: The Drizzle schema uses a TEXT column without a CHECK constraint, but the
+// application enforces these values via TypeScript. The canonical enum values are:
+type RelationshipType = 'advisory' | 'capital' | 'program' | 'service' | 'ecosystem';
 
 interface ValuePropositionCanvas {
   customer_segment: string;
@@ -1800,6 +2007,11 @@ CREATE TABLE pitch_narratives (
   verification_token UUID DEFAULT gen_random_uuid(),  -- For public verification URL (full UUID entropy)
   verification_request_count INTEGER DEFAULT 0,       -- Track verification requests for abuse detection
 
+  -- Publication state (see "Narrative Publication" section)
+  is_published BOOLEAN DEFAULT FALSE,               -- TRUE = shareable with PHs, FALSE = draft
+  first_published_at TIMESTAMPTZ,                   -- When founder first approved for sharing
+  last_publish_review_at TIMESTAMPTZ,               -- When founder last completed HITL review
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -1829,6 +2041,11 @@ CREATE TABLE narrative_versions (
 );
 
 -- Evidence packages shared with Portfolio Holders
+-- Cardinality: One project may have multiple evidence packages (e.g., different versions
+-- for different audiences). Selection rules:
+--   - "Latest" = most recent created_at
+--   - Auto-attachment to connection requests uses latest active package
+--   - Only one package per project can be is_primary = true (enforced by partial unique index below)
 CREATE TABLE evidence_packages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id),
@@ -1841,6 +2058,7 @@ CREATE TABLE evidence_packages (
 
   -- Access control
   is_public BOOLEAN DEFAULT FALSE,            -- Visible in Founder Directory
+  is_primary BOOLEAN DEFAULT FALSE,           -- Primary package for auto-attachment
   founder_consent BOOLEAN NOT NULL DEFAULT FALSE,
   consent_timestamp TIMESTAMPTZ,
 
@@ -1848,6 +2066,11 @@ CREATE TABLE evidence_packages (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure only one primary package per project (partial unique index)
+CREATE UNIQUE INDEX idx_evidence_packages_primary_per_project
+  ON evidence_packages(project_id)
+  WHERE is_primary = TRUE;
 
 -- Track which Portfolio Holders have accessed which packages
 CREATE TABLE evidence_package_access (
@@ -1925,21 +2148,34 @@ CREATE POLICY "Founders can view own packages"
   ON evidence_packages FOR SELECT
   USING (auth.uid() = founder_id);
 
-CREATE POLICY "Connected PHs can view shared packages"
+-- SECURITY FIX: Added founder_consent check to prevent unauthorized data access
+-- Consultants can ONLY view packages when founder has explicitly granted consent
+-- See "Founder Consent Flow" documentation in schema comments
+CREATE POLICY "Consultants can view packages with consent"
   ON evidence_packages FOR SELECT
   USING (
-    EXISTS (
-      SELECT 1 FROM consultant_clients cc
-      WHERE cc.consultant_id = auth.uid()
-        AND cc.client_id = evidence_packages.founder_id  -- Note: consultant_clients uses client_id, not founder_id
-        AND cc.connection_status = 'active'
+    -- Owner can always view their own packages (redundant with above policy, but explicit)
+    auth.uid() = founder_id
+    OR
+    -- Connected consultant with EXPLICIT consent
+    (
+      founder_consent = TRUE  -- CRITICAL: Must have explicit founder consent
+      AND EXISTS (
+        SELECT 1 FROM consultant_clients cc
+        WHERE cc.consultant_id = auth.uid()
+          AND cc.client_id = evidence_packages.founder_id
+          AND cc.connection_status = 'active'
+      )
     )
-    OR (
+    OR
+    -- Public packages: founder has opted into marketplace discovery
+    (
       is_public = TRUE
+      AND founder_consent = TRUE  -- Public also requires consent flag
       AND EXISTS (
         SELECT 1 FROM user_profiles up
         WHERE up.id = auth.uid()
-          AND up.role = 'consultant'  -- Use existing role column; consultant_verification_status requires migration
+          AND up.role = 'consultant'
       )
     )
   );
@@ -2133,6 +2369,19 @@ CREATE TRIGGER customer_profile_change_stales_narrative
 CREATE TRIGGER vpc_change_stales_narrative
   AFTER INSERT OR UPDATE ON value_proposition_canvas
   FOR EACH ROW
+  EXECUTE FUNCTION mark_narrative_stale();
+
+-- Founder profile changes trigger soft staleness (Team slide may be outdated)
+-- Note: Triggers on founder_profiles which stores professional background data
+-- for the Team slide. user_profiles (name, email) changes are handled separately.
+CREATE TRIGGER founder_profile_staleness_trigger
+  AFTER UPDATE ON founder_profiles
+  FOR EACH ROW
+  WHEN (
+    OLD.professional_summary IS DISTINCT FROM NEW.professional_summary OR
+    OLD.linkedin_url IS DISTINCT FROM NEW.linkedin_url OR
+    OLD.years_experience IS DISTINCT FROM NEW.years_experience
+  )
   EXECUTE FUNCTION mark_narrative_stale();
 ```
 
@@ -2370,6 +2619,39 @@ GET /api/evidence-package/:id
 
 **Response**: Full `EvidencePackage` schema (both narrative and methodology formats).
 
+```
+GET /api/evidence-packages
+```
+
+**Query Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `project_id` | UUID | Required. Filter by project |
+| `latest` | boolean | Optional. If `true`, return only the most recent package (by `created_at`) |
+| `primary` | boolean | Optional. If `true`, return only the primary package (where `is_primary = true`) |
+
+**Authorization**: Founder owner of the project only.
+
+**Response** (when `latest=true` or `primary=true`):
+```json
+{
+  "package": { /* EvidencePackage */ } | null
+}
+```
+
+**Response** (without `latest` or `primary` filter):
+```json
+{
+  "packages": [/* EvidencePackage[] */],
+  "total": 3
+}
+```
+
+**Logic**:
+- If `latest=true`: Return single package with most recent `created_at` for the project
+- If `primary=true`: Return single package where `is_primary = true` (null if none set)
+- Default: Return all packages for the project, ordered by `created_at DESC`
+
 ### Founder Profile CRUD
 
 ```
@@ -2515,6 +2797,99 @@ GET /api/narrative/:id/versions/:version/diff
 ```
 
 **Response**: Field-by-field diff between specified version and current (or previous version).
+
+
+### Narrative Publication
+
+```
+POST /api/narrative/:id/publish
+```
+
+**Authorization**: Founder owner only.
+
+**Request**:
+
+```json
+{
+  "hitl_confirmation": {
+    "reviewed_slides": true,
+    "verified_traction": true,
+    "added_context": true,
+    "confirmed_ask": true
+  }
+}
+```
+
+**Response (Success)**:
+
+```json
+{
+  "narrative_id": "uuid",
+  "is_published": true,
+  "published_at": "2026-02-05T14:30:00Z",
+  "first_publish": true
+}
+```
+
+**Response (Blocked)**:
+
+```json
+{
+  "error": {
+    "code": "PUBLISH_BLOCKED",
+    "message": "Narrative cannot be published due to blocking issues",
+    "details": {
+      "blocking_gaps": [
+        {
+          "slide": "use_of_funds",
+          "gap_type": "missing",
+          "description": "Investment ask amount not specified"
+        }
+      ],
+      "alignment_status": "flagged",
+      "stale_severity": null
+    }
+  }
+}
+```
+
+**Logic**:
+
+1. Check publication gate requirements (see "Narrative Publication" section):
+   - No `blocking_publish = true` in `metadata.evidence_gaps`
+   - `alignment_status != 'flagged'`
+   - `narrative_stale_severity != 'hard'`
+2. If first publish, require `hitl_confirmation` object with all fields `true`
+3. On success:
+   - Set `is_published = true`
+   - Set `first_published_at = NOW()` if null
+   - Set `last_publish_review_at = NOW()`
+   - Record HITL checkpoint in `approval_checkpoints` table
+4. Return success response
+
+```
+POST /api/narrative/:id/unpublish
+```
+
+**Authorization**: Founder owner only.
+
+**Request**: Empty body or `{}`
+
+**Response**:
+
+```json
+{
+  "narrative_id": "uuid",
+  "is_published": false,
+  "unpublished_at": "2026-02-05T15:00:00Z"
+}
+```
+
+**Logic**:
+
+1. Set `is_published = false`
+2. Existing Evidence Packages remain accessible to connected PHs (snapshot)
+3. New PH connections will not see the narrative
 
 ### External Verification
 
@@ -4172,11 +4547,167 @@ test.describe('Narrative Editing', () => {
   test('version history shows edit diff');
 });
 
+test.describe('Verification integrity after regeneration', () => {
+  test('verification returns verified for current export', async () => {
+    // Setup: Generate narrative and export PDF
+    const narrative = await generateNarrative(projectId);
+    const exportResult = await exportNarrative(narrative.id, 'pdf');
+
+    // Act: Verify immediately
+    const verification = await verifyNarrative(exportResult.verification_token);
+
+    // Assert: Should be verified (hashes match)
+    expect(verification.status).toBe('verified');
+    expect(verification.current_hash_matches).toBe(true);
+  });
+
+  test('verification returns outdated for pre-regeneration PDF', async () => {
+    // Setup: Generate narrative v1 and export
+    const narrative = await generateNarrative(projectId);
+    const v1Export = await exportNarrative(narrative.id, 'pdf');
+    const v1Token = v1Export.verification_token;
+    const v1Hash = v1Export.generation_hash;
+
+    // Act: Regenerate narrative (new evidence hash)
+    await regenerateNarrative(narrative.id);
+
+    // Act: Verify with v1 token
+    const verification = await verifyNarrative(v1Token);
+
+    // Assert: Should be outdated (hash mismatch)
+    expect(verification.status).toBe('outdated');
+    expect(verification.current_hash_matches).toBe(false);
+    expect(verification.generation_hash).toBe(v1Hash);
+    expect(verification.current_hash).not.toBe(v1Hash);
+  });
+
+  test('new export after regeneration has new token and hash', async () => {
+    // Setup: Generate, export, regenerate
+    const narrative = await generateNarrative(projectId);
+    const v1Export = await exportNarrative(narrative.id, 'pdf');
+    await regenerateNarrative(narrative.id);
+
+    // Act: Export again after regeneration
+    const v2Export = await exportNarrative(narrative.id, 'pdf');
+
+    // Assert: New export has different token and hash
+    expect(v2Export.verification_token).not.toBe(v1Export.verification_token);
+    expect(v2Export.generation_hash).not.toBe(v1Export.generation_hash);
+
+    // Verify v2 export is verified
+    const verification = await verifyNarrative(v2Export.verification_token);
+    expect(verification.status).toBe('verified');
+  });
+
+  test('verification returns not_found for invalid token', async () => {
+    const verification = await verifyNarrative('invalid-token-uuid');
+    expect(verification.status).toBe('not_found');
+  });
+});
+
 // Phase 3: Marketplace Integration
 test.describe('Marketplace Integration', () => {
   test('PH requests more evidence from founder');
   test('founder receives and acts on feedback');
   test('verification endpoint rate limits excessive requests');
+});
+
+// RLS Founder Consent Enforcement (Task #17)
+test.describe('RLS founder consent enforcement', () => {
+  test('connected consultant cannot view package without consent', async () => {
+    // Setup: Create connection but founder has NOT granted consent
+    const { founder, consultant } = await setupConnection();
+    const package = await createEvidencePackage(founder.id, projectId);
+
+    // Ensure consent is NOT granted
+    await updatePackage(package.id, { founder_consent: false });
+
+    // Act: Query as consultant
+    const { data, error } = await supabaseAsConsultant
+      .from('evidence_packages')
+      .select('*')
+      .eq('id', package.id);
+
+    // Assert: RLS blocks access - returns empty array
+    expect(data).toHaveLength(0);
+  });
+
+  test('connected consultant CAN view package WITH consent', async () => {
+    // Setup: Create connection with consent granted
+    const { founder, consultant } = await setupConnection();
+    const package = await createEvidencePackage(founder.id, projectId);
+
+    // Grant consent
+    await updatePackage(package.id, { founder_consent: true });
+
+    // Act: Query as consultant
+    const { data, error } = await supabaseAsConsultant
+      .from('evidence_packages')
+      .select('*')
+      .eq('id', package.id);
+
+    // Assert: Access granted
+    expect(data).toHaveLength(1);
+    expect(data[0].id).toBe(package.id);
+  });
+
+  test('founder can always view own packages regardless of consent flag', async () => {
+    // Setup: Create package with consent = false
+    const founder = await createFounder();
+    const package = await createEvidencePackage(founder.id, projectId);
+    await updatePackage(package.id, { founder_consent: false });
+
+    // Act: Query as founder
+    const { data, error } = await supabaseAsFounder
+      .from('evidence_packages')
+      .select('*')
+      .eq('id', package.id);
+
+    // Assert: Founder can always see their own packages
+    expect(data).toHaveLength(1);
+  });
+
+  test('consent revocation immediately blocks access', async () => {
+    // Setup: Consultant has access initially
+    const { founder, consultant } = await setupConnection();
+    const package = await createEvidencePackage(founder.id, projectId);
+    await updatePackage(package.id, { founder_consent: true });
+
+    // Verify initial access
+    let result = await supabaseAsConsultant
+      .from('evidence_packages')
+      .select('*')
+      .eq('id', package.id);
+    expect(result.data).toHaveLength(1);
+
+    // Act: Founder revokes consent
+    await updatePackage(package.id, { founder_consent: false });
+
+    // Assert: Access immediately blocked
+    result = await supabaseAsConsultant
+      .from('evidence_packages')
+      .select('*')
+      .eq('id', package.id);
+    expect(result.data).toHaveLength(0);
+  });
+
+  test('public package requires both is_public AND founder_consent', async () => {
+    // Setup: Create public package without consent
+    const founder = await createFounder();
+    const package = await createEvidencePackage(founder.id, projectId);
+    await updatePackage(package.id, { is_public: true, founder_consent: false });
+
+    const consultant = await createVerifiedConsultant();
+
+    // Act: Query as consultant (no connection, just public access)
+    const { data, error } = await supabaseAsConsultant
+      .from('evidence_packages')
+      .select('*')
+      .eq('id', package.id);
+
+    // Assert: Blocked because founder_consent = false
+    expect(data).toHaveLength(0);
+  });
 });
 ```
 
@@ -4540,6 +5071,10 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-04 | **Narrative version history** for founder learning                    | Reinforces validation→pitch quality connection; shows founders how evidence improvements strengthen narrative                                                                             |
 | 2026-02-04 | **Team slide optional**                                               | Don't gate narrative generation on incomplete founder profile; evidence gaps are features not blockers                                                                                    |
 | 2026-02-04 | **Financial projections excluded** from Evidence Package              | Only methodology-verified data included; full projections are speculation outside VPD scope                                                                                               |
+| 2026-02-05 | **Publication state machine** with draft/published states             | Narratives need a clear sharing gate; PHs should only see reviewed, complete narratives; founders control visibility                                                                      |
+| 2026-02-05 | **Generation prerequisites defined** with required vs optional fields | Prevents speculative narratives; allows generation with placeholders for founder-input fields; evidence gaps track what's missing                                                        |
+| 2026-02-05 | **HITL review required for first publication**                        | Founders must take ownership of AI-generated content before sharing with investors; subsequent edits don't require re-review unless flagged                                              |
+| 2026-02-05 | **Option B (generate first, prompt to fill)** recommended for Phase 1 | Faster time-to-value; founders see immediate results; publish gate catches gaps before sharing; Option A (pre-step) deferred to Phase 2                                                  |
 
 ---
 
@@ -4600,3 +5135,4 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-04 | 2.5     | **Canonicalization completeness**: (1) Replaced SQL note for per-slide edits with reference to TypeScript helper functions (SQL was returning regeneration edits incorrectly). (2) Extended canonicalization to sort ALL arrays: string arrays alphabetically, added `sortBmcArrays()` helper for BMC fields. (3) Explicitly listed all VPC and CustomerProfile fields in canonicalization (not using spread). (4) Updated Canonicalization Rules table with separate rules for object arrays vs string arrays, added Sorted Arrays Summary. |
 | 2026-02-05 | 3.0     | **Get Backed framework integration**: Complete slide-by-slide specification update based on _Get Backed_ (Baehr & Loomis). Each slide now includes: Purpose statement ("What is it?"), What to demonstrate, Quality checks ("What questions must this slide answer?"), and field-to-question mappings. **Schema expansions**: Cover (branding, document metadata), Overview (one_liner, industry, novel_insight), Opportunity (market_confusion), Problem (pain_narrative, affected_population, customer_story, why_exists), Solution (use_cases, demo_assets, ip_defensibility), Traction (growth_metrics, assumptions_validated, sales_process), Customer (persona_summary, demographics, willingness_to_pay, acquisition fields, paying_customers), Competition (primary/secondary_competitors, potential_threats, positioning_map, incumbent_defense), Business Model (split VPD-verified vs optional founder-supplied per Unit Economics Only decision), Team (members[] array, advisors[], investors[], hiring_gaps, team_culture with persistence note), Use of Funds (allocations[], milestones[] with success_criteria). **Consistency fixes**: Aligned all field tables with TypeScript schema, fixed evidence_gap → metadata.evidence_gaps, removed unused UnitEconomics type, added test fixture checklist. |
 | 2026-02-05 | 3.1     | **Beyond Architecture: Story, Design, and Text**: Added comprehensive guidance for the 75% of pitch deck work that goes beyond slide architecture. **Story section**: Four story archetypes (Origin, Customer, Industry, Venture Growth) with elements for each, what makes a great story (things happen, vivid sensory details, conflict), story-to-slide mapping table, example arc diagram, and StartupAI story generation support. **Design section**: Five key elements (Layout, Typography, Color, Images/Photography, Visualized Data) with guidance for each, links to existing PDF Brand Guidelines. **Text section**: Four key elements (Writing Style, Voice and Tone, Format, When Words Are Not Enough) with techniques table for making evidence compelling. Critical insight: "Your evidence will not speak for itself." Updated Table of Contents. |
+| 2026-02-05 | 3.2     | **Generation Prerequisites and Narrative Publication**: (1) Added Generation Prerequisites section defining minimum required evidence for narrative generation (project basics, at least one hypothesis, customer profile, VPC). (2) Defined founder-input field categories: required for generation (`company_name`, `industry`), optional with placeholder (`sales_process`, `acquisition_channel`, `ask_amount`, `ask_type`, `logo_url`, `hero_image_url`), and optional for richness (`linkedin_url`, `ip_defensibility`, `other_participants`). (3) Added evidence gaps for missing inputs with `blocking_publish` flag. (4) Documented UI flow options: Option A (pre-step) vs Option B (generate first), recommending Option B for Phase 1. (5) Added Narrative Publication section defining draft/published states, publication gate requirements (no blocking gaps, alignment passed, HITL review, not hard-stale), HITL review checkpoint flow for first publication, unpublish flow. (6) Added `is_published`, `first_published_at`, `last_publish_review_at` to `pitch_narratives` schema. (7) Added `POST /api/narrative/:id/publish` and `POST /api/narrative/:id/unpublish` API endpoints with request/response schemas. (8) Added publication metrics (`time_to_first_publish`, `publish_gate_failure_reasons`, `unpublish_rate`, `edit_after_publish_rate`). Updated Table of Contents, Decision Log. |
