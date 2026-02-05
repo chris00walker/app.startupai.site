@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v2.3 | **Updated**: 2026-02-04 | **Owner**: product-strategist
+**Status**: Draft v2.5 | **Updated**: 2026-02-04 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -1026,9 +1026,11 @@ CREATE TABLE pitch_narratives (
   alignment_issues JSONB DEFAULT '[]',        -- Array of Guardian-detected issues
 
   -- NOTE: Per-slide edit tracking is DERIVED from edit_history, not stored separately.
-  -- To get edited slides: SELECT DISTINCT jsonb_array_elements(edit_history)->>'slide'
-  --                       FROM pitch_narratives WHERE id = ? AND edit_history @> '[{"edit_source":"founder"}]'
-  -- See "Regeneration with Edit Preservation" section for helper functions.
+  -- Use the TypeScript helper functions in "Regeneration with Edit Preservation" section:
+  --   getFounderEditedSlides(editHistory)  -- Returns Set<SlideKey> of founder-edited slides
+  --   getSlideEdits(editHistory, slide)    -- Returns Map of field -> value for a slide
+  -- These helpers correctly filter by edit_source:'founder' at the element level.
+  -- Raw SQL queries on edit_history JSONB are complex and error-prone; prefer application logic.
 
   -- IMPORTANT: alignment_status state transitions
   -- 1. New AI-generated narrative: DEFAULT 'verified' (AI output is trusted)
@@ -2145,8 +2147,7 @@ import { createHash } from 'crypto';
 
 /**
  * Recursively sorts object keys for deterministic serialization.
- * Arrays are NOT reordered (order may be semantically meaningful),
- * but objects within arrays have their keys sorted.
+ * Arrays are serialized in their given order (sorting happens before this).
  */
 function stableStringify(obj: unknown): string {
   if (obj === null || obj === undefined) {
@@ -2166,6 +2167,30 @@ function stableStringify(obj: unknown): string {
   return '{' + pairs.join(',') + '}';
 }
 
+/**
+ * Sort all array fields in BusinessModelCanvas for deterministic hashing.
+ * BMC has multiple string array fields that need alphabetical sorting.
+ */
+function sortBmcArrays(bmc: BusinessModelCanvas): BusinessModelCanvas {
+  return {
+    ...bmc,
+    key_partners: [...(bmc.key_partners || [])].sort(),
+    key_activities: [...(bmc.key_activities || [])].sort(),
+    key_resources: [...(bmc.key_resources || [])].sort(),
+    value_propositions: [...(bmc.value_propositions || [])].sort(),
+    customer_relationships: [...(bmc.customer_relationships || [])].sort(),
+    channels: [...(bmc.channels || [])].sort(),
+    customer_segments: [...(bmc.customer_segments || [])].sort(),
+    // cost_structure and revenue_streams may be objects or strings - sort if arrays
+    cost_structure: Array.isArray(bmc.cost_structure)
+      ? [...bmc.cost_structure].sort()
+      : bmc.cost_structure,
+    revenue_streams: Array.isArray(bmc.revenue_streams)
+      ? [...bmc.revenue_streams].sort()
+      : bmc.revenue_streams,
+  };
+}
+
 function canonicalizeEvidence(evidence: EvidencePackage): string {
   // Hash the validation_evidence section (methodology data)
   // This is immutable and represents the actual evidence
@@ -2176,22 +2201,29 @@ function canonicalizeEvidence(evidence: EvidencePackage): string {
 
     // Validation evidence (sorted arrays for determinism)
     validation_evidence: {
-      // VPC - sort pains/gains by description
+      // VPC - sort all arrays for determinism
       vpc: {
-        ...evidence.validation_evidence.vpc,
+        customer_segment: evidence.validation_evidence.vpc.customer_segment,
+        customer_jobs: [...evidence.validation_evidence.vpc.customer_jobs].sort(),  // String array - alphabetical
         pains: [...evidence.validation_evidence.vpc.pains]
           .sort((a, b) => a.description.localeCompare(b.description)),
         gains: [...evidence.validation_evidence.vpc.gains]
           .sort((a, b) => a.description.localeCompare(b.description)),
+        pain_relievers: [...evidence.validation_evidence.vpc.pain_relievers].sort(),  // String array
+        gain_creators: [...evidence.validation_evidence.vpc.gain_creators].sort(),    // String array
+        products_services: [...evidence.validation_evidence.vpc.products_services].sort(),  // String array
+        fit_assessment: evidence.validation_evidence.vpc.fit_assessment,
       },
 
-      // Customer profile - sort by job/pain description
+      // Customer profile - sort all arrays
       customer_profile: {
-        ...evidence.validation_evidence.customer_profile,
+        segment_name: evidence.validation_evidence.customer_profile.segment_name,
         jobs_to_be_done: [...evidence.validation_evidence.customer_profile.jobs_to_be_done]
           .sort((a, b) => a.job.localeCompare(b.job)),
         pains: [...evidence.validation_evidence.customer_profile.pains]
           .sort((a, b) => a.pain.localeCompare(b.pain)),
+        gains: [...evidence.validation_evidence.customer_profile.gains]
+          .sort((a, b) => a.gain.localeCompare(b.gain)),
       },
 
       // Competitor map - sort competitors by name
@@ -2201,8 +2233,8 @@ function canonicalizeEvidence(evidence: EvidencePackage): string {
           .sort((a, b) => a.name.localeCompare(b.name)),
       },
 
-      // BMC - keep as-is (single values, not arrays)
-      bmc: evidence.validation_evidence.bmc,
+      // BMC - sort any array fields for determinism
+      bmc: sortBmcArrays(evidence.validation_evidence.bmc),
 
       // Experiment results - sort by experiment_id
       experiment_results: [...evidence.validation_evidence.experiment_results]
@@ -2212,12 +2244,13 @@ function canonicalizeEvidence(evidence: EvidencePackage): string {
       gate_scores: evidence.validation_evidence.gate_scores,
 
       // HITL record - sort checkpoints by type then timestamp
+      // Uses responded_at if available, falls back to triggered_at (per HITLRecord interface)
       hitl_record: {
         ...evidence.validation_evidence.hitl_record,
         checkpoints: [...(evidence.validation_evidence.hitl_record.checkpoints || [])]
           .sort((a, b) =>
             a.checkpoint_type.localeCompare(b.checkpoint_type) ||
-            a.approved_at.localeCompare(b.approved_at)
+            (a.responded_at ?? a.triggered_at).localeCompare(b.responded_at ?? b.triggered_at)
           ),
       },
     },
@@ -2253,11 +2286,23 @@ function computeEvidenceHash(evidence: EvidencePackage): string {
 |------|-------------|---------|
 | Hash scope | Only `validation_evidence` + `integrity` metadata; NOT `pitch_narrative` | Founder edits don't change hash |
 | Object key ordering | All nested object keys sorted alphabetically via `stableStringify` | `{b: 1, a: 2}` → `{"a":2,"b":1}` |
-| Array ordering | Arrays sorted by semantic key (name, id, timestamp) | VPC pains sorted by `description` |
-| Null handling | Missing optional fields become explicit `null` | `metric_value: undefined` → `"null"` |
+| Object array sorting | Arrays of objects sorted by semantic key (description, name, id, job, pain) | VPC pains sorted by `description` |
+| String array sorting | String arrays (`string[]`) sorted alphabetically | `['c','a','b']` → `['a','b','c']` |
+| Null/undefined | `stableStringify` converts `null` and `undefined` to `"null"` | `{x: null}` → `{"x":null}` |
 | Timestamp format | All timestamps in ISO 8601 UTC format | `2026-02-04T12:00:00.000Z` |
 | Number precision | Floats kept as-is (JavaScript number precision) | `0.78333` stays `0.78333` |
 | No whitespace | JSON serialized without pretty-printing | `{"key":"value"}` not `{ "key": "value" }` |
+
+**Sorted Arrays Summary**:
+- String arrays: Alphabetical sort (`.sort()`)
+- Object arrays: Sorted by semantic key field:
+  - `pains`: by `description` or `pain`
+  - `gains`: by `description` or `gain`
+  - `jobs_to_be_done`: by `job`
+  - `competitors`: by `name`
+  - `experiment_results`: by `experiment_id`
+  - `checkpoints`: by `checkpoint_type`, then `responded_at ?? triggered_at`
+  - `agent_versions`: by `agent_name`
 
 **Fields Included in Hash**:
 - `project_id`, `version`
@@ -3726,7 +3771,7 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | **Narrative-Evidence Alignment** | Guardian check verifying that narrative claims are supported by underlying validation data                                                       |
 | **Baseline Narrative**           | The original AI-generated narrative, preserved unchanged when founder makes edits. Used for alignment verification                               |
 | **Provenance Badge**             | Visual indicator showing narrative state: "AI-generated", "Founder-edited · Verified", or "Founder-edited · Flagged"                             |
-| **Verification URL**             | Public URL (`app.startupai.site/verify/{hash}`) that validates an exported PDF's integrity and freshness                                         |
+| **Verification URL**             | Public URL (`app.startupai.site/verify/{verification_token}`) that validates an exported PDF's integrity and freshness                           |
 | **Narrative Version**            | Historical snapshot of a narrative, created when regeneration occurs. Enables founder learning through evolution tracking                        |
 | **DO-Evidence**                  | Behavioral evidence (actions taken by customers). Weight: 1.0 (direct) or 0.8 (indirect)                                                         |
 | **SAY-Evidence**                 | Stated preferences or intentions from interviews/surveys. Weight: 0.3                                                                            |
@@ -3764,3 +3809,5 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-04 | 2.1     | **Schema/RLS fixes**: (1) Added `WITH CHECK` clause to `founder_profiles FOR ALL` RLS policy for INSERT/UPDATE operations. (2) Added analytics tables RLS guidance: service-role only access with commented future user-facing policies. (3) Updated narrative caching logic to reference `projects.narrative_is_stale` instead of removed field, with explicit cache check and invalidation SQL queries. |
 | 2026-02-04 | 2.2     | **Contract alignment**: (1) Aligned verification endpoint to use `/api/verify/:verification_token` consistently (removed `{short-hash}` references). (2) Removed `fit_score_at_generation` from public verification response per sanitization table security rationale. (3) Added `is_edited`, `alignment_status`, `request_access_url` to Response Sanitization table. (4) Rewrote hash canonicalization to use actual EvidencePackage fields (`validation_evidence.*` instead of non-existent fields). (5) Added `stableStringify` function for deterministic nested key ordering (fixes `JSON.stringify` limitation). (6) Clarified hash scope: validation_evidence + integrity metadata only; pitch_narrative excluded so founder edits don't change hash. |
 | 2026-02-04 | 2.3     | **Regeneration algorithm fix**: (1) Added `getFounderEditedSlides()` and `getSlideEdits()` helper functions to derive per-slide edit status from `edit_history`. (2) Rewrote regeneration algorithm to use actual schema: computes edited slides from edit_history, applies founder edits via deep merge, tracks edit_source for each change. (3) Added Evidence Citation Updates section explaining how stale citations are handled during regeneration. (4) Added SQL note to pitch_narratives schema showing how to query per-slide edits from JSONB. (5) Removed references to non-existent per-slide `is_edited` and `content` fields. |
+| 2026-02-04 | 2.4     | **Hash/Glossary consistency**: (1) Fixed HITL checkpoint sorting to use `responded_at ?? triggered_at` instead of non-existent `approved_at` field (aligns with HITLRecord interface). (2) Updated Glossary "Verification URL" term to use `{verification_token}` instead of `{hash}`. |
+| 2026-02-04 | 2.5     | **Canonicalization completeness**: (1) Replaced SQL note for per-slide edits with reference to TypeScript helper functions (SQL was returning regeneration edits incorrectly). (2) Extended canonicalization to sort ALL arrays: string arrays alphabetically, added `sortBmcArrays()` helper for BMC fields. (3) Explicitly listed all VPC and CustomerProfile fields in canonicalization (not using spread). (4) Updated Canonicalization Rules table with separate rules for object arrays vs string arrays, added Sorted Arrays Summary. |
