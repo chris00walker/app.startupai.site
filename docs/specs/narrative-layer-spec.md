@@ -313,7 +313,7 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 | `tam`                    | Pulse market sensing | Total Addressable Market                     |
 | `sam`                    | Pulse market sensing | Serviceable Addressable Market               |
 | `som`                    | Pulse market sensing | Serviceable Obtainable Market                |
-| `growth_rate`            | Pulse                | Market growth trajectory (%)                 |
+| `growth_trajectory`      | Pulse                | Market growth rate + timing                  |
 | `why_now`                | Sage synthesis       | Macro trends enabling this venture           |
 | `market_tailwinds`       | Pulse                | Regulatory, technological, behavioral shifts |
 | `market_confusion`       | Pulse + Sage         | Ambiguity/fragmentation creating opportunity |
@@ -354,7 +354,8 @@ _Note: Not all companies solve new problems; some focus on solving age-old probl
 | `customer_story`       | Validation Agent          | Specific person's experience (name, face, struggle) |
 | `why_exists`           | Sage synthesis            | Root cause — why does this problem persist? |
 | `status_quo`           | Competitor Analyst        | How is it currently being addressed?   |
-| `severity_evidence`    | Validation Agent          | Interview quotes, behavioral data      |
+| `severity_score`       | Validation Agent          | 0-1 quantified pain validation score   |
+| `evidence_quotes`      | Validation Agent          | Top 3 interview quotes illustrating pain |
 
 **What to demonstrate**:
 
@@ -422,12 +423,16 @@ _Note: If you are pre-product and don't have meaningful milestones or metrics, u
 
 | Field                    | Source             | Generation Method                      |
 | ------------------------ | ------------------ | -------------------------------------- |
+| `evidence_summary`       | Sage synthesis     | Narrative summary of all evidence      |
 | `growth_metrics`         | Validation Agent   | Key metrics with trend data (hockey-stick) |
-| `do_evidence`            | Validation Agent   | Signup rates, LOIs, usage data         |
 | `assumptions_validated`  | Validation Agent   | Which assumptions are proving true     |
-| `experiment_results`     | Validation Agent   | Completed experiments + outcomes       |
 | `sales_process`          | Founder input      | How you attract, educate, qualify, close, service |
-| `hitl_progress`          | Approval workflows | Checkpoints completed / total          |
+| `do_direct`              | Validation Agent   | Weight 1.0 evidence (paying customers, contracts) |
+| `do_indirect`            | Validation Agent   | Weight 0.8 evidence (LOIs, signups, usage) |
+| `say_evidence`           | Validation Agent   | Weight 0.3 evidence (interviews, surveys) |
+| `interview_count`        | Evidence table     | Count of interview evidence            |
+| `experiment_count`       | Validation Agent   | Number of completed experiments        |
+| `hitl_completion_rate`   | Approval workflows | Checkpoints completed / total          |
 
 **What to demonstrate**:
 
@@ -453,17 +458,20 @@ _Note: If you are pre-product and don't have meaningful milestones or metrics, u
 
 **Purpose**: Demonstrate how well you know your customers and the market they represent. Describe where they live, what they like to do, and how much they'd be willing to spend. If you already have sales, use those as examples. Also describe the market — how many potential customers are out there who will want to buy your product.
 
-| Field                  | Source              | Generation Method                        |
-| ---------------------- | ------------------- | ---------------------------------------- |
-| `customer_persona`     | Customer Profile    | Describe the person (reminds of someone they know) |
-| `demographics`         | Customer Profile    | Where they live, what they do            |
-| `willingness_to_pay`   | Validation Agent    | How much they'd spend                    |
-| `market_size`          | Pulse               | How many people fit this description     |
-| `target_percentage`    | Sage synthesis      | What % you expect to buy, who you target first |
-| `acquisition_channel`  | Founder input       | How will you reach them?                 |
-| `acquisition_cost`     | Founder input / Validation | CAC estimate                      |
-| `paying_customers`     | Validation Agent    | Existing revenue proof (if any)          |
-| `behavioral_insights`  | Validation Agent    | Interview-derived patterns               |
+| Field                    | Source              | Generation Method                        |
+| ------------------------ | ------------------- | ---------------------------------------- |
+| `segments`               | `customer_profiles` | Customer segment definitions             |
+| `persona_summary`        | Customer Profile    | Describe the person vividly (reminds of someone they know) |
+| `demographics`           | Customer Profile    | Where they live, what they do            |
+| `willingness_to_pay`     | Validation Agent    | How much they'd spend                    |
+| `market_size`            | Pulse               | How many people fit this description     |
+| `target_percentage`      | Sage synthesis      | What % you expect to buy (0-1)           |
+| `target_first`           | Sage synthesis      | Which segment you will target first      |
+| `acquisition_channel`    | Founder input       | How will you reach them?                 |
+| `acquisition_cost`       | Founder input / Validation | CAC estimate                      |
+| `paying_customers`       | Validation Agent    | Existing revenue proof (if any)          |
+| `behavioral_insights`    | Validation Agent    | Interview-derived patterns               |
+| `segment_prioritization` | Sage synthesis      | Which segment first and why              |
 
 **What to demonstrate**:
 
@@ -473,7 +481,7 @@ _Note: If you are pre-product and don't have meaningful milestones or metrics, u
 
 **Quality checks** (questions this slide must answer):
 
-- Who is your customer(s)? → `customer_persona`, `demographics`
+- Who is your customer(s)? → `persona_summary`, `demographics`
 - How will you reach the customer? → `acquisition_channel`
 - What is the acquisition cost per customer? → `acquisition_cost`
 - Is your customer willing to pay for your product or service? → `willingness_to_pay`, `paying_customers`
@@ -527,20 +535,30 @@ Pre-revenue companies may make up assumptions and financials, but that is not an
 
 Equally important: contextualize your math (e.g., "if we get 1% of the market, then we will have hit our revenue projection").
 
+**VPD-verified fields** (from Ledger, included in evidence integrity):
+
 | Field                   | Source         | Generation Method                  |
 | ----------------------- | -------------- | ---------------------------------- |
 | `cac`                   | Ledger         | Customer acquisition cost          |
 | `ltv`                   | Ledger         | Lifetime value per customer        |
 | `ltv_cac_ratio`         | Ledger         | LTV/CAC (should be >3x)            |
 | `unit_economics`        | Ledger         | Per-unit cost breakdown            |
-| `monthly_costs`         | Ledger         | Monthly cost breakdown             |
-| `burn_rate`             | Ledger         | Monthly spend rate                 |
-| `gross_profit`          | Ledger         | Revenue - COGS                     |
-| `ebitda`                | Ledger         | Earnings before interest, taxes, depreciation, amortization |
-| `net_income`            | Ledger         | Bottom line                        |
-| `cash_flow`             | Ledger         | Cash in vs. cash out               |
-| `revenue_projections`   | Ledger         | Forward-looking revenue estimates  |
+| `pricing_strategy`      | Ledger         | Pricing model + rationale          |
 | `market_context`        | Sage synthesis | "If we get X% of market..." framing |
+
+**Optional founder-supplied fields** (excluded from evidence integrity hash):
+
+| Field                   | Source         | Generation Method                  |
+| ----------------------- | -------------- | ---------------------------------- |
+| `monthly_costs`         | Founder input  | Monthly cost breakdown (optional)  |
+| `burn_rate`             | Founder input  | Monthly spend rate (optional)      |
+| `gross_profit`          | Founder input  | Revenue - COGS (optional)          |
+| `ebitda`                | Founder input  | Earnings before interest, taxes, depreciation, amortization (optional) |
+| `net_income`            | Founder input  | Bottom line (optional)             |
+| `cash_flow`             | Founder input  | Cash in vs. cash out (optional)    |
+| `revenue_projections`   | Founder input  | Forward-looking estimates (optional) |
+
+_Note: Per the "Financial Projections — Unit Economics Only" decision, full financial projections are founder-generated and not VPD-validated. They are excluded from the evidence integrity hash but can be included in the narrative for investor presentation._
 
 **What to demonstrate**:
 
@@ -563,16 +581,20 @@ Equally important: contextualize your math (e.g., "if we get 1% of the market, t
 
 | Field                    | Source           | Generation Method                           |
 | ------------------------ | ---------------- | ------------------------------------------- |
-| `team_members`           | Founder input    | Key team member profiles (≤75 words each)   |
-| `current_roles`          | Founder input    | What each person does now                   |
-| `prior_experience`       | Founder input    | Relevant past roles                         |
-| `accomplishments`        | Founder input    | Significant achievements                    |
-| `education`              | Founder input    | Relevant degrees/certifications             |
-| `domain_expertise`       | Founder input    | Why they have insight to get the job done   |
-| `advisors_investors`     | Founder input    | Major advisers or investors (optional)      |
-| `hiring_gaps`            | Founder input    | Who else needs to be hired                  |
-| `team_culture`           | Founder input    | What kind of culture are you creating       |
-| `hitl_coachability`      | HITL checkpoints | Checkpoint completion rate + responsiveness |
+| `members[]`              | Founder input    | Array of team member objects:               |
+|   `.name`                |                  | Team member name                            |
+|   `.current_role`        |                  | What they do now                            |
+|   `.bio`                 |                  | ≤75 words!                                  |
+|   `.prior_experience`    |                  | Relevant past roles (array)                 |
+|   `.accomplishments`     |                  | Significant achievements (array)            |
+|   `.education`           |                  | Relevant degrees/certifications (optional)  |
+|   `.domain_expertise`    |                  | Why they have insight to get the job done   |
+|   `.linkedin_url`        |                  | LinkedIn profile (optional)                 |
+| `advisors[]`             | Founder input    | Array: name, title, relevance (optional)    |
+| `investors[]`            | Founder input    | Array: name, firm (optional)                |
+| `hiring_gaps`            | Founder input    | Who else needs to be hired (array)          |
+| `team_culture`           | Founder input    | What kind of culture you're creating        |
+| `coachability_score`     | HITL checkpoints | From checkpoint completion rate + responsiveness |
 
 **What to demonstrate**:
 
@@ -582,8 +604,8 @@ Equally important: contextualize your math (e.g., "if we get 1% of the market, t
 
 **Quality checks** (questions this slide must answer):
 
-- Why are you the right people for the job? → `domain_expertise`, `prior_experience`, `accomplishments`
-- Is this team sufficient to accomplish the goal? → `team_members`, `advisors_investors`
+- Why are you the right people for the job? → `members[].domain_expertise`, `members[].prior_experience`, `members[].accomplishments`
+- Is this team sufficient to accomplish the goal? → `members[]`, `advisors[]`, `investors[]`
 - Are there others who need to be hired? → `hiring_gaps`
 
 **Narrative function**: Show who is behind the venture. The HITL coachability signal is unique to StartupAI — it provides behavioral evidence that the founder responds to feedback, iterates, and executes. Team precedes Use of Funds because investors back _people_ before they evaluate _budgets_.
@@ -600,9 +622,9 @@ _Note: Some entrepreneurs like to create slides with exit strategies, acquisitio
 | -------------------- | ---------------- | ---------------------------------------- |
 | `ask_amount`         | Founder input    | How much are you raising?                |
 | `ask_type`           | Founder input    | SAFE, equity, convertible note, etc.     |
-| `allocation`         | Validation Agent | How will you spend it? (specific breakdown) |
-| `milestones`         | Validation Agent | What will you accomplish with it?        |
-| `timeline`           | Validation Agent | When will milestones be achieved?        |
+| `allocations[]`      | Validation Agent | How will you spend it? (category, amount, %, experiment) |
+| `milestones[]`       | Validation Agent | What will you accomplish? (description, date, criteria) |
+| `timeline_weeks`     | Validation Agent | Total runway in weeks                    |
 | `other_participants` | Founder input    | Who else is participating in this round? |
 
 **What to demonstrate**:
@@ -613,9 +635,9 @@ _Note: Some entrepreneurs like to create slides with exit strategies, acquisitio
 **Quality checks** (questions this slide must answer):
 
 - What size and type of investment are you looking for? → `ask_amount`, `ask_type`
-- How will you spend it? → `allocation`
-- What will you accomplish with it? → `milestones`
-- Who else is likely to be participating in this investment round? → `other_participants`
+- How will you spend it? → `allocations[]`
+- What will you accomplish with it? → `milestones[]`
+- Who else is likely to be participating in this investment round? → `other_participants[]`
 
 **Narrative function**: The closing slide — show the investor exactly what their capital buys. Framed as validation experiments, not vague "product development" buckets. Placed last because the ask is most compelling _after_ the investor knows the team (Slide 9) and has full context.
 
@@ -921,10 +943,13 @@ interface PitchNarrative {
   };
 
   // Slide 8: Business Model
-  // PURPOSE: Answer three questions: 1) CAC? 2) LTV? 3) Cost breakdown per unit and monthly?
-  //          Include gross profit, EBITDA, net income, burn rate, and cash flow.
+  // PURPOSE: Answer three questions: 1) CAC? 2) LTV? 3) Cost breakdown per unit?
   // DEMONSTRATE: Consistency, Financial literacy, Level-headedness
+  // NOTE: Per "Financial Projections — Unit Economics Only" decision, only unit economics
+  //       (cac, ltv, unit_economics, pricing_strategy) are VPD-verified. Other financial
+  //       fields are optional founder-supplied inputs excluded from evidence integrity hash.
   business_model: {
+    // VPD-verified fields (from Ledger, included in evidence integrity)
     revenue_model: string;       // Narrative description
     cac: number;                 // Customer acquisition cost
     ltv: number;                 // Lifetime value per customer
@@ -935,11 +960,15 @@ interface PitchNarrative {
       margin_per_unit: number;
       breakdown: { category: string; amount: number }[];
     };
-    monthly_costs: {
+    pricing_strategy: string;
+    market_context: string;      // "If we get X% of market..." framing
+
+    // Optional founder-supplied fields (excluded from evidence integrity hash)
+    monthly_costs?: {
       total: number;
       breakdown: { category: string; amount: number }[];
     };
-    burn_rate: number;           // Monthly spend rate
+    burn_rate?: number;          // Monthly spend rate
     gross_profit?: number;       // Revenue - COGS
     ebitda?: number;             // Earnings before interest, taxes, depreciation, amortization
     net_income?: number;         // Bottom line
@@ -948,9 +977,7 @@ interface PitchNarrative {
       period: string;
       amount: number;
     }[];
-    market_context: string;      // "If we get X% of market..." framing
-    pricing_strategy: string;
-    path_to_profitability: string;
+    path_to_profitability?: string; // Founder's projection (optional)
   };
 
   // Slide 9: Team
@@ -1140,14 +1167,7 @@ interface Competitor {
   differentiation: string;  // How we differ from this competitor
 }
 
-interface UnitEconomics {
-  cac: number;              // Customer Acquisition Cost
-  ltv: number;              // Lifetime Value
-  ltv_cac_ratio: number;
-  gross_margin_percent: number;
-  payback_period_months: number;
-  assumptions: string[];    // Key assumptions behind these numbers
-}
+// Note: UnitEconomics is defined inline in business_model.unit_economics
 
 interface FounderProfile {
   name: string;
@@ -3619,7 +3639,8 @@ narrative_synthesis_task:
   expected_output: >
     JSON object matching the PitchNarrative schema with all 10 slides
     populated from available evidence. Slides with insufficient evidence
-    must include an `evidence_gap` field describing what's missing.
+    should have entries in `metadata.evidence_gaps[slide_name]` describing
+    the gap_type, description, recommended_action, and blocking_publish status.
 
   dependencies:
     - customer_research_task
@@ -3871,6 +3892,13 @@ _Aligned with: Portfolio Holder Vision Phase 1 (Founder Launch)_
 - [ ] Build Founder Profile form component (dashboard)
 - [ ] Extend Report Compiler with `narrative_synthesis_task`
 - [ ] Implement `PitchNarrative` schema and JSON output
+- [ ] **Test fixtures**: Update test fixtures and contract tests to include new required fields:
+  - `overview.industry`, `overview.novel_insight`, `overview.one_liner`
+  - `traction.growth_metrics[]`, `traction.assumptions_validated[]`
+  - `customer.persona_summary`, `customer.target_first`, `customer.segment_prioritization`
+  - `team.members[]` array structure (replacing flat fields)
+  - `business_model.unit_economics` inline structure
+  - All slide-level required fields per updated schema
 - [ ] Build narrative preview component (Founder Dashboard)
 - [ ] Implement soft/hard staleness detection triggers
 - [ ] Add PDF export with verification footer (URL + QR code)
@@ -4134,7 +4162,7 @@ If narrative quality matters for marketplace ranking (Phase 4+), create a separa
 If `founder_profiles` data is missing, the Team slide generates with:
 - Basic info from `user_profiles` (name, email)
 - HITL coachability signal (always available from checkpoint data)
-- `evidence_gap` field: "Founder profile incomplete — add professional background for stronger Team slide"
+- `metadata.evidence_gaps['team']`: `{ gap_type: 'missing', description: "Founder profile incomplete — add professional background for stronger Team slide", recommended_action: "Complete founder profile in dashboard", blocking_publish: false }`
 
 This encourages profile completion without blocking narrative generation.
 
