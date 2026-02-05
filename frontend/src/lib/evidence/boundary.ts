@@ -79,6 +79,7 @@ const EvidenceRowSchema = z
     evidence_source: z.string().optional().nullable(),
     occurred_on: z.union([z.string(), z.date()]).optional().nullable(),
     linked_assumptions: z.array(z.string()).optional().nullable(),
+    narrative_category: z.enum(['DO-direct', 'DO-indirect', 'SAY'] as const).optional().nullable(),
     tags: z.array(z.string()).optional().nullable(),
     created_at: z.union([z.string(), z.date()]).optional().nullable(),
     updated_at: z.union([z.string(), z.date()]).optional().nullable(),
@@ -202,6 +203,7 @@ export function parseEvidenceRows(
           : data.occurred_on
         : null,
       linkedAssumptions: data.linked_assumptions ?? null,
+      narrativeCategory: data.narrative_category ?? null,
       tags: data.tags ?? null,
       createdAt: safeParseDate(data.created_at),
       updatedAt: safeParseDate(data.updated_at),

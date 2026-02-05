@@ -6,7 +6,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid, numeric, integer, date, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, numeric, integer, date, jsonb, boolean } from 'drizzle-orm/pg-core';
 import { userProfiles } from './users';
 
 /**
@@ -70,6 +70,14 @@ export const projects = pgTable('projects', {
   experimentsCount: integer('experiments_count').default(0),
   evidenceCount: integer('evidence_count').default(0),
   
+  // Narrative Layer staleness tracking (spec :2438-2444)
+  narrativeGeneratedAt: timestamp('narrative_generated_at', { withTimezone: true }),
+  narrativeIsStale: boolean('narrative_is_stale').default(true),
+  narrativeStaleSeverity: text('narrative_stale_severity')
+    .$type<'soft' | 'hard'>()
+    .default('hard'),
+  narrativeStaleReason: text('narrative_stale_reason'),
+
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

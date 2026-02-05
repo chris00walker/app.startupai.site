@@ -116,3 +116,13 @@ export * from './legacy-clients';
 
 // Design Asset Infrastructure (Figma Integration)
 export * from './design-assets';
+
+// Narrative Layer Infrastructure (US-NL01)
+export * from './pitch-narratives';
+export * from './narrative-versions';
+export * from './narrative-exports';
+export * from './evidence-packages';
+export * from './evidence-package-access';
+export * from './founder-profiles';
+export * from './narrative-funnel-events';
+export * from './package-engagement-events';

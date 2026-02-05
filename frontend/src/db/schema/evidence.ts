@@ -41,6 +41,10 @@ export const evidence = pgTable('evidence', {
   occurredOn: date('occurred_on'),
   linkedAssumptions: text('linked_assumptions').array(),
   
+  // DO/SAY behavioral classification for narrative layer (spec :1753-1793)
+  narrativeCategory: text('narrative_category')
+    .$type<'DO-direct' | 'DO-indirect' | 'SAY'>(),
+
   // Metadata
   tags: text('tags').array(),
   

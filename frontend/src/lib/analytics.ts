@@ -72,6 +72,13 @@ export type ProductEvent =
   | 'marketplace.opt_in.consultant_disabled'
   | 'marketplace.opt_in.founder_enabled'
   | 'marketplace.opt_in.founder_disabled'
+  // Narrative Layer events (US-NL01)
+  | 'narrative_generate_started'
+  | 'narrative_regenerate_started'
+  | 'narrative_export_started'
+  | 'narrative_publish_started'
+  | 'narrative_edit_saved'
+  | 'narrative_viewed'
 
 interface EventProperties {
   [key: string]: string | number | boolean | undefined

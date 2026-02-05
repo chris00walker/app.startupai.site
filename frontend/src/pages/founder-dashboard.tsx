@@ -42,6 +42,13 @@ import { useRecentActivity, type ActivityItem } from "@/hooks/useRecentActivity"
 import { useRecommendedActions, type RecommendedAction } from "@/hooks/useRecommendedActions"
 // Connection requests (TASK-025)
 import { ConnectionRequestCard } from "@/components/dashboard/ConnectionRequestCard"
+// Narrative Layer (US-NL01)
+import { NarrativeDashboardCard } from "@/components/narrative/NarrativeDashboardCard"
+import { NarrativeEmptyState } from "@/components/narrative/NarrativeEmptyState"
+import { NarrativePromptCard } from "@/components/narrative/NarrativePromptCard"
+import { FounderProfileCard } from "@/components/founder/FounderProfileCard"
+import { EvidencePackageCard } from "@/components/evidence-package/EvidencePackageCard"
+import { useNarrative, useNarrativePrerequisites, useFounderProfile } from "@/hooks/useNarrative"
 import { trackPageView, trackEvent } from "@/lib/analytics"
 import {
   Target,
@@ -57,7 +64,8 @@ import {
   Users,
   BookOpen,
   Map,
-  FlaskConical
+  FlaskConical,
+  Sparkles
 } from "lucide-react"
 
 function QuickStats({ projectId, currentStage }: { projectId?: string, currentStage?: string }) {
@@ -354,6 +362,105 @@ function EmptyState() {
   )
 }
 
+function NarrativeTabContent({ projectId }: { projectId?: string }) {
+  const {
+    narrative,
+    isLoading: narrativeLoading,
+    isGenerating,
+    generate,
+  } = useNarrative({ projectId })
+
+  const {
+    prerequisites,
+    allMet,
+    completedCount,
+    total,
+  } = useNarrativePrerequisites(projectId)
+
+  const {
+    profile: founderProfile,
+    completeness: profileCompleteness,
+    missingFields: profileMissing,
+  } = useFounderProfile()
+
+  const handleGenerate = () => {
+    generate()
+  }
+
+  if (narrativeLoading) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Loading narrative...
+      </div>
+    )
+  }
+
+  // No narrative yet — show empty state or prompt
+  if (!narrative) {
+    return (
+      <div className="space-y-6">
+        {allMet ? (
+          <NarrativePromptCard onGenerate={handleGenerate} isGenerating={isGenerating} />
+        ) : (
+          <NarrativeEmptyState
+            prerequisites={prerequisites}
+            completedCount={completedCount}
+            total={total}
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+          />
+        )}
+
+        {/* Founder profile card */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <FounderProfileCard
+            completeness={profileCompleteness}
+            missingFields={profileMissing}
+            hasProfile={!!founderProfile}
+            onEdit={() => {
+              // Navigate to profile editing — for now, a simple alert
+              // Full editing page is part of the narrative page
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Narrative exists — show dashboard cards
+  return (
+    <div className="space-y-6">
+      <NarrativeDashboardCard
+        narrative={narrative}
+        onView={() => {
+          if (projectId) {
+            window.location.href = `/project/${projectId}/narrative`
+          }
+        }}
+        onRegenerate={() => generate({ force_regenerate: true })}
+        onExport={() => {
+          if (projectId) {
+            window.location.href = `/project/${projectId}/narrative`
+          }
+        }}
+      />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <FounderProfileCard
+          completeness={profileCompleteness}
+          missingFields={profileMissing}
+          hasProfile={!!founderProfile}
+        />
+        <EvidencePackageCard
+          hasPackage={false}
+          onView={() => {}}
+          onCreate={() => {}}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function FounderDashboard() {
   const [activeTab, setActiveTab] = React.useState('overview')
   const { projects, isLoading, error } = useProjects()
@@ -486,10 +593,14 @@ export default function FounderDashboard() {
     >
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6" data-testid="dashboard">
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full max-w-4xl grid-cols-6">
+          <TabsList className="grid w-full max-w-5xl grid-cols-7">
             <TabsTrigger value="overview">
               <Target className="h-4 w-4 mr-1.5 hidden sm:inline" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="narrative">
+              <Sparkles className="h-4 w-4 mr-1.5 hidden sm:inline" />
+              Narrative
             </TabsTrigger>
             <TabsTrigger value="canvases">
               <LayoutGrid className="h-4 w-4 mr-1.5 hidden sm:inline" />
@@ -571,6 +682,11 @@ export default function FounderDashboard() {
             <RecentActivity projectId={projectId} />
             <NextSteps projectId={projectId} />
           </div>
+        </TabsContent>
+
+        {/* NARRATIVE TAB - Pitch narrative, founder profile, evidence package */}
+        <TabsContent value="narrative" className="space-y-6">
+          <NarrativeTabContent projectId={projectId} />
         </TabsContent>
 
         {/* CANVASES TAB - Value Proposition Canvas + Business Model Canvas */}

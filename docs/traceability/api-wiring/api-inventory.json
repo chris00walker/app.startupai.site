@@ -603,6 +603,30 @@
       "description": "Auto-Sync Projects Cron Job"
     },
     {
+      "path": "/api/evidence-package/[id]",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Evidence Package API (by ID)"
+    },
+    {
+      "path": "/api/evidence-package/create",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Evidence Package Create API"
+    },
+    {
+      "path": "/api/evidence-packages",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Evidence Packages List API"
+    },
+    {
       "path": "/api/founder/connections",
       "methods": [
         "POST",
@@ -634,6 +658,15 @@
       ],
       "type": "nextjs",
       "description": "Consultant Directory API"
+    },
+    {
+      "path": "/api/founder/profile",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Founder Profile API"
     },
     {
       "path": "/api/founder/profile/marketplace",
@@ -785,6 +818,78 @@
       ],
       "type": "nextjs",
       "description": "Apply Field Mapping API"
+    },
+    {
+      "path": "/api/narrative/[id]",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Narrative API (by ID)"
+    },
+    {
+      "path": "/api/narrative/[id]/edit",
+      "methods": [
+        "PATCH"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Edit API"
+    },
+    {
+      "path": "/api/narrative/[id]/export",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Export API"
+    },
+    {
+      "path": "/api/narrative/[id]/exports",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Exports List API"
+    },
+    {
+      "path": "/api/narrative/[id]/publish",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Publication API"
+    },
+    {
+      "path": "/api/narrative/[id]/unpublish",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Unpublish API"
+    },
+    {
+      "path": "/api/narrative/[id]/versions",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Versions API"
+    },
+    {
+      "path": "/api/narrative/generate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Generation API"
+    },
+    {
+      "path": "/api/narrative/regenerate",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Regeneration API"
     },
     {
       "path": "/api/onboarding/brief",
@@ -989,6 +1094,14 @@
       ],
       "type": "nextjs",
       "description": "Public Metrics API"
+    },
+    {
+      "path": "/api/verify/[token]",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Verification API"
     },
     {
       "path": "/api/vpc/[projectId]",
