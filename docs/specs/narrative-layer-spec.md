@@ -656,7 +656,7 @@ The 10 essential slides are the building blocks — the architecture of a pitch 
 
 For perspective, a founder may spend 25% of their time on the architecture and the remaining 75% on these components that really differentiate their deck.
 
-_Note: This section covers Story. Design and Text guidance will be added in future versions._
+This section covers all three elements: **Story**, **Design**, and **Text**.
 
 ---
 
@@ -827,6 +827,135 @@ StartupAI's narrative layer can assist with story generation by:
 **Schema support**: The `customer_story` field in the Problem slide schema directly supports the Customer Story archetype. The `why_now` field in Opportunity supports the Industry Story.
 
 **HITL checkpoint**: Story content should be reviewed by founders before publication — these are deeply personal and strategic choices about how to present the venture.
+
+---
+
+#### Design
+
+Design transforms information into visual communication. A well-designed pitch deck doesn't just look professional — it guides the viewer's attention, reinforces your message, and creates emotional resonance.
+
+**Key Elements:**
+
+##### 1. Layout
+
+The arrangement of elements on each slide. Good layout creates visual hierarchy, guides the eye, and ensures the most important information stands out.
+
+- **Consistency**: Use the same layout patterns across similar slide types
+- **White space**: Don't crowd slides — breathing room increases comprehension
+- **Visual hierarchy**: Size, position, and contrast indicate importance
+- **Grid alignment**: Elements should align to an invisible grid for polish
+
+##### 2. Typography
+
+The fonts and text styling that convey tone and ensure readability.
+
+- **Font pairing**: Typically one font for headlines, one for body text
+- **Size hierarchy**: Clear distinction between titles, subtitles, and body
+- **Readability**: Large enough to read from the back of the room (or on a phone)
+- **Consistency**: Same styling for the same content types throughout
+
+##### 3. Color
+
+Color creates mood, reinforces brand, and directs attention.
+
+- **Brand palette**: 2-3 primary colors plus neutrals
+- **Contrast**: Ensure text is readable against backgrounds
+- **Meaning**: Use color consistently (e.g., green for positive metrics)
+- **Restraint**: Too many colors create visual chaos
+
+##### 4. Images and Photography
+
+Visual content that creates emotional connection and breaks up text.
+
+- **Quality**: High-resolution, professional images only
+- **Relevance**: Images should reinforce, not distract from, your message
+- **Authenticity**: Real photos of your product/customers beat stock photos
+- **Consistency**: Similar style and treatment across all images
+
+##### 5. Visualized Data
+
+Charts, graphs, and diagrams that make numbers compelling.
+
+- **Clarity**: The insight should be immediately obvious
+- **Simplicity**: One message per visualization
+- **Labels**: Always label axes, include units, cite sources
+- **Honesty**: Don't manipulate scales to exaggerate trends
+
+**StartupAI Design Support:**
+
+StartupAI provides design guidance through:
+- PDF Brand Guidelines (see [PDF Brand Guidelines](#pdf-brand-guidelines) section)
+- Evidence hierarchy color tokens (brand-aligned)
+- Methodology Verified Badge specifications
+- OG image templates for social sharing
+
+_Note: Founders retain creative control over visual design. StartupAI provides a professional baseline that can be customized._
+
+---
+
+#### Text
+
+The words you choose matter enormously. Text is how you communicate when you're not in the room — and even when you are, the words on screen shape what the audience hears.
+
+**Key Elements:**
+
+##### 1. Writing Style
+
+How you construct sentences and convey information.
+
+- **Clarity over cleverness**: Say what you mean directly
+- **Active voice**: "We reduced costs by 40%" not "Costs were reduced by 40%"
+- **Concrete over abstract**: Specific examples beat general claims
+- **Brevity**: Every word should earn its place
+
+##### 2. Voice and Tone
+
+The personality that comes through in your writing.
+
+- **Voice**: Your consistent personality (confident, thoughtful, bold)
+- **Tone**: How voice adapts to context (more formal for financials, warmer for team)
+- **Authenticity**: The voice should sound like the founder, not a corporate template
+- **Consistency**: Same voice across all slides
+
+##### 3. Format
+
+How text is structured and presented.
+
+- **Headlines**: Clear, compelling, benefit-focused
+- **Bullet points**: Parallel structure, consistent punctuation
+- **Numbers**: Formatted consistently (e.g., $1.2M not $1,200,000)
+- **Emphasis**: Bold for key terms, italics sparingly
+
+##### 4. When Words Are Not Enough
+
+**Your evidence will not speak for itself.** You must find ways to make that evidence compelling and real to your audience.
+
+This is the critical insight: having strong validation data is necessary but not sufficient. The Narrative Layer exists because:
+
+- Raw metrics don't create emotional resonance
+- Evidence needs context to be meaningful
+- Stories make data memorable
+- Investors decide with both logic AND emotion
+
+**Techniques for making evidence compelling:**
+
+| Technique | Example |
+|-----------|---------|
+| **Anchor with comparison** | "40% faster than the industry average" not just "40% faster" |
+| **Make it personal** | "That's $2,400/year back in every customer's pocket" |
+| **Use time** | "In just 3 months..." creates momentum |
+| **Show transformation** | Before/after comparisons |
+| **Quote real people** | Verbatim customer quotes with attribution |
+
+**StartupAI Text Generation:**
+
+The Sage agent synthesizes evidence into narrative text, but founders should:
+- Review all generated text for voice/tone alignment
+- Add personal anecdotes and specific details
+- Ensure claims are supported by the evidence shown
+- Edit for their authentic voice
+
+**HITL checkpoint**: All narrative text should be reviewed before publication. Generated text is a starting point, not the final word.
 
 ---
 
