@@ -1,6 +1,6 @@
 # Specification: Narrative Layer Architecture
 
-**Status**: Draft v3.1 | **Updated**: 2026-02-05 | **Owner**: product-strategist
+**Status**: Draft v3.3 | **Updated**: 2026-02-05 | **Owner**: product-strategist
 **Depends On**: `portfolio-holder-vision.md` v3.0, `03-methodology.md`, `02-organization.md`
 **Approved By**: Pending Founder Review
 
@@ -1107,8 +1107,10 @@ A pitch narrative exists in one of two states:
 
 | State | Stored As | Description |
 |-------|-----------|-------------|
-| **Draft** | `is_published = false` | Private to founder; can be edited freely; not visible in marketplace |
-| **Published** | `is_published = true` | Shareable with Portfolio Holders; visible in Founder Directory if opted in |
+| **Draft** | `is_published = false` | Can be edited freely; can be shared via evidence packages (with warning); not visible in Founder Directory |
+| **Published** | `is_published = true` | Can be shared via evidence packages; visible in Founder Directory if opted in |
+
+**Note on Draft Sharing (Decision Log Task #32)**: Draft narratives CAN be shared via evidence packages to enable early feedback from trusted Portfolio Holders. The UI should display a "Draft - may change" warning badge on packages containing unpublished narratives. Publication (`is_published = true`) is only required for Founder Directory listing visibility, not for direct package sharing.
 
 ### State Transitions
 
@@ -2004,7 +2006,10 @@ CREATE TABLE pitch_narratives (
   --            FROM projects p WHERE p.id = pitch_narratives.project_id
 
   -- Verification security (see "Verification Endpoint Security" section)
-  verification_token UUID DEFAULT gen_random_uuid(),  -- For public verification URL (full UUID entropy)
+  -- DEPRECATED: verification_token moved to narrative_exports table (per-export, not per-narrative)
+  -- See Decision Log entry 2026-02-05: "Verification tokens are per-export, not per-narrative"
+  -- Rationale: Per-export tokens allow detecting stale PDFs after regeneration.
+  -- Old exports can be marked "outdated" while new exports remain "verified".
   verification_request_count INTEGER DEFAULT 0,       -- Track verification requests for abuse detection
 
   -- Publication state (see "Narrative Publication" section)
@@ -2018,6 +2023,38 @@ CREATE TABLE pitch_narratives (
 
   CONSTRAINT unique_project_narrative UNIQUE (project_id)
 );
+
+-- Export history with per-export verification tokens
+-- Each export captures a point-in-time snapshot with its own verification URL.
+-- When the narrative is regenerated, old exports become "outdated" but remain verifiable.
+-- This enables: (1) detecting stale PDFs shared externally, (2) audit trail of exports,
+-- (3) lead capture from external investors verifying old PDFs.
+CREATE TABLE narrative_exports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  narrative_id UUID NOT NULL REFERENCES pitch_narratives(id) ON DELETE CASCADE,
+
+  -- Verification (see "Verification Endpoint Security" section)
+  verification_token UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE,  -- Public verification URL token
+  generation_hash VARCHAR(64) NOT NULL,             -- SHA-256 of narrative content at export time
+
+  -- Export metadata
+  export_format VARCHAR(10) NOT NULL,               -- 'pdf', 'pptx', 'json'
+  exported_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Match tracking (for comparing against current narrative)
+  -- When verifying: if generation_hash != current narrative hash, export is "outdated"
+  CONSTRAINT valid_export_format CHECK (export_format IN ('pdf', 'pptx', 'json'))
+);
+
+-- Index for fast verification token lookup (public API)
+-- Note: UNIQUE constraint on column already creates implicit unique index,
+-- but explicit index ensures optimal query planning for verification endpoint
+CREATE UNIQUE INDEX idx_narrative_exports_verification_token
+  ON narrative_exports(verification_token);
+
+-- Index for finding exports by narrative (dashboard listing)
+CREATE INDEX idx_narrative_exports_narrative_id
+  ON narrative_exports(narrative_id);
 
 -- Narrative version history for founder learning
 CREATE TABLE narrative_versions (
@@ -2144,6 +2181,10 @@ CREATE POLICY "Founders can view own narrative versions"
   );
 
 -- Evidence packages: founder + connected Portfolio Holders
+-- NOTE: is_published is NOT checked here. Per Decision Log (Task #32):
+-- Draft narratives CAN be shared via evidence packages for early feedback.
+-- is_published only gates Founder Directory listing, not direct package access.
+-- Access is gated by founder_consent and connection status, not publication state.
 CREATE POLICY "Founders can view own packages"
   ON evidence_packages FOR SELECT
   USING (auth.uid() = founder_id);
@@ -2168,10 +2209,17 @@ CREATE POLICY "Consultants can view packages with consent"
       )
     )
     OR
-    -- Public packages: founder has opted into marketplace discovery
+    -- Public packages: founder has opted into marketplace discovery (Founder Directory)
+    -- NOTE: This path DOES check is_published. Per Decision Log (Task #32):
+    -- Founder Directory listing requires published narrative, unlike direct package sharing.
     (
       is_public = TRUE
       AND founder_consent = TRUE  -- Public also requires consent flag
+      AND EXISTS (
+        SELECT 1 FROM pitch_narratives pn
+        WHERE pn.id = evidence_packages.pitch_narrative_id
+          AND pn.is_published = TRUE  -- REQUIRED for Founder Directory visibility
+      )
       AND EXISTS (
         SELECT 1 FROM user_profiles up
         WHERE up.id = auth.uid()
@@ -2460,7 +2508,7 @@ CREATE INDEX idx_package_engagement_access ON package_engagement_events(access_i
 
 -- Verification to connection conversion tracking
 ALTER TABLE evidence_package_access
-  ADD COLUMN verification_token_used UUID,  -- Links to pitch_narratives.verification_token
+  ADD COLUMN verification_token_used UUID,  -- Links to narrative_exports.verification_token (per-export)
   ADD COLUMN source VARCHAR(50);            -- 'directory', 'connection', 'verification_url', 'direct_share'
 ```
 
@@ -2903,10 +2951,12 @@ GET /api/verify/:verification_token
 
 ```json
 {
-  "status": "verified" | "updated" | "not_found",
+  "status": "verified" | "outdated" | "not_found",
   "generated_at": "2026-02-04T14:34:00Z",
   "venture_name": "Acme Logistics",
   "evidence_id": "a3f8c2d1e9b4",
+  "generation_hash": "abc123...",
+  "current_hash": "abc123...",
   "current_hash_matches": true,
   "evidence_updated_at": "2026-02-04T14:34:00Z",
   "validation_stage_at_generation": "Solution Testing",
@@ -2924,6 +2974,98 @@ GET /api/verify/:verification_token
   - `flagged`: Guardian detected claims that may exceed evidence (view with caution)
   - `pending`: Edits not yet reviewed by Guardian
 - `request_access_url`: Deep link to request founder connection (lead capture for marketplace).
+
+### Narrative Export
+
+```
+POST /api/narrative/:id/export
+```
+
+**Authorization**: Founder owner only.
+
+Creates an export record and generates a downloadable file. Each export gets a unique verification token for integrity checking.
+
+**Request**:
+
+```json
+{
+  "format": "pdf" | "pptx" | "json",
+  "include_qr_code": true
+}
+```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `format` | string | Yes | - | Export format: `pdf`, `pptx`, or `json` |
+| `include_qr_code` | boolean | No | `true` for PDF | Whether to embed QR code for verification |
+
+**Response (Success)**:
+
+```json
+{
+  "success": true,
+  "export_id": "uuid",
+  "verification_token": "uuid",
+  "generation_hash": "sha256...",
+  "verification_url": "https://app.startupai.site/verify/abc123",
+  "download_url": "https://storage.supabase.co/...",
+  "expires_at": "2026-02-06T14:30:00Z"
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `export_id` | Unique identifier for this export record |
+| `verification_token` | Token for external integrity verification (per-export) |
+| `generation_hash` | SHA-256 hash of narrative content at export time |
+| `verification_url` | Public URL for verifying export authenticity |
+| `download_url` | Signed URL for downloading the exported file |
+| `expires_at` | When the download URL expires (24-hour default) |
+
+**Response (Error)**:
+
+```json
+{
+  "error": {
+    "code": "FORMAT_NOT_SUPPORTED",
+    "message": "Export format 'docx' is not supported",
+    "details": {
+      "supported_formats": ["pdf", "pptx", "json"]
+    }
+  }
+}
+```
+
+| HTTP Status | Error Code | Condition |
+|-------------|------------|-----------|
+| 401 | `UNAUTHORIZED` | Missing or invalid authentication |
+| 403 | `FORBIDDEN` | Authenticated but not owner of narrative |
+| 404 | `NOT_FOUND` | Narrative does not exist |
+| 422 | `FORMAT_NOT_SUPPORTED` | Requested format not available |
+
+**Logic**:
+
+1. Verify user owns the narrative
+2. Generate export file in requested format
+3. Create row in `narrative_exports` table with:
+   - `verification_token`: New UUID for this export
+   - `generation_hash`: SHA-256 of narrative content
+   - `format`: Requested format
+   - `qr_code_included`: Whether QR code was embedded
+4. Upload file to Supabase Storage bucket `narrative-exports`
+5. Generate signed URL with 24-hour expiration
+6. If `include_qr_code = true` (PDF only):
+   - QR code contains `verification_url`
+   - QR placement: Bottom-right of cover slide
+   - QR includes: venture name, generation date, verification link
+7. Return export metadata with download URL
+
+**Implementation Notes**:
+
+- QR code links to `/verify/:verification_token` for public integrity checking
+- Each export creates a new verification token (per-export tokens, not per-narrative)
+- Download URLs expire after 24 hours; export record persists for re-download
+- Export record links back to narrative version for audit trail
 
 ### Portfolio Holder Feedback (Phase 3)
 
@@ -3638,10 +3780,12 @@ GET /api/verify/:verification_token
 **Response** (public, unauthenticated):
 ```json
 {
-  "status": "verified" | "updated" | "not_found",
+  "status": "verified" | "outdated" | "not_found",
   "generated_at": "2026-02-04T14:34:00Z",
   "venture_name": "Acme Logistics",
   "evidence_id": "a3f8c2...d1e9b4",
+  "generation_hash": "abc123...",
+  "current_hash": "abc123...",
   "current_hash_matches": true,
   "evidence_updated_at": "2026-02-04T14:34:00Z",
   "validation_stage_at_generation": "Solution Testing",
@@ -3667,9 +3811,11 @@ The verification URL uses a full UUID token rather than a truncated SHA-256 hash
 | Full UUID v4 | 122 bits | Computationally infeasible to enumerate |
 
 - Generate a separate random UUID as `verification_token` (not derived from content)
-- Store in `pitch_narratives` table alongside the integrity hash
+- Store in `narrative_exports` table alongside the `generation_hash` (per-export, not per-narrative)
 - URL format: `app.startupai.site/verify/{verification_token}`
 - The `evidence_id` displayed to users remains the truncated SHA-256 for readability
+- Each export gets its own token; regeneration creates new exports with new tokens
+- Old export tokens continue to work but return `outdated` status
 
 **Rate Limiting**:
 
@@ -3724,7 +3870,7 @@ interface VerificationLog {
   verification_token: string;  // Which narrative was verified
   user_agent: string;          // Browser/client identification
   referrer: string | null;     // Where the request originated
-  result: 'verified' | 'updated' | 'not_found' | 'rate_limited';
+  result: 'verified' | 'outdated' | 'not_found' | 'rate_limited';
 }
 ```
 
@@ -5075,6 +5221,7 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-05 | **Generation prerequisites defined** with required vs optional fields | Prevents speculative narratives; allows generation with placeholders for founder-input fields; evidence gaps track what's missing                                                        |
 | 2026-02-05 | **HITL review required for first publication**                        | Founders must take ownership of AI-generated content before sharing with investors; subsequent edits don't require re-review unless flagged                                              |
 | 2026-02-05 | **Option B (generate first, prompt to fill)** recommended for Phase 1 | Faster time-to-value; founders see immediate results; publish gate catches gaps before sharing; Option A (pre-step) deferred to Phase 2                                                  |
+| 2026-02-05 | **Verification tokens are per-export, not per-narrative**             | Per-export tokens allow detecting stale PDFs after regeneration. Each export has its own `verification_token` and `generation_hash`; old exports show "outdated" status while new exports show "verified". Supports: (1) integrity verification of externally-shared PDFs, (2) export audit trail, (3) lead capture from external investors. |
 
 ---
 
@@ -5136,3 +5283,4 @@ This is negligible compared to the full CrewAI pipeline cost. Regeneration on ev
 | 2026-02-05 | 3.0     | **Get Backed framework integration**: Complete slide-by-slide specification update based on _Get Backed_ (Baehr & Loomis). Each slide now includes: Purpose statement ("What is it?"), What to demonstrate, Quality checks ("What questions must this slide answer?"), and field-to-question mappings. **Schema expansions**: Cover (branding, document metadata), Overview (one_liner, industry, novel_insight), Opportunity (market_confusion), Problem (pain_narrative, affected_population, customer_story, why_exists), Solution (use_cases, demo_assets, ip_defensibility), Traction (growth_metrics, assumptions_validated, sales_process), Customer (persona_summary, demographics, willingness_to_pay, acquisition fields, paying_customers), Competition (primary/secondary_competitors, potential_threats, positioning_map, incumbent_defense), Business Model (split VPD-verified vs optional founder-supplied per Unit Economics Only decision), Team (members[] array, advisors[], investors[], hiring_gaps, team_culture with persistence note), Use of Funds (allocations[], milestones[] with success_criteria). **Consistency fixes**: Aligned all field tables with TypeScript schema, fixed evidence_gap → metadata.evidence_gaps, removed unused UnitEconomics type, added test fixture checklist. |
 | 2026-02-05 | 3.1     | **Beyond Architecture: Story, Design, and Text**: Added comprehensive guidance for the 75% of pitch deck work that goes beyond slide architecture. **Story section**: Four story archetypes (Origin, Customer, Industry, Venture Growth) with elements for each, what makes a great story (things happen, vivid sensory details, conflict), story-to-slide mapping table, example arc diagram, and StartupAI story generation support. **Design section**: Five key elements (Layout, Typography, Color, Images/Photography, Visualized Data) with guidance for each, links to existing PDF Brand Guidelines. **Text section**: Four key elements (Writing Style, Voice and Tone, Format, When Words Are Not Enough) with techniques table for making evidence compelling. Critical insight: "Your evidence will not speak for itself." Updated Table of Contents. |
 | 2026-02-05 | 3.2     | **Generation Prerequisites and Narrative Publication**: (1) Added Generation Prerequisites section defining minimum required evidence for narrative generation (project basics, at least one hypothesis, customer profile, VPC). (2) Defined founder-input field categories: required for generation (`company_name`, `industry`), optional with placeholder (`sales_process`, `acquisition_channel`, `ask_amount`, `ask_type`, `logo_url`, `hero_image_url`), and optional for richness (`linkedin_url`, `ip_defensibility`, `other_participants`). (3) Added evidence gaps for missing inputs with `blocking_publish` flag. (4) Documented UI flow options: Option A (pre-step) vs Option B (generate first), recommending Option B for Phase 1. (5) Added Narrative Publication section defining draft/published states, publication gate requirements (no blocking gaps, alignment passed, HITL review, not hard-stale), HITL review checkpoint flow for first publication, unpublish flow. (6) Added `is_published`, `first_published_at`, `last_publish_review_at` to `pitch_narratives` schema. (7) Added `POST /api/narrative/:id/publish` and `POST /api/narrative/:id/unpublish` API endpoints with request/response schemas. (8) Added publication metrics (`time_to_first_publish`, `publish_gate_failure_reasons`, `unpublish_rate`, `edit_after_publish_rate`). Updated Table of Contents, Decision Log. |
+| 2026-02-05 | 3.3     | **Per-export verification tokens**: Architectural decision that verification tokens are per-export, not per-narrative. (1) Deprecated `verification_token` column on `pitch_narratives` table. (2) Added `narrative_exports` table with: `id` UUID PK, `narrative_id` UUID FK, `verification_token` UUID UNIQUE, `generation_hash` VARCHAR(64), `export_format` VARCHAR(10), `exported_at` TIMESTAMPTZ. (3) Updated Verification Endpoint Security section to reference `narrative_exports` table. (4) Updated `evidence_package_access.verification_token_used` FK reference. (5) Added Decision Log entry documenting rationale: per-export allows detecting stale PDFs after regeneration; old exports show "outdated" status while new exports show "verified". |
