@@ -328,13 +328,13 @@ The following mapping demonstrates that **9 of 10 essential slides can be popula
 
 - What trends is your company riding? → `why_now`, `market_tailwinds`
 - How big is the market? → `tam`, `sam`, `som`
-- How big can your company be? → `som` + `growth_rate`
+- How big can your company be? → `som` + `growth_trajectory`
 - What are the macro- and micro-trends that your company will be riding? → `market_tailwinds`
 
 **Data source detail**:
 
 - `market_sensing.tam`, `market_sensing.sam`, `market_sensing.som` → market sizing
-- `market_sensing.growth_rate` → trajectory
+- `market_sensing.growth_trajectory` → trajectory
 - Sage synthesizes macro context from Pulse market data into a "why now" narrative
 - Pulse identifies market fragmentation/confusion that creates differentiation opportunity
 
@@ -443,7 +443,7 @@ _Note: If you are pre-product and don't have meaningful milestones or metrics, u
 **Quality checks** (questions this slide must answer):
 
 - Is there massive growth? → `growth_metrics`
-- Where are the venture's assumptions proving true? → `assumptions_validated`, `experiment_results`
+- Where are the venture's assumptions proving true? → `assumptions_validated`, `experiment_count`
 - What is the strategy to reach and close more customers? → `sales_process`
 
 **Narrative function**: This is StartupAI's **killer differentiator**. Traditional pitch decks claim traction with vanity metrics. StartupAI provides methodology-verified behavioral evidence. The narrative must frame this distinction explicitly.
@@ -535,10 +535,11 @@ Pre-revenue companies may make up assumptions and financials, but that is not an
 
 Equally important: contextualize your math (e.g., "if we get 1% of the market, then we will have hit our revenue projection").
 
-**VPD-verified fields** (from Ledger, included in evidence integrity):
+**VPD-verified fields** (included in evidence integrity):
 
 | Field                   | Source         | Generation Method                  |
 | ----------------------- | -------------- | ---------------------------------- |
+| `revenue_model`         | Ledger         | Narrative description of how money flows |
 | `cac`                   | Ledger         | Customer acquisition cost          |
 | `ltv`                   | Ledger         | Lifetime value per customer        |
 | `ltv_cac_ratio`         | Ledger         | LTV/CAC (should be >3x)            |
@@ -557,6 +558,7 @@ Equally important: contextualize your math (e.g., "if we get 1% of the market, t
 | `net_income`            | Founder input  | Bottom line (optional)             |
 | `cash_flow`             | Founder input  | Cash in vs. cash out (optional)    |
 | `revenue_projections`   | Founder input  | Forward-looking estimates (optional) |
+| `path_to_profitability` | Founder input  | Founder's projection to profitability (optional) |
 
 _Note: Per the "Financial Projections — Unit Economics Only" decision, full financial projections are founder-generated and not VPD-validated. They are excluded from the evidence integrity hash but can be included in the narrative for investor presentation._
 
@@ -578,6 +580,8 @@ _Note: Per the "Financial Projections — Unit Economics Only" decision, full fi
 #### Slide 9: Team
 
 **Purpose**: Give the background for each key team member, including their current roles, prior experience, significant accomplishments, and education. If there are major investors or advisers, name them here. Keep your bio to less than a minute total when presenting. Your goals are to build rapport, be known, and build confidence that the team can accomplish the mission.
+
+**Persistence note**: Team data (`members[]`, `advisors[]`, `investors[]`, `team_culture`, `hiring_gaps`) is stored in `pitch_narratives.narrative_data` JSONB, not in separate database tables. The `founder_profiles` table models only the primary founder for basic profile data. Full team composition is edited directly within the narrative via the Pitch Editor UI. This approach supports multi-member teams without schema migration while keeping team data tied to the narrative it appears in.
 
 | Field                    | Source           | Generation Method                           |
 | ------------------------ | ---------------- | ------------------------------------------- |
