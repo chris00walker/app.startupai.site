@@ -85,7 +85,7 @@ export default function AdminFeaturesPage() {
               Control feature rollouts and A/B testing
             </p>
           </div>
-          <Button disabled>
+          <Button onClick={() => { setEditingFlag(null); setEditorOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" />
             Add Flag
           </Button>
