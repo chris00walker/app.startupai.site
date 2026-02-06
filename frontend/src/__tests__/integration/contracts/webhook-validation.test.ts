@@ -442,6 +442,54 @@ describe('Webhook Contract Validation (Shared Schemas)', () => {
   });
 
   // =========================================================================
+  // VALIDATION_PROGRESS INSERT CONTRACT (C2 column names)
+  // =========================================================================
+
+  describe('validation_progress insert contract', () => {
+    // Known columns from production validation_progress table
+    const VALID_PROGRESS_COLUMNS = new Set([
+      'id', 'run_id', 'validation_phase', 'crew', 'task', 'agent',
+      'status', 'progress_pct', 'output', 'error_message', 'duration_ms', 'created_at',
+    ]);
+
+    const VALID_PROGRESS_STATUSES = ['started', 'in_progress', 'completed', 'failed', 'skipped'];
+
+    it('insert payload keys should be subset of known table columns', () => {
+      // This is the HITL progress insert payload from the webhook handler
+      const hitlProgressPayload = {
+        run_id: createTestId(),
+        validation_phase: 0,
+        status: 'in_progress',
+        crew: 'HITL',
+        task: 'approve_brief',
+        agent: 'Human',
+        progress_pct: 0,
+        created_at: new Date().toISOString(),
+      };
+
+      for (const key of Object.keys(hitlProgressPayload)) {
+        expect(VALID_PROGRESS_COLUMNS).toContain(key);
+      }
+    });
+
+    it('status value should be one of valid CHECK constraint values', () => {
+      const hitlStatus = 'in_progress';
+      expect(VALID_PROGRESS_STATUSES).toContain(hitlStatus);
+    });
+
+    it('"paused" should NOT be a valid validation_progress status', () => {
+      expect(VALID_PROGRESS_STATUSES).not.toContain('paused');
+    });
+
+    it('should NOT include project_id, user_id, phase_name, or current_phase columns', () => {
+      const invalidColumns = ['project_id', 'user_id', 'phase_name', 'current_phase'];
+      for (const col of invalidColumns) {
+        expect(VALID_PROGRESS_COLUMNS).not.toContain(col);
+      }
+    });
+  });
+
+  // =========================================================================
   // BOUNDARY TESTS - Numeric Values
   // =========================================================================
 

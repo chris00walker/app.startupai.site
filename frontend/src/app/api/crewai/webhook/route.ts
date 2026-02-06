@@ -1034,6 +1034,7 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
   // Determine approval_type based on checkpoint name
   // Map HITL checkpoints to valid approval_type values from schema
   const approvalTypeMap: Record<string, string> = {
+    'approve_brief': 'gate_progression',
     'approve_founders_brief': 'gate_progression',
     'approve_vpc_completion': 'gate_progression',
     'approve_experiment_plan': 'gate_progression',
@@ -1050,6 +1051,7 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
 
   // Determine owner_role based on checkpoint phase/type
   const ownerRoleMap: Record<string, string> = {
+    'approve_brief': 'compass',              // Phase 1 - Modal sends this name
     'approve_founders_brief': 'compass',     // Phase 0 - Compass leads synthesis
     'approve_vpc_completion': 'compass',     // Phase 1 - VPC
     'approve_experiment_plan': 'pulse',      // Phase 1 - Pulse runs experiments
@@ -1104,15 +1106,13 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
   console.log('[api/crewai/webhook] HITL checkpoint approval request created:', approvalRequest?.id);
 
   // Insert HITL progress event for Realtime
+  // Only use columns that exist in production validation_progress table (C5 fix)
   await admin
     .from('validation_progress')
     .insert({
       run_id: payload.run_id,
-      project_id: payload.project_id,
-      user_id: payload.user_id,
-      status: 'paused',
-      current_phase: 0,  // Will be updated from validation_runs
-      phase_name: 'Awaiting Approval',
+      validation_phase: 0,
+      status: 'in_progress',
       crew: 'HITL',
       task: payload.checkpoint,
       agent: 'Human',

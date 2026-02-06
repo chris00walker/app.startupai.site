@@ -222,27 +222,49 @@ export async function POST(request: NextRequest) {
       // Non-fatal - continue
     }
 
-    // Create validation_runs record for progress tracking
-    const { error: runError } = await supabase
-      .from('validation_runs')
-      .insert({
-        project_id: project.id,
-        user_id: targetUserId,
-        run_id: runId,
-        status: modalKickoffSucceeded ? 'running' : 'pending',
-        current_phase: 1,
-        phase_name: 'VPC Discovery',
-        started_at: new Date().toISOString(),
-        inputs: {
-          raw_idea: validatedData.raw_idea,
-          hints: validatedData.hints || {},
-          additional_context: validatedData.additional_context || null,
-        },
-      });
+    // Create or update validation_runs record for progress tracking
+    // When Modal kickoff succeeded, Modal already created a row with id=runId.
+    // UPDATE that row to add run_id and inputs (avoids duplicate rows - C4).
+    // When Modal kickoff failed, no Modal row exists, so INSERT a new one.
+    if (modalKickoffSucceeded) {
+      const { error: runError } = await supabase
+        .from('validation_runs')
+        .update({
+          run_id: runId,
+          inputs: {
+            raw_idea: validatedData.raw_idea,
+            hints: validatedData.hints || {},
+            additional_context: validatedData.additional_context || null,
+          },
+          phase_name: 'VPC Discovery',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', runId);
 
-    if (runError) {
-      console.warn('[Quick Start] Failed to create validation_runs:', runError);
-      // Non-fatal - progress tracking won't work but project is created
+      if (runError) {
+        console.warn('[Quick Start] Failed to update validation_runs:', runError);
+      }
+    } else {
+      const { error: runError } = await supabase
+        .from('validation_runs')
+        .insert({
+          project_id: project.id,
+          user_id: targetUserId,
+          run_id: runId,
+          status: 'pending',
+          current_phase: 1,
+          phase_name: 'VPC Discovery',
+          started_at: new Date().toISOString(),
+          inputs: {
+            raw_idea: validatedData.raw_idea,
+            hints: validatedData.hints || {},
+            additional_context: validatedData.additional_context || null,
+          },
+        });
+
+      if (runError) {
+        console.warn('[Quick Start] Failed to create validation_runs:', runError);
+      }
     }
 
     // Cache for idempotency

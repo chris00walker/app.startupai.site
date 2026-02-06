@@ -486,3 +486,185 @@ describe('POST /api/crewai/webhook - Consultant Onboarding', () => {
     expect(mockFrom).toHaveBeenCalledWith('consultant_profiles');
   });
 });
+
+// =============================================================================
+// HITL CHECKPOINT HANDLER TESTS (C3 + C5 + C6)
+// =============================================================================
+
+describe('POST /api/crewai/webhook - HITL Checkpoint', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env.MODAL_AUTH_TOKEN = VALID_TOKEN;
+
+    // Default mock for validation_runs update
+    mockInsert.mockReturnValue({
+      select: mockInsertSelect,
+    });
+  });
+
+  afterEach(() => {
+    delete process.env.MODAL_AUTH_TOKEN;
+  });
+
+  function createHITLPayload(overrides: Partial<any> = {}) {
+    return {
+      flow_type: 'hitl_checkpoint',
+      run_id: 'run-hitl-001',
+      project_id: TEST_PROJECT_ID,
+      user_id: TEST_USER_ID,
+      checkpoint: 'approve_brief',
+      title: 'Approve Founders Brief',
+      description: 'Review and approve the generated founders brief',
+      options: [
+        { id: 'approve', label: 'Approve', description: 'Approve the brief' },
+        { id: 'revise', label: 'Revise', description: 'Request changes' },
+      ],
+      recommended: 'approve',
+      context: { brief_summary: 'Test brief' },
+      ...overrides,
+    };
+  }
+
+  it('should insert validation_progress with only valid columns', async () => {
+    const payload = createHITLPayload();
+    const req = createMockRequest(payload, VALID_TOKEN);
+
+    await POST(req);
+
+    // Find the validation_progress table access and its insert call
+    // mockFrom is called per table, and we need to track which insert belongs to which table
+    const fromCallsWithIndex = mockFrom.mock.calls.map((call: string[], i: number) => ({
+      table: call[0],
+      index: i,
+    }));
+
+    const progressAccess = fromCallsWithIndex.find(
+      (c: { table: string }) => c.table === 'validation_progress'
+    );
+    expect(progressAccess).toBeDefined();
+
+    // The insert is called on the returned object, so check the insert call data
+    // that corresponds to HITL progress (identified by crew='HITL')
+    const insertCalls = mockInsert.mock.calls;
+    const hitlInsert = insertCalls.find((call: any[]) => {
+      const data = call[0];
+      return data && data.crew === 'HITL';
+    });
+    expect(hitlInsert).toBeDefined();
+
+    if (hitlInsert) {
+      const insertData = hitlInsert[0];
+      // These columns do NOT exist in production validation_progress
+      expect(insertData).not.toHaveProperty('project_id');
+      expect(insertData).not.toHaveProperty('user_id');
+      expect(insertData).not.toHaveProperty('phase_name');
+      expect(insertData).not.toHaveProperty('current_phase');
+    }
+  });
+
+  it('should use status "in_progress" for HITL progress', async () => {
+    const payload = createHITLPayload();
+    const req = createMockRequest(payload, VALID_TOKEN);
+
+    await POST(req);
+
+    // Check that at least one insert used 'in_progress' status (not 'paused')
+    const insertCalls = mockInsert.mock.calls;
+    const hasInProgressStatus = insertCalls.some((call: any[]) => {
+      const data = call[0];
+      return data && data.status === 'in_progress' && data.crew === 'HITL';
+    });
+    expect(hasInProgressStatus).toBe(true);
+  });
+
+  it('should use validation_phase column for HITL progress', async () => {
+    const payload = createHITLPayload();
+    const req = createMockRequest(payload, VALID_TOKEN);
+
+    await POST(req);
+
+    // Check validation_progress insert uses validation_phase
+    const insertCalls = mockInsert.mock.calls;
+    const hasValidationPhase = insertCalls.some((call: any[]) => {
+      const data = call[0];
+      return data && data.crew === 'HITL' && 'validation_phase' in data;
+    });
+    expect(hasValidationPhase).toBe(true);
+  });
+
+  it('should map "approve_brief" checkpoint to gate_progression + compass', async () => {
+    const payload = createHITLPayload({ checkpoint: 'approve_brief' });
+    const req = createMockRequest(payload, VALID_TOKEN);
+
+    await POST(req);
+
+    // Check that approval_requests insert used correct mapping
+    const insertCalls = mockInsert.mock.calls;
+    const approvalInsert = insertCalls.find((call: any[]) => {
+      const data = call[0];
+      return data && data.approval_type;
+    });
+    expect(approvalInsert).toBeDefined();
+    if (approvalInsert) {
+      expect(approvalInsert[0].approval_type).toBe('gate_progression');
+      expect(approvalInsert[0].owner_role).toBe('compass');
+    }
+  });
+
+  it('should map all defined checkpoints without falling through to defaults', async () => {
+    const checkpoints = [
+      'approve_brief',
+      'approve_founders_brief',
+      'approve_vpc_completion',
+      'approve_experiment_plan',
+      'approve_pricing_test',
+      'approve_campaign_launch',
+      'approve_spend_increase',
+      'approve_desirability_gate',
+      'approve_feasibility_gate',
+      'approve_viability_gate',
+      'approve_pivot',
+      'approve_proceed',
+      'request_human_decision',
+    ];
+
+    // These are the expected non-default mappings
+    const expectedApprovalTypes: Record<string, string> = {
+      'approve_brief': 'gate_progression',
+      'approve_founders_brief': 'gate_progression',
+      'approve_vpc_completion': 'gate_progression',
+      'approve_experiment_plan': 'gate_progression',
+      'approve_pricing_test': 'gate_progression',
+      'approve_campaign_launch': 'campaign_launch',
+      'approve_spend_increase': 'spend_increase',
+      'approve_desirability_gate': 'gate_progression',
+      'approve_feasibility_gate': 'gate_progression',
+      'approve_viability_gate': 'gate_progression',
+      'approve_pivot': 'segment_pivot',
+      'approve_proceed': 'gate_progression',
+      'request_human_decision': 'gate_progression',
+    };
+
+    for (const checkpoint of checkpoints) {
+      jest.clearAllMocks();
+      mockInsert.mockReturnValue({
+        select: mockInsertSelect,
+      });
+
+      const payload = createHITLPayload({ checkpoint });
+      const req = createMockRequest(payload, VALID_TOKEN);
+      await POST(req);
+
+      const insertCalls = mockInsert.mock.calls;
+      const approvalInsert = insertCalls.find((call: any[]) => {
+        const data = call[0];
+        return data && data.approval_type;
+      });
+
+      expect(approvalInsert).toBeDefined();
+      if (approvalInsert) {
+        expect(approvalInsert[0].approval_type).toBe(expectedApprovalTypes[checkpoint]);
+      }
+    }
+  });
+});

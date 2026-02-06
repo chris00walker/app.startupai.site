@@ -176,11 +176,29 @@ export class ModalClient {
       headers['Authorization'] = `Bearer ${this.config.authToken}`;
     }
 
+    // Translate QuickStartKickoffRequest fields to Modal's KickoffRequest schema
+    let modalPayload: Record<string, unknown>;
+    if (isQuickStartRequest(request)) {
+      modalPayload = {
+        project_id: request.project_id,
+        user_id: request.user_id,
+        entrepreneur_input: request.raw_idea,
+        user_type: request.user_type || 'founder',
+        conversation_transcript: [
+          request.hints ? `Hints: ${JSON.stringify(request.hints)}` : null,
+          request.additional_context ? `Context: ${request.additional_context}` : null,
+        ].filter(Boolean).join('\n') || null,
+      };
+    } else {
+      // LegacyKickoffRequest already matches Modal's schema
+      modalPayload = { ...request };
+    }
+
     try {
       const response = await fetch(this.config.kickoffUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(modalPayload),
       });
 
       if (!response.ok) {
