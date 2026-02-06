@@ -31,6 +31,7 @@ export const evidencePackageAccess = pgTable(
     // Access tracking
     firstAccessedAt: timestamp('first_accessed_at', { withTimezone: true }).defaultNow(),
     lastAccessedAt: timestamp('last_accessed_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
     accessCount: integer('access_count').default(1),
     viewDurationSeconds: integer('view_duration_seconds').default(0),
 

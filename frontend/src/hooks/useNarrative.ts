@@ -19,7 +19,7 @@ interface NarrativeState {
   isLoading: boolean;
   isGenerating: boolean;
   error: string | null;
-  generatedFrom: 'cache' | 'generation' | null;
+  generatedFrom: 'cache' | 'crewai_cache' | 'generation' | null;
 }
 
 interface GenerateOptions {
@@ -36,7 +36,7 @@ interface NarrativeGenerateResponse {
   narrative_id: string;
   pitch_narrative: PitchNarrative;
   is_fresh: boolean;
-  generated_from: 'cache' | 'generation';
+  generated_from: 'cache' | 'crewai_cache' | 'generation';
 }
 
 interface NarrativeErrorResponse {
@@ -137,7 +137,7 @@ export function useNarrative({ projectId, autoFetch = true }: UseNarrativeOption
 
       const body = options.force_regenerate
         ? { project_id: projectId, preserve_edits: options.preserve_edits ?? false }
-        : { project_id: projectId, force_regenerate: true };
+        : { project_id: projectId };
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -363,6 +363,8 @@ interface ExportResult {
   verification_url: string;
   download_url: string;
   expires_at: string;
+  evidence_package_id?: string;
+  summary_card_url?: string;
 }
 
 export function useNarrativeExport(narrativeId: string | undefined) {
@@ -370,11 +372,20 @@ export function useNarrativeExport(narrativeId: string | undefined) {
   const [lastExport, setLastExport] = useState<ExportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const exportPdf = useCallback(async (includeQrCode = true) => {
+  const exportPdf = useCallback(async (
+    options: { includeQrCode?: boolean; includeEvidence?: boolean } | boolean = true
+  ) => {
     if (!narrativeId) return;
 
     setIsExporting(true);
     setError(null);
+
+    const normalized = typeof options === 'boolean'
+      ? { includeQrCode: options, includeEvidence: false }
+      : {
+          includeQrCode: options.includeQrCode ?? true,
+          includeEvidence: options.includeEvidence ?? false,
+        };
 
     try {
       const response = await fetch(`/api/narrative/${narrativeId}/export`, {
@@ -382,7 +393,8 @@ export function useNarrativeExport(narrativeId: string | undefined) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           format: 'pdf',
-          include_qr_code: includeQrCode,
+          include_qr_code: normalized.includeQrCode,
+          include_evidence: normalized.includeEvidence,
         }),
       });
 

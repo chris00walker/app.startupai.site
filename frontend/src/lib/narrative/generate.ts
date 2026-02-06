@@ -23,8 +23,9 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { PitchNarrativeContent, ValidationEvidence, GenerateNarrativeResponse } from './types';
-import { computeNarrativeHash, computeSourceEvidenceHash, computeIntegrityHash } from './hash';
+import type { PitchNarrativeContent, ValidationEvidence } from './types';
+import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { computeIntegrityHash } from './hash';
 
 /**
  * Prerequisite check result
@@ -487,12 +488,25 @@ export function buildNarrativeFromEvidence(
  * Called as side effect during generation (step 8.7).
  */
 export async function upsertPrimaryEvidencePackage(
-  supabase: SupabaseClient,
   projectId: string,
   userId: string,
   narrativeId: string,
   evidence: ValidationEvidence
 ): Promise<{ id: string; integrityHash: string } | null> {
+  const adminClient = createAdminClient();
+
+  // Defensive ownership check before service-role writes.
+  const { data: ownerCheck, error: ownerError } = await adminClient
+    .from('projects')
+    .select('user_id')
+    .eq('id', projectId)
+    .single();
+
+  if (ownerError || !ownerCheck || ownerCheck.user_id !== userId) {
+    console.error('Project ownership check failed for evidence package upsert', ownerError);
+    return null;
+  }
+
   const integrityMeta = {
     methodology_version: '1.0',
     agent_versions: [],
@@ -502,7 +516,7 @@ export async function upsertPrimaryEvidencePackage(
   const integrityHash = computeIntegrityHash(evidence, integrityMeta);
 
   // Check if primary package exists
-  const { data: existing } = await supabase
+  const { data: existing } = await adminClient
     .from('evidence_packages')
     .select('id')
     .eq('project_id', projectId)
@@ -511,7 +525,7 @@ export async function upsertPrimaryEvidencePackage(
 
   if (existing) {
     // Update existing primary package
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await adminClient
       .from('evidence_packages')
       .update({
         pitch_narrative_id: narrativeId,
@@ -529,7 +543,7 @@ export async function upsertPrimaryEvidencePackage(
     return { id: updated.id, integrityHash };
   } else {
     // Create new primary package
-    const { data: created, error } = await supabase
+    const { data: created, error } = await adminClient
       .from('evidence_packages')
       .insert({
         project_id: projectId,

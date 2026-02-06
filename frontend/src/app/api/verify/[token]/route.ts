@@ -4,7 +4,10 @@
  * GET /api/verify/:verification_token - Public verification endpoint
  *
  * No auth required. Uses service role for token lookup.
- * Rate limited: 30/min burst per IP (in-memory; upgrade to Upstash Redis for multi-instance).
+ * Rate limited with dual-window policy per IP:
+ * - Burst: 30/minute
+ * - Sustained: 300/hour
+ * Uses Upstash Redis when configured, with in-memory fallback.
  *
  * Response per spec :3092-3105:
  * - status, exported_at, venture_name, evidence_id, generation_hash,
@@ -22,11 +25,106 @@ import { computeNarrativeHash } from '@/lib/narrative/hash';
 import { createRateLimiter } from '@/lib/security/rate-limit';
 import type { PitchNarrativeContent, VerificationResponse } from '@/lib/narrative/types';
 
-// Rate limiting: 30 requests per minute per IP (burst protection)
-const verifyRateLimiter = createRateLimiter({
+// Fallback rate limiting (used when Upstash Redis is not configured).
+const verifyBurstFallback = createRateLimiter({
   maxRequests: 30,
   windowMs: 60 * 1000, // 1 minute
 });
+const verifySustainedFallback = createRateLimiter({
+  maxRequests: 300,
+  windowMs: 60 * 60 * 1000, // 1 hour
+});
+
+interface RateLimitDecision {
+  allowed: boolean;
+  retryAfterSeconds: number;
+}
+
+function normalizeTtl(ttlSeconds: number, fallback: number): number {
+  return ttlSeconds > 0 ? ttlSeconds : fallback;
+}
+
+async function checkUpstashDualWindowRateLimit(key: string): Promise<RateLimitDecision | null> {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  const burstWindowSec = 60;
+  const sustainedWindowSec = 60 * 60;
+  const burstLimit = 30;
+  const sustainedLimit = 300;
+
+  const burstKey = `narrative:verify:burst:${key}`;
+  const sustainedKey = `narrative:verify:sustained:${key}`;
+
+  const pipeline = [
+    ['INCR', burstKey],
+    ['INCR', sustainedKey],
+    ['TTL', burstKey],
+    ['TTL', sustainedKey],
+    ['EXPIRE', burstKey, String(burstWindowSec), 'NX'],
+    ['EXPIRE', sustainedKey, String(sustainedWindowSec), 'NX'],
+  ];
+
+  try {
+    const response = await fetch(`${url}/pipeline`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(pipeline),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upstash pipeline failed: ${response.status}`);
+    }
+
+    const results = await response.json() as Array<{ result?: number | string }>;
+    const burstCount = Number(results[0]?.result ?? 0);
+    const sustainedCount = Number(results[1]?.result ?? 0);
+    const burstTtl = Number(results[2]?.result ?? burstWindowSec);
+    const sustainedTtl = Number(results[3]?.result ?? sustainedWindowSec);
+
+    const burstExceeded = burstCount > burstLimit;
+    const sustainedExceeded = sustainedCount > sustainedLimit;
+
+    if (!burstExceeded && !sustainedExceeded) {
+      return { allowed: true, retryAfterSeconds: 0 };
+    }
+
+    const retryAfterSeconds = Math.max(
+      burstExceeded ? normalizeTtl(burstTtl, burstWindowSec) : 0,
+      sustainedExceeded ? normalizeTtl(sustainedTtl, sustainedWindowSec) : 0
+    );
+
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.max(1, retryAfterSeconds),
+    };
+  } catch (error) {
+    console.error('[verify] Upstash rate limit check failed, using fallback limiter:', error);
+    return null;
+  }
+}
+
+function checkFallbackDualWindowRateLimit(key: string): RateLimitDecision {
+  const burst = verifyBurstFallback(key);
+  const sustained = verifySustainedFallback(key);
+
+  if (burst.allowed && sustained.allowed) {
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
+
+  return {
+    allowed: false,
+    retryAfterSeconds: Math.max(
+      1,
+      Math.ceil(Math.max(burst.resetIn, sustained.resetIn) / 1000)
+    ),
+  };
+}
 
 export async function GET(
   _request: NextRequest,
@@ -38,13 +136,16 @@ export async function GET(
   const ip = _request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     ?? _request.headers.get('x-real-ip')
     ?? 'unknown';
-  const rateLimit = verifyRateLimiter(`verify:${ip}`);
+  const key = `verify:${ip}`;
+  const upstashDecision = await checkUpstashDualWindowRateLimit(key);
+  const rateLimit = upstashDecision ?? checkFallbackDualWindowRateLimit(key);
+
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { status: 'rate_limited', message: 'Too many verification requests' },
       {
         status: 429,
-        headers: { 'Retry-After': String(Math.ceil(rateLimit.resetIn / 1000)) },
+        headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
       }
     );
   }

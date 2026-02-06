@@ -70,6 +70,7 @@ export default function NarrativePage() {
   const [showRegenDialog, setShowRegenDialog] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [previewPackage, setPreviewPackage] = useState<EvidencePackage | null>(null);
+  const [previewAccessId, setPreviewAccessId] = useState<string | undefined>(undefined);
   const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
@@ -93,14 +94,18 @@ export default function NarrativePage() {
     await generate({ force_regenerate: true, preserve_edits: preserveEdits });
   };
 
-  const handleExport = async (includeQrCode: boolean) => {
+  const handleExport = async (options: { includeQrCode: boolean; includeEvidence: boolean }) => {
     trackEvent('narrative_export_started', {
       project_id: projectId,
       format: 'pdf',
-      include_qr: includeQrCode,
+      include_qr: options.includeQrCode,
+      include_evidence: options.includeEvidence,
       category: 'narrative',
     });
-    return await exportPdf(includeQrCode);
+    return await exportPdf({
+      includeQrCode: options.includeQrCode,
+      includeEvidence: options.includeEvidence,
+    });
   };
 
   const handlePublish = async (confirmation: {
@@ -131,6 +136,7 @@ export default function NarrativePage() {
   const handlePreview = async () => {
     setPreviewLoading(true);
     setShowPreviewDialog(true);
+    setPreviewAccessId(undefined);
     try {
       const res = await fetch(`/api/evidence-packages?project_id=${projectId}&primary=true`);
       if (res.ok) {
@@ -140,7 +146,9 @@ export default function NarrativePage() {
           // Fetch the full package
           const pkgRes = await fetch(`/api/evidence-package/${pkg.id}`);
           if (pkgRes.ok) {
-            setPreviewPackage(await pkgRes.json());
+            const fullPackage = await pkgRes.json() as EvidencePackage & { access_id?: string };
+            setPreviewPackage(fullPackage);
+            setPreviewAccessId(fullPackage.access_id);
           }
         }
       }
@@ -300,7 +308,7 @@ export default function NarrativePage() {
               Loading preview...
             </div>
           ) : previewPackage ? (
-            <EvidencePackageViewer package_data={previewPackage} />
+            <EvidencePackageViewer package_data={previewPackage} accessId={previewAccessId} />
           ) : (
             <div className="py-12 text-center text-sm text-muted-foreground">
               No evidence package found. Generate a narrative first to create one.

@@ -573,6 +573,7 @@ export interface UnpublishNarrativeResponse {
 export interface ExportNarrativeRequest {
   format: 'pdf' | 'json';
   include_qr_code?: boolean;
+  include_evidence?: boolean;
 }
 
 export interface ExportNarrativeResponse {
@@ -583,6 +584,8 @@ export interface ExportNarrativeResponse {
   verification_url: string;
   download_url: string;
   expires_at: string;
+  evidence_package_id?: string;
+  summary_card_url?: string;
 }
 
 export interface ExportListItem {

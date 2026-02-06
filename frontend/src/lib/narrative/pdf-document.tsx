@@ -10,7 +10,7 @@
 
 import React from 'react';
 import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
-import type { PitchNarrativeContent, MarketSize } from './types';
+import type { PitchNarrativeContent, MarketSize, ValidationEvidence } from './types';
 
 // Ensure fonts are registered before any rendering
 import './pdf-fonts';
@@ -261,6 +261,7 @@ function SlideFooter({ pageNumber, verificationShort, qrDataUrl }: SlideFooterPr
       <Text style={styles.footerText}>{verificationShort}</Text>
       <Text style={styles.footerCenter}>{pageNumber}</Text>
       {qrDataUrl ? (
+        // eslint-disable-next-line jsx-a11y/alt-text
         <Image src={qrDataUrl} style={{ width: 48, height: 48 }} />
       ) : (
         <Text style={styles.footerText}> </Text>
@@ -275,6 +276,13 @@ interface SlideProps {
   content: PitchNarrativeContent;
   verificationShort: string;
   qrDataUrl: string | null;
+}
+
+interface EvidenceAppendixSlideProps {
+  evidence: ValidationEvidence;
+  verificationShort: string;
+  qrDataUrl: string | null;
+  pageNumber: number;
 }
 
 function CoverSlide({ content }: { content: PitchNarrativeContent }) {
@@ -681,15 +689,112 @@ function UseOfFundsSlide({ content, verificationShort, qrDataUrl }: SlideProps) 
   );
 }
 
+function EvidenceAppendixOverviewSlide({
+  evidence,
+  verificationShort,
+  qrDataUrl,
+  pageNumber,
+}: EvidenceAppendixSlideProps) {
+  const scores = evidence.gate_scores;
+  const experimentCount = evidence.experiment_results?.length ?? 0;
+  const checkpointCount = evidence.hitl_record?.checkpoints?.length ?? 0;
+
+  return (
+    <Page size="LETTER" style={styles.page}>
+      <Text style={styles.slideHeader}>Validation Evidence Appendix</Text>
+      <Text style={[styles.body, { marginBottom: 16 }]}>
+        This section includes the supporting validation evidence snapshot captured at export time.
+      </Text>
+
+      <View style={styles.columns}>
+        <View style={styles.column}>
+          <MetricRow label="Overall Fit" value={scorePercent(scores.overall_fit ?? 0)} />
+          <MetricRow label="Desirability" value={scorePercent(scores.desirability ?? 0)} />
+          <MetricRow label="Feasibility" value={scorePercent(scores.feasibility ?? 0)} />
+          <MetricRow label="Viability" value={scorePercent(scores.viability ?? 0)} />
+        </View>
+        <View style={styles.column}>
+          <MetricRow label="Current Gate" value={(scores.current_gate ?? 'desirability').toUpperCase()} />
+          <MetricRow label="Experiments" value={String(experimentCount)} />
+          <MetricRow label="HITL Checkpoints" value={String(checkpointCount)} />
+          <MetricRow label="Evidence Method" value="VPD" />
+        </View>
+      </View>
+
+      <SlideFooter pageNumber={pageNumber} verificationShort={verificationShort} qrDataUrl={qrDataUrl} />
+    </Page>
+  );
+}
+
+function EvidenceAppendixDetailSlide({
+  evidence,
+  verificationShort,
+  qrDataUrl,
+  pageNumber,
+}: EvidenceAppendixSlideProps) {
+  const experimentLines = (evidence.experiment_results ?? [])
+    .slice(0, 8)
+    .map((exp) => `${exp.hypothesis_id || 'Hypothesis'}: ${exp.outcome}`);
+
+  const painLines = (evidence.vpc?.pains ?? [])
+    .slice(0, 4)
+    .map((pain) => pain.description);
+
+  const gainLines = (evidence.vpc?.gains ?? [])
+    .slice(0, 4)
+    .map((gain) => gain.description);
+
+  const insightLines = (evidence.customer_profile?.behavioral_insights ?? [])
+    .slice(0, 4);
+
+  return (
+    <Page size="LETTER" style={styles.page}>
+      <Text style={styles.slideHeader}>Evidence Highlights</Text>
+      <View style={styles.columns}>
+        <View style={styles.column}>
+          <Text style={[styles.subheading, { fontSize: 18 }]}>Customer Pains</Text>
+          <BulletList items={painLines.length ? painLines : ['No pains captured']} maxItems={4} />
+
+          <View style={styles.divider} />
+
+          <Text style={[styles.subheading, { fontSize: 18 }]}>Customer Gains</Text>
+          <BulletList items={gainLines.length ? gainLines : ['No gains captured']} maxItems={4} />
+        </View>
+        <View style={styles.column}>
+          <Text style={[styles.subheading, { fontSize: 18 }]}>Experiment Outcomes</Text>
+          <BulletList items={experimentLines.length ? experimentLines : ['No experiments recorded']} maxItems={8} />
+
+          <View style={styles.divider} />
+
+          <Text style={[styles.subheading, { fontSize: 18 }]}>Behavioral Insights</Text>
+          <BulletList items={insightLines.length ? insightLines : ['No insights recorded']} maxItems={4} />
+        </View>
+      </View>
+
+      <SlideFooter pageNumber={pageNumber} verificationShort={verificationShort} qrDataUrl={qrDataUrl} />
+    </Page>
+  );
+}
+
 // --- Main Document ---
 
 export interface NarrativePdfProps {
   content: PitchNarrativeContent;
   verificationShort: string;
   qrDataUrl: string | null;
+  includeEvidenceAppendix?: boolean;
+  validationEvidence?: ValidationEvidence;
 }
 
-export function NarrativePdfDocument({ content, verificationShort, qrDataUrl }: NarrativePdfProps) {
+export function NarrativePdfDocument({
+  content,
+  verificationShort,
+  qrDataUrl,
+  includeEvidenceAppendix = false,
+  validationEvidence,
+}: NarrativePdfProps) {
+  const includeEvidence = includeEvidenceAppendix && !!validationEvidence;
+
   return (
     <Document
       title={`${content.cover?.venture_name ?? 'Pitch Narrative'} - StartupAI`}
@@ -708,6 +813,22 @@ export function NarrativePdfDocument({ content, verificationShort, qrDataUrl }: 
       <BusinessModelSlide content={content} verificationShort={verificationShort} qrDataUrl={qrDataUrl} />
       <TeamSlide content={content} verificationShort={verificationShort} qrDataUrl={qrDataUrl} />
       <UseOfFundsSlide content={content} verificationShort={verificationShort} qrDataUrl={qrDataUrl} />
+      {includeEvidence && validationEvidence && (
+        <EvidenceAppendixOverviewSlide
+          evidence={validationEvidence}
+          verificationShort={verificationShort}
+          qrDataUrl={qrDataUrl}
+          pageNumber={12}
+        />
+      )}
+      {includeEvidence && validationEvidence && (
+        <EvidenceAppendixDetailSlide
+          evidence={validationEvidence}
+          verificationShort={verificationShort}
+          qrDataUrl={qrDataUrl}
+          pageNumber={13}
+        />
+      )}
     </Document>
   );
 }

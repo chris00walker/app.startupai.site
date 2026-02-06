@@ -90,6 +90,23 @@ export async function mockAgentStatus(page: Page): Promise<void> {
 }
 
 /**
+ * Mock approvals endpoints used by dashboard/global header hooks.
+ * Prevents unrelated 403/fetch noise during page-level E2E assertions.
+ */
+export async function mockApprovals(page: Page): Promise<void> {
+  await page.route('**/api/approvals*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        approvals: [],
+        client_approvals: [],
+      }),
+    });
+  });
+}
+
+/**
  * Setup all dashboard-related API mocks
  * Call this BEFORE navigating to the dashboard page
  */
@@ -98,6 +115,7 @@ export async function setupDashboardMocks(page: Page): Promise<void> {
     mockGateEvaluation(page),
     mockCrewAIAnalysis(page),
     mockAgentStatus(page),
+    mockApprovals(page),
   ]);
 }
 

@@ -21,9 +21,14 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/errors';
 import { checkPrerequisites, gatherEvidence, buildNarrativeFromEvidence, upsertPrimaryEvidencePackage } from '@/lib/narrative/generate';
-import { computeNarrativeHash, computeSourceEvidenceHash } from '@/lib/narrative/hash';
+import { computeSourceEvidenceHash } from '@/lib/narrative/hash';
 import { trackNarrativeFunnelEvent } from '@/lib/narrative/access-tracking';
 import { getFounderEditedSlides, getSlideEdits } from '@/lib/narrative/edit';
+import {
+  applyGuardianCorrections,
+  guardianCheckGeneration,
+  guardianCheckRegeneration,
+} from '@/lib/narrative/guardian';
 import type { PitchNarrative, PitchNarrativeContent, EditHistoryEntry, SlideKey } from '@/lib/narrative/types';
 
 const generateSchema = z.object({
@@ -149,7 +154,6 @@ export async function POST(request: NextRequest) {
   );
 
   // Step 7: Compute hashes
-  const narrativeHash = computeNarrativeHash(narrativeData);
   const sourceEvidenceHash = computeSourceEvidenceHash(evidence);
 
   // Step 8: Handle existing narrative (update vs create)
@@ -162,10 +166,13 @@ export async function POST(request: NextRequest) {
   let narrativeId: string;
   let isEdited = false;
   let finalNarrativeData: PitchNarrativeContent = narrativeData;
+  let alignmentStatus: 'verified' | 'flagged' = 'verified';
+  let alignmentIssues: unknown[] = [];
 
   if (existingNarrative) {
     // Handle edit preservation for regeneration
     let finalEditHistory: unknown[] = [];
+    let founderEditsMerged = false;
 
     if (preserve_edits && existingNarrative.is_edited && Array.isArray(existingNarrative.edit_history)) {
       // Edit merge algorithm (spec :4497-4511)
@@ -214,7 +221,22 @@ export async function POST(request: NextRequest) {
           (entry) => entry.edit_source === 'founder'
         );
         isEdited = true;
+        founderEditsMerged = true;
       }
+    }
+
+    // Guardian re-validation for regeneration, auto-correction for generation.
+    if (force_regenerate) {
+      const check = guardianCheckRegeneration(finalNarrativeData);
+      alignmentStatus = check.status;
+      alignmentIssues = check.issues;
+    } else {
+      const check = guardianCheckGeneration(finalNarrativeData);
+      if (check.auto_corrections?.length) {
+        finalNarrativeData = applyGuardianCorrections(finalNarrativeData, check.auto_corrections);
+      }
+      alignmentStatus = check.status;
+      alignmentIssues = check.issues;
     }
 
     // Update existing narrative
@@ -222,12 +244,12 @@ export async function POST(request: NextRequest) {
       .from('pitch_narratives')
       .update({
         narrative_data: finalNarrativeData,
-        baseline_narrative: narrativeData,
+        baseline_narrative: founderEditsMerged ? narrativeData : finalNarrativeData,
         source_evidence_hash: sourceEvidenceHash,
         is_edited: isEdited,
         edit_history: finalEditHistory,
-        alignment_status: 'verified',
-        alignment_issues: [],
+        alignment_status: alignmentStatus,
+        alignment_issues: alignmentIssues,
       })
       .eq('id', existingNarrative.id);
 
@@ -260,15 +282,25 @@ export async function POST(request: NextRequest) {
         trigger_reason: force_regenerate ? 'regeneration' : 'initial_generation',
       });
   } else {
+    // Initial generation: run Guardian auto-correction before first insert.
+    const check = guardianCheckGeneration(finalNarrativeData);
+    if (check.auto_corrections?.length) {
+      finalNarrativeData = applyGuardianCorrections(finalNarrativeData, check.auto_corrections);
+    }
+    alignmentStatus = check.status;
+    alignmentIssues = check.issues;
+
     // Create new narrative
     const { data: created, error: createError } = await supabase
       .from('pitch_narratives')
       .insert({
         project_id,
         user_id: user.id,
-        narrative_data: narrativeData,
-        baseline_narrative: narrativeData,
+        narrative_data: finalNarrativeData,
+        baseline_narrative: finalNarrativeData,
         source_evidence_hash: sourceEvidenceHash,
+        alignment_status: alignmentStatus,
+        alignment_issues: alignmentIssues,
       })
       .select('id')
       .single();
@@ -286,7 +318,7 @@ export async function POST(request: NextRequest) {
       .insert({
         narrative_id: narrativeId,
         version_number: 1,
-        narrative_data: narrativeData,
+        narrative_data: finalNarrativeData,
         source_evidence_hash: sourceEvidenceHash,
         fit_score_at_version: evidence.gate_scores.overall_fit,
         trigger_reason: 'initial_generation',
@@ -294,7 +326,10 @@ export async function POST(request: NextRequest) {
   }
 
   // Step 8.7: Upsert primary evidence package
-  await upsertPrimaryEvidencePackage(supabase, project_id, user.id, narrativeId, evidence);
+  const packageResult = await upsertPrimaryEvidencePackage(project_id, user.id, narrativeId, evidence);
+  if (!packageResult) {
+    return narrativeError('INTERNAL_ERROR', 'Failed to create evidence package for narrative export');
+  }
 
   // Step 9: Update project staleness
   await supabase

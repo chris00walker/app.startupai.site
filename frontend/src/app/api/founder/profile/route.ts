@@ -27,6 +27,35 @@ const updateProfileSchema = z.object({
   years_experience: z.number().int().min(0).max(100).optional().nullable(),
 });
 
+const PROFILE_FIELDS = [
+  'professional_summary',
+  'domain_expertise',
+  'previous_ventures',
+  'linkedin_url',
+  'company_website',
+  'years_experience',
+] as const;
+
+type ProfileField = (typeof PROFILE_FIELDS)[number];
+
+function isFilledValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+}
+
+function computeProfileStatus(profile: Record<string, unknown> | null | undefined): {
+  completeness: number;
+  missing_fields: ProfileField[];
+} {
+  const missing_fields = PROFILE_FIELDS.filter((field) => !isFilledValue(profile?.[field]));
+  const filledCount = PROFILE_FIELDS.length - missing_fields.length;
+  const completeness = Math.round((filledCount / PROFILE_FIELDS.length) * 100);
+
+  return { completeness, missing_fields };
+}
+
 /**
  * GET - Get founder profile with completeness indicator
  */
@@ -55,20 +84,15 @@ export async function GET() {
     .eq('id', user.id)
     .single();
 
-  // Calculate completeness
-  const fields = [
-    profile?.professional_summary,
-    profile?.domain_expertise?.length,
-    profile?.linkedin_url,
-    profile?.years_experience,
-  ];
-  const filledFields = fields.filter(Boolean).length;
-  const completeness = Math.round((filledFields / fields.length) * 100);
+  const { completeness, missing_fields } = computeProfileStatus(
+    (profile as Record<string, unknown> | null) ?? null
+  );
 
   return NextResponse.json({
     profile: profile ?? null,
     user: userProfile ?? null,
     completeness,
+    missing_fields,
   });
 }
 
@@ -121,7 +145,15 @@ export async function PATCH(request: NextRequest) {
       return narrativeError('INTERNAL_ERROR', 'Failed to update profile');
     }
 
-    return NextResponse.json({ profile: updated });
+    const { completeness, missing_fields } = computeProfileStatus(
+      (updated as Record<string, unknown> | null) ?? null
+    );
+
+    return NextResponse.json({
+      profile: updated,
+      completeness,
+      missing_fields,
+    });
   } else {
     // Create new
     const { data: created, error: createError } = await supabase
@@ -138,6 +170,17 @@ export async function PATCH(request: NextRequest) {
       return narrativeError('INTERNAL_ERROR', 'Failed to create profile');
     }
 
-    return NextResponse.json({ profile: created }, { status: 201 });
+    const { completeness, missing_fields } = computeProfileStatus(
+      (created as Record<string, unknown> | null) ?? null
+    );
+
+    return NextResponse.json(
+      {
+        profile: created,
+        completeness,
+        missing_fields,
+      },
+      { status: 201 }
+    );
   }
 }

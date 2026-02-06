@@ -142,12 +142,16 @@ export function VerificationPageContent({ data, isLoading }: VerificationPagePro
             {/* Request access CTA */}
             {data.request_access_url && (
               <div className="pt-2 text-center">
-                <a href={data.request_access_url}>
-                  <Button>
+                <Button asChild>
+                  <a
+                    href={data.request_access_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Request Full Access
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               </div>
             )}
 

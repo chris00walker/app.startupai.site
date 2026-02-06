@@ -17,7 +17,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import React, { createElement } from 'react';
 import { renderToBuffer } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
 import { createClient } from '@/lib/supabase/server';
@@ -26,7 +25,7 @@ import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/erro
 import { computeNarrativeHash } from '@/lib/narrative/hash';
 import { trackNarrativeFunnelEvent } from '@/lib/narrative/access-tracking';
 import { NarrativePdfDocument } from '@/lib/narrative/pdf-document';
-import type { PitchNarrativeContent } from '@/lib/narrative/types';
+import type { PitchNarrativeContent, ValidationEvidence } from '@/lib/narrative/types';
 
 // Ensure fonts are registered at module load
 import '@/lib/narrative/pdf-fonts';
@@ -36,6 +35,7 @@ const SIGNED_URL_EXPIRY_SECONDS = 86400; // 24 hours
 const exportSchema = z.object({
   format: z.enum(['pdf', 'json']).default('pdf'),
   include_qr_code: z.boolean().optional().default(true),
+  include_evidence: z.boolean().optional().default(false),
 });
 
 export async function POST(
@@ -68,7 +68,7 @@ export async function POST(
     });
   }
 
-  const { format, include_qr_code } = result.data;
+  const { format, include_qr_code, include_evidence } = result.data;
 
   // Phase 1: Only PDF is supported
   if (format !== 'pdf') {
@@ -94,7 +94,7 @@ export async function POST(
   // 1. Prefer evidence_packages WHERE pitch_narrative_id = :narrative_id
   let { data: evidencePackage } = await supabase
     .from('evidence_packages')
-    .select('id')
+    .select('id, evidence_data')
     .eq('pitch_narrative_id', id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -104,7 +104,7 @@ export async function POST(
   if (!evidencePackage) {
     const { data: primaryPackage } = await supabase
       .from('evidence_packages')
-      .select('id')
+      .select('id, evidence_data')
       .eq('project_id', narrative.project_id)
       .eq('is_primary', true)
       .single();
@@ -161,6 +161,7 @@ export async function POST(
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.startupai.site';
   const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
   const verificationShort = `verify.startupai.com/${verificationToken.substring(0, 8)}`;
+  const summaryCardUrl = `${baseUrl}/api/og/evidence-package/${evidencePackage.id}`;
 
   // Generate QR code as data URL (PNG embedded)
   let qrDataUrl: string | null = null;
@@ -184,14 +185,16 @@ export async function POST(
   // Generate PDF
   let pdfBuffer: Buffer;
   try {
-    const documentElement = createElement(NarrativePdfDocument, {
+    const evidenceData = evidencePackage.evidence_data as ValidationEvidence | null;
+    const pdfDocument = NarrativePdfDocument({
       content: narrativeData,
       verificationShort,
       qrDataUrl,
+      includeEvidenceAppendix: include_evidence && !!evidenceData,
+      validationEvidence: evidenceData ?? undefined,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    pdfBuffer = await renderToBuffer(documentElement as any);
+    pdfBuffer = await renderToBuffer(pdfDocument);
   } catch (pdfError) {
     console.error('PDF generation failed:', pdfError);
     // Clean up the export record on failure
@@ -233,6 +236,7 @@ export async function POST(
     export_id: exportRow.id,
     format,
     include_qr_code,
+    include_evidence,
   }).catch(() => {});
 
   return NextResponse.json({
@@ -243,5 +247,7 @@ export async function POST(
     verification_url: verificationUrl,
     download_url: signedUrl?.signedUrl ?? '',
     expires_at: new Date(Date.now() + SIGNED_URL_EXPIRY_SECONDS * 1000).toISOString(),
+    evidence_package_id: evidencePackage.id,
+    summary_card_url: summaryCardUrl,
   });
 }

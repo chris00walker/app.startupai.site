@@ -307,7 +307,7 @@ function EmptyState() {
         <div className="space-y-2">
           <h2 className="text-3xl font-bold">Welcome to StartupAI! 🚀</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ready to validate your startup idea with AI-powered insights? Let's create your first validation project.
+            Ready to validate your startup idea with AI-powered insights? Let&apos;s create your first validation project.
           </p>
         </div>
       </div>
@@ -383,6 +383,76 @@ function NarrativeTabContent({ projectId }: { projectId?: string }) {
     missingFields: profileMissing,
   } = useFounderProfile()
 
+  const [primaryPackage, setPrimaryPackage] = React.useState<{
+    id: string
+    isPublic: boolean
+    isPrimary: boolean
+    founderConsent: boolean
+    sharedCount: number
+  } | null>(null)
+
+  React.useEffect(() => {
+    let active = true
+
+    async function loadPrimaryPackage() {
+      if (!projectId) return
+      try {
+        const listResponse = await fetch(`/api/evidence-packages?project_id=${projectId}&primary=true`)
+        if (!listResponse.ok) return
+
+        const listData = await listResponse.json() as {
+          packages?: Array<{
+            id: string
+            is_public?: boolean
+            is_primary?: boolean
+            founder_consent?: boolean
+          }>
+        }
+
+        const pkg = listData.packages?.[0]
+        if (!pkg) {
+          if (active) setPrimaryPackage(null)
+          return
+        }
+
+        const packageResponse = await fetch(`/api/evidence-package/${pkg.id}`)
+        if (!packageResponse.ok) {
+          if (active) {
+            setPrimaryPackage({
+              id: pkg.id,
+              isPublic: !!pkg.is_public,
+              isPrimary: !!pkg.is_primary,
+              founderConsent: !!pkg.founder_consent,
+              sharedCount: 0,
+            })
+          }
+          return
+        }
+
+        const packageData = await packageResponse.json() as {
+          access?: { shared_with?: string[] }
+        }
+
+        if (active) {
+          setPrimaryPackage({
+            id: pkg.id,
+            isPublic: !!pkg.is_public,
+            isPrimary: !!pkg.is_primary,
+            founderConsent: !!pkg.founder_consent,
+            sharedCount: packageData.access?.shared_with?.length ?? 0,
+          })
+        }
+      } catch {
+        // Non-blocking dashboard enhancement
+      }
+    }
+
+    loadPrimaryPackage()
+    return () => {
+      active = false
+    }
+  }, [projectId, narrative?.id])
+
   const handleGenerate = () => {
     generate()
   }
@@ -452,9 +522,19 @@ function NarrativeTabContent({ projectId }: { projectId?: string }) {
           hasProfile={!!founderProfile}
         />
         <EvidencePackageCard
-          hasPackage={false}
-          onView={() => {}}
-          onCreate={() => {}}
+          hasPackage={!!primaryPackage}
+          isPublic={primaryPackage?.isPublic}
+          isPrimary={primaryPackage?.isPrimary}
+          founderConsent={primaryPackage?.founderConsent}
+          sharedCount={primaryPackage?.sharedCount ?? 0}
+          onView={() => {
+            if (projectId) {
+              window.location.href = `/project/${projectId}/narrative`
+            }
+          }}
+          onCreate={() => {
+            generate({ force_regenerate: true, preserve_edits: true })
+          }}
         />
       </div>
     </div>

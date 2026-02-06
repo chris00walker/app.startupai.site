@@ -27,9 +27,10 @@ import { EXPORT_COPY } from '@/lib/constants/narrative';
 interface ExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onExport: (includeQrCode: boolean) => Promise<{
+  onExport: (options: { includeQrCode: boolean; includeEvidence: boolean }) => Promise<{
     download_url?: string;
     verification_url?: string;
+    summary_card_url?: string;
   } | undefined>;
   isExporting?: boolean;
 }
@@ -41,13 +42,15 @@ export function ExportDialog({
   isExporting,
 }: ExportDialogProps) {
   const [includeQrCode, setIncludeQrCode] = useState(true);
+  const [includeEvidence, setIncludeEvidence] = useState(false);
   const [result, setResult] = useState<{
     download_url?: string;
     verification_url?: string;
+    summary_card_url?: string;
   } | null>(null);
 
   const handleExport = async () => {
-    const data = await onExport(includeQrCode);
+    const data = await onExport({ includeQrCode, includeEvidence });
     if (data) {
       setResult(data);
     }
@@ -55,6 +58,8 @@ export function ExportDialog({
 
   const handleClose = () => {
     setResult(null);
+    setIncludeEvidence(false);
+    setIncludeQrCode(true);
     onOpenChange(false);
   };
 
@@ -83,6 +88,22 @@ export function ExportDialog({
                   </Label>
                   <p className="text-xs text-muted-foreground">
                     {EXPORT_COPY.qr_code_help}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="include-evidence"
+                  checked={includeEvidence}
+                  onCheckedChange={(checked) => setIncludeEvidence(checked === true)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor="include-evidence" className="text-sm font-medium cursor-pointer">
+                    Include validation evidence appendix
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Adds evidence snapshots, gate scores, and experiment outcomes to the PDF.
                   </p>
                 </div>
               </div>
@@ -139,6 +160,19 @@ export function ExportDialog({
                       {result.verification_url}
                     </p>
                   </div>
+                )}
+
+                {result.summary_card_url && (
+                  <a
+                    href={result.summary_card_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 p-3 rounded-lg border hover:bg-muted transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span className="text-sm font-medium">Download Summary Card (PNG)</span>
+                    <ExternalLink className="h-3 w-3 ml-auto text-muted-foreground" />
+                  </a>
                 )}
               </div>
             </div>

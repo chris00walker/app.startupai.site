@@ -59,6 +59,16 @@ export async function GET(
   };
 
   return NextResponse.json({
+    // Full DB-backed shape used by edit/history APIs.
+    id: narrative.id,
+    narrative_data: narrative.narrative_data,
+    baseline_narrative: narrative.baseline_narrative,
+    source_evidence_hash: narrative.source_evidence_hash,
+    generation_version: narrative.generation_version,
+    created_at: narrative.created_at,
+    updated_at: narrative.updated_at,
+
+    // Assembled API shape used by narrative views.
     pitch_narrative: pitchNarrative,
     is_edited: narrative.is_edited,
     alignment_status: narrative.alignment_status,

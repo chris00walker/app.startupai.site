@@ -9,18 +9,20 @@
 
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { NarrativePreview } from '@/components/narrative/NarrativePreview';
-import { FileText, Shield, BarChart3, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Shield, BarChart3, CheckCircle, Clock, Download } from 'lucide-react';
 import type { EvidencePackage } from '@/lib/narrative/types';
 
 interface EvidencePackageViewerProps {
   package_data: EvidencePackage;
   accessId?: string;
   onTabChange?: (tab: string) => void;
+  pdfDownloadUrl?: string;
 }
 
 function IntegrityTab({ integrity }: { integrity: EvidencePackage['integrity'] }) {
@@ -213,8 +215,14 @@ export function EvidencePackageViewer({
   package_data,
   accessId,
   onTabChange,
+  pdfDownloadUrl,
 }: EvidencePackageViewerProps) {
-  const mountTimeRef = useRef(Date.now());
+  const mountTimeRef = useRef(0);
+  const [activeTab, setActiveTab] = useState('narrative');
+
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, []);
 
   const trackEvent = useCallback(
     (eventType: string, eventValue?: Record<string, unknown>) => {
@@ -265,26 +273,56 @@ export function EvidencePackageViewer({
   }, [accessId]);
 
   const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
     trackEvent('tab_switch', { tab });
+
+    if (tab === 'narrative') {
+      trackEvent('slide_view', { slide: 'narrative_overview' });
+    } else if (tab === 'evidence') {
+      trackEvent('evidence_expand', { section: 'validation_evidence' });
+    } else if (tab === 'integrity') {
+      trackEvent('evidence_expand', { section: 'integrity' });
+    }
+
     onTabChange?.(tab);
   };
 
   return (
-    <Tabs defaultValue="narrative" onValueChange={handleTabChange} className="space-y-4">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="narrative" className="gap-1.5">
-          <FileText className="h-4 w-4" />
-          Pitch Narrative
-        </TabsTrigger>
-        <TabsTrigger value="evidence" className="gap-1.5">
-          <BarChart3 className="h-4 w-4" />
-          Validation Evidence
-        </TabsTrigger>
-        <TabsTrigger value="integrity" className="gap-1.5">
-          <Shield className="h-4 w-4" />
-          Integrity
-        </TabsTrigger>
-      </TabsList>
+    <Tabs
+      defaultValue="narrative"
+      value={activeTab}
+      onValueChange={handleTabChange}
+      className="space-y-4"
+    >
+      <div className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="narrative" className="gap-1.5">
+            <FileText className="h-4 w-4" />
+            Pitch Narrative
+          </TabsTrigger>
+          <TabsTrigger value="evidence" className="gap-1.5">
+            <BarChart3 className="h-4 w-4" />
+            Validation Evidence
+          </TabsTrigger>
+          <TabsTrigger value="integrity" className="gap-1.5">
+            <Shield className="h-4 w-4" />
+            Integrity
+          </TabsTrigger>
+        </TabsList>
+        {pdfDownloadUrl && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              trackEvent('pdf_download', { url: pdfDownloadUrl });
+              window.open(pdfDownloadUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            PDF
+          </Button>
+        )}
+      </div>
 
       <TabsContent value="narrative">
         {package_data.pitch_narrative?.content && (
