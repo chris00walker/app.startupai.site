@@ -133,22 +133,29 @@ export async function POST(
   }
 
   // Record HITL checkpoint via existing approval system
-  await supabase
+  const { error: approvalInsertError } = await supabase
     .from('approval_requests')
     .insert({
       execution_id: `narrative_publish_${id}`,
-      task_id: `publish_${id}`,
+      task_id: 'publish_narrative',
       user_id: user.id,
       project_id: narrative.project_id,
-      approval_type: 'brief_review',
-      owner_role: 'founder',
+      approval_type: 'gate_progression',
+      owner_role: 'compass',
       title: 'Narrative Publication Review',
       description: 'Founder reviewed and approved narrative for publication',
+      task_output: {
+        narrative_id: id,
+        hitl_confirmation: result.data.hitl_confirmation,
+      },
       status: 'approved',
       decision: 'approved',
       decided_by: user.id,
       decided_at: now,
     });
+  if (approvalInsertError) {
+    console.error('Failed to record publication approval audit:', approvalInsertError);
+  }
 
   // Track funnel event (fire-and-forget)
   trackNarrativeFunnelEvent(narrative.project_id, user.id, 'narrative_published', {

@@ -892,6 +892,14 @@
       "description": "Narrative Versions API"
     },
     {
+      "path": "/api/narrative/[id]/versions/[version]/diff",
+      "methods": [
+        "GET"
+      ],
+      "type": "nextjs",
+      "description": "Narrative Version Diff API"
+    },
+    {
       "path": "/api/narrative/generate",
       "methods": [
         "POST"

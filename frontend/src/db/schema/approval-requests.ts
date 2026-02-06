@@ -30,7 +30,7 @@ export type ApprovalType =
 /**
  * Owner role for approval routing
  */
-export type ApprovalOwnerRole = 'founder' | 'consultant' | 'admin';
+export type ApprovalOwnerRole = 'compass' | 'ledger' | 'pulse' | 'guardian' | 'forge';
 
 export const approvalRequests = pgTable('approval_requests', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),
@@ -56,7 +56,15 @@ export const approvalRequests = pgTable('approval_requests', {
   description: text('description').notNull(),
   taskOutput: jsonb('task_output').$type<Record<string, unknown>>().default({}).notNull(),
   evidenceSummary: jsonb('evidence_summary').$type<Record<string, unknown>>().default({}),
-  options: jsonb('options').$type<Array<{ key: string; label: string; description?: string }>>().default([]),
+  options: jsonb('options')
+    .$type<Array<{
+      id: string;
+      label: string;
+      description?: string;
+      recommended?: boolean;
+      risk_level?: 'low' | 'medium' | 'high';
+    }>>()
+    .default([]),
 
   // Status and decision
   status: text('status').$type<ApprovalRequestStatus>().default('pending').notNull(),

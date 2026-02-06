@@ -3,7 +3,7 @@
  *
  * Full decision modal with context, options, and feedback form.
  *
- * @story US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
+ * @story US-AH01, US-H01, US-H02, US-H04, US-H05, US-H06, US-H07, US-H08, US-H09
  */
 
 'use client';
@@ -38,7 +38,9 @@ import {
 import { FounderAvatarWithLabel } from './FounderAvatar';
 import { ApprovalTypeIndicator } from './ApprovalTypeIndicator';
 import { EvidenceSummary } from './EvidenceSummary';
-import type { ApprovalRequest, ApprovalOption, OwnerRole, ApprovalType } from '@/types/crewai';
+import { FoundersBriefPanel } from './FoundersBriefPanel';
+import type { ApprovalRequest, ApprovalOption, OwnerRole, ApprovalType, ModalFoundersBrief } from '@/types/crewai';
+import { isFoundersBriefCheckpoint } from '@/lib/approvals/checkpoint-contract';
 
 interface ApprovalDetailModalProps {
   approval: ApprovalRequest | null;
@@ -104,6 +106,11 @@ export function ApprovalDetailModal({
   const timeRemaining = formatTimeRemaining(approval.expires_at);
   const hasOptions = approval.options && approval.options.length > 0;
   const recommendedOption = approval.options?.find((opt) => opt.recommended);
+
+  const isBriefApproval = isFoundersBriefCheckpoint(approval.task_id);
+  const briefData = isBriefApproval
+    ? (approval.task_output?.founders_brief as ModalFoundersBrief | undefined)
+    : undefined;
 
   const handleApprove = async () => {
     setIsSubmitting(true);
@@ -201,6 +208,11 @@ export function ApprovalDetailModal({
               <h4 className="text-sm font-medium">Description</h4>
               <p className="text-sm text-muted-foreground">{approval.description}</p>
             </div>
+
+            {/* Founder's Brief (for brief approval checkpoints) */}
+            {isBriefApproval && briefData && (
+              <FoundersBriefPanel brief={briefData} />
+            )}
 
             {/* Evidence Summary */}
             {approval.evidence_summary && Object.keys(approval.evidence_summary).length > 0 && (

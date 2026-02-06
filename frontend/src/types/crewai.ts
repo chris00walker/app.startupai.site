@@ -155,6 +155,84 @@ export interface ApprovalRequest {
 }
 
 /**
+ * Modal's nested Founder's Brief format.
+ * Used in approval_requests.task_output.founders_brief for approve_brief checkpoints.
+ * All fields optional for defensive rendering (Modal format may evolve).
+ *
+ * Intentionally excluded bookkeeping fields (present in payload but always null, internal to Modal):
+ * brief_id, founder_id, session_id, created_at, updated_at
+ */
+export interface ModalFoundersBrief {
+  version?: number
+  the_idea?: {
+    one_liner?: string
+    description?: string
+    inspiration?: string
+    unique_insight?: string
+  }
+  problem_hypothesis?: {
+    problem_statement?: string
+    who_has_this_problem?: string
+    frequency?: string
+    current_alternatives?: string
+    why_alternatives_fail?: string
+    evidence_of_problem?: string | null
+    validation_status?: string
+  }
+  customer_hypothesis?: {
+    primary_segment?: string
+    segment_description?: string
+    characteristics?: string[]
+    where_to_find_them?: string
+    estimated_size?: string | null
+    validation_status?: string
+  }
+  solution_hypothesis?: {
+    proposed_solution?: string
+    key_features?: string[]
+    differentiation?: string
+    unfair_advantage?: string | null
+    validation_status?: string
+  }
+  key_assumptions?: Array<{
+    assumption?: string
+    category?: string
+    risk_level?: string
+    testable?: boolean
+    tested?: boolean
+    validated?: boolean | null
+    how_to_test?: string
+  }>
+  success_criteria?: {
+    target_metrics?: Record<string, string>
+    fit_score_target?: number
+    zombie_ratio_max?: number
+    problem_resonance_target?: number
+    minimum_viable_signal?: string
+    deal_breakers?: string[]
+  }
+  founder_context?: {
+    motivation?: string
+    time_commitment?: string
+    founder_background?: string
+    resources_available?: string
+  }
+  qa_status?: {
+    legitimacy_check?: string
+    legitimacy_notes?: string
+    intent_verification?: string
+    intent_notes?: string
+    overall_status?: string
+  }
+  metadata?: {
+    interview_turns?: number
+    confidence_score?: number
+    followup_questions_asked?: number
+    interview_duration_minutes?: number
+  }
+}
+
+/**
  * User preferences for auto-approving certain decision types.
  */
 export interface ApprovalPreferences {

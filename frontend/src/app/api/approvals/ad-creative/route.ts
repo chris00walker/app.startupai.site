@@ -253,16 +253,19 @@ export async function POST(request: NextRequest) {
     const { error: approvalRecordError } = await adminSupabase
       .from('approval_requests')
       .insert({
+        execution_id: `ad_campaign_${campaignId}`,
+        task_id: 'approve_campaign_launch',
         user_id: user.id,
         project_id: campaign.project_id,
-        approval_type: 'ad_creative_review',
+        approval_type: 'campaign_launch',
+        owner_role: 'pulse',
         title: `Ad Creative Approval: ${campaign.name}`,
-        description: `Approved ad campaign for Meta deployment`,
+        description: 'Approved ad campaign for Meta deployment',
         status: 'approved',
         decision: 'approved',
-        decision_at: new Date().toISOString(),
-        feedback: feedback || null,
-        context: {
+        decided_at: new Date().toISOString(),
+        human_feedback: feedback || null,
+        task_output: {
           campaign_id: campaignId,
           copy_state: copyState,
           platform: campaign.platform,

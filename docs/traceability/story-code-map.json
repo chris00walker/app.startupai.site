@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generated_at": "2026-01-30T18:42:46.795Z",
+    "generated_at": "2026-02-06T20:41:49.862Z",
     "version": "1.0.0",
     "story_count": 264,
-    "annotated_file_count": 570
+    "annotated_file_count": 698
   },
   "stories": {
     "US-F01": {
@@ -37,7 +37,9 @@
         }
       ],
       "unit_tests": [
+        "frontend/src/__tests__/api/crewai/modal-client.test.ts",
         "frontend/src/__tests__/api/onboarding/brief/route.test.ts",
+        "frontend/src/__tests__/api/projects/quick-start.test.ts",
         "frontend/src/components/onboarding/__tests__/FoundersBriefReview.test.tsx"
       ],
       "links": {
@@ -71,7 +73,9 @@
             }
           ],
           "unit_tests": [
+            "frontend/src/__tests__/api/crewai/modal-client.test.ts",
             "frontend/src/__tests__/api/onboarding/brief/route.test.ts",
+            "frontend/src/__tests__/api/projects/quick-start.test.ts",
             "frontend/src/components/onboarding/__tests__/FoundersBriefReview.test.tsx"
           ]
         },
@@ -670,7 +674,10 @@
           "file": "16-quick-start-founder.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/api/crewai/modal-client.test.ts",
+        "frontend/src/__tests__/api/projects/quick-start.test.ts"
+      ],
       "links": {
         "annotated": {
           "components": [
@@ -687,7 +694,10 @@
               "file": "16-quick-start-founder.spec.ts"
             }
           ],
-          "unit_tests": []
+          "unit_tests": [
+            "frontend/src/__tests__/api/crewai/modal-client.test.ts",
+            "frontend/src/__tests__/api/projects/quick-start.test.ts"
+          ]
         },
         "baseline": {
           "components": [],
@@ -1439,7 +1449,8 @@
       "title": "Invite Client",
       "components": [
         "frontend/src/components/ClientForm.tsx",
-        "frontend/src/components/consultant/InviteClientModal.tsx"
+        "frontend/src/components/consultant/InviteClientModal.tsx",
+        "frontend/src/db/schema/consultant-clients.ts"
       ],
       "api_routes": [
         "frontend/src/app/api/auth/validate-invite/route.ts",
@@ -1470,7 +1481,8 @@
         "annotated": {
           "components": [
             "frontend/src/components/ClientForm.tsx",
-            "frontend/src/components/consultant/InviteClientModal.tsx"
+            "frontend/src/components/consultant/InviteClientModal.tsx",
+            "frontend/src/db/schema/consultant-clients.ts"
           ],
           "api_routes": [
             "frontend/src/app/api/auth/validate-invite/route.ts",
@@ -2608,6 +2620,7 @@
       "components": [
         "frontend/src/components/approvals/ApprovalDetailModal.tsx",
         "frontend/src/components/approvals/ApprovalList.tsx",
+        "frontend/src/components/approvals/FoundersBriefPanel.tsx",
         "frontend/src/components/onboarding/FoundersBriefReview.tsx"
       ],
       "api_routes": [
@@ -2637,6 +2650,7 @@
       "unit_tests": [
         "frontend/src/__tests__/api/crewai/webhook/route.test.ts",
         "frontend/src/__tests__/api/onboarding/brief/route.test.ts",
+        "frontend/src/__tests__/components/approvals/ApprovalDetailModal.test.tsx",
         "frontend/src/__tests__/hooks/useApprovals.test.ts",
         "frontend/src/__tests__/integration/contracts/webhook-validation.test.ts",
         "frontend/src/components/onboarding/__tests__/FoundersBriefReview.test.tsx"
@@ -2646,6 +2660,7 @@
           "components": [
             "frontend/src/components/approvals/ApprovalDetailModal.tsx",
             "frontend/src/components/approvals/ApprovalList.tsx",
+            "frontend/src/components/approvals/FoundersBriefPanel.tsx",
             "frontend/src/components/onboarding/FoundersBriefReview.tsx"
           ],
           "api_routes": [
@@ -2675,6 +2690,7 @@
           "unit_tests": [
             "frontend/src/__tests__/api/crewai/webhook/route.test.ts",
             "frontend/src/__tests__/api/onboarding/brief/route.test.ts",
+            "frontend/src/__tests__/components/approvals/ApprovalDetailModal.test.tsx",
             "frontend/src/__tests__/hooks/useApprovals.test.ts",
             "frontend/src/__tests__/integration/contracts/webhook-validation.test.ts",
             "frontend/src/components/onboarding/__tests__/FoundersBriefReview.test.tsx"
@@ -10539,7 +10555,10 @@
     },
     "US-AH01": {
       "title": "Approve Founder's Brief",
-      "components": [],
+      "components": [
+        "frontend/src/components/approvals/ApprovalDetailModal.tsx",
+        "frontend/src/components/approvals/FoundersBriefPanel.tsx"
+      ],
       "api_routes": [
         "frontend/src/app/api/approvals/[id]/route.ts"
       ],
@@ -10551,10 +10570,16 @@
           "file": "35-agent-hitl-checkpoints.spec.ts"
         }
       ],
-      "unit_tests": [],
+      "unit_tests": [
+        "frontend/src/__tests__/components/approvals/ApprovalDetailModal.test.tsx",
+        "frontend/src/__tests__/components/approvals/FoundersBriefPanel.test.tsx"
+      ],
       "links": {
         "annotated": {
-          "components": [],
+          "components": [
+            "frontend/src/components/approvals/ApprovalDetailModal.tsx",
+            "frontend/src/components/approvals/FoundersBriefPanel.tsx"
+          ],
           "api_routes": [
             "frontend/src/app/api/approvals/[id]/route.ts"
           ],
@@ -10566,7 +10591,10 @@
               "file": "35-agent-hitl-checkpoints.spec.ts"
             }
           ],
-          "unit_tests": []
+          "unit_tests": [
+            "frontend/src/__tests__/components/approvals/ApprovalDetailModal.test.tsx",
+            "frontend/src/__tests__/components/approvals/FoundersBriefPanel.test.tsx"
+          ]
         },
         "baseline": {
           "components": [],
@@ -13902,10 +13930,22 @@
         "US-FT01"
       ]
     },
+    "frontend/src/__tests__/api/crewai/modal-client.test.ts": {
+      "stories": [
+        "US-F01",
+        "US-F07"
+      ]
+    },
     "frontend/src/__tests__/api/onboarding/brief/route.test.ts": {
       "stories": [
         "US-F01",
         "US-H01"
+      ]
+    },
+    "frontend/src/__tests__/api/projects/quick-start.test.ts": {
+      "stories": [
+        "US-F01",
+        "US-F07"
       ]
     },
     "frontend/src/components/onboarding/__tests__/FoundersBriefReview.test.tsx": {
@@ -14753,6 +14793,11 @@
         "US-CT03"
       ]
     },
+    "frontend/src/db/schema/consultant-clients.ts": {
+      "stories": [
+        "US-C02"
+      ]
+    },
     "frontend/src/app/api/auth/validate-invite/route.ts": {
       "stories": [
         "US-C02"
@@ -15144,7 +15189,14 @@
         "US-H06",
         "US-H07",
         "US-H08",
-        "US-H09"
+        "US-H09",
+        "US-AH01"
+      ]
+    },
+    "frontend/src/components/approvals/FoundersBriefPanel.tsx": {
+      "stories": [
+        "US-H01",
+        "US-AH01"
       ]
     },
     "frontend/src/app/api/approvals/[id]/route.ts": {
@@ -15179,6 +15231,12 @@
         "US-H07",
         "US-H08",
         "US-H09"
+      ]
+    },
+    "frontend/src/__tests__/components/approvals/ApprovalDetailModal.test.tsx": {
+      "stories": [
+        "US-H01",
+        "US-AH01"
       ]
     },
     "frontend/src/__tests__/hooks/useApprovals.test.ts": {
@@ -16997,6 +17055,11 @@
     "../startupai-crew/src/crews/viability/governance_crew.py": {
       "stories": [
         "US-AVB05"
+      ]
+    },
+    "frontend/src/__tests__/components/approvals/FoundersBriefPanel.test.tsx": {
+      "stories": [
+        "US-AH01"
       ]
     },
     "frontend/tests/e2e/35-agent-hitl-checkpoints.spec.ts": {

@@ -91,21 +91,26 @@ export async function recordPublicationHITL(
   confirmation: PublishNarrativeRequest['hitl_confirmation']
 ): Promise<void> {
   const supabase = createAdminClient();
+  const nowIso = new Date().toISOString();
 
-  // Record in approval_requests table with checkpoint_type = 'narrative_publish'
+  // Record publication confirmation in the same approval_requests contract used by HITL.
   await supabase
     .from('approval_requests')
     .insert({
-      entity_type: 'narrative',
-      entity_id: narrativeId,
+      execution_id: `narrative_publish_${narrativeId}`,
+      task_id: 'publish_narrative',
       user_id: userId,
-      checkpoint_type: 'narrative_publish',
-      status: 'approved',
-      metadata: {
-        reviewed_slides: confirmation.reviewed_slides,
-        verified_traction: confirmation.verified_traction,
-        added_context: confirmation.added_context,
-        confirmed_ask: confirmation.confirmed_ask,
+      approval_type: 'gate_progression',
+      owner_role: 'compass',
+      title: 'Narrative Publication Review',
+      description: 'Founder reviewed and approved narrative for publication',
+      task_output: {
+        narrative_id: narrativeId,
+        hitl_confirmation: confirmation,
       },
+      status: 'approved',
+      decision: 'approved',
+      decided_by: userId,
+      decided_at: nowIso,
     });
 }

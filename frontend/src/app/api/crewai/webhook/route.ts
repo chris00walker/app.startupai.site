@@ -21,6 +21,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
+import { getHitlCheckpointContract } from '@/lib/approvals/checkpoint-contract';
 
 // Import shared schemas - single source of truth for validation
 import {
@@ -1031,43 +1032,9 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
     })
     .eq('run_id', payload.run_id);
 
-  // Determine approval_type based on checkpoint name
-  // Map HITL checkpoints to valid approval_type values from schema
-  const approvalTypeMap: Record<string, string> = {
-    'approve_brief': 'gate_progression',
-    'approve_founders_brief': 'gate_progression',
-    'approve_vpc_completion': 'gate_progression',
-    'approve_experiment_plan': 'gate_progression',
-    'approve_pricing_test': 'gate_progression',
-    'approve_campaign_launch': 'campaign_launch',
-    'approve_spend_increase': 'spend_increase',
-    'approve_desirability_gate': 'gate_progression',
-    'approve_feasibility_gate': 'gate_progression',
-    'approve_viability_gate': 'gate_progression',
-    'approve_pivot': 'segment_pivot',
-    'approve_proceed': 'gate_progression',
-    'request_human_decision': 'gate_progression',
-  };
-
-  // Determine owner_role based on checkpoint phase/type
-  const ownerRoleMap: Record<string, string> = {
-    'approve_brief': 'compass',              // Phase 1 - Modal sends this name
-    'approve_founders_brief': 'compass',     // Phase 0 - Compass leads synthesis
-    'approve_vpc_completion': 'compass',     // Phase 1 - VPC
-    'approve_experiment_plan': 'pulse',      // Phase 1 - Pulse runs experiments
-    'approve_pricing_test': 'ledger',        // Phase 1 - Ledger handles pricing
-    'approve_campaign_launch': 'pulse',      // Phase 2 - Marketing
-    'approve_spend_increase': 'ledger',      // Phase 2 - Budget
-    'approve_desirability_gate': 'compass',  // Phase 2 - Gate
-    'approve_feasibility_gate': 'forge',     // Phase 3 - Technical
-    'approve_viability_gate': 'ledger',      // Phase 4 - Financial
-    'approve_pivot': 'compass',              // Phase 4 - Strategy
-    'approve_proceed': 'compass',            // Phase 4 - Final
-    'request_human_decision': 'compass',     // Phase 4 - Final decision
-  };
-
-  const approvalType = approvalTypeMap[payload.checkpoint] || 'gate_progression';
-  const ownerRole = ownerRoleMap[payload.checkpoint] || 'compass';
+  const checkpointContract = getHitlCheckpointContract(payload.checkpoint);
+  const approvalType = checkpointContract?.approvalType || 'gate_progression';
+  const ownerRole = checkpointContract?.ownerRole || 'compass';
 
   // Transform context into evidence_summary for UI display
   const evidenceSummary = buildEvidenceSummaryFromContext(payload.checkpoint, payload.context);
