@@ -17,6 +17,10 @@
       "testId": "checkpoint-contract:approve_vpc_completion"
     },
     {
+      "id": "approve_discovery_output",
+      "testId": "checkpoint-contract:approve_discovery_output"
+    },
+    {
       "id": "approve_experiment_plan",
       "testId": "checkpoint-contract:approve_experiment_plan"
     },

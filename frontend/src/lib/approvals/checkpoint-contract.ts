@@ -30,6 +30,11 @@ const CHECKPOINT_CONTRACT = {
     ownerRole: 'compass',
     renderVariant: 'generic',
   },
+  approve_discovery_output: {
+    approvalType: 'gate_progression',
+    ownerRole: 'compass',
+    renderVariant: 'generic',
+  },
   approve_experiment_plan: {
     approvalType: 'gate_progression',
     ownerRole: 'pulse',
