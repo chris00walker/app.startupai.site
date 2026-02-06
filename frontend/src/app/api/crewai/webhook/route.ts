@@ -1033,8 +1033,18 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
     .eq('run_id', payload.run_id);
 
   const checkpointContract = getHitlCheckpointContract(payload.checkpoint);
-  const approvalType = checkpointContract?.approvalType || 'gate_progression';
-  const ownerRole = checkpointContract?.ownerRole || 'compass';
+  if (!checkpointContract) {
+    return NextResponse.json(
+      {
+        error: `Unknown HITL checkpoint "${payload.checkpoint}"`,
+        code: 'UNKNOWN_HITL_CHECKPOINT',
+      },
+      { status: 422 }
+    );
+  }
+
+  const approvalType = checkpointContract.approvalType;
+  const ownerRole = checkpointContract.ownerRole;
 
   // Transform context into evidence_summary for UI display
   const evidenceSummary = buildEvidenceSummaryFromContext(payload.checkpoint, payload.context);

@@ -68,8 +68,24 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
         working-directory: frontend
 
-      - name: E2E tests
-        run: pnpm test:e2e
+      - name: E2E preflight
+        run: pnpm test:e2e:preflight
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+
+      - name: E2E smoke
+        run: pnpm test:e2e:smoke
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+
+      - name: E2E full
+        run: pnpm test:e2e:full
         working-directory: frontend
         env:
           # E2E tests need the standard Supabase env vars

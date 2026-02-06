@@ -23,6 +23,7 @@ import {
   hitlCheckpointSchema,
   consultantOnboardingSchema,
 } from '@/app/api/crewai/webhook/schemas';
+import { HITL_CHECKPOINT_IDS } from '@/lib/approvals/checkpoint-contract';
 import { createTestId, createTestName } from '../../utils/db-test-utils';
 
 // ============================================================================
@@ -74,12 +75,13 @@ function buildValidProgressPayload() {
 }
 
 function buildValidHITLPayload() {
+  const defaultCheckpoint = HITL_CHECKPOINT_IDS[0] || 'approve_brief';
   return {
     flow_type: 'hitl_checkpoint' as const,
     run_id: createTestId(),
     project_id: createTestId(),
     user_id: createTestId(),
-    checkpoint: 'approve_desirability_gate',
+    checkpoint: defaultCheckpoint,
     title: 'Approve Desirability Gate',
     description: 'Review desirability evidence and approve gate passage',
     options: [
@@ -291,6 +293,16 @@ describe('Webhook Contract Validation (Shared Schemas)', () => {
     it('should reject when description is missing', () => {
       const payload = buildValidHITLPayload();
       delete (payload as any).description;
+
+      const result = hitlCheckpointSchema.safeParse(payload);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject unknown checkpoint identifiers', () => {
+      const payload = {
+        ...buildValidHITLPayload(),
+        checkpoint: 'unknown_checkpoint',
+      };
 
       const result = hitlCheckpointSchema.safeParse(payload);
       expect(result.success).toBe(false);

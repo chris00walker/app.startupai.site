@@ -6,11 +6,17 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ApprovalDetailModal } from '@/components/approvals/ApprovalDetailModal';
 import type { ApprovalRequest } from '@/types/crewai';
 import { HITL_CHECKPOINT_CONTRACT } from '@/lib/approvals/checkpoint-contract';
+
+const mockTrackEvent = jest.fn();
+
+jest.mock('@/lib/analytics/index', () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}));
 
 function mockApprovalRequest(overrides: Partial<ApprovalRequest> = {}): ApprovalRequest {
   return {
@@ -61,6 +67,10 @@ function mockApprovalRequest(overrides: Partial<ApprovalRequest> = {}): Approval
 const noop = async () => true;
 
 describe('ApprovalDetailModal - brief integration', () => {
+  beforeEach(() => {
+    mockTrackEvent.mockClear();
+  });
+
   it('renders FoundersBriefPanel when task_id is "approve_brief"', () => {
     const approval = mockApprovalRequest({ task_id: 'approve_brief' });
 
@@ -179,5 +189,32 @@ describe('ApprovalDetailModal - brief integration', () => {
 
       unmount();
     }
+  });
+
+  it('renders explicit warning and telemetry for unknown checkpoints', async () => {
+    const approval = mockApprovalRequest({ task_id: 'unknown_checkpoint' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    expect(screen.getByTestId('unsupported-checkpoint-warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('founders-brief-panel')).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        'approval_checkpoint_unsupported',
+        expect.objectContaining({
+          approvalId: approval.id,
+          taskId: 'unknown_checkpoint',
+        })
+      );
+    });
   });
 });

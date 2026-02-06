@@ -12,7 +12,16 @@ import { defineConfig, devices } from '@playwright/test'
  */
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3001'
-const port = Number(process.env.PLAYWRIGHT_PORT ?? 3001)
+const isCI = Boolean(process.env.CI)
+
+const testTimeout = Number(process.env.PLAYWRIGHT_TEST_TIMEOUT_MS ?? 60_000)
+const expectTimeout = Number(process.env.PLAYWRIGHT_EXPECT_TIMEOUT_MS ?? 10_000)
+const globalTimeout = Number(process.env.PLAYWRIGHT_GLOBAL_TIMEOUT_MS ?? 1_200_000)
+const actionTimeout = Number(process.env.PLAYWRIGHT_ACTION_TIMEOUT_MS ?? 10_000)
+const navigationTimeout = Number(process.env.PLAYWRIGHT_NAV_TIMEOUT_MS ?? 30_000)
+const webServerTimeout = Number(process.env.PLAYWRIGHT_WEBSERVER_TIMEOUT_MS ?? 120_000)
+const retries = Number(process.env.PLAYWRIGHT_RETRIES ?? (isCI ? 2 : 0))
+const workers = Number(process.env.PLAYWRIGHT_WORKERS ?? 1)
 
 export default defineConfig({
   // Global setup - resets test user onboarding state before test run
@@ -28,22 +37,24 @@ export default defineConfig({
   ],
 
   // Timeouts
-  timeout: 60_000, // Increased for AI responses
+  timeout: testTimeout,
+  globalTimeout,
   expect: {
-    timeout: 10_000,
+    timeout: expectTimeout,
   },
 
   // Execution settings
   fullyParallel: false, // Sequential execution for onboarding tests
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 1, // 1 retry locally catches transient failures
-  workers: 1, // Single worker for sequential execution
+  forbidOnly: isCI,
+  retries,
+  workers,
   
   // Reporting
   reporter: [
     ['html', { outputFolder: 'test-results/playwright-report', open: 'never' }],
     ['list'],
-    ...(process.env.CI ? [['github'] as const] : []),
+    ['./tests/e2e/reporters/failure-taxonomy-reporter.ts'],
+    ...(isCI ? [['github'] as const] : []),
   ],
   
   // Global test configuration
@@ -55,8 +66,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
 
     // Timeout settings for reliable test execution
-    actionTimeout: 10_000,      // 10s for clicks, fills, etc.
-    navigationTimeout: 30_000,  // 30s for page navigations
+    actionTimeout,
+    navigationTimeout,
 
     // Browser context options
     viewport: { width: 1280, height: 720 },
@@ -69,9 +80,9 @@ export default defineConfig({
   // Development server - auto-starts Next.js for E2E tests
   webServer: {
     command: 'pnpm dev',
-    port,
-    reuseExistingServer: !process.env.CI, // Reuse if already running locally
-    timeout: 120_000, // 2 min for Next.js to start
+    url: `${baseURL}/api/health`,
+    reuseExistingServer: !isCI,
+    timeout: webServerTimeout,
   },
 
   // Browser testing - using Playwright's bundled Chromium (Chrome-equivalent)

@@ -8,7 +8,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -40,7 +40,11 @@ import { ApprovalTypeIndicator } from './ApprovalTypeIndicator';
 import { EvidenceSummary } from './EvidenceSummary';
 import { FoundersBriefPanel } from './FoundersBriefPanel';
 import type { ApprovalRequest, ApprovalOption, OwnerRole, ApprovalType, ModalFoundersBrief } from '@/types/crewai';
-import { isFoundersBriefCheckpoint } from '@/lib/approvals/checkpoint-contract';
+import {
+  getApprovalRenderVariant,
+  isHitlCheckpointId,
+} from '@/lib/approvals/checkpoint-contract';
+import { trackEvent } from '@/lib/analytics/index';
 
 interface ApprovalDetailModalProps {
   approval: ApprovalRequest | null;
@@ -101,13 +105,26 @@ export function ApprovalDetailModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!approval) return;
+    if (isHitlCheckpointId(approval.task_id)) return;
+
+    trackEvent('approval_checkpoint_unsupported', {
+      approvalId: approval.id,
+      taskId: approval.task_id,
+      approvalType: approval.approval_type,
+    });
+  }, [approval]);
+
   if (!approval) return null;
 
   const timeRemaining = formatTimeRemaining(approval.expires_at);
   const hasOptions = approval.options && approval.options.length > 0;
   const recommendedOption = approval.options?.find((opt) => opt.recommended);
 
-  const isBriefApproval = isFoundersBriefCheckpoint(approval.task_id);
+  const renderVariant = getApprovalRenderVariant(approval.task_id);
+  const isBriefApproval = renderVariant === 'founders_brief_panel';
+  const isUnsupportedCheckpoint = !isHitlCheckpointId(approval.task_id);
   const briefData = isBriefApproval
     ? (approval.task_output?.founders_brief as ModalFoundersBrief | undefined)
     : undefined;
@@ -208,6 +225,20 @@ export function ApprovalDetailModal({
               <h4 className="text-sm font-medium">Description</h4>
               <p className="text-sm text-muted-foreground">{approval.description}</p>
             </div>
+
+            {isUnsupportedCheckpoint && (
+              <div
+                data-testid="unsupported-checkpoint-warning"
+                className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"
+              >
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div>
+                    Unsupported checkpoint contract: <code>{approval.task_id}</code>. Rendering generic fallback.
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Founder's Brief (for brief approval checkpoints) */}
             {isBriefApproval && briefData && (

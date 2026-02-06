@@ -77,6 +77,10 @@ jest.mock('@/lib/supabase/admin', () => ({
 
 // Import after mocks
 import { POST } from '@/app/api/crewai/webhook/route';
+import {
+  HITL_CHECKPOINT_CONTRACT,
+  HITL_CHECKPOINT_IDS,
+} from '@/lib/approvals/checkpoint-contract';
 
 // =============================================================================
 // TEST HELPERS
@@ -612,40 +616,7 @@ describe('POST /api/crewai/webhook - HITL Checkpoint', () => {
   });
 
   it('should map all defined checkpoints without falling through to defaults', async () => {
-    const checkpoints = [
-      'approve_brief',
-      'approve_founders_brief',
-      'approve_vpc_completion',
-      'approve_experiment_plan',
-      'approve_pricing_test',
-      'approve_campaign_launch',
-      'approve_spend_increase',
-      'approve_desirability_gate',
-      'approve_feasibility_gate',
-      'approve_viability_gate',
-      'approve_pivot',
-      'approve_proceed',
-      'request_human_decision',
-    ];
-
-    // These are the expected non-default mappings
-    const expectedApprovalTypes: Record<string, string> = {
-      'approve_brief': 'gate_progression',
-      'approve_founders_brief': 'gate_progression',
-      'approve_vpc_completion': 'gate_progression',
-      'approve_experiment_plan': 'gate_progression',
-      'approve_pricing_test': 'gate_progression',
-      'approve_campaign_launch': 'campaign_launch',
-      'approve_spend_increase': 'spend_increase',
-      'approve_desirability_gate': 'gate_progression',
-      'approve_feasibility_gate': 'gate_progression',
-      'approve_viability_gate': 'gate_progression',
-      'approve_pivot': 'segment_pivot',
-      'approve_proceed': 'gate_progression',
-      'request_human_decision': 'gate_progression',
-    };
-
-    for (const checkpoint of checkpoints) {
+    for (const checkpoint of HITL_CHECKPOINT_IDS) {
       jest.clearAllMocks();
       mockInsert.mockReturnValue({
         select: mockInsertSelect,
@@ -663,8 +634,20 @@ describe('POST /api/crewai/webhook - HITL Checkpoint', () => {
 
       expect(approvalInsert).toBeDefined();
       if (approvalInsert) {
-        expect(approvalInsert[0].approval_type).toBe(expectedApprovalTypes[checkpoint]);
+        expect(approvalInsert[0].approval_type).toBe(HITL_CHECKPOINT_CONTRACT[checkpoint].approvalType);
+        expect(approvalInsert[0].owner_role).toBe(HITL_CHECKPOINT_CONTRACT[checkpoint].ownerRole);
       }
     }
+  });
+
+  it('should reject unknown checkpoints before database writes', async () => {
+    const payload = createHITLPayload({ checkpoint: 'unknown_checkpoint' });
+    const req = createMockRequest(payload, VALID_TOKEN);
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toContain('Invalid payload for hitl_checkpoint');
   });
 });

@@ -8,6 +8,10 @@
  */
 
 import { z } from 'zod';
+import {
+  HITL_CHECKPOINT_IDS,
+  type HitlCheckpointId,
+} from '@/lib/approvals/checkpoint-contract';
 
 // =============================================================================
 // SHARED TYPES
@@ -191,12 +195,19 @@ export type ProgressUpdatePayload = z.infer<typeof progressUpdateSchema>;
 // HITL CHECKPOINT SCHEMAS
 // =============================================================================
 
+const HITL_CHECKPOINT_ENUM_VALUES = HITL_CHECKPOINT_IDS as [
+  HitlCheckpointId,
+  ...HitlCheckpointId[],
+];
+
+export const hitlCheckpointIdSchema = z.enum(HITL_CHECKPOINT_ENUM_VALUES);
+
 export const hitlCheckpointSchema = z.object({
   flow_type: z.literal('hitl_checkpoint'),
   run_id: z.string(),
   project_id: z.string().uuid(),
   user_id: z.string().uuid(),
-  checkpoint: z.string(),
+  checkpoint: hitlCheckpointIdSchema,
   title: z.string(),
   description: z.string(),
   options: z.array(z.object({

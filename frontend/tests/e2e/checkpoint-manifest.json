@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "requiredSpecs": [
+    "tests/e2e/43-hitl-checkpoint-contract.spec.ts"
+  ],
+  "checkpoints": [
+    {
+      "id": "approve_brief",
+      "testId": "checkpoint-contract:approve_brief"
+    },
+    {
+      "id": "approve_founders_brief",
+      "testId": "checkpoint-contract:approve_founders_brief"
+    },
+    {
+      "id": "approve_vpc_completion",
+      "testId": "checkpoint-contract:approve_vpc_completion"
+    },
+    {
+      "id": "approve_experiment_plan",
+      "testId": "checkpoint-contract:approve_experiment_plan"
+    },
+    {
+      "id": "approve_pricing_test",
+      "testId": "checkpoint-contract:approve_pricing_test"
+    },
+    {
+      "id": "approve_campaign_launch",
+      "testId": "checkpoint-contract:approve_campaign_launch"
+    },
+    {
+      "id": "approve_spend_increase",
+      "testId": "checkpoint-contract:approve_spend_increase"
+    },
+    {
+      "id": "approve_desirability_gate",
+      "testId": "checkpoint-contract:approve_desirability_gate"
+    },
+    {
+      "id": "approve_feasibility_gate",
+      "testId": "checkpoint-contract:approve_feasibility_gate"
+    },
+    {
+      "id": "approve_viability_gate",
+      "testId": "checkpoint-contract:approve_viability_gate"
+    },
+    {
+      "id": "approve_pivot",
+      "testId": "checkpoint-contract:approve_pivot"
+    },
+    {
+      "id": "approve_proceed",
+      "testId": "checkpoint-contract:approve_proceed"
+    },
+    {
+      "id": "request_human_decision",
+      "testId": "checkpoint-contract:request_human_decision"
+    }
+  ]
+}

@@ -14,7 +14,7 @@ export interface HitlCheckpointContract {
   renderVariant: ApprovalRenderVariant;
 }
 
-export const HITL_CHECKPOINT_CONTRACT: Record<string, HitlCheckpointContract> = {
+const CHECKPOINT_CONTRACT = {
   approve_brief: {
     approvalType: 'gate_progression',
     ownerRole: 'compass',
@@ -80,16 +80,29 @@ export const HITL_CHECKPOINT_CONTRACT: Record<string, HitlCheckpointContract> = 
     ownerRole: 'compass',
     renderVariant: 'generic',
   },
-};
+} satisfies Record<string, HitlCheckpointContract>;
 
-export const HITL_CHECKPOINT_IDS = Object.keys(HITL_CHECKPOINT_CONTRACT);
+export const HITL_CHECKPOINT_CONTRACT = CHECKPOINT_CONTRACT;
+
+export type HitlCheckpointId = keyof typeof CHECKPOINT_CONTRACT;
+
+export const HITL_CHECKPOINT_IDS = Object.freeze(
+  Object.keys(CHECKPOINT_CONTRACT) as HitlCheckpointId[]
+);
+
+export function isHitlCheckpointId(checkpoint: string): checkpoint is HitlCheckpointId {
+  return checkpoint in HITL_CHECKPOINT_CONTRACT;
+}
 
 export function getHitlCheckpointContract(checkpoint: string): HitlCheckpointContract | undefined {
+  if (!isHitlCheckpointId(checkpoint)) {
+    return undefined;
+  }
   return HITL_CHECKPOINT_CONTRACT[checkpoint];
 }
 
 export function getApprovalRenderVariant(taskId: string): ApprovalRenderVariant {
-  return HITL_CHECKPOINT_CONTRACT[taskId]?.renderVariant ?? 'generic';
+  return getHitlCheckpointContract(taskId)?.renderVariant ?? 'generic';
 }
 
 export function isFoundersBriefCheckpoint(taskId: string): boolean {
