@@ -67,25 +67,27 @@ export interface ProjectReportsResult {
 interface DbReport {
   id: string;
   project_id: string;
-  user_id: string;
   title: string;
   report_type: string;
   content: Record<string, unknown>;
-  ai_model: string | null;
-  generation_metadata: Record<string, unknown> | null;
+  model: string | null;
+  tokens_used: string | null;
   generated_at: string;
-  created_at: string;
+  updated_at: string;
 }
 
 function transformReport(dbReport: DbReport): ValidationReport {
+  const content = dbReport.content as ValidationReport['content'];
+  // Extract metadata from content JSONB if present
+  const metadata = (dbReport.content as Record<string, unknown>)?.metadata as ValidationReport['metadata'] | undefined;
   return {
     id: dbReport.id,
     title: dbReport.title,
     reportType: dbReport.report_type,
-    content: dbReport.content as ValidationReport['content'],
-    aiModel: dbReport.ai_model || 'unknown',
+    content,
+    aiModel: dbReport.model || 'unknown',
     generatedAt: dbReport.generated_at,
-    metadata: dbReport.generation_metadata as ValidationReport['metadata'],
+    metadata,
   };
 }
 

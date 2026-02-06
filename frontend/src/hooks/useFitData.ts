@@ -55,7 +55,6 @@ interface ReportRecord {
   id: string;
   report_type: string;
   content: Record<string, unknown>;
-  generation_metadata?: Record<string, unknown>;
 }
 
 function calculateScore(supporting: number, contradicting: number, total: number): number {
@@ -114,9 +113,9 @@ export function useFitData(projectId: string | undefined) {
       // Fetch reports for insights
       const { data: reportsData, error: reportsError } = await supabase
         .from('reports')
-        .select('id, report_type, content, generation_metadata')
+        .select('id, report_type, content')
         .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+        .order('generated_at', { ascending: false });
 
       if (reportsError) throw reportsError;
 
@@ -154,12 +153,12 @@ export function useFitData(projectId: string | undefined) {
             evidenceCount: 1,
           }));
 
-        // Extract insights from reports
+        // Extract insights from reports (from content JSONB)
         const qaInsights: FitData['qaInsights'] = [];
         const latestReport = reports[0];
-        if (latestReport?.generation_metadata) {
-          const metadata = latestReport.generation_metadata as Record<string, unknown>;
-          const insights = metadata.insights as string[] | undefined;
+        if (latestReport?.content) {
+          const content = latestReport.content as Record<string, unknown>;
+          const insights = content.insights as string[] | undefined;
           if (insights) {
             qaInsights.push(...insights.slice(0, 3).map((insight, i) => ({
               id: `insight-${i}`,

@@ -296,18 +296,31 @@ export async function POST(request: NextRequest) {
 
 /**
  * Generate a project name from the raw business idea.
- * Takes the first sentence or first 50 characters.
+ * Tries to extract a product/company name, then falls back to first clause.
  */
 function generateProjectName(rawIdea: string): string {
-  // Try to get first sentence
-  const sentenceMatch = rawIdea.match(/^[^.!?]+[.!?]?/);
-  if (sentenceMatch && sentenceMatch[0].length <= 100) {
-    return sentenceMatch[0].trim();
+  // Take only the first line to avoid multi-line matches
+  const firstLine = rawIdea.split('\n')[0].trim();
+
+  // Try to extract a proper noun / product name before common verb patterns
+  // e.g. "StartupAI targets two segments" → "StartupAI"
+  // e.g. "My App is a platform for..." → "My App"
+  const nameBeforeVerb = firstLine.match(
+    /^(.+?)\s+(?:is|are|was|were|targets?|provides?|helps?|enables?|connects?|allows?|offers?|aims?|solves?|addresses?|automates?|simplifies?|streamlines?|transforms?|revolutionizes?|disrupts?|delivers?|creates?|builds?|makes?|uses?|leverages?|combines?|integrates?)\b/i
+  );
+  if (nameBeforeVerb && nameBeforeVerb[1].length <= 60 && nameBeforeVerb[1].length >= 2) {
+    return nameBeforeVerb[1].trim();
   }
 
-  // Fall back to first 50 chars
-  const truncated = rawIdea.substring(0, 50).trim();
-  if (rawIdea.length > 50) {
+  // Try first clause before a colon, dash, or comma
+  const clauseMatch = firstLine.match(/^([^:,\-–—]+)/);
+  if (clauseMatch && clauseMatch[1].trim().length <= 60 && clauseMatch[1].trim().length >= 2) {
+    return clauseMatch[1].trim();
+  }
+
+  // Fall back to first 50 chars of first line
+  const truncated = firstLine.substring(0, 50).trim();
+  if (firstLine.length > 50) {
     return truncated + '...';
   }
   return truncated;
