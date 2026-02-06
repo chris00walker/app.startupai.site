@@ -26,7 +26,7 @@ export interface UseApprovalsResult {
   error: Error | null;
   refetch: () => Promise<void>;
   approve: (id: string, decision?: string, feedback?: string) => Promise<boolean>;
-  reject: (id: string, feedback?: string) => Promise<boolean>;
+  reject: (id: string, feedback?: string, decision?: string) => Promise<boolean>;
 }
 
 export function useApprovals(
@@ -142,7 +142,7 @@ export function useApprovals(
     }
   };
 
-  const reject = async (id: string, feedback?: string): Promise<boolean> => {
+  const reject = async (id: string, feedback?: string, decision?: string): Promise<boolean> => {
     try {
       const response = await fetch(`/api/approvals/${id}`, {
         method: 'PATCH',
@@ -150,6 +150,7 @@ export function useApprovals(
         body: JSON.stringify({
           action: 'reject',
           feedback,
+          decision: decision || 'rejected',
         }),
       });
 

@@ -54,8 +54,8 @@ export default function ApprovalsPage() {
     return success;
   };
 
-  const handleReject = async (id: string, feedback?: string) => {
-    const success = await reject(id, feedback);
+  const handleReject = async (id: string, feedback?: string, decision?: string) => {
+    const success = await reject(id, feedback, decision);
     if (success) {
       setIsModalOpen(false);
       setSelectedApproval(null);

@@ -241,22 +241,21 @@ export async function PATCH(
     },
   });
 
-  // If approved, resume CrewAI execution
-  if (isApproved) {
-    // Map frontend decision values to Modal expected values
-    // Modal expects: approved, rejected, override_proceed, iterate, segment_[1-9], custom_segment
-    const modalDecision = body.decision === 'approve' ? 'approved' :
-                          body.decision === 'reject' ? 'rejected' :
-                          body.decision || 'approved';
+  // Always resume CrewAI execution with the decision (approval AND rejection)
+  // For rejection: body.decision may be 'iterate' (regenerate) or 'rejected' (stop)
+  const modalDecision = isApproved
+    ? (body.decision === 'approve' ? 'approved' :
+       body.decision === 'reject' ? 'rejected' :
+       body.decision || 'approved')
+    : (body.decision || 'rejected');
 
-    await resumeCrewAIExecution(
-      approval.execution_id,
-      approval.task_id,
-      modalDecision,
-      body.feedback || 'Approved by user',
-      user.id
-    );
-  }
+  await resumeCrewAIExecution(
+    approval.execution_id,
+    approval.task_id,
+    modalDecision,
+    body.feedback || (isApproved ? 'Approved by user' : 'Rejected by user'),
+    user.id
+  );
 
   console.log(`[api/approvals] Approval ${id} ${body.action}ed by ${user.id}`);
 

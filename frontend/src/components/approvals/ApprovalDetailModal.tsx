@@ -43,15 +43,17 @@ import type { ApprovalRequest, ApprovalOption, OwnerRole, ApprovalType, ModalFou
 import {
   getApprovalRenderVariant,
   isHitlCheckpointId,
+  isFoundersBriefCheckpoint,
 } from '@/lib/approvals/checkpoint-contract';
 import { trackEvent } from '@/lib/analytics/index';
+import { toast } from 'sonner';
 
 interface ApprovalDetailModalProps {
   approval: ApprovalRequest | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApprove: (id: string, decision?: string, feedback?: string) => Promise<boolean>;
-  onReject: (id: string, feedback?: string) => Promise<boolean>;
+  onReject: (id: string, feedback?: string, decision?: string) => Promise<boolean>;
 }
 
 function formatTimeRemaining(expiresAt: string): { text: string; isUrgent: boolean } {
@@ -141,6 +143,7 @@ export function ApprovalDetailModal({
       );
       if (success) {
         onOpenChange(false);
+        toast.success('Brief approved — validation will resume');
         resetForm();
       } else {
         setSubmitError('Failed to approve. Please try again.');
@@ -153,13 +156,20 @@ export function ApprovalDetailModal({
   };
 
   const handleReject = async () => {
+    // Require feedback for brief checkpoints
+    if (isFoundersBriefCheckpoint(approval.task_id) && !feedback.trim()) {
+      setSubmitError('Feedback is required when rejecting. Please explain what needs to change.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      const success = await onReject(approval.id, feedback || undefined);
+      const success = await onReject(approval.id, feedback || undefined, 'rejected');
       if (success) {
         onOpenChange(false);
+        toast.success('Brief rejected — feedback submitted');
         resetForm();
       } else {
         setSubmitError('Failed to reject. Please try again.');
@@ -240,6 +250,24 @@ export function ApprovalDetailModal({
               </div>
             )}
 
+            {/* Original Input (for brief checkpoints) */}
+            {isBriefApproval && Boolean(approval.task_output?.entrepreneur_input) && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Your original input:</p>
+                <p className="mt-1 text-sm text-blue-800 dark:text-blue-200">{String(approval.task_output.entrepreneur_input)}</p>
+                {Boolean(approval.task_output?.hints) && (
+                  <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                    <p className="font-medium">Hints provided:</p>
+                    <ul className="mt-1 list-disc list-inside">
+                      {Object.entries(approval.task_output.hints as Record<string, string>).map(([key, value]) => (
+                        <li key={key}>{key.replace(/_/g, ' ')}: {String(value)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Founder's Brief (for brief approval checkpoints) */}
             {isBriefApproval && briefData && (
               <FoundersBriefPanel brief={briefData} />
@@ -294,7 +322,9 @@ export function ApprovalDetailModal({
 
             {/* Feedback */}
             <div className="space-y-2">
-              <Label htmlFor="feedback">Your Feedback (optional)</Label>
+              <Label htmlFor="feedback">
+                Your Feedback {isBriefApproval ? '(required for rejection)' : '(optional)'}
+              </Label>
               <Textarea
                 id="feedback"
                 placeholder="Add any notes or reasoning for your decision..."
@@ -326,7 +356,7 @@ export function ApprovalDetailModal({
             <Button
               variant="destructive"
               onClick={handleReject}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (isBriefApproval && !feedback.trim())}
               className="gap-2"
             >
               {isSubmitting ? (

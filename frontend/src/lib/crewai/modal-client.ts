@@ -184,6 +184,8 @@ export class ModalClient {
         user_id: request.user_id,
         entrepreneur_input: request.raw_idea,
         user_type: request.user_type || 'founder',
+        hints: request.hints || null,
+        additional_context: request.additional_context || null,
         conversation_transcript: [
           request.hints ? `Hints: ${JSON.stringify(request.hints)}` : null,
           request.additional_context ? `Context: ${request.additional_context}` : null,

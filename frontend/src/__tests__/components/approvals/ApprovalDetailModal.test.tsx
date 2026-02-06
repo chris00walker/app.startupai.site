@@ -2,15 +2,28 @@
  * ApprovalDetailModal Integration Tests
  *
  * Tests that FoundersBriefPanel is conditionally rendered for brief approval checkpoints.
- * @story US-AH01, US-H01
+ * Also tests: decision parameter (Fix 5b), rejection flow (Fix 6), toast (Fix 7),
+ * original input display (Fix 8).
+ *
+ * @story US-AH01, US-H01, US-H04, US-H05
  */
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { ApprovalDetailModal } from '@/components/approvals/ApprovalDetailModal';
 import type { ApprovalRequest } from '@/types/crewai';
 import { HITL_CHECKPOINT_CONTRACT } from '@/lib/approvals/checkpoint-contract';
+
+const mockToastSuccess = jest.fn();
+jest.mock('sonner', () => ({
+  toast: {
+    success: (...args: unknown[]) => mockToastSuccess(...args),
+    error: jest.fn(),
+    info: jest.fn(),
+  },
+}));
 
 const mockTrackEvent = jest.fn();
 
@@ -69,6 +82,7 @@ const noop = async () => true;
 describe('ApprovalDetailModal - brief integration', () => {
   beforeEach(() => {
     mockTrackEvent.mockClear();
+    mockToastSuccess.mockClear();
   });
 
   it('renders FoundersBriefPanel when task_id is "approve_brief"', () => {
@@ -216,5 +230,259 @@ describe('ApprovalDetailModal - brief integration', () => {
         })
       );
     });
+  });
+});
+
+// =============================================================================
+// Fix 5b: decision parameter passed through onReject
+// =============================================================================
+
+describe('ApprovalDetailModal - decision parameter', () => {
+  beforeEach(() => {
+    mockTrackEvent.mockClear();
+    mockToastSuccess.mockClear();
+  });
+
+  it('passes decision="rejected" to onReject by default', async () => {
+    const mockReject = jest.fn().mockResolvedValue(true);
+    const approval = mockApprovalRequest({ task_id: 'approve_brief' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={mockReject}
+      />
+    );
+
+    // Type feedback (required for brief rejection)
+    const textarea = screen.getByPlaceholderText(/add any notes/i);
+    await userEvent.type(textarea, 'Needs revision');
+
+    // Click reject
+    const rejectBtn = screen.getByRole('button', { name: /reject/i });
+    await userEvent.click(rejectBtn);
+
+    await waitFor(() => {
+      expect(mockReject).toHaveBeenCalledWith('approval-001', 'Needs revision', 'rejected');
+    });
+  });
+});
+
+// =============================================================================
+// Fix 6: Brief rejection flow — feedback required, button disabled/enabled
+// Fix 7: Toast on success/failure
+// =============================================================================
+
+describe('ApprovalDetailModal - brief rejection flow', () => {
+  beforeEach(() => {
+    mockTrackEvent.mockClear();
+    mockToastSuccess.mockClear();
+  });
+
+  it('disables Reject button for brief checkpoints when feedback is empty', () => {
+    const approval = mockApprovalRequest({ task_id: 'approve_brief' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    const rejectBtn = screen.getByRole('button', { name: /reject/i });
+    expect(rejectBtn).toBeDisabled();
+  });
+
+  it('enables Reject button for brief checkpoints when feedback has content', async () => {
+    const approval = mockApprovalRequest({ task_id: 'approve_brief' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    const textarea = screen.getByPlaceholderText(/add any notes/i);
+    await userEvent.type(textarea, 'Some feedback');
+
+    const rejectBtn = screen.getByRole('button', { name: /reject/i });
+    expect(rejectBtn).not.toBeDisabled();
+  });
+
+  it('does NOT disable Reject button for non-brief checkpoints when feedback is empty', () => {
+    const approval = mockApprovalRequest({
+      task_id: 'approve_vpc_completion',
+      task_output: { some_data: 'value' },
+    });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    const rejectBtn = screen.getByRole('button', { name: /reject/i });
+    expect(rejectBtn).not.toBeDisabled();
+  });
+
+  it('shows feedback label with "required for rejection" for brief checkpoints', () => {
+    const approval = mockApprovalRequest({ task_id: 'approve_brief' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    expect(screen.getByText(/required for rejection/i)).toBeInTheDocument();
+  });
+
+  it('calls toast.success after successful rejection', async () => {
+    const mockReject = jest.fn().mockResolvedValue(true);
+    const approval = mockApprovalRequest({ task_id: 'approve_brief' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={mockReject}
+      />
+    );
+
+    const textarea = screen.getByPlaceholderText(/add any notes/i);
+    await userEvent.type(textarea, 'Needs changes');
+
+    const rejectBtn = screen.getByRole('button', { name: /reject/i });
+    await userEvent.click(rejectBtn);
+
+    await waitFor(() => {
+      expect(mockToastSuccess).toHaveBeenCalledWith('Brief rejected — feedback submitted');
+    });
+  });
+
+  it('calls toast.success after successful approval', async () => {
+    const mockApprove = jest.fn().mockResolvedValue(true);
+    // Use an approval without options so the Approve button is not disabled
+    const approval = mockApprovalRequest({ task_id: 'approve_brief', options: [] });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={mockApprove}
+        onReject={noop}
+      />
+    );
+
+    const approveBtn = screen.getByRole('button', { name: /approve/i });
+    await userEvent.click(approveBtn);
+
+    await waitFor(() => {
+      expect(mockToastSuccess).toHaveBeenCalledWith('Brief approved — validation will resume');
+    });
+  });
+
+  it('keeps inline error (not toast) when rejection fails', async () => {
+    const mockReject = jest.fn().mockResolvedValue(false);
+    const approval = mockApprovalRequest({ task_id: 'approve_brief' });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={mockReject}
+      />
+    );
+
+    const textarea = screen.getByPlaceholderText(/add any notes/i);
+    await userEvent.type(textarea, 'Bad brief');
+
+    const rejectBtn = screen.getByRole('button', { name: /reject/i });
+    await userEvent.click(rejectBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to reject/i)).toBeInTheDocument();
+      expect(mockToastSuccess).not.toHaveBeenCalled();
+    });
+  });
+});
+
+// =============================================================================
+// Fix 8: Original input display
+// =============================================================================
+
+describe('ApprovalDetailModal - original input display', () => {
+  beforeEach(() => {
+    mockTrackEvent.mockClear();
+    mockToastSuccess.mockClear();
+  });
+
+  it('renders "Your original input" box when task_output.entrepreneur_input is present', () => {
+    const approval = mockApprovalRequest({
+      task_id: 'approve_brief',
+      task_output: {
+        founders_brief: { the_idea: { one_liner: 'Test idea' } },
+        entrepreneur_input: 'Dog walking subscription service',
+        hints: { industry: 'pet care', geography: 'US' },
+      },
+    });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    expect(screen.getByText('Your original input:')).toBeInTheDocument();
+    expect(screen.getByText('Dog walking subscription service')).toBeInTheDocument();
+    expect(screen.getByText(/pet care/i)).toBeInTheDocument();
+  });
+
+  it('does not render "Your original input" box when entrepreneur_input is absent', () => {
+    const approval = mockApprovalRequest({
+      task_id: 'approve_brief',
+      task_output: {
+        founders_brief: { the_idea: { one_liner: 'Test idea' } },
+      },
+    });
+
+    render(
+      <ApprovalDetailModal
+        approval={approval}
+        open={true}
+        onOpenChange={() => {}}
+        onApprove={noop}
+        onReject={noop}
+      />
+    );
+
+    expect(screen.queryByText('Your original input:')).not.toBeInTheDocument();
   });
 });

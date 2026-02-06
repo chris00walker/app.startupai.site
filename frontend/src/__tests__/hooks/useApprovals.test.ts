@@ -273,6 +273,7 @@ describe('useApprovals', () => {
         body: JSON.stringify({
           action: 'reject',
           feedback: 'Not ready',
+          decision: 'rejected',
         }),
       });
     });
