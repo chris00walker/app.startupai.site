@@ -467,6 +467,7 @@ export default function FounderDashboard() {
   const { user } = useAuth()
   const router = useRouter()
   const { isEnabled: isAIAssistantEnabled } = useFeatureFlag('dashboard_ai_assistant')
+  const isNarrativeEnabled = process.env.NEXT_PUBLIC_NARRATIVE_LAYER_ENABLED === 'true'
 
   // TASK-025: Pending connection requests count
   const [pendingConnectionCount, setPendingConnectionCount] = React.useState(0)
@@ -598,10 +599,12 @@ export default function FounderDashboard() {
               <Target className="h-4 w-4 mr-1.5 hidden sm:inline" />
               Overview
             </TabsTrigger>
+            {isNarrativeEnabled && (
             <TabsTrigger value="narrative">
               <Sparkles className="h-4 w-4 mr-1.5 hidden sm:inline" />
               Narrative
             </TabsTrigger>
+            )}
             <TabsTrigger value="canvases">
               <LayoutGrid className="h-4 w-4 mr-1.5 hidden sm:inline" />
               Canvases
@@ -685,9 +688,11 @@ export default function FounderDashboard() {
         </TabsContent>
 
         {/* NARRATIVE TAB - Pitch narrative, founder profile, evidence package */}
+        {isNarrativeEnabled && (
         <TabsContent value="narrative" className="space-y-6">
           <NarrativeTabContent projectId={projectId} />
         </TabsContent>
+        )}
 
         {/* CANVASES TAB - Value Proposition Canvas + Business Model Canvas */}
         <TabsContent value="canvases" className="space-y-6">

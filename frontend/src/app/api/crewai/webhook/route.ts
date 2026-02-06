@@ -9,13 +9,14 @@
  * Supported flow types:
  * - founder_validation: Validation results
  * - consultant_onboarding: Results from ConsultantOnboardingFlow
- * - progress_update: Real-time progress from Modal (NEW)
- * - hitl_checkpoint: HITL checkpoint notifications from Modal (NEW)
+ * - progress_update: Real-time progress from Modal
+ * - hitl_checkpoint: HITL checkpoint notifications from Modal
+ * - narrative_synthesis: Pitch narrative from NarrativeSynthesisCrew
  *
  * Authentication:
  * - Bearer token (MODAL_AUTH_TOKEN)
  *
- * @story US-F06, US-F08, US-F09, US-H01
+ * @story US-F06, US-F08, US-F09, US-H01, US-NL01
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -27,11 +28,13 @@ import {
   consultantOnboardingSchema,
   progressUpdateSchema,
   hitlCheckpointSchema,
+  narrativeSynthesisSchema,
   type FlowType,
   type FounderValidationPayload,
   type ConsultantOnboardingPayload,
   type ProgressUpdatePayload,
   type HITLCheckpointPayload,
+  type NarrativeSynthesisPayload,
 } from './schemas';
 
 // =============================================================================
@@ -1128,6 +1131,174 @@ async function handleHITLCheckpoint(payload: HITLCheckpointPayload): Promise<Nex
 }
 
 // =============================================================================
+// NARRATIVE SYNTHESIS HANDLER
+// =============================================================================
+
+/**
+ * Handle narrative_synthesis webhook from CrewAI NarrativeSynthesisCrew.
+ *
+ * Stores the AI-generated PitchNarrativeContent in the pitch_narratives table,
+ * updating the existing row if one exists (UNIQUE on project_id) or creating a new one.
+ *
+ * @story US-NL01
+ */
+async function handleNarrativeSynthesis(payload: NarrativeSynthesisPayload): Promise<NextResponse> {
+  console.log('[api/crewai/webhook] Processing narrative_synthesis:', {
+    project_id: payload.project_id,
+    user_id: payload.user_id,
+    run_id: payload.run_id,
+    event_type: payload.event_type,
+    alignment_status: payload.alignment_status,
+    has_content: !!payload.pitch_narrative_content,
+  });
+
+  if (payload.event_type === 'narrative_failed') {
+    console.warn('[api/crewai/webhook] Narrative synthesis failed:', payload.error_message);
+    return NextResponse.json({
+      success: false,
+      flow_type: 'narrative_synthesis',
+      run_id: payload.run_id,
+      error: payload.error_message || 'Narrative synthesis failed',
+    });
+  }
+
+  if (!payload.pitch_narrative_content) {
+    return NextResponse.json(
+      { error: 'pitch_narrative_content is required for narrative_generated event' },
+      { status: 400 }
+    );
+  }
+
+  const admin = createAdminClient();
+
+  // Verify project exists and belongs to user
+  const { data: project, error: projectError } = await admin
+    .from('projects')
+    .select('id, user_id')
+    .eq('id', payload.project_id)
+    .single();
+
+  if (projectError || !project) {
+    console.error('[api/crewai/webhook] Project not found:', projectError);
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
+
+  if (project.user_id !== payload.user_id) {
+    console.error('[api/crewai/webhook] User ID mismatch');
+    return NextResponse.json({ error: 'User ID does not match project owner' }, { status: 403 });
+  }
+
+  const nowIso = new Date().toISOString();
+  const narrativeContent = payload.pitch_narrative_content;
+
+  // Check if a narrative already exists for this project
+  const { data: existing } = await admin
+    .from('pitch_narratives')
+    .select('id')
+    .eq('project_id', payload.project_id)
+    .single();
+
+  let narrativeId: string;
+
+  if (existing) {
+    // Update existing narrative with CrewAI output
+    const { error: updateError } = await admin
+      .from('pitch_narratives')
+      .update({
+        narrative_data: narrativeContent,
+        baseline_narrative: narrativeContent,
+        alignment_status: payload.alignment_status,
+        alignment_issues: payload.alignment_issues,
+        agent_run_id: payload.run_id,
+        is_edited: false,
+        edit_history: [],
+        updated_at: nowIso,
+      })
+      .eq('id', existing.id);
+
+    if (updateError) {
+      console.error('[api/crewai/webhook] Failed to update narrative:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update narrative', details: updateError.message },
+        { status: 500 }
+      );
+    }
+
+    narrativeId = existing.id;
+    console.log('[api/crewai/webhook] Narrative updated:', narrativeId);
+  } else {
+    // Create new narrative
+    const { data: created, error: createError } = await admin
+      .from('pitch_narratives')
+      .insert({
+        project_id: payload.project_id,
+        user_id: payload.user_id,
+        narrative_data: narrativeContent,
+        baseline_narrative: narrativeContent,
+        source_evidence_hash: '',  // Will be recomputed on next generate call
+        alignment_status: payload.alignment_status,
+        alignment_issues: payload.alignment_issues,
+        agent_run_id: payload.run_id,
+      })
+      .select('id')
+      .single();
+
+    if (createError || !created) {
+      console.error('[api/crewai/webhook] Failed to create narrative:', createError);
+      return NextResponse.json(
+        { error: 'Failed to create narrative', details: createError?.message },
+        { status: 500 }
+      );
+    }
+
+    narrativeId = created.id;
+    console.log('[api/crewai/webhook] Narrative created:', narrativeId);
+  }
+
+  // Create version record
+  const { data: latestVersion } = await admin
+    .from('narrative_versions')
+    .select('version_number')
+    .eq('narrative_id', narrativeId)
+    .order('version_number', { ascending: false })
+    .limit(1)
+    .single();
+
+  const nextVersion = (latestVersion?.version_number ?? 0) + 1;
+
+  await admin
+    .from('narrative_versions')
+    .insert({
+      narrative_id: narrativeId,
+      version_number: nextVersion,
+      narrative_data: narrativeContent,
+      source_evidence_hash: '',
+      trigger_reason: 'crewai_generation',
+    });
+
+  // Update project staleness
+  await admin
+    .from('projects')
+    .update({
+      narrative_is_stale: false,
+      narrative_generated_at: nowIso,
+      narrative_stale_severity: null,
+      narrative_stale_reason: null,
+    })
+    .eq('id', payload.project_id);
+
+  return NextResponse.json({
+    success: true,
+    flow_type: 'narrative_synthesis',
+    run_id: payload.run_id,
+    narrative_id: narrativeId,
+    alignment_status: payload.alignment_status,
+    alignment_issues_count: payload.alignment_issues.length,
+    message: 'Narrative synthesis results stored successfully',
+  });
+}
+
+// =============================================================================
 // MAIN HANDLER
 // =============================================================================
 
@@ -1160,7 +1331,7 @@ export async function POST(request: NextRequest) {
   if (!flowType) {
     console.error('[api/crewai/webhook] Missing flow_type in payload');
     return NextResponse.json(
-      { error: 'Missing flow_type field. Expected: founder_validation | consultant_onboarding' },
+      { error: 'Missing flow_type field. Expected: founder_validation | consultant_onboarding | progress_update | hitl_checkpoint | narrative_synthesis' },
       { status: 400 }
     );
   }
@@ -1217,10 +1388,22 @@ export async function POST(request: NextRequest) {
         return await handleHITLCheckpoint(validation.data);
       }
 
+      case 'narrative_synthesis': {
+        const validation = narrativeSynthesisSchema.safeParse(body);
+        if (!validation.success) {
+          console.error('[api/crewai/webhook] narrative_synthesis validation failed:', validation.error.flatten());
+          return NextResponse.json(
+            { error: 'Invalid payload for narrative_synthesis', details: validation.error.flatten() },
+            { status: 400 }
+          );
+        }
+        return await handleNarrativeSynthesis(validation.data);
+      }
+
       default:
         console.error('[api/crewai/webhook] Unknown flow_type:', flowType);
         return NextResponse.json(
-          { error: `Unknown flow_type: ${flowType}. Expected: founder_validation | consultant_onboarding | progress_update | hitl_checkpoint` },
+          { error: `Unknown flow_type: ${flowType}. Expected: founder_validation | consultant_onboarding | progress_update | hitl_checkpoint | narrative_synthesis` },
           { status: 400 }
         );
     }

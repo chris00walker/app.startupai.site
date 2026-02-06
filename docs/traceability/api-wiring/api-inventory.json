@@ -619,6 +619,14 @@
       "description": "Evidence Package Create API"
     },
     {
+      "path": "/api/evidence-package/track",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Evidence Package Engagement Tracking API"
+    },
+    {
       "path": "/api/evidence-packages",
       "methods": [
         "GET"
@@ -850,6 +858,14 @@
       ],
       "type": "nextjs",
       "description": "Narrative Exports List API"
+    },
+    {
+      "path": "/api/narrative/[id]/guardian-check",
+      "methods": [
+        "POST"
+      ],
+      "type": "nextjs",
+      "description": "Guardian Alignment Check API"
     },
     {
       "path": "/api/narrative/[id]/publish",

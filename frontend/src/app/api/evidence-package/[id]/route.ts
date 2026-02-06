@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/errors';
+import { trackPackageAccess } from '@/lib/narrative/access-tracking';
 import type { PitchNarrative, EvidencePackage, ValidationEvidence, PitchNarrativeContent } from '@/lib/narrative/types';
 
 export async function GET(
@@ -35,6 +36,17 @@ export async function GET(
 
   if (fetchError || !pkg) {
     return narrativeError('NOT_FOUND', 'Evidence package not found');
+  }
+
+  // Track access for non-founder viewers (Portfolio Holders)
+  let accessId: string | undefined;
+  if (pkg.founder_id !== user.id) {
+    try {
+      const access = await trackPackageAccess(id, user.id);
+      accessId = access.accessId;
+    } catch (err) {
+      console.error('[evidence-package] Access tracking failed:', err);
+    }
   }
 
   // Fetch linked pitch narrative if available
@@ -93,5 +105,5 @@ export async function GET(
     },
   };
 
-  return NextResponse.json(response);
+  return NextResponse.json({ ...response, access_id: accessId });
 }

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" width="200" height="200">
+  <defs>
+    <linearGradient id="badge-bg" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield shape -->
+  <path d="M100 10 L180 50 L180 110 C180 155 145 185 100 195 C55 185 20 155 20 110 L20 50 Z" fill="url(#badge-bg)"/>
+  <path d="M100 16 L174 53 L174 110 C174 151 141 180 100 189 C59 180 26 151 26 110 L26 53 Z" fill="none" stroke="#60A5FA" stroke-width="1.5" opacity="0.5"/>
+  <!-- Checkmark -->
+  <path d="M70 100 L90 120 L132 78" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Text: VERIFIED -->
+  <text x="100" y="148" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="white" letter-spacing="2">VERIFIED</text>
+  <!-- Text: StartupAI -->
+  <text x="100" y="166" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="400" fill="#93C5FD" letter-spacing="1">StartupAI</text>
+</svg>

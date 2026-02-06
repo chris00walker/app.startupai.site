@@ -329,12 +329,16 @@ CREATE TRIGGER vpc_change_stales_narrative
   FOR EACH ROW
   EXECUTE FUNCTION mark_narrative_stale();
 
--- Founder profile trigger: only fires on meaningful field changes
+-- Founder profile trigger: fires on INSERT (always) or UPDATE with meaningful field changes
 CREATE TRIGGER founder_profile_staleness_trigger
-  AFTER INSERT OR UPDATE ON founder_profiles
+  AFTER INSERT ON founder_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION mark_narrative_stale();
+
+CREATE TRIGGER founder_profile_update_staleness_trigger
+  AFTER UPDATE ON founder_profiles
   FOR EACH ROW
   WHEN (
-    TG_OP = 'INSERT' OR
     OLD.professional_summary IS DISTINCT FROM NEW.professional_summary OR
     OLD.linkedin_url IS DISTINCT FROM NEW.linkedin_url OR
     OLD.years_experience IS DISTINCT FROM NEW.years_experience OR

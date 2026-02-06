@@ -9,6 +9,7 @@
 
 'use client';
 
+import { useEffect, useRef, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,7 @@ import type { EvidencePackage } from '@/lib/narrative/types';
 
 interface EvidencePackageViewerProps {
   package_data: EvidencePackage;
+  accessId?: string;
   onTabChange?: (tab: string) => void;
 }
 
@@ -209,10 +211,66 @@ function ValidationEvidenceTab({ evidence }: { evidence: EvidencePackage['valida
 
 export function EvidencePackageViewer({
   package_data,
+  accessId,
   onTabChange,
 }: EvidencePackageViewerProps) {
+  const mountTimeRef = useRef(Date.now());
+
+  const trackEvent = useCallback(
+    (eventType: string, eventValue?: Record<string, unknown>) => {
+      if (!accessId) return;
+      fetch('/api/evidence-package/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'engagement',
+          access_id: accessId,
+          event_type: eventType,
+          event_value: eventValue,
+        }),
+      }).catch(() => {});
+    },
+    [accessId]
+  );
+
+  // View duration beacon on unload
+  useEffect(() => {
+    if (!accessId) return;
+
+    const sendDuration = () => {
+      const seconds = Math.round((Date.now() - mountTimeRef.current) / 1000);
+      if (seconds < 1) return;
+      navigator.sendBeacon(
+        '/api/evidence-package/track',
+        JSON.stringify({
+          action: 'duration',
+          access_id: accessId,
+          duration_seconds: seconds,
+        })
+      );
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') sendDuration();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', sendDuration);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', sendDuration);
+      sendDuration();
+    };
+  }, [accessId]);
+
+  const handleTabChange = (tab: string) => {
+    trackEvent('tab_switch', { tab });
+    onTabChange?.(tab);
+  };
+
   return (
-    <Tabs defaultValue="narrative" onValueChange={onTabChange} className="space-y-4">
+    <Tabs defaultValue="narrative" onValueChange={handleTabChange} className="space-y-4">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="narrative" className="gap-1.5">
           <FileText className="h-4 w-4" />

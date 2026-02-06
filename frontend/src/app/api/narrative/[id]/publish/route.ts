@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/errors';
+import { trackNarrativeFunnelEvent } from '@/lib/narrative/access-tracking';
 import type { PitchNarrativeContent } from '@/lib/narrative/types';
 
 const publishSchema = z.object({
@@ -148,6 +149,12 @@ export async function POST(
       decided_by: user.id,
       decided_at: now,
     });
+
+  // Track funnel event (fire-and-forget)
+  trackNarrativeFunnelEvent(narrative.project_id, user.id, 'narrative_published', {
+    narrative_id: id,
+    first_publish: isFirstPublish,
+  }).catch(() => {});
 
   return NextResponse.json({
     narrative_id: id,

@@ -9,7 +9,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { VersionTimeline } from '@/components/narrative/VersionTimeline';
 import { VersionDiff } from '@/components/narrative/VersionDiff';
@@ -19,6 +19,10 @@ import Link from 'next/link';
 import { trackPageView } from '@/lib/analytics';
 
 export default function NarrativeHistoryPage() {
+  if (process.env.NEXT_PUBLIC_NARRATIVE_LAYER_ENABLED !== 'true') {
+    notFound();
+  }
+
   const params = useParams();
   const projectId = params?.id as string;
 

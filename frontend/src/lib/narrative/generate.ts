@@ -278,7 +278,8 @@ export function buildNarrativeFromEvidence(
   evidence: ValidationEvidence,
   founderProfile: { professional_summary?: string | null; domain_expertise?: string[] | null; linkedin_url?: string | null; company_website?: string | null; previous_ventures?: unknown; years_experience?: number | null } | null,
   userProfile: { full_name?: string | null; email?: string | null } | null,
-  allEvidence: { id: string; content: string; narrative_category?: string | null; summary?: string | null; strength?: string | null }[]
+  allEvidence: { id: string; content: string; narrative_category?: string | null; summary?: string | null; strength?: string | null }[],
+  pivotCount: number = 0
 ): PitchNarrativeContent {
   const founderName = userProfile?.full_name ?? 'Founder';
   const email = userProfile?.email ?? '';
@@ -296,8 +297,7 @@ export function buildNarrativeFromEvidence(
     doDirectEvidence.length > 0 ? 'DO-direct' :
     doIndirectEvidence.length > 0 ? 'DO-indirect' : 'SAY';
 
-  // Count invalidated hypotheses for pivot tracking
-  const pivotCount = 0; // TODO: query hypotheses with status='invalidated'
+  // Pivot count passed from caller (queried from hypotheses table)
 
   return {
     version: '1.0',

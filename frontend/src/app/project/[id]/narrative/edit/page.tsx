@@ -10,7 +10,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { NarrativeEditor } from '@/components/narrative/NarrativeEditor';
 import { NarrativeLoadingState } from '@/components/narrative/NarrativeLoadingState';
@@ -30,6 +30,10 @@ interface NarrativeEditData {
 }
 
 export default function NarrativeEditPage() {
+  if (process.env.NEXT_PUBLIC_NARRATIVE_LAYER_ENABLED !== 'true') {
+    notFound();
+  }
+
   const params = useParams();
   const router = useRouter();
   const projectId = params?.id as string;

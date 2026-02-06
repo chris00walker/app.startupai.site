@@ -4,7 +4,7 @@
  * GET /api/verify/:verification_token - Public verification endpoint
  *
  * No auth required. Uses service role for token lookup.
- * Rate limited: 30/min burst, 500/hr sustained (via Upstash Redis).
+ * Rate limited: 30/min burst per IP (in-memory; upgrade to Upstash Redis for multi-instance).
  *
  * Response per spec :3092-3105:
  * - status, exported_at, venture_name, evidence_id, generation_hash,
@@ -19,7 +19,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { computeNarrativeHash } from '@/lib/narrative/hash';
+import { createRateLimiter } from '@/lib/security/rate-limit';
 import type { PitchNarrativeContent, VerificationResponse } from '@/lib/narrative/types';
+
+// Rate limiting: 30 requests per minute per IP (burst protection)
+const verifyRateLimiter = createRateLimiter({
+  maxRequests: 30,
+  windowMs: 60 * 1000, // 1 minute
+});
 
 export async function GET(
   _request: NextRequest,
@@ -27,8 +34,20 @@ export async function GET(
 ) {
   const { token } = await params;
 
-  // TODO: Rate limiting with Upstash Redis
-  // For Phase 1, proceed without rate limiting
+  // Rate limiting by IP address
+  const ip = _request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? _request.headers.get('x-real-ip')
+    ?? 'unknown';
+  const rateLimit = verifyRateLimiter(`verify:${ip}`);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { status: 'rate_limited', message: 'Too many verification requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.ceil(rateLimit.resetIn / 1000)) },
+      }
+    );
+  }
 
   const adminClient = createAdminClient();
 

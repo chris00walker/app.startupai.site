@@ -10,7 +10,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { NarrativeEmptyState } from '@/components/narrative/NarrativeEmptyState';
@@ -21,7 +21,10 @@ import { ExportDialog } from '@/components/narrative/ExportDialog';
 import { PublishDialog } from '@/components/narrative/PublishDialog';
 import { RegenerationDialog } from '@/components/narrative/RegenerationDialog';
 import { ProvenanceBadge } from '@/components/narrative/ProvenanceBadge';
+import { EvidencePackageViewer } from '@/components/evidence-package/EvidencePackageViewer';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNarrative, useNarrativePrerequisites, useNarrativeExport } from '@/hooks/useNarrative';
+import type { EvidencePackage, PitchNarrativeContent } from '@/lib/narrative/types';
 import {
   ArrowLeft,
   Download,
@@ -29,12 +32,17 @@ import {
   Globe,
   Pencil,
   History,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
 import { trackPageView, trackEvent } from '@/lib/analytics';
 import { useEffect } from 'react';
 
 export default function NarrativePage() {
+  if (process.env.NEXT_PUBLIC_NARRATIVE_LAYER_ENABLED !== 'true') {
+    notFound();
+  }
+
   const params = useParams();
   const router = useRouter();
   const projectId = params?.id as string;
@@ -60,6 +68,9 @@ export default function NarrativePage() {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showRegenDialog, setShowRegenDialog] = useState(false);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [previewPackage, setPreviewPackage] = useState<EvidencePackage | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     trackPageView('Narrative', { project_id: projectId });
@@ -114,6 +125,29 @@ export default function NarrativePage() {
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.error?.message || 'Publish failed');
+    }
+  };
+
+  const handlePreview = async () => {
+    setPreviewLoading(true);
+    setShowPreviewDialog(true);
+    try {
+      const res = await fetch(`/api/evidence-packages?project_id=${projectId}&primary=true`);
+      if (res.ok) {
+        const data = await res.json();
+        const pkg = data.packages?.[0];
+        if (pkg) {
+          // Fetch the full package
+          const pkgRes = await fetch(`/api/evidence-package/${pkg.id}`);
+          if (pkgRes.ok) {
+            setPreviewPackage(await pkgRes.json());
+          }
+        }
+      }
+    } catch {
+      // Non-fatal — dialog will show empty state
+    } finally {
+      setPreviewLoading(false);
     }
   };
 
@@ -217,6 +251,10 @@ export default function NarrativePage() {
             <Download className="h-3.5 w-3.5 mr-1.5" />
             Export
           </Button>
+          <Button variant="outline" size="sm" onClick={handlePreview}>
+            <Eye className="h-3.5 w-3.5 mr-1.5" />
+            Preview as PH
+          </Button>
           <Button size="sm" onClick={() => setShowPublishDialog(true)}>
             <Globe className="h-3.5 w-3.5 mr-1.5" />
             Publish
@@ -246,6 +284,30 @@ export default function NarrativePage() {
         onOpenChange={setShowRegenDialog}
         onRegenerate={handleRegenerate}
       />
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Preview as Portfolio Holder
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              This is how your evidence package appears to investors.
+            </p>
+          </DialogHeader>
+          {previewLoading ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Loading preview...
+            </div>
+          ) : previewPackage ? (
+            <EvidencePackageViewer package_data={previewPackage} />
+          ) : (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              No evidence package found. Generate a narrative first to create one.
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

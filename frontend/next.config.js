@@ -18,6 +18,9 @@ const nextConfig = {
     (extension) => !extension.includes('test') && !extension.includes('spec')
   ),
 
+  // Native modules that must be resolved at runtime, not bundled by Turbopack
+  serverExternalPackages: ['@resvg/resvg-js', '@react-pdf/renderer', 'satori'],
+
   // Performance optimizations
   experimental: {
     // Optimize bundle splitting

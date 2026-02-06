@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/errors';
 import { applyEdit, buildEditEntry } from '@/lib/narrative/edit';
+import { trackNarrativeFunnelEvent } from '@/lib/narrative/access-tracking';
 import type { EditHistoryEntry, PitchNarrativeContent } from '@/lib/narrative/types';
 
 const editSchema = z.object({
@@ -103,9 +104,31 @@ export async function PATCH(
     return narrativeError('INTERNAL_ERROR', 'Failed to save edits');
   }
 
-  // TODO: Enqueue background Guardian alignment check
-  // For Phase 1, Guardian runs synchronously here or via a separate API call
-  // For Phase 2+, move to Modal for latency
+  // Fire-and-forget background Guardian alignment check.
+  // The guardian-check endpoint updates alignment_status and alignment_issues
+  // via admin client, which triggers the Realtime subscription in the UI.
+  const editedFields = result.data.edits.map((e) => e.field);
+  const guardianUrl = new URL(
+    `/api/narrative/${id}/guardian-check`,
+    request.nextUrl.origin
+  );
+
+  fetch(guardianUrl.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      cookie: request.headers.get('cookie') || '',
+    },
+    body: JSON.stringify({ edited_fields: editedFields }),
+  }).catch((err) => {
+    console.error('Failed to enqueue Guardian alignment check:', err);
+  });
+
+  // Track funnel event (fire-and-forget)
+  trackNarrativeFunnelEvent(narrative.project_id, user.id, 'narrative_edited', {
+    narrative_id: id,
+    edited_fields: editedFields,
+  }).catch(() => {});
 
   return NextResponse.json({
     narrative_id: id,

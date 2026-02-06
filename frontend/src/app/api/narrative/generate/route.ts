@@ -22,7 +22,9 @@ import { createClient } from '@/lib/supabase/server';
 import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/errors';
 import { checkPrerequisites, gatherEvidence, buildNarrativeFromEvidence, upsertPrimaryEvidencePackage } from '@/lib/narrative/generate';
 import { computeNarrativeHash, computeSourceEvidenceHash } from '@/lib/narrative/hash';
-import type { PitchNarrative } from '@/lib/narrative/types';
+import { trackNarrativeFunnelEvent } from '@/lib/narrative/access-tracking';
+import { getFounderEditedSlides, getSlideEdits } from '@/lib/narrative/edit';
+import type { PitchNarrative, PitchNarrativeContent, EditHistoryEntry, SlideKey } from '@/lib/narrative/types';
 
 const generateSchema = z.object({
   project_id: z.string().uuid(),
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
   if (!force_regenerate) {
     const { data: existing } = await supabase
       .from('pitch_narratives')
-      .select('*')
+      .select('id, project_id, narrative_data, agent_run_id, created_at, updated_at')
       .eq('project_id', project_id)
       .single();
 
@@ -99,11 +101,14 @@ export async function POST(request: NextRequest) {
         content: existing.narrative_data,
       };
 
+      // Distinguish CrewAI-generated narratives from in-app ones
+      const generatedFrom = existing.agent_run_id ? 'crewai_cache' : 'cache';
+
       return NextResponse.json({
         narrative_id: existing.id,
         pitch_narrative: pitchNarrative,
         is_fresh: false,
-        generated_from: 'cache',
+        generated_from: generatedFrom,
       });
     }
   }
@@ -117,21 +122,30 @@ export async function POST(request: NextRequest) {
     supabase.from('user_profiles').select('full_name, email').eq('id', user.id).single(),
   ]);
 
-  // Fetch raw evidence for narrative building
-  const { data: allEvidenceRows } = await supabase
-    .from('evidence')
-    .select('id, content, narrative_category, summary, strength')
-    .eq('project_id', project_id);
+  // Fetch raw evidence and invalidated hypotheses count
+  const [{ data: allEvidenceRows }, { count: pivotCount }] = await Promise.all([
+    supabase
+      .from('evidence')
+      .select('id, content, narrative_category, summary, strength')
+      .eq('project_id', project_id),
+    supabase
+      .from('hypotheses')
+      .select('*', { count: 'exact', head: true })
+      .eq('project_id', project_id)
+      .eq('status', 'invalidated'),
+  ]);
 
   // Step 6: Build narrative
-  // Phase 1: Use in-app generation (Vercel AI SDK or direct LLM call)
-  // TODO: Replace with CrewAI Report Compiler via Modal /kickoff for Phase 2
+  // Phase 1: In-app evidence-to-narrative mapping
+  // Phase 2+: CrewAI NarrativeSynthesisCrew delivers AI-quality narratives via webhook
+  // (flow_type: 'narrative_synthesis' → stored by webhook handler → returned from cache above)
   const narrativeData = buildNarrativeFromEvidence(
     project,
     evidence,
     founderProfile,
     userProfile,
-    allEvidenceRows ?? []
+    allEvidenceRows ?? [],
+    pivotCount ?? 0
   );
 
   // Step 7: Compute hashes
@@ -147,17 +161,60 @@ export async function POST(request: NextRequest) {
 
   let narrativeId: string;
   let isEdited = false;
+  let finalNarrativeData: PitchNarrativeContent = narrativeData;
 
   if (existingNarrative) {
     // Handle edit preservation for regeneration
-    let finalNarrativeData = narrativeData;
     let finalEditHistory: unknown[] = [];
 
     if (preserve_edits && existingNarrative.is_edited && Array.isArray(existingNarrative.edit_history)) {
-      // TODO: Implement edit merge algorithm (spec :4497-4511)
-      // For now, preserve edits flag is noted but full merge is Phase 2
-      isEdited = true;
-      finalEditHistory = existingNarrative.edit_history;
+      // Edit merge algorithm (spec :4497-4511)
+      // Deep-merge founder edits onto new AI-generated content so manual
+      // refinements survive regeneration.
+      const editHistory = existingNarrative.edit_history as EditHistoryEntry[];
+      const editedSlides = getFounderEditedSlides(editHistory);
+
+      if (editedSlides.size > 0) {
+        // Deep clone so we don't mutate the original narrativeData
+        finalNarrativeData = JSON.parse(JSON.stringify(narrativeData)) as PitchNarrativeContent;
+
+        for (const slideKey of editedSlides) {
+          // Only merge if the slide exists in the new narrative
+          if (!(slideKey in finalNarrativeData)) continue;
+
+          const slideEdits = getSlideEdits(editHistory, slideKey);
+
+          for (const [fieldPath, newValue] of slideEdits) {
+            // fieldPath is the full dot-notation path stored in edit_history
+            // (e.g. "traction.evidence_summary"). Navigate into the cloned
+            // narrative and overwrite the AI value with the founder value.
+            const parts = fieldPath.split('.');
+            let current: Record<string, unknown> = finalNarrativeData as unknown as Record<string, unknown>;
+            const parentPath = parts.slice(0, -1);
+            const lastKey = parts[parts.length - 1];
+
+            let pathValid = true;
+            for (const key of parentPath) {
+              if (current[key] === undefined || current[key] === null) {
+                // Parent path doesn't exist in new content; skip this edit
+                pathValid = false;
+                break;
+              }
+              current = current[key] as Record<string, unknown>;
+            }
+
+            if (pathValid) {
+              current[lastKey] = newValue;
+            }
+          }
+        }
+
+        // Preserve only founder edit_history entries
+        finalEditHistory = editHistory.filter(
+          (entry) => entry.edit_source === 'founder'
+        );
+        isEdited = true;
+      }
     }
 
     // Update existing narrative
@@ -250,12 +307,18 @@ export async function POST(request: NextRequest) {
     })
     .eq('id', project_id);
 
+  // Track funnel event (fire-and-forget)
+  trackNarrativeFunnelEvent(project_id, user.id, force_regenerate ? 'narrative_regenerated' : 'narrative_generated', {
+    narrative_id: narrativeId,
+    preserve_edits,
+  }).catch(() => {});
+
   // Step 10: Build response
   const pitchNarrative: PitchNarrative = {
     id: narrativeId,
     project_id,
     generated_at: new Date().toISOString(),
-    content: narrativeData,
+    content: finalNarrativeData,
   };
 
   return NextResponse.json({

@@ -13,7 +13,7 @@ import { z } from 'zod';
 // SHARED TYPES
 // =============================================================================
 
-export type FlowType = 'founder_validation' | 'consultant_onboarding' | 'progress_update' | 'hitl_checkpoint';
+export type FlowType = 'founder_validation' | 'consultant_onboarding' | 'progress_update' | 'hitl_checkpoint' | 'narrative_synthesis';
 
 // =============================================================================
 // FOUNDER VALIDATION SCHEMAS
@@ -211,3 +211,31 @@ export const hitlCheckpointSchema = z.object({
 });
 
 export type HITLCheckpointPayload = z.infer<typeof hitlCheckpointSchema>;
+
+// =============================================================================
+// NARRATIVE SYNTHESIS SCHEMAS
+// =============================================================================
+
+export const narrativeSynthesisSchema = z.object({
+  flow_type: z.literal('narrative_synthesis'),
+  project_id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  run_id: z.string(),
+  event_type: z.enum(['narrative_generated', 'narrative_failed']),
+  pitch_narrative_content: z.record(z.string(), z.any()).nullable(),
+  alignment_status: z.enum(['verified', 'flagged']).default('verified'),
+  alignment_issues: z.array(z.object({
+    slide: z.string(),
+    field: z.string(),
+    issue_type: z.string(),
+    current_language: z.string().optional(),
+    suggested_language: z.string().optional(),
+    evidence_needed: z.string().optional(),
+  })).default([]),
+  evidence_gaps: z.record(z.string(), z.any()).default({}),
+  evidence_sources_used: z.array(z.string()).default([]),
+  error_message: z.string().optional(),
+  timestamp: z.string().optional(),
+});
+
+export type NarrativeSynthesisPayload = z.infer<typeof narrativeSynthesisSchema>;

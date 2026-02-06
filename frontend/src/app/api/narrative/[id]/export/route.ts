@@ -17,11 +17,21 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import React, { createElement } from 'react';
+import { renderToBuffer } from '@react-pdf/renderer';
+import QRCode from 'qrcode';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@/lib/supabase/admin';
 import { checkNarrativeLayerEnabled, narrativeError } from '@/lib/narrative/errors';
 import { computeNarrativeHash } from '@/lib/narrative/hash';
+import { trackNarrativeFunnelEvent } from '@/lib/narrative/access-tracking';
+import { NarrativePdfDocument } from '@/lib/narrative/pdf-document';
 import type { PitchNarrativeContent } from '@/lib/narrative/types';
+
+// Ensure fonts are registered at module load
+import '@/lib/narrative/pdf-fonts';
+
+const SIGNED_URL_EXPIRY_SECONDS = 86400; // 24 hours
 
 const exportSchema = z.object({
   format: z.enum(['pdf', 'json']).default('pdf'),
@@ -59,6 +69,11 @@ export async function POST(
   }
 
   const { format, include_qr_code } = result.data;
+
+  // Phase 1: Only PDF is supported
+  if (format !== 'pdf') {
+    return narrativeError('FORMAT_NOT_SUPPORTED', `Export format '${format}' is not yet supported. Only 'pdf' is available.`);
+  }
 
   // Fetch narrative
   const { data: narrative, error: fetchError } = await supabase
@@ -116,52 +131,12 @@ export async function POST(
   const ventureName = narrativeData.cover?.venture_name ?? project?.name ?? 'Untitled';
   const validationStage = project?.validation_stage ?? 'DESIRABILITY';
 
-  // Generate export content
-  let storagePath: string;
+  // Create export record first to get verification_token for the PDF
   const adminClient = createAdminClient();
+  const exportId = crypto.randomUUID();
+  const storagePath = `exports/${id}/${exportId}.pdf`;
 
-  if (format === 'pdf') {
-    // TODO: Implement full PDF generation with @react-pdf/renderer
-    // For Phase 1, create a JSON placeholder stored as the export
-    const exportContent = JSON.stringify({
-      type: 'pdf_placeholder',
-      narrative: narrativeData,
-      generated_at: new Date().toISOString(),
-    });
-
-    storagePath = `narrative-exports/${id}/${crypto.randomUUID()}.json`;
-
-    const { error: uploadError } = await adminClient
-      .storage
-      .from('narrative-exports')
-      .upload(storagePath, exportContent, {
-        contentType: 'application/json',
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error('Error uploading export:', uploadError);
-      return narrativeError('INTERNAL_ERROR', 'Failed to upload export');
-    }
-  } else {
-    // JSON export
-    storagePath = `narrative-exports/${id}/${crypto.randomUUID()}.json`;
-
-    const { error: uploadError } = await adminClient
-      .storage
-      .from('narrative-exports')
-      .upload(storagePath, JSON.stringify(narrativeData), {
-        contentType: 'application/json',
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error('Error uploading JSON export:', uploadError);
-      return narrativeError('INTERNAL_ERROR', 'Failed to upload export');
-    }
-  }
-
-  // Create narrative_exports row (service role to bypass RLS for INSERT)
+  // Insert with a placeholder storage_path; we update after upload
   const { data: exportRow, error: insertError } = await adminClient
     .from('narrative_exports')
     .insert({
@@ -182,22 +157,91 @@ export async function POST(
     return narrativeError('INTERNAL_ERROR', 'Failed to create export record');
   }
 
-  // Generate signed download URL (1 hour expiry)
+  const verificationToken = exportRow.verification_token as string;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.startupai.site';
+  const verificationUrl = `${baseUrl}/verify/${verificationToken}`;
+  const verificationShort = `verify.startupai.com/${verificationToken.substring(0, 8)}`;
+
+  // Generate QR code as data URL (PNG embedded)
+  let qrDataUrl: string | null = null;
+  if (include_qr_code) {
+    try {
+      qrDataUrl = await QRCode.toDataURL(verificationUrl, {
+        width: 192,
+        margin: 1,
+        color: {
+          dark: '#0F172A',
+          light: '#FFFFFF',
+        },
+        errorCorrectionLevel: 'M',
+      });
+    } catch (qrError) {
+      // QR code generation failure is non-fatal; proceed without it
+      console.error('QR code generation failed:', qrError);
+    }
+  }
+
+  // Generate PDF
+  let pdfBuffer: Buffer;
+  try {
+    const documentElement = createElement(NarrativePdfDocument, {
+      content: narrativeData,
+      verificationShort,
+      qrDataUrl,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pdfBuffer = await renderToBuffer(documentElement as any);
+  } catch (pdfError) {
+    console.error('PDF generation failed:', pdfError);
+    // Clean up the export record on failure
+    await adminClient
+      .from('narrative_exports')
+      .delete()
+      .eq('id', exportRow.id);
+    return narrativeError('INTERNAL_ERROR', 'Failed to generate PDF');
+  }
+
+  // Upload PDF to Supabase Storage
+  const { error: uploadError } = await adminClient
+    .storage
+    .from('narrative-exports')
+    .upload(storagePath, pdfBuffer, {
+      contentType: 'application/pdf',
+      upsert: false,
+    });
+
+  if (uploadError) {
+    console.error('Error uploading PDF:', uploadError);
+    // Clean up the export record on failure
+    await adminClient
+      .from('narrative_exports')
+      .delete()
+      .eq('id', exportRow.id);
+    return narrativeError('INTERNAL_ERROR', 'Failed to upload export');
+  }
+
+  // Generate signed download URL (24 hour expiry)
   const { data: signedUrl } = await adminClient
     .storage
     .from('narrative-exports')
-    .createSignedUrl(storagePath, 3600);
+    .createSignedUrl(storagePath, SIGNED_URL_EXPIRY_SECONDS);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.startupai.site';
-  const verificationUrl = `${baseUrl}/verify/${exportRow.verification_token}`;
+  // Track funnel event (fire-and-forget)
+  trackNarrativeFunnelEvent(narrative.project_id, user.id, 'narrative_exported', {
+    narrative_id: id,
+    export_id: exportRow.id,
+    format,
+    include_qr_code,
+  }).catch(() => {});
 
   return NextResponse.json({
     success: true,
     export_id: exportRow.id,
-    verification_token: exportRow.verification_token,
+    verification_token: verificationToken,
     generation_hash: generationHash,
     verification_url: verificationUrl,
     download_url: signedUrl?.signedUrl ?? '',
-    expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
+    expires_at: new Date(Date.now() + SIGNED_URL_EXPIRY_SECONDS * 1000).toISOString(),
   });
 }
