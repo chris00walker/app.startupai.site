@@ -457,7 +457,7 @@ function main(): void {
     if (!ALLOWED_OWNER_ROLES.has(contract.ownerRole)) {
       issues.push(`HITL_CHECKPOINT_CONTRACT["${checkpoint}"] has unsupported ownerRole "${contract.ownerRole}".`);
     }
-    if (!['founders_brief_panel', 'generic'].includes(contract.renderVariant)) {
+    if (!['founders_brief_panel', 'discovery_output_panel', 'generic'].includes(contract.renderVariant)) {
       issues.push(`HITL_CHECKPOINT_CONTRACT["${checkpoint}"] has unsupported renderVariant "${contract.renderVariant}".`);
     }
   }

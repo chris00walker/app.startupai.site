@@ -17,7 +17,7 @@ import {
 // SHARED TYPES
 // =============================================================================
 
-export type FlowType = 'founder_validation' | 'consultant_onboarding' | 'progress_update' | 'hitl_checkpoint' | 'narrative_synthesis';
+export type FlowType = 'founder_validation' | 'consultant_onboarding' | 'progress_update' | 'hitl_checkpoint' | 'narrative_synthesis' | 'validation_failed';
 
 // =============================================================================
 // FOUNDER VALIDATION SCHEMAS
@@ -250,3 +250,16 @@ export const narrativeSynthesisSchema = z.object({
 });
 
 export type NarrativeSynthesisPayload = z.infer<typeof narrativeSynthesisSchema>;
+
+// =============================================================================
+// VALIDATION FAILED SCHEMAS
+// =============================================================================
+
+export const validationFailedSchema = z.object({
+  flow_type: z.literal('validation_failed'),
+  run_id: z.string(),
+  error_message: z.string().optional(),
+  timestamp: z.string().optional(),
+});
+
+export type ValidationFailedPayload = z.infer<typeof validationFailedSchema>;

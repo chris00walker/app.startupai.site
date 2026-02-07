@@ -106,6 +106,49 @@ const statusConfig: Record<
 const PHASE1_WARNING_MS = 20 * 60 * 1000;
 const PHASE1_ESCALATION_MS = 30 * 60 * 1000;
 
+// Fix 3: Map HITL states to deterministic progress values
+const HITL_PROGRESS: Record<string, number> = {
+  approve_brief: 23,
+  approve_founders_brief: 23,
+  approve_discovery_output: 40,
+  approve_desirability_gate: 60,
+  approve_feasibility_gate: 80,
+  approve_viability_gate: 100,
+};
+
+function getProgressForPausedState(hitlState: string | null): number | null {
+  return hitlState ? HITL_PROGRESS[hitlState] ?? null : null;
+}
+
+// Fix 5: Human-readable HITL descriptions
+function getHITLDescription(hitlState: string): string {
+  const descriptions: Record<string, string> = {
+    approve_brief: "Your Founder's Brief is ready for review.",
+    approve_founders_brief: "Your Founder's Brief is ready for review.",
+    approve_discovery_output: 'VPC Discovery is complete. Review results to continue.',
+    approve_desirability_gate: 'Desirability validation is complete. Review to continue.',
+    approve_feasibility_gate: 'Feasibility analysis is complete. Review to continue.',
+    approve_viability_gate: 'Viability evaluation is complete. Review to continue.',
+  };
+  return descriptions[hitlState] ?? 'Your review is needed to continue validation.';
+}
+
+// Fix 5: Detect HITL events in activity feed
+function isHITLEvent(event: ValidationProgressEvent): boolean {
+  return (
+    event.status === ('hitl_checkpoint' as ValidationProgressEvent['status']) ||
+    ['approve_brief', 'approve_discovery_output', 'approve_founders_brief'].includes(event.crew ?? '')
+  );
+}
+
+// Fix 0b: Sanitize error message for display
+function sanitizeErrorMessage(message: string | undefined): string {
+  if (!message) return 'An unexpected error occurred during validation.';
+  // Strip Pydantic stack traces — show only the first sentence
+  const firstSentence = message.split('\n')[0].slice(0, 200);
+  return firstSentence || 'An unexpected error occurred during validation.';
+}
+
 export function ValidationProgressTimeline({
   runId,
   variant = 'modal',
@@ -132,7 +175,10 @@ export function ValidationProgressTimeline({
     return totalEvents > 0 ? Math.round((completedEvents / totalEvents) * 100) : 0;
   }, [progress, currentPhase]);
 
-  const overallProgress = calculateOverallProgress(currentPhase, phaseProgress);
+  // Fix 3: Use deterministic progress for paused states
+  const overallProgress = status === 'paused'
+    ? getProgressForPausedState(run?.hitl_state ?? null) ?? calculateOverallProgress(currentPhase, phaseProgress)
+    : calculateOverallProgress(currentPhase, phaseProgress);
 
   // Get latest event for current activity display
   const latestEvent = progress.length > 0 ? progress[progress.length - 1] : null;
@@ -169,15 +215,12 @@ export function ValidationProgressTimeline({
     return () => window.clearInterval(interval);
   }, [status, currentPhase, phase1StartMs]);
 
-  // Handle status changes
+  // Fix 2: Only auto-trigger onComplete — HITL requires manual button click (no auto-redirect)
   useEffect(() => {
-    if (status === 'paused' && run?.hitl_state && onHITLRequired) {
-      onHITLRequired(run.hitl_state);
-    }
     if (status === 'completed' && onComplete) {
       onComplete();
     }
-  }, [status, run?.hitl_state, onHITLRequired, onComplete]);
+  }, [status, onComplete]);
 
   // Handle errors
   useEffect(() => {
@@ -304,7 +347,10 @@ export function ValidationProgressTimeline({
             <span className="text-muted-foreground">Overall Progress</span>
             <span className="font-medium">{overallProgress}%</span>
           </div>
-          <Progress value={overallProgress} className="h-2" />
+          <Progress
+            value={overallProgress}
+            className={cn('h-2', status === 'failed' && '[&>div]:bg-red-500')}
+          />
         </div>
 
         {/* Phase Stepper */}
@@ -385,26 +431,27 @@ export function ValidationProgressTimeline({
           </div>
         )}
 
-        {/* HITL Pause State */}
+        {/* Fix 5: HITL Pause State — prominent banner */}
         {status === 'paused' && run?.hitl_state && (
-          <Alert className="border-yellow-300 bg-yellow-50 dark:bg-yellow-950/30">
-            <PauseCircle className="h-4 w-4 text-yellow-600" />
-            <AlertTitle className="text-yellow-800 dark:text-yellow-200">
-              Approval Required
-            </AlertTitle>
-            <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-              The validation process has paused and requires your approval to
-              continue.
+          <div className="bg-amber-50 border border-amber-300 rounded-lg p-4 dark:bg-amber-950/30 dark:border-amber-700">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                  Action Required
+                </Badge>
+                <p className="mt-1 text-sm text-amber-900 dark:text-amber-100">
+                  {getHITLDescription(run.hitl_state)}
+                </p>
+              </div>
               <Button
-                variant="outline"
                 size="sm"
-                className="mt-3 w-full border-yellow-400 text-yellow-700 hover:bg-yellow-100"
+                className="shrink-0"
                 onClick={() => onHITLRequired?.(run.hitl_state!)}
               >
                 Review & Approve
               </Button>
-            </AlertDescription>
-          </Alert>
+            </div>
+          </div>
         )}
 
         {/* Completion State */}
@@ -429,12 +476,28 @@ export function ValidationProgressTimeline({
           </Alert>
         )}
 
-        {/* Error State */}
-        {status === 'failed' && run?.error_message && (
+        {/* Fix 0b: Enhanced Error State */}
+        {status === 'failed' && (
           <Alert variant="destructive">
             <XCircle className="h-4 w-4" />
-            <AlertTitle>Analysis Failed</AlertTitle>
-            <AlertDescription>{run.error_message}</AlertDescription>
+            <AlertTitle>Validation Failed</AlertTitle>
+            <AlertDescription>
+              <p>{sanitizeErrorMessage(run?.error_message)}</p>
+              <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-red-300 text-red-700 hover:bg-red-50"
+                  onClick={handleRetry}
+                  disabled={isRetrying}
+                >
+                  {isRetrying ? 'Restarting...' : 'Start New Validation'}
+                </Button>
+              </div>
+              {retryError && (
+                <p className="mt-2 text-sm text-red-600">{retryError}</p>
+              )}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -456,8 +519,9 @@ export function ValidationProgressTimeline({
   );
 }
 
-// Activity log item for inline variant
+// Fix 5: Activity log item with HITL event prominence
 function ActivityLogItem({ event }: { event: ValidationProgressEvent }) {
+  const hitl = isHITLEvent(event);
   const statusColors = {
     started: 'text-blue-600',
     in_progress: 'text-blue-600',
@@ -467,9 +531,16 @@ function ActivityLogItem({ event }: { event: ValidationProgressEvent }) {
   };
 
   return (
-    <div className="flex items-center gap-2 text-xs py-1 px-2 rounded bg-muted/50">
-      <span className={cn('font-medium', statusColors[event.status])}>
-        {event.status === 'completed' ? (
+    <div
+      className={cn(
+        'flex items-center gap-2 text-xs py-1 px-2 rounded',
+        hitl ? 'bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-700' : 'bg-muted/50'
+      )}
+    >
+      <span className={cn('font-medium', hitl ? 'text-amber-600' : statusColors[event.status])}>
+        {hitl ? (
+          <PauseCircle className="h-3 w-3 inline mr-1" />
+        ) : event.status === 'completed' ? (
           <CheckCircle className="h-3 w-3 inline mr-1" />
         ) : event.status === 'failed' ? (
           <XCircle className="h-3 w-3 inline mr-1" />
@@ -477,9 +548,9 @@ function ActivityLogItem({ event }: { event: ValidationProgressEvent }) {
           <Loader2 className="h-3 w-3 inline mr-1 animate-spin" />
         )}
       </span>
-      <span className="text-muted-foreground truncate flex-1">
-        {event.crew}
-        {event.task && ` - ${event.task}`}
+      <span className={cn('truncate flex-1', hitl ? 'text-amber-800 font-medium dark:text-amber-200' : 'text-muted-foreground')}>
+        {hitl ? 'Action Required' : event.crew}
+        {!hitl && event.task && ` - ${event.task}`}
       </span>
       <span className="text-muted-foreground">
         {new Date(event.created_at).toLocaleTimeString([], {

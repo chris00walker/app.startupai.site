@@ -179,16 +179,21 @@ export function useValidationProgress(
     };
   }, [runId, enableRealtime]);
 
-  // Optional fallback polling (if Realtime fails)
+  // Automatic polling fallback for active runs (defense-in-depth if Realtime fails)
+  const runStatus = run?.status;
   useEffect(() => {
-    if (!pollInterval || !runId) return;
+    if (!runId) return;
+    // Poll when run is in an active state, regardless of pollInterval config
+    const isActive = runStatus === 'running' || runStatus === 'pending' || runStatus === 'paused';
+    const interval = isActive ? (pollInterval || 5000) : pollInterval;
+    if (!interval) return;
 
-    const interval = setInterval(() => {
+    const timer = setInterval(() => {
       fetchRun();
-    }, pollInterval);
+    }, interval);
 
-    return () => clearInterval(interval);
-  }, [runId, pollInterval, fetchRun]);
+    return () => clearInterval(timer);
+  }, [runId, runStatus, pollInterval, fetchRun]);
 
   return {
     run,

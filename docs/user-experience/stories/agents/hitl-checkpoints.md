@@ -18,18 +18,22 @@ Stories for all 10 human-in-the-loop checkpoints in the validation system.
 
 ## Overview
 
-| ID | Checkpoint | Phase | Trigger | Blocking |
-|----|------------|-------|---------|----------|
-| US-AH01 | approve_brief | 1A | Brief generated | Yes |
-| US-AH02 | approve_experiment_plan | 1B | Test cards ready | Yes |
-| US-AH03 | approve_pricing_test | 1B | WTP experiment planned | Yes |
-| US-AH04 | approve_discovery_output | 1B | VPC complete, fit >= 70 | Yes |
-| US-AH05 | approve_campaign_launch | 2 | Ads ready | Yes |
-| US-AH06 | approve_spend_increase | 2 | Budget threshold | Yes |
-| US-AH07 | approve_desirability_gate | 2 | D signal ready | Yes |
-| US-AH08 | approve_feasibility_gate | 3 | F signal ready | Yes |
-| US-AH09 | approve_viability_gate | 4 | V signal ready | Yes |
-| US-AH10 | request_human_decision | 4 | Final synthesis ready | Yes |
+| ID | Checkpoint | Phase | Trigger | Blocking | Status |
+|----|------------|-------|---------|----------|--------|
+| US-AH01 | approve_brief | 1A | Brief generated | Yes | Implemented |
+| US-AH02 | approve_experiment_plan | 1B | Test cards ready | Yes | Future (crew-side not implemented) |
+| US-AH03 | approve_pricing_test | 1B | WTP experiment planned | Yes | Future (crew-side not implemented) |
+| US-AH04 | approve_discovery_output | 1B | VPC complete, fit >= 70 | Yes | Implemented |
+| US-AH05 | approve_campaign_launch | 2 | Ads ready | Yes | Registered |
+| US-AH06 | approve_spend_increase | 2 | Budget threshold | Yes | Registered |
+| US-AH07 | approve_desirability_gate | 2 | D signal ready | Yes | Registered |
+| US-AH08 | approve_feasibility_gate | 3 | F signal ready | Yes | Registered |
+| US-AH09 | approve_viability_gate | 4 | V signal ready | Yes | Registered |
+| US-AH10 | request_human_decision | 4 | Final synthesis ready | Yes | Registered |
+
+> **Note**: "Implemented" = crew fires checkpoint + frontend has specialized panel + evidence transform.
+> "Registered" = checkpoint-contract.ts has entry but crew-side implementation is for future phases.
+> "Future" = stories exist but crew runs all Stage B crews without intermediate HITL checkpoints.
 
 ---
 

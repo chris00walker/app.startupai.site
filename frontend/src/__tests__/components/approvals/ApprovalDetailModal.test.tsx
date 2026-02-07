@@ -16,6 +16,20 @@ import { ApprovalDetailModal } from '@/components/approvals/ApprovalDetailModal'
 import type { ApprovalRequest } from '@/types/crewai';
 import { HITL_CHECKPOINT_CONTRACT } from '@/lib/approvals/checkpoint-contract';
 
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => '/approvals',
+}));
+
 const mockToastSuccess = jest.fn();
 jest.mock('sonner', () => ({
   toast: {

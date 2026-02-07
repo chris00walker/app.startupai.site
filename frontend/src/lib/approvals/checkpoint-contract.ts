@@ -6,7 +6,7 @@
 
 import type { ApprovalType, OwnerRole } from '@/types/crewai';
 
-export type ApprovalRenderVariant = 'founders_brief_panel' | 'generic';
+export type ApprovalRenderVariant = 'founders_brief_panel' | 'discovery_output_panel' | 'generic';
 
 export interface HitlCheckpointContract {
   approvalType: ApprovalType;
@@ -33,13 +33,15 @@ const CHECKPOINT_CONTRACT = {
   approve_discovery_output: {
     approvalType: 'gate_progression',
     ownerRole: 'compass',
-    renderVariant: 'generic',
+    renderVariant: 'discovery_output_panel',
   },
+  // Future: crew-side implementation needed (US-AH02)
   approve_experiment_plan: {
     approvalType: 'gate_progression',
     ownerRole: 'pulse',
     renderVariant: 'generic',
   },
+  // Future: crew-side implementation needed (US-AH03)
   approve_pricing_test: {
     approvalType: 'gate_progression',
     ownerRole: 'ledger',

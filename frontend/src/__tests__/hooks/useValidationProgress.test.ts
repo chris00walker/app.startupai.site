@@ -340,7 +340,9 @@ describe('useValidationProgress', () => {
       expect(mockFrom.mock.calls.length).toBeGreaterThan(initialCalls);
     });
 
-    it('should not poll when pollInterval is 0', async () => {
+    it('should auto-poll for active runs even when pollInterval is 0', async () => {
+      // With Fix 1: auto-polling activates for running/pending/paused runs
+      // even when pollInterval is explicitly 0 (defense-in-depth for Realtime)
       const { result } = renderHook(() =>
         useValidationProgress('run-123', { pollInterval: 0 })
       );
@@ -351,12 +353,13 @@ describe('useValidationProgress', () => {
 
       const initialCalls = mockFrom.mock.calls.length;
 
-      // Advance time - should not trigger additional calls
+      // Advance time - SHOULD trigger additional calls since mock run is "running"
       await act(async () => {
         jest.advanceTimersByTime(10000);
       });
 
-      expect(mockFrom.mock.calls.length).toBe(initialCalls);
+      // Active run (status=running) triggers auto-polling at 5s default
+      expect(mockFrom.mock.calls.length).toBeGreaterThan(initialCalls);
     });
   });
 

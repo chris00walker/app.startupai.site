@@ -242,18 +242,32 @@ export async function PATCH(
   });
 
   // Always resume CrewAI execution with the decision (approval AND rejection)
-  // For rejection: body.decision may be 'iterate' (regenerate) or 'rejected' (stop)
-  const modalDecision = isApproved
-    ? (body.decision === 'approve' ? 'approved' :
-       body.decision === 'reject' ? 'rejected' :
-       body.decision || 'approved')
-    : (body.decision || 'rejected');
+  // Fix 7: Map segment_pivot_intent → Modal iterate + structured envelope
+  const isDiscoverySegmentPivotIntent =
+    approval.task_id === 'approve_discovery_output' &&
+    body.action === 'approve' &&
+    body.decision === 'segment_pivot_intent';
+
+  const modalDecision = isDiscoverySegmentPivotIntent
+    ? 'iterate'
+    : isApproved
+      ? (body.decision === 'approve' ? 'approved' :
+         body.decision === 'reject' ? 'rejected' :
+         body.decision || 'approved')
+      : (body.decision || 'rejected');
+
+  const modalFeedback = isDiscoverySegmentPivotIntent
+    ? `SEGMENT_PIVOT|${JSON.stringify({
+        target_segment: body.feedback?.trim() ?? '',
+        rationale: body.feedback?.trim() ?? '',
+      })}`
+    : (body.feedback || (isApproved ? 'Approved by user' : 'Rejected by user'));
 
   await resumeCrewAIExecution(
     approval.execution_id,
     approval.task_id,
     modalDecision,
-    body.feedback || (isApproved ? 'Approved by user' : 'Rejected by user'),
+    modalFeedback,
     user.id
   );
 

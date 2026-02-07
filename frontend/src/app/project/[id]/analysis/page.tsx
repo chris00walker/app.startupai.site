@@ -12,20 +12,31 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { VPCReportViewer } from '@/components/vpc';
 import { InnovationPhysicsPanel } from '@/components/signals';
 import { ValidationProgressTimeline } from '@/components/validation/ValidationProgressTimeline';
 import { useActiveValidationRun } from '@/hooks/useValidationProgress';
-import { ArrowLeft, Download, Share2, FileText } from 'lucide-react';
+import { ArrowLeft, Download, Share2, FileText, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { trackPageView } from '@/lib/analytics';
+
+const APPROVAL_BANNERS: Record<string, string> = {
+  brief: "Brief approved! Starting VPC Discovery \u2014 5 AI crews are researching your market, competitors, and value proposition. ~15 minutes.",
+  discovery_output: "Discovery approved! Starting Desirability validation \u2014 testing market demand with experiments.",
+};
 
 export default function ProjectAnalysisPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const projectId = params?.id as string;
+  const approvedParam = searchParams?.get('approved');
+
+  // Show post-approval banner once, then dismiss
+  const [showApprovalBanner, setShowApprovalBanner] = useState(!!approvedParam);
 
   // Check for active validation run
   const {
@@ -84,6 +95,24 @@ export default function ProjectAnalysisPage() {
             </div>
           </div>
         </div>
+
+        {/* Fix 6: Post-approval banner */}
+        {showApprovalBanner && approvedParam && APPROVAL_BANNERS[approvedParam] && (
+          <Alert className="border-green-300 bg-green-50 dark:bg-green-950/30">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800 dark:text-green-200">
+              {APPROVAL_BANNERS[approvedParam]}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-2 text-green-600 hover:text-green-800"
+                onClick={() => setShowApprovalBanner(false)}
+              >
+                Dismiss
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Progress Timeline */}
         <ValidationProgressTimeline

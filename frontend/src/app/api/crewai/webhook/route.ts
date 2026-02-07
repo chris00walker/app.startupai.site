@@ -30,6 +30,7 @@ import {
   progressUpdateSchema,
   hitlCheckpointSchema,
   narrativeSynthesisSchema,
+  validationFailedSchema,
   type FlowType,
   type FounderValidationPayload,
   type ConsultantOnboardingPayload,
@@ -843,8 +844,9 @@ function buildEvidenceSummaryFromContext(
   const evidenceSummary: Record<string, unknown> = {};
 
   switch (checkpoint) {
+    case 'approve_brief':
     case 'approve_founders_brief': {
-      // Phase 0: Founder's Brief approval
+      // Phase 0/1A: Founder's Brief approval
       const foundersBreif = context.founders_brief as Record<string, unknown> | undefined;
       const businessIdea = (foundersBreif?.business_idea || context.business_idea || '') as string;
       const assumptions = (foundersBreif?.assumptions || context.assumptions || []) as string[];
@@ -853,6 +855,23 @@ function buildEvidenceSummaryFromContext(
         ? `Founder's Brief prepared: ${businessIdea.slice(0, 100)}${businessIdea.length > 100 ? '...' : ''}`
         : 'Founder\'s Brief ready for review';
       evidenceSummary.key_learnings = assumptions.slice(0, 5);
+      break;
+    }
+
+    case 'approve_discovery_output': {
+      // Phase 1B: VPC Discovery complete
+      const fitScore = context.fit_score as number ?? 0;
+      const gateReady = context.gate_ready as boolean;
+      const cpSummary = context.customer_profile_summary as Record<string, unknown> | undefined;
+      const vmSummary = context.value_map_summary as Record<string, unknown> | undefined;
+
+      evidenceSummary.summary = `VPC fit score: ${fitScore}/100. ${gateReady ? 'Ready for Phase 2.' : 'Below threshold.'}`;
+      evidenceSummary.key_learnings = [
+        `Customer segment: ${cpSummary?.segment ?? 'Unknown'}`,
+        `${cpSummary?.jobs_count ?? 0} jobs, ${cpSummary?.pains_count ?? 0} pains, ${cpSummary?.gains_count ?? 0} gains identified`,
+        `${vmSummary?.products_count ?? 0} products/services mapped`,
+      ];
+      evidenceSummary.metrics = { fit_score: fitScore };
       break;
     }
 
@@ -1377,10 +1396,31 @@ export async function POST(request: NextRequest) {
         return await handleNarrativeSynthesis(validation.data);
       }
 
+      case 'validation_failed': {
+        const validation = validationFailedSchema.safeParse(body);
+        if (!validation.success) {
+          console.error('[api/crewai/webhook] validation_failed validation failed:', validation.error.flatten());
+          return NextResponse.json(
+            { error: 'Invalid payload for validation_failed', details: validation.error.flatten() },
+            { status: 400 }
+          );
+        }
+        const { run_id, error_message } = validation.data;
+        // Defense-in-depth: crew already wrote status directly to Supabase
+        const admin = createAdminClient();
+        await admin.from('validation_runs').update({
+          status: 'failed',
+          error_message: (error_message || 'Unknown error').slice(0, 500),
+          updated_at: new Date().toISOString(),
+        }).eq('run_id', run_id);
+        console.log(`[api/crewai/webhook] validation_failed processed for run ${run_id}`);
+        return NextResponse.json({ received: true });
+      }
+
       default:
         console.error('[api/crewai/webhook] Unknown flow_type:', flowType);
         return NextResponse.json(
-          { error: `Unknown flow_type: ${flowType}. Expected: founder_validation | consultant_onboarding | progress_update | hitl_checkpoint | narrative_synthesis` },
+          { error: `Unknown flow_type: ${flowType}. Expected: founder_validation | consultant_onboarding | progress_update | hitl_checkpoint | narrative_synthesis | validation_failed` },
           { status: 400 }
         );
     }

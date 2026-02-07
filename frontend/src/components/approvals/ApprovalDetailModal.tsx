@@ -35,10 +35,12 @@ import {
   ThumbsDown,
   AlertCircle,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { FounderAvatarWithLabel } from './FounderAvatar';
 import { ApprovalTypeIndicator } from './ApprovalTypeIndicator';
 import { EvidenceSummary } from './EvidenceSummary';
 import { FoundersBriefPanel } from './FoundersBriefPanel';
+import { DiscoveryOutputPanel } from './DiscoveryOutputPanel';
 import type { ApprovalRequest, ApprovalOption, OwnerRole, ApprovalType, ModalFoundersBrief } from '@/types/crewai';
 import {
   getApprovalRenderVariant,
@@ -102,6 +104,7 @@ export function ApprovalDetailModal({
   onApprove,
   onReject,
 }: ApprovalDetailModalProps) {
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [feedback, setFeedback] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -126,12 +129,20 @@ export function ApprovalDetailModal({
 
   const renderVariant = getApprovalRenderVariant(approval.task_id);
   const isBriefApproval = renderVariant === 'founders_brief_panel';
+  const isDiscoveryApproval = renderVariant === 'discovery_output_panel';
   const isUnsupportedCheckpoint = !isHitlCheckpointId(approval.task_id);
   const briefData = isBriefApproval
     ? (approval.task_output?.founders_brief as ModalFoundersBrief | undefined)
     : undefined;
+  const isSegmentPivotSelected = selectedOption === 'segment_pivot_intent';
 
   const handleApprove = async () => {
+    // Require feedback for segment pivot
+    if (isSegmentPivotSelected && !feedback.trim()) {
+      setSubmitError('Feedback is required for segment pivots. Enter the target segment and why it is a better fit.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -143,7 +154,24 @@ export function ApprovalDetailModal({
       );
       if (success) {
         onOpenChange(false);
-        toast.success('Brief approved — validation will resume');
+        const projectId = approval.project_id || (approval.project as Record<string, string> | undefined)?.id;
+        // Determine checkpoint-specific toast and redirect param
+        if (isDiscoveryApproval) {
+          toast.success('Discovery approved — validation will resume');
+          if (projectId) {
+            router.push(`/project/${projectId}/analysis?approved=discovery_output`);
+          }
+        } else if (isBriefApproval) {
+          toast.success('Brief approved — validation will resume');
+          if (projectId) {
+            router.push(`/project/${projectId}/analysis?approved=brief`);
+          }
+        } else {
+          toast.success('Approved — validation will resume');
+          if (projectId) {
+            router.push(`/project/${projectId}/analysis?approved=${approval.task_id}`);
+          }
+        }
         resetForm();
       } else {
         setSubmitError('Failed to approve. Please try again.');
@@ -156,8 +184,8 @@ export function ApprovalDetailModal({
   };
 
   const handleReject = async () => {
-    // Require feedback for brief checkpoints
-    if (isFoundersBriefCheckpoint(approval.task_id) && !feedback.trim()) {
+    // Require feedback for brief and discovery checkpoints
+    if ((isFoundersBriefCheckpoint(approval.task_id) || isDiscoveryApproval) && !feedback.trim()) {
       setSubmitError('Feedback is required when rejecting. Please explain what needs to change.');
       return;
     }
@@ -169,7 +197,17 @@ export function ApprovalDetailModal({
       const success = await onReject(approval.id, feedback || undefined, 'rejected');
       if (success) {
         onOpenChange(false);
-        toast.success('Brief rejected — feedback submitted');
+        if (isDiscoveryApproval) {
+          toast.success('Discovery rejected — feedback submitted');
+        } else if (isBriefApproval) {
+          toast.success('Brief rejected — feedback submitted');
+        } else {
+          toast.success('Rejected — feedback submitted');
+        }
+        const projectId = approval.project_id || (approval.project as Record<string, string> | undefined)?.id;
+        if (projectId) {
+          router.push(`/project/${projectId}/analysis`);
+        }
         resetForm();
       } else {
         setSubmitError('Failed to reject. Please try again.');
@@ -273,6 +311,11 @@ export function ApprovalDetailModal({
               <FoundersBriefPanel brief={briefData} />
             )}
 
+            {/* Discovery Output (for approve_discovery_output checkpoint) */}
+            {isDiscoveryApproval && approval.task_output && (
+              <DiscoveryOutputPanel context={approval.task_output as Record<string, unknown>} />
+            )}
+
             {/* Evidence Summary */}
             {approval.evidence_summary && Object.keys(approval.evidence_summary).length > 0 && (
               <EvidenceSummary evidenceSummary={approval.evidence_summary} />
@@ -323,11 +366,17 @@ export function ApprovalDetailModal({
             {/* Feedback */}
             <div className="space-y-2">
               <Label htmlFor="feedback">
-                Your Feedback {isBriefApproval ? '(required for rejection)' : '(optional)'}
+                Your Feedback {isSegmentPivotSelected
+                  ? '(required — enter target segment and rationale)'
+                  : (isBriefApproval || isDiscoveryApproval)
+                    ? '(required for rejection)'
+                    : '(optional)'}
               </Label>
               <Textarea
                 id="feedback"
-                placeholder="Add any notes or reasoning for your decision..."
+                placeholder={isSegmentPivotSelected
+                  ? 'Enter the target segment and why it is a better fit...'
+                  : 'Add any notes or reasoning for your decision...'}
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 rows={3}
