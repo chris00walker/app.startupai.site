@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "generated_at": "2026-02-06T03:20:40.982Z",
+    "generated_at": "2026-02-07T00:28:08.401Z",
     "version": "1.0.0",
     "checksums": {
       "docs/traceability/docs-registry.json": "d2c645a0785ffd2b3efe0154bb1802d5",
-      "docs/traceability/./story-code-map.json": "01aedc725f9dbc256861bb0f7d0a6022",
-      "docs/traceability/./api-wiring/api-inventory.json": "d45200cfdd1a5d4757af3be308e8283a",
+      "docs/traceability/./story-code-map.json": "adc5c600dc22b101b222667e3d62ee7c",
+      "docs/traceability/./api-wiring/api-inventory.json": "9c844448766290a74a5e81064283835f",
       "docs/traceability/./schema-coverage-report.json": "dc1915c8f238d75da87bdea9f684e2bc",
       "app:CLAUDE.md": "28b65abc8d7c3be4e38b0eea37be36db",
       "app:README.md": "86f1dde02942f23e6baa782ab48ba458",
