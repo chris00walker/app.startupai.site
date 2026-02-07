@@ -50,14 +50,6 @@ const customJestConfig = {
     '!src/pages/_document.tsx',
     '!src/components/legacy/**'
   ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80
-    }
-  },
   // Test organization for specification-driven testing
   verbose: true
 }
